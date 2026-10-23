@@ -18,6 +18,8 @@
 | [ADR-0004](adr/0004-capability-centered-host.md) | 能力/插件中心，而非固定Agent中心 | 已采纳 |
 | [ADR-0005](adr/0005-windows-first.md) | Windows首发及支持边界 | 已采纳 |
 | [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
+| [候选使用场景与验收](07-use-cases-and-acceptance.md) | 功能流程、边界、失败与可验证用例 | 候选，不等于MVP承诺 |
+| [需求追踪与准备度](08-readiness-and-traceability.md) | 已确认方向、验收追踪和开工缺口 | 尚不具备全面开工条件 |
 | [术语表](../CONTEXT.md) | 区分桌宠、设置台、能力插件与人设 | 工作词汇，可随澄清修订 |
 
 ## 文档制作规则
