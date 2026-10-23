@@ -6,8 +6,8 @@
 
 | 文档 | 用途 | 状态 |
 | --- | --- | --- |
-| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.12，持续细化 |
-| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q10已选Electron/TS；Q11待回答；已列出开工前剩余问题Q11—Q27 |
+| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.13，持续细化 |
+| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q11已按DSH方案确定；Q12待回答；剩余问题Q12—Q27 |
 | [Coopanion 交互评审](02-coopanion-ui-review.md) | 设置台、角色交互、扩展UI边界与可借鉴原则 | 官方资料/源码/截图静态核查 |
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
@@ -26,10 +26,11 @@
 | [统一插件模型与生命周期](11-plugin-composition-and-lifecycle.md) | 平级插件、职责标签、依赖及拆卸 | 统一模型已确认，协议与实现待选 |
 | [ADR-0010](adr/0010-unified-plugin-model.md) | 同一种插件标准，不设功能/提供者层级 | 已采纳 |
 | [ADR-0011](adr/0011-electron-typescript-desktop.md) | Electron + TypeScript桌面底座 | 已采纳 |
-| [Electron运行边界](12-electron-runtime-boundaries.md) | 进程职责、信任与受限运行选项 | 草案，Q11待选 |
-| [插件与能力契约草案](13-plugin-contract-draft.md) | 清单字段、生命周期、能力规则、听写接口、权限与契约测试 | 草案v0.1，Q11相关部分待定 |
+| [ADR-0012](adr/0012-dsh-style-trust-and-permissions.md) | 插件信任与权限按DSH方案 | 已采纳 |
+| [Electron运行边界](12-electron-runtime-boundaries.md) | 进程职责、信任与受限运行选项 | 草案，信任策略已定（ADR-0012） |
+| [插件与能力契约草案](13-plugin-contract-draft.md) | 清单字段、生命周期、能力规则、听写接口、权限与契约测试 | 草案v0.1，信任模型已对齐DSH方案 |
 | [测试与验收策略](14-test-and-acceptance-strategy.md) | 测试层次、分段耗时与负载测量、兼容矩阵、故障注入、完成定义 | 方法草案，数值待定 |
-| [安全与隐私策略](15-security-and-privacy.md) | 数据清单、信任边界、15项风险与对策、参考项目教训、安全验收 | 草案，Q11/Q22/Q23/Q24待定 |
+| [安全与隐私策略](15-security-and-privacy.md) | 数据清单、信任边界、15项风险与对策、参考项目教训、安全验收 | 草案，Q22/Q23/Q24待定 |
 | [技术选型预研](16-technical-recommendations-prep.md) | Q16本地识别、Q18原生能力、Q19插件框架、Q27仓库结构的证据与倾向 | 预研，待逐题确认 |
 | [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
 | [候选使用场景与验收](07-use-cases-and-acceptance.md) | 功能流程、边界、失败与可验证用例 | 候选，不等于MVP承诺 |

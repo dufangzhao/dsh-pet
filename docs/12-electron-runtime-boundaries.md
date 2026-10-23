@@ -1,6 +1,6 @@
 # Electron运行边界草案 v0.1
 
-状态：Electron + TypeScript已确认（[ADR-0011](adr/0011-electron-typescript-desktop.md)）；进程分工、插件信任策略与UI框架仍是待定设计。这里不是正在运行的系统拓扑。
+状态：Electron + TypeScript已确认（[ADR-0011](adr/0011-electron-typescript-desktop.md)）；插件信任已按DSH方案确定（[ADR-0012](adr/0012-dsh-style-trust-and-permissions.md)）；进程分工与UI框架仍是待定设计。这里不是正在运行的系统拓扑。
 
 ## 不将“统一插件”误解为“所有工作挤在一起”
 
@@ -35,7 +35,9 @@
 
 前两者并不自动实现第三者。Node进程、utilityProcess、node:vm、manifest权限声明都不能单独等同于安全沙箱。平台研究见[技术材料](../research/tech-platform.json)。
 
-## Q11：首版插件信任策略的待选路径
+## Q11：首版插件信任策略（已决定）
+
+**已决定（2026-10-24）**：按DSH方案，见[ADR-0012](adr/0012-dsh-style-trust-and-permissions.md)——可信插件、权限预设、一次性审批、审计，对应下面的A。B保留为将来开放陌生第三方插件生态时的备选。
 
 ### A · 可信插件优先，明确不宣称恶意插件沙箱（建议）
 
