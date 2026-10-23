@@ -7,7 +7,7 @@
 | 文档 | 用途 | 状态 |
 | --- | --- | --- |
 | [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.13，持续细化 |
-| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q14已选普通话+中英混说；Q15待提供；剩余问题Q15—Q27 |
+| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q15已提供首批软件；Q16待确认；剩余问题Q16—Q27 |
 | [Coopanion 交互评审](02-coopanion-ui-review.md) | 设置台、角色交互、扩展UI边界与可借鉴原则 | 官方资料/源码/截图静态核查 |
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
@@ -30,7 +30,7 @@
 | [Electron运行边界](12-electron-runtime-boundaries.md) | 进程职责、信任与受限运行选项 | 草案，信任策略已定（ADR-0012） |
 | [插件与能力契约草案](13-plugin-contract-draft.md) | 清单字段、生命周期、能力规则、听写接口、权限与契约测试 | 草案v0.1，信任模型已对齐DSH方案 |
 | [测试与验收策略](14-test-and-acceptance-strategy.md) | 测试层次、分段耗时与负载测量、兼容矩阵、故障注入、完成定义 | 方法草案，数值待定 |
-| [安全与隐私策略](15-security-and-privacy.md) | 数据清单、信任边界、15项风险与对策、参考项目教训、安全验收 | 草案，Q22/Q23/Q24待定 |
+| [安全与隐私策略](15-security-and-privacy.md) | 数据清单、信任边界、16项风险与对策、参考项目教训、安全验收 | 草案，Q22/Q23/Q24待定 |
 | [技术选型预研](16-technical-recommendations-prep.md) | Q16本地识别、Q18原生能力、Q19插件框架、Q27仓库结构的证据与倾向 | 预研，待逐题确认 |
 | [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
 | [候选使用场景与验收](07-use-cases-and-acceptance.md) | 功能流程、边界、失败与可验证用例 | 候选，不等于MVP承诺 |
