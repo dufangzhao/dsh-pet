@@ -1,0 +1,1298 @@
+{
+  "schema_version": 1,
+  "title": "Coopanion 架构与实现核验",
+  "scope": "仅官方仓库源码、文档、GitHub发布/CI元数据的定向静态核验；不运行、不安装仓库；不做UI截图和文档访谈；不是全仓安全审计或性能评测",
+  "retrieved_at": "2026-10-23T19:07:24.268Z",
+  "repository": "https://github.com/Pal-AI-Lab/Coopanion",
+  "baseline": {
+    "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+    "commit_time": "2026-10-23T05:04:30Z",
+    "tag": "v0.2.8",
+    "tag_points_to_commit": true,
+    "tag_api": "https://api.github.com/repos/Pal-AI-Lab/Coopanion/git/ref/tags/v0.2.8",
+    "cortico_submodule": {
+      "repository": "https://github.com/Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "tree_evidence": "https://api.github.com/repos/Pal-AI-Lab/Coopanion/git/trees/3dd0892c2d70a026253ab980af392302b88ff8b1?recursive=1"
+    },
+    "access_note": "GitHub MCP get_me返回401，转公开GitHub API/web_fetch读取固定commit raw；所有代码只当资料读取"
+  },
+  "verdict": {
+    "summary": "建议优先借鉴交互与架构分层；接受AGPL、可自建素材、且愿意重构语音与权限插件宿主时，可作为有条件二开底座。不应把它当作开箱即用的全局听写+声音克隆+安全可替换能力平台。",
+    "fork_fit": "中等：成熟的可见桌宠/控制台/会话/工具/文件记忆/跨平台打包链可复用；产品核心仍是陪伴型智能体，而非系统级语音生产力工具。",
+    "interaction_reference_fit": "高：气泡/状态反馈/前后台窗口协调/全局PTT/用户抢回控制/形象契约值得借鉴。视觉素材与源代码许可须单独处理。",
+    "alternative": "若计划闭源或授权弹性优先，可评估仅基于MIT Cortico自建桌宠宿主；不能因此复制AGPL桌宠World或排除授权的鲸鱼贴图。"
+  },
+  "findings": [
+    {
+      "topic": "技术栈与进程",
+      "documentation": "README称基于Cortico Core + Cormini Persona + 桌宠World。",
+      "implementation": "Electron主进程fork Node/tsx Core；Core组装Persona与World，桌宠有本地HTTP/WS服务，单独Electron桌宠host，CUA原生调用再fork引擎。ASR sherpa在World/Core进程，不是专用隔离插件进程。主语言TS/JS/CJS，部分控制台React/CodeMirror/Tailwind，桌宠自写JS/SVG/WebGL。",
+      "refs": [
+        "stack",
+        "corehost",
+        "assembly",
+        "assembly2",
+        "asrconstruct",
+        "window"
+      ],
+      "unknown": "未画出全部进程/线程图；未运行观察内存、帧率、启动时间。"
+    },
+    {
+      "topic": "Cortico/Core/Cormini/World边界",
+      "documentation": "Cortico是框架，Core负责生命周期，Persona定义认知与Memory语义，World负责环境输入输出。",
+      "implementation": "Coopanion固定装配Cormini的子类，覆盖PARTNER和git行为，再挂console、desktop-pet、coopanion通知World。Core负责编排session/事件/工具/provider；World提供工具、事件、envPrompt和配置；provider适配模型协议。Cortico支持bot扩展不意味着Coopanion现有入口支持任意Persona一键互换。",
+      "refs": [
+        "assembly",
+        "assembly2",
+        "world",
+        "types",
+        "memory"
+      ]
+    },
+    {
+      "topic": "扩展manifest与lifecycle",
+      "documentation": "npm扩展分world/provider/bot；安装后重启，再启用World。",
+      "implementation": "manifest版本world6/provider6/bot7，检查ESM/默认导出/ID冲突/UI资产路径；上一版有临时过渡层。World defaults/create/preflight、start/stop、activate/deactivate/restart及前缀重建真实存在；停用后宿主lease阻止继续事件注入。模块代码升级不是热替换，需重启进程。未启用World也会create，disabled不是拒绝执行模块代码的信任边界。",
+      "refs": [
+        "manifest",
+        "manifestcompat",
+        "extensionsdoc",
+        "loader",
+        "world",
+        "worldconstruct",
+        "worldlife",
+        "hostlease"
+      ]
+    },
+    {
+      "topic": "能力、路由与隔离",
+      "documentation": "describe展示全部工具与事件，能力元数据用于市场/配置。",
+      "implementation": "当前manifest无文件/网络/麦克风/屏幕等强制capability授权。read/write/speak/act等tags是分类/装配线索；describe外工具或事件仍执行只warn。Node import同进程信任插件，Core进程分离与错误捕获不是每插件OS隔离。存在World认知请求只能点名自有工具及卸载lease等局部约束，不能说完全无安全设计。模型每次请求按activeProvider路由；语音识别/语音输出尚未统一为可替换能力插槽。",
+      "refs": [
+        "manifest",
+        "loader",
+        "world",
+        "tags",
+        "cognition",
+        "hostlease",
+        "modelroute",
+        "asrconstruct"
+      ],
+      "unknown": "未完整审计所有Provider、WebUI面板、extension安装脚本和转发路径，也未实测恶意扩展。"
+    },
+    {
+      "topic": "配置与密钥",
+      "documentation": "World配置归worlds.<id>，部署配置覆盖默认；本地保存Key/登录态。",
+      "implementation": "WorldContext提供共享cfg引用/persist/restart；热读取配置即时生效，构造时复制值需重启。Coopanion rounds复制故需重启。core/companion从providers/<endpoint>/.env读取密钥引用，并无在这些路径中发现OS密钥保险库。",
+      "refs": [
+        "world",
+        "secrets",
+        "assembly2"
+      ],
+      "unknown": "未审计全套配置迁移、所有密钥静态加密/OS凭据仓库可能性；不能宣称密钥已安全加密。"
+    },
+    {
+      "topic": "Electron窗口与渲染",
+      "documentation": "透明置顶、点击穿透、跨屏移动；鲸鱼称Live2D式分件模型。",
+      "implementation": "BrowserWindow确实transparent/frame:false/alwaysOnTop/contextIsolation/sandbox，默认穿透；Coo按帧SVG；鲸鱼自研WebGL2/1 sprite rig，Canvas在SVG中，动态脸部与弹簧，不是Live2D Cubism运行时。所核验内置形象不是WebM播放。",
+      "refs": [
+        "window",
+        "coorender",
+        "coorender2",
+        "whalerender",
+        "webgl"
+      ],
+      "unknown": "不证明任意Live2D模型、WebM、VRM、Spine资源可直接导入；未全仓证明完全不存在任何视频用途。"
+    },
+    {
+      "topic": "ASR/PTT",
+      "documentation": "FunASR/SenseVoiceSmall、Whisper small、Windows SAPI；hold/toggle/always；默认LeftAlt*2。",
+      "implementation": "本地PCM到sherpa OfflineRecognizer，SenseVoice500ms部分句重识别、Whisper句末转写；Windows系统引擎单独辅助进程。koffi全局键态读取。识别末端将文字flush到desktop-pet.speech事件唤醒bot，而非将结果直接写回当前任意应用。",
+      "refs": [
+        "voicereadme",
+        "asr",
+        "asr2",
+        "asrconstruct",
+        "asrevent",
+        "hotkey",
+        "hotkeylinux"
+      ],
+      "unknown": "准确率/耗时/噪声表现未测；README性能数据仅作者声明；不把全局触发键等同全局听写。"
+    },
+    {
+      "topic": "TTS、音色创建与声音克隆",
+      "documentation": "说话声将气泡逐字念成短音节，可调音高和速度；第三方声明为Edge Xiaoyi音节。",
+      "implementation": "严格说有文本转声音的轻量拼接链，不是完全随机音效；但不是通常期望的整句自然神经TTS。规则/词典到IPA到最近中文音节，加载本地zh.ogg切片，以WebAudio playbackRate改音高并改时长。开发用build.py支持Edge/Azure及--voice重建音节库，非产品UI音色训练或用户录音克隆。",
+      "refs": [
+        "speech",
+        "speech2",
+        "speechtext",
+        "speechbuild",
+        "assets"
+      ],
+      "unknown": "未验证Edge生成音节音频的再分发及商业使用许可条款；未发现已检查生产语音链中的参考音频上传/说话人embedding/训练克隆模型流程，不作全仓不存在第三方TTS扩展的断言。"
+    },
+    {
+      "topic": "模型、记忆及git版本化",
+      "documentation": "多家模型；PARTNER.md每次整份进提示词；工作区每次改动版本化。",
+      "implementation": "Coo provider按协议实例化Responses/Chat/Anthropic/Gemini，Core当前端点路由；多供应商代码存在不等于全部真实服务验证。记忆为文件工作区而非已核验向量RAG：CONSTITUTION/PARTNER及清单进入前缀，其余按需文件读写。成功写工具串行git commit，启动按应用版本tag，blobs排除；无git仍可写但无该版本保障；git仓是记忆工作区，不是自动改项目源码。",
+      "refs": [
+        "provider",
+        "providernote",
+        "modelroute",
+        "memory",
+        "memory2",
+        "memorycommit",
+        "git",
+        "gitexec"
+      ],
+      "unknown": "尚未审计全部摘要/handoff算法、长期遗忘效果、冲突解决和恢复可靠性；不能宣称全量记忆无损或所有文件变动均即时被监听提交。"
+    },
+    {
+      "topic": "真实电脑控制",
+      "documentation": "默认关闭，启用后能截图/点按/键盘/窗口；用户活动会让位，登录支付交还人。",
+      "implementation": "11类工具真实到原生API，Windows GDI截图、SetCursorPos/SendInput/EnumWindows，非虚拟桌面模拟。CUA引擎为子进程可重启，但不是隔离虚拟机。默认截图缩放1280x800及操作后截图；control=false拒绝输入，仅允许看。",
+      "refs": [
+        "cuatools",
+        "cuawin",
+        "cuawin2",
+        "cuadefault",
+        "cuadoc"
+      ],
+      "unknown": "macOS/Linux底层实现此轮主要依据官方文档而非逐行核验；未操作真实电脑。"
+    },
+    {
+      "topic": "授权周期与敏感动作",
+      "documentation": "ask-each-turn / ask-before-acting / ask-once / never-ask，默认ask-once 30分钟；旧部署保留ask-each-turn。",
+      "implementation": "see与act在引擎调用前permit；ask-once读取免问，动作经同意后grantedUntil生效；拒绝/超时当前turn继续拒绝，turn结束重置permission；grantedUntil是Cua对象内存状态，进程重建不保留。关闭cua将工具移除且结束引擎；同一对象switchedOff/endEngine没有清grantedUntil，故不能把关闭再开等同撤销旧同意（静态判断，未运行复现）。v0.2.8不存在终端输入/系统快捷键的额外分类审批。登录/密码/支付及不可逆动作先问在ENV_PROMPT，不能等同强制逐项策略拦截。",
+      "refs": [
+        "cuadefault",
+        "cuaop",
+        "cuastop",
+        "cuaworld",
+        "cuaworld2",
+        "cuamigration",
+        "v028",
+        "cuaprompt"
+      ],
+      "prd_implication": "应明确读屏与输入分离授权、立即撤销、任务/应用/时间范围、敏感动作硬拦截；不能照搬30分钟广域同意作为实用助手默认。"
+    },
+    {
+      "topic": "本地HTTP与页面边界",
+      "documentation": "浏览器写请求同源，桌宠宿主随机凭据。",
+      "implementation": "window/overlay-source校验启动key；浏览器Origin与Host限制；无Origin的本机客户端仍被允许。因此防网页跨源不等于防本机恶意程序。Electron renderer sandbox/contextIsolation真实存在，但不能覆盖Node World插件。",
+      "refs": [
+        "serverauth",
+        "serverorigin",
+        "window",
+        "loader"
+      ],
+      "unknown": "未进行CSRF、路径、WS、导航或权限绕过完整安全测试。"
+    },
+    {
+      "topic": "figure pack schema、可执行性和兼容",
+      "documentation": "API2起长久向后兼容，kit冻结、同版本只加不改，zip/folder导入。",
+      "implementation": "figure.json manifest/api当前与最旧均2；entry/export动态import工厂，model/axes/presets/vocab/sounds/can/moves/needs等。pack是可执行JS不是纯贴图。工厂body至少step/layout/do，宿主postMessage传递有限状态，iframe opaque origin + connect-src none。128MiB导入、路径拒绝..与绝对路径；ready20秒超时。当前只实现2，未来兼容是承诺而非已观察多代兼容。",
+      "refs": [
+        "pack",
+        "packparse",
+        "packcontract",
+        "packexec",
+        "packsandbox",
+        "packhost",
+        "packimport",
+        "packcompat",
+        "fixture"
+      ]
+    },
+    {
+      "topic": "figure capability不是系统能力插件",
+      "documentation": "needs目前只有windows，供身体站在窗沿。",
+      "implementation": "几何顶边接口不提供标题/应用名；声明后可在CUA关闭时读取，和真实操作权限不同。沙箱不直接支持网络fetch、音视频元素与字体，声音经manifest交宿主。不应把装形象包等同装ASR/TTS/电脑能力插件。",
+      "refs": [
+        "pack",
+        "packcontract",
+        "packsandbox",
+        "packneeds"
+      ],
+      "unknown": "窗口几何授权是否另需用户同意，此轮未见统一capability审批；README明确macOS/Linux窗沿未实测。"
+    },
+    {
+      "topic": "许可与资产风险",
+      "documentation": "当前AGPL3-or-later，0.1.10及之前MIT；Cortico MIT；鲸鱼贴图排除。",
+      "implementation": "LICENSE正文核实AGPL与Steamworks附加许可；Cortico固定提交MIT正文核实。鲸鱼原设/二创/商标及AI生成贴图并非随代码获得可自由再用授权。音节音频、模型及词典各有独立来源/许可。",
+      "refs": [
+        "lic",
+        "rootlicense",
+        "mit",
+        "assets",
+        "thirdparty"
+      ],
+      "implication": "允许商业使用不等于允许闭源组合分发；二开分发/网络交互需评估AGPL对应源码义务，Steamworks例外不是普遍闭源例外。建议新建自有形象资产并单独核查语音音频/模型条款。此为工程许可提醒，不是法律意见。"
+    },
+    {
+      "topic": "成熟度、tests与CI",
+      "documentation": "三平台发行，但无Windows签名/macOS Developer ID；官方承认mac/linux多屏未真机验证。",
+      "implementation": "v0.2.8公开release非prerelease，八个主要安装/便携产物及校验和；固定提交CI和release job均success。CI矩阵三OS，静态检查+Vitest含World回归；真实CUA E2E明确排除；API2 JSDOM契约测试存在。因此是有持续交付与回归的早期产品，不是裸demo，也不是经全面桌面/安全/供应商互操作验证的成熟平台。",
+      "refs": [
+        "ci",
+        "e2eexcluded",
+        "fixture",
+        "release",
+        "releasepublish",
+        "unsigned",
+        "security",
+        "cuadoc"
+      ],
+      "unknown": "没有运行测试；未核验所有case数量/覆盖率、历史失败率、安装包签名字节、真实设备体验或性能。"
+    }
+  ],
+  "requirements_gap": [
+    {
+      "requirement": "全局听写到任意前台应用",
+      "available": "全局PTT、麦克风管理、本地ASR、部分转写反馈、取消句子；CUA另有键盘注入。",
+      "missing": "独立听写模式及目标输入框/焦点快照、直接文本落点、剪贴板保护、文本注入适配（UIA/IME/粘贴）、撤销/替换上句、与聊天/指令模式隔离、识别隐私和失败回退。",
+      "judgment": "可复用识别和交互组件，不能仅把speech事件接到agent再让它打字当作可靠全局听写。",
+      "refs": [
+        "asrevent",
+        "asrconstruct",
+        "hotkey",
+        "cuatools"
+      ]
+    },
+    {
+      "requirement": "可创建/克隆个性音色",
+      "available": "固定音节库、音高/语速；开发构建脚本可换服务voice。",
+      "missing": "整句/流式TTS接口、音色库、录音/导入/同意证明、说话人建模或远程克隆API、预览/删除/版本/成本控制、播放取消与嘴型同步契约。",
+      "judgment": "需要新增独立TTS与voice-profile能力；不能宣传现有pitch调节=克隆。",
+      "refs": [
+        "speech",
+        "speech2",
+        "speechbuild"
+      ]
+    },
+    {
+      "requirement": "可替换能力插件与统一路由",
+      "available": "World/provider/bot模块边界、manifest、生命周期、配置UI、工具事件总线、市场。",
+      "missing": "ASR/TTS/voice/听写输出等统一service接口和声明，按能力选择默认/备用实现、实例和版本依赖管理、强制最小授权与进程/RPC隔离、故障恢复与资源预算、可撤销权限、跨插件迁移兼容保证。",
+      "judgment": "World作为集成扩展可用；不等于安全能力内核。建议ASR/TTS从desktop-pet World解耦。",
+      "refs": [
+        "manifest",
+        "loader",
+        "world",
+        "modelroute",
+        "asrconstruct"
+      ]
+    }
+  ],
+  "reuse_assessment": {
+    "fork_pros": [
+      "桌宠窗口、点击穿透、气泡工具和动作词表已形成实现链。",
+      "会话/事件/状态/文件记忆/git历史与模型接入可节省基础开发。",
+      "figure API2、配置面板、扩展市场与多平台发布流程已存在。"
+    ],
+    "fork_cons": [
+      "AGPL影响闭源策略；鲸鱼贴图不随代码授权。",
+      "ASR、电脑控制、窗口与宠物交互集中于桌宠World，目标能力替换需重构。",
+      "npm World/provider直接导入Node，无法以现有manifest约束不可信插件OS访问。",
+      "授权策略较宽松，敏感行为多靠提示词；全局听写和声音克隆核心缺口未补。",
+      "v0.x持续演进，World/provider/bot API只保证上一代过渡，长期插件兼容成本需承担。"
+    ],
+    "interaction_only_pros": [
+      "可独立设计满足实用AI桌宠的服务内核，避免迁就陪伴型固定装配。",
+      "可保留气泡/PTT/状态反馈的设计思想，采用自有美术和独立实现。"
+    ],
+    "interaction_only_cons": [
+      "需重新实现透明窗口/点击穿透/多屏/音频采集/动画生命周期等跨平台细节。",
+      "不能把借鉴交互视为可以复制AGPL代码或受限资产。"
+    ]
+  },
+  "recommended_prd_decisions": [
+    "把宠物UI层与ASR、TTS、voice profiles、听写输出、LLM、记忆、电脑控制拆成不同能力接口。",
+    "同时定义三种模式：与宠物聊天、直接全局听写、执行命令；每次录音清楚显示输出目标。",
+    "插件manifest包含capabilities、resources、platforms、API范围、配置schema；权限broker强制执行，而非describe文本。",
+    "区分纯数据形象、沙箱脚本形象与系统能力插件三种风险层级。",
+    "明确授权范围/有效期/立即撤销与敏感动作硬审批，不照搬ask-once默认。",
+    "若二开优先级高，先做小范围POC：一个ASR替换插件、一个流式TTS、一个不经LLM的前台听写链；当前研究未运行这些POC。"
+  ],
+  "live_metadata": {
+    "release": {
+      "tag": "v0.2.8",
+      "published_at": "2026-10-23T05:08:14Z",
+      "draft": false,
+      "prerelease": false,
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/releases/tag/v0.2.8",
+      "api": "https://api.github.com/repos/Pal-AI-Lab/Coopanion/releases/latest",
+      "assets": [
+        "Coopanion-0.2.8-linux-x64.AppImage",
+        "Coopanion-0.2.8-linux-x64.deb",
+        "Coopanion-0.2.8-mac-arm64.dmg",
+        "Coopanion-0.2.8-mac-arm64.zip",
+        "Coopanion-0.2.8-mac-x64.dmg",
+        "Coopanion-0.2.8-mac-x64.zip",
+        "Coopanion-0.2.8-win-x64-portable.zip",
+        "Coopanion-Setup-0.2.8.exe",
+        "SHA256SUMS.txt"
+      ]
+    },
+    "ci": {
+      "head_sha": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/actions/runs/39903749432"
+    },
+    "release_workflow": {
+      "head_sha": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/actions/runs/39903750917"
+    }
+  },
+  "coverage": {
+    "method": "通过官方GitHub API枚举完整路径树，再定向读取固定提交文件与行段。部分大文件仅查看与问题相关的行段；证据锚点标明实际覆盖。",
+    "not_done": [
+      "不运行/安装/构建仓库或依赖",
+      "不调用任何真实ASR/TTS/模型服务",
+      "不下载发布包验证字节/签名",
+      "不对全部扩展或所有源码做安全审计",
+      "不测试延迟、识别准确率、CPU/GPU/内存、帧率",
+      "不采集星标/下载量指标",
+      "不负责官方UI截图与交互访谈"
+    ],
+    "important_unknowns": [
+      "未知第三方World市场中是否已有可用TTS/全局听写插件；本次只核查主仓和固定Cortico子模块。",
+      "未知所有模型服务真实API互操作；README明确真实Key验证范围有限。",
+      "音节音频服务条款与角色/商标再利用权利未获独立法律确认。",
+      "无法由当前API2代码证明未来升级始终兼容。",
+      "关闭再开启CUA不清grant的行为是源码推断，未实际运行复现。",
+      "未核验完整网络隐私/遥测实现；不能将本地ASR等同应用离线。"
+    ]
+  },
+  "evidence": {
+    "v028": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "docs/releases/v0.2.8.md",
+      "lines": [
+        1,
+        7
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/docs/releases/v0.2.8.md#L1-L7",
+      "observation": "v0.2.8撤回v0.2.7终端输入/Win键/系统快捷键二次确认，只按所选询问时机审批"
+    },
+    "secrets": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/companion.ts",
+      "lines": [
+        78,
+        84
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/companion.ts#L78-L84",
+      "observation": "按activeProvider检查ChatGPT登录态，否则读取providers/<endpoint>/.env中的secret"
+    },
+    "rootlicense": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "README_zh.md",
+      "lines": [
+        371,
+        375
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/README_zh.md#L371-L375",
+      "observation": "当前AGPL、0.1.10及之前MIT、Cortico MIT及资产排除范围的官方声明"
+    },
+    "stack": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "package.json",
+      "lines": [
+        1,
+        61
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/package.json#L1-L61",
+      "observation": "0.2.8，Node>=22，pnpm 11.28.6，Electron 44.4.4，TypeScript、tsx、esbuild、Express、ws；React19和Tailwind4用于部分控制台而非整个桌宠统一React渲染"
+    },
+    "submodule": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": ".gitmodules",
+      "lines": [
+        1,
+        3
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/.gitmodules#L1-L3",
+      "observation": "官方Cortico子模块URL"
+    },
+    "assembly": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/companion.ts",
+      "lines": [
+        388,
+        396
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/companion.ts#L388-L396",
+      "observation": "动态加载固定打包的Cormini并用coopanionPersona扩展"
+    },
+    "assembly2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/companion.ts",
+      "lines": [
+        473,
+        554
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/companion.ts#L473-L554",
+      "observation": "固定Cormini Persona；组装console/desktop-pet/coopanion Worlds；注册内置及扩展providers；主轮次20/40，context128000/keepRatio.25；不是任意bot热切换入口"
+    },
+    "corehost": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "app/core-host.cjs",
+      "lines": [
+        74,
+        89
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/app/core-host.cjs#L74-L89",
+      "observation": "Electron主应用fork core/boot.ts作为Node模式子进程"
+    },
+    "manifest": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/extensions/manifest.ts",
+      "lines": [
+        23,
+        55
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/extensions/manifest.ts#L23-L55",
+      "observation": "world6/provider6/bot7；manifest含kind/api/UI资产/describe，无细粒度OS能力权限声明"
+    },
+    "manifestcompat": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/extensions/manifest.ts",
+      "lines": [
+        128,
+        140
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/extensions/manifest.ts#L128-L140",
+      "observation": "只接受当前契约或上一版过渡；过旧或过新拒绝"
+    },
+    "extensionsdoc": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "docs/extensions.md",
+      "lines": [
+        303,
+        315
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/docs/extensions.md#L303-L315",
+      "observation": "上一版world5/provider5/bot6过渡层下个大版本删除，不是无限兼容承诺"
+    },
+    "loader": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/extensions.ts",
+      "lines": [
+        249,
+        340
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/extensions.ts#L249-L340",
+      "observation": "启动时校验后await import入口到当前Node进程；安装卸载需重启，非每插件隔离进程"
+    },
+    "world": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/world.ts",
+      "lines": [
+        28,
+        69
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/world.ts#L28-L69",
+      "observation": "WorldContext活配置及persist/restart；defaults/preflight/create/describe；未声明工具/事件仍运行只告警"
+    },
+    "worldlife": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/world.ts",
+      "lines": [
+        357,
+        397
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/world.ts#L357-L397",
+      "observation": "activate/deactivate/restart及配置持久化、构造失败回退"
+    },
+    "worldconstruct": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/world.ts",
+      "lines": [
+        217,
+        260
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/world.ts#L217-L260",
+      "observation": "包括未enabled在内的定义先create实例，enabled只决定挂载"
+    },
+    "types": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/core/types.ts",
+      "lines": [
+        902,
+        951
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/core/types.ts#L902-L951",
+      "observation": "World工具、环境模板、start/stop、handoff/runPhase及shutdownVerification接口"
+    },
+    "tags": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/core/types.ts",
+      "lines": [
+        197,
+        279
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/core/types.ts#L197-L279",
+      "observation": "read/write/speak/act/flow/snapshot为工具标签；barrier与interruptible为执行约定，不等于OS权限沙箱"
+    },
+    "hostlease": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/core/core.ts",
+      "lines": [
+        471,
+        515
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/core/core.ts#L471-L515",
+      "observation": "宿主lease撤销事件注入，隐藏World仍可落库但不投递"
+    },
+    "cognition": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/core/core.ts",
+      "lines": [
+        361,
+        378
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/core/core.ts#L361-L378",
+      "observation": "World请求Persona认知时点名工具限制在自己的工具集合；局部检查不等于Node权限隔离"
+    },
+    "modelroute": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "src/core/core.ts",
+      "lines": [
+        439,
+        467
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/src/core/core.ts#L439-L467",
+      "observation": "每次请求按activeProvider绑定端点；modelFacts按当前端点读取accepts/contextWindow"
+    },
+    "provider": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-provider-coo/src/index.ts",
+      "lines": [
+        141,
+        206
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-provider-coo/src/index.ts#L141-L206",
+      "observation": "实际create分支构造ClaudeProvider/GeminiProvider/VendorChat/VendorResponses；阻止非私网HTTP端点发送"
+    },
+    "providernote": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "README_zh.md",
+      "lines": [
+        163,
+        169
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/README_zh.md#L163-L169",
+      "observation": "官方仅声明真实Key测过DeepSeek、Anthropic、阶跃Step Plan，其他按文档接入；ChatGPT登录声明"
+    },
+    "window": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/host/electron-main.cjs",
+      "lines": [
+        374,
+        396
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/host/electron-main.cjs#L374-L396",
+      "observation": "透明无边框置顶BrowserWindow，contextIsolation和sandbox=true，默认点击穿透，showInactive"
+    },
+    "micpermission": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/host/electron-main.cjs",
+      "lines": [
+        507,
+        512
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/host/electron-main.cjs#L507-L512",
+      "observation": "Electron media权限处理，macOS麦克风许可请求"
+    },
+    "coorender": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/coo/coo.js",
+      "lines": [
+        187,
+        206
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/coo/coo.js#L187-L206",
+      "observation": "Coo按帧生成SVG path/group"
+    },
+    "coorender2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/coo/coo.js",
+      "lines": [
+        346,
+        351
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/coo/coo.js#L346-L351",
+      "observation": "draw通过petG.innerHTML更新SVG"
+    },
+    "whalerender": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/whale/figure.js",
+      "lines": [
+        1,
+        15
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/whale/figure.js#L1-L15",
+      "observation": "自研sprite rig、spring及动态脸部贴图，Canvas嵌在SVG组"
+    },
+    "webgl": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/kit/rig.js",
+      "lines": [
+        48,
+        57
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/kit/rig.js#L48-L57",
+      "observation": "WebGL2回退WebGL1；非Cubism SDK"
+    },
+    "voicereadme": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/README.md",
+      "lines": [
+        154,
+        215
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/README.md#L154-L215",
+      "observation": "官方ASR/PTT模式、模型、权限与平台限制；文中性能数字未复测"
+    },
+    "asr": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/asr/sherpa.ts",
+      "lines": [
+        65,
+        99
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/sherpa.ts#L65-L99",
+      "observation": "SenseVoiceSmall每500ms重识别部分句，Whisper small仅句末转写"
+    },
+    "asr2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/asr/sherpa.ts",
+      "lines": [
+        188,
+        198
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/sherpa.ts#L188-L198",
+      "observation": "sherpa OfflineRecognizer.createAsync，CPU后端"
+    },
+    "asrevent": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/world.ts",
+      "lines": [
+        1594,
+        1618
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/world.ts#L1594-L1618",
+      "observation": "完成语音通过desktop-pet.speech/desktop-pet.voice事件flush给bot，没有在此末端写入当前应用输入框"
+    },
+    "asrconstruct": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/world.ts",
+      "lines": [
+        610,
+        629
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/world.ts#L610-L629",
+      "observation": "桌宠World直接new SherpaAsr和SystemRecognizer，非独立ASR provider发现"
+    },
+    "hotkey": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/asr/hotkey.ts",
+      "lines": [
+        126,
+        147
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/hotkey.ts#L126-L147",
+      "observation": "koffi GetAsyncKeyState/CoreGraphics全局键态读取与macOS输入监控许可"
+    },
+    "hotkeylinux": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/asr/hotkey.ts",
+      "lines": [
+        184,
+        194
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/hotkey.ts#L184-L194",
+      "observation": "XQueryKeymap仅知X服务器按键，Wayland原生窗口焦点限制"
+    },
+    "speech": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/speech.js",
+      "lines": [
+        1,
+        16
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/speech.js#L1-L16",
+      "observation": "Animal Crossing式语音，中文无声音节库；各语言转IPA匹配近似音节"
+    },
+    "speech2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/speech.js",
+      "lines": [
+        70,
+        128
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/speech.js#L70-L128",
+      "observation": "加载zh.json+zh.ogg，decodeAudioData/AudioBufferSource+playbackRate拼接播放"
+    },
+    "speechbuild": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/scripts/speech-bank/build.py",
+      "lines": [
+        1,
+        20
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/scripts/speech-bank/build.py#L1-L20",
+      "observation": "构建时调用Edge或Azure TTS逐音节制库，--voice可换合成服务音色，默认Xiaoyi；不是用户录音克隆"
+    },
+    "speechtext": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/speech/index.ts",
+      "lines": [
+        1,
+        38
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/speech/index.ts#L1-L38",
+      "observation": "字符/词典/规则到IPA，再到bank syllable；中文逐字常用读音，数字Mandarin"
+    },
+    "memory": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/persona.ts",
+      "lines": [
+        1,
+        12
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/persona.ts#L1-L12",
+      "observation": "PARTNER全文前缀、写工具每次Git提交、blobs排除、Git不可用仍写入"
+    },
+    "memory2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/persona.ts",
+      "lines": [
+        24,
+        47
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/persona.ts#L24-L47",
+      "observation": "PARTNER与partner/拆分、writes映射、start-version tag"
+    },
+    "memorycommit": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/persona.ts",
+      "lines": [
+        153,
+        190
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/persona.ts#L153-L190",
+      "observation": "启动快照与写入成功后串行commitAllAsync"
+    },
+    "git": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "bots/cormini/persona/workspaceGit.ts",
+      "lines": [
+        1,
+        5
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/bots/cormini/persona/workspaceGit.ts#L1-L5",
+      "observation": "独立工作区Git，checkpoint annotated tag，rollback reset --hard；失败不阻断文件写"
+    },
+    "gitexec": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "bots/cormini/persona/workspaceGit.ts",
+      "lines": [
+        142,
+        180
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/bots/cormini/persona/workspaceGit.ts#L142-L180",
+      "observation": "固定工作区execFile git，剥离定位环境变量，非应用源码自动提交"
+    },
+    "cuadefault": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/config.ts",
+      "lines": [
+        8,
+        51
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/config.ts#L8-L51",
+      "observation": "默认disabled/control=true/ask-once/30分钟；截图1280x800；闲置2s/让位最多15s"
+    },
+    "cuaop": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/cua.ts",
+      "lines": [
+        228,
+        275
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/cua.ts#L228-L275",
+      "observation": "每次非info/confirm引擎调用分see/act授权，读取免问取决level，grantedUntil内存时间，拒绝保持当前turn"
+    },
+    "cuastop": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/cua.ts",
+      "lines": [
+        153,
+        194
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/cua.ts#L153-L194",
+      "observation": "turn结束仅清permission；switchedOff/endEngine结束引擎但没有清grantedUntil"
+    },
+    "cuatools": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/cua.ts",
+      "lines": [
+        331,
+        358
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/cua.ts#L331-L358",
+      "observation": "11种真实电脑工具，全部interruptible"
+    },
+    "cuaworld": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/world.ts",
+      "lines": [
+        917,
+        920
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/world.ts#L917-L920",
+      "observation": "关闭cua时调用同一个Cua对象的switchedOff"
+    },
+    "cuaworld2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/world.ts",
+      "lines": [
+        1654,
+        1657
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/world.ts#L1654-L1657",
+      "observation": "仅cuaOn向模型挂出电脑工具，否则提供设置开启入口"
+    },
+    "cuawin": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/engine/win32.ts",
+      "lines": [
+        41,
+        56
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine/win32.ts#L41-L56",
+      "observation": "koffi连接GDI/SendInput/GetLastInputInfo/EnumWindows"
+    },
+    "cuawin2": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/engine/win32.ts",
+      "lines": [
+        108,
+        153
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine/win32.ts#L108-L153",
+      "observation": "BitBlt截图，检查SendInput注入数量，SetCursorPos实际移动"
+    },
+    "cuaprompt": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/cua/ENV_PROMPT.md",
+      "lines": [
+        18,
+        21
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/ENV_PROMPT.md#L18-L21",
+      "observation": "登录/密码/支付交还用户和不可逆动作先问是提示词规则，而非此处硬编码的独立动作授权"
+    },
+    "cuadoc": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/README.md",
+      "lines": [
+        410,
+        438
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/README.md#L410-L438",
+      "observation": "平台实现说明，macOS/Linux多屏未真机验证声明，Windows真实E2E说明"
+    },
+    "cuamigration": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "core/seed.ts",
+      "lines": [
+        18,
+        20
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/core/seed.ts#L18-L20",
+      "observation": "旧配置保持ask-each-turn；新配置ask-once"
+    },
+    "pack": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/packs.ts",
+      "lines": [
+        30,
+        53
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/packs.ts#L30-L53",
+      "observation": "manifest/api/oldest均2，needs仅windows，sounds允许ogg/mp3/wav"
+    },
+    "packparse": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/packs.ts",
+      "lines": [
+        248,
+        311
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/packs.ts#L248-L311",
+      "observation": "版本/路径/必需字段校验，未知可选项跳过；entry/export为执行入口"
+    },
+    "packcontract": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/figure-frame.js",
+      "lines": [
+        9,
+        36
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/figure-frame.js#L9-L36",
+      "observation": "工厂与body API契约，step/layout/do必需，其余可选；host事件/声音接口"
+    },
+    "packexec": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/figure-frame.js",
+      "lines": [
+        72,
+        95
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/figure-frame.js#L72-L95",
+      "observation": "校验message来源parent后import(m.entry)并执行工厂，非纯数据皮肤"
+    },
+    "packsandbox": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/server.ts",
+      "lines": [
+        330,
+        335
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/server.ts#L330-L335",
+      "observation": "CSP sandbox allow-scripts opaque origin；default none、connect none，仅本地脚本/图片"
+    },
+    "serverauth": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/server.ts",
+      "lines": [
+        160,
+        168
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/server.ts#L160-L168",
+      "observation": "window和overlay-source用启动时随机key验证"
+    },
+    "serverorigin": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/server.ts",
+      "lines": [
+        220,
+        231
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/server.ts#L220-L231",
+      "observation": "浏览器写请求同源限制；无Origin本机客户端可通过，非本机恶意进程隔离"
+    },
+    "packhost": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/web/body-host.js",
+      "lines": [
+        119,
+        137
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/body-host.js#L119-L137",
+      "observation": "iframe sandbox allow-scripts，20秒ready超时"
+    },
+    "packcompat": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/README.md",
+      "lines": [
+        299,
+        316
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/README.md#L299-L316",
+      "observation": "从API2起向后兼容、只加不改、旧kit保留的未来承诺及冻结fixture"
+    },
+    "packneeds": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/README.md",
+      "lines": [
+        269,
+        282
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/README.md#L269-L282",
+      "observation": "needs windows只给几何顶边；独立于cua.enabled；mac/linux未实测"
+    },
+    "packimport": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/src/pack-import.ts",
+      "lines": [
+        22,
+        79
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/pack-import.ts#L22-L79",
+      "observation": "128MiB限制、路径分段拒绝绝对路径和..、zip解压规模统计"
+    },
+    "lic": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "LICENSE",
+      "lines": [
+        1,
+        16
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/LICENSE#L1-L16",
+      "observation": "AGPL3-or-later，加Steamworks链接附加许可"
+    },
+    "mit": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Cortico",
+      "commit": "ace4c640af07f21c15f81116c370fda0fe828389",
+      "path": "LICENSE",
+      "lines": [
+        1,
+        21
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Cortico/blob/ace4c640af07f21c15f81116c370fda0fe828389/LICENSE#L1-L21",
+      "observation": "Cortico MIT许可"
+    },
+    "assets": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/THIRD_PARTY_NOTICES.md",
+      "lines": [
+        26,
+        38
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/THIRD_PARTY_NOTICES.md#L26-L38",
+      "observation": "鲸鱼贴图来源与商标说明、明确不属AGPL；音节来自Edge Xiaoyi"
+    },
+    "thirdparty": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "packages/cortico-world-desktop-pet/THIRD_PARTY_NOTICES.md",
+      "lines": [
+        3,
+        24
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/THIRD_PARTY_NOTICES.md#L3-L24",
+      "observation": "sherpa Apache2/onnxruntime MIT，SenseVoice模型单独协议，Whisper MIT，Electron MIT及第三方许可"
+    },
+    "ci": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": ".github/workflows/ci.yml",
+      "lines": [
+        11,
+        35
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/.github/workflows/ci.yml#L11-L35",
+      "observation": "Windows/macOS/Ubuntu矩阵，build/typecheck/web/typecheck-worlds/tests"
+    },
+    "e2eexcluded": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "vitest.worlds.config.ts",
+      "lines": [
+        4,
+        16
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/vitest.worlds.config.ts#L4-L16",
+      "observation": "World回归排除tests/cua/e2e"
+    },
+    "fixture": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "tests/figure-frame-contract.test.js",
+      "lines": [
+        1,
+        35
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/tests/figure-frame-contract.test.js#L1-L35",
+      "observation": "JSDOM冻结API2夹具ready/frames/gesture/scheme/walk契约测试"
+    },
+    "release": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": ".github/workflows/release.yml",
+      "lines": [
+        16,
+        54
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/.github/workflows/release.yml#L16-L54",
+      "observation": "多平台打包；macOS没有Developer ID，ad hoc"
+    },
+    "releasepublish": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": ".github/workflows/release.yml",
+      "lines": [
+        81,
+        98
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/.github/workflows/release.yml#L81-L98",
+      "observation": "检查全套产物并SHA256SUMS后发布"
+    },
+    "unsigned": {
+      "basis": "official_documentation",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "README_zh.md",
+      "lines": [
+        63,
+        104
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/README_zh.md#L63-L104",
+      "observation": "Windows未数字签名与macOS无开发者签名声明"
+    },
+    "security": {
+      "basis": "source",
+      "repository": "Pal-AI-Lab/Coopanion",
+      "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+      "path": "SECURITY.md",
+      "lines": [
+        11,
+        25
+      ],
+      "url": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/SECURITY.md#L11-L25",
+      "observation": "只主线与下一版本修复；外部扩展和框架各自报告"
+    }
+  }
+}

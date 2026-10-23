@@ -10,6 +10,8 @@
 - [产品需求基线 v0.1](docs/00-product-brief.md)
 - [逐题选型与决策清单](docs/01-discovery-plan.md)
 - [Coopanion 设置与交互专项评审](docs/02-coopanion-ui-review.md)
+- [Coopanion 架构与复用核验](docs/04-coopanion-architecture-review.md)
+- [扩展产品规格](docs/03-extension-product-spec.md)与[已确认架构决策](docs/adr/0001-controlled-ui-contributions.md)
 - [项目术语](CONTEXT.md)
 - [第一阶段可视化调研报告](research/report/ai-desktop-pet-research-20261023.html)
 

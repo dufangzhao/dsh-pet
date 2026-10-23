@@ -46,11 +46,11 @@ Coopanion值得优先借鉴的是“桌面角色 + 气泡交互 + 完整设置�
 4. 扩展要展示内容，可经Bot气泡/对话反馈，或托管自己的独立应用环境。
 5. v0.2.2曾加入桌宠菜单“扩展页面”，v0.2.3因越过产品边界撤回。
 
-因此它有开放扩展，但不是任意扩展都能接入普通设置台。我们可以选择沿用这种收敛方式，也可以增加受控贡献点；见[Q1](01-discovery-plan.md)。
+因此它有开放扩展，但不是任意扩展都能接入普通设置台。本项目Q1已选择能力 + 受控UI贡献点，开放方向比其普通界面更广；这并不决定是否fork。见[ADR-0001](adr/0001-controlled-ui-contributions.md)。
 
 ## 声音与角色，不从界面标签推断能力
 
-并行源码核验已发现：语音输出使用预生成音节库、近似音节映射与播放速率调音高；不能直接称为自然整句TTS、音色克隆或训练平台。角色中有自研sprite rig的表现路径；Live2D式效果不自动意味着兼容Cubism模型。详细固定来源与覆盖范围将在架构专项结果交接后补入本页。
+并行源码核验已发现：语音输出使用预生成音节库、近似音节映射与播放速率调音高；不能直接称为自然整句TTS、音色克隆或训练平台。角色中有自研sprite rig的表现路径；Live2D式效果不自动意味着兼容Cubism模型。现已完成固定提交核验：[speech.js · speech](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/speech.js#L1-L16)、[index.ts · speechtext](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/speech/index.ts#L1-L38)、[figure.js · whalerender](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/web/whale/figure.js#L1-L15)。完整说明见[架构评审](04-coopanion-architecture-review.md)。
 
 ## 不能照搬的地方
 
