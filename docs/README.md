@@ -27,6 +27,7 @@
 | [ADR-0010](adr/0010-unified-plugin-model.md) | 同一种插件标准，不设功能/提供者层级 | 已采纳 |
 | [ADR-0011](adr/0011-electron-typescript-desktop.md) | Electron + TypeScript桌面底座 | 已采纳 |
 | [Electron运行边界](12-electron-runtime-boundaries.md) | 进程职责、信任与受限运行选项 | 草案，Q11待选 |
+| [插件与能力契约草案](13-plugin-contract-draft.md) | 清单字段、生命周期、能力规则、听写接口、权限与契约测试 | 草案v0.1，Q11相关部分待定 |
 | [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
 | [候选使用场景与验收](07-use-cases-and-acceptance.md) | 功能流程、边界、失败与可验证用例 | 候选，不等于MVP承诺 |
 | [需求追踪与准备度](08-readiness-and-traceability.md) | 已确认方向、验收追踪和开工缺口 | 尚不具备全面开工条件 |
