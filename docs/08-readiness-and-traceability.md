@@ -11,6 +11,12 @@
 | Q3=MIT | 自有代码MIT；第三方内容另审 | [ADR-0003](adr/0003-mit-license.md) |
 | Q4=A | 能力/插件中心，优先复用合适框架 | [ADR-0004](adr/0004-capability-centered-host.md) |
 | Q5=A | Windows首发，其他平台后续 | [ADR-0005](adr/0005-windows-first.md) |
+| AGPL追问后的补充 | Coopanion仅参考，本阶段不二开 | [ADR-0006](adr/0006-reference-coopanion-without-fork.md) |
+| Q6=A | 首条闭环为语音听写到目标应用 | [ADR-0007](adr/0007-dictation-first-workflow.md) |
+| Q7=C | 首版完整本地/云ASR，用户首次选择 | [ADR-0008](adr/0008-local-and-cloud-asr.md) |
+| Q8=A | 云ASR使用用户自带服务商Key | [ADR-0009](adr/0009-cloud-asr-byok.md) |
+| Q9修订确认 | 统一单层插件模型，职责/来源不分层级 | [ADR-0010](adr/0010-unified-plugin-model.md) |
+| Q10=A | Electron + TypeScript桌面底座 | [ADR-0011](adr/0011-electron-typescript-desktop.md) |
 
 用户询问AGPL含义并在解释后明确“仅作参考，先不二开”。当前保持MIT，Coopanion仅作交互/架构参考，见[ADR-0006](adr/0006-reference-coopanion-without-fork.md)。不得继续将该问题标为等待回答，也不得把不fork误解为所有基础组件必须自写。
 
