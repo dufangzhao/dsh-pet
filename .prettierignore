@@ -1,0 +1,17 @@
+# 已有文档与调研材料不纳入新工程的格式检查
+docs/
+research/
+qa/
+CONTEXT.md
+README.md
+THIRD_PARTY_NOTICES.md
+LICENSE
+
+# 生成物与依赖
+node_modules/
+dist/
+out/
+release/
+coverage/
+pnpm-lock.yaml
+*.tsbuildinfo

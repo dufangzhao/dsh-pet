@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+  - plugins/*
+
+# 开发工具版本集中管理，各包以 "catalog:" 引用，避免版本漂移。
+catalog:
+  '@types/node': 24.19.2
+  typescript: 6.0.3
+  vite: 8.3.5
+  vitest: 5.0.5
+
+# 依赖安装时不自动执行第三方构建/安装脚本；确需执行时逐个评审后加入。
+onlyBuiltDependencies: []

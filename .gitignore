@@ -7,6 +7,7 @@ dist/
 out/
 build/
 release/
+coverage/
 *.tsbuildinfo
 
 # 环境变量与密钥（只提交 .env.example）
@@ -28,6 +29,8 @@ venv/
 
 # 模型权重与大文件：通过下载脚本获取，不入库
 models/
+.model-cache/
+samples/private/
 *.onnx
 *.safetensors
 *.pt
