@@ -31,25 +31,21 @@
 
 **成立条件**：实施前先用最小原型验证锁定版本的类型声明、启停和清理行为，即[架构验证项V-01](05-architecture-overview.md)。Q11已按DSH方案确定为可信插件，插件可由框架在宿主内直接承载；插件仍只面对项目自己的SDK，这个倾向不变。
 
-## Q18 Windows原生能力的实现语言（依赖Q12、Q15）
+## Q18 Windows原生能力：补核后修订
 
-**需要的原生能力**
+用户要求查看Coopanion后，已完成[固定提交专项核验](17-coopanion-native-implementation.md)。该项目在Windows使用Koffi读取键态、调用SendInput/GDI；CUA操作在子进程，按键采用轮询，不是必须用键盘钩子。
 
-- 文字输入：SendInput只能向同级或更低权限级别的程序输入；返回值只表示事件已插入输入流，不代表目标应用已收到。[input-01、input-02，[Windows自动化调研](../research/tech-windows-automation.json)]
-- 目标识别与复核：通过UI Automation获取焦点元素、判断是否为密码类控件。[lib-dotnet-01、input-08]
-- 如果Q12选择“按住说话”，需要能同时收到按下和松开的全局键盘事件。Electron的globalShortcut没有松开回调[ELE-02]；可用Windows低级键盘钩子（[LowLevelKeyboardProc](https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc)，配合SetWindowsHookEx），或uiohook-napi。
+此前C#路线的理由需收窄：现成.NET/UIA封装是优势，但没有“全方面最成熟”的实测；辅助进程可降低直接Electron原生模块耦合，却仍要测试IPC、部署和平台兼容。Node工作进程也可避免阻塞主界面，Koffi并不必然依赖LGPL的uiohook。
 
-**候选**
+| 候选 | 可取之处 | 未解决问题 |
+| --- | --- | --- |
+| Node/TS + Koffi工作进程 | 语言统一；有Coopanion的Win32/IPC机制参考 | 输入控件语义、密码框、目标绑定与回读；运行时/原生包版本仍需验证 |
+| C#/.NET辅助进程 | 现成UIA封装；可把目标识别与输入集成到明确进程 | 新语言/发布运行时；自绘软件、富文本和终端兼容不自动解决 |
+| Rust辅助进程 | 可实现原生适配层，发布依赖可控 | 工具链和封装覆盖尚未验证，不能单凭语言宣称更快/更小 |
 
-| 候选 | 依据 | 优点 | 风险 |
-| --- | --- | --- | --- |
-| A：C#/.NET辅助进程 | 本机已装.NET 10 SDK；FlaUI（MIT）封装UIA，最新正式发布v5.0.0，主分支已到v6并面向.NET 10；System.Windows.Automation源码为MIT[lib-flaui-01、lib-flaui-02、lib-dotnet-01] | UIA生态最成熟；键盘钩子、文字输入、UIA集中在一个独立进程，与Electron版本解耦 | 多一种语言和运行时；需选择发布方式（自带运行时会增大安装包） |
-| B：Rust辅助进程 | uiautomation-rs（Apache-2.0，0.25.1）[lib-rust-01、lib-rust-02] | 单文件、体积小、无托管运行时 | 本机未装Rust；封装成熟度与覆盖范围未验证 |
-| C：Node原生扩展（koffi调用Win32、uiohook-napi） | koffi为MIT、Node 16以上、提供Windows x64预编译包[lib-koffi-01]；uiohook-napi提供按下与松开事件[ELE-03] | 不引入新语言 | koffi不提供现成的UIA封装和COM线程处理；uiohook-napi依赖LGPL-3.0或更高版本的libuiohook，需审计分发义务[ELE-04]；原生模块要匹配Electron的ABI |
+**更新倾向**：先批准有限的Node/Koffi与C#对照验证，再定主实现；若用户更看重统一TS或UIA现成封装，可选择相应优先路线。当前未选定也未运行任何原型。验证同一text.input契约，不为比较语言而维护两套正式系统。
 
-**我的倾向：A。** UIA在.NET中最成熟；三项原生能力集中在一个可单独测试的辅助进程里，通过统一插件契约接入（作为text.input等能力的提供方）。这样能避开Electron原生模块的ABI问题，也不必审计LGPL依赖的分发义务。
-
-**成立条件**：Q12已选“一个键两种用法”，必须接收按键松开事件，键盘钩子是必需能力，这进一步支持把钩子、文字输入、UIA集中在一个C#辅助进程里。若Q15中的软件主要是网页，还要评估是否需要浏览器侧方案。
+Q12要求检测按下/松开状态，轮询与钩子都应验证短按、误触、冲突与资源成本。Q15的多类目标应用及“每句复核目标”的要求，是选择实现的主要依据。
 
 ## Q16 本地识别引擎与模型（已确认：sherpa-onnx，两个模型实测后定默认）
 
@@ -97,6 +93,6 @@ docs/  research/  qa/
 ## 需要先回答的前置问题
 
 - Q11：已定（按DSH方案）。
-- Q12：已定（一个键两种用法），需要键盘钩子。
+- Q12：已定（一个键两种用法），需可靠检测按下/松开；轮询与钩子机制待验证。
 - Q14：已定（普通话 + 中英混说），对应表中第一行。
 - Q15：影响Q18和兼容矩阵。

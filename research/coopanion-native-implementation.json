@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "title": "Coopanion Windows原生实现补核：Q18",
+  "checked_at": "2026-10-23T21:51:10.060Z",
+  "commit": "3dd0892c2d70a026253ab980af392302b88ff8b1",
+  "method": "固定提交官方raw源码静态读取；未clone、安装、运行或调用系统输入；未将产品源码复制入本项目。",
+  "sources": {
+    "hotkey": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/hotkey.ts#L124-L129",
+    "poll": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/hotkey.ts#L237-L252",
+    "interval": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/world.ts#L98-L107",
+    "core": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/app/core-host.cjs#L74-L89",
+    "env": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/app/core-env.cjs#L1-L9",
+    "spawn": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/cua.ts#L198-L212",
+    "dll": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine/win32.ts#L15-L83",
+    "capture": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine/win32.ts#L100-L153",
+    "typing": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine/win32.ts#L174-L194",
+    "windows": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine/win32.ts#L197-L248",
+    "cancel": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine-child.ts#L182-L239",
+    "guard": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine-child.ts#L40-L66",
+    "layout": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/cua/engine-child.ts#L95-L104",
+    "deps": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/package.json#L60-L75",
+    "hotkeyDefaults": "https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/hotkey.ts#L31-L44"
+  },
+  "findings": [
+    {
+      "id": "N01",
+      "level": "source_verified",
+      "fact": "Electron应用fork Core，Core再按需fork CUA引擎子进程；Node/TypeScript通过Koffi调用Win32，不是C#实现。",
+      "refs": [
+        "core",
+        "spawn",
+        "dll"
+      ]
+    },
+    {
+      "id": "N02",
+      "level": "source_verified",
+      "fact": "Core环境明确设置ELECTRON_RUN_AS_NODE=1；fork处未覆写execPath。不能因此将其子进程说成与Electron完全无关的独立Node安装或免原生兼容检查。",
+      "refs": [
+        "core",
+        "env",
+        "spawn"
+      ]
+    },
+    {
+      "id": "N03",
+      "level": "source_verified",
+      "fact": "桌宠World包固定Koffi 3.3.1、sherpa-onnx-node 1.13.8，开发依赖Electron 44.4.4；这是源码版本配置，不是本机运行验证。",
+      "refs": [
+        "deps"
+      ]
+    },
+    {
+      "id": "N04",
+      "level": "source_verified",
+      "fact": "Windows说话键使用Koffi调用GetAsyncKeyState并读取高位；watchHotkey以setInterval观察变化。World调用时配置30ms，属于代码参数，不是实测延迟。该路径不是SetWindowsHookEx键盘钩子。",
+      "refs": [
+        "hotkey",
+        "poll",
+        "interval"
+      ]
+    },
+    {
+      "id": "N05",
+      "level": "source_verified",
+      "fact": "所查Windows引擎动态加载user32/gdi32/kernel32/dwmapi，使用GDI BitBlt截图、SetCursorPos移动、SendInput发送输入、EnumWindows与GetForegroundWindow取得顶层窗口信息。",
+      "refs": [
+        "dll",
+        "capture",
+        "windows"
+      ]
+    },
+    {
+      "id": "N06",
+      "level": "source_verified",
+      "fact": "typeUnicode遍历UTF-16单元发KEYEVENTF_UNICODE；LF转成VK_RETURN按下/松开，CR忽略。只检查SendInput插入事件数量，不读取目标输入框验证文本。",
+      "refs": [
+        "typing",
+        "capture"
+      ]
+    },
+    {
+      "id": "N07",
+      "level": "bounded_absence",
+      "fact": "已完整读取的win32.ts共261行；其中未见UIA控件树、FocusedElement、IsPassword或目标输入框文字回读实现。该结论限于所查Windows引擎路径，不能扩展为全仓绝对不存在。",
+      "refs": [
+        "dll",
+        "windows",
+        "typing"
+      ]
+    },
+    {
+      "id": "N08",
+      "level": "source_verified",
+      "fact": "引擎以任务ID接受cancel；长文本按16个grapheme一组发送，在组间检查取消和用户活动。开始发送的点击/拖动/按键序列并不在每一步取消；停止不是任意OS副作用可回滚。",
+      "refs": [
+        "cancel",
+        "guard"
+      ]
+    },
+    {
+      "id": "N09",
+      "level": "source_verified",
+      "fact": "原生引擎检查显示器布局是否变化；窗口枚举保存handle/pid/rect等，focus工具会尝试激活顶层窗口。它们不是输入控件/光标选择区身份验证。",
+      "refs": [
+        "layout",
+        "windows"
+      ]
+    },
+    {
+      "id": "N10",
+      "level": "analysis",
+      "fact": "本项目可以独立实现Node工作进程+Koffi适配器，也可以使用C#/.NET辅助进程；应以目标控件识别、输入安全、原文保护、取消和回读的实测选择，不能以语言名称推定成功。",
+      "refs": [
+        "windows",
+        "typing",
+        "cancel"
+      ]
+    },
+    {
+      "id": "N11",
+      "level": "analysis",
+      "fact": "Q12要求检测按下/松开，不等于只能使用键盘钩子；轮询与钩子在短按漏检、延迟、CPU、冲突/拦截语义上须验证。",
+      "refs": [
+        "hotkey",
+        "poll",
+        "interval"
+      ]
+    },
+    {
+      "id": "N12",
+      "level": "analysis",
+      "fact": "通用CUA输入方法的LF→Enter和主动聚焦行为不应直接成为听写默认策略；终端控制字符、同窗不同输入框和结果未知必须另有策略。",
+      "refs": [
+        "typing",
+        "windows"
+      ]
+    },
+    {
+      "id": "N13",
+      "level": "source_verified",
+      "fact": "默认热键为LeftAlt*2，即一次轻点后再次按住；不应将其默认手势或tapTracker直接当作本项目已选的单键轻点持续/长按即说状态机。",
+      "refs": [
+        "hotkeyDefaults",
+        "poll"
+      ]
+    }
+  ],
+  "limitations": [
+    "仅静态核验，未测CPU、帧率、短按识别、安装包或原生ABI兼容。",
+    "未验证任何用户目标应用输入成功；未做全仓UIA穷尽扫描或安全审计。",
+    "Koffi及其他组件的实际版本/许可需在本项目选择时再固定；本次不选择Q18。",
+    "当前Coopanion产品为AGPL，本项目仅作方案参考，不复制其实现代码。"
+  ]
+}

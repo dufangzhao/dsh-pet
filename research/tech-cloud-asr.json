@@ -1,0 +1,976 @@
+{
+  "schema_version": 1,
+  "title": "Windows优先插件化AI桌宠：BYOK云端实时听写接口核查",
+  "researched_on": "2026-10-24",
+  "timezone": "Asia/Taipei",
+  "scope": "云端语音转文字，用于听写到其他应用；首版内置阿里云百炼、火山引擎豆包语音、OpenAI，由用户自选，不替用户调用服务",
+  "method": {
+    "baseline_read": "research/tech-voice-character.json",
+    "baseline_reused": "已先读取既有记录；不重复TTS、声音复刻与语音对话评测，本次补充ASR具体接口和新的转写弃用通知。",
+    "actions": "仅读取本机既有资料和官方公开网页；搜索用于发现官方URL及读取官方页面索引摘录；未打开第三方正文作为证据。未安装、未运行软件或网页脚本、未调用任何语音/模型/控制台API、未写实现代码。仅写本JSON，使用工具内存数据整理与JSON.parse回读校验。",
+    "github": "未使用GitHub MCP或GitHub API。",
+    "file_check": "写入前glob research/tech-cloud-asr.json，未发现既有文件。",
+    "verification_levels": [
+      "官方文档",
+      "未知"
+    ],
+    "evidence_policy": "官方文档指一手来源，不意味着运行验证。evidence_scope逐项区分正文与官方搜索摘录；火山摘录覆盖有限，不将搜索引擎概括或第三方内容视为官方事实。未知项保留尝试读取的精确官方URL。",
+    "interpretation": "project_implication及project_recommendations是项目设计推论/建议，不是厂家保证。模型别名、文档与配额会变化，实施前复核。",
+    "excluded": "不含价格、不估算延迟/准确率/吞吐；分包时长、静音阈值与配额仅记录文档规定或建议，不作为性能估算。"
+  },
+  "providers": [
+    {
+      "id": "aliyun-model-studio",
+      "name": "阿里云百炼",
+      "findings": [
+        {
+          "id": "ali-model",
+          "topic": "1 推荐接口与模型",
+          "fact": "官方总览将输入法/语音消息等短段输入推荐为 qwen-audio-3.1-asr-flash-message；会议课堂等持续转写推荐 qwen-audio-3.1-asr-flash-streaming。两者是不同模型及参数集合。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/asr-model/"
+          ],
+          "project_implication": "本项目按住说话式听写优先评估Message；连续听写可提供Streaming配置，不能把3.0示例当最新默认。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-legacy",
+          "topic": "1 旧模型与迁移",
+          "fact": "总览仍列 Qwen-ASR-Realtime、Fun-ASR-Realtime、Paraformer 等系列；本次未见这些系列已关闭的声明。新的推荐不等于旧型号弃用。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/asr-model/",
+            "https://help.aliyun.com/zh/model-studio/realtime-asr-model-apis"
+          ],
+          "project_implication": "新适配器优先当前推荐；如兼容旧qwen3-asr-flash-realtime，应独立协议，不把旧/realtime事件与新/inference任务事件混用。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-protocol",
+          "topic": "2 传输协议",
+          "fact": "Message与Streaming接入页明确支持WebSocket和AOQ（AI over QUIC）。本文具体核查WebSocket；未获得这两个模型以HTTP双向流或WebRTC直接实时识别的支持说明。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-model-access",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-model-access"
+          ],
+          "project_implication": "首版Windows原生/主进程WebSocket是已明确文档化的路线，无需因为实时语音对话支持WebRTC就套到ASR模型。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-endpoints",
+          "topic": "2 地区与域名",
+          "fact": "Message WebSocket：北京 wss://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api-ws/v1/inference；新加坡 wss://{WorkspaceId}.ap-southeast-1.maas.aliyuncs.com/api-ws/v1/inference。文档建议从 dashscope.aliyuncs.com / dashscope-intl.aliyuncs.com 迁移至对应业务空间专属域名。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api"
+          ],
+          "project_implication": "配置需含region、WorkspaceId与API Key；模型放run-task中，不放旧/realtime的model查询参数。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-region-key",
+          "topic": "3 BYOK地区匹配",
+          "fact": "官方实时识别示例明确北京与新加坡的API Key不同；获取临时Key文档也说明各地域Key不同。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/real-time-speech-recognition-user-guide",
+            "https://help.aliyun.com/zh/model-studio/generate-temporary-api-key"
+          ],
+          "project_implication": "用户选择厂家后还需选择地域，禁止拿北京Key试探新加坡；模型具体地域可用性应按用户业务空间复核。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-auth",
+          "topic": "3 鉴权",
+          "fact": "WebSocket握手使用 Authorization: Bearer <API Key>；X-DashScope-WorkSpace 为可选请求头。该数据面文档不要求AppID+Token或AccessKey签名。无效/缺少Key在握手阶段返回401/403。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api"
+          ],
+          "project_implication": "BYOK可由受信本机连接层使用用户的百炼Key；不要要求用户提供阿里云主账号AccessKey，也不要将Key暴露给任意插件或渲染页。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-temp-key",
+          "topic": "3 临时凭证",
+          "fact": "百炼提供后端生成临时API Key，默认60秒、TTL可设1至1800秒，继承生成它的Key全部权限且不能提前删除；到期自动失效。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/generate-temporary-api-key"
+          ],
+          "project_implication": "临时Key不是自动缩权，也不能替代用户自带永久Key的安全保管；可作为将来隔离不可信客户端的选项，本次未调用生成接口。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-temp-asr-scope",
+          "topic": "3 临时凭证适用边界",
+          "fact": "临时Key通用文档未在所读段落明确列出Message/Streaming长连接中途到期的行为或模型专属兼容矩阵。",
+          "verification_level": "未知",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/generate-temporary-api-key",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api"
+          ],
+          "project_implication": "不能保证短期Key到期后现有ASR会话保持多久；首版以明确的Bearer API Key路径设计。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "ali-audio-message",
+          "topic": "4 音频输入",
+          "fact": "Message sample_rate仅支持16000 Hz；format支持pcm、wav、mp3、opus、speex、aac、amr；opus/speex要求Ogg封装、wav必须PCM、amr仅AMR-NB。WS音频为二进制、单声道；官方快速开始使用16kHz单声道16-bit PCM WAV。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api",
+            "https://help.aliyun.com/zh/model-studio/real-time-speech-recognition-user-guide"
+          ],
+          "project_implication": "Windows采集输出建议规范化为16kHz单声道PCM16，避免容器/编码名称混淆；AMR-NB与16k参数的适用细节未实测。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-audio-streaming",
+          "topic": "4 Streaming与Message的差异",
+          "fact": "Streaming客户端参数文档写sample_rate支持任意采样率，音频format列表及封装要求与上述Message一致；总览要求所有实时模型单声道。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events",
+            "https://help.aliyun.com/zh/model-studio/asr-model/"
+          ],
+          "project_implication": "不要将Message的仅16k限制错误推广到Streaming；首版仍可统一提供16k单声道录音。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-chunks",
+          "topic": "4 分块大小",
+          "fact": "本次所读Message/Streaming专属协议页未找到强制或推荐的单包字节数/时长上限；总览示例的1024字节或3200帧不是协议上限。",
+          "verification_level": "未知",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events",
+            "https://help.aliyun.com/zh/model-studio/real-time-speech-recognition-user-guide"
+          ],
+          "project_implication": "按采样格式实现可配置分块与背压；不能把其他Gummy模型的100ms建议冒充本模型硬要求。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "ali-partials",
+          "topic": "5 临时与定稿",
+          "fact": "Message intermediate_result_enabled默认false，设true才有流式中间文本；result-generated以sentence_end=false/true区分中间/定稿；中间结果可能修订，官方要求按sentence_id更新而非直接拼接。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-server-events"
+          ],
+          "project_implication": "首版需显式开启中间预览；只对sentence_end=true且未处理的sentence_id执行外部输入，避免重复或回删已输入文字。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-streaming-final",
+          "topic": "5 Streaming结果",
+          "fact": "Streaming result-generated同时包括中间与最终结果，以sentence_id和sentence_end标识；words中有字时间戳和punctuation；sentence_begin可标记首个中间结果，heartbeat=true应跳过。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-server-events"
+          ],
+          "project_implication": "适配器输出统一partial/final事件，但保留provider原始句ID和时间戳。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-vad",
+          "topic": "5 断句与VAD",
+          "fact": "Message和Streaming支持max_sentence_silence，默认800ms、范围200至6000ms；3.1可选near_meeting_16k或默认far_field_meeting_16k VAD模型。Streaming另有multi_threshold_mode_enabled避免VAD切句过长。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events"
+          ],
+          "project_implication": "提供高级断句配置；按键松开结束与自动VAD断句分开处理。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-punctuation-polish",
+          "topic": "5 标点与润色",
+          "fact": "Message定稿结果包含标点字段和带标点文本。disfluency_removal_enabled默认false，开启会过滤语气词并润色输出；与是否返回中间结果是不同开关。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-server-events"
+          ],
+          "project_implication": "原样听写默认不润色，润色须显式可选，避免悄悄改变用户原意。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-vocabulary",
+          "topic": "5 热词与上下文",
+          "fact": "支持即时vocabulary及预编译vocabulary_id；即时热词权重1至5或50，超级热词最多50；两类合并超过2000时随机选择2000。input.context支持前轮上下文，每种消息最多5条、每轮user+assistant文本总计400字符。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events"
+          ],
+          "project_implication": "BYOK首版可用即时词表而无需额外创建云资源；应本机校验词数并让用户选择是否向云发送上下文。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-languages",
+          "topic": "6 中英文基础支持",
+          "fact": "3.1 Message/Streaming列有中文多方言和英语等语言；language_hints最多4项、不设自动识别。Message的语言提示仅在最终结果生效，中间结果不支持。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/asr-model/",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events"
+          ],
+          "project_implication": "可以配置zh/en提示；预览可能与定稿语言表现不同，不将预览作为最终输入。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-code-switch",
+          "topic": "6 中英混说保证",
+          "fact": "所读3.1模型总览和参数支持多语种与多语言提示，但未找到针对同句中英混说的明确保证或边界说明。",
+          "verification_level": "未知",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/asr-model/",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events"
+          ],
+          "project_implication": "记录为待验收能力，而非将“同时支持中文和英语”直接等同“中英混说保证”。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "ali-privacy",
+          "topic": "7 数据保存与训练",
+          "fact": "百炼FAQ明确称不会将用户数据用于模型训练，同时声明依相关法律法规会存储模型与应用调用产生的数据，并指向服务协议。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/faq-about-alibaba-cloud-model-studio"
+          ],
+          "project_implication": "用户需知晓音频/文本发送云端且可能留存；不得宣传百炼API零留存。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-retention",
+          "topic": "7 ASR留存细则",
+          "fact": "FAQ没有在所读段落给出本ASR原始音频、临时结果、最终文本分别保存多久、删除接口或地域差异。体验中心历史对话保留规则不能套用到ASR API。",
+          "verification_level": "未知",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/faq-about-alibaba-cloud-model-studio"
+          ],
+          "project_implication": "敏感听写应提示用户自行确认合同与保留政策；本地不保存录音不代表云端不保存。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "ali-stop",
+          "topic": "8 正常提前结束",
+          "fact": "开启run-task后等待task-started再发音频；音频发送完后发送finish-task，继续接收result-generated直到task-finished，再关闭WS；task-finished后也可复用连接，task-failed后连接关闭不可复用。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-server-events"
+          ],
+          "project_implication": "用户松开键属于停止采集并排空结果，不应直接断链丢尾句。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-cancel",
+          "topic": "8 取消与删除",
+          "fact": "Message/Streaming所读客户端事件未提供独立cancel-task或已提交音频撤销/删除保证。",
+          "verification_level": "未知",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events"
+          ],
+          "project_implication": "取消操作应立即停止采集、禁止迟到结果注入并关闭连接；不能把传输关闭承诺为撤销云处理或删除云数据。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "ali-duration",
+          "topic": "9 时长与空闲",
+          "fact": "总览Streaming音频最大时长/大小标为无限制；Message推荐表标为破折号。heartbeat默认false，文档称即使持续发静音也会在一定时间后超时；true可在持续发送静音情况下保持连接。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/asr-model/",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events",
+            "https://help.aliyun.com/zh/model-studio/qwen-audio-asr-streaming-client-events"
+          ],
+          "project_implication": "“音频无限制”不等于连接永不超时；连续听写仍需断线状态和恢复策略。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "ali-quotas",
+          "topic": "9 配额未知",
+          "fact": "所读ASR专属资料未核实Message单次硬时长、当前账号并发数、空闲超时准确秒数及各模型地域可用性全矩阵。",
+          "verification_level": "未知",
+          "sources": [
+            "https://help.aliyun.com/zh/model-studio/asr-model/",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-websocket-api",
+            "https://help.aliyun.com/zh/model-studio/qwen-asr-message-client-events"
+          ],
+          "project_implication": "不要复制示例task-failed的23秒作为通用超时；上线前按用户账号/控制台配额确认。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        }
+      ]
+    },
+    {
+      "id": "volcengine-doubao-speech",
+      "name": "火山引擎（豆包语音）",
+      "coverage_warning": "现行官方页可在搜索索引读到部分段落，但直接抓取多次只返回JS外壳或在正文前100000字符截断。以下“官方文档”摘录仅核实摘录本身；缺少的字段、完整协议、隐私和配额均标未知，不能视为可直接实现的完整规格。",
+      "findings": [
+        {
+          "id": "volc-model",
+          "topic": "1 当前推荐",
+          "fact": "现行实时/一句话识别文档推荐豆包流式语音识别模型2.0；明确1.0为历史版本，新接入优先2.0，现有1.0仍可正常使用。2.0小时版资源ID为volc.seedasr.sauc.duration。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/unidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "首版用2.0资源，不把历史volc.bigasr.sauc.duration自动当最新模型。模型展示名与X-Api-Resource-Id应分别存储。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-model-id",
+          "topic": "1 精确模型ID边界",
+          "fact": "当前所读实时API摘录以产品名“豆包流式语音识别模型2.0”和资源ID选择；请求体是否另必须指定model_name及其精确值未完整核验。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "不要凭记忆给请求体填一个类似OpenAI的model字段；按完整官方协议复核。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-protocol",
+          "topic": "2 协议与端点",
+          "fact": "现行实时语音识别页列WebSocket端点 wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async；一种持续返回中间结果并在句末返回最终结果的流式服务。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "首版实时预览应选择该端点，不能把REST Ark聊天端点或TTS端点用作ASR。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-one-shot",
+          "topic": "2 一句话与实时区别",
+          "fact": "一句话识别页列 wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_nostream，并将其定位无需实时出字的输入法/消息语音转写场景。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/unidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "若只需松键后整段输入可另设模式；不要把nostream模式包装成持续实时字幕。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-legacy-endpoint",
+          "topic": "1/2 历史接口",
+          "fact": "历史大模型流式页列双向 wss://openspeech.bytedance.com/api/v3/sauc/bigmodel 与流式输入bigmodel_nostream；现行导航另有实时bigmodel_async页。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/LargemodelstreamingautomaticspeechrecognitionAPI?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "旧bigmodel协议只保留为迁移参考，未见关闭日期，不编造弃用截止时间。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-region",
+          "topic": "2 端点地区与其他协议",
+          "fact": "所读官方摘录未明确openspeech.bytedance.com的ASR处理地区、数据驻留地区或可选地域域名；也未核实该实时ASR产品的HTTP双向流/WebRTC支持。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en"
+          ],
+          "project_implication": "不从.com域名、站点部署元数据或SDK支持平台推断音频处理地区；地区需求应向厂家确认。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-new-auth",
+          "topic": "3 新版鉴权",
+          "fact": "现行实时识别API参数列X-Api-Key为必选；2.0对应资源ID见X-Api-Resource-Id相关模型列表。历史页也明示新版控制台只需要X-Api-Key。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/LargemodelstreamingautomaticspeechrecognitionAPI?lang=zh"
+          ],
+          "project_implication": "新版BYOK可设计API Key+资源选择；不要强迫新版用户寻找AppID。语音服务Key是否等同用户持有的其他方舟Key需按产品权限确认。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-old-auth",
+          "topic": "3 旧版鉴权",
+          "fact": "历史页X-Api-Access-Key说明它是火山控制台获得的Access Token，并注明旧版控制台使用、新版只需X-Api-Key。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/LargemodelstreamingautomaticspeechrecognitionAPI?lang=zh"
+          ],
+          "project_implication": "Access Token不是云账号AccessKey Secret；旧配置应有独立迁移入口，避免将其当HMAC签名密钥。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-old-appid",
+          "topic": "3 旧版AppID/签名/临时Key",
+          "fact": "本次未完整读取旧版AppID配套请求头表、当前短期ASR凭证生成机制、有效期或AccessKey签名是否可作该数据面替代。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/LargemodelstreamingautomaticspeechrecognitionAPI?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/APIKeyUsage?lang=en",
+            "https://docs.volcengine.com/docs/DoubaoVoice/old-version-console-authentication-reference-example?lang=zh"
+          ],
+          "project_implication": "旧版AppID+Token具体字段组合和短期Key方案须后续核验，不把云控制面签名方式直接搬到ASR。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-audio-defaults",
+          "topic": "4 采样率与声道",
+          "fact": "现行实时接口摘录写音频采样率默认16000，声道数默认1。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "首版采集可围绕16k单声道准备，但默认值不是完整支持范围。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-audio-codecs",
+          "topic": "4 编码完整范围",
+          "fact": "本次实时bigmodel_async正文未完整读到format/codec/bits取值表，不能确认完整支持编码、位深、采样率范围或wav头规则。一句话页摘录列wav/mp3/ogg/pcm/spx/amr/aac/m4a和默认16位，但不据此宣称实时端点完全相同。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/unidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "在正式实现前补读实时页音频表；不能直接将浏览器webm/opus或48k录音原样发送并假定可用。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-chunks",
+          "topic": "4 分块建议",
+          "fact": "流式识别接入必读建议按实时节奏发送，每包100至200ms，发包间隔100至200ms。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en"
+          ],
+          "project_implication": "这是上游建议，不是本项目性能估算；音频缓冲需按时长计算并按实时速率发送。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-results",
+          "topic": "5 中间与最终",
+          "fact": "实时识别页说明说话过程中持续返回识别结果，中间结果会随后续音频更新，句末返回最终确定分句。接入必读以definite=true表示句子最终稳定结果。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en"
+          ],
+          "project_implication": "预览允许替换；只有definite=true的句子进入外部应用输入队列，并做去重。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-vad",
+          "topic": "5 断句与二遍重识别",
+          "fact": "接入必读说明通过连续静音达到end_window_size判断句末；不开enable_nonstream时句末直接definite=true；开启时对该小段重新识别并替换临时文字，最终definite=true。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en",
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "不能把第一遍看起来完整的文本当定稿；不同配置统一映射成final但需等待对应稳定标志。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-punc",
+          "topic": "5 标点与ITN",
+          "fact": "现行实时页索引包含enable_punc与enable_itn字段；一句话页明确标点开启后添加逗号、句号、问号等。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/unidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "应提供保留标点/规范化的能力标识；实时页精确默认值和相互依赖仍待完整参数表复核。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-hotwords",
+          "topic": "5 热词与上下文",
+          "fact": "现行实时页摘录含corpus以及context中hotwords词条；说明context实际传参需序列化为JSON字符串。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "词表需由火山适配器转换，不可直接传阿里的词权重对象；长度、互斥项未完整核实前不承诺无限词表。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-feature-limits",
+          "topic": "5 热词/VAD参数边界",
+          "fact": "end_window_size默认值/范围、enable_punc默认值、热词最大数/长度和corpus与其他功能的兼容限制，本次未完整核验。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en"
+          ],
+          "project_implication": "保留厂家原始参数高级配置之前应补文档验收，不能套用历史版本常量。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-code-switch",
+          "topic": "6 中英混说",
+          "fact": "接入必读官方摘录列2.0多语种与中文方言支持，但本次未读到针对实时2.0同句中英混说的明确说明。搜索中的“中英混合”也出现在历史音视频字幕产品页，不可挪用。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en",
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/ProductOverview-8?lang=zh"
+          ],
+          "project_implication": "将中英混说列为需要官方补充及后续实际验收项目；不得用翻译/字幕产品宣传代替本ASR保证。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-privacy",
+          "topic": "7 保存/训练/隐私",
+          "fact": "已尝试官方生成式模型服务专用条款，正文仅返回JS外壳；索引摘录有关客户内容授权义务，但未获得本实时ASR不训练承诺、原始音频/转写保存期、删除流程或地域驻留政策的足够证据。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/Generativemodelservicespecificterms-1?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Generativemodelservicespecificterms-1?lang=en",
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh"
+          ],
+          "project_implication": "明确标未知；上线前必须补读适用合同，不能借方舟其他产品或终端豆包App政策宣称零留存/不训练。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-finish",
+          "topic": "8 正常中途结束",
+          "fact": "流式识别接入必读说明发送携带结束标志的最后一包音频，负包sequence为负值；最后一包仅表示音频发送完毕，不代表服务端结果已全部返回。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en"
+          ],
+          "project_implication": "松开按键后发送末包并继续接收结果，不能直接关闭WS丢尾句。",
+          "evidence_scope": "仅官方页面的搜索索引摘录；已尝试读取同页，正文被JavaScript外壳或100000字符抓取截断遮挡；不是完整参数表核验，实施前需人工复核原页"
+        },
+        {
+          "id": "volc-cancel",
+          "topic": "8 取消与连接收尾",
+          "fact": "本次未完整核实实时2.0独立cancel消息、全会话结果完成标志、可否复用连接和服务端撤销处理/删除保证。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en"
+          ],
+          "project_implication": "取消时本地立即停止录音且禁止迟到结果注入；网络关闭不等于删除已上传音频。完成标志须补读协议后实现。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "volc-limits",
+          "topic": "9 并发与单次时长",
+          "fact": "未从完整官方正文核实当前实时2.0默认并发、账号分档、最大单次时长或空闲超时。官方搜索有正式版并发说明，但来自计费页且未读适用条件，未把数字写成本产品保证。",
+          "verification_level": "未知",
+          "sources": [
+            "https://docs.volcengine.com/docs/DoubaoVoice/bidirectional-streaming-automatic-speech-recognition-websocket?lang=zh",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Accessmust-read_1?lang=en",
+            "https://docs.volcengine.com/docs/DoubaoVoice/Billinginstructions-21?lang=zh"
+          ],
+          "project_implication": "不借录音文件极速版的2小时限制来描述实时会话；上线按用户语音服务配额确认并处理超限。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        }
+      ]
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "findings": [
+        {
+          "id": "openai-current",
+          "topic": "1 当前推荐模型",
+          "fact": "Realtime transcription指南当前推荐gpt-live-transcribe，专门用于无语音助手回复的实时转写；通过WS ?intent=transcription建立连接后用session.update、session.type=transcription及audio.input.transcription.model选模型。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/models/gpt-live-transcribe"
+          ],
+          "project_implication": "首版纯听写不创建语音对话、不发送response.create、不需要TTS输出。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-deprecation",
+          "topic": "1 转写弃用与迁移",
+          "fact": "2026-08-26官方通知：whisper-1、gpt-4o-transcribe、gpt-4o-mini-transcribe、gpt-4o-transcribe-diarize于2027-02-26关闭；推荐gpt-live-transcribe或gpt-transcribe。2026-07-20旧快照通知另列gpt-4o-mini-transcribe-2025-03-20于2027-01-20关闭并迁移2025-12-15快照。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/deprecations#2026-08-26-transcription-models",
+            "https://developers.openai.com/api/docs/deprecations#2026-07-20-legacy-audio-realtime-and-transcription-models",
+            "https://developers.openai.com/api/docs/guides/speech-to-text"
+          ],
+          "project_implication": "新项目不要将4o转写家族作为长期默认；迁移必须按实时/文件工作流选择，不只换模型字符串。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-committed",
+          "topic": "1/2 提交后转写",
+          "fact": "gpt-transcribe可用于Realtime的已commit音频turn，转写在commit后开始，文档称该特殊流程需要WebSocket；会利用此前已转写turn作为上下文，并可返回检测语言。gpt-live-transcribe随语音到来输出文字，不返回检测语言预测。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "给用户清晰区分实时预览与整段转写；不把gpt-transcribe的提交后deltas等同持续边说边出字。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-file-stream",
+          "topic": "2 HTTP流边界",
+          "fact": "POST https://api.openai.com/v1/audio/transcriptions支持gpt-transcribe并设stream=true，处理已完成录音时返回transcript.text.delta与最终transcript.text.done；这是文件上传后的文本流，不是持续麦克风输入通道。旧4o转写模型也支持文件流，whisper-1不支持。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/speech-to-text#streaming-the-transcription-of-a-completed-audio-recording"
+          ],
+          "project_implication": "持续听写用Realtime；HTTP文件流仅作为松键后整段识别的另一模式。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-transport",
+          "topic": "2 WebSocket/WebRTC",
+          "fact": "纯转写WS连接为wss://api.openai.com/v1/realtime?intent=transcription，不在URL传model。转写指南指向WebRTC用于浏览器音频；gpt-transcribe提交后转写特殊路径则要求WS。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/guides/voice-webrtc?api=realtime"
+          ],
+          "project_implication": "Windows受信本机层优先WS；浏览器渲染层若使用WebRTC，应采用转写会话配置而非复制语音对话示例。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-region",
+          "topic": "2 地区",
+          "fact": "常规指南使用api.openai.com。数据控制页列/v1/realtime/transcription_sessions的gpt-live-transcribe/gpt-transcribe支持美国及欧洲（EEA+瑞士）区域存储与处理；区域域名为us.api.openai.com、eu.api.openai.com，资格及数据控制要求仍适用，非美国地区需批准及附加协议。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/guides/your-data"
+          ],
+          "project_implication": "不能承诺任意BYOK都能选欧盟；UI地区选项需显示账号资格，不能把全球端点自动解释成欧盟驻留。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-china",
+          "topic": "2 地理可用性范围",
+          "fact": "本次未核实Windows用户所在国家/地区的完整API可用性清单；不因支持中文而推断中国大陆可用，也未对网络可达性做测试。",
+          "verification_level": "未知",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/guides/your-data"
+          ],
+          "project_implication": "首版按用户账户与所在地合法可用性提示；不提供绕过地区限制的接入建议。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "openai-auth",
+          "topic": "3 标准Key",
+          "fact": "Realtime WS握手可使用标准API Key，Authorization: Bearer <API Key>；没有AppID+Token或云AccessKey签名要求。官方连接指南要求将长期Key保留在受信服务端，而不是浏览器。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/guides/voice-websockets?api=realtime"
+          ],
+          "project_implication": "BYOK桌面方案建议由受信本机主进程/凭证层建连，不把Key交任意插件、网页或日志。此本机架构是项目建议，不是官方对桌面Key存储的安全认证。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-ephemeral",
+          "topic": "3 临时凭证",
+          "fact": "Realtime client_secrets支持type=transcription会话。临时secret有效期默认600秒，可设10至7200秒；过期限制新建会话，已开始会话可继续；过期前可创建多个会话。WebRTC指南说明用标准Key在受信后端签发临时凭证。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/reference/resources/realtime/subresources/client_secrets",
+            "https://developers.openai.com/api/docs/guides/voice-webrtc?api=realtime"
+          ],
+          "project_implication": "短期凭证不是必需的厂商托管中转，也不是一次性口令；若本地受信层代签仍必须先有用户的长期Key。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-audio",
+          "topic": "4 音频输入",
+          "fact": "Realtime转写例子使用24kHz PCM并以Base64音频放入input_audio_buffer.append；通用事件参考默认PCM16、24kHz、单声道。会话格式类型列audio/pcm（PCM仅24kHz）、audio/pcmu（G.711 μ-law）、audio/pcma（G.711 A-law）。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/reference/resources/realtime/client-events",
+            "https://developers.openai.com/api/reference/resources/realtime/subresources/client_secrets"
+          ],
+          "project_implication": "首版以24kHz单声道PCM16为明确演示路径；不要把阿里/火山16k帧直接送入24k配置。G.711与每个模型的组合未运行验证。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-chunks",
+          "topic": "4 分块上限",
+          "fact": "input_audio_buffer.append可由客户端选择块大小，每事件最多15 MiB；append不返回确认事件。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/reference/resources/realtime/client-events#input_audio_buffer.append"
+          ],
+          "project_implication": "此为上限不是建议的实时包大小；需小块缓冲、背压及断线管理，不等每块ACK。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-file-input",
+          "topic": "4 文件输入限制",
+          "fact": "文件转写输入最大25MB，支持mp3/mp4/mpeg/mpga/m4a/wav/webm。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/speech-to-text"
+          ],
+          "project_implication": "这些文件容器不能当作Realtime append的原始PCM格式表；两条音频管线分开。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-partials",
+          "topic": "5 临时与定稿",
+          "fact": "gpt-live-transcribe发conversation.item.input_audio_transcription.delta和completed；后者给出该已commit item的最终transcript。不同turn的completed顺序不保证，必须按item_id关联；官方提醒后续deltas可能修正早期文本。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "预览与外部注入分离；按输入turn顺序排队定稿，用item_id关联，不能依消息到达顺序直接打字。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-vad",
+          "topic": "5 VAD关键限制",
+          "fact": "当前gpt-live-transcribe指南明确audio.input.turn_detection省略或null，不支持server_vad或semantic_vad；推荐客户端VAD检测结束后发送input_audio_buffer.commit。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "首版必须有按键松开commit或本地VAD；不能直接复用Realtime语音对话的服务端VAD设定。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-doc-scope",
+          "topic": "5 通用类型与特定模型",
+          "fact": "client_secrets通用转写类型列server/semantic VAD，当前专用gpt-live-transcribe指南却明确禁止这两种VAD；通用schema包含多个模型能力，不等于每个模型都支持。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/reference/resources/realtime/subresources/client_secrets"
+          ],
+          "project_implication": "对gpt-live-transcribe以专用指南的限制为准；参数能力应按模型声明，而非只按厂商声明。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-context",
+          "topic": "5 热词与上下文",
+          "fact": "当前gpt-live-transcribe支持prompt、keywords、languages；keywords是提示而非强制输出，每词一行，不允许尖括号、CR/LF；prompt过长或关键词违规会拒绝更新。languages取代language，不应同时发送。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "提供用户词汇表与领域提示；不要让桌宠人格提示覆盖听写词表，也不要把提示词当绝对纠错规则。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-punctuation-observed",
+          "topic": "5 标点证据范围",
+          "fact": "官方转写completed示例为带逗号和问号的文本，但所读指南没有给出专用标点开关或中文标点规则。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "可保留模型输出标点；不要默认追加第二套标点，也不能声称可通过enable_punc控制OpenAI。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-punc-guarantee",
+          "topic": "5 标点保证",
+          "fact": "当前实时转写的标点可控性、特定标点规范及逐句自动标点保证未在所读资料中明确。",
+          "verification_level": "未知",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "如产品要求中文全角标点，后续另作用户可控的本地规范化或验收，不暗中重写。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "openai-multilingual",
+          "topic": "6 多语言提示",
+          "fact": "指南明确多种预期语言可配置languages，并列en、ISO639-3的cmn/yue和zh-cn/zh-tw/zh-hk等代码；生产检查建议纳入code-switching测试。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "可为中文/英文听写提供多语言提示，不能继续使用旧模型的单language写法。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-code-switch",
+          "topic": "6 中英混说保证",
+          "fact": "当前文档表明有多语言提示并要求测试code-switching，但未在所读页面给出同句中英混说专属保证或质量承诺。",
+          "verification_level": "未知",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription"
+          ],
+          "project_implication": "中英混说可作为目标场景，但必须在后续真实麦克风验收，不在本次只读调研估算准确率。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "openai-privacy",
+          "topic": "7 训练和留存",
+          "fact": "数据控制页说明自2023-03-01起API数据默认不用于训练/改进模型，除非显式选择共享；/v1/realtime表列滥用监测30天、无应用状态留存、ZDR eligible。一般日志默认最多30天，法律或保护服务/第三方需要时可更久。ZDR/Modified Abuse Monitoring需申请批准，且有例外。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/your-data"
+          ],
+          "project_implication": "“不训练”不能写成“零留存”；BYOK用户的组织设置决定实际政策，不替其承诺ZDR。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-retention-exact",
+          "topic": "7 专属端点留存边界",
+          "fact": "留存表明确列/v1/realtime，地区表单列/v1/realtime/transcription_sessions；本次所读留存表未单列gpt-live-transcribe逐类音频/中间文本保存周期。",
+          "verification_level": "未知",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/your-data"
+          ],
+          "project_implication": "保留通用Realtime政策范围并提示用户核对组织合同；不把其他audio/transcriptions端点留存规则套给实时转写。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "openai-finish",
+          "topic": "8 正常结束一段",
+          "fact": "input_audio_buffer.commit提交输入buffer，空buffer会报错；gpt-live-transcribe用commit获取该turn最终结果。commit不是结束整个连接，也不自动生成模型回复。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/reference/resources/realtime/client-events#input_audio_buffer.commit"
+          ],
+          "project_implication": "停止采集后提交非空尾段，等待对应completed再决定关闭；连续听写可继续下个turn。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-clear",
+          "topic": "8 取消未提交缓冲",
+          "fact": "input_audio_buffer.clear清除buffer中音频字节，服务端回应input_audio_buffer.cleared。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/reference/resources/realtime/client-events#input_audio_buffer.clear"
+          ],
+          "project_implication": "取消未提交音频可清buffer，同时本地停止采集、撤销预览并阻止迟到结果注入。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-cancel-committed",
+          "topic": "8 取消已提交/关闭会话",
+          "fact": "所读纯转写指南未给出撤销已commit转写任务、已上传数据删除或关闭后撤销处理的保证；不能把response.cancel（模型回复）当成已提交输入转写的撤销。整个会话传输关闭的精确排空保证也未单独说明。",
+          "verification_level": "未知",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/reference/resources/realtime/client-events"
+          ],
+          "project_implication": "应用需区分cancel丢弃结果与finish等待定稿；关闭WS是本地停止传输措施，不是云数据删除保证。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        },
+        {
+          "id": "openai-limits-model",
+          "topic": "9 模型限制",
+          "fact": "gpt-live-transcribe不提供词级时间戳、说话人标签或转写置信度。模型页说明rate limits依usage tier而异。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/models/gpt-live-transcribe"
+          ],
+          "project_implication": "听写首版不用依赖这些字段；账号配额不能写死为所有BYOK用户相同。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-session-general",
+          "topic": "9 通用Realtime时长",
+          "fact": "Realtime conversations指南给出Realtime会话最大60分钟；该段位于speech-to-speech会话章节。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-conversations"
+          ],
+          "project_implication": "可据此安排通用会话轮换策略，但不要无条件声称新gpt-live-transcribe专属时长已独立核验。",
+          "evidence_scope": "已读取官方正文相关段落"
+        },
+        {
+          "id": "openai-session-specific",
+          "topic": "9 专属时长与并发",
+          "fact": "本次未找到gpt-live-transcribe专属最大会话时长、最大未commit音频时长、统一并发数及空闲超时的明确独立说明。",
+          "verification_level": "未知",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/realtime-transcription",
+            "https://developers.openai.com/api/docs/models/gpt-live-transcribe",
+            "https://developers.openai.com/api/reference/resources/realtime/subresources/client_secrets"
+          ],
+          "project_implication": "正式实现前复核账号limits及专属模型要求；临时Key TTL不是会话时长上限。",
+          "evidence_scope": "在本次所读官方资料中未获得足够证据；未知不表示不支持"
+        }
+      ]
+    }
+  ],
+  "project_recommendations": [
+    {
+      "id": "adapter-contract",
+      "recommendation": "内置三家提供者但由用户自选。统一start、append、partial-replace、final、finish-and-drain、cancel-discard、error能力；保留模型/地域/凭证类型差异，不强行用同一WS协议。",
+      "basis": [
+        "ali-partials",
+        "volc-results",
+        "openai-partials",
+        "openai-vad"
+      ]
+    },
+    {
+      "id": "safe-external-dictation",
+      "recommendation": "临时结果仅在桌宠预览，定稿按句/turn ID去重后才交给本机外部应用输入层；取消后屏蔽迟到结果。ASR服务只负责文字，窗口定位、权限、剪贴板/输入注入及回读是另外的本机边界，本报告未验证。",
+      "basis": [
+        "ali-partials",
+        "volc-results",
+        "openai-partials",
+        "openai-cancel-committed"
+      ]
+    },
+    {
+      "id": "credential-boundary",
+      "recommendation": "BYOK密钥由本机受信凭证/连接层持有，不向任意插件发放原始Key；UI分别支持阿里地域+WorkspaceId+Key、火山新版API Key+Resource ID、OpenAI Key+合格地区。旧火山鉴权待补核，不用统一AppID表单。",
+      "basis": [
+        "ali-auth",
+        "ali-endpoints",
+        "volc-new-auth",
+        "volc-old-appid",
+        "openai-auth"
+      ]
+    },
+    {
+      "id": "push-to-talk-first",
+      "recommendation": "首版可先按键按下采集、松开finish/commit，降低对各家VAD一致性的依赖；OpenAI gpt-live-transcribe需要客户端断句，阿里/火山可选择服务端断句。",
+      "basis": [
+        "ali-vad",
+        "volc-vad",
+        "openai-vad"
+      ]
+    },
+    {
+      "id": "privacy-disclosure",
+      "recommendation": "首次启用每家云听写前明确告知音频及所选上下文将发送该厂家，显示政策链接；本地默认不保留录音是产品选项，不等于厂家零留存。火山隐私未知须在上线前补齐。",
+      "basis": [
+        "ali-privacy",
+        "ali-retention",
+        "volc-privacy",
+        "openai-privacy"
+      ]
+    }
+  ],
+  "release_blockers": [
+    "火山：取得现行bigmodel_async完整协议正文，复核编码/采样率/位深、末结果标志、旧版鉴权字段及配额；本报告官方摘录不构成完整实现规格。",
+    "火山：补读适用的生成式模型服务条款，核实ASR保存/训练/删除和地区政策。",
+    "三家：同句中英混说、真实麦克风断句、重复注入防护、取消迟到结果、弱网恢复均未运行测试。",
+    "OpenAI：复核gpt-live-transcribe专属会话时长及账户地域资格；阿里：复核Message模型在所选业务空间/地区的可用性和限额。"
+  ],
+  "validation": {
+    "required": "写入后使用read回读全部UTF-8行并JSON.parse；只校验结构与字段完整性，不声称远程接口运行通过。"
+  }
+}
