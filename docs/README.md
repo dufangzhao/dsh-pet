@@ -6,8 +6,8 @@
 
 | 文档 | 用途 | 状态 |
 | --- | --- | --- |
-| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.10，持续细化 |
-| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q8已选BYOK；Q9单层统一模型修订待确认 |
+| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.11，持续细化 |
+| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q9已确认统一插件模型；Q10桌面底座待回答 |
 | [Coopanion 交互评审](02-coopanion-ui-review.md) | 设置台、角色交互、扩展UI边界与可借鉴原则 | 官方资料/源码/截图静态核查 |
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
@@ -23,7 +23,8 @@
 | [ADR-0008](adr/0008-local-and-cloud-asr.md) | 首版完整本地/云ASR | 已采纳 |
 | [ASR双路径规格](10-asr-providers-and-dataflow.md) | 两种生命周期、数据流和验收 | 双路径/BYOK已定，提供方/协议待选 |
 | [ADR-0009](adr/0009-cloud-asr-byok.md) | 首版云ASR使用用户自带服务商Key | 已采纳 |
-| [统一插件模型与生命周期](11-plugin-composition-and-lifecycle.md) | 平级插件、职责标签、依赖及拆卸 | 按用户反馈修订，待Q9确认 |
+| [统一插件模型与生命周期](11-plugin-composition-and-lifecycle.md) | 平级插件、职责标签、依赖及拆卸 | 统一模型已确认，协议与实现待选 |
+| [ADR-0010](adr/0010-unified-plugin-model.md) | 同一种插件标准，不设功能/提供者层级 | 已采纳 |
 | [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
 | [候选使用场景与验收](07-use-cases-and-acceptance.md) | 功能流程、边界、失败与可验证用例 | 候选，不等于MVP承诺 |
 | [需求追踪与准备度](08-readiness-and-traceability.md) | 已确认方向、验收追踪和开工缺口 | 尚不具备全面开工条件 |
