@@ -17,11 +17,23 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.5",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "electron": "45.0.0",
+    "esbuild": "0.28.2",
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
     "globals": "17.13.0",
+    "koffi": "3.3.1",
     "prettier": "3.9.10",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sherpa-onnx-node": "1.13.8",
+    "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.0"
   }

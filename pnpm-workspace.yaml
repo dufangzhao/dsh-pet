@@ -12,3 +12,7 @@ catalog:
 
 # 依赖安装时不自动执行第三方构建/安装脚本；确需执行时逐个评审后加入。
 onlyBuiltDependencies: []
+
+# sherpa JS wrapper uses a caret range; pin the tested Windows binary too.
+overrides:
+  'sherpa-onnx-node>sherpa-onnx-win-x64': 1.13.8

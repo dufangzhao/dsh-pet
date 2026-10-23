@@ -7,7 +7,9 @@
 - 调研文档与JSON中的第三方资料、短摘录、文件路径和链接用于研究溯源；原始材料依其各自权利与许可。
 - [既有可视化研究报告](research/report/ai-desktop-pet-research-20261023.html)由visual-explainer工具生成，其中内嵌的第三方渲染脚本/样式不因根目录MIT声明而被重新许可。该文件是研究交付物，不作为产品运行时代码复用；若未来要随产品分发，先核验工具包及内嵌资源许可并保留必要声明。
 - Coopanion官方截图只用于本地研究缓存，未作为产品资产纳入版本；文档中的外部截图链接不表示再分发授权。
-- 当前未建立产品运行依赖，也未把Coopanion或其他桌宠项目的运行时代码复制进来。
+- 已建立M0工程与验证依赖，精确版本见[版本基线](qa/versions.md)，完整依赖图见[pnpm锁文件](pnpm-lock.yaml)。Electron、React、Tailwind、Cordis、Koffi、Vite、Vitest、esbuild等直接依赖声明MIT；TypeScript、sherpa-onnx-node、Playwright声明Apache-2.0。分发前仍须生成完整传递依赖及NOTICE清单，不能只凭此摘要完成发行许可验收。
+- 未把Coopanion或其他桌宠项目的产品源码、素材、图片或文案复制进来。
+- ASR验证模型与公开样本仅下载到忽略缓存，不入库、不随产品分发。[验证清单](qa/M0-asr-fixtures.json)记录固定来源、修订及哈希；SenseVoice权重遵循其独立FunASR模型协议1.1，不因引擎Apache-2.0或本项目MIT而重新许可；Paraformer转换仓库模型卡标Apache-2.0，但正式分发仍须复核上游及附带资源。
 
 ## 后续引入要求
 

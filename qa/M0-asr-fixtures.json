@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "purpose": "M0-04 local compatibility fixtures, not product model defaults or redistribution approval",
+  "createdOn": "2026-10-24",
+  "storage": ".cache/asr-models/ (never commit weights or audio)",
+  "models": [
+    {
+      "id": "sensevoice-small-int8",
+      "repository": "csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17",
+      "revision": "2365baeacb507f821a0c8120fcee3d484dba7a07",
+      "source": "https://huggingface.co/api/models/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17?blobs=true",
+      "files": [
+        {
+          "path": "model.int8.onnx",
+          "bytes": 239233841,
+          "sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/2365baeacb507f821a0c8120fcee3d484dba7a07/model.int8.onnx"
+        },
+        {
+          "path": "tokens.txt",
+          "bytes": 315894,
+          "gitBlobSha1": "2cfc92fc2ff26aaa690b7c01fd96b41109413881",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/2365baeacb507f821a0c8120fcee3d484dba7a07/tokens.txt"
+        },
+        {
+          "path": "test_wavs/zh.wav",
+          "bytes": 178988,
+          "gitBlobSha1": "24a2bfc5c039f9d97db2cf1f2461699b582e0a90",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/2365baeacb507f821a0c8120fcee3d484dba7a07/test_wavs/zh.wav"
+        },
+        {
+          "path": "test_wavs/en.wav",
+          "bytes": 228908,
+          "gitBlobSha1": "6140dfd30ae6ee4e7af07717ca171583150ffcb3",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/2365baeacb507f821a0c8120fcee3d484dba7a07/test_wavs/en.wav"
+        },
+        {
+          "path": "LICENSE",
+          "bytes": 71,
+          "gitBlobSha1": "b5aafcccf5cfd5f7293c710bd6588dc6544eef2b",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/2365baeacb507f821a0c8120fcee3d484dba7a07/LICENSE"
+        },
+        {
+          "path": "README.md",
+          "bytes": 104,
+          "gitBlobSha1": "a05f82e98818e72a7184df7580dac4aa72ac41c3",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/2365baeacb507f821a0c8120fcee3d484dba7a07/README.md"
+        }
+      ]
+    },
+    {
+      "id": "streaming-paraformer-zh-en-int8",
+      "repository": "csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en",
+      "revision": "8e40c43232a1c5c66c82111efc5820d3accca11b",
+      "source": "https://huggingface.co/api/models/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en?blobs=true",
+      "files": [
+        {
+          "path": "encoder.int8.onnx",
+          "bytes": 165462184,
+          "sha256": "81a70226a8934e6ed92aa1d4fc486b428b5398e2f2619ed4897b7294cab90e9a",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/8e40c43232a1c5c66c82111efc5820d3accca11b/encoder.int8.onnx"
+        },
+        {
+          "path": "decoder.int8.onnx",
+          "bytes": 71664561,
+          "sha256": "f3cca9f77bb9d93c8fcbfb63ae617b6b1ee96818df3aa3b151c40658fe38594f",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/8e40c43232a1c5c66c82111efc5820d3accca11b/decoder.int8.onnx"
+        },
+        {
+          "path": "tokens.txt",
+          "bytes": 75756,
+          "gitBlobSha1": "57bc045ddda0434ed4440c38e14287c595b258d9",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/8e40c43232a1c5c66c82111efc5820d3accca11b/tokens.txt"
+        },
+        {
+          "path": "test_wavs/0.wav",
+          "bytes": 321744,
+          "gitBlobSha1": "6ef8fc2940e6b87d14ccd80274a50465ad978b35",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/8e40c43232a1c5c66c82111efc5820d3accca11b/test_wavs/0.wav"
+        },
+        {
+          "path": "test_wavs/1.wav",
+          "bytes": 163244,
+          "gitBlobSha1": "22d84d23a4c3b7d4589aac0198e156becbda9f0e",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/8e40c43232a1c5c66c82111efc5820d3accca11b/test_wavs/1.wav"
+        },
+        {
+          "path": "README.md",
+          "bytes": 415,
+          "gitBlobSha1": "23c9cb2b0edb172e6790f2ed5ff398fdba6e233a",
+          "url": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/8e40c43232a1c5c66c82111efc5820d3accca11b/README.md"
+        }
+      ]
+    }
+  ]
+}
