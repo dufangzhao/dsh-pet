@@ -12,6 +12,7 @@
 - [Coopanion 设置与交互专项评审](docs/02-coopanion-ui-review.md)
 - [Coopanion 架构与复用核验](docs/04-coopanion-architecture-review.md)
 - [扩展产品规格](docs/03-extension-product-spec.md)与[已确认架构决策](docs/adr/0001-controlled-ui-contributions.md)
+- [总体架构草案](docs/05-architecture-overview.md)
 - [项目术语](CONTEXT.md)
 - [第一阶段可视化调研报告](research/report/ai-desktop-pet-research-20261023.html)
 
