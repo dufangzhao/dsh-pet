@@ -29,6 +29,7 @@
 | [Electron运行边界](12-electron-runtime-boundaries.md) | 进程职责、信任与受限运行选项 | 草案，Q11待选 |
 | [插件与能力契约草案](13-plugin-contract-draft.md) | 清单字段、生命周期、能力规则、听写接口、权限与契约测试 | 草案v0.1，Q11相关部分待定 |
 | [测试与验收策略](14-test-and-acceptance-strategy.md) | 测试层次、分段耗时与负载测量、兼容矩阵、故障注入、完成定义 | 方法草案，数值待定 |
+| [安全与隐私策略](15-security-and-privacy.md) | 数据清单、信任边界、15项风险与对策、参考项目教训、安全验收 | 草案，Q11/Q22/Q23/Q24待定 |
 | [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
 | [候选使用场景与验收](07-use-cases-and-acceptance.md) | 功能流程、边界、失败与可验证用例 | 候选，不等于MVP承诺 |
 | [需求追踪与准备度](08-readiness-and-traceability.md) | 已确认方向、验收追踪和开工缺口 | 尚不具备全面开工条件 |
