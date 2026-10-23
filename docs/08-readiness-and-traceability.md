@@ -18,6 +18,7 @@
 | Q9修订确认 | 统一单层插件模型，职责/来源不分层级 | [ADR-0010](adr/0010-unified-plugin-model.md) |
 | Q10=A | Electron + TypeScript桌面底座 | [ADR-0011](adr/0011-electron-typescript-desktop.md) |
 | Q11=按DSH方案 | 可信插件 + 权限预设 + 一次性审批 + 审计 | [ADR-0012](adr/0012-dsh-style-trust-and-permissions.md) |
+| Q12=C | 听写一个键两种用法 | [选型清单](01-discovery-plan.md) |
 
 用户询问AGPL含义并在解释后明确“仅作参考，先不二开”。当前保持MIT，Coopanion仅作交互/架构参考，见[ADR-0006](adr/0006-reference-coopanion-without-fork.md)。不得继续将该问题标为等待回答，也不得把不fork误解为所有基础组件必须自写。
 
@@ -70,6 +71,6 @@
 
 ## 下一轮访谈应先解决什么
 
-许可追问与Q6已解决，首条闭环为[语音听写](09-dictation-mvp-prd.md)。Q7已选择首版完整本地/云双路径；Q8已确定BYOK；Q9进一步确认功能与提供者采用统一单层插件模型。Q10已选择Electron + TypeScript。开工前剩余问题Q11—Q27已按依赖排序列入[选型清单](01-discovery-plan.md)；Q11已按DSH方案确定（[ADR-0012](adr/0012-dsh-style-trust-and-permissions.md)）；当前问Q12（听写开始与结束方式）。不要在缺少答案时自动采用推荐项。
+许可追问与Q6已解决，首条闭环为[语音听写](09-dictation-mvp-prd.md)。Q7已选择首版完整本地/云双路径；Q8已确定BYOK；Q9进一步确认功能与提供者采用统一单层插件模型。Q10已选择Electron + TypeScript。开工前剩余问题Q11—Q27已按依赖排序列入[选型清单](01-discovery-plan.md)；Q11已按DSH方案确定（[ADR-0012](adr/0012-dsh-style-trust-and-permissions.md)）；Q12已选一个键两种用法；当前问Q13（识别结果写入方式）。不要在缺少答案时自动采用推荐项。
 
 完成MVP与技术选择后，再把[架构草案中的验证任务](05-architecture-overview.md)转换为可执行工作包。验证原型也需要用户允许；本阶段不启动实现或安装被研究项目。
