@@ -6,12 +6,13 @@
 
 | 文档 | 用途 | 状态 |
 | --- | --- | --- |
-| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.2，持续细化 |
-| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q1已选B；Q2待回答 |
+| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.3，持续细化 |
+| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q1=B、Q2=A已确认；Q3待回答 |
 | [Coopanion 交互评审](02-coopanion-ui-review.md) | 设置台、角色交互、扩展UI边界与可借鉴原则 | 官方资料/源码/截图静态核查 |
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
 | [ADR-0001](adr/0001-controlled-ui-contributions.md) | 为什么选择能力 + 受控UI扩展 | 已采纳 |
+| [ADR-0002](adr/0002-standalone-with-optional-dsh.md) | 独立应用与DSH可选集成 | 已采纳 |
 | [术语表](../CONTEXT.md) | 区分桌宠、设置台、能力插件与人设 | 工作词汇，可随澄清修订 |
 
 ## 文档制作规则
