@@ -8,7 +8,7 @@
 
 本项目已选择受控UI贡献点（[ADR-0001](adr/0001-controlled-ui-contributions.md)），这比Coopanion固定普通界面的边界更开放。采用它的代码与借鉴其交互是两项不同决定，目前均未替用户选择。
 
-**后续项目决策：**用户已选择[MIT](adr/0003-mit-license.md)。下文“接受AGPL时可条件fork”保留为研究比较，不再是本项目默认路径；框架与可复用代码仍须逐项核验。
+**后续项目决策：**用户已选择[MIT](adr/0003-mit-license.md)，并在AGPL解释后明确[仅作参考、先不二开](adr/0006-reference-coopanion-without-fork.md)。下文条件fork保留为历史研究比较，不作为当前实施路线；框架与可复用组件仍须逐项核验。
 
 ## 简化实现链路
 

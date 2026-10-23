@@ -16,6 +16,10 @@
 - [项目术语](CONTEXT.md)
 - [第一阶段可视化调研报告](research/report/ai-desktop-pet-research-20261023.html)
 
+## 参考项目边界
+
+Coopanion仅作为交互、设置台与架构参考，本阶段不二开，见[ADR-0006](docs/adr/0006-reference-coopanion-without-fork.md)。这不排斥按许可复用合适的基础框架和引擎。
+
 ## 版本管理
 
 本地 Git 主分支为 main。需求与文档分阶段提交；实现阶段的分支/发布策略仍待确认。
