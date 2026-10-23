@@ -11,6 +11,8 @@
 
 - [ADR-0005](adr/0005-windows-first.md)：Windows首发，其他平台仅保留适配边界。
 
+- [ADR-0011](adr/0011-electron-typescript-desktop.md)：桌面底座Electron + TypeScript；具体版本与UI框架后定。
+
 ## 分层建议
 
 ```text
@@ -111,6 +113,6 @@
 
 ## 尚未决定
 
-具体Windows版本/CPU架构、桌面壳与UI框架、具体插件框架版本、插件语言/信任分级、数据存储、能力提供方、MVP、数值性能预算和发行方式。
+具体Windows版本/CPU架构、Electron版本与UI框架、具体插件框架版本、插件语言/信任分级、数据存储、能力提供方、MVP细节、数值性能预算和发行方式。
 
 研究依据：[平台资料](../research/tech-platform.json) · [Windows自动化](../research/tech-windows-automation.json) · [语音与角色](../research/tech-voice-character.json) · [Coopanion架构核验](04-coopanion-architecture-review.md)。
