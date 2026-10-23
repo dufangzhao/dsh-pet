@@ -1,0 +1,797 @@
+{
+  "title": "Windows 11 插件化桌宠：文字注入、焦点、截图与受控电脑操作一手研究",
+  "researched_on": "2026-10-24",
+  "timezone": "Asia/Taipei",
+  "method": {
+    "allowed": "只读官方文档、维护者官方仓库/模型卡与本机既有研究文件；仅写本 JSON",
+    "not_performed": [
+      "未安装或运行被调研软件",
+      "未调用任何注入、剪贴板修改、截图或电脑操作接口",
+      "未运行模型或性能测试",
+      "未编写实现代码",
+      "未验证 API 账号权限或计算价格"
+    ],
+    "github_access": "直接读取公开 raw.githubusercontent.com 与 api.github.com；未使用 GitHub MCP，故无 MCP 身份探测或 401 回退过程",
+    "evidence_policy": "每条事实与建议均附核验等级、精确 URL 或本机路径、项目含义。源码等级含官方仓库 README、manifest、许可证及 release 元数据。项目含义为本研究推导，非上游承诺。未知不等于不支持。main/master/latest 为可变引用，仅表示读取当日；发布前需固定版本/commit并复核。成熟度只描述发布、源码与官方定位证据，不按星数或宣传估计稳定性。",
+    "prior_read": {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/research/practical-modules.json",
+      "verification_level": "本机文件",
+      "coverage": "读取了开头120行，作为背景；未把未读部分当证据。",
+      "project_implication": "沿用 ASR 与注入、视觉观察与实际执行分层的研究方向；本报告独立核验指定 Windows 细节。"
+    }
+  },
+  "input_context": {
+    "verification_level": "未知",
+    "source": "用户提供；未核验本机硬件或运行时文件",
+    "declared": "Windows 11；i5-11400H；16GB RAM；RTX 3050 Ti 4GB；Node 24；Python 3.12；.NET 10 SDK；候选 Electron+TypeScript",
+    "project_implication": "仅作选型约束，不据此推出速度、显存可用量、模型可运行性或版本兼容结论。"
+  },
+  "sections": [
+    {
+      "topic": "文字注入与权限",
+      "facts": [
+        {
+          "id": "input-01",
+          "fact": "SendInput 将 INPUT 事件按序插入键盘/鼠标输入流；返回成功插入的事件数，而非目标应用完成输入或保存的证明。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput"
+          ],
+          "project_implication": "执行结果区分 dispatched 与 verified；需独立回读目标值或观察预期 UI 状态。"
+        },
+        {
+          "id": "input-02",
+          "fact": "SendInput 受 UIPI 限制，只允许注入相同或更低完整性级别的应用；被 UIPI 阻止时，返回值/GetLastError 不会明确指出 UIPI 是原因。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput"
+          ],
+          "project_implication": "普通权限桌宠不能承诺输入到管理员窗口；错误分类保留 blocked_or_unknown，不能把返回0直接诊断成UIPI。"
+        },
+        {
+          "id": "input-03",
+          "fact": "KEYEVENTF_UNICODE 要求 wVk=0，wScan 为要发送的 Unicode 字符；合成 VK_PACKET，面向前台线程消息队列，经 TranslateMessage 形成 WM_CHAR；该标志只能与 KEYEVENTF_KEYUP 组合。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-keybdinput"
+          ],
+          "project_implication": "采用 Unicode 文本注入适配器，和快捷键/物理扫描码接口分开；它不是指定后台 HWND 的通用写值 API。应覆盖 UTF-16、组合字符及应用差异测试。"
+        },
+        {
+          "id": "input-04",
+          "fact": "SendInput 不重置当前键盘状态，用户已按住的按键可能干扰；官方建议检查 GetAsyncKeyState 并作必要处理。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput"
+          ],
+          "project_implication": "热键触发听写后需处理按键释放与并发输入，不能擅自吞掉用户操作或无限重试。"
+        },
+        {
+          "id": "input-05",
+          "fact": "UIAccess 是受约束的辅助技术权限：需要 Authenticode 签名、安全安装位置和 manifest；官方不建议非辅助技术应用使用。UIAccess 本身不足以任意跨完整性边界，也不自动访问 SYSTEM UI。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-securityoverview"
+          ],
+          "project_implication": "不要把“以管理员运行整个 Electron”或“加 uiAccess=true”当默认方案。若以后支持真实无障碍场景，应单独评估签名原生代理与最小权限，UAC/登录安全桌面默认人工处理。"
+        },
+        {
+          "id": "input-06",
+          "fact": "ValuePattern.SetValue 设置控件值；只读或禁用控件会抛异常。官方示例先检查支持模式、启用、可聚焦、只读；标准多行编辑控件通常走 TextPattern 而非 ValuePattern。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.valuepattern.setvalue"
+          ],
+          "project_implication": "只对确实支持 ValuePattern 的控件提供明确 replace_value；不得将整值替换伪装成 caret_insert，也不能把读取不到模式自动当文本框。"
+        },
+        {
+          "id": "input-07",
+          "fact": "TextPattern/TextPatternRange 提供文本、格式、选区、遍历；TextPattern 不提供插入/修改文本的方法。全文被替换后旧 range 可失效。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview"
+          ],
+          "project_implication": "TextPattern 用于观察与验证，不作为输入引擎；多行编辑用明确授权的键盘/粘贴或专用应用接口，保持快照新鲜。"
+        },
+        {
+          "id": "input-08",
+          "fact": "UIA IsPassword 表示元素含受保护内容；官方说明可供读屏软件判断是否应朗读文本。TextPattern 文档要求提供者不暴露密码等敏感文本。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.automationelement.automationelementinformation.ispassword",
+            "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview"
+          ],
+          "project_implication": "默认拒绝密码/PIN 字段听写、读取、TTS和截图外发；属性缺失或 false 不是整个屏幕无敏感信息的证明。"
+        },
+        {
+          "id": "input-09",
+          "fact": "本研究未验证各应用对 VK_PACKET、粘贴、UIA 整值设置、撤销、IME 合成与框架事件的具体兼容性。",
+          "verification_level": "未知",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-keybdinput",
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.valuepattern.setvalue",
+            "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview"
+          ],
+          "project_implication": "“语音听写到任意应用”应定义为覆盖目标应用清单并提供失败提示，而不是100%兼容承诺；本机成功率未知。"
+        }
+      ]
+    },
+    {
+      "topic": "剪贴板粘贴及恢复",
+      "facts": [
+        {
+          "id": "clip-01",
+          "fact": "同一时刻只有一个窗口可打开剪贴板；EmptyClipboard 清空旧内容、释放相关资源、通知旧 owner 并转移所有权。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations"
+          ],
+          "project_implication": "粘贴适配器会改变系统共享状态；须显式授权、短时打开并可靠关闭，不能把 Ctrl+V 视为无副作用后台注入。"
+        },
+        {
+          "id": "clip-02",
+          "fact": "剪贴板可同时包含纯文本、RTF、图像、注册/私有格式及延迟渲染格式；粘贴方通常选择它识别的优先格式。延迟渲染依赖原 owner 响应 WM_RENDERFORMAT。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations",
+            "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats"
+          ],
+          "project_implication": "只备份纯文本会丢格式；不能承诺任意 OLE/私有/延迟对象无损恢复。首版可限定支持的可复制格式，遇复杂内容提示改用Unicode输入或取消。"
+        },
+        {
+          "id": "clip-03",
+          "fact": "GetClipboardSequenceNumber 在内容改变或清空时递增；延迟渲染直到实际渲染才递增；无相应窗口站访问权可返回0。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber"
+          ],
+          "project_implication": "恢复前检测本次写入之后是否有外部变化；检测到用户新复制则不恢复旧内容。序列号不是粘贴消费确认或原子回滚机制。"
+        },
+        {
+          "id": "clip-04",
+          "fact": "Windows 有剪贴板历史与跨设备同步；注册格式 ExcludeClipboardContentFromMonitorProcessing 可排除历史/同步，CanIncludeInClipboardHistory 与 CanUploadToCloudClipboard 的DWORD零值可分别阻止。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats"
+          ],
+          "project_implication": "临时听写文本按隐私策略设置排除标记；恢复当前剪贴板不能推导为撤销所有历史、第三方监听或已发送数据。"
+        },
+        {
+          "id": "clip-05",
+          "fact": "文档只定义剪贴板提供/获取协议，没有给出适用于所有应用的“Ctrl+V已消费完成且可立即恢复”统一保证。",
+          "verification_level": "未知",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations",
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber"
+          ],
+          "project_implication": "本项目建议事务记录 snapshot_formats、owned_sequence、target、paste_dispatch、verification、restore_result；确认目标消费后且无竞争修改才尽力恢复。不得以固定等待时间证明完成；该流程为建议，未实现/实测。"
+        }
+      ]
+    },
+    {
+      "topic": "TSF与Windows语音输入参考",
+      "facts": [
+        {
+          "id": "tsf-01",
+          "fact": "TSF 是支持高级文本输入/自然语言服务的 Windows 系统框架，文本服务可提供键盘、手写、语音识别；官方开发者定位为熟悉COM的C/C++程序员。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/tsf/text-services-framework"
+          ],
+          "project_implication": "若要输入法式上下文听写、组合文本等能力，可把TSF作为专门原生输入服务，而非简单TS函数。"
+        },
+        {
+          "id": "tsf-02",
+          "fact": "TSF文本服务除了标准COM进程内服务注册，还需注册文本服务、语言profile和类别；文档建议提供二进制数字签名。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/tsf/text-service-registration"
+          ],
+          "project_implication": "复杂度来自COM生命周期、注册/卸载、语言切换与发布签名，不是仅调用一次SendInput；不估算工期或维护成本。"
+        },
+        {
+          "id": "tsf-03",
+          "fact": "读取/修改context文本前需请求edit session，由TSF manager与context owner协商document lock，获得锁后才读写。微软将上下文输入所需TSF能力描述为比只读TextPattern更复杂。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/tsf/edit-sessions",
+            "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview"
+          ],
+          "project_implication": "TSF可作为后续阶段；需独立worker/原生组件设计并核验目标应用text store，不能认为TSF天然覆盖全部应用。"
+        },
+        {
+          "id": "tsf-04",
+          "fact": "Windows 11语音输入通过Win+H或触摸键盘麦克风启动；需要网络、麦克风和文本框内光标，启动后等待Listening提示；使用Azure Speech在线识别，可配置自动标点等。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://support.microsoft.com/en-us/windows/use-voice-typing-to-talk-instead-of-type-on-your-pc-fec94565-c4bd-329d-e59a-af033fa5689f"
+          ],
+          "project_implication": "可借鉴热键、明确监听状态、停止入口与输入框前置条件；Win+H是产品行为参考，不是可替换为本地ASR的公共注入SDK证明。"
+        },
+        {
+          "id": "tsf-05",
+          "fact": "当前支持页面另有Copilot+ PC的Fluid dictation：使用设备上SLM校正，限全部英语locale，安全字段禁用；不能把这段本地处理说明泛化为全部Win+H识别离线。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://support.microsoft.com/en-us/windows/use-voice-typing-to-talk-instead-of-type-on-your-pc-fec94565-c4bd-329d-e59a-af033fa5689f"
+          ],
+          "project_implication": "给定电脑不能仅凭Windows 11就宣称支持Copilot+功能；桌宠应独立声明ASR、文本整理、注入三段的数据去向。"
+        }
+      ]
+    },
+    {
+      "topic": "焦点、光标与目标锁定",
+      "facts": [
+        {
+          "id": "focus-01",
+          "fact": "GetForegroundWindow 返回用户正在操作的前台窗口HWND；激活切换期间可为NULL。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getforegroundwindow"
+          ],
+          "project_implication": "开始听写时记录目标窗口，提交时重新核验，NULL或变化则暂停，不把文字落到新前台窗口。"
+        },
+        {
+          "id": "focus-02",
+          "fact": "GetGUIThreadInfo 可以读取指定线程或前台线程的GUI信息，即使活动窗口不属于调用进程也可成功；无输入队列/线程不存在会失败，激活切换时句柄可能无效。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getguithreadinfo"
+          ],
+          "project_implication": "用于交叉核验线程、前台、输入焦点，不依赖调用者自己的GetFocus状态。结果需带采样时间与失败状态。"
+        },
+        {
+          "id": "focus-03",
+          "fact": "GUITHREADINFO 包含 hwndFocus、hwndCaret、rcCaret；rcCaret是相对hwndCaret客户区的矩形，GetGUIThreadInfo说明其为该窗口逻辑坐标，且可能含方向和padding信息，不必然等于精确插入点。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getguithreadinfo",
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-guithreadinfo"
+          ],
+          "project_implication": "区分文本插入光标与鼠标指针；统一坐标系、窗口偏移和DPI转换，无法获得caret时标unknown，不伪造屏幕坐标。"
+        },
+        {
+          "id": "focus-04",
+          "fact": "AutomationElement.FocusedElement 返回当前焦点UIA元素；如果客户端可能查询自己的UI，官方要求UIA调用放在独立线程。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.automationelement.focusedelement"
+          ],
+          "project_implication": "UIA工作线程/原生代理与Electron界面隔离；通过元素身份、角色、密码/只读状态检查听写目标，而非仅窗口标题。"
+        },
+        {
+          "id": "focus-05",
+          "fact": "SetForegroundWindow 有前台锁、菜单状态、最近输入等限制；即使满足列出条件仍可被拒绝，Windows不允许应用在用户操作其他窗口时强行抢前台。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow"
+          ],
+          "project_implication": "优先不抢焦点的语义控件操作；需要前台时应请求用户切换/确认并回读，不用反复激活或绕过限制。"
+        }
+      ]
+    },
+    {
+      "topic": "UIA与FFI库许可、维护和成熟度证据",
+      "facts": [
+        {
+          "id": "lib-flaui-01",
+          "fact": "FlaUI是Windows .NET UI自动化封装，支持UIA2/UIA3；README说明不同后端在WPF/Store/WinForms存在适配差异。许可证MIT。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/FlaUI/FlaUI/master/README.md",
+            "https://raw.githubusercontent.com/FlaUI/FlaUI/main/LICENSE.txt"
+          ],
+          "project_implication": "推荐作为C# Windows自动化代理候选；保留MIT声明，并按应用选择后端，避免以单一后端承诺全平台全控件。"
+        },
+        {
+          "id": "lib-flaui-02",
+          "fact": "读取时GitHub releases/latest返回v5.0.0，published_at为2025-02-25；发布说明增加.NET 8支持并移除.NET Standard/Core3.1/.NET5。当前main的FlaUI.Core.csproj则声明Version6.0.0和net48/net8.0-windows/net10.0-windows。",
+          "verification_level": "源码",
+          "sources": [
+            "https://api.github.com/repos/FlaUI/FlaUI/releases/latest",
+            "https://raw.githubusercontent.com/FlaUI/FlaUI/main/src/FlaUI.Core/FlaUI.Core.csproj"
+          ],
+          "project_implication": "发布元数据与主线源码分开锁定；主线有.NET10目标是兼容性线索，不是已发布包或本机测试结果。实际选用版本、NuGet发布状态和运行可靠性仍需以后核验。"
+        },
+        {
+          "id": "lib-dotnet-01",
+          "fact": "System.Windows.Automation的FocusedElement/ValuePattern文档指向UIAutomationClient.dll；dotnet/wpf中AutomationElement源文件及仓库许可证均标MIT。旧.NET Framework概览指向原生Windows UIA文档获取最新信息。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/dotnet/wpf/main/src/Microsoft.DotNet.Wpf/src/UIAutomation/UIAutomationClient/System/Windows/Automation/AutomationElement.cs",
+            "https://raw.githubusercontent.com/dotnet/wpf/main/LICENSE.TXT",
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.automationelement.focusedelement",
+            "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview"
+          ],
+          "project_implication": ".NET直接UIA是可审计的底层选择；MIT只针对所引源码，不意味着Windows系统DLL可任意重新分发。当前宿主目标框架与WindowsDesktop依赖需单独确定。"
+        },
+        {
+          "id": "lib-rust-01",
+          "fact": "leexgone/uiautomation-rs为Windows UIA封装，Apache-2.0；main crate manifest读取为0.25.1、edition2024、windows/windows-core 0.62.2；提供pattern/control/input，事件、剪贴板、截图等可选feature。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/leexgone/uiautomation-rs/main/README.md",
+            "https://raw.githubusercontent.com/leexgone/uiautomation-rs/main/crates/uiautomation/Cargo.toml",
+            "https://raw.githubusercontent.com/leexgone/uiautomation-rs/main/LICENSE"
+          ],
+          "project_implication": "Rust sidecar是替代C#的候选，保留许可证、适用NOTICE与修改说明；依赖原生Windows API，不是跨平台UIA引擎。"
+        },
+        {
+          "id": "lib-rust-02",
+          "fact": "该Rust库README明确v0.19前后部分默认feature变化；公开源码与示例可核验，但本研究未验证全控件覆盖或生产稳定性。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/leexgone/uiautomation-rs/main/README.md"
+          ],
+          "project_implication": "成熟度评价限于可读API/示例和版本化维护证据；固定版本和feature，目标应用兼容性未知，不按0.x版本号自动断言不可用。"
+        },
+        {
+          "id": "lib-py-01",
+          "fact": "pywinauto支持win32与uia两个backend；README声明0.6.0起BSD-3-Clause，0.5.4及以前LGPLv2.1或更高。当前LICENSE为BSD三条款。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/pywinauto/pywinauto/master/README.md",
+            "https://raw.githubusercontent.com/pywinauto/pywinauto/master/LICENSE"
+          ],
+          "project_implication": "Python既有自动化适配可复用，但不能把旧版本许可套到新版本；二进制分发保留版权条件，不用作者名背书。"
+        },
+        {
+          "id": "lib-py-02",
+          "fact": "GitHub releases/latest读取为0.6.9，2025-01-06发布，描述为最后一个兼容Python2.7的版本；README将开发描述为维护者业余项目，并列pywin32/comtypes依赖。",
+          "verification_level": "源码",
+          "sources": [
+            "https://api.github.com/repos/pywinauto/pywinauto/releases/latest",
+            "https://raw.githubusercontent.com/pywinauto/pywinauto/master/README.md"
+          ],
+          "project_implication": "有长期发布/多后端基础，非SLA保证；本机Python3.12与选定依赖组合尚未实测，不能因py2.py3 wheel标签就承诺兼容。"
+        },
+        {
+          "id": "lib-koffi-01",
+          "fact": "Koffi官方说明为Node.js动态C FFI，MIT，Node>=16；列Windows x86/x64/ARM64为支持测试平台并提供预构建二进制，支持同步/异步调用与回调。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://koffi.dev/"
+          ],
+          "project_implication": "给定Node24符合公开最低版本条件；适合封装少量Win32调用，不提供现成UIA树/COM线程/安全策略。Electron内置Node与打包兼容性仍需单独验证。"
+        },
+        {
+          "id": "lib-koffi-02",
+          "fact": "Koffi官方changelog在2026-10-10列3.3.3，近期记录包含崩溃、栈分配与缓冲区问题修复。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://koffi.dev/changelog"
+          ],
+          "project_implication": "存在持续维护记录，但FFI错误可有原生进程风险；建议不在桌宠渲染器暴露任意DLL调用，固定版本并隔离执行。未据此推断相对性能或“无崩溃”。"
+        }
+      ]
+    },
+    {
+      "topic": "截图与屏幕采集",
+      "facts": [
+        {
+          "id": "capture-01",
+          "fact": "GraphicsCaptureSession从Windows10 1803/build17134提供；WGC可采集显示器或应用窗口，官方流程使用安全系统选择器并在活动目标外画黄色通知边框；应先调用IsSupported。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.graphicscapturesession",
+            "https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/screen-capture"
+          ],
+          "project_implication": "Windows11优先场景可列为原生窗口采集候选，但设备支持和用户许可必须运行时检查；保留显式采集状态与停止入口。"
+        },
+        {
+          "id": "capture-02",
+          "fact": "IGraphicsCaptureItemInterop.CreateForWindow允许通过HWND创建窗口采集项，最低Windows10 1903/build18362。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.capture.interop/nf-windows-graphics-capture-interop-igraphicscaptureiteminterop-createforwindow"
+          ],
+          "project_implication": "有原生Win32精确窗口绑定入口；不应说所有WGC路线都强制每次弹选择器。非picker流程仍由本项目实施授权与可见告知。"
+        },
+        {
+          "id": "capture-03",
+          "fact": "IsBorderRequired文档最低build20348；关闭边框前需RequestAccessAsync(Borderless)用户同意及graphicsCaptureWithoutBorder capability。拒绝后设置false可成功但被忽略；其他app要求边框时仍显示。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.graphicscapturesession.isborderrequired"
+          ],
+          "project_implication": "不能承诺静默无黄框截图，也不能仅检查setter成功就宣称边框已关；默认保留指示，需无框时走正规授权并核验。"
+        },
+        {
+          "id": "capture-04",
+          "fact": "WGC文档提醒HDR像素格式/色调映射、帧ContentSize、resize或device lost时重建frame pool，且捕获帧释放后不能继续保存底层surface引用。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/screen-capture"
+          ],
+          "project_implication": "统一截图协议必须携带原始尺寸、裁剪区域、像素/色彩信息和时间，避免错误坐标与失效帧；本机帧率/资源占用未知。"
+        },
+        {
+          "id": "capture-05",
+          "fact": "DXGI Desktop Duplication从Windows8提供桌面逐帧DXGI surface及dirty/move rect；客户端需处理旋转和可能单独绘制的鼠标指针。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/desktop-dup-api"
+          ],
+          "project_implication": "适合显示器级观察后备，不是语义控件API或保证遮挡窗口内容的窗口捕获；统一每屏坐标/旋转/指针元数据。"
+        },
+        {
+          "id": "capture-06",
+          "fact": "DuplicateOutput按显示输出创建；设备须属于相应adapter，多显示器无显式同步。可能因安全桌面权限、并发上限、会话断开等失败；Windows7平台更新返回E_NOTIMPL。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_2/nf-dxgi1_2-idxgioutput1-duplicateoutput"
+          ],
+          "project_implication": "不可只根据Requirements表把Windows7写成可用；遇锁屏/断开/权限失败停止采集并报告原因，不自动提升为SYSTEM。"
+        },
+        {
+          "id": "capture-07",
+          "fact": "Electron desktopCapturer在main进程工作，getSources支持screen/window，返回源与缩略图；与setDisplayMediaRequestHandler/getDisplayMedia配合采集；getDisplayMedia不能以deviceId选择源。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://www.electronjs.org/docs/latest/api/desktop-capturer"
+          ],
+          "project_implication": "Electron首版可先用官方采集入口；选择权限由主进程受控，不向插件任意暴露全部屏幕源。默认缩略图150×150不是高质量GUI定位输入保证。"
+        },
+        {
+          "id": "capture-08",
+          "fact": "本次Electron API文档未承诺特定Windows捕获后端、黄框/系统提示行为或所有最小化/遮挡窗口的结果；本机也未进行采集验证。",
+          "verification_level": "未知",
+          "sources": [
+            "https://www.electronjs.org/docs/latest/api/desktop-capturer",
+            "https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/screen-capture"
+          ],
+          "project_implication": "不能把WGC版本/黄框规则无条件套给desktopCapturer，也不能承诺隐藏窗口可采集；需以后对选定Electron版本做明确矩阵验收。"
+        }
+      ]
+    },
+    {
+      "topic": "电脑操作Agent、定位模型与MCP",
+      "facts": [
+        {
+          "id": "agent-claude-01",
+          "fact": "2026-10-24读取的Anthropic官方文档元数据将computer_toolset_20260801标GA；Claude API及Google managed为GA，AWS/Bedrock/Foundry条目仍beta。新toolset不需beta header，旧computer_20251124/computer_20250124有独立模型/平台兼容规则。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md"
+          ],
+          "project_implication": "供应商适配器需记录model+platform+tool_version三元组，不能笼统写“Claude computer use仍全是beta”。本项目账号能否调用未知，未请求API。"
+        },
+        {
+          "id": "agent-claude-02",
+          "fact": "新工具为client toolset，提供截图、鼠标、键盘等成员；每次实际调用由应用在自行控制的环境执行，文档说明其当前不在Claude Managed Agents中提供。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md"
+          ],
+          "project_implication": "模型只是动作提出者，Windows执行、权限、目标绑定、结果回读由本项目代理承担；浏览器内部任务可另用语义browser use。"
+        },
+        {
+          "id": "agent-claude-03",
+          "fact": "Anthropic建议专用VM/container、最小权限、隔离登录等敏感数据、网络域白名单、重大现实后果和需同意操作的人类确认；明确网页/图像提示注入风险，并要求告知终端用户风险和取得同意。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md"
+          ],
+          "project_implication": "本机常驻桌宠不默认给予全桌面自主权；首版限用户选择的窗口/动作，支付、接受条款、账号操作等在执行点确认，模型防注入分类器不替代宿主策略。"
+        },
+        {
+          "id": "agent-openai-01",
+          "fact": "当前OpenAI官方文档提供Responses computer工具及Python/Node ComputerToolset，并区分BrowserToolset语义浏览器路线与Agents API托管浏览器路线。迁移表明确legacy computer-use-preview → GA gpt-6.1-sol/computer，单action变actions数组。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/tools-computer-use.md",
+            "https://developers.openai.com/api/docs/guides/tools-computer-use-integration.md"
+          ],
+          "project_implication": "新接入不要照搬2025年的preview工具格式；SDK循环与driver分离，按账户模型工具权限核验。此处是官方公开状态，不代表当前用户已获得服务授权。"
+        },
+        {
+          "id": "agent-openai-02",
+          "fact": "computer-use-preview官方模型页仍列旧snapshot computer-use-preview-2025-03-11，说明只能用Responses API；当前指南要求检查模型的Tools和项目access。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/models/computer-use-preview.md",
+            "https://developers.openai.com/api/docs/guides/tools-computer-use.md"
+          ],
+          "project_implication": "保留旧协议兼容仅在真实需求下；文档存在不等于每个账户/地区均能调用，账号可用性、当前套餐授权与调用费用未知且不估算。"
+        },
+        {
+          "id": "agent-openai-03",
+          "fact": "OpenAI安全章节要求隔离浏览器/VM、站点和动作白名单，把屏幕/文档/工具内容视为不可信；购买、数据传输、破坏性改动等需确认，敏感信息输入表单即算传输；限制步骤/时间、支持取消并核验实际结果。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/tools-computer-use.md"
+          ],
+          "project_implication": "把安全检查放到实际执行层，而非仅system prompt；输入凭证前即确认，不能等点击Submit才认定外发。动作批处理也须逐项受控。"
+        },
+        {
+          "id": "agent-tars-01",
+          "fact": "UI-TARS是视觉GUI agent模型/工具项目；UI-TARS-desktop是基于模型的本地/远程电脑及浏览器操作应用。两仓库根许可证均Apache-2.0。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/README.md",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/LICENSE",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS-desktop/main/README.md",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS-desktop/main/LICENSE"
+          ],
+          "project_implication": "可研究动作协议与desktop operator，但不是Windows UIA库；复用代码保留许可/适用NOTICE，依赖与服务许可独立审核。"
+        },
+        {
+          "id": "agent-tars-02",
+          "fact": "ByteDance-Seed官方UI-TARS-1.5-7B模型卡标license:apache-2.0。仓库同时区分已开放的7B与研究访问的更强模型，且README提到UI-TARS-2研究进展。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://huggingface.co/ByteDance-Seed/UI-TARS-1.5-7B/raw/main/README.md",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/README.md"
+          ],
+          "project_implication": "代码许可不能自动覆盖任意系列/云服务；本次只确认该7B模型卡，不将系列名称等同所有权重均可下载/商用。3050Ti 4GB上运行能力未知，不推估。"
+        },
+        {
+          "id": "agent-tars-03",
+          "fact": "UI-TARS官方坐标指南按模型预处理smart_resize后的宽高把模型输出映射回原图；README提示Qwen2.5-VL系采用绝对坐标；另明确存在幻觉、GUI误识别与计算资源等限制。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/README_coordinates.md",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/README.md"
+          ],
+          "project_implication": "统一观测必须保存原图、缩放/裁剪变换、模型坐标约定；模型坐标先转成受控窗口坐标再验证，不直接当全桌面物理像素。"
+        },
+        {
+          "id": "agent-tars-04",
+          "fact": "UI-TARS-desktop当前README还介绍Agent TARS：GUI/DOM混合浏览器策略、事件流及MCP集成；Desktop列Windows/macOS/browser支持。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/bytedance/UI-TARS-desktop/main/README.md"
+          ],
+          "project_implication": "可借鉴事件流、operator适配与观察/执行分层；跨平台声明不证明本项目应用兼容性，也不把远程operator宣传当长期价格承诺。"
+        },
+        {
+          "id": "agent-qwen-01",
+          "fact": "Qwen2.5-VL官方博客说明能生成box/point及结构化JSON坐标，作为visual agent使用工具执行电脑/手机任务；Qwen3-VL官方README列Computer-Use/Mobile Agent与2D grounding cookbook。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://qwenlm.github.io/blog/qwen2.5-vl/",
+            "https://raw.githubusercontent.com/QwenLM/Qwen3-VL/main/README.md"
+          ],
+          "project_implication": "可作为截图理解/定位提供者，不等于包含Windows执行器、安全授权或成功校验。按版本分别声明能力，不能泛称所有Qwen-VL均有相同GUI协议。"
+        },
+        {
+          "id": "agent-qwen-02",
+          "fact": "Qwen3-VL官方computer_use notebook示例将display宽高设1000，按坐标/1000映射到resize后的图像尺寸；本次大notebook响应被截断，但上述代码片段已读取。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/QwenLM/Qwen3-VL/main/cookbooks/computer_use.ipynb"
+          ],
+          "project_implication": "Qwen3相对坐标示例与UI-TARS/Qwen2.5系绝对坐标不能混用；解析器必须版本化。只核验所读片段，未执行notebook，也未核验全部cookbook内容。"
+        },
+        {
+          "id": "agent-qwen-03",
+          "fact": "本次访问旧Qwen2.5-VL main README时已返回Qwen3-VL内容；未逐一审核Qwen各尺寸、量化制品和历史版本的权重许可证。",
+          "verification_level": "未知",
+          "sources": [
+            "https://qwenlm.github.io/blog/qwen2.5-vl/",
+            "https://raw.githubusercontent.com/QwenLM/Qwen3-VL/main/README.md"
+          ],
+          "project_implication": "Qwen2.5能力使用其官方历史博客为证；实际下载前按精确仓库/revision/权重许可复核，不把重定向的main当历史版本事实。"
+        },
+        {
+          "id": "agent-ufo-01",
+          "fact": "Microsoft UFO根仓库MIT；当前根README为UFO³，仍将UFO²列为Windows Desktop AgentOS；UFO² README明确UIA/Win32/WinCOM、GUI+原生API、UIA+视觉混合检测和HostAgent/AppAgent分工。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/microsoft/UFO/main/README.md",
+            "https://raw.githubusercontent.com/microsoft/UFO/main/ufo/README.md",
+            "https://raw.githubusercontent.com/microsoft/UFO/main/LICENSE"
+          ],
+          "project_implication": "Windows优先架构参考价值在混合检测和原生API优先，不需把整套UFO框架直接并入桌宠；MIT与模型/依赖许可分开。"
+        },
+        {
+          "id": "agent-ufo-02",
+          "fact": "UFO² README把Picture-in-Picture Desktop标为coming soon；当前根README对稳定性/LTS有项目自述，但本研究未验证安全隔离实现或稳定性。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/microsoft/UFO/main/ufo/README.md",
+            "https://raw.githubusercontent.com/microsoft/UFO/main/README.md"
+          ],
+          "project_implication": "不能因为图示写sandboxed就承诺可无干扰、隔离地控制真实桌面；首版自行定义明确的窗口权限与独立测试环境。"
+        },
+        {
+          "id": "agent-wmcp-01",
+          "fact": "CursorTouch/Windows-MCP当前README和LICENSE.md为MIT，README标Windows10–11、视觉可选；pyproject读取为0.8.8、requires-python>=3.14、Development Status 4-Beta。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/CursorTouch/Windows-MCP/main/README.md",
+            "https://raw.githubusercontent.com/CursorTouch/Windows-MCP/main/pyproject.toml",
+            "https://raw.githubusercontent.com/CursorTouch/Windows-MCP/main/LICENSE.md"
+          ],
+          "project_implication": "给定Python3.12不满足当前主线要求；不安装、不擅自升级。作为独立可选MCP provider研究，先锁定兼容版本与依赖再验证，而非默认底层核心。"
+        },
+        {
+          "id": "agent-wmcp-02",
+          "fact": "Windows-MCP说明可通过Windows UI元素交互，State的use_dom模式过滤浏览器UI，Firefox用IAccessible2 fallback，因为不暴露UIA RootWebArea。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/CursorTouch/Windows-MCP/main/README.md"
+          ],
+          "project_implication": "其所谓DOM模式不能自动当作Playwright/CDP真实DOM控制；需按提供者的实际语义与能力标注，不能混淆浏览器协议与UIA/IA2。"
+        },
+        {
+          "id": "agent-pw-01",
+          "fact": "Microsoft Playwright MCP根许可证Apache-2.0；README描述通过结构化accessibility snapshots进行浏览器自动化，不需要视觉模型，另提供可选vision坐标能力。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/microsoft/playwright-mcp/main/README.md",
+            "https://raw.githubusercontent.com/microsoft/playwright-mcp/main/LICENSE"
+          ],
+          "project_implication": "网页任务优先此类语义定位，桌面原生窗口仍由Windows执行代理处理；MCP只做接口接入，不等于桌面权限模型。"
+        },
+        {
+          "id": "agent-pw-02",
+          "fact": "Playwright MCP README明确自身不是安全边界；allowed/blocked origins不构成安全边界且不影响redirect；文件访问与secret替换等便利机制也有非安全保证声明。",
+          "verification_level": "源码",
+          "sources": [
+            "https://raw.githubusercontent.com/microsoft/playwright-mcp/main/README.md"
+          ],
+          "project_implication": "需独立profile、浏览器进程沙箱/VM、真实网络和文件系统策略；不能把MCP origin白名单当沙箱。禁止插件直接挂接用户现有登录浏览器后获得无限权限。"
+        }
+      ]
+    },
+    {
+      "topic": "比较与本项目统一底层规范建议",
+      "facts": [
+        {
+          "id": "design-01",
+          "fact": "UIA/Playwright语义路线暴露控件或网页元素及可用操作；视觉模型路线基于截图输出位置和动作；UFO明确将UIA与视觉结合。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.valuepattern.setvalue",
+            "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview",
+            "https://raw.githubusercontent.com/microsoft/playwright-mcp/main/README.md",
+            "https://raw.githubusercontent.com/microsoft/UFO/main/ufo/README.md",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/README_coordinates.md"
+          ],
+          "project_implication": "建议优先级：已有应用API → 浏览器语义/Windows UIA → 受控坐标视觉。语义路线依赖提供者暴露正确结构；canvas/自绘等缺失时才降级视觉，而不是遍历失败就盲点。此优先级是项目设计建议。"
+        },
+        {
+          "id": "design-02",
+          "fact": "语义操作并不消除权限风险：页面/控件文本仍是不可信内容；视觉坐标则必须处理截图尺寸与转换。两类方法均不能仅凭工具返回证明业务目标成功。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/tools-computer-use.md",
+            "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md",
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getguithreadinfo",
+            "https://raw.githubusercontent.com/bytedance/UI-TARS/main/README_coordinates.md"
+          ],
+          "project_implication": "统一Observation包含target/session/snapshot/time/coverage与坐标空间；Action包含目标、动作、参数、授权范围、前置条件；Result分dispatched/satisfied/unsatisfied/unknown。过期快照或目标变化拒绝执行。"
+        },
+        {
+          "id": "design-03",
+          "fact": "Electron官方安全清单要求隔离上下文、进程沙箱、远程内容不启用Node、校验IPC sender，不向不可信网页暴露Electron API；Electron不是普通受限网页。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://www.electronjs.org/docs/latest/tutorial/security"
+          ],
+          "project_implication": "建议TS插件仅调用窄能力broker；Windows UIA/SendInput/剪贴板/采集放受控sidecar。插件manifest声明observe_screen、read_uia、write_text、keyboard_mouse等能力，由核心统一审批、撤销、审计和紧急停止；这不是声称Electron默认能隔离任意Node插件。"
+        },
+        {
+          "id": "design-04",
+          "fact": "官方电脑操作安全建议均强调最小权限、隔离和人工确认；Windows前台切换与完整性权限另有系统限制。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://developers.openai.com/api/docs/guides/tools-computer-use.md",
+            "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md",
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput",
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow"
+          ],
+          "project_implication": "首版让用户主动选目标和启动会话，默认禁止密码/支付/删除/安装/权限提升，风险操作在执行点重新确认；取消键及用户接管立即终止待执行队列，不自动关闭UAC或绕开系统提示。"
+        },
+        {
+          "id": "design-05",
+          "fact": "通用听写需要独立处理焦点、文本注入、敏感字段和结果校验；TSF另需COM注册/语言profile/编辑锁。",
+          "verification_level": "官方文档",
+          "sources": [
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.automationelement.focusedelement",
+            "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-keybdinput",
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.valuepattern.setvalue",
+            "https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.automationelement.automationelementinformation.ispassword",
+            "https://learn.microsoft.com/en-us/windows/win32/tsf/text-service-registration",
+            "https://learn.microsoft.com/en-us/windows/win32/tsf/edit-sessions"
+          ],
+          "project_implication": "首版建议已确认焦点上的Unicode输入为caret_insert候选，明确支持的ValuePattern用于replace_value，剪贴板仅用户同意后后备；TSF是后续独立输入法工程。不得在失败后静默提升权限或转换为整框覆盖。"
+        },
+        {
+          "id": "design-06",
+          "fact": "本研究无本机组件测试、模型推理、账号调用或资源测量。",
+          "verification_level": "未知",
+          "sources": [
+            "https://raw.githubusercontent.com/FlaUI/FlaUI/main/src/FlaUI.Core/FlaUI.Core.csproj",
+            "https://raw.githubusercontent.com/leexgone/uiautomation-rs/main/crates/uiautomation/Cargo.toml",
+            "https://koffi.dev/",
+            "https://raw.githubusercontent.com/CursorTouch/Windows-MCP/main/pyproject.toml",
+            "https://developers.openai.com/api/docs/guides/tools-computer-use.md",
+            "https://huggingface.co/ByteDance-Seed/UI-TARS-1.5-7B/raw/main/README.md"
+          ],
+          "project_implication": "C# FlaUI/UIA sidecar可优先验证，Rust为替代；Koffi限少量Win32胶水。不得给3050Ti 4GB上的VLM延迟/显存、API成功率、月费或TSF工期估算。"
+        }
+      ]
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "unknown-01",
+      "fact": "指定Windows11 build、多屏/DPI/HDR、锁屏/RDP场景以及目标应用版本的兼容结果未知。",
+      "verification_level": "未知",
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/screen-capture",
+        "https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_2/nf-dxgi1_2-idxgioutput1-duplicateoutput",
+        "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getguithreadinfo"
+      ],
+      "project_implication": "后续经用户允许再测Notepad、Office、浏览器内容框、Electron编辑器、终端、WinUI、自绘画布、管理员窗口与密码框；这只是验收清单，本次未运行。"
+    },
+    {
+      "id": "unknown-02",
+      "fact": "剪贴板任意格式无损恢复、所有应用粘贴完成确认、TextPattern/UIA提供者一致性未知。",
+      "verification_level": "未知",
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations",
+        "https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats",
+        "https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-textpattern-overview"
+      ],
+      "project_implication": "设计明确restore_not_supported/conflict/unknown，不以模拟输入成功覆盖业务失败。"
+    },
+    {
+      "id": "unknown-03",
+      "fact": "所有云模型在用户账户/地区的具体可用权限、保留条款适配、调用费用及本地模型硬件表现未知；本任务不估算价格/性能。",
+      "verification_level": "未知",
+      "sources": [
+        "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md",
+        "https://developers.openai.com/api/docs/guides/tools-computer-use.md",
+        "https://huggingface.co/ByteDance-Seed/UI-TARS-1.5-7B/raw/main/README.md",
+        "https://raw.githubusercontent.com/QwenLM/Qwen3-VL/main/README.md"
+      ],
+      "project_implication": "供应商接入按选定模型/版本/地区后续核验；本地与云端是可替换能力提供者，不改变Windows执行代理的权限边界。"
+    },
+    {
+      "id": "unknown-04",
+      "fact": "FlaUI main含.NET10 target，但已发布包与本机.NET10集成未测；pywinauto在本机Python3.12未测；Koffi在所选Electron内置Node/asar打包未测。",
+      "verification_level": "未知",
+      "sources": [
+        "https://raw.githubusercontent.com/FlaUI/FlaUI/main/src/FlaUI.Core/FlaUI.Core.csproj",
+        "https://api.github.com/repos/FlaUI/FlaUI/releases/latest",
+        "https://api.github.com/repos/pywinauto/pywinauto/releases/latest",
+        "https://koffi.dev/"
+      ],
+      "project_implication": "固定SDK、依赖、目标架构后做受控兼容验证；不要用用户列出的运行时版本替代运行证据。"
+    }
+  ],
+  "source_access_notes": {
+    "partial_sources": [
+      {
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool.md",
+        "coverage": "大型Markdown响应有截断；已读取front matter、工具介绍、兼容与Security considerations，不声明全文核验。"
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/tools-computer-use-integration.md",
+        "coverage": "大型Markdown响应有截断；已读取Migration表中GA/preview差异。"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/QwenLM/Qwen3-VL/main/cookbooks/computer_use.ipynb",
+        "coverage": "notebook响应截断；仅读取GUI grounding与1000坐标映射代码片段，未执行。"
+      },
+      {
+        "url": "https://qwenlm.github.io/blog/qwen2.5-vl/",
+        "coverage": "页面截断；已读取官方能力概览与grounding部分。"
+      },
+      {
+        "url": "https://www.electronjs.org/docs/latest/tutorial/security",
+        "coverage": "页面截断；已读取安全清单及隔离说明。"
+      }
+    ],
+    "failed_paths_not_used_as_evidence": [
+      "https://raw.githubusercontent.com/FlaUI/FlaUI/master/LICENSE (404；正确为main/LICENSE.txt)",
+      "https://koffi.dev/faq (404；改读首页与changelog)",
+      "https://raw.githubusercontent.com/CursorTouch/Windows-MCP/main/LICENSE (404；正确为LICENSE.md)",
+      "https://raw.githubusercontent.com/microsoft/UFO/main/documents/docs/advanced_usage/control_detection/hybrid_detection.md (404；改读官方ufo/README.md)",
+      "https://microsoft.github.io/UFO/advanced_usage/control_detection/hybrid_detection/ (404；未把404导航当功能证明)"
+    ]
+  }
+}

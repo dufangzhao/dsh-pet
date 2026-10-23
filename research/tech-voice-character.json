@@ -1,0 +1,822 @@
+{
+  "schema_version": 1,
+  "title": "桌宠语音与角色技术补充调研",
+  "researched_on": "2026-10-24",
+  "target": "Windows 11优先、Electron+TypeScript候选的插件化AI桌宠/多模态助手",
+  "method": {
+    "allowed_sources": "官方一手文档、官方源码、本机既有文件；搜索仅用于发现官方URL，未读第三方正文作为证据。",
+    "actions": "未安装、未运行被调研软件、未写实现代码；仅写本JSON。工具中的数据整理与JSON.parse不属于运行被调研软件。",
+    "performance_and_prices": "不估算性能、显存或价格；无价格表。",
+    "github": "使用公开 raw/API，只读；未调用GitHub MCP。",
+    "reproducibility": "main/master/dev/release为可变分支；这份记录是读取时观察，不是不可变版本审计。实施时应固定版本/revision/hash并复核许可。",
+    "verification_levels": [
+      "官方文档",
+      "源码",
+      "本机文件",
+      "未知"
+    ],
+    "interpretation": "project_implication 为项目设计含义/建议，不是上游运行保证；未知项保留实际查看或尝试的精确URL。"
+  },
+  "existing_research": {
+    "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/research/practical-modules.json",
+    "referenced_component_ids": [
+      "sherpa-onnx",
+      "sensevoice",
+      "cosyvoice",
+      "gpt-sovits",
+      "vroid-vrm"
+    ],
+    "note": "优先以 component.id 定位；本文件不重做既有 Live2D/VRoid Studio许可结论。"
+  },
+  "findings": [
+    {
+      "id": "baseline",
+      "topic": "范围与既有资料",
+      "fact": "已先读取 practical-modules.json；该文件已有 sherpa-onnx、SenseVoice、CosyVoice、GPT-SoVITS、Live2D、VRoid/VRM 的基础能力及许可记录。",
+      "verification_level": "本机文件",
+      "sources": [
+        "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/research/practical-modules.json"
+      ],
+      "project_implication": "本报告补充 Node、中文模型、云复刻、人设与轻量角色；已有引擎许可和制作软件授权不重复展开。",
+      "limitations": [
+        "已有文件是前次调研记录，不等同本次重新核验所有上游来源。"
+      ]
+    },
+    {
+      "id": "node-platform",
+      "topic": "sherpa Node/Electron",
+      "fact": "官方 npm 包为 sherpa-onnx-node；安装文档要求 Node>=16，列出的平台为 Linux x64/arm64、macOS x64/arm64、Windows x64。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/javascript-api/install.rst"
+      ],
+      "project_implication": "Windows x64 是文档列明的平台；本项目 Windows 11 x64 仍需后续验证。不要把整个 sherpa 支持的 Windows x86/arm64 自动视为该 npm 包预编译支持。",
+      "limitations": [
+        "未安装包；Node 24 与具体 Electron 版本组合的运行验证未知。"
+      ]
+    },
+    {
+      "id": "node-dependencies",
+      "topic": "sherpa Node/Electron",
+      "fact": "官方文档称安装该包无需预装 C/C++ 编译器、Python 或 CMake；运行需要共享库，Windows DLL 位于 node_modules 内并自动查找。麦克风示例另用 node-cpal，扬声器示例另用 speaker。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/javascript-api/install.rst"
+      ],
+      "project_implication": "将音频采集/播放与推理提供者分开；发布包需保留 native addon 及 DLL 布局，不能只复制 JS。",
+      "limitations": [
+        "无需编译器的说法针对官方 npm 安装路径，不保证额外音频依赖或 Electron 重编译同样免工具链。"
+      ]
+    },
+    {
+      "id": "electron-native",
+      "topic": "sherpa Node/Electron",
+      "fact": "Electron 官方说明原生 Node 模块存在 Electron/Node ABI 差异，提供 @electron/rebuild 流程；Windows 的 win_delay_load_hook 和平台/架构必须匹配。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://www.electronjs.org/docs/latest/tutorial/using-native-node-modules"
+      ],
+      "project_implication": "这是通用风险清单而非 sherpa 已失败的证据；固定 Electron、sherpa 包版本并单独验收原生模块装载。",
+      "limitations": [
+        "未取得 sherpa-onnx-node 对指定 Electron 版本的官方兼容矩阵；是否必须重编译该具体包未知，不能不加区分地声称所有 Node-API 模块都必须重编译。"
+      ]
+    },
+    {
+      "id": "electron-asar",
+      "topic": "sherpa Node/Electron",
+      "fact": "Electron 文档指出 process.dlopen 等 API 可能需要将 ASAR 内容解包；可使用 unpack，app.asar.unpacked 应随包分发。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://www.electronjs.org/docs/latest/tutorial/asar-archives"
+      ],
+      "project_implication": "建议把 .node、所需 DLL 和模型资源置于可访问的真实文件路径，验收打包后路径；不要以开发目录可用代替安装包可用。",
+      "limitations": [
+        "本次不运行 Electron，也未验证该包的 ASAR 自动解包行为。"
+      ]
+    },
+    {
+      "id": "kokoro-zh",
+      "topic": "中文离线 TTS",
+      "fact": "sherpa 官方列有 kokoro-multi-lang-v1_0（中英、53 speakers）与 kokoro-multi-lang-v1_1（中英、103 speakers）；v1_0 文档说明上游虽多语种，此集成只加入英语和中文支持。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/tts/pretrained_models/kokoro.rst"
+      ],
+      "project_implication": "可作为离线中英固定音色候选；能力登记按具体模型包，而非笼统写“所有语言 Kokoro”。",
+      "limitations": []
+    },
+    {
+      "id": "kokoro-license",
+      "topic": "中文离线 TTS",
+      "fact": "hexgrad 官方 Kokoro-82M 与 Kokoro-82M-v1.1-zh 模型卡标注 Apache-2.0。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+        "https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh/raw/main/README.md"
+      ],
+      "project_implication": "许可筛选可优先考察这些明确模型版本；引擎、转换权重、词典/前端与实际音色素材分别归档。",
+      "limitations": [
+        "仅确认所列上游模型卡；本次未下载 sherpa 模型压缩包，包内全部附带资源许可未逐一核对；Apache 标签不是对所有声音人格权的保证。"
+      ]
+    },
+    {
+      "id": "vits-melo",
+      "topic": "中文离线 TTS",
+      "fact": "sherpa 的 vits-melo-tts-zh_en 由 myshell-ai/MeloTTS-Chinese 转换，支持中英单说话人；文档提醒英语词须在 lexicon.txt 中才可发音。原模型卡标 MIT。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/tts/pretrained_models/vits.rst",
+        "https://huggingface.co/myshell-ai/MeloTTS-Chinese/raw/main/README.md"
+      ],
+      "project_implication": "这是比“VITS 全家族可用”更可追踪的中文候选；专业词、英文夹杂词典需列入后续验收，不假定任意英语词可读。",
+      "limitations": [
+        "未检查转换压缩包附加文件；模型卡语言元数据含 ko，但正文及 sherpa 转换说明明确该中文模型，不能只靠单个 metadata 字段推断语言。"
+      ]
+    },
+    {
+      "id": "vits-other",
+      "topic": "中文离线 TTS",
+      "fact": "sherpa VITS 列表还包含中文多说话人候选，例如 vits-icefall-zh-aishell3；本次未取得该具体制品完整许可核验。",
+      "verification_level": "未知",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/tts/pretrained_models/vits.rst"
+      ],
+      "project_implication": "可登记为待审模型，不作为已获商用分发许可的默认包。",
+      "limitations": [
+        "未知：具体下载权重、训练数据及随附词典的完整许可。"
+      ]
+    },
+    {
+      "id": "matcha-baker",
+      "topic": "中文离线 TTS",
+      "fact": "官方提供 matcha-icefall-zh-baker（中文、单女声），同时明确提示其 Data Baker 训练数据集仅限 non-commercial；示例还需要独立 vocoder。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/tts/pretrained_models/matcha.rst"
+      ],
+      "project_implication": "商业桌宠默认候选中应先排除或取得独立明确授权；声码器也要独立管理。",
+      "limitations": [
+        "数据集限制不等于已读到完整模型许可证；不能将其标为已确认允许商用的权重。"
+      ]
+    },
+    {
+      "id": "streaming-paraformer",
+      "topic": "中文离线 ASR",
+      "fact": "官方提供 sherpa-onnx-streaming-paraformer-bilingual-zh-en，支持中英和文档列出的部分中文方言；该模型文档明确不支持 timestamps。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa/master/docs/source/onnx/pretrained_models/online-paraformer/paraformer-models.rst"
+      ],
+      "project_implication": "适用于需边说边出字的候选；统一 ASR capability 必须将 partial/final 和 timestamps 分开，不能强制所有流式模型提供词级时间戳。",
+      "limitations": [
+        "流式能力不证明本机延迟、准确率或 CPU 占用；未实测。"
+      ]
+    },
+    {
+      "id": "streaming-zipformer",
+      "topic": "中文离线 ASR",
+      "fact": "sherpa 官方 README 列出 sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20 与 small bilingual 2023-02-16，语言为中文和英语。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/README.md"
+      ],
+      "project_implication": "以明确流式 Zipformer 模型作为另一 ASR 提供者；避免把非流式同族模型误配给流式接口。",
+      "limitations": [
+        "该两项完整模型分发许可本次未单独复核，登记为许可待审；未比较性能。"
+      ]
+    },
+    {
+      "id": "sensevoice-vad",
+      "topic": "中文离线 ASR",
+      "fact": "已有研究记录 SenseVoiceSmall 的 sherpa 部署，以及其 VAD 分段/伪流式不等于原生流式 ASR。",
+      "verification_level": "本机文件",
+      "sources": [
+        "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/research/practical-modules.json#/components/2"
+      ],
+      "project_implication": "本项目应分别声明 online recognizer 与 VAD-segmented offline recognizer；SenseVoice 标签与最终转写分字段，不能将分句结果包装成可信的逐字增量。",
+      "limitations": [
+        "继承 practical-modules.json 的 sensevoice 条目；本次不重复其权重许可审查。"
+      ]
+    },
+    {
+      "id": "ali-cloning",
+      "topic": "云语音：阿里百炼",
+      "fact": "当前官方声音复刻页覆盖 Qwen-Audio-TTS、Qwen-Audio-Realtime、CosyVoice；音色创建时绑定 target_model，不能跨模型使用。同段录音要给不同目标模型分别创建音色。旧 qwen-tts-voice-cloning URL 当前也返回这一统一页面。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/voice-cloning-user-guide",
+        "https://help.aliyun.com/zh/model-studio/qwen-tts-voice-cloning"
+      ],
+      "project_implication": "voice profile 必须含 provider、region/workspace、target_model、voice_id；不可只存一个通用“音色名”。",
+      "limitations": [
+        "当前页面路径与名称在变动；不要混同云 API 模型与本地开源 Qwen/CosyVoice 权重。"
+      ]
+    },
+    {
+      "id": "ali-qwen-models",
+      "topic": "云语音：阿里百炼",
+      "fact": "当前 TTS 总览列出的 Qwen-Audio-TTS 模型支持声音复刻；Qwen3-TTS-Flash 表内的 qwen3-tts-flash 与 qwen3-tts-flash-realtime 标为不支持声音复刻。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/tts-model/"
+      ],
+      "project_implication": "模型选项必须按当前 capability 表筛选；不要因为“Qwen-TTS”系列名称就给所有模型显示克隆功能。",
+      "limitations": []
+    },
+    {
+      "id": "ali-tts-stream",
+      "topic": "云语音：阿里百炼",
+      "fact": "TTS 官方总览描述 WebSocket 支持流式文本输入和流式音频输出；HTTP 接收完整文本并支持音频流式返回。Qwen-Audio-TTS/CosyVoice 使用同名模型覆盖这两种接入。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/tts-model/"
+      ],
+      "project_implication": "将 text-input-streaming 与 audio-output-streaming 作为两个能力位；桌宠 LLM 增量文本可接双向流式适配器。",
+      "limitations": []
+    },
+    {
+      "id": "ali-asr",
+      "topic": "云语音：阿里百炼",
+      "fact": "实时识别官方页描述接收音频流并实时转写带标点文本，包含 Qwen-Audio-ASR-Streaming、Fun-ASR-Realtime 等接入及 WebSocket 示例。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/real-time-speech-recognition-user-guide"
+      ],
+      "project_implication": "云听写提供者可以只负责音频到转写；任意应用的输入框定位、注入和回读仍属于本机执行层。",
+      "limitations": [
+        "该长页面抓取截断，但相关介绍与示例已读；所有型号/地域/配额矩阵未完整核验。"
+      ]
+    },
+    {
+      "id": "ali-consent-experience",
+      "topic": "云语音：阿里百炼",
+      "fact": "百炼体验功能特别说明第4条规定模型广场体验声音复刻只上传本人声音，禁止第三方或未成年人声音，复刻后仅用于体验；第5条限制体验生成内容的商业化及第三方传播。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://terms.alicdn.com/legal-agreement/terms/common_platform_service/20260716114753386/20260716114753386.html"
+      ],
+      "project_implication": "不能将控制台体验所得音色或音频直接当生产资产；产品应分清体验流程与正式生产 API 授权。",
+      "limitations": [
+        "此证据是体验功能特别说明，不能外推为全部付费/生产 API 的合同条件。"
+      ]
+    },
+    {
+      "id": "ali-consent-production",
+      "topic": "云语音：阿里百炼",
+      "fact": "正式生产 API 的全部声音权利证明、同意材料和身份核验细则：本次所读复刻 API 页未完整给出，未知。",
+      "verification_level": "未知",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/voice-cloning-user-guide",
+        "https://terms.alicdn.com/legal-agreement/terms/common_platform_service/20260716114753386/20260716114753386.html"
+      ],
+      "project_implication": "生产上线前取得适用于目标地域、模型和账户的条款；项目层先要求可审计的说话人同意、来源和用途，但不能声称这些本地记录已经满足供应商要求。",
+      "limitations": []
+    },
+    {
+      "id": "volc-cloning",
+      "topic": "云语音：火山豆包",
+      "fact": "官方使用指南要求开通相应声音复刻/声音复刻2.0/端到端语音服务；使用 speakerid，查询音色训练状态，合成时将音色 ID 放入 voice_type。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://www.volcengine.com/docs/6561/1167802"
+      ],
+      "project_implication": "将音色制作、训练状态和 TTS 合成分生命周期；开启服务或取得 API Key 不等于已具备可用复刻音色。",
+      "limitations": [
+        "只读页面，未开通服务或上传声音。"
+      ]
+    },
+    {
+      "id": "volc-consent",
+      "topic": "云语音：火山豆包",
+      "fact": "火山声音复刻协议3.1.3要求上传处理的内容归用户所有或获得权利人合法授权；3.1.4写明生成数据的商业用途及许可第三方需火山书面授权；3.2.3写明限中国大陆地区使用。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://www.volcengine.com/docs/6561/1136414"
+      ],
+      "project_implication": "该公开协议有明确发布风险，应在商用和插件市场设计前确认与实际采购合同/新产品条款的适用关系，不能直接标“可任意商用”。",
+      "limitations": [
+        "本次仅确认此公开协议正文；是否被本账号另签合同替代、是否覆盖全部新版产品未知。详细声纹本人验证/朗读同意流程未知。"
+      ]
+    },
+    {
+      "id": "volc-streaming",
+      "topic": "云语音：火山豆包",
+      "fact": "官方 API 导航和标题提供“双向流式语音合成(WebSocket)”以及单向 HTTP/WebSocket 路径；本次该正文抓取仅返回导航/截断内容，未完整核验复刻2.0对应的协议字段。",
+      "verification_level": "未知",
+      "sources": [
+        "https://www.volcengine.com/docs/6561/2532486",
+        "https://www.volcengine.com/docs/6561/1167802"
+      ],
+      "project_implication": "可登记双向流式候选，但在接入前必须核对目标复刻模型与当前资源标识支持范围；不要将目录标题当完整协议验证。",
+      "limitations": []
+    },
+    {
+      "id": "minimax-cloning",
+      "topic": "云语音：MiniMax",
+      "fact": "官方音色快速复刻接口为 POST /v1/voice_clone；调用前要求个人或企业认证。需先上传音频获取 file_id，用户提供 voice_id；返回音色若7天未正式调用会删除。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://platform.minimaxi.com/docs/api-reference/voice-cloning-clone.md"
+      ],
+      "project_implication": "音色制作插件需维护账号认证前置条件、远端音色 ID、创建时间及有效状态，不能把试听成功视作永久可用。",
+      "limitations": []
+    },
+    {
+      "id": "minimax-validation",
+      "topic": "云语音：MiniMax",
+      "fact": "当前复刻接口有可选 text_validation 与 accuracy，用 ASR 文本相似度检查样本；这是样本内容检查，不是文档明确的声音权利授权证明。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://platform.minimaxi.com/docs/api-reference/voice-cloning-clone.md"
+      ],
+      "project_implication": "区分音频格式/文本验证、账号实名、说话人授权三层，不把可选 ASR 校验当作真人同意。",
+      "limitations": []
+    },
+    {
+      "id": "minimax-consent",
+      "topic": "云语音：MiniMax",
+      "fact": "音色快速复刻 API 页未完整给出说话人授权合同、同意录音或活体核验要求，本次未知。",
+      "verification_level": "未知",
+      "sources": [
+        "https://platform.minimaxi.com/docs/api-reference/voice-cloning-clone.md"
+      ],
+      "project_implication": "上线前从官方适用服务协议补齐授权材料要求；不要宣称无同意限制或实名即代表获声音授权。",
+      "limitations": []
+    },
+    {
+      "id": "minimax-stream",
+      "topic": "云语音：MiniMax",
+      "fact": "HTTP TTS POST /v1/t2a_v2 支持 stream=true，返回 text/event-stream 的音频片段；请求通过 voice_setting.voice_id 指定音色。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://platform.minimaxi.com/docs/api-reference/speech-t2a-http.md"
+      ],
+      "project_implication": "复刻为制作阶段，流式合成为运行阶段；统一音频事件应承载 codec/sample rate、序号和取消标志。",
+      "limitations": [
+        "这里只确认 HTTP 的音频输出流；不据此声称该 HTTP 端点支持连续文本双向流。"
+      ]
+    },
+    {
+      "id": "eleven-consent",
+      "topic": "云语音：ElevenLabs",
+      "fact": "IVC 操作指南要求用户确认拥有克隆该声音的权利和同意；当前 voice-cloning 概念页明确 IVC 与 PVC 都包含 voice-captcha 声音验证步骤，并说明验证不能完全保证录音权属，授权使用责任仍在创作者。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://elevenlabs.io/docs/eleven-creative/voices/voice-cloning/instant-voice-cloning",
+        "https://elevenlabs.io/docs/eleven-api/concepts/voice-cloning"
+      ],
+      "project_implication": "克隆 UX 应包含授权确认及供应商实际验证跳转；不沿用旧的“IVC一定无需验证”结论。",
+      "limitations": [
+        "操作页对 IVC 的说明与概念页详略不同；未登录核验具体账户当前界面及风控流程。"
+      ]
+    },
+    {
+      "id": "eleven-stream",
+      "topic": "云语音：ElevenLabs",
+      "fact": "官方 POST /v1/text-to-speech/{voice_id}/stream 将文本转换为所选音色并返回音频流。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://elevenlabs.io/docs/api-reference/text-to-speech/stream"
+      ],
+      "project_implication": "克隆所得 voice_id 可由 TTS 提供者管理；不能把建音色请求与音频流请求视为同一协议。",
+      "limitations": [
+        "克隆权限和音色归属仍由账号/条款决定；未验证本账号权限。"
+      ]
+    },
+    {
+      "id": "azure-access",
+      "topic": "云语音：Azure",
+      "fact": "Custom Neural Voice 是 Limited Access，需注册、审批并限定批准用例；官方页称仅 Microsoft managed customers 可申请。Custom Neural Voice Lite 的演示/评估不自动赋予部署许可。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/speech-service/text-to-speech/limited-access"
+      ],
+      "project_implication": "不适合作为所有桌宠用户默认开放的“即点即克隆”；先把它作为有企业资质与批准用例的可选提供者。",
+      "limitations": []
+    },
+    {
+      "id": "azure-consent",
+      "topic": "云语音：Azure",
+      "fact": "官方要求创建模型前取得 voice talent 明确书面许可并先提供披露说明；需上传预定义同意语句录音，微软可用 speaker recognition 验证其与训练音频同人。部署需向用户披露合成性质并提供反馈渠道。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/speech-service/text-to-speech/limited-access"
+      ],
+      "project_implication": "音色资产登记必须能关联同意文本、同意录音、说话人及批准用例；撤回、保留和删除也需要供应商级流程。",
+      "limitations": []
+    },
+    {
+      "id": "azure-stream",
+      "topic": "云语音：Azure",
+      "fact": "Speech SDK 官方列出 PullAudioOutputStream、PushAudioOutputStream、Synthesizing event、AudioDataStream 的流式输出方式。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-lower-speech-synthesis-latency"
+      ],
+      "project_implication": "TTS 输出层可按音频片段播放；不要把语音流式输出与 Custom Neural Voice 访问资格混为一谈。",
+      "limitations": [
+        "此处为 Speech SDK 通用能力；具体批准 CNV 模型/端点的全部模式和地区未核验。"
+      ]
+    },
+    {
+      "id": "openai-tts",
+      "topic": "云语音：OpenAI",
+      "fact": "Speech API 官方文档说明支持 chunk transfer encoding 逐块音频输出，并要求向终端用户明确说明所听为 AI 生成声音、非人类声音。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://developers.openai.com/api/docs/guides/text-to-speech.md"
+      ],
+      "project_implication": "无论内置或自定义音色都需要清晰的合成语音标识；音频播放插件应支持流式和中断。",
+      "limitations": []
+    },
+    {
+      "id": "openai-deprecation",
+      "topic": "云语音：OpenAI",
+      "fact": "当前官方 TTS 页面明确 tts-1、tts-1-hd、gpt-4o-mini-tts 已弃用，将于2027-01-06关闭，建议迁移 gpt-realtime-2.1-mini 的 Realtime API；该模型不能直接用于 /v1/audio/speech。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://developers.openai.com/api/docs/guides/text-to-speech.md"
+      ],
+      "project_implication": "不要将旧 Speech API 固化成长期唯一 TTS 接口；这是工作流迁移而非只换 model 字段。",
+      "limitations": [
+        "记录读取时的官方页面内容，日期与模型名仍应在真正实施时复核；未调用 API 验证。"
+      ]
+    },
+    {
+      "id": "openai-clone",
+      "topic": "云语音：OpenAI",
+      "fact": "从录音创建 custom voice 限符合资格的客户；需说话人同意录音和匹配的声音样本，通过 API 创建。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://developers.openai.com/api/docs/guides/custom-voices.md"
+      ],
+      "project_implication": "不要向所有用户承诺 OpenAI 任意音色即时克隆；voice profile 应记录资格状态与 consent recording ID。",
+      "limitations": [
+        "仅描述“从录音创建”路径；当前同页的文字描述生成音色是另一能力，不能与克隆混淆。"
+      ]
+    },
+    {
+      "id": "openai-realtime-availability",
+      "topic": "端到端实时语音",
+      "fact": "OpenAI 当前 Realtime 指南提供 GA 接口迁移说明，浏览器 WebRTC/服务端 WebSocket 接入，当前示例模型 gpt-realtime-2.1；客户端示例使用服务端签发的短期密钥。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://developers.openai.com/api/docs/guides/realtime.md"
+      ],
+      "project_implication": "可实现端到端语音会话提供者；长期 API Key 不应进入角色卡或不可信插件。",
+      "limitations": [
+        "本账号、目标用户地区及目标模型实际可用性未知，未测试连接。"
+      ]
+    },
+    {
+      "id": "openai-bargein",
+      "topic": "端到端实时语音",
+      "fact": "Realtime 在启用 VAD 时可检测用户语音并取消当前回复；WebRTC/SIP 服务端知道播放位置并可截断未播放音频。WebSocket 客户端自己停止播放，并用 conversation.item.truncate 报告已播放位置。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://developers.openai.com/api/docs/guides/realtime-conversations.md"
+      ],
+      "project_implication": "统一会话层要关联 response/item、播放进度和取消；“服务端停止生成”不等于“本机已缓存音频停止播放”。",
+      "limitations": []
+    },
+    {
+      "id": "ali-realtime-availability",
+      "topic": "端到端实时语音",
+      "fact": "Qwen-Omni 实时官方页列北京/新加坡地域，需相应 API Key；当前描述音频/图像实时输入、文本/音频输出，并列 WebSocket、WebRTC、AOQ，当前推荐模型 Qwen3.8-Omni-Flash-Realtime。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/realtime"
+      ],
+      "project_implication": "适合作为音视频会话提供者，而非直接替代执行层；输入摄像头/屏幕帧须由权限层控制。",
+      "limitations": [
+        "页面较长且抓取截断，相关段落已读；本账号开通状态、各协议当前全部限制未知。"
+      ]
+    },
+    {
+      "id": "ali-bargein",
+      "topic": "端到端实时语音",
+      "fact": "Qwen-Omni 官方示例提供 VAD/Manual 模式；在 speech_started 时处理打断，发送 response.cancel，并清空本地播放队列。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://help.aliyun.com/zh/model-studio/realtime"
+      ],
+      "project_implication": "适配器需把取消模型回复、停止播放、丢弃旧响应后续分块做成同一可追踪操作；不能仅改 UI 为“已打断”。",
+      "limitations": []
+    },
+    {
+      "id": "gemini-live-evidence",
+      "topic": "端到端实时语音",
+      "fact": "Google 官方 live-api-web-console README 描述基于 WebSocket 的 Live API，含音频播放、麦克风/摄像头/屏幕采集模块。源码处理 serverContent.interrupted，hook 将 interrupted 绑定到 audioStreamer.stop()。",
+      "verification_level": "源码",
+      "sources": [
+        "https://raw.githubusercontent.com/google-gemini/live-api-web-console/main/README.md",
+        "https://raw.githubusercontent.com/google-gemini/live-api-web-console/main/src/lib/genai-live-client.ts",
+        "https://raw.githubusercontent.com/google-gemini/live-api-web-console/main/src/hooks/use-live-api.ts"
+      ],
+      "project_implication": "可验证 API/示例确有打断信号与停止播放路径；为 Gemini 会话适配器保留独立事件映射，不照抄 OpenAI 事件名。",
+      "limitations": [
+        "这是源码静态观察，不是当前服务可用性或生产 SLA 实测。"
+      ]
+    },
+    {
+      "id": "gemini-availability",
+      "topic": "端到端实时语音",
+      "fact": "Gemini Live 当前正式/预览状态、指定模型/地区/账号可用性：未知。官方 capabilities 页面搜索摘录含“Live API is in preview”，但本次该域名正文多次 fetch failed，未将摘录提升为完整核验。",
+      "verification_level": "未知",
+      "sources": [
+        "https://ai.google.dev/gemini-api/docs/live-api/capabilities",
+        "https://ai.google.dev/api/live.md"
+      ],
+      "project_implication": "登记为候选提供者；实施前重新核对官方模型页、支持地区及账户权限，不能凭示例仓库存在声称本机可直接使用。",
+      "limitations": []
+    },
+    {
+      "id": "cosy-4gb",
+      "topic": "4GB 显存推理",
+      "fact": "本次所读 CosyVoice 官方 README 没有明确保证 RTX 3050 Ti 4GB 可运行指定版本推理；没有据此判定能或不能。",
+      "verification_level": "未知",
+      "sources": [
+        "https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/README.md"
+      ],
+      "project_implication": "4GB 可运行性、稳定性、并发与延迟均保持未知；本地克隆 TTS 不列为首发硬件保证，需以后单独获准实测。",
+      "limitations": [
+        "未运行软件；没有将参数量、权重文件大小或第三方经验换算显存。"
+      ]
+    },
+    {
+      "id": "gpts-4gb",
+      "topic": "4GB 显存推理",
+      "fact": "GPT-SoVITS 官方 README 说明 is_half 可减少显存，并指出 V2Pro 比 V2 稍高；但本次中英文 README 未明确保证该4GB设备的推理能力。",
+      "verification_level": "未知",
+      "sources": [
+        "https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/README.md",
+        "https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/docs/cn/README.md"
+      ],
+      "project_implication": "不能将 FP16 开关或其他显卡的官方数据当成本机可用证明；须按模型版本、参考音频长度、批量与精度单独验证。",
+      "limitations": [
+        "Docker shm_size 示例描述系统共享内存，不是4GB GPU显存要求；不作性能估计。"
+      ]
+    },
+    {
+      "id": "card-v2-fields",
+      "topic": "角色人设格式",
+      "fact": "V2 根对象 spec=chara_card_v2、spec_version=2.0、data；data 包含 name、description、personality、scenario、first_mes、mes_example、creator_notes、system_prompt、post_history_instructions、alternate_greetings、可选 character_book、tags、creator、character_version、extensions。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/malfoyslastname/character-card-spec-v2/main/spec_v2.md"
+      ],
+      "project_implication": "导入导出可优先实现这个人设互操作层；语音模型 ID、桌宠外观与输入权限不要混入这些标准字段。",
+      "limitations": []
+    },
+    {
+      "id": "card-v2-semantics",
+      "topic": "角色人设格式",
+      "fact": "V2 要求保留未知 extensions，并建议命名空间；creator_notes 不可用于 prompt，creator/character_version 不用于 prompt，tags 不建议用于 prompt；system_prompt 与 post_history_instructions 有替换默认设置的规范语义并支持 {{original}}。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/malfoyslastname/character-card-spec-v2/main/spec_v2.md"
+      ],
+      "project_implication": "角色文本不得替换桌宠宿主的安全政策或工具权限。若产品只支持数据交换、不完全遵循聊天前端提示拼接语义，应明确声明兼容范围，而非宣称完全兼容。",
+      "limitations": []
+    },
+    {
+      "id": "card-v2-license",
+      "topic": "角色人设格式",
+      "fact": "V2 仓库根目录 API 列表只有 README、keyword_definitions、spec_v1、spec_v2，本次未发现 LICENSE；直接访问 main/LICENSE 返回404。规范文本许可未知。",
+      "verification_level": "未知",
+      "sources": [
+        "https://api.github.com/repos/malfoyslastname/character-card-spec-v2/contents",
+        "https://raw.githubusercontent.com/malfoyslastname/character-card-spec-v2/main/LICENSE"
+      ],
+      "project_implication": "可以记录格式事实，但不要把仓库文本/实现自动标 MIT；如要复制规范正文或附带上游实现，需另确认授权。",
+      "limitations": [
+        "未发现许可证不是证明作者禁止实现该格式；也不是给实际角色卡内容授予许可。"
+      ]
+    },
+    {
+      "id": "card-v3-fields",
+      "topic": "角色人设格式",
+      "fact": "V3 根对象 spec=chara_card_v3、spec_version=3.0；继承并调整 V2 数据结构，新增可选 assets（type/uri/name/ext）、nickname、creator_notes_multilingual、source、creation_date、modification_date，以及 group_only_greetings；character_book 改用 Lorebook 定义。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/kwaroran/character-card-spec-v3/main/SPEC_V3.md"
+      ],
+      "project_implication": "内部角色模型可带版本化适配器；不要将“能解析 JSON”当作对全部 Lorebook 行为、资源 URI 与提示语义的完全支持。",
+      "limitations": []
+    },
+    {
+      "id": "card-v3-container",
+      "topic": "角色人设格式",
+      "fact": "V3 可用 JSON、PNG/APNG 的 ccv3 tEXt chunk（UTF-8 JSON后Base64）、或 CHARX。CHARX 为 ZIP，根目录 card.json；资源 URI 拼写为 embeded://（不是 embedded://）。同图有 chara 和 ccv3 时应优先 ccv3。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/kwaroran/character-card-spec-v3/main/SPEC_V3.md"
+      ],
+      "project_implication": "导入层需校验 ZIP 路径和资源大小，并将外部资源视为不可信；可先支持 PNG/JSON，再按能力支持 CHARX。",
+      "limitations": [
+        "这些安全检查是项目建议，不是宣称规范已替项目提供沙箱。"
+      ]
+    },
+    {
+      "id": "card-v3-license",
+      "topic": "角色人设格式",
+      "fact": "V3 官方仓库 LICENSE 是 MIT 文本，版权为2024 Kwaroran；要求保留版权及许可声明。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/kwaroran/character-card-spec-v3/main/LICENSE"
+      ],
+      "project_implication": "可在遵守 MIT 的前提下复用该规范文本；实际人设、图片、音频、模型等卡片资源仍须各自授权。",
+      "limitations": []
+    },
+    {
+      "id": "sillytavern-compat",
+      "topic": "角色人设格式",
+      "fact": "SillyTavern release 分支 parser 实际读取 ccv3 优先于 chara；写入 chara，并尝试增加 spec=chara_card_v3/spec_version=3.0 的 ccv3 chunk。文件顶部旧注释称仅写 chara，与实际实现不一致。",
+      "verification_level": "源码",
+      "sources": [
+        "https://raw.githubusercontent.com/SillyTavern/SillyTavern/release/src/character-card-parser.js"
+      ],
+      "project_implication": "可确认此版本 PNG 元数据层的 V2/V3互操作；以实现而非旧注释为证，不保证所有 V3 资源、Lorebook、CHARX 功能无损往返。",
+      "limitations": [
+        "可变 release 分支静态读取，未运行 SillyTavern，也未做导入导出测试。"
+      ]
+    },
+    {
+      "id": "pngtuber-approach",
+      "topic": "轻量2D角色",
+      "fact": "veadotube mini 官方说明按麦克风激活切换开/闭嘴图片，自动眨眼；每状态最多4图，可只用2图或1图并配合动画。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://veado.tube/docs/usage/mini/"
+      ],
+      "project_implication": "项目可以设计自有“静默/说话/眨眼/情绪”图片状态机；用 TTS 实际输出的音量包络驱动嘴巴是建议，不需把整个外部制作应用嵌入桌宠。",
+      "limitations": []
+    },
+    {
+      "id": "veado-format",
+      "topic": "轻量2D角色",
+      "fact": "当前 .veado/.veadoscene 使用以 VEADOTUBE ASCII 开头的分块二进制结构；旧 mini1.4 .veadomini 是含图片与 YAML 的改名ZIP，1.3c及更早又是不同二进制格式。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://veado.tube/docs/tech/file/"
+      ],
+      "project_implication": "导入器必须识别文件版本，不能把所有 .veado 或 .veadomini 一律当ZIP；优先导入用户自有图片并保留原工程。",
+      "limitations": []
+    },
+    {
+      "id": "veado-license",
+      "topic": "轻量2D角色",
+      "fact": "当前官方条款对 veadotube 相关可执行文件、素材与源码采用 ISTSL 1.0 no resale；限制可用用户/组织类型与用途、禁止转售软件或其部分，页面明确不是 FOSS 许可证。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://veado.tube/docs/terms/"
+      ],
+      "project_implication": "只把其交互方式作为参考或外部用户工具；不能把它当 MIT SDK 直接放进商业插件商店。使用官方内置头像/标识还需遵守页面额外说明。",
+      "limitations": [
+        "这不是对用户自制图片自动适用的统一授权；实际素材仍看创作者许可。"
+      ]
+    },
+    {
+      "id": "pngplus-license",
+      "topic": "轻量2D角色",
+      "fact": "PNGTuber Plus 官方 LICENSE 为 Unlicense（公有领域奉献及免责声明），不是 MIT；README 标明它是 Godot4.1.2 stable 工程，未来版本兼容未保证。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/kaiakairos/PNGTuber-Plus/master/LICENSE",
+        "https://raw.githubusercontent.com/kaiakairos/PNGTuber-Plus/master/README.md"
+      ],
+      "project_implication": "源码可作为实现参考，但需审查附带素材、插件与 Godot等依赖；不要将该工程直接当 Electron/TypeScript 库。",
+      "limitations": []
+    },
+    {
+      "id": "pngplus-format",
+      "topic": "轻量2D角色",
+      "fact": "saving.gd 以 JSON.parse_string 与 JSON.stringify 读写保存数据；示例记录图片 path、parentId、pos、offset、showTalk、showBlink、drag、x/y振幅频率与zindex，设置路径为 settings.pngtp。",
+      "verification_level": "源码",
+      "sources": [
+        "https://raw.githubusercontent.com/kaiakairos/PNGTuber-Plus/master/autoload/saving.gd"
+      ],
+      "project_implication": "它是图层/父子结构及动画参数的工程数据，不是 Character Card人设格式；转换到自有2D格式时须保留素材引用和路径安全。",
+      "limitations": [
+        "这里只核验 JSON保存机制及示例字段；未宣称所有发行版、头像导出扩展名或所有资源都是自包含。"
+      ]
+    },
+    {
+      "id": "viseme",
+      "topic": "口型同步",
+      "fact": "Azure Speech 官方 viseme 文档提供22个 viseme ID、Audio offset（100ns tick），Speech SDK 有 VisemeReceived 事件，可附 SVG 或 blend shapes；SVG仅支持 en-US，其他能力需按语言支持表核对。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-speech-synthesis-viseme"
+      ],
+      "project_implication": "统一口型事件应含时间基准、视素ID/权重及来源；依据真实播放时钟调度。无视素提供者退化为音量开合，不应假装有音素级对齐。",
+      "limitations": []
+    },
+    {
+      "id": "three-vrm-license",
+      "topic": "VRM与运行时",
+      "fact": "three-vrm dev/LICENSE 为 MIT，pixiv版权声明；与已有文件 vroid-vrm 结论一致。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/pixiv/three-vrm/dev/LICENSE",
+        "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/research/practical-modules.json#/components/6"
+      ],
+      "project_implication": "@pixiv/three-vrm 可作为候选Web运行时，但 MIT 不授予导入VRM角色、服装、纹理或音色的使用权。",
+      "limitations": [
+        "既有条目以 id=vroid-vrm 为准，JSON数组索引不是稳定标识；本次重读运行时LICENSE。"
+      ]
+    },
+    {
+      "id": "vrm-meta-fields",
+      "topic": "VRM与运行时",
+      "fact": "VRM1.0 meta 需 name/authors/licenseUrl；授权字段包括 avatarPermission、commercialUsage、creditNotation、allowRedistribution、modification，以及暴力/性/政治宗教/反社会仇恨用途布尔字段；还可带 copyrightInformation、thirdPartyLicenses、otherLicenseUrl。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/vrm-c/vrm-specification/master/specification/VRMC_vrm-1.0/meta.md",
+        "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/research/practical-modules.json"
+      ],
+      "project_implication": "延续已有 VRM授权研究，导入UI应显示许可文档与字段，不只展示模型作者；将资产授权与宿主执行权限分别管理。",
+      "limitations": []
+    },
+    {
+      "id": "vrm-meta-defaults",
+      "topic": "VRM与运行时",
+      "fact": "VRM1.0 默认 avatarPermission=onlyAuthor、commercialUsage=personalNonProfit、creditNotation=required、allowRedistribution=false、modification=prohibited；用途布尔项默认false。commercialUsage 可为personalNonProfit/personalProfit/corporation；modification 可为prohibited/allowModification/allowModificationRedistribution。",
+      "verification_level": "官方文档",
+      "sources": [
+        "https://raw.githubusercontent.com/vrm-c/vrm-specification/master/specification/VRMC_vrm-1.0/meta.md"
+      ],
+      "project_implication": "缺省不得解释为全部允许；个人获利许可不等于公司使用许可，角色改造与改造后再分发需分别判断。",
+      "limitations": []
+    }
+  ],
+  "project_recommendations": [
+    {
+      "recommendation": "默认本地语音先将 sherpa CPU/Node部署作为待验收路径，中文TTS优先筛选明确许可的Kokoro/Melo具体制品；不承诺性能。",
+      "basis": [
+        "node-platform",
+        "node-dependencies",
+        "kokoro-license",
+        "vits-melo",
+        "matcha-baker"
+      ]
+    },
+    {
+      "recommendation": "ASR、VAD、TTS、voice enrollment、实时语音会话、播放器/口型、角色人设、角色视觉资产分成独立能力；共同使用可取消请求、版本化能力声明及结构化错误。",
+      "basis": [
+        "streaming-paraformer",
+        "sensevoice-vad",
+        "ali-tts-stream",
+        "minimax-cloning",
+        "openai-bargein",
+        "viseme"
+      ]
+    },
+    {
+      "recommendation": "voice profile记录provider/target_model/region/voice_id、声音权利来源与同意证据；账号实名、供应商验证和实际声音授权不能互相替代。",
+      "basis": [
+        "ali-cloning",
+        "minimax-validation",
+        "eleven-consent",
+        "azure-consent",
+        "openai-clone"
+      ]
+    },
+    {
+      "recommendation": "先以PNG图片状态机作为自有轻量角色实现；V2/V3只作为人设交换层，VRM作为另一个视觉插件。角色卡永远不是工具权限来源，不执行导入卡里的脚本。",
+      "basis": [
+        "pngtuber-approach",
+        "card-v2-semantics",
+        "card-v3-container",
+        "vrm-meta-fields"
+      ]
+    },
+    {
+      "recommendation": "实时对话打断协议统一包含服务端cancel、本地播放停止/清队列、丢弃旧响应分块与会话历史对齐；不同供应商保留各自事件映射。",
+      "basis": [
+        "openai-bargein",
+        "ali-bargein",
+        "gemini-live-evidence"
+      ]
+    },
+    {
+      "recommendation": "商用发布前优先解决火山公开复刻条款适用范围、阿里/MiniMax生产声音授权细则、veadotube限制及具体模型包附加许可。",
+      "basis": [
+        "volc-consent",
+        "ali-consent-production",
+        "minimax-consent",
+        "veado-license",
+        "kokoro-license"
+      ]
+    }
+  ],
+  "explicit_unknowns": [
+    "RTX3050Ti 4GB上CosyVoice/GPT-SoVITS指定版本的稳定推理、速度、并发、显存峰值。",
+    "sherpa-onnx-node与本机Node24、所选Electron版本、打包器的实际组合兼容性。",
+    "所有云服务在用户实际账户、地区、网络与模型版本上的可用性和额度。",
+    "Gemini Live当前产品阶段及完整地区/模型矩阵；官方正文抓取失败，仅源码侧打断机制已验证。",
+    "阿里与MiniMax生产复刻业务的完整说话人授权/核验条款；火山所读协议与实际采购合同的适用关系。",
+    "Character Card V2规范文本的明确许可证，以及SillyTavern对V3全部资源/行为的完整无损兼容。",
+    "未下载的ONNX压缩包中全部字典、声码器、音色等附带资源的完整许可。"
+  ]
+}

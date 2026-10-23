@@ -1,0 +1,1447 @@
+{
+  "schema_version": 1,
+  "research_date": "2026-10-24",
+  "language": "zh-CN",
+  "scope": "Windows 11 优先插件化 AI 桌宠/多模态电脑助手：平台、插件架构、协议和发布；只读研究，不做实现",
+  "method": {
+    "allowed_sources": [
+      "官方一手文档",
+      "官方源码/发布元数据",
+      "用户指定本机文件"
+    ],
+    "not_performed": [
+      "安装依赖",
+      "启动被调研软件",
+      "运行构建或测试",
+      "写入实现代码",
+      "性能估算",
+      "价格估算"
+    ],
+    "only_requested_output": "research/tech-platform.json",
+    "github_access": "使用公开 GitHub API/raw 与官方站点 web_fetch；未使用 GitHub MCP，故无 get_me/401 分支。",
+    "local_access": "指定 package.json/README 直接 read 可访问 ASAR 虚拟路径；glob 遍历虚拟目录失败；声明入口读取失败如实记录。",
+    "freshness": "所有 URL 为查询时观察；main/master/dev 可能包含未发布行为。已明确 Electron latest 与 main 的 safeStorage 差异，electron-builder master 的 next/v27 边界。",
+    "verification_levels": {
+      "官方文档": "官方发布文档、官方 README、GitHub/npm 公共元数据；未运行",
+      "源码": "官方仓库源码/许可证静态检查；未运行",
+      "本机文件": "指定安装包文件已读取；不存在的精确入口记录 read 结果",
+      "未知": "缺少本机实测或申请人等证据，不用估算补足"
+    }
+  },
+  "project_context": {
+    "status": "用户提供背景，未独立验证",
+    "target": "Windows 11 优先；Electron + TypeScript 候选",
+    "user_reported_machine": "i5-11400H；16GB RAM；RTX 3050 Ti 4GB；Node 24；Python 3.12；.NET 10 SDK",
+    "features": [
+      "语音听写到任意应用",
+      "TTS 与音色克隆",
+      "角色制作",
+      "看屏幕",
+      "受控鼠标键盘操作"
+    ]
+  },
+  "local_package_inventory": [
+    {
+      "package": "@deepseek-ai/cordis",
+      "version": "4.0.5",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/cordis-plugin-loader",
+      "version": "1.0.6",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/cordis-plugin-include",
+      "version": "1.0.10",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-include/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-include/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-include/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/schemastery",
+      "version": "3.18.5",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/schemastery/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/schemastery/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/schemastery/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-plugin-manager",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-plugin-market",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-plugin-market-index",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market-index/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market-index/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market-index/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-permission-presets",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-permission-presets/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-permission-presets/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-permission-presets/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-user-approval",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-user-approval/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-user-approval/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-user-approval/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-sdk-protocol",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-protocol/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-protocol/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-protocol/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-sdk-jsonrpc-server",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-cordis-host-runner",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-host-runner/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-host-runner/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-host-runner/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-cordis-client-runner",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    },
+    {
+      "package": "@deepseek-ai/dsh-mcp-client",
+      "version": "0.2.1-rc.2",
+      "declared_license": "MIT",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-mcp-client/package.json",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-mcp-client/README.md",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-mcp-client/lib/types/index.d.ts",
+          "locator": ""
+        }
+      ],
+      "inspection": {
+        "package_json": "已读取",
+        "readme": "已读取；按相关段落提取机制",
+        "declared_types_entry": "读取返回 not found；未全面枚举 ASAR 声明目录"
+      },
+      "project_implication": "锁定精确包和宿主组合；README 与元数据不能替代发布类型、源码及运行兼容性验收。"
+    }
+  ],
+  "facts": [
+    {
+      "id": "DSH-01",
+      "topic": "Context/Service/inject/Fiber",
+      "claim": "本机 Cordis README 将 Context 定义为根依赖容器；ctx.plugin() 返回 Fiber；Service 发布具名服务；inject 声明运行前必须存在的服务；Fiber dispose 清理其所属 effects、事件监听和服务。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/README.md",
+          "locator": "L33-L67"
+        }
+      ],
+      "project_implication": "可将 ASR、TTS、屏幕读取、输入控制分别设计成服务，并让插件的监听器、音频句柄、任务在卸载时统一释放。",
+      "limits": "README 机制说明已核验；本机声明入口不存在，未证明所有异常/竞态清理路径。"
+    },
+    {
+      "id": "DSH-02",
+      "topic": "配置 schema",
+      "claim": "Schemastery README 描述类型驱动验证、默认值、object/array/union/intersect/transform、扩展类型以及 schema JSON 序列化/跨环境恢复。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/schemastery/README.md",
+          "locator": "L8-L16; L18-L49; L137-L236"
+        }
+      ],
+      "project_implication": "统一插件配置验证、设置面板元数据和迁移策略，避免前后端维护不同的字段定义。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-03",
+      "topic": "loader 配置",
+      "claim": "Loader 持有 EntryTree，按模块名导入并应用配置；entry 包含 id/name/config/group/disabled/inject，提供 create/update/remove/resolve/await/locate。Include 读取 YAML/JSON，路径相对 ctx.baseUrl；可应用 initial/patches，文件可写时将更新写回。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/README.md",
+          "locator": "L3-L49"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-include/README.md",
+          "locator": "L3-L43"
+        }
+      ],
+      "project_implication": "可采用稳定 entry id、分组、显式依赖和禁用开关；配置是执行组合，不应无校验接受模型写入任意模块名。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-04",
+      "topic": "运行时配置更新",
+      "claim": "本机 Loader 的 volatile-only 更新可保持正在运行的引用并发出 loader/volatile-update；普通有效配置变化或上下文变化走普通 remount；无效候选保留旧引用。直接 fiber.update() 保留更新流水线及默认重启语义。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/README.md",
+          "locator": "L51-L53"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/README.md",
+          "locator": "L103-L105"
+        }
+      ],
+      "project_implication": "可把音量/显示偏好等热变参数与模型加载路径/后端切换等需重启参数分开；不能把所有配置修改都当作无损热更新。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-05",
+      "topic": "HMR",
+      "claim": "官方 vendored HMR README 描述：监视源码、追踪 Node 模块图、清除受影响缓存并重载依赖变更文件的 entry；框架层依赖变化回退 loader.exit() 交给宿主重启；要求 loader/timer 与 Node 内部模块加载器。Plugin Manager README 说明 YAML 启用 HMR 才会即时应用配置，否则需要重启。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/vendor/hmr/README.md",
+          "locator": "Requirements; opening paragraphs"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/README.md",
+          "locator": "L14"
+        }
+      ],
+      "project_implication": "开发态 HMR 应有专门边界和可重启兜底；不要承诺在任意 Electron/Node 版本无条件可用。",
+      "limits": "公开 master 的 HMR 说明与本机 manager 文档结合；未读取或运行本机 HMR 包，未验证客户端构建 watcher。"
+    },
+    {
+      "id": "DSH-06",
+      "topic": "持久插件管理",
+      "claim": "Plugin Manager 管理 profile 插件与 bundle；插件开关更新 cordis.patch.yml 的 disabled，bundle 开关调整 package.json 的 dsh.profile.bundles 顺序，禁用不移除依赖；更改影响该 profile 的所有会话。安装 Host 代码在进程内、workspace sandbox 之外执行。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/README.md",
+          "locator": "L14; L31; L40"
+        }
+      ],
+      "project_implication": "借鉴组合管理，但第三方包安装必须作为代码信任决策，不等同于普通配置；应另建受限扩展宿主。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-07",
+      "topic": "Host 动态插件",
+      "claim": "Host runner 保存会话范围、进程本地定义；define/run/stop/undefine 管理生命周期，stop 保留定义，undefine 删除定义；重启清空；Host half 在 node:vm realm 内执行。文档明确 facade/global 隔离不是安全边界，声明的服务可触达真实运行时。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-host-runner/README.md",
+          "locator": "L12; L52-L62"
+        }
+      ],
+      "project_implication": "生命周期框架与安全隔离分开；不可信角色脚本/插件不能仅放 node:vm 就授予文件、网络、键鼠访问。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-08",
+      "topic": "Client 动态插件",
+      "claim": "Client runner 在浏览器页加载动态包的 Client half；输入为普通 JavaScript async function body，不支持 JSX/TypeScript/module imports；暴露 React/console/styles/host，按 inject 白名单访问服务；host.call 仅路由到本包 Host half。Host 先加载，Client 后加载；页面刷新后需显式再次运行。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/README.md",
+          "locator": "L28-L40; L54; L75"
+        }
+      ],
+      "project_implication": "可借鉴 Host 提供能力、Client 贡献 UI 的分工；不要把这一动态代码格式误认为全部静态 npm 插件必须遵守的格式。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-09",
+      "topic": "权限预设",
+      "claim": "permission-presets 只组合 sandbox mode 与 approval policy，并管理选择及未来会话默认值；实际执行由各 enforcement service 负责；无匹配组合显示 custom；已存在/恢复会话不自动被新默认值覆盖。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-permission-presets/README.md",
+          "locator": "L12; L28-L64"
+        }
+      ],
+      "project_implication": "权限 UI 是组合层，执行层仍需独立校验；桌宠应把屏幕、麦克风、键鼠、网络、文件等能力纳入可审计策略。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-10",
+      "topic": "审批",
+      "claim": "user-approval 是渠道无关的一次性审批接口；ask 派发 approval/request waterfall，never 拒绝而不是自动批准；缺失/失败 answerer 返回 unavailable 并 fail closed。审批只适用于本请求，取消后迟到答复无效，请求与结果写审计日志。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-user-approval/README.md",
+          "locator": "L12; L28-L56"
+        }
+      ],
+      "project_implication": "高风险鼠标键盘动作应绑定目标、动作、时效、请求 ID 和取消信号；“不弹窗”必须区分预授权与禁止请求，不能默认为允许。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-11",
+      "topic": "市场服务",
+      "claim": "plugin-market 读取用户配置的索引；默认没有 index URL，不主动请求市场；验证索引后附加安装状态、兼容性和精确安装参数；安装仍交由 pluginManager。只读查询工具不等于安装授权。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market/README.md",
+          "locator": "L12; L27-L42; L62-L77"
+        }
+      ],
+      "project_implication": "可先做显式来源白名单市场；浏览与安装分权，服务端获取与 UI 呈现分层。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-12",
+      "topic": "市场索引格式",
+      "claim": "官方 format-1 类型：顶层 format:1、title、可选 description、metadata、plugins；插件含 name、可选 title/description/icon/author/homepage/repository、metadata、非空 versions；版本含精确 SemVer version、Unix 秒 publishTimestamp、source、engines.dsh。source 为 npm（可选 registry）或 git（https URL、40 位小写十六进制 commit、可选相对 POSIX path）。repository 仅展示，不是安装源。",
+      "verification_level": "源码",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/packages/util/plugin-market-index/src/types.ts",
+          "locator": "MarketIndex / MarketPlugin / MarketVersion / MarketSource"
+        }
+      ],
+      "project_implication": "本项目市场应将展示源与可执行安装源区分，固定版本/提交并声明宿主兼容范围。",
+      "limits": "核验的是公开 master 类型，不能证明其与本机所有字节一致；本机 README 同样标注 format 1。"
+    },
+    {
+      "id": "DSH-13",
+      "topic": "市场校验边界",
+      "claim": "parseMarketIndex 报含 JSON path 的错误、丢弃未知成员、补默认集合、按 SemVer 降序排列版本、解析相对 icon；README 明确验证器不能证明 name/version/publishTimestamp/engines.dsh 或展示字段与真实包一致，也不能证明包声明了 bundle。源码本地化字段接受字符串或语言键映射，映射要求 en。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market-index/README.md",
+          "locator": "L27-L31; L63-L64"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/packages/util/plugin-market-index/src/index.ts",
+          "locator": "localizedText"
+        }
+      ],
+      "project_implication": "格式有效≠供应链可信；签名/摘要、来源策略、包实际 manifest 复核应另设机制。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-14",
+      "topic": "SDK 协议用途",
+      "claim": "dsh-sdk-protocol 是纯库，定义换行分帧 JSON-RPC 2.0、请求/结果/通知类型；SDK 客户端驱动 harness 会话，不是 MCP tools 协议。请求含 initialize、session/prompt/resume/wait、工作目录 get/set、shutdown；通知含 session.event/status、subagent.started/finished。prompt 返回的是持久入队 messageId，不是最终回答。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-protocol/README.md",
+          "locator": "L12; L28-L60"
+        }
+      ],
+      "project_implication": "桌宠前端到 Agent runtime 可采用独立会话协议；将入队、流式事件、最终完成、取消分开建模，不要把 SDK 等同于 MCP。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-15",
+      "topic": "SDK Server",
+      "claim": "dsh-sdk-jsonrpc-server 是 Loader 插件，服务 stdio，使进程外 SDK 客户端创建会话/入队提示/接收事件；stdout 只允许协议帧，诊断进 stderr；initialize 等插件树稳定后才成功，prompt 必须等握手完成；shutdown 先应答再清理根运行时。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server/README.md",
+          "locator": "L12; L32; L46-L58"
+        }
+      ],
+      "project_implication": "Python/.NET helper 与 TS 主体可沿用显式握手、事件和停机契约；日志不能污染 stdout 协议。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DSH-16",
+      "topic": "MCP Client",
+      "claim": "本机 MCP client 每 entry 配置一个 serverName，支持 stdio/streamable-http，注册 mcp__<serverName>__<rawName>；发现/重连更新工具集合，失败保留或撤销规则由服务管理；README 说明当前 SDK 协商 2026-07-28 并回退旧版，stdio 协商可能先启动临时 probe。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-mcp-client/README.md",
+          "locator": "L12; L28; L55-L93"
+        }
+      ],
+      "project_implication": "MCP 作为外部工具适配层而非任意本地进程授权；创建连接本身可能启动软件，故本次未连接或运行任何待调研服务。",
+      "limits": "仅本机 README 声明的协商行为；未审计 2026-07-28 规范，本报告协议对照明确固定为 2025-11-25。"
+    },
+    {
+      "id": "PUB-01",
+      "topic": "公开仓库与 npm",
+      "claim": "公开 GitHub API 返回 deepseek-ai/deepseek-harness 为 private:false、archived:false、default_branch:master；npm 公共 registry 的 @deepseek-ai/cordis/4.0.5 返回精确版本、tarball 和 integrity，repository 指向 DSH 的 vendor/cordis；因此该 scoped 版本已公开发布，不只是 package.json 中 publishConfig 的意图。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://api.github.com/repos/deepseek-ai/deepseek-harness",
+          "locator": "private/archived/default_branch"
+        },
+        {
+          "url": "https://registry.npmjs.org/@deepseek-ai%2fcordis/4.0.5",
+          "locator": "name/version/repository/dist"
+        }
+      ],
+      "project_implication": "可以研究公开源码和锁定 npm 精确版本；仍需在实施时复核供应链和与宿主版本的兼容性。",
+      "limits": "查询时点快照；未下载 tarball，未验证本机与 tarball 的字节一致性。"
+    },
+    {
+      "id": "PUB-02",
+      "topic": "upstream 与 vendored 关系",
+      "claim": "DSH vendor README 明确为 source-vendored Cordis/foundation libraries，改用 @deepseek-ai scope，保留 MIT 许可证并维护本地修改日志。Cordis baseline 为 upstream 4.0.0-rc.7、提交 56b3d4f725681cf4556c1a8695a709cc3b6eed74；Loader 局部同步 rc.11 resolver；包含 Fiber 清理/重入等本地修补。Harness 发布版本与 upstream baseline 分开记录。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/vendor/README.md",
+          "locator": "Manifest; Partial Loader sync; Local modifications"
+        }
+      ],
+      "project_implication": "@deepseek-ai/cordis 4.0.5 不能推断等于上游 cordis 4.0.5；选择一个发行线，建立适配层与生命周期回归测试。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "PUB-03",
+      "topic": "上游稳定性",
+      "claim": "cordiverse/cordis 公共 API 显示公开且未归档；npm cordis latest 在查询时为 4.0.0-rc.12。官方 README 明示处于 active development，API 不稳定、可能不经通知改变。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://api.github.com/repos/cordiverse/cordis",
+          "locator": ""
+        },
+        {
+          "url": "https://registry.npmjs.org/cordis/latest",
+          "locator": ""
+        },
+        {
+          "url": "https://raw.githubusercontent.com/cordiverse/cordis/main/packages/core/README.md",
+          "locator": ""
+        }
+      ],
+      "project_implication": "应锁版本、隔离框架 API、避免向第三方暴露全部内部 Context；升级前审查变更而非跟随 latest。",
+      "limits": "latest 与 branch 可变化；并未证明所有上游 API 与 DSH 版本兼容。"
+    },
+    {
+      "id": "PUB-04",
+      "topic": "许可证",
+      "claim": "上游 Cordis LICENSE 为 MIT（Shigma），DSH 根 LICENSE 为 MIT（2026 DeepSeek）；本机指定包的 package.json 均标注 MIT。MIT 文本要求保留版权和许可声明。",
+      "verification_level": "源码",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/cordiverse/cordis/main/LICENSE",
+          "locator": ""
+        },
+        {
+          "url": "https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/LICENSE",
+          "locator": ""
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/package.json",
+          "locator": "L33"
+        }
+      ],
+      "project_implication": "机制借鉴和合规复用有明确许可基础，但每个依赖仍需单独审查，不能把根仓库 MIT 视为全部依赖 MIT。",
+      "limits": "本机各包许可证字段已读；未逐一读取安装包实际 LICENSE 文件。"
+    },
+    {
+      "id": "PUB-05",
+      "topic": "Koishi 与 Cordis",
+      "claim": "Koishi 是聊天机器人框架；其官方 packages/core/package.json 中 @koishijs/core 4.18.11 依赖 cordis ^3.18.1；顶层 koishi 包包含自己的 core/loader 和插件生态元数据。这表明 Koishi 建于 Cordis 之上，而非 Cordis 等于 Koishi。",
+      "verification_level": "源码",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/koishijs/koishi/master/packages/core/package.json",
+          "locator": "dependencies.cordis"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/koishijs/koishi/master/packages/koishi/package.json",
+          "locator": ""
+        }
+      ],
+      "project_implication": "可借鉴 Cordis 通用 DI，而无需引入整个机器人业务栈；Koishi 插件不能推定兼容 DSH Cordis 4 发行线。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "VSC-01",
+      "topic": "扩展宿主进程",
+      "claim": "VS Code 当前桌面源码通过 WindowUtilityProcess 创建并启动 extensionHostProcess；官方文档区分 local/remote Node.js host 与 browser WebWorker host，入口分别 main/browser。",
+      "verification_level": "源码",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/extensions/electron-main/extensionHostStarter.ts",
+          "locator": "WindowUtilityProcess; start entryPoint"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/vscode-docs/main/api/advanced-topics/extension-host.md",
+          "locator": "Configurations; runtimes"
+        }
+      ],
+      "project_implication": "可借鉴独立扩展宿主保护桌宠 UI 故障边界；不是每个扩展天然独占一进程，也不能等同于 OS 权限沙箱。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "VSC-02",
+      "topic": "manifest 与贡献点",
+      "claim": "VS Code 扩展根 package.json 是 manifest，name+publisher 组成唯一 ID，engines.vscode 声明兼容范围，main/browser 定义入口；contributes 是静态 JSON 声明，如 commands/configuration/menus/keybindings/views。运行时 API 再绑定实际行为。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/vscode-docs/main/api/get-started/extension-anatomy.md",
+          "locator": "Extension Manifest"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/vscode-docs/main/api/references/extension-manifest.md",
+          "locator": ""
+        },
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/vscode-docs/main/api/references/contribution-points.md",
+          "locator": ""
+        }
+      ],
+      "project_implication": "桌宠 manifest 可声明角色面板、命令、设置、工具、音色提供者；先发现贡献再按需运行代码，比启动即执行所有包更清晰。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "VSC-03",
+      "topic": "按需激活",
+      "claim": "activationEvents 在匹配事件时激活扩展，例 onCommand/onLanguage/onView/onStartupFinished。自 VS Code 1.74，扩展自己声明的 commands/languages/views 等贡献可隐式触发，不一定必须再手写对应事件。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/vscode-docs/main/api/references/activation-events.md",
+          "locator": "onLanguage; onCommand; onView; onStartupFinished"
+        }
+      ],
+      "project_implication": "可以用首次录音/首次调用音色/打开角色编辑器等事件激活插件；贡献发现与实际加载应分开。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "VSC-04",
+      "topic": "扩展宿主信任边界",
+      "claim": "VS Code 官方 runtime-security 文档说明 extension host 与 VS Code 本体具有相同权限，可读写文件、发网络请求和启动进程。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://code.visualstudio.com/docs/configure/extensions/extension-runtime-security",
+          "locator": "Extension runtime permissions"
+        }
+      ],
+      "project_implication": "进程隔离解决故障传播但不自动约束恶意插件；本项目若承诺受控电脑操作，必须额外执行权限与审批。",
+      "limits": "该页面抓取被长度限制截断；本事实所述权限段已完整出现。"
+    },
+    {
+      "id": "ELE-01",
+      "topic": "utilityProcess",
+      "claim": "utilityProcess.fork 在 Electron Main 进程、app ready 之后创建带 Node.js 与 MessagePort 的 Chromium utility child，支持 postMessage、退出监控和 kill；stdio 仅可配 stdout/stderr，stdin 不能设为 ignore 以外的模式。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/utility-process.md",
+          "locator": "fork options; note; postMessage"
+        }
+      ],
+      "project_implication": "适合 TS/Node 扩展宿主或隔离 helper；现成 MCP stdio 子进程需可写 stdin，不能直接当成 utilityProcess 的透明替代。Python/.NET 可另用受控外部进程。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "ELE-02",
+      "topic": "按住说话",
+      "claim": "globalShortcut.register(accelerator, callback) 的公开回调在快捷键被按下/触发时调用；API 没有 keyup 回调。它可在应用无键盘焦点时工作，注册冲突可返回 false。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://www.electronjs.org/docs/latest/api/global-shortcut",
+          "locator": "register"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/global-shortcut.md",
+          "locator": "Methods"
+        }
+      ],
+      "project_implication": "仅用 globalShortcut 不足以准确实现“按下开始、松开结束”；可用切换式录音，或另设有 keydown/keyup 的受控全局输入 helper。处理冲突、按键重复与异常停录。",
+      "limits": "“不足以实现按住说话”是基于公开 API 的工程推论；未运行输入测试。"
+    },
+    {
+      "id": "ELE-03",
+      "topic": "uiohook-napi 能力与维护状态",
+      "claim": "uiohook-napi 官方 README 声明是 libuiohook 的 N-API C bindings，提供 keydown/keyup 与鼠标事件。GitHub API 返回 archived:false，pushed_at 为 2026-03-21T18:18:41Z；npm latest 为 1.5.5、engines.node >=16；GitHub releases/latest 返回 404。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/SnosMe/uiohook-napi/master/README.md",
+          "locator": "API"
+        },
+        {
+          "url": "https://api.github.com/repos/SnosMe/uiohook-napi",
+          "locator": "archived/pushed_at"
+        },
+        {
+          "url": "https://registry.npmjs.org/uiohook-napi/latest",
+          "locator": ""
+        },
+        {
+          "url": "https://api.github.com/repos/SnosMe/uiohook-napi/releases/latest",
+          "locator": ""
+        }
+      ],
+      "project_implication": "具有按住说话所需两类事件，可作为候选；“未归档/有 npm 包”不等于当前 Electron+Node 24 已兼容或维护 SLA。",
+      "limits": "只报告可观察状态，不将 pushed_at 当作最后功能修复时间；本机兼容性未知。"
+    },
+    {
+      "id": "ELE-04",
+      "topic": "uiohook 许可证分层",
+      "claim": "uiohook-napi LICENSE 为 MIT，.gitmodules 指向 kwhat/libuiohook；该上游 include/uiohook.h 明确 LGPL v3 或更高版本，COPYING.LESSER.md 为 LGPL 3 文本。",
+      "verification_level": "源码",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/SnosMe/uiohook-napi/master/LICENSE",
+          "locator": ""
+        },
+        {
+          "url": "https://raw.githubusercontent.com/SnosMe/uiohook-napi/master/.gitmodules",
+          "locator": ""
+        },
+        {
+          "url": "https://raw.githubusercontent.com/kwhat/libuiohook/master/include/uiohook.h",
+          "locator": "license header"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/kwhat/libuiohook/master/COPYING.LESSER.md",
+          "locator": ""
+        }
+      ],
+      "project_implication": "不能只标“MIT 即可闭源打包”；选定 npm 版本后应审计其固定 submodule、二进制链接方式和 LGPL 分发义务。",
+      "limits": "未下载 npm tarball，未核验 1.5.5 实际内置 libuiohook 提交与链接方式；不提供法律结论。"
+    },
+    {
+      "id": "ELE-05",
+      "topic": "Windows safeStorage",
+      "claim": "Electron 发布文档说明 Windows 同步和异步 safeStorage 均依赖 DPAPI，保护同机其他用户，但不防同一用户空间的其他应用。当前 latest 文档标注同步 API 自 Electron 45 弃用、计划 46 删除；main 分支已写删除。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://www.electronjs.org/docs/latest/api/safe-storage",
+          "locator": "Platform-Specific Key Providers; Methods"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/safe-storage.md",
+          "locator": "note"
+        }
+      ],
+      "project_implication": "API 密钥可用 DPAPI 包装后存储，但仍须限制插件获取解密接口；实现前固定 Electron 版本，选择对应同步/异步 API。",
+      "limits": "开发分支与发布文档状态不同，不能把 main 文档当作所选稳定版。没有测试密钥恢复或跨机器迁移。"
+    },
+    {
+      "id": "ELE-06",
+      "topic": "desktopCapturer 静态截图",
+      "claim": "desktopCapturer.getSources 在 Main 枚举 screen/window，返回 NativeImage thumbnail；默认 thumbnailSize 为 150x150，可请求更大尺寸，但实际 thumbnail 尺寸不保证等于请求值；NativeImage.toPNG 可输出 PNG Buffer。display_id 与 screen Display id 对应，但可能为空。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/desktop-capturer.md",
+          "locator": "getSources options"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/structures/desktop-capturer-source.md",
+          "locator": "thumbnail/display_id"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/native-image.md",
+          "locator": "image.toPNG"
+        }
+      ],
+      "project_implication": "看屏幕可先枚举并绑定明确目标，再获取 thumbnail；必须读实际图片尺寸和显示器缩放，不把缩略图请求尺寸直接当作键鼠坐标。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "ELE-07",
+      "topic": "desktopCapturer 流捕获与限制",
+      "claim": "官方例子用 session.setDisplayMediaRequestHandler 选择源，再由 renderer 的 getDisplayMedia 获取流；getDisplayMedia 不允许 deviceId 选源。macOS 10.15+ 屏幕捕获需要用户同意；Linux PipeWire 枚举只有一个用户所选源。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/desktop-capturer.md",
+          "locator": "example; deviceId note; Caveats"
+        }
+      ],
+      "project_implication": "截图与连续视频流分别设计；明确源选择与同意流程，不能依赖枚举顺序抓首屏。Windows 最小化/保护内容/UAC 安全桌面覆盖率须后续实测。",
+      "limits": "后一句覆盖率为待验证项，不宣称 API 保证可捕获所有窗口；未运行截屏。"
+    },
+    {
+      "id": "ELE-08",
+      "topic": "原生模块 ABI",
+      "claim": "Electron 官方 native-module 文档说明 Electron 与普通 Node 可能有不同 ABI，需要对应 Electron 构建/重建，并核对平台、架构及 Windows delay-load hook。Node-API 官方文档提供跨 Node 主版本 ABI 稳定性，但仅在其约束内。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/tutorial/using-native-node-modules.md",
+          "locator": "introduction; Troubleshooting"
+        },
+        {
+          "url": "https://nodejs.org/api/n-api.html",
+          "locator": "Implications of ABI stability"
+        }
+      ],
+      "project_implication": "用户本机 Node 24 并非 Electron 内嵌 Node 的兼容证明；区分 Node-API-only addon 与依赖 V8/Node ABI 的 addon，固定 Electron/架构和预构建供应来源。",
+      "limits": "Node-API 页面截断，但 ABI 稳定性段已读取；未做构建或加载实验。"
+    },
+    {
+      "id": "ELE-09",
+      "topic": "V8 memory cage",
+      "claim": "Electron 官方 memory-cage 文章说明外部 malloc 内存包装成 ArrayBuffer/Buffer 的原生模块可能受 cage 限制，示例 napi_create_external_buffer 会失败；替代是复制进 V8 分配的 Buffer，或先用 V8 分配器分配再填数据。N-API 也受此约束。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://www.electronjs.org/blog/v8-memory-cage",
+          "locator": "I want to refactor a Node native module to support Electron 21+"
+        }
+      ],
+      "project_implication": "ASR/TTS/图像处理 addon 需专查外部 Buffer 用法；不能因为写着 N-API 就认定兼容。无法适配时可考虑独立 helper 的消息/文件协议。",
+      "limits": "本文是 Electron 21+ 迁移背景；选定当前版本仍需复核。未估算拷贝开销或性能。"
+    },
+    {
+      "id": "ELE-10",
+      "topic": "iframe 与 WebContentsView",
+      "claim": "Electron 官方 Web Embeds 推荐 iframe 用 sandbox 仅放行必需能力，网页 CSP 可限制嵌入；WebContentsView 由 Main 创建/定位，不是 DOM 元素，可分别配置 webPreferences；官方不推荐新用 webview tag。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/tutorial/web-embeds.md",
+          "locator": "Iframes; WebViews; WebContentsView"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/web-contents-view.md",
+          "locator": "constructor"
+        }
+      ],
+      "project_implication": "第一方可信 UI 可共享组件；不可信角色/插件 UI 候选为限权 iframe 或单独 WebContentsView，需单独来源、IPC 白名单、导航/弹窗/下载策略。",
+      "limits": "隔离方案属于建议；未证明 iframe 必然独立 OS 进程或 WebContentsView 自动完成权限隔离。"
+    },
+    {
+      "id": "ELE-11",
+      "topic": "contextIsolation",
+      "claim": "contextIsolation 将 preload 与网页置于不同 JS context，自 Electron 12 默认开启；官方明确只启用隔离和 contextBridge 并不能自动安全，不应向网页暴露不受限制的 ipcRenderer.send，应每能力封装专门 API。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/tutorial/context-isolation.md",
+          "locator": "Security considerations"
+        }
+      ],
+      "project_implication": "禁用 Node 直通，桥只提供 schema 校验后的窄能力；每次输入控制/屏幕捕获调用仍在主进程校验来源和授权。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DIST-01",
+      "topic": "NSIS 与 electron-updater",
+      "claim": "electron-builder 官方 NSIS 文档称 NSIS 是默认 Windows target；electron-updater 官方文档支持 Windows NSIS，不支持 Squirrel.Windows；发布需构建 installer 与 latest.yml 等元数据，应用使用 electron-updater 的 autoUpdater 而非 Electron 内置同名 API。支持 Windows 代码签名验证。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/website/docs/nsis.md",
+          "locator": "opening"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/website/docs/features/auto-update.md",
+          "locator": "Auto-updatable targets; Differences; Setup"
+        }
+      ],
+      "project_implication": "Windows 优先候选为 NSIS+electron-updater；应用更新、插件更新、模型资源更新需分别设计信任与回滚，不能共用“下载即执行”。",
+      "limits": "引用官方 master 文档；该站正在展示 next/v27，本文未承诺 v27 新字段已进入稳定版。"
+    },
+    {
+      "id": "DIST-02",
+      "topic": "签名选项",
+      "claim": "electron-builder 官方签名文档列出证书文件/Windows certificate store、HSM/token、Azure Trusted Signing 等后端，讨论 OV 和 EV 两类 CA 代码签名证书，两者可配合更新。微软 Artifact Signing 是托管签名服务，FAQ 明确不颁发 EV 证书。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/website/docs/features/code-signing/code-signing-win.md",
+          "locator": "Choosing a signing method; OV vs. EV"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/artifact-signing/overview",
+          "locator": ""
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/artifact-signing/faq",
+          "locator": "Does Artifact Signing issue EV certificates?"
+        }
+      ],
+      "project_implication": "根据主体资格、密钥托管方式和 CI 环境选择签名方案；不要把 Artifact Signing 视为购买 EV 证书。",
+      "limits": "builder master 包含 v27 的新配置与 Beta 后端；具体配置键以选定稳定版本为准。未报价，未核验申请人或 CA 要求，未承诺 OV 私钥一定可导出。"
+    },
+    {
+      "id": "DIST-03",
+      "topic": "SmartScreen",
+      "claim": "微软官方 distribution-feature-status 说明 2024 起 EV 不再提供即时 SmartScreen reputation bypass，OV/EV 均不保证首次下载无警告；声誉综合文件 hash 与签名发布者。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/distribution-feature-status#smartscreen-reputation-ev-certificates-no-longer-grant-instant-bypass",
+          "locator": ""
+        }
+      ],
+      "project_implication": "代码签名用于发布者/完整性验证，不应向用户承诺“买 EV 必无弹窗”；保持发布者身份连续并处理首次安装指引。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "DIST-04",
+      "topic": "Artifact Signing 个人资格",
+      "claim": "微软当前 quickstart：Public Trust 个人开发者必须位于美国或加拿大；个人 identity validation 使用关联 Azure billing account，Account Type 必须 Individual，法定姓名和 sold-to 地址需匹配政府证件。组织支持地域另有名单；Private Trust 不受同一地域限制。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart",
+          "locator": "Prerequisites"
+        }
+      ],
+      "project_implication": "不能默认本项目个人开发者可申请 Public Trust；先核实实际所在地/主体。Private Trust 不能被当成面向普通用户公开分发的等价信任捷径。",
+      "limits": "申请人所在地、法律主体、账号类型均未知；没有价格估算。页面被长度限制截断，但先决条件段完整。"
+    },
+    {
+      "id": "TAU-01",
+      "topic": "WebView2",
+      "claim": "Tauri v2 官方文档说明 Windows 使用基于 Microsoft Edge/Chromium 的 WebView2，可自行更新；Windows 11 预装 WebView2。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://v2.tauri.app/reference/webview-versions/",
+          "locator": "WebView2 (Windows)"
+        }
+      ],
+      "project_implication": "Tauri 可作为 Windows 桌宠壳候选，但应记录 WebView2 runtime 版本和部署策略；不能从“不打包 Chromium”直接推断本项目内存或启动时间。",
+      "limits": "未检查本机 WebView2 安装与版本；未采用该页面关于旧 Windows 的宽泛支持表述作为新项目支持承诺。"
+    },
+    {
+      "id": "TAU-02",
+      "topic": "透明窗口",
+      "claim": "Tauri 官方配置源码 WindowConfig 定义 transparent:boolean，默认 false；Windows 注释说明 noRedirectionBitmap 可帮助避免创建透明窗口的白闪，window effects 需要透明窗口。",
+      "verification_level": "源码",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-utils/src/config.rs",
+          "locator": "WindowConfig.transparent; no_redirection_bitmap; defaults"
+        }
+      ],
+      "project_implication": "Windows 透明桌宠并非 Electron 独占能力；实际角色透明边缘、点击穿透、DPI、多屏、白闪需独立验收。",
+      "limits": "核验 dev 分支源码且响应截断；相关字段段完整。未证明所有 Tauri 2.x 版本都有 noRedirectionBitmap，未运行 UI。"
+    },
+    {
+      "id": "TAU-03",
+      "topic": "Capabilities",
+      "claim": "Tauri v2 capabilities 按 window/webview 授予或拒绝权限，可限制平台和远程 URL；一个窗口匹配多份 capability 时权限合并；JSON/TOML capability 可存于 src-tauri/capabilities。默认仅打包代码可访问 API；应用自行 invoke_handler 注册的命令默认可被所有窗口调用，需额外 AppManifest commands 控制。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/tauri-apps/tauri-docs/v2/src/content/docs/security/capabilities.mdx",
+          "locator": "overview; AppManifest; Target Platform; Remote API Access"
+        }
+      ],
+      "project_implication": "可借鉴显式能力目录和 scope；必须审查权限合并与自定义命令，而非认为用了 Tauri 就天然最小权限。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "TAU-04",
+      "topic": "Capabilities 安全边界",
+      "claim": "Tauri capabilities 文档将边界定义为降低 frontend compromise 与系统接口暴露，不防恶意/不安全 Rust 代码、过宽 scopes 或错误 command scope checks；Linux/Android 还不能区分 iframe 与所属窗口的 API 请求。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/tauri-apps/tauri-docs/v2/src/content/docs/security/capabilities.mdx",
+          "locator": "Security Boundaries; Remote API Access warning"
+        }
+      ],
+      "project_implication": "受控鼠标键盘仍需后端执行级审计；不可信 native plugin/sidecar 不能依赖 WebView 权限机制自动约束。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "TAU-05",
+      "topic": "Sidecar",
+      "claim": "Tauri v2 用 bundle.externalBin 打包外部二进制，并为支持架构提供带 target triple 后缀的文件；可用 shell plugin sidecar 接口运行；JavaScript 侧 execute/spawn 对应 shell:allow-execute/allow-spawn 和允许项/参数 scope。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/tauri-apps/tauri-docs/v2/src/content/docs/develop/sidecar.mdx",
+          "locator": "Embedding External Binaries; Running it from JavaScript; Passing arguments"
+        }
+      ],
+      "project_implication": "Python ASR/TTS 或 .NET Windows helper 可作为 sidecar，需统一协议、版本、启动/退出、取消和日志；打包 helper 不等于插件热加载或沙箱。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "RPC-01",
+      "topic": "JSON-RPC 2.0",
+      "claim": "JSON-RPC 2.0 是传输无关协议；request 包含 jsonrpc:\"2.0\"、method、可选 params 与 id；无 id 为 notification，server 不应回复 notification；response 用匹配 id 与 result 或 error（互斥），error 含 code/message，可选 data；批量响应不保证与请求顺序相同。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://www.jsonrpc.org/specification",
+          "locator": "4 Request; 4.1 Notification; 5 Response; 6 Batch"
+        }
+      ],
+      "project_implication": "桌宠内部 IPC 可定义版本化 method/schema、request id 与错误码；二进制大数据、超时、取消、权限和分帧须由外层合同补齐。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "RPC-02",
+      "topic": "MCP stdio",
+      "claim": "固定 2025-11-25 规范：MCP JSON-RPC 消息 UTF-8；stdio 由 client 启动 server 子进程，stdin/stdout 交换单条换行分隔消息，不允许消息中包含实际分隔换行；stderr 可用于日志，stdout 禁止非 MCP 消息。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports.md",
+          "locator": "stdio"
+        }
+      ],
+      "project_implication": "适合本机插件 helper 对接；JSON 字符串中的换行应转义，不能 pretty-print 多行帧；进程启动本身是权限行为。",
+      "limits": "有意固定规范版本，不宣称这是当前最新版本；与本机 DSH README 的 2026-07-28 协商说明分开。"
+    },
+    {
+      "id": "RPC-03",
+      "topic": "MCP Streamable HTTP",
+      "claim": "2025-11-25 规范的 Streamable HTTP 替代旧 2024-11-05 HTTP+SSE；单 MCP endpoint 使用 POST，GET 可开 SSE（不支持可返回405）；每个 POST 为单条 JSON-RPC，Accept 支持 application/json 与 text/event-stream；request 的返回可为 JSON 或 SSE。session 可选，Mcp-Session-Id 与协议版本头有明确规则。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports.md",
+          "locator": "Streamable HTTP; Sending; Listening; Session Management; Protocol Version Header"
+        }
+      ],
+      "project_implication": "服务型/远程工具可走该传输，但不是任意 HTTP JSON endpoint；需实现版本协商、流事件、重连与请求对应。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "RPC-04",
+      "topic": "MCP HTTP 安全",
+      "claim": "规范要求校验 Origin 防 DNS rebinding，出现无效 Origin 必须403；本机服务 SHOULD 绑定127.0.0.1而非0.0.0.0，并 SHOULD 做认证；断连不等于取消，取消应用明确 notification，SSE Last-Event-ID 重放为可选。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports.md",
+          "locator": "Security Warning; Sending; Resumability"
+        }
+      ],
+      "project_implication": "桌宠本机 API 不可仅凭 localhost 假定可信；执行动作需认证与显式取消，断线不能默默重放键鼠动作。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "RPC-05",
+      "topic": "LSP 分帧对照",
+      "claim": "LSP 3.17 基础协议用 ASCII header 与 UTF-8 JSON-RPC content；Content-Length 必填、计的是内容字节而非字符；header 与 body 之间为 CRLF CRLF，Content-Type 默认 application/vscode-jsonrpc; charset=utf-8。",
+      "verification_level": "官方文档",
+      "sources": [
+        {
+          "url": "https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/",
+          "locator": "Base protocol: Header Part / Content Part"
+        }
+      ],
+      "project_implication": "DSH SDK/MCP stdio 的换行帧与 LSP 长度帧不可共用未经配置的 parser；中文文本必须按 UTF-8 字节数计长度。",
+      "limits": "官方长页面响应截断，但基础分帧段完整。"
+    },
+    {
+      "id": "UNK-01",
+      "topic": "本机声明文件缺失",
+      "claim": "14 个指定包 package.json 均指向 lib/types/index.d.ts，但本次逐一 read 返回 not found；普通 glob 无法进入 ASAR 虚拟目录，未完成该目录其他声明的全面枚举。",
+      "verification_level": "本机文件",
+      "sources": [
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/package.json",
+          "locator": "types/exports"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/cordis-plugin-include/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/schemastery/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-plugin-market-index/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-permission-presets/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-user-approval/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-protocol/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-host-runner/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/lib/types/index.d.ts",
+          "locator": "read: not found"
+        },
+        {
+          "path": "C:/Users/ASUS/AppData/Local/Programs/DeepSeek Harness/resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-mcp-client/lib/types/index.d.ts",
+          "locator": "read: not found"
+        }
+      ],
+      "project_implication": "本报告本机机制主要依据 README；实施时应取得对应发布源码/声明，不把类型入口元数据当作声明文件已存在。",
+      "limits": "只证明这些精确入口读取失败，不声称整个 ASAR 中绝无 .d.ts。"
+    },
+    {
+      "id": "UNK-02",
+      "topic": "兼容性与性能",
+      "claim": "本机硬件上的插件启动、ASR/TTS 实时性、GPU 显存占用、捕获延迟、任意应用听写成功率及 Electron/Tauri 性能比较均未知；未安装、运行、构建或压测被调研软件。",
+      "verification_level": "未知",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/tutorial/using-native-node-modules.md",
+          "locator": ""
+        },
+        {
+          "url": "https://v2.tauri.app/reference/webview-versions/",
+          "locator": ""
+        }
+      ],
+      "project_implication": "16GB RAM/4GB VRAM 只能作为用户提供的后续测试环境约束，不能在当前只读调研中推导模型容量或性能结论。",
+      "limits": "来源为相关平台边界文档，不是本机测量证据；用户提供的硬件/版本未重新枚举核实。"
+    },
+    {
+      "id": "UNK-03",
+      "topic": "发布主体与价格",
+      "claim": "个人/组织签名申请资格在本项目未知，证书/云签名/构建服务的实际价格未核验，不提供估算。",
+      "verification_level": "未知",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart",
+          "locator": "Prerequisites"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/website/docs/features/code-signing/code-signing-win.md",
+          "locator": ""
+        }
+      ],
+      "project_implication": "需要申请人法律主体、所在地和具体供应商后才能做合规采购决定。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    },
+    {
+      "id": "UNK-04",
+      "topic": "Windows 捕获与输入覆盖",
+      "claim": "Electron screenshot、uiohook 以及后续输入 helper 对目标应用、管理员窗口、UAC 安全桌面、最小化/受保护窗口的端到端覆盖未知。",
+      "verification_level": "未知",
+      "sources": [
+        {
+          "url": "https://raw.githubusercontent.com/electron/electron/main/docs/api/desktop-capturer.md",
+          "locator": ""
+        },
+        {
+          "url": "https://raw.githubusercontent.com/SnosMe/uiohook-napi/master/README.md",
+          "locator": ""
+        }
+      ],
+      "project_implication": "“听写到任意应用”和“受控电脑操作”不能只靠这两份 API 文档承诺；后续必须制定应用矩阵并在用户授权下验收。",
+      "limits": "只读文档/源码核验，未运行验证。"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "REC-01",
+      "type": "建议而非现有实现事实",
+      "text": "保持 Electron+TypeScript 为候选；用 Cordis 风格管理可信服务生命周期，用独立 extension host/helper 和受控 IPC 处理故障边界，用执行级权限/审批实现真正的受控操作。",
+      "based_on": [
+        "DSH-01",
+        "DSH-06",
+        "DSH-07",
+        "VSC-01",
+        "VSC-04",
+        "ELE-01",
+        "ELE-11"
+      ]
+    },
+    {
+      "id": "REC-02",
+      "type": "建议而非现有实现事实",
+      "text": "统一插件合同：稳定 ID/版本/engines、Host/Client 入口、inject、配置 schema、声明式 contributes/activation、能力权限、生命周期与取消、审计与错误码。不要把市场 metadata 当作代码授权。",
+      "based_on": [
+        "DSH-02",
+        "DSH-03",
+        "DSH-09",
+        "DSH-10",
+        "DSH-12",
+        "DSH-13",
+        "VSC-02",
+        "VSC-03"
+      ]
+    },
+    {
+      "id": "REC-03",
+      "type": "建议而非现有实现事实",
+      "text": "按住说话单列输入 helper；第一版可选切换式录音降低 keyup 依赖。不可信 UI 采用限权 iframe/WebContentsView，令牌只在受信 Host 访问。",
+      "based_on": [
+        "ELE-02",
+        "ELE-03",
+        "ELE-04",
+        "ELE-05",
+        "ELE-10",
+        "ELE-11"
+      ]
+    },
+    {
+      "id": "REC-04",
+      "type": "建议而非现有实现事实",
+      "text": "内部会话 IPC、MCP 外部工具、音频/图像数据通道分开；在传输合同写明 framing、编码、握手、取消、超时、帧大小与版本，不把 JSON-RPC 等同于 MCP 或 LSP。",
+      "based_on": [
+        "DSH-14",
+        "DSH-15",
+        "RPC-01",
+        "RPC-02",
+        "RPC-03",
+        "RPC-04",
+        "RPC-05"
+      ]
+    },
+    {
+      "id": "REC-05",
+      "type": "建议而非现有实现事实",
+      "text": "Tauri v2 保留为对照，不用包体/内存推测决定；比较透明窗口实测、WebView2 部署、Rust/sidecar 成本和能力治理。",
+      "based_on": [
+        "TAU-01",
+        "TAU-02",
+        "TAU-03",
+        "TAU-04",
+        "TAU-05",
+        "UNK-02"
+      ]
+    },
+    {
+      "id": "REC-06",
+      "type": "建议而非现有实现事实",
+      "text": "发布路线先固定 NSIS、签名主体和稳定 electron-builder 版本；独立设计应用/插件/模型资源的签名与回滚，避免采用开发分支新字段而未验证稳定版支持。",
+      "based_on": [
+        "DIST-01",
+        "DIST-02",
+        "DIST-03",
+        "DIST-04",
+        "UNK-03"
+      ]
+    }
+  ],
+  "coverage": {
+    "requested_topics": [
+      "1 本机 DSH 14 包",
+      "2 Cordis/DSH/Koishi 关系、公开发布、许可、变更风险",
+      "3 VS Code 扩展模型",
+      "4 Electron/API/native/UI/installer/signing",
+      "5 Tauri v2 对照",
+      "6 JSON-RPC/MCP/LSP"
+    ],
+    "known_limits": [
+      "本机 lib/types 精确入口均不可读，未声称完成全部类型声明检查",
+      "未运行软件或本机兼容测试",
+      "未核验签名申请人、价格和性能",
+      "部分官方 HTML/API 返回被100000字符截断，仅引用已完整获取的相关段落；重要 MCP/Tauri 内容补用完整官方 Markdown",
+      "未把官方最新分支视为所选发行版，实施前需固定版本再次核对"
+    ]
+  }
+}
