@@ -1,13 +1,13 @@
 # 开发文档导航
 
-状态：访谈进行中 · 2026-10-24 · 不具备全面开工条件。
+状态：文档阶段完成 · 2026-10-24 · 用户已确认开工，实现在新会话中进行（见[开工提示词](20-implementation-kickoff-prompt.md)）。
 
 ## 已有文档
 
 | 文档 | 用途 | 状态 |
 | --- | --- | --- |
 | [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.13，持续细化 |
-| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q17已选三家云端厂家；Q18已补核Coopanion，路线待确认 |
+| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | 访谈完成；剩余事项按规则暂定 |
 | [Coopanion 交互评审](02-coopanion-ui-review.md) | 设置台、角色交互、扩展UI边界与可借鉴原则 | 官方资料/源码/截图静态核查 |
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
@@ -18,8 +18,8 @@
 | [ADR-0004](adr/0004-capability-centered-host.md) | 能力/插件中心，而非固定Agent中心 | 已采纳 |
 | [ADR-0005](adr/0005-windows-first.md) | Windows首发及支持边界 | 已采纳 |
 | [ADR-0006](adr/0006-reference-coopanion-without-fork.md) | Coopanion仅作参考，本阶段不二开 | 已采纳 |
-| [ADR-0007](adr/0007-dictation-first-workflow.md) | 语音听写作为首条日常实用闭环 | 已采纳 |
-| [听写PRD草案](09-dictation-mvp-prd.md) | 首条闭环、状态、验收与工作包 | 听写优先、双路径已定，细节待选 |
+| [ADR-0007](adr/0007-dictation-first-workflow.md) | 原“语音听写优先” | 已被ADR-0013取代 |
+| [听写插件PRD](09-dictation-mvp-prd.md) | 跨应用听写的已定决策 | 后续插件，不在首版（ADR-0013） |
 | [ADR-0008](adr/0008-local-and-cloud-asr.md) | 首版完整本地/云ASR | 已采纳 |
 | [ASR双路径规格](10-asr-providers-and-dataflow.md) | 两种生命周期、数据流和验收 | 双路径/BYOK已定，提供方/协议待选 |
 | [ADR-0009](adr/0009-cloud-asr-byok.md) | 首版云ASR使用用户自带服务商Key | 已采纳 |
@@ -27,6 +27,10 @@
 | [ADR-0010](adr/0010-unified-plugin-model.md) | 同一种插件标准，不设功能/提供者层级 | 已采纳 |
 | [ADR-0011](adr/0011-electron-typescript-desktop.md) | Electron + TypeScript桌面底座 | 已采纳 |
 | [ADR-0012](adr/0012-dsh-style-trust-and-permissions.md) | 插件信任与权限按DSH方案 | 已采纳 |
+| [ADR-0013](adr/0013-voice-chat-first-loop.md) | 首条闭环改为跟桌宠语音对话 | 已采纳 |
+| [语音对话PRD](18-voice-chat-mvp-prd.md) | 首版范围、流程、状态、异常、内置插件、验收 | v1.0，可开工 |
+| [实现计划与任务拆解](19-implementation-plan.md) | 暂定默认、分工、仓库结构、M0至M5工作包 | v1.0，可开工 |
+| [开工提示词](20-implementation-kickoff-prompt.md) | 新会话的第一条消息 | 可直接使用 |
 | [Electron运行边界](12-electron-runtime-boundaries.md) | 进程职责、信任与受限运行选项 | 草案，信任策略已定（ADR-0012） |
 | [插件与能力契约草案](13-plugin-contract-draft.md) | 清单字段、生命周期、能力规则、听写接口、权限与契约测试 | 草案v0.1，信任模型已对齐DSH方案 |
 | [测试与验收策略](14-test-and-acceptance-strategy.md) | 测试层次、分段耗时与负载测量、兼容矩阵、故障注入、完成定义 | 方法草案，数值待定 |
@@ -61,11 +65,11 @@
 
 ## 可开工检查门槛
 
-- [ ] 产品形态、首发平台、目标用户与发布/许可路径已选择。
-- [ ] MVP和后续版本分开，首版有明确用户闭环。
-- [ ] 插件开放边界与UI贡献点明确，不能只写“高度可扩展”。
-- [ ] 关键技术路径有理由、备选及待验证风险，未知项有验证任务。
-- [ ] 每条首版能力有输入输出、状态、错误、取消、权限和验收标准。
-- [ ] 性能目标有测量环境/负载/指标/阈值；没有把模型延迟与UI卡顿混为一谈。
-- [ ] 任务粒度能直接交给开发者或编码Agent，且每项有完成定义。
-- [ ] 用户确认共识。可先启动有限验证原型，不代表所有风险已消除。
+- [x] 产品形态、首发平台与许可路径已选择（MIT、Windows首发；首批验证在用户本机）。
+- [x] MVP和后续版本分开，首版闭环为跟桌宠语音对话。
+- [x] 插件开放边界与UI贡献点明确（ADR-0001、ADR-0010、实现计划第2节）。
+- [x] 关键技术路径有理由、备选及待验证风险；未知项对应M0验证任务。
+- [x] 首版能力有输入输出、状态、错误、取消、权限和验收（接口为示意，实现时冻结）。
+- [x] 性能初始目标、测量方法与负载场景已定，M5实测后调整。
+- [x] 任务已拆成含负责方、依赖、写入范围与完成定义的工作包。
+- [x] 用户已确认共识并要求开工（2026-10-24）；M0验证仍可能暴露需要用户选择的问题。

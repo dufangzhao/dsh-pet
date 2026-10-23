@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0013
 date: 2026-10-24
 source: 用户在Q6选择A
 ---

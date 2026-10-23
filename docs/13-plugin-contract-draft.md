@@ -157,7 +157,7 @@ stateDiagram-v2
 - **流**：分块有序编号、明确的结束或错误、有背压（有界队列或额度机制），时间戳使用单调时钟。
 - **健康与资源**：提供方报告加载中、就绪、占用设备或模型等状态，宿主汇总到诊断页。
 
-## 6. 首条闭环的能力草案：听写
+## 6. 语音能力草案（audio.capture与speech.asr用于首版；text.input属于后续听写插件）
 
 以下 TypeScript 只表达接口语义，不是冻结的 API。
 
@@ -218,6 +218,49 @@ interface InputReceipt {
 4. 取消后不再发起新提交；旧世代转录被丢弃。已发送的系统事件不能保证撤回。
 5. SendInput插入事件数量只能证明发送层结果，不能直接标为confirmed。分段中断、子进程退出或超时时，应区分未发送、部分发送、已发未验证和效果未知；当前示意InputReceipt还需补齐这些语义后才可冻结。
 
+## 6b. 首版语音对话新增的能力（示意）
+
+以下TypeScript只表达接口语义，不是冻结的API。取消统一通过TaskContext的signal完成。
+
+```ts
+// input.talkKey@1：只报告按键的按下与松开；长按与轻点由使用方判定，便于以后的听写插件采用不同规则
+interface TalkKey {
+  configure(hotkey: string): Promise<{ ok: true } | { ok: false; reason: string }>
+  events(): AsyncIterable<{ type: 'down' | 'up'; at: number }>   // at：单调时钟毫秒
+}
+
+// llm.chat@1：模型服务插件提供
+interface ChatModel {
+  describe(): Promise<{ vendor: string; protocol: 'openai-chat' | 'anthropic' | 'gemini'; models: string[] }>
+  complete(ctx: TaskContext, req: {
+    model: string
+    messages: { role: 'system' | 'user' | 'assistant'; content: string }[]
+  }): AsyncIterable<
+    | { type: 'delta'; text: string }
+    | { type: 'done'; usage?: { inputTokens?: number; outputTokens?: number } }
+  >
+}
+
+// chat.session@1：对话插件提供；语音对话插件把定稿文字交给它
+interface ChatSession {
+  send(ctx: TaskContext, input: { text: string; source: 'voice' | 'keyboard' }): AsyncIterable<
+    | { type: 'thinking' }
+    | { type: 'delta'; text: string }
+    | { type: 'done' }
+  >
+  history(): Promise<{ role: 'user' | 'assistant'; content: string; at: string }[]>
+  clear(): Promise<void>
+}
+
+// avatar.render@1：默认角色插件提供
+interface AvatarRenderer {
+  setState(state: 'idle' | 'listening' | 'thinking' | 'replying' | 'error'): void
+  showBubble(content: { text: string; kind: 'partial' | 'final' | 'reply' | 'error' }): void
+}
+```
+
+首版插件与这些能力的对应关系见[语音对话PRD](18-voice-chat-mvp-prd.md)第8节。
+
 ## 7. 界面贡献点契约
 
 - **首版候选**：设置页（优先由配置结构生成表单）、命令、热键请求、快捷按钮、结果或任务面板。首版具体开放哪些，随MVP细化确定。
@@ -267,4 +310,4 @@ interface InputReceipt {
 - 首版开放的贡献点清单。
 - 音频格式、背压机制、取消时限与超时等数值。
 
-验收场景见[候选场景](07-use-cases-and-acceptance.md)；听写细节见[听写PRD](09-dictation-mvp-prd.md)与[ASR双路径规格](10-asr-providers-and-dataflow.md)；运行边界见[Electron运行边界](12-electron-runtime-boundaries.md)。
+验收场景见[候选场景](07-use-cases-and-acceptance.md)；首版需求见[语音对话PRD](18-voice-chat-mvp-prd.md)；后续听写插件见[听写PRD](09-dictation-mvp-prd.md)与[ASR双路径规格](10-asr-providers-and-dataflow.md)；运行边界见[Electron运行边界](12-electron-runtime-boundaries.md)。

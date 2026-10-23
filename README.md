@@ -1,12 +1,15 @@
 # AI 桌宠项目（暂定名）
 
-当前阶段：需求访谈与架构选型。尚未开始产品代码实现；自有代码已确定采用MIT，已确定Electron + TypeScript及统一插件方向，具体框架版本和首版细节仍待选择。
+当前阶段：文档与选型完成，用户已确认开工。实现在新会话中进行，入口见[开工提示词](docs/20-implementation-kickoff-prompt.md)。首版闭环为跟桌宠语音对话。
 
 目标是实用、可定制、交互顺畅的独立桌面助手：用户可按需组合语音、声音、角色、屏幕理解与电脑操作能力，而非仅有聊天/养成的桌宠。已确定能力 + 受控UI贡献点；DSH为可选集成，不是运行前提。
 
 ## 从这里阅读
 
 - [文档导航与开工条件](docs/README.md)
+- [首版需求：跟桌宠语音对话](docs/18-voice-chat-mvp-prd.md)
+- [实现计划与任务拆解](docs/19-implementation-plan.md)
+- [开工提示词](docs/20-implementation-kickoff-prompt.md)
 - [产品需求基线 v0.1](docs/00-product-brief.md)
 - [逐题选型与决策清单](docs/01-discovery-plan.md)
 - [Coopanion 设置与交互专项评审](docs/02-coopanion-ui-review.md)
