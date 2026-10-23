@@ -6,8 +6,8 @@
 
 | 文档 | 用途 | 状态 |
 | --- | --- | --- |
-| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.5，持续细化 |
-| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q1=B、Q2=A、Q3=MIT、Q4=A已确认；Q5待回答 |
+| [产品需求基线](00-product-brief.md) | 已确认目标、需求来源、候选场景、质量要求与未知项 | v0.6，持续细化 |
+| [选型访谈清单](01-discovery-plan.md) | 每次一个问题；列选项、优劣、推荐和决策状态 | Q1—Q5已记录；当前澄清AGPL，MIT尚未变更 |
 | [Coopanion 交互评审](02-coopanion-ui-review.md) | 设置台、角色交互、扩展UI边界与可借鉴原则 | 官方资料/源码/截图静态核查 |
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
@@ -16,6 +16,8 @@
 | [ADR-0003](adr/0003-mit-license.md) | 本项目MIT与第三方材料边界 | 已采纳 |
 | [总体架构草案](05-architecture-overview.md) | 职责分层、能力工作流与验证项 | 方向已定，技术未冻结 |
 | [ADR-0004](adr/0004-capability-centered-host.md) | 能力/插件中心，而非固定Agent中心 | 已采纳 |
+| [ADR-0005](adr/0005-windows-first.md) | Windows首发及支持边界 | 已采纳 |
+| [MIT/AGPL解释](06-license-notes.md) | 开源、收费、分发、网络使用与代码复用 | 说明材料，不改变许可决策 |
 | [术语表](../CONTEXT.md) | 区分桌宠、设置台、能力插件与人设 | 工作词汇，可随澄清修订 |
 
 ## 文档制作规则

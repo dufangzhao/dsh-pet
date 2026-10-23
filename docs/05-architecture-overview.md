@@ -9,6 +9,8 @@
 - [ADR-0003](adr/0003-mit-license.md)：项目自有代码MIT。
 - [ADR-0004](adr/0004-capability-centered-host.md)：能力/插件中心，Agent是可替换能力；优先复用合适的插件基础框架。
 
+- [ADR-0005](adr/0005-windows-first.md)：Windows首发，其他平台仅保留适配边界。
+
 ## 分层建议
 
 ```text
@@ -109,6 +111,6 @@
 
 ## 尚未决定
 
-首发平台、桌面壳与UI框架、具体插件框架版本、插件语言/信任分级、数据存储、能力提供方、MVP、数值性能预算和发行方式。
+具体Windows版本/CPU架构、桌面壳与UI框架、具体插件框架版本、插件语言/信任分级、数据存储、能力提供方、MVP、数值性能预算和发行方式。
 
 研究依据：[平台资料](../research/tech-platform.json) · [Windows自动化](../research/tech-windows-automation.json) · [语音与角色](../research/tech-voice-character.json) · [Coopanion架构核验](04-coopanion-architecture-review.md)。
