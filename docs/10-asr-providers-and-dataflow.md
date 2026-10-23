@@ -6,6 +6,27 @@
 
 用户在Q8选择[自带服务商Key](adr/0009-cloud-asr-byok.md)，云识别费用由用户直接承担。首版不提供自有云账号/额度后台，也不在安装包或插件里嵌入维护者共享Key。具体凭据存储/代理方式、提供商和错误呈现仍需细化。
 
+## 云端厂家由用户选择（Q17澄清）
+
+用户要求本地与云端都支持，并由用户自行选择云端厂家。设计如下：
+
+- 云端识别作为一个插件包，内置**厂家表**：每家一个服务地址，内部按协议复用适配器。用户在设置中选择厂家、填写自己的Key（BYOK）。
+- 第三方也可以按统一插件规范，以独立插件新增厂家；它们和内置厂家一样实现 `speech.asr@1`。
+- 每家标注验证状态：**已用真实Key验证**，或**按官方文档接入、未验证**。未验证的厂家在界面上如实显示。
+- 首版内置哪些厂家，见[选型清单Q17](01-discovery-plan.md)。
+
+### 参考：Coopanion如何规划（固定提交静态核查，仅作参考）
+
+| 方面 | Coopanion的做法 | 对本项目的启发 |
+| --- | --- | --- |
+| 聊天模型服务商 | 一个服务商插件内置十多家厂家，每家一个端点；按协议构造Anthropic、Gemini、Chat、Responses等适配器；每次请求按当前选中的厂家路由；阻止向非私网地址发送明文HTTP请求。[源码](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-provider-coo/src/index.ts#L141-L206) | 厂家表 + 按协议复用适配器 |
+| 验证状态 | 官方说明只有DeepSeek、Anthropic、阶跃星辰Step Plan用真实Key测过，其余按文档接入。[说明](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/README_zh.md#L163-L169) | 如实标注每家的验证状态 |
+| 语音识别 | 只在本机：SenseVoiceSmall、Whisper small、Windows系统识别三种引擎；没有云端识别。[说明](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/README.md#L154-L215) | 本项目额外提供云端 |
+| 边说边出字 | SenseVoiceSmall每500毫秒把正在说的半句重新识别一次，给出临时结果；Whisper small只在句末转写。[源码](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/asr/sherpa.ts#L65-L99) | Q16实测时的候选做法，代价是更多CPU |
+| 可替换性 | 桌宠模块直接创建识别引擎，不是可替换的识别插件。[源码](https://github.com/Pal-AI-Lab/Coopanion/blob/3dd0892c2d70a026253ab980af392302b88ff8b1/packages/cortico-world-desktop-pet/src/world.ts#L610-L629) | 本项目把识别做成可替换的能力 |
+
+另记两个候选，均不改变已确认的Q16：Windows系统识别可作为免下载的后备引擎；“定时重识别半句”可让SenseVoiceSmall也在气泡里边说边出字。是否采用，在实测与交互细节中再定。
+
 ## 用户看到的两种运行方式
 
 | 方式 | 需要准备 | 识别数据去向 | 必须说明的限制 |
