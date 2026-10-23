@@ -1,0 +1,1090 @@
+{
+  "schema_version": 1,
+  "research_scope": {
+    "requested_repositories": [
+      "https://github.com/PC2005-cloud/dsh-pet",
+      "https://github.com/12we21/cute-fat-fish-pet"
+    ],
+    "method": "只读远程公开源代码和仓库官方资料；未运行仓库程序、未安装、未克隆、未下载发布二进制。使用自写 Node 文本筛选处理 curl 获取的源码不属于执行仓库代码。唯一写入文件为本报告。",
+    "snapshot": {
+      "started_utc": "2026-10-23T15:22:18Z",
+      "started_local": "2026-10-23T23:22:18+08:00",
+      "ended_utc": "2026-10-23T15:42:03.334Z",
+      "time_zone": "Asia/Taipei",
+      "ended_local": "2026-10-23T23:42:03.334+08:00",
+      "dynamic_metrics_observed_window_utc": "2026-10-23T15:22:18Z/2026-10-23T15:42:03.334Z",
+      "note": "动态数字来自本次公开 GitHub REST 200 响应，不是 README badge；不是当前永久数值。"
+    },
+    "access_limitations": [
+      "按要求先调用 GitHub get_me，返回401 Bad credentials；未继续使用需凭据GitHub工具。改用公开api.github.com、raw.githubusercontent.com。",
+      "web_fetch 每次约100000字符上限；部分目录递归和超长文件响应截断。cute main.js/sprite.js 后续用只读 curl+自写Node文本筛选补足相关段；dsh host/index.ts与cute lib/index.js只验证选定核心段，未全量审计所有后半段路由。",
+      "一次 Node 文本筛选正则包含未转义斜线导致纯读管道失败，未产生文件或程序运行副作用；该次未作证据。",
+      "未运行任何测试、未验证真实窗口效果/语音质量/性能/签名/下载二进制一致性；测试和发布说明只作维护信号。"
+    ],
+    "evidence_levels": {
+      "source_verified": "实际读取固定commit源代码所支持的有限结论；不代表动态测试通过",
+      "readme_or_official_claims": "项目README/NOTICE/SECURITY/发布说明的作者声明，未自动当作事实",
+      "inference": "根据已列证据作出的评估/借鉴建议",
+      "unknown": "本次证据不足或未验证"
+    }
+  },
+  "headline_conclusions": [
+    "dsh-pet 最新提交不能再概括为“只有DSH宿主才有AI”：插件聊天确实经ctx.llm，但新增独立Electron应用已注入OpenAI-compatible/Anthropic适配器。README“独立对话不可用”落后于源码。",
+    "cute-fat-fish-pet 是基于上游0.3.0引擎的Windows产品化扩展：独立适配Ollama/在线Key、离线ASR、联网Edge TTS、屏幕观察、规则式本机动作。不是独立重写的新动画引擎。",
+    "两者渲染均为透明WebM视频切换+DOM/CSS与共享物理逻辑，非Live2D/VRM。局部透明Electron窗+命中区切换穿透是主要可复用设计。",
+    "cute的三权限开关是renderer localStorage+动作拦截层，不等同于OS沙箱；后端IPC可接收路径，SECURITY中的强表述不宜照搬。",
+    "代码开源免费不等于模型API免费或订阅资格通用；没有证据证明二者绕过或自动继承ChatGPT/Claude等免费订阅认证。"
+  ],
+  "repositories": [
+    {
+      "repository": "PC2005-cloud/dsh-pet",
+      "url": "https://github.com/PC2005-cloud/dsh-pet",
+      "commit": "bb436f9f065043d1d976648b3ed27173ce48e9bf",
+      "default_branch": "main",
+      "package_version": "0.3.8",
+      "github_snapshot": {
+        "source": "https://api.github.com/repos/PC2005-cloud/dsh-pet",
+        "stars": 3706,
+        "forks": 269,
+        "open_issues_including_pull_requests": 11,
+        "subscribers": 5,
+        "archived": false,
+        "created_at": "2026-08-14T00:38:45Z",
+        "pushed_at": "2026-10-23T15:11:36Z",
+        "last_commit_at": "2026-10-23T15:11:31Z",
+        "primary_language_label": "TypeScript",
+        "latest_observed_stable": {
+          "tag": "v0.3.8",
+          "published_at": "2026-10-22T04:32:08Z",
+          "url": "https://github.com/PC2005-cloud/dsh-pet/releases/tag/v0.3.8",
+          "assets_count": 0
+        },
+        "latest_observed_prerelease": {
+          "tag": "v0.3.8-test.2",
+          "published_at": "2026-10-23T13:19:33Z",
+          "url": "https://github.com/PC2005-cloud/dsh-pet/releases/tag/v0.3.8-test.2",
+          "asset": "dsh-pet-win-x64.zip",
+          "asset_bytes": 203111995,
+          "asset_download_count": 55,
+          "author_note": "修复桌面 shared-core.js 缺失；仅联调、非正式发布"
+        },
+        "release_source": "https://api.github.com/repos/PC2005-cloud/dsh-pet/releases?per_page=5",
+        "metrics_caution": "open_issues_count包含开放PR；未把stars当作稳定性证据。"
+      },
+      "findings": [
+        {
+          "topic": "语言/框架/桌面壳",
+          "source_verified": [
+            "TypeScript宿主与React浏览器客户端，Cordis依赖注入，tsdown构建；Electron helper使用CommonJS/DOM脚本；Python用于离线素材链。",
+            "包依赖包含OpenAI/Anthropic SDK；Node >=22.12.0。"
+          ],
+          "evidence_ids": [
+            "a_manifest",
+            "a_app",
+            "a_encode"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [],
+          "unknown": []
+        },
+        {
+          "topic": "运行形态与DSH耦合",
+          "source_verified": [
+            "DSH插件模式需要宿主的llm/default-model/credentials/webserver等peer服务；桌面helper只是独立窗口进程，不等于无DSH。",
+            "新独立Electron应用在同一进程创建HTTP路由、伪Cordis ctx、AI服务，再复用helper。",
+            "独立ctx的on()为空操作，因此没有真实DSH会话事件联动。"
+          ],
+          "evidence_ids": [
+            "a_manifest",
+            "a_app",
+            "a_ctx"
+          ],
+          "readme_or_official_claims": [
+            "README仍说独立模式不能余额/碎碎念/对话/通知。"
+          ],
+          "inference": [
+            "当前main比README描述的独立功能更完整；应按指定commit评估，不能假定稳定版或测试包包含main的全部修改。"
+          ],
+          "unknown": [
+            "未核对v0.3.8稳定tag与main的逐文件差异；CLI与Electron app在所有端点上的完整一致性未实测。"
+          ]
+        },
+        {
+          "topic": "渲染资产与动画",
+          "source_verified": [
+            "双HTML video元素播放命名.webm；状态/权重选择、朝向镜像、拖拽物理由共享逻辑与renderer组合。",
+            "离线编码脚本实际设置640×360、libvpx-vp9、yuva420p保留alpha。脚本顶部残留360×360文字，实际常量优先。"
+          ],
+          "evidence_ids": [
+            "a_render",
+            "a_animation",
+            "a_encode",
+            "a_drag"
+          ],
+          "readme_or_official_claims": [
+            "README称百余动画与AI视频素材生成链；当前资产均PR手工抠像。"
+          ],
+          "inference": [
+            "适合短循环2D视频宠物，资产工程和角色种类/实例分离值得借鉴；不像骨骼动画那样可连续参数化表情。"
+          ],
+          "unknown": [
+            "未逐个探测二进制视频编码、透明像素、总数或AI生成来源/授权。"
+          ]
+        },
+        {
+          "topic": "透明/穿透/拖拽",
+          "source_verified": [
+            "每只宠物局部透明无边框置顶窗，不铺满屏幕；default ignoreMouseEvents + forward。",
+            "preload仅暴露窗口/命中区控制，busy拖动保持输入；renderer屏幕坐标轨迹 → 弹簧 → 抛掷 → bounds IPC → setContentBounds。",
+            "contextIsolation=true、nodeIntegration=false但sandbox=false。"
+          ],
+          "evidence_ids": [
+            "a_window",
+            "a_mouse",
+            "a_mouse_native",
+            "a_drag"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [
+            "DPI、跨屏边界与跨窗碰撞设计较细；不能因contextIsolation存在就宣称完全隔离。"
+          ],
+          "unknown": [
+            "Windows/macOS/Linux真实透明/穿透表现未跑。"
+          ]
+        },
+        {
+          "topic": "AI接入/协议/认证",
+          "source_verified": [
+            "插件generateChat：配置模型优先、当前DSH模型兜底 → ctx.llm.stream → BlockAssembler；模型支持off时才传reasoningEffort。",
+            "独立应用：OpenAI Chat Completions流或Anthropic Messages流，显式用户API Key；独立重建请求头且拒绝重定向。",
+            "独立默认enabled=false、automaticWhispers=false；未配置不就绪。"
+          ],
+          "evidence_ids": [
+            "a_chat",
+            "a_model",
+            "a_transport",
+            "a_ai_policy"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [],
+          "unknown": [
+            "DSH侧不同模型认证由外部宿主提供，本仓库不能证明任何免费订阅/自动OAuth继承或服务商资格。",
+            "源码里模型特判名称只是作者代码，不证明相应官方模型实时存在或可用。"
+          ]
+        },
+        {
+          "topic": "语音",
+          "source_verified": [],
+          "evidence_ids": [
+            "a_manifest",
+            "a_chat"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [],
+          "unknown": [
+            "在已检核心依赖、聊天、helper桥中未发现ASR/TTS集成；未据此证明整个仓库绝无语音。whisper在本项目意为文字碎碎念，不是OpenAI Whisper语音识别。"
+          ]
+        },
+        {
+          "topic": "记忆",
+          "source_verified": [
+            "memory.json按种类/宠物实例分桶；chatQueue防同时读改写冲突；读取损坏备份；仅最近配置轮数作为上下文，但历史追加落盘。",
+            "回复写入say状态叶，与碎碎念共享渲染链。"
+          ],
+          "evidence_ids": [
+            "a_memory",
+            "a_memory_call",
+            "a_state"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [
+            "这是持久聊天历史/人设，不是向量数据库、RAG或模型训练。"
+          ],
+          "unknown": [
+            "无限历史增长、长期压缩/清理策略未完整审计。"
+          ]
+        },
+        {
+          "topic": "工具/代理权限",
+          "source_verified": [
+            "插件聊天已读options无通用工具执行循环；状态与动画API/菜单/占用锁面向驱动宠物，不代表开放式电脑代理。",
+            "独立app配置服务有token/Host/Origin校验；renderer沙箱关闭。"
+          ],
+          "evidence_ids": [
+            "a_chat",
+            "a_auth",
+            "a_window"
+          ],
+          "readme_or_official_claims": [
+            "README宣传HTTP+同页Cordis接口驱动气泡/动作/状态/菜单/锁。"
+          ],
+          "inference": [
+            "可把它当作代理任务状态的展示端；工具执行应留在有独立授权的宿主。"
+          ],
+          "unknown": [
+            "DSH宿主自身工具权限、安全审批及所有HTTP插件端点授权未审计，不能继承本报告结论。"
+          ]
+        },
+        {
+          "topic": "存储",
+          "source_verified": [
+            "配置/记忆/日志在DSH home的dsh-pet子目录；Electron userData与运行时下载缓存另存。",
+            "独立AI Key是JSON明文但有POSIX0600或Windows ACL限制，独占临时文件→fsync→rename；公开设置只给hasKey。"
+          ],
+          "evidence_ids": [
+            "a_ai_store",
+            "a_storage",
+            "a_ai_policy"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [
+            "比裸JSON多了权限/原子写保护，但仍不是OS keychain/凭据库加密。"
+          ],
+          "unknown": []
+        },
+        {
+          "topic": "打包与平台",
+          "source_verified": [
+            "electron-builder.yml应用入口lib/app.js，asar，Electron43.3.0，Windows dir产物。",
+            "本次发布列表确认Windows x64 ZIP测试包；稳定0.3.8 release无二进制附件。"
+          ],
+          "evidence_ids": [
+            "a_package",
+            "a_manifest"
+          ],
+          "readme_or_official_claims": [
+            "README宣称Windows/Linux/macOS以及浏览器overlay；Safari透明视频需额外HEVC素材路径。"
+          ],
+          "inference": [
+            "插件跨平台设计与实际打包发布范围必须分开。"
+          ],
+          "unknown": [
+            "未验证macOS签名/notarization、Linux包、Windows签名或真实平台验收。"
+          ]
+        },
+        {
+          "topic": "许可证",
+          "source_verified": [
+            "读取LICENSE确认MIT，PC2005-cloud版权与保留声明要求。"
+          ],
+          "evidence_ids": [
+            "a_license",
+            "a_pipeline_doc"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [],
+          "unknown": [
+            "MIT仓库声明不自动解决字体、表情包、AI素材第三方权利；本次未逐资产授权审计。"
+          ]
+        },
+        {
+          "topic": "维护成熟度",
+          "source_verified": [
+            "依赖清单有typecheck/lint/format/test/test:ui/OpenAPI检查；源码目录含较多针对状态、跨屏、锁与路由的测试。",
+            "当日仍提交；最新桌面测试release说明修复缺失shared-core导致不可显示。"
+          ],
+          "evidence_ids": [
+            "a_manifest",
+            "a_package"
+          ],
+          "readme_or_official_claims": [
+            "README明确小修累积发布，main修复不等于已发布。"
+          ],
+          "inference": [
+            "插件/动画引擎已有较完整工程约束；独立桌面AI仍是近期演进阶段，文档漂移和测试包性质降低开箱即用确定性。"
+          ],
+          "unknown": [
+            "未执行测试，未取得CI通过率/覆盖率/贡献者稳定性，不能称生产级。"
+          ]
+        }
+      ],
+      "end_to_end_paths": [
+        {
+          "name": "DSH插件聊天",
+          "path": "用户输入 → Web React或桌面聊天UI → /dsh-pet-7340/chat（桌面走host桥接/HTTP适配） → host串行chatQueue → 读取人设+memory.json最近N轮 → generateChat → modelCandidates → ctx.llm.stream（DSH provider/auth适配器） → BlockAssembler正文 → 写memory.json与pets.<id>.say → /state长轮询 → applySayLeaf → 说话动画+气泡",
+          "evidence_ids": [
+            "a_chat",
+            "a_memory",
+            "a_memory_call",
+            "a_state"
+          ],
+          "boundary": "DSH provider/auth在仓库外，本次不推断其免费订阅能力；host后半路由未逐条审计。"
+        },
+        {
+          "name": "新独立桌面应用AI",
+          "path": "Electron app/main → createStandaloneAi + createStandaloneContext → apply共用宿主路由 → require既有helper → 用户聊天 →同一generateChat →伪ctx.llm.stream → sdkTextStream → OpenAI-compatible/Anthropic远端 →正文 →记忆+状态 →video与气泡",
+          "evidence_ids": [
+            "a_app",
+            "a_ctx",
+            "a_chat",
+            "a_transport"
+          ],
+          "boundary": "使用独立配置的API Key；默认关闭；没有真实DSH会话事件。"
+        },
+        {
+          "name": "拖拽动画",
+          "path": "pointerdown/move/up →renderer屏幕坐标采样/共享物理函数 →视觉位置、朝向、挤压 →preload pet:set-bounds →Electron setContentBounds；命中区进出 →pet:set-interactive →setIgnoreMouseEvents；video ended →选下一命名WebM →双视频切换",
+          "evidence_ids": [
+            "a_drag",
+            "a_mouse",
+            "a_mouse_native",
+            "a_render",
+            "a_animation"
+          ]
+        }
+      ],
+      "strengths": [
+        "共享纯逻辑和浏览器/桌面两端复用",
+        "较细的多屏/DPI/输入忙碌态处理",
+        "状态API/动画资源管线适合与外部代理解耦",
+        "独立AI新增显式配置、令牌与Key文件权限控制"
+      ],
+      "weaknesses": [
+        "DSH插件API/版本耦合",
+        "源码与README存在独立AI能力漂移",
+        "独立桌面包处于测试迭代",
+        "视频资产较重、表情参数化受限、sandbox=false"
+      ],
+      "recommended_borrowing": [
+        "取共享物理/动画选取与局部窗穿透设计",
+        "取状态树/长轮询展示端接口",
+        "取AI请求隔离和私密配置原子写思路；迁移时优先改OS凭据存储",
+        "勿直接复制外部服务商/模型可用性声明"
+      ]
+    },
+    {
+      "repository": "12we21/cute-fat-fish-pet",
+      "url": "https://github.com/12we21/cute-fat-fish-pet",
+      "commit": "e53f63e67227671aca092e3334c8611e29b880b6",
+      "default_branch": "main",
+      "package_version": "1.2.3",
+      "github_snapshot": {
+        "source": "https://api.github.com/repos/12we21/cute-fat-fish-pet",
+        "stars": 16,
+        "forks": 0,
+        "open_issues_including_pull_requests": 1,
+        "subscribers": 0,
+        "archived": false,
+        "created_at": "2026-10-08T04:30:21Z",
+        "pushed_at": "2026-10-18T06:46:43Z",
+        "last_commit_at": "2026-10-18T06:42:41Z",
+        "primary_language_label": "JavaScript",
+        "latest_observed_release": {
+          "tag": "v1.2.3",
+          "published_at": "2026-10-18T06:46:44Z",
+          "prerelease": false,
+          "target_commitish": "e53f63e67227671aca092e3334c8611e29b880b6",
+          "url": "https://github.com/12we21/cute-fat-fish-pet/releases/tag/v1.2.3",
+          "selected_assets": [
+            {
+              "name": "cute-fat-fish-pet-1.2.3-setup.exe",
+              "bytes": 347857693,
+              "download_count": 856
+            },
+            {
+              "name": "cute-fat-fish-pet-1.2.3-win-x64.zip",
+              "bytes": 417039455,
+              "download_count": 291
+            }
+          ],
+          "sha256_sidecars": true
+        },
+        "release_source": "https://api.github.com/repos/12we21/cute-fat-fish-pet/releases?per_page=5",
+        "metrics_caution": "仅列本次已可靠取得的选定资产，不合计别名下载，不将stars/版本号视为成熟证明。"
+      },
+      "findings": [
+        {
+          "topic": "语言/框架/桌面壳",
+          "source_verified": [
+            "主应用和独立适配为JavaScript/Node ESM；保留TypeScript/React/Cordis插件源码及预构建lib；Electron桌面。",
+            "Python用于NSIS/ZIP打包入口；根package与src子包都声明DSH插件入口。"
+          ],
+          "evidence_ids": [
+            "b_manifest",
+            "b_build",
+            "b_nsis"
+          ],
+          "readme_or_official_claims": [
+            "README称以dsh-pet0.3.0为引擎基础，逐文件一致数量见自身差异表。"
+          ],
+          "inference": [
+            "主要价值是上游引擎的产品化与本机功能扩展，不是全新渲染栈。"
+          ],
+          "unknown": [
+            "未重新计算“232/243字节一致”的上游对照hash。"
+          ]
+        },
+        {
+          "topic": "运行形态/DSH耦合",
+          "source_verified": [
+            "DSH模式仍用Cordis/DSH peers；独立版伪ctx把LLM等接口补成Ollama/在线适配，独立路径强制设置自己的DSH_HOME。",
+            "预构建lib中有额外本地模型/屏幕观察逻辑；不能只读src/src旧TS就代表实际运行产物。"
+          ],
+          "evidence_ids": [
+            "b_manifest",
+            "b_ctx",
+            "b_plugin_ai",
+            "b_paths"
+          ],
+          "readme_or_official_claims": [
+            "README称DSH插件是功能子集；离线ASR/Edge TTS/控制台主要随安装包ZIP提供。"
+          ],
+          "inference": [
+            "保留dsh-pet路由/目录/key等内部标识利于升级，但可能与其它同源插件数据冲突。"
+          ],
+          "unknown": [
+            "DSH现行宿主版本与该0.3.0基础的所有兼容边界未测试。"
+          ]
+        },
+        {
+          "topic": "渲染资产/动画",
+          "source_verified": [
+            "HTML videoA/videoB + CSS opacity 0.18s；继承上游共享物理、随机动作和WebM命名资源机制。"
+          ],
+          "evidence_ids": [
+            "b_render",
+            "b_css",
+            "b_window"
+          ],
+          "readme_or_official_claims": [
+            "README称106 hand-drawn VP9-alpha动画、screen blend；NOTICE称素材自有。"
+          ],
+          "inference": [
+            "适合沿用视频宠物，不是Live2D/VRM引擎；“手绘”不能由文件扩展或来源声明验证。"
+          ],
+          "unknown": [
+            "未核验106数量/编码/手绘来源；当前已读CSS未见screen blend实现，故该效果只列README声明。"
+          ]
+        },
+        {
+          "topic": "透明/穿透/拖拽",
+          "source_verified": [
+            "局部透明无框置顶Electron窗；setIgnoreMouseEvents+forward；preload窗口控制桥；共享弹簧/抛掷物理。",
+            "contextIsolation=true、nodeIntegration=false、sandbox=false。"
+          ],
+          "evidence_ids": [
+            "b_window",
+            "b_mouse",
+            "b_preload"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [
+            "具备上游局部窗设计优势，新增大量原生能力后应扩大IPC安全审查。"
+          ],
+          "unknown": [
+            "未运行实际拖拽、多屏、CPU/GPU占用测试。"
+          ]
+        },
+        {
+          "topic": "AI协议/认证",
+          "source_verified": [
+            "独立Ollama POST /api/chat及在线OpenAI-compatible POST /chat/completions；二者stream:false，结果包装AsyncIterable满足旧ctx接口。",
+            "本地/自动/在线模式：local不自动改用联网模型；auto本地优先；online可回落本地。在线视觉有单独模型/地址/Key就绪检查。",
+            "插件模式可调DSH当前模型；独立版只需自身Key/Ollama服务，不需DSH认证服务。"
+          ],
+          "evidence_ids": [
+            "b_ctx",
+            "b_ollama",
+            "b_online",
+            "b_plugin_ai"
+          ],
+          "readme_or_official_claims": [],
+          "inference": [
+            "“流式接口”这里是契约适配，不代表远端逐token串流。"
+          ],
+          "unknown": [
+            "无证据说明ChatGPT/Claude等免费订阅/OAuth自动接入；Ollama程序与模型需另备，模型许可证另算。"
+          ]
+        },
+        {
+          "topic": "语音",
+          "source_verified": [
+            "主进程只在VOICE.on时批准media权限；真实node.exe子进程运行stt-worker，JSON行协议传回结果。",
+            "worker用sherpa-onnx离线SenseVoice；先增益再Silero VAD；VAD不可用会回退逐段识别。",
+            "TTS为Edge在线朗读端点的自写TLS/WebSocket+SSML → MP3；不是离线TTS。"
+          ],
+          "evidence_ids": [
+            "b_voice",
+            "b_worker_launch",
+            "b_stt",
+            "b_vad",
+            "b_tts",
+            "b_tts_endpoint",
+            "b_preload"
+          ],
+          "readme_or_official_claims": [
+            "README称安装包/ZIP带语音引擎和模型；“免费、无Key”出现在作者Edge实现注释。"
+          ],
+          "inference": [
+            "ASR隔离真实Node解决native-addon/Electron ABI边界思路可借鉴；Edge非正式接口的UA/token/端点变动形成运维风险。"
+          ],
+          "unknown": [
+            "未验证Edge官方授权/免费服务保证、可用性或音质；不把内置通用token当模型订阅凭据。"
+          ]
+        },
+        {
+          "topic": "记忆与屏幕感知",
+          "source_verified": [
+            "memory.json聊天历史与人设；最近轮次送模型；JSON队列写入。",
+            "screen-watch/state.json保存配置；原生SwCapture.exe优先、PowerShell抓屏兜底，shot.jpg经附件服务送视觉模型。"
+          ],
+          "evidence_ids": [
+            "b_memory",
+            "b_screen",
+            "b_screen_model"
+          ],
+          "readme_or_official_claims": [
+            "README称开关可停截图；选择在线视觉时图像发到用户所配端点。"
+          ],
+          "inference": [
+            "有屏幕感知/短期对话上下文，不等于长期语义记忆/RAG；需向用户明确图像数据流。"
+          ],
+          "unknown": [
+            "未全量审计截图保留、脱敏、删除、所有定时触发与隐私模式。"
+          ]
+        },
+        {
+          "topic": "工具/代理权限",
+          "source_verified": [
+            "onChatSendIntercept用规则识别开应用/文件/网址/录屏意图，先检查app/file/url三开关；非命中交正常聊天。",
+            "开关默认false，保存在renderer localStorage；最近20条动作日志。录屏启动用app权限，停止不强制同门控。",
+            "preload提供固定IPC；main open-target接受kind/target并可打开绝对/相对路径，URL限定http(s)；未见此handler再次检查三开关。",
+            "OBS start/stop/status调用本地主进程obsCtl，不把OBS密码直接给renderer。",
+            "控制桥是回环HTTP+随机token+Origin检查；/health例外。"
+          ],
+          "evidence_ids": [
+            "b_perm",
+            "b_action",
+            "b_preload",
+            "b_open",
+            "b_obs",
+            "b_bridge",
+            "b_http"
+          ],
+          "readme_or_official_claims": [
+            "SECURITY称“renderer can never choose a path”；与已读IPC路径分支不一致。"
+          ],
+          "inference": [
+            "是规则式有限桌面动作，不是通用LLM tool-calling代理；“只打开”仍可能启动可执行文件，不能等同无副作用。",
+            "UI权限不是OS级沙箱；移植时应在主进程重做权限检查、发送者验证、目标规范化/白名单与执行确认。"
+          ],
+          "unknown": [
+            "未做攻击测试；不能仅凭静态发现断言任意远程利用；未审计全部HTTP端点/IPC发送者约束。"
+          ]
+        },
+        {
+          "topic": "存储",
+          "source_verified": [
+            "独立数据根优先级：环境变量→data-root.txt→portable.txt→APPDATA/BlueHairMaid；dsh-pet子目录保存用户数据。",
+            "online.json在程序standalone目录明文存API Key；并非全部配置都在APPDATA。",
+            "renderer localStorage保存权限与状态，Electron helper userData单独存在；控制token保存在helper-control.json。"
+          ],
+          "evidence_ids": [
+            "b_paths",
+            "b_online_store",
+            "b_perm",
+            "b_bridge"
+          ],
+          "readme_or_official_claims": [
+            "README/SECURITY明确Key明文且禁止外发；卸载保留用户数据。"
+          ],
+          "inference": [
+            "备份应用整个目录可能夹带API Key；应迁移OS凭据库并定义导出脱敏规则。"
+          ],
+          "unknown": [
+            "Windows上仅mode0600是否形成预期ACL未实测。"
+          ]
+        },
+        {
+          "topic": "打包平台",
+          "source_verified": [
+            "build复制源码/预构建lib成stage/app；Electron、真实Node、speech外部运行时另补；mkexe调用NSIS。",
+            "发布资产确有Windows x64安装EXE/便携ZIP及SHA256旁文件。"
+          ],
+          "evidence_ids": [
+            "b_build",
+            "b_nsis",
+            "b_paths"
+          ],
+          "readme_or_official_claims": [
+            "README产品定位Windows；运行时不入git，约689MB；需准备工具链。"
+          ],
+          "inference": [
+            "便携/安装一体产品化比上游更完整，但二进制体积大且源码重建依赖外部运行时。"
+          ],
+          "unknown": [
+            "未验证签名、可复现构建、平台移植或包内模型实际版本；不因Electron跨平台就称成品支持macOS/Linux。"
+          ]
+        },
+        {
+          "topic": "许可证",
+          "source_verified": [
+            "LICENSE是MIT并保留两作者版权。"
+          ],
+          "evidence_ids": [
+            "b_license",
+            "b_notice"
+          ],
+          "readme_or_official_claims": [
+            "NOTICE列Electron/Node MIT、sherpa/SenseVoice Apache-2.0、Silero MIT；素材称自有；字体仅注明用于本应用。"
+          ],
+          "inference": [
+            "二次发布需保留上游署名并逐项审查字体/模型/素材许可；不能把总仓库MIT覆盖解释为每项资源均可随意商用。"
+          ],
+          "unknown": [
+            "没有核验所有第三方实际LICENSE与权利链；字体商用/再分发授权不明确。"
+          ]
+        },
+        {
+          "topic": "维护/成熟度",
+          "source_verified": [
+            "公开仓库创建于2026-10-08，本次快照latest release1.2.3有成品与hash；2026-10-18最后提交。",
+            "构建脚本含路径隐私门禁与verify分发；src package明确一些继承测试依赖缺失/不适用于本仓库。"
+          ],
+          "evidence_ids": [
+            "b_manifest",
+            "b_build",
+            "b_update_doc"
+          ],
+          "readme_or_official_claims": [
+            "README称无自动更新、无内建自启动；手工下载安装覆盖。"
+          ],
+          "inference": [
+            "Windows功能面完整但项目历史很短、维护规模小；大文件补丁和预构建lib并行使变更审计成本高。"
+          ],
+          "unknown": [
+            "未跑测试/自验脚本；没有可独立确认的CI通过率、真实用户稳定性、二进制签名结论。"
+          ]
+        }
+      ],
+      "end_to_end_paths": [
+        {
+          "name": "独立聊天/语音输入",
+          "path": "键盘聊天或麦克风PCM →（语音：preload voiceTranscribe →main→真实Node stt-worker→SenseVoice/VAD→文字）→onChatSendIntercept规则动作检查→普通聊天发送host /chat→memory.json最近N轮+人设→generateChat→local/auto先Ollama；online走伪ctx.llm→online.mjs OpenAI-compatible→正文→写记忆/气泡动画→可选ttsSpeak→Edge SSML/WebSocket→MP3播放",
+          "evidence_ids": [
+            "b_preload",
+            "b_worker_launch",
+            "b_stt",
+            "b_vad",
+            "b_action",
+            "b_memory",
+            "b_plugin_ai",
+            "b_ctx",
+            "b_online",
+            "b_tts"
+          ],
+          "boundary": "语音入口/普通聊天连接为已读组件综合路径；未动态执行验证全链路。TTS仍联网，即使LLM处于local模式也不可概括“整个应用绝不联网”。"
+        },
+        {
+          "name": "看屏幕",
+          "path": "屏幕观察配置/触发→SwCapture.exe或capture.ps1→shot.jpg→视觉模型就绪检查→attachments.saveImages→ctx.llm→本地Ollama images或在线image_url data URL→评论正文→气泡/动画",
+          "evidence_ids": [
+            "b_screen",
+            "b_screen_model",
+            "b_ollama",
+            "b_online"
+          ],
+          "boundary": "在线视觉把屏幕内容发送给用户配置端点；没有默认脱敏保证。"
+        },
+        {
+          "name": "有限本机动作",
+          "path": "用户文字/ASR文字→renderer正则parseRecIntent/parseIntent/targets分类→renderer权限检查与20条审计→preload固定IPC→main打开目标或obsCtl→操作结果回话；不命中则交LLM聊天",
+          "evidence_ids": [
+            "b_perm",
+            "b_action",
+            "b_preload",
+            "b_open",
+            "b_obs"
+          ],
+          "boundary": "不是模型自行任意调用shell；但openPath可启动程序，且权限必须在可信main再加固。"
+        }
+      ],
+      "strengths": [
+        "Windows安装器/便携包/控制台/路径迁移更完整",
+        "独立Ollama与在线模型选择及视觉配置明确",
+        "离线ASR、VAD、Node worker隔离可借鉴",
+        "动作歧义返回候选、规则化执行比任意命令面更窄"
+      ],
+      "weaknesses": [
+        "Key明文程序目录存储",
+        "renderer权限与main IPC边界不一致；sandbox=false",
+        "Edge TTS依赖易变化网络接口",
+        "预构建lib有补丁，旧TS不能完整代表发货代码",
+        "资产/运行时大且维护历史短"
+      ],
+      "recommended_borrowing": [
+        "借鉴独立ctx适配层与本地/在线/视觉分流",
+        "借鉴ASR worker和VAD流水线，但保持TTS与本地模型联网声明分离",
+        "借鉴数据路径优先级与不覆盖用户数据的seed策略",
+        "动作模块应重构为主进程权限服务，勿原样当安全沙箱复用"
+      ]
+    }
+  ],
+  "cross_repo_caveats": [
+    "两项目使用相近dsh-pet路由、数据目录和helper身份；插件同时安装的冲突风险要先隔离验证。",
+    "README、注释、包版本与最新main可发生漂移；本报告固定commit仅代表本次源码快照。",
+    "价格/订阅权益/模型列表与服务条款均未从服务商官方实时核验；所有免费模型或订阅能力保持未知。"
+  ],
+  "evidence": {
+    "a_manifest": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/package.json#L74-L155",
+      "path": "dsh-pet/package.json",
+      "lines": "74-155",
+      "short_evidence": "0.3.8；tsdown/TypeScript/React；openai 7.39.0、@anthropic-ai/sdk 0.135.0；Cordis/DSH peer dependencies；node >=22.12.0"
+    },
+    "a_readme": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/README.md#L164-L180",
+      "path": "README.md",
+      "lines": "164-180",
+      "short_evidence": "独立模式段落仍称“不可用：余额、碎碎念、对话、系统通知”"
+    },
+    "a_app": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/app/main.ts#L118-L174",
+      "path": "dsh-pet/src/app/main.ts",
+      "lines": "118-174",
+      "short_evidence": "createStandaloneAi(dshHomeDir(), logger) → createStandaloneContext({ai}) → apply(context.ctx) → require(helperMain)"
+    },
+    "a_ctx": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/context.ts#L189-L220",
+      "path": "dsh-pet/src/standalone/context.ts",
+      "lines": "189-220",
+      "short_evidence": "on() 不订阅 DSH 事件；currentSelection 与 llm.stream 转发可选 ai 服务"
+    },
+    "a_chat": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/host/chat.ts#L70-L161",
+      "path": "dsh-pet/src/host/chat.ts",
+      "lines": "70-161",
+      "short_evidence": "modelCandidates → createUserMessage/createAssistantMessage → llm.stream(options) → BlockAssembler"
+    },
+    "a_model": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/host/model-selection.ts#L22-L59",
+      "path": "dsh-pet/src/host/model-selection.ts",
+      "lines": "22-59",
+      "short_evidence": "配置 chatModel/whisperModel 优先，当前 DSH 选中模型兜底并去重"
+    },
+    "a_transport": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/ai-transport.ts#L17-L104",
+      "path": "dsh-pet/src/standalone/ai-transport.ts",
+      "lines": "17-104",
+      "short_evidence": "OpenAI chat.completions.create(stream:true) / Anthropic messages.create；独立构造 Bearer/x-api-key 请求头，redirect:error"
+    },
+    "a_ai_policy": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/ai-config.ts#L17-L26",
+      "path": "dsh-pet/src/standalone/ai-config.ts",
+      "lines": "17-26",
+      "short_evidence": "enabled:false；automaticWhispers:false；whisperIntervalSec:300；apiKey 空"
+    },
+    "a_ai_store": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/ai-storage.ts#L22-L103",
+      "path": "dsh-pet/src/standalone/ai-storage.ts",
+      "lines": "22-103",
+      "short_evidence": "standalone-ai.json；chmod 0600 / Windows icacls；临时文件先限制权限再写 JSON、fsync、rename；不是加密存储"
+    },
+    "a_auth": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/request-security.ts#L29-L74",
+      "path": "dsh-pet/src/standalone/request-security.ts",
+      "lines": "29-74",
+      "short_evidence": "随机 32-byte token；精确 Host/Origin/Fetch-Metadata 检查；x-dsh-pet-token 恒定时间比较"
+    },
+    "a_window": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/main.js#L433-L456",
+      "path": "dsh-pet/runtime/electron-helper/main.js",
+      "lines": "433-456",
+      "short_evidence": "transparent:true, frame:false, alwaysOnTop:true, contextIsolation:true, nodeIntegration:false, sandbox:false"
+    },
+    "a_mouse": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/preload.js#L1-L49",
+      "path": "dsh-pet/runtime/electron-helper/preload.js",
+      "lines": "1-49",
+      "short_evidence": "setBounds / setInteractive / setInputBusy / setInputRegions 通过 pet:* IPC；忙碌拖动不翻回穿透"
+    },
+    "a_mouse_native": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/main.js#L350-L352",
+      "path": "dsh-pet/runtime/electron-helper/main.js",
+      "lines": "350-352",
+      "short_evidence": "setIgnoreMouseEvents(ignore,{forward:true})"
+    },
+    "a_render": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/sprite.js#L180-L185",
+      "path": "dsh-pet/runtime/electron-helper/sprite.js",
+      "lines": "180-185",
+      "short_evidence": "两个 HTML video：videoA/videoB；不是 Live2D、VRM 或骨骼模型渲染"
+    },
+    "a_animation": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/sprite.js#L517-L520",
+      "path": "dsh-pet/runtime/electron-helper/sprite.js",
+      "lines": "517-520",
+      "short_evidence": "视频源 = assetBase + encodeURIComponent(next) + .webm；loop 与 muted"
+    },
+    "a_drag": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/sprite.js#L1165-L1396",
+      "path": "dsh-pet/runtime/electron-helper/sprite.js",
+      "lines": "1165-1396",
+      "short_evidence": "指针按下/移动/释放；屏幕坐标采样、弹簧跟随、估速抛掷；共用重力/反弹/碰撞实现"
+    },
+    "a_state": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/events.js#L285-L393",
+      "path": "dsh-pet/runtime/electron-helper/events.js",
+      "lines": "285-393",
+      "short_evidence": "GET /state 长轮询；applySayLeaf 和工作状态叶子驱动气泡与动画"
+    },
+    "a_memory": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/host/index.ts#L769-L802",
+      "path": "dsh-pet/src/host/index.ts",
+      "lines": "769-802",
+      "short_evidence": "memory.json 按种类/实例分桶；chatQueue 串行化；损坏备份；JSON writeFile"
+    },
+    "a_memory_call": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/host/index.ts#L913-L939",
+      "path": "dsh-pet/src/host/index.ts",
+      "lines": "913-939",
+      "short_evidence": "最近 rounds*2 条历史 → generateChat → 追加 user/assistant → writeMemory → state.writePet say"
+    },
+    "a_encode": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/scripts/encode_thumbs.py#L33-L66",
+      "path": "scripts/encode_thumbs.py",
+      "lines": "33-66",
+      "short_evidence": "实际 TARGET_W=640,TARGET_H=360；ffmpeg libvpx-vp9 解码/编码，scale + format=yuva420p"
+    },
+    "a_pipeline_doc": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/README.md#L511-L552",
+      "path": "README.md",
+      "lines": "511-552",
+      "short_evidence": "AI 源视频 → 遮罩 → 自动绿幕或 PR 手工抠像 → 归一化 → 播放变体；声称当前资产均走 PR 路线"
+    },
+    "a_package": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/electron-builder.yml#L16-L48",
+      "path": "dsh-pet/electron-builder.yml",
+      "lines": "16-48",
+      "short_evidence": "extraMetadata.main=lib/app.js；asar:true；Electron 43.3.0；Windows target dir"
+    },
+    "a_storage": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/host/storage-paths.ts#L61-L105",
+      "path": "dsh-pet/src/host/storage-paths.ts",
+      "lines": "61-105",
+      "short_evidence": "用户配置根、Electron 运行时、Electron userData、下载缓存是不同目录"
+    },
+    "a_license": {
+      "url": "https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/LICENSE#L1-L21",
+      "path": "LICENSE",
+      "lines": "1-21",
+      "short_evidence": "MIT；Copyright 2026 PC2005-cloud"
+    },
+    "b_manifest": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/package.json#L24-L114",
+      "path": "src/package.json",
+      "lines": "24-114",
+      "short_evidence": "预构建 lib 入口；TS/React/Cordis peers；@electron/get/extract-zip；注释列出部分测试依赖缺失"
+    },
+    "b_origin_doc": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/README.md#L21-L27",
+      "path": "README.md",
+      "lines": "21-27",
+      "short_evidence": "声明基于 dsh-pet 0.3.0；243 个上游文件中 232 byte-identical、11 修改、另增 3 引擎文件（本次未重新算 hash）"
+    },
+    "b_render": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/sprite.js#L137-L145",
+      "path": "src/runtime/electron-helper/sprite.js",
+      "lines": "137-145",
+      "short_evidence": "双 HTML video 播放；沿用共享纯逻辑"
+    },
+    "b_css": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/index.html#L43-L54",
+      "path": "src/runtime/electron-helper/index.html",
+      "lines": "43-54",
+      "short_evidence": "video opacity 与 0.18s ease 交叉淡入"
+    },
+    "b_window": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L414-L437",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "414-437",
+      "short_evidence": "透明无边框置顶局部窗口；contextIsolation:true,nodeIntegration:false,sandbox:false"
+    },
+    "b_mouse": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L309-L311",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "309-311",
+      "short_evidence": "setIgnoreMouseEvents(ignore,{forward:true})"
+    },
+    "b_ctx": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/context.mjs#L60-L78",
+      "path": "standalone/context.mjs",
+      "lines": "60-78",
+      "short_evidence": "按 brain/provider/是否含图在 onlineStream 与 ollamaStream 之间路由；local 不联网模型兜底"
+    },
+    "b_ollama": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/ollama.mjs#L143-L186",
+      "path": "standalone/ollama.mjs",
+      "lines": "143-186",
+      "short_evidence": "POST /api/chat；stream:false；messages 含本地附件 base64；生成结果再包装为 AsyncIterable"
+    },
+    "b_online": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/online.mjs#L150-L209",
+      "path": "standalone/online.mjs",
+      "lines": "150-209",
+      "short_evidence": "POST /chat/completions；Bearer apiKey；stream:false；视觉单独 base/key/model；读 choices[0].message.content"
+    },
+    "b_online_store": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/online.mjs#L29-L56",
+      "path": "standalone/online.mjs",
+      "lines": "29-56",
+      "short_evidence": "配置保存到 standalone/online.json；JSON.stringify/writeFileSync 明文"
+    },
+    "b_plugin_ai": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/lib/index.js#L462-L472",
+      "path": "src/lib/index.js",
+      "lines": "462-472",
+      "short_evidence": "petBrainPlan；local/auto 先 petOllamaGenerate；local 失败直接返回；否则取 ctx.agentDefaultModel"
+    },
+    "b_memory": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/lib/index.js#L1649-L1768",
+      "path": "src/lib/index.js",
+      "lines": "1649-1768",
+      "short_evidence": "memory.json、chatQueue、最近 rounds*2 对话、generateChat、追加历史"
+    },
+    "b_screen": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/lib/index.js#L1965-L1975",
+      "path": "src/lib/index.js",
+      "lines": "1965-1975",
+      "short_evidence": "screen-watch/state.json；capture.ps1 / SwCapture.exe；shot.jpg"
+    },
+    "b_screen_model": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/lib/index.js#L2114-L2145",
+      "path": "src/lib/index.js",
+      "lines": "2114-2145",
+      "short_evidence": "选视觉模型；attachments.saveImages 读取 shot.jpg；无模型/附件服务则返回错误"
+    },
+    "b_perm": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/sprite.js#L2605-L2660",
+      "path": "src/runtime/electron-helper/sprite.js",
+      "lines": "2605-2660",
+      "short_evidence": "app/file/url 默认 false；localStorage dsh-pet-perm-{id}；最近20条动作日志"
+    },
+    "b_action": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/sprite.js#L2882-L2936",
+      "path": "src/runtime/electron-helper/sprite.js",
+      "lines": "2882-2936",
+      "short_evidence": "onChatSendIntercept → 正则意图/目标分类 → this.perm 检查 → 执行动作；录屏启动依赖 app 权限"
+    },
+    "b_preload": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/preload.js#L88-L130",
+      "path": "src/runtime/electron-helper/preload.js",
+      "lines": "88-130",
+      "short_evidence": "openTarget、recStart/Stop、voiceTranscribe、ttsSpeak 的固定 IPC 桥"
+    },
+    "b_open": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1485-L1524",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "1485-1524",
+      "short_evidence": "接收 kind/target；URL 限 http(s)；路径分支 path.resolve/openPath；本 handler 未重复读取三个 UI 权限开关"
+    },
+    "b_obs": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1526-L1578",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "1526-1578",
+      "short_evidence": "rec-start/stop/status 调 obsCtl；渲染端只给动作；使用 OBS 自有配置"
+    },
+    "b_bridge": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L627-L808",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "627-808",
+      "short_evidence": "loopback 控制桥；随机24-byte token 持久化 helper-control.json；tokenOk timingSafeEqual；/health 免认证，/state与/set需认证"
+    },
+    "b_http": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/server.mjs#L87-L150",
+      "path": "standalone/server.mjs",
+      "lines": "87-150",
+      "short_evidence": "来源检查在路由前；/shutdown 要 POST+token（有 token 配置时）；不能推广为所有端点统一认证"
+    },
+    "b_voice": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1645-L1655",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "1645-1655",
+      "short_evidence": "media 仅 VOICE.on 时批准；其它权限拒绝"
+    },
+    "b_worker_launch": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1713-L1754",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "1713-1754",
+      "short_evidence": "固定真实 node.exe + stt-worker.mjs，spawn shell:false；stdin/stdout JSON 行协议"
+    },
+    "b_stt": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/stt-worker.mjs#L158-L185",
+      "path": "src/runtime/electron-helper/stt-worker.mjs",
+      "lines": "158-185",
+      "short_evidence": "sherpa.createOfflineRecognizer；SenseVoice 模型配置与语言"
+    },
+    "b_vad": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/stt-worker.mjs#L189-L247",
+      "path": "src/runtime/electron-helper/stt-worker.mjs",
+      "lines": "189-247",
+      "short_evidence": "16kHz Silero VAD；先增益归一，短语音过滤；VAD 不可用则回退逐段识别"
+    },
+    "b_tts": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1985-L2055",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "1985-2055",
+      "short_evidence": "Edge Read Aloud；SSML voice/prosody；自行 TLS/WebSocket 协议，MP3 合成；音高配置文件"
+    },
+    "b_tts_endpoint": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L2160-L2166",
+      "path": "src/runtime/electron-helper/main.js",
+      "lines": "2160-2166",
+      "short_evidence": "api.msedgeservices.com/tts/cognitiveservices/websocket/v1；旧 speech.platform.bing.com 作兜底"
+    },
+    "b_paths": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/paths.mjs#L26-L67",
+      "path": "standalone/paths.mjs",
+      "lines": "26-67",
+      "short_evidence": "DSH_PET_DATA_DIR > data-root.txt > portable.txt > APPDATA/BlueHairMaid；独立数据根 dsh-pet"
+    },
+    "b_build": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/build/build.mjs#L170-L202",
+      "path": "build/build.mjs",
+      "lines": "170-202",
+      "short_evidence": "复制 src 到 stage/app；复制控制台/独立层/默认数据；另取 Electron/Node/speech 三套运行时"
+    },
+    "b_nsis": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/build/mkexe.py#L28-L84",
+      "path": "build/mkexe.py",
+      "lines": "28-84",
+      "short_evidence": "读取版本号，调用 NSIS makensis 与 build/installer.nsi"
+    },
+    "b_license": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/LICENSE#L1-L22",
+      "path": "LICENSE",
+      "lines": "1-22",
+      "short_evidence": "MIT；保留 PC2005-cloud 与 Mikolu 两段版权"
+    },
+    "b_notice": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/NOTICE.md#L31-L49",
+      "path": "NOTICE.md",
+      "lines": "31-49",
+      "short_evidence": "第三方运行时/语音模型许可证声明；字体只列使用说明，未给出清晰独立授权条款；Ollama/在线模型/Edge TTS/OBS 不随包"
+    },
+    "b_security_doc": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/SECURITY.md#L53-L66",
+      "path": "SECURITY.md",
+      "lines": "53-66",
+      "short_evidence": "声明 renderer 不能选择路径、三权限默认关闭；明确 online.json 明文 Key"
+    },
+    "b_readme_voice": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/README.md#L125-L125",
+      "path": "README.md",
+      "lines": "125-125",
+      "short_evidence": "README 将 DSH 插件模式列为子集，称离线语音、Edge TTS、控制台随安装包/ZIP提供"
+    },
+    "b_readme_assets": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/README.md#L62-L69",
+      "path": "README.md",
+      "lines": "62-69",
+      "short_evidence": "声明106手绘透明动画、screen blend、聊天/看屏幕/语音；手绘与数量未重新审计"
+    },
+    "b_update_doc": {
+      "url": "https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/README.md#L144-L155",
+      "path": "README.md",
+      "lines": "144-155",
+      "short_evidence": "无自动更新；人工下载覆盖安装；保留用户数据"
+    }
+  }
+}

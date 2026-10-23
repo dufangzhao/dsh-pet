@@ -1,0 +1,555 @@
+{
+  "title": "插件式实用 AI 桌宠：官方组件与模块边界研究",
+  "researched_on": "2026-10-23",
+  "scope": {
+    "platform": "Windows 先行；推理提供者可本地/云替换，输入执行始终在目标设备受控运行",
+    "method": "只读官方公开 README、文档、许可证、模型卡；未克隆仓库、未安装依赖、未运行组件或性能测试",
+    "excluded": [
+      "桌宠仓库重复调研",
+      "完整接口规范",
+      "未经实测的延迟、显存、准确率或吞吐承诺"
+    ],
+    "evidence_note": "URL 中 main/master/develop/dev 为可变分支；以下为读取当日内容，产品发布需固定版本、模型 revision 与文件哈希并复核许可。架构建议是本研究的设计判断，不是上游承诺。"
+  },
+  "conclusions": [
+    "ASR 音频转文字 ≠ 全局听写。录音、热键、VAD、文字整理、目标输入框锁定、注入和回读必须单独编排。",
+    "克隆可包含零样本参考音频条件化，也可包含数据准备和微调；它不是每次 TTS 请求都重新训练。制作工作流输出 voice profile/模型制品，TTS 推理只消费这些制品。",
+    "屏幕截图/VLM 理解只产生观察或动作候选；UIA/pywinauto/Playwright 才负责实际执行。执行返回与目标达成须分别报告。",
+    "sherpa-onnx 是推理部署工具集，SenseVoice 是可由它承载的模型；二者不是互斥层级。faster-whisper 是 Whisper/CTranslate2 推理实现。",
+    "Live2D Cubism Editor、VRoid Studio 是制作工具；桌宠集成的是导出资产与渲染运行时，不宜把完整制作软件打包到桌宠。",
+    "Live2D 可扩展应用与 VRoid 角色生成工具的许可条件，可能影响插件市场或内置捏人功能，需早于产品发布确认。"
+  ],
+  "components": [
+    {
+      "id": "sherpa-onnx",
+      "role": "本地 ASR/VAD/关键词检测的优先部署候选",
+      "verified": [
+        "支持流式与非流式 ASR；具体模式依模型而定",
+        "官方列出 Windows x64/x86/arm64 及 C/C++、C#、Python、JavaScript 等 API",
+        "官方有 SenseVoice 集成文档；不能把宿主支持流式推导为所有模型原生流式"
+      ],
+      "recommendation": "Windows 常驻语音插件优先评估它；按模型能力选择真正流式识别，或 VAD 分句后离线识别。模型与引擎版本分别登记。",
+      "license": {
+        "code": "Apache-2.0",
+        "weights": "逐个预训练模型及转换制品核对；仓库 Apache-2.0 不覆盖全部下载权重",
+        "redistribution": "保留许可证、适用 NOTICE 与第三方依赖说明；ONNX 转换不消除原始权重许可"
+      },
+      "sources": [
+        "sherpa-readme",
+        "sherpa-license",
+        "sherpa-sensevoice"
+      ]
+    },
+    {
+      "id": "faster-whisper",
+      "role": "Whisper 多语种录音/分句转写候选",
+      "verified": [
+        "基于 CTranslate2，可选 CPU/GPU 与量化配置",
+        "transcribe 返回 segments 和识别信息，支持可选词级时间戳及 Silero VAD",
+        "segments 为生成器不等于原生实时麦克风流式协议；低延迟在线体验需额外分块/缓冲/去重设计"
+      ],
+      "recommendation": "放入独立 Python worker，作为文件转写或按键录音转写提供者；不把 CUDA/CTranslate2/PyAV 依赖塞进桌宠主进程。",
+      "license": {
+        "code": "MIT",
+        "weights": "OpenAI Whisper 官方 README 明确其代码和权重为 MIT；Distil-Whisper、微调和转换仓库仍需按实际下载制品核对",
+        "redistribution": "保留 MIT 声明，另审 CTranslate2、PyAV/FFmpeg、CUDA/cuDNN 与 VAD 制品的分发条件"
+      },
+      "sources": [
+        "faster-readme",
+        "faster-license",
+        "whisper-readme"
+      ]
+    },
+    {
+      "id": "sensevoice",
+      "role": "中文/粤语及多语种语音理解候选",
+      "verified": [
+        "已发布 SenseVoiceSmall 支持普通话、粤语、英语、日语、韩语；不能把论文家族语言范围套给该权重",
+        "除 ASR，还可产生语言、情绪和音频事件标签",
+        "README 将社区 streaming-sensevoice 标为伪流式方案；不能把 VAD 分段处理称为原生流式"
+      ],
+      "recommendation": "可通过 sherpa-onnx ONNX 提供者部署，或独立 FunASR worker；文本与情绪/事件标签分字段，标签不能直接成为用户命令或事实。",
+      "license": {
+        "code": "MIT（读取当日 main/LICENSE；不能沿用旧文章中的许可证印象）",
+        "weights": "官方 SenseVoiceSmall 模型卡为 other，指向 FunASR Model Open Source License Agreement v1.1",
+        "conditions": [
+          "协议覆盖权重及微调衍生品，要求出处、作者信息与相关模型名",
+          "包含行为、终止与协议修订条款，不应等同标准 MIT/Apache 权重",
+          "当前官方 README 链接商业使用许可澄清；不可仅因第3节“参考和学习”字样就断言禁止商用，但发布前应归档许可与澄清并法务复核",
+          "其他转换版本的模型卡不能自动替代原始权重许可"
+        ]
+      },
+      "sources": [
+        "sense-readme",
+        "sense-license",
+        "sense-card",
+        "funasr-model-license"
+      ]
+    },
+    {
+      "id": "cosyvoice",
+      "role": "参考音色条件化、跨语言及可流式 TTS 候选",
+      "verified": [
+        "当前官方 README 包含 CosyVoice 1/2/3 系列，必须按实际版本声明能力",
+        "官方示例提供 zero-shot、cross-lingual、instruct 等推理路径；参考音频/转录需求随模式不同",
+        "示例返回 tts_speech，并由模型 sample_rate 标识采样率；支持音频分块，部分版本支持流式文本输入",
+        "官方有 FastAPI/gRPC 服务部署路径；可选 ttsfrd 示例 wheel 为 Linux 平台，不证明所有加速路径 Windows 原生可用"
+      ],
+      "recommendation": "将版本化 CosyVoice worker 视为可替换本地或自托管服务；Windows 先验证基础推理，不以 Linux Docker/vLLM/TensorRT 示例承诺 Windows 开箱即用。",
+      "license": {
+        "code": "Apache-2.0",
+        "weights": "本次读取 CosyVoice2-0.5B 与 Fun-CosyVoice3-0.5B-2512 官方模型卡均标 apache-2.0；不扩推到全部辅助模型/资源包",
+        "voice": "参考录音、声音人格/表演权益、训练数据和输出用途须独立获授权；零样本克隆也不豁免"
+      },
+      "sources": [
+        "cosy-readme",
+        "cosy-license",
+        "cosy-example",
+        "cosy2-card",
+        "cosy3-card"
+      ]
+    },
+    {
+      "id": "gpt-sovits",
+      "role": "音色制作/微调工作流与 TTS 推理候选",
+      "verified": [
+        "README 包含零样本与少样本微调，及分离、切分、ASR、标注等数据制作工具",
+        "官方提供 Windows 安装/整合包路径，但整合包不能代替依赖及权重审查",
+        "api_v2.py 文档区描述 /tts：text、text_lang、ref_audio_path、prompt_lang、可选 prompt_text 等，返回音频或错误 JSON",
+        "提供权重切换控制端点；流式选项与模型版本有约束，不能假定所有模型都具有同样流式能力"
+      ],
+      "recommendation": "制作工具作为可选离线任务插件；日常桌宠仅连接最小推理服务。控制/权重切换端点不直接暴露给 LLM，避免跨请求全局模型切换污染。",
+      "license": {
+        "code": "MIT",
+        "weights": "官方 lj1995/GPT-SoVITS 模型卡标 mit；该总仓库标签不替代所有附加 BERT/HuBERT/G2PW/UVR 等权重各自许可",
+        "voice": "仅接收拥有授权的录音和训练集；标注来源、说话人同意、允许用途、是否可云上传与撤回/删除策略"
+      },
+      "sources": [
+        "gpts-readme",
+        "gpts-license",
+        "gpts-card",
+        "gpts-api"
+      ]
+    },
+    {
+      "id": "live2d-cubism",
+      "role": "2D 角色制作与运行时渲染",
+      "verified": [
+        "Editor 导出 .moc3、.model3.json、纹理；可附 .physics3.json、.motion3.json 等",
+        "model3.json 链接模型、纹理等运行时资源；.cmo3/.can3 属编辑源工程，不是统一渲染入口",
+        "SDK 分 Native/Web/Unity 等路线，导出版本须匹配所选 SDK"
+      ],
+      "recommendation": "外部 Cubism Editor 制作；桌宠提供 avatar.live2d 渲染适配器，将通用表情/嘴型/动作映射到角色专属参数。",
+      "license": {
+        "editor": "专有软件，FREE/PRO 与使用条款独立于 SDK",
+        "framework": "Live2D Open Software License Agreement（自定义许可，不是 MIT/Apache）",
+        "core": "Live2D Proprietary Software License Agreement",
+        "release": "官网要求 AI/Chatbot/工具先判断是否 Expandable Application；此类应用需事先审查并签专门 Publication License，个人/小企业通常豁免不能直接套用",
+        "assets": "示例、原画、模型、动作、音频各有权利人；下载或购买不自动取得桌宠打包、商用、再分发、改作许可",
+        "risk": "支持用户导入模型/插件扩展的桌宠应向 Live2D 确认分类；插件隔离不是许可豁免"
+      },
+      "sources": [
+        "live-export",
+        "live-sdk-license",
+        "live-framework-license",
+        "live-open-license",
+        "live-core-license"
+      ]
+    },
+    {
+      "id": "vroid-vrm",
+      "role": "3D 角色制作、交换格式及渲染",
+      "verified": [
+        "VRoid Studio 官方提供 Windows/macOS 制作软件；VRM 是角色数据格式，不是整个桌宠应用",
+        "three-vrm 在 three.js 上使用 VRM；Unity 路线可评估 UniVRM",
+        "VRM 1.0 meta 定义 avatarPermission、commercialUsage、allowRedistribution、modification、creditNotation 等；缺省并非全允许",
+        "VRM 0.x 旧字段与 1.0 不同，导入器需声明版本并分别解读"
+      ],
+      "recommendation": "外部 VRoid 制作后导入 VRM；WebView 渲染优先评估 three-vrm，Unity 路线评估 UniVRM；角色制作与角色运行时分别插件化。",
+      "license": {
+        "studio": "专有免费软件，遵守 pixiv VRoid Studio 条款；不是开源 SDK",
+        "runtime": "three-vrm MIT；UniVRM MIT；引擎及其他依赖另审",
+        "assets": "VRoid 自带模型/网格/纹理不是 CC0。无特殊条款的预设可按官方 guidelines 商用及销售模型；特殊条款、示例模型、第三方服装/纹理另查",
+        "authoring_tool": "利用 VRoid 网格/纹理组合或变形并生成/导出模型、头像、物品的制作应用，guidelines 要求另取 pixiv 许可（仅本人使用例外）；不把可导入渲染与可做捏人平台混为一谈",
+        "vrm": "VRM 1.0 采用 VRM Public License 与文件 meta 设置共同表达资产使用条件；运行时 MIT 不覆盖角色资产"
+      },
+      "sources": [
+        "vroid-studio",
+        "vroid-guidelines",
+        "vrm1-license",
+        "vrm1-meta",
+        "vrm-legacy-license",
+        "three-readme",
+        "three-license",
+        "univrm-license"
+      ]
+    },
+    {
+      "id": "windows-uia-pywinauto",
+      "role": "Windows 控件观察与实际桌面操作",
+      "verified": [
+        "UI Automation 提供 UI 元素属性及控件模式；它是 Windows 无障碍/自动化 API，不是 VLM",
+        "pywinauto 支持 win32 与 uia 后端，需按目标应用选择；并非所有自绘控件可访问",
+        "set_edit_text 等语义接口与 click_input/type_keys 等真实输入路径能力不同",
+        "pywinauto 文档说明真实鼠标/键盘通常依赖活动桌面，锁屏、RDP 最小化/断开可能导致失败",
+        "SendInput 受 UIPI 限制，只能向相同或较低完整性级别应用注入；返回成功插入事件数不证明业务完成"
+      ],
+      "recommendation": "Windows 本地执行 broker 优先语义定位/Invoke/ValuePattern；缺失能力才显式请求前台键鼠或像素路径；永不默认管理员运行，不绕过 UAC/安全桌面。",
+      "license": {
+        "uia": "Windows 系统 API，受 Windows/SDK 适用许可约束；不能标成某个开源包许可",
+        "pywinauto": "BSD-3-Clause",
+        "assets": "无模型权重；截图/控件树可能包含敏感数据，应最小采集"
+      },
+      "sources": [
+        "uia-doc",
+        "uia-setvalue",
+        "sendinput-doc",
+        "pywin-start",
+        "pywin-remote",
+        "pywin-license"
+      ]
+    },
+    {
+      "id": "playwright",
+      "role": "已授权浏览器页面的 DOM/语义定位与执行",
+      "verified": [
+        "提供 fill、click、键盘、选择、上传等浏览器动作",
+        "fill 用于 input/textarea/contenteditable 并触发 input 事件；特殊键盘处理可用逐键输入",
+        "动作前自动等待元素条件，且有可重试断言；业务结果仍需显式检查",
+        "它不是 Windows 通用桌面执行器，不能用 DOM 定位控制原生应用或所有系统对话框"
+      ],
+      "recommendation": "独立 browser.execute 适配器，绑定确定 browser context/page 与用户授权会话；以 role/label/稳定 locator 为主，不默认接管或复制用户日常浏览器配置。",
+      "license": {
+        "code": "Apache-2.0",
+        "dependencies": "随包浏览器、浏览器品牌与第三方 notices 分别审查；网站条款及账号访问授权独立于代码许可"
+      },
+      "sources": [
+        "pw-input",
+        "pw-actionability",
+        "pw-license"
+      ]
+    }
+  ],
+  "plugin_boundaries": [
+    {
+      "id": "audio.capture",
+      "responsibility": "Windows 麦克风/全局热键/PTT；可拆 VAD 或唤醒词适配器",
+      "input": [
+        "设备选择",
+        "开始/停止/取消",
+        "采集同意与 session_id"
+      ],
+      "output": [
+        "AudioFrame{PCM, sample_rate, channels, timestamp, sequence}",
+        "语音开始/结束/设备错误"
+      ],
+      "not_responsible_for": [
+        "识别文本",
+        "向其他应用注入"
+      ],
+      "notes": [
+        "默认按键说话，持续监听显式开启并常显状态",
+        "本地先做 VAD/回声或播放门控；避免桌宠 TTS 再被识别成命令"
+      ]
+    },
+    {
+      "id": "speech.asr",
+      "responsibility": "统一包裹 sherpa-onnx、faster-whisper、SenseVoice 或云 ASR",
+      "input": [
+        "音频帧流或片段",
+        "语言提示",
+        "可选词表/标点选项",
+        "取消信号"
+      ],
+      "output": [
+        "Transcript{segment_id, revision, text, is_final}",
+        "可选词/片段时间戳、语言、模型原始标签",
+        "ProviderCapabilities"
+      ],
+      "not_responsible_for": [
+        "应用焦点",
+        "自动执行识别出的命令"
+      ],
+      "notes": [
+        "声明 native_streaming/chunked/batch，不能伪造 interim",
+        "confidence/timestamps/hotwords 不支持时明确缺失，不能填虚构值",
+        "云发送需独立同意，失败不静默上传"
+      ]
+    },
+    {
+      "id": "dictation.compose",
+      "responsibility": "ASR 结果整理与用户预览",
+      "input": [
+        "最终转录",
+        "原文保留",
+        "可选用户授权的润色模式"
+      ],
+      "output": [
+        "TextCommit{original_text, proposed_text, request_id}",
+        "用户确认或取消"
+      ],
+      "not_responsible_for": [
+        "键鼠注入",
+        "以润色为名改变事实"
+      ],
+      "notes": [
+        "临时结果只显示不反复插入目标输入框",
+        "听写内容默认为文字，不当成操作系统命令"
+      ]
+    },
+    {
+      "id": "dictation.inject.windows",
+      "responsibility": "向已确认 Windows 输入目标提交文字",
+      "input": [
+        "最终 TextCommit",
+        "目标窗口/进程/控件身份及快照",
+        "插入或替换范围",
+        "授权策略"
+      ],
+      "output": [
+        "InjectionResult{status, method, target, verification, error}",
+        "可安全支持时的撤销信息"
+      ],
+      "not_responsible_for": [
+        "ASR 推理"
+      ],
+      "notes": [
+        "UIA SetValue 是设置控件值，不天然等于光标处插入；必须明确插入/替换语义，防止覆盖原文",
+        "注入前重验焦点及控件，变化时暂停；剪贴板粘贴仅显式回退并保护原剪贴板",
+        "密码/敏感输入框默认禁用，确认后再操作；不自动提交表单",
+        "SendInput/粘贴只能报告已发送，未读回不称已成功写入"
+      ]
+    },
+    {
+      "id": "voice.authoring",
+      "responsibility": "合法录音导入、清洗、切分、转录核对、零样本 profile 或可选微调任务",
+      "input": [
+        "授权录音与转录",
+        "说话人同意/来源/用途",
+        "基础模型 revision",
+        "作业配置"
+      ],
+      "output": [
+        "VoiceProfile{voice_id, provider_id, model_revision, reference_assets, optional_checkpoints, rights_manifest}",
+        "制作报告与试听"
+      ],
+      "not_responsible_for": [
+        "常驻对话生成",
+        "每次发声时训练"
+      ],
+      "notes": [
+        "参考转录与待合成文本分开",
+        "重型制作任务独立进程/环境，可撤销与删除；不导入任意模型包脚本"
+      ]
+    },
+    {
+      "id": "speech.tts",
+      "responsibility": "CosyVoice、GPT-SoVITS 或云 TTS 的统一推理适配",
+      "input": [
+        "文本或受支持的文本流",
+        "voice_id/VoiceProfile",
+        "语言与可选语速/风格",
+        "取消/打断信号"
+      ],
+      "output": [
+        "AudioChunk{format, sample_rate, channels, sequence, request_id}",
+        "结束/错误",
+        "可选对齐/viseme 信息"
+      ],
+      "not_responsible_for": [
+        "微调数据制作",
+        "操作系统点击"
+      ],
+      "notes": [
+        "只发送 provider 支持的风格和流式选项",
+        "不保证所有后端返回音素；缺失时由独立嘴型模块基于音量/音频驱动",
+        "本地音频路径不能直接发送给远程服务；须授权上传并转换为服务端 asset_id",
+        "输出音频设备播放、队列和打断由 audio.playback 管理"
+      ]
+    },
+    {
+      "id": "avatar.import",
+      "responsibility": "验证 Live2D/VRM 包及许可元数据",
+      "input": [
+        "用户选择的角色资产",
+        "来源与许可证",
+        "运行时版本"
+      ],
+      "output": [
+        "AvatarManifest{format, version, resources, rights, expressions, motions, parameter_map}",
+        "拒绝/不兼容原因"
+      ],
+      "not_responsible_for": [
+        "重分发付费资产",
+        "完整角色编辑器"
+      ],
+      "notes": [
+        "检查包路径越界、远程资源引用与体积限制；不执行包内任意代码",
+        "缺许可不推定可商用/分享，区分个人本地加载与发布分发"
+      ]
+    },
+    {
+      "id": "avatar.render",
+      "responsibility": "Live2D 与 VRM 可替换渲染提供者",
+      "input": [
+        "AvatarManifest",
+        "抽象表情/姿态/注视/动作事件",
+        "音频包络或 viseme",
+        "帧时钟"
+      ],
+      "output": [
+        "透明表面/渲染句柄",
+        "命中区域",
+        "加载/动作完成/错误事件"
+      ],
+      "not_responsible_for": [
+        "模型训练",
+        "系统输入权限",
+        "对话逻辑"
+      ],
+      "notes": [
+        "保留 2D/3D 能力差异，不承诺任意动作互转",
+        "Windows 透明窗口、拖拽、置顶、点击穿透属于壳层，不能由角色资产直接获得执行权限"
+      ]
+    },
+    {
+      "id": "screen.observe-and-understand",
+      "responsibility": "分离本地观察采集与可本地/云替换的 VLM 理解",
+      "input": [
+        "用户授权窗口/区域",
+        "截图与坐标系/DPI/时间戳",
+        "可选 UIA 树或 DOM 快照",
+        "用户问题"
+      ],
+      "output": [
+        "Observation{scene_text, candidate_elements, bounds, evidence_id, uncertainty}",
+        "可选动作建议而非执行"
+      ],
+      "not_responsible_for": [
+        "真实鼠标键盘操作",
+        "自行批准自己的建议"
+      ],
+      "notes": [
+        "截图含网页/邮件中的指令时按不可信数据处理",
+        "最小区域捕获、敏感信息遮蔽、云上传单独确认",
+        "坐标必须带截图身份与有效期；截图过期需重新观察",
+        "本研究未指定 VLM 型号，不虚构任何视觉模型性能或授权"
+      ]
+    },
+    {
+      "id": "computer.plan-policy",
+      "responsibility": "将用户意图与观察转换为受权限约束的动作计划",
+      "input": [
+        "明确用户目标",
+        "Observation/结构化控件",
+        "动作权限与风险规则"
+      ],
+      "output": [
+        "ActionRequest{target, operation, arguments, preconditions, expected_postconditions, approval}",
+        "无法确定时的澄清请求"
+      ],
+      "not_responsible_for": [
+        "直接系统输入"
+      ],
+      "notes": [
+        "删除、付款、发送、发布、凭据与提权需对应确认",
+        "限定应用/页面/动作范围，可见停止按钮与执行日志"
+      ]
+    },
+    {
+      "id": "computer.execute-and-verify",
+      "responsibility": "Windows UIA/pywinauto 与 Playwright 分适配器，执行后独立观测验证",
+      "input": [
+        "已授权 ActionRequest",
+        "新鲜目标定位",
+        "timeout/cancel"
+      ],
+      "output": [
+        "ActionResult{sent, observed_status, evidence, error, foreground_effect}",
+        "satisfied/unsatisfied/unknown 后置条件"
+      ],
+      "not_responsible_for": [
+        "把模型猜测视为成功",
+        "将浏览器动作扩权为全桌面操作"
+      ],
+      "notes": [
+        "优先 app API/DOM/UIA，最后才坐标与前台键鼠；升级路径可见并受授权",
+        "点击已发送不等于保存/发送成功；读取目标文本、页面状态或产物作为证据",
+        "unknown 不当成功；允许手动接管，避免失败后无限重复危险动作"
+      ]
+    }
+  ],
+  "replacement_and_windows_guidance": {
+    "shared_contract": [
+      "provider_id 与模型 revision/voice_id 分开",
+      "能力协商：支持语言、输入输出编码、流式方式、可选时间戳、取消与并发限制",
+      "返回 request_id、错误分类和真实观测，不将不支持能力模拟成已成功",
+      "本地 worker 用受控 IPC/回环服务；云适配使用同一逻辑输入输出并单独管理凭据/上传策略",
+      "插件默认最小权限：麦克风、截屏、联网、剪贴板、输入注入分别授予；ASR/TTS 插件不应同时拥有桌面控制权限",
+      "大模型按需下载/卸载，校验来源和哈希；不随主程序无差别捆绑所有环境/权重",
+      "CPU/GPU 可用性与资源冲突实际探测；ASR/TTS/VLM 争用 GPU 时排队/卸载策略需后续验证"
+    ],
+    "suggested_sequence": [
+      "先落地 Windows PTT 录音 → 单个 ASR provider → 文本预览 → 已确认目标注入",
+      "再加入单个 TTS provider、播放打断与基础嘴型；音色制作作为可选工具",
+      "角色先导入/渲染；Live2D 发布前确认可扩展应用许可，VRM 做逐资产授权展示",
+      "自动化先做小范围 UIA/Playwright 明确目标动作，再补截图/VLM 模糊定位"
+    ],
+    "validation_remaining": [
+      "目标 Windows 版本/CPU/显卡上的安装与依赖兼容",
+      "中文/英文/中英混说、静音、噪声与断句错误",
+      "输入焦点变化、IME、富文本、密码框、管理员窗口、锁屏与 RDP",
+      "TTS 首包、持续合成、取消、排队与播放回声；不在研究中承诺数值",
+      "模型/声音/角色分发权与 Live2D/pixiv 适用合同确认"
+    ]
+  },
+  "sources": {
+    "sherpa-readme": "https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/README.md",
+    "sherpa-license": "https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/LICENSE",
+    "sherpa-sensevoice": "https://k2-fsa.github.io/sherpa/onnx/sense-voice/index.html",
+    "faster-readme": "https://raw.githubusercontent.com/SYSTRAN/faster-whisper/master/README.md",
+    "faster-license": "https://raw.githubusercontent.com/SYSTRAN/faster-whisper/master/LICENSE",
+    "whisper-readme": "https://raw.githubusercontent.com/openai/whisper/main/README.md",
+    "sense-readme": "https://raw.githubusercontent.com/FunAudioLLM/SenseVoice/main/README.md",
+    "sense-license": "https://raw.githubusercontent.com/FunAudioLLM/SenseVoice/main/LICENSE",
+    "sense-card": "https://huggingface.co/FunAudioLLM/SenseVoiceSmall/raw/main/README.md",
+    "funasr-model-license": "https://raw.githubusercontent.com/modelscope/FunASR/main/MODEL_LICENSE",
+    "cosy-readme": "https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/README.md",
+    "cosy-license": "https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/LICENSE",
+    "cosy-example": "https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/example.py",
+    "cosy2-card": "https://huggingface.co/FunAudioLLM/CosyVoice2-0.5B/raw/main/README.md",
+    "cosy3-card": "https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512/raw/main/README.md",
+    "gpts-readme": "https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/README.md",
+    "gpts-license": "https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/LICENSE",
+    "gpts-card": "https://huggingface.co/lj1995/GPT-SoVITS/raw/main/README.md",
+    "gpts-api": "https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/api_v2.py",
+    "live-export": "https://docs.live2d.com/en/cubism-editor-manual/export-moc3-motion3-files/",
+    "live-sdk-license": "https://www.live2d.com/en/sdk/license/",
+    "live-framework-license": "https://raw.githubusercontent.com/Live2D/CubismWebFramework/develop/LICENSE.md",
+    "live-open-license": "https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html",
+    "live-core-license": "https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html",
+    "vroid-studio": "https://vroid.com/en/studio",
+    "vroid-guidelines": "https://vroid.com/en/studio/guidelines",
+    "vrm1-license": "https://vrm.dev/en/licenses/1.0/",
+    "vrm1-meta": "https://raw.githubusercontent.com/vrm-c/vrm-specification/master/specification/VRMC_vrm-1.0/meta.md",
+    "vrm-legacy-license": "https://vrm.dev/en/vrm/meta/license/",
+    "three-readme": "https://raw.githubusercontent.com/pixiv/three-vrm/dev/README.md",
+    "three-license": "https://raw.githubusercontent.com/pixiv/three-vrm/dev/LICENSE",
+    "univrm-license": "https://raw.githubusercontent.com/vrm-c/UniVRM/master/LICENSE.txt",
+    "uia-doc": "https://learn.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32",
+    "uia-setvalue": "https://learn.microsoft.com/en-us/windows/win32/api/uiautomationcore/nf-uiautomationcore-ivalueprovider-setvalue",
+    "sendinput-doc": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput",
+    "pywin-start": "https://pywinauto.readthedocs.io/en/latest/getting_started.html",
+    "pywin-remote": "https://pywinauto.readthedocs.io/en/latest/remote_execution.html",
+    "pywin-license": "https://raw.githubusercontent.com/pywinauto/pywinauto/master/LICENSE",
+    "pw-input": "https://playwright.dev/docs/input",
+    "pw-actionability": "https://playwright.dev/docs/actionability",
+    "pw-license": "https://raw.githubusercontent.com/microsoft/playwright/main/LICENSE"
+  },
+  "limitations": [
+    "未经实际部署，所有选型建议都需要目标设备验证；不引用上游 benchmark 作为本桌宠性能承诺",
+    "许可信息为技术尽调摘要，不是法律意见；模型卡可能只有仓库级标签，发布前需逐文件及依赖追溯",
+    "未读取任何个人会话/录音/账号或操作系统界面；仅访问公开资料",
+    "一个猜测的旧 Live2D 导出文档 URL 返回 404，已通过官方有效导出页面替代，404 不作为证据"
+  ]
+}

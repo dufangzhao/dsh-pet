@@ -1,0 +1,924 @@
+{
+  "schema_version": "1.0",
+  "title": "已发布桌宠产品与工程对照",
+  "queried_on": "2026-10-23",
+  "timezone": "Asia/Taipei",
+  "scope": {
+    "read_only": true,
+    "product_software_executed": false,
+    "files_written": [
+      "research/product-benchmarks.json"
+    ],
+    "existing_file_check": "开始时glob精确目标，未找到既有文件",
+    "selection": "三款均有可验证Steam发布资料；无需臆造候选仓库",
+    "not_included": [
+      {
+        "name": "Mega-Gorilla/Index",
+        "reason": "精确公开GitHub地址404，搜索未证实对应桌宠；由已核验MateEngine补足。404不能证明从未存在。",
+        "sources": [
+          "excluded_index"
+        ]
+      }
+    ],
+    "method": "官方Steam商店/API、官方官网、官方GitHub原始源码/依赖和发布feed交叉读取；未下载/运行二进制，未实测性能或网络。",
+    "limitations": [
+      "GitHub工具已先get_me，但401 Bad credentials；随后使用公开网页/API/raw。公开API后续403限流，未绕过权限或使用凭据。",
+      "源码为查询日main/master快照，未取得不可变commit SHA；不能保证与当前Steam二进制一一对应。",
+      "商业闭源Desktop Mate未取得官方源码或依赖清单；不猜测Unity/Electron/Win32等底层栈。",
+      "不引用销量、市占率、实时在线数或星标作市场份额证据。作者性能宣称非独立基准。"
+    ],
+    "evidence_legend": {
+      "源码验证": "已直接读取代码/项目配置；只证明所读源码或依赖中的事实",
+      "官方声明": "官方README、官网、商店、更新公告或许可证声明；非运行验证",
+      "未知": "未找到足够一手材料，或所读材料不足以证明",
+      "分析": "由已引用事实推导的优劣/风险建议，并非测量事实"
+    }
+  },
+  "executive_summary": [
+    {
+      "text": "MateEngine提供原生小型本地生成式AI聊天；Qwen2.5 1.5B由README/NOTICE声明，仓库含LLMUnity。无需把聊天归因于DLC。",
+      "evidence_status": "官方声明",
+      "sources": [
+        "mate_store_api",
+        "mate_notice",
+        "mate_llm_package"
+      ]
+    },
+    {
+      "text": "VPet现行定位为桌宠核心+插件式AI。2023年官方公告移除ChatGPT；开发者插件示例提供ChatGPT兼容API与EdgeTTS。README残留winCGPTSetting不能证明现行本体原生AI。",
+      "evidence_status": "官方声明",
+      "sources": [
+        "vpet_ai_removal",
+        "vpet_plugin_demo",
+        "vpet_talk"
+      ]
+    },
+    {
+      "text": "Desktop Mate作为非生成式AI桌面表现与授权角色DLC生态参照：官方描述3D互动、语音台词、闹钟和游戏同步；没有已验证的LLM/记忆/工具代理能力。",
+      "evidence_status": "官方声明",
+      "sources": [
+        "desktop_site",
+        "desktop_store_api"
+      ]
+    },
+    {
+      "text": "商业复用首要边界是代码、角色模型、动画、音频分别授权。VPet代码Apache-2.0不覆盖默认动画自由商用；MateEngine现行Pro v2.1限制商业与分发，不能只读AGPL标签。",
+      "evidence_status": "官方声明",
+      "sources": [
+        "vpet_license",
+        "vpet_readme",
+        "mate_license",
+        "mate_readme"
+      ]
+    }
+  ],
+  "products": [
+    {
+      "id": "vpet-simulator",
+      "name": "VPet-Simulator / 虚拟桌宠模拟器",
+      "owner": "LB Game / LorisYounger",
+      "official": {
+        "repository": "https://github.com/LorisYounger/VPet",
+        "website": "https://www.exlb.net/VPet",
+        "steam": "https://store.steampowered.com/app/1920960/VPet/",
+        "plugin_examples": "https://github.com/LorisYounger/VPet.Plugin.Demo"
+      },
+      "ai_classification": {
+        "category": "AI via code plugins; non-LLM core desktop pet",
+        "core_native_generative_ai": false,
+        "qualification": "限定所查现行本体/官方公告；历史版本曾内置ChatGPT。插件接口本身不等于内置模型。",
+        "dlc_role": "核验商店列出的DLC为Pancake Cat皮肤与ModMaker，不应称AI DLC。",
+        "evidence": [
+          "vpet_ai_removal",
+          "vpet_talk",
+          "vpet_plugin_demo",
+          "vpet_skin",
+          "vpet_modmaker"
+        ]
+      },
+      "engineering": {
+        "stack": {
+          "text": "所读Windows工程为C#/.NET 10（net10.0-windows7.0）、WPF并启用WinForms；Panuon.WPF.UI 1.2.4.10、NAudio 3.0.1、WpfAnimatedGif 2.0.2、LinePutScript与Facepunch.Steamworks。此为main源码配置，不是对发行二进制栈的检测。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "vpet_project"
+          ]
+        },
+        "desktop_rendering": {
+          "text": "WPF无边框桌面窗口（WindowStyle=None、ShowInTaskbar=False、WindowChrome）；核心以PNG动画/静态图和分层食物动画展示。Live2D/Spine被官方列作插件扩展方案，不应写成默认渲染器。最新公告增加APNG。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "vpet_window",
+            "vpet_readme",
+            "vpet_recent_news"
+          ]
+        },
+        "cross_platform_stack": {
+          "text": "官方宣布macOS/Linux beta，但本次读取的是Windows工程，跨平台具体渲染实现未核验；不得据此推断整产品均使用WPF。",
+          "evidence_status": "未知",
+          "sources": [
+            "vpet_beta_post",
+            "vpet_project"
+          ]
+        },
+        "model": {
+          "text": "本体使用选项式对话；开发者ChatGPT插件以ChatGPT兼容API接入模型。未证实统一内置本地模型、默认供应商或当前模型版本。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "vpet_selection",
+            "vpet_plugin_demo"
+          ]
+        },
+        "speech": {
+          "text": "官方示例EdgeTTS插件提供语音及讲述人/语调/语速；本体统一ASR未核验，插件语音不能当本体内置语音助手。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_plugin_demo"
+          ]
+        },
+        "memory": {
+          "text": "GameSave/统计为养成状态存档；未核验本体具备LLM长期语义记忆、向量库或跨会话摘要。具体聊天历史由插件决定。",
+          "evidence_status": "未知",
+          "sources": [
+            "vpet_readme",
+            "vpet_talk"
+          ]
+        },
+        "tools": {
+          "text": "官方示例有时钟/倒计时/番茄钟、联机插件；不能等同LLM function calling或桌面自动化工具权限系统。DLL代码插件可扩展功能。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_plugin_demo",
+            "vpet_plugin_loader"
+          ]
+        }
+      },
+      "release_and_maturity": {
+        "query_date": "2026-10-23",
+        "initial_release": {
+          "text": "Steam英文API记录2023-08-13，已发布；基本产品免费。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_store_api"
+          ]
+        },
+        "platforms": {
+          "text": "Steam商店platforms字段仍仅Windows；2026年近期官方公告另宣布macOS/Linux跨平台beta。Windows优先，代码插件可能需适配，部分DLC可能不可用。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_store_api",
+            "vpet_recent_news"
+          ]
+        },
+        "signals": [
+          {
+            "text": "已具正式商店、工坊、ModMaker与NuGet可嵌入核心；最新公告含Steam Remote Storage、存档管理器、MOD验证、APNG及修复。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "vpet_readme",
+              "vpet_modmaker",
+              "vpet_recent_news"
+            ]
+          },
+          {
+            "text": "GitHub releases.atom可见v1.09条目更新于2024-03-16，但Steam仍有2026更新，不能用仓库release日期单独判断停更。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "vpet_releases",
+              "vpet_recent_news"
+            ]
+          }
+        ]
+      },
+      "licensing_and_assets": {
+        "code": {
+          "text": "根LICENSE为Apache-2.0；依赖仍需逐项履约，保留声明、许可证及修改说明。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "vpet_license"
+          ]
+        },
+        "character_sdk": {
+          "text": "Core可嵌入WPF；ModMaker和Plugin.Demo支持动画、物品、对话、主题、代码功能扩展；不是所有角色素材都继承代码许可。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_readme",
+            "vpet_modmaker",
+            "vpet_plugin_demo"
+          ]
+        },
+        "assets": {
+          "text": "默认动画归VUP-Simulator团队：非商业需来源/链接；商业需联系作者、首次醒目弹窗与可访问出处；禁止出售动画获利，分发动画不得收费；内置图片同类约束，图库禁止商用。第三方角色按各自授权。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_readme"
+          ]
+        }
+      },
+      "privacy_and_security": [
+        {
+          "text": "官方说明会依游戏设置收集存档、设置、游戏统计（若有）、配置（若有）、IP与SteamID；可在设置控制，查看/删除需联系客服。不能称完全离线无遥测。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "vpet_privacy"
+          ]
+        },
+        {
+          "text": "CoreMOD直接Assembly.LoadFrom加载DLL；存在宿主代码执行/供应链风险，不是沙箱素材。官方2026-09公告披露盗用热门MOD植入病毒后重上传，说明不是原作者插件被证实恶意；已增加拦截、哈希签名/验证等措施。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "vpet_plugin_loader",
+            "vpet_recent_news",
+            "vpet_security_post"
+          ]
+        },
+        {
+          "text": "启用云模型/EdgeTTS时，应单独审查插件网络端点、会话文本、API密钥保存及服务商政策。此为风险提示，未做流量测试。",
+          "evidence_status": "分析",
+          "sources": [
+            "vpet_plugin_demo"
+          ]
+        }
+      ],
+      "strengths": [
+        {
+          "text": "Windows 2D桌宠核心、养成状态和工坊内容类型清晰；代码许可相对便于自建工程，UI与AI接口分离适合作为宿主设计参照。",
+          "evidence_status": "分析",
+          "sources": [
+            "vpet_project",
+            "vpet_readme",
+            "vpet_talk",
+            "vpet_license"
+          ]
+        }
+      ],
+      "weaknesses": [
+        {
+          "text": "不是现成全栈AI代理；依赖插件拼装模型/语音/记忆，插件权限风险高；素材授权独立，跨平台仍beta。",
+          "evidence_status": "分析",
+          "sources": [
+            "vpet_plugin_demo",
+            "vpet_recent_news",
+            "vpet_readme"
+          ]
+        }
+      ],
+      "engineering_takeaway": "优先借鉴2D动画状态机、宿主/插件接口和养成存档分层；自研时对插件采用进程隔离、权限声明、版本签名和最小数据访问，不直接继承无限制DLL信任。"
+    },
+    {
+      "id": "mateengine",
+      "name": "MateEngine",
+      "owner": "Shinyflvres / shinyflvre",
+      "official": {
+        "repository": "https://github.com/shinyflvre/Mate-Engine",
+        "website": null,
+        "website_note": "Steam API website字段为空；以互链官方仓库+Steam为已核验入口，不另猜域名。",
+        "steam": "https://store.steampowered.com/app/3625270/MateEngine/"
+      },
+      "ai_classification": {
+        "category": "native local generative AI desktop companion",
+        "core_native_generative_ai": true,
+        "qualification": "商店CHATTING明确small, local AI；复杂对话可借MOD。尚未核验交付模型精确量化/哈希或模型切换行为。",
+        "dlc_role": "本地聊天不是角色DLC前提；GitHub与Steam版本另有独占内容/工坊差异。",
+        "evidence": [
+          "mate_store_api",
+          "mate_readme",
+          "mate_notice"
+        ]
+      },
+      "engineering": {
+        "stack": {
+          "text": "Unity 6000.2.6f2项目、C#脚本；manifest含UGUI 2.0.0、PostProcessing 3.5.1、Localization 1.5.8等。LLMUnity package 2.5.1随仓库提供。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "mate_version",
+            "mate_manifest",
+            "mate_voice",
+            "mate_llm_package"
+          ]
+        },
+        "desktop_rendering": {
+          "text": "Unity实时3D角色，VRM导入、MToon/MToon10、鼠标跟随、拖拽、触碰、音乐动作。uWindowCapture目录存在；本次未验证透明窗口、点击穿透、置顶与系统API具体实现，不凭目录名推断。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_store_api",
+            "mate_assets_inventory"
+          ]
+        },
+        "model": {
+          "text": "README/NOTICE声明Qwen2.5 1.5B；随附LLMUnity文档说明基于llama.cpp。前者是产品模型声明，后者是已存在依赖的后端说明，并非发行包模型权重验证。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_notice",
+            "mate_readme",
+            "mate_llm_docs"
+          ]
+        },
+        "speech": {
+          "text": "MEVoicePack.cs提供AudioClip事件语音/音效映射；README比较表把AI Voices列为不支持。没有足够证据证明原生ASR或生成式TTS，不能把声音包当语音AI。",
+          "evidence_status": "源码验证",
+          "sources": [
+            "mate_voice",
+            "mate_readme"
+          ]
+        },
+        "memory": {
+          "text": "LLMUnity依赖可保存chat列表至persistentDataPath并提供RAG，但未验证MateEngine产品实际配置启用持久聊天或长期记忆；长期语义记忆记为未知。",
+          "evidence_status": "未知",
+          "sources": [
+            "mate_llm_docs"
+          ]
+        },
+        "tools": {
+          "text": "README列AI API功能/Minecraft集成，release提到Minecraft声音包；LLMUnity有function-calling样例，但未证明产品内有通用工具调用或安全授权代理。产品能力应与依赖示例分开。",
+          "evidence_status": "未知",
+          "sources": [
+            "mate_readme",
+            "mate_llm_package",
+            "mate_releases"
+          ]
+        }
+      },
+      "release_and_maturity": {
+        "query_date": "2026-10-23",
+        "initial_release": {
+          "text": "Steam API记录2025-04-16，已发布；GitHub提供免费版本，Steam为付费支持渠道（不固定引用易变化价格）。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_store_api",
+            "mate_readme"
+          ]
+        },
+        "platforms": {
+          "text": "官方Steam列Windows（Win11，Win10支持但未测试）；README链接Linux移植明确标Unofficial，不列作正式Linux发行承诺。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_store_api",
+            "mate_readme"
+          ]
+        },
+        "signals": [
+          {
+            "text": "release feed最新可见Public Release x3.3.0，条目updated=2026-01-19T16:49:26Z；含实验桌面行走、窗口停靠修复、内存/多实例修复及多显示器已知问题。updated不是独立确认的首发时间。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "mate_releases",
+              "mate_release_330"
+            ]
+          },
+          {
+            "text": "具工坊与Mod SDK目录、可导入用户VRM；角色质量取决于用户模型、骨骼、材质与贴图。未独立测量CPU/GPU/RAM。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "mate_sdk_inventory",
+              "mate_store_api"
+            ]
+          }
+        ],
+        "documentation_conflicts": [
+          {
+            "text": "同一Steam描述既介绍实验窗口停靠，又称因反作弊暂禁；README宣称Anti Cheat Safe，而商店要求避免反作弊应用。release x3.3又描述停靠修复，因此按版本与场景验证，不能保证反作弊安全。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "mate_store_api",
+              "mate_readme",
+              "mate_releases"
+            ]
+          },
+          {
+            "text": "同一商店正文给出VRM1.X/MToon10说明，底部仍称coming soon；精确版本兼容矩阵未实测，不作全兼容承诺。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "mate_store_api"
+            ]
+          }
+        ]
+      },
+      "licensing_and_assets": {
+        "code": {
+          "text": "README称Mixed GNU AGPL v3 & MateProv2；实际根LICENSE开头是MateEngine Pro v2.1，禁止商业用途和一般商业/二进制平台分发，要求衍生源码公开，含官方Steam Workshop特别许可。不能当作纯AGPL或OSI宽松开源；需逐文件审查、向作者澄清混合授权。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_license",
+            "mate_readme"
+          ]
+        },
+        "character_sdk": {
+          "text": "仓库提供Mod SDK（MEReceiver/MEManipulator/MEClothes等）；原始独立MOD代码可按条款非商业分发，含产品源码的MOD有额外公开源码/分发限制。VRM格式开放不意味着模型有商用权。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_sdk_inventory",
+            "mate_license"
+          ]
+        },
+        "assets": {
+          "text": "默认角色All Rights Reserved by Yorshka Shop，README禁止随自制构建再分发；LICENSE另对音频/视觉/字体等资产限制商用、单独再分发/转售，要求署名。用户VRM、动作、声音包需逐项确认授权。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_readme",
+            "mate_license"
+          ]
+        },
+        "model_license": {
+          "text": "NOTICE将Qwen2.5 1.5B标为Apache-2.0；LICENSE同时附Llama 3.2条文，不能据此推断当前产品正在运行Llama，也不能认为代码和素材一起受Apache授权。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "mate_notice",
+            "mate_license"
+          ]
+        }
+      },
+      "privacy_and_security": [
+        {
+          "text": "本地小模型路径减少聊天必须送云的需求，但并不证明整个应用零网络；LLMUnity允许远程服务且MOD可改变行为，Steam/Discord等集成也需单独审查。",
+          "evidence_status": "分析",
+          "sources": [
+            "mate_store_api",
+            "mate_llm_docs",
+            "mate_readme"
+          ]
+        },
+        {
+          "text": "音乐舞蹈使用应用音频源白名单；桌面/窗口交互与mod导入涉及额外系统/资源访问，应审查采集范围与插件来源。未验证录屏上传或用户数据外传，不能指控。",
+          "evidence_status": "分析",
+          "sources": [
+            "mate_store_api",
+            "mate_assets_inventory"
+          ]
+        },
+        {
+          "text": "未核验专门的产品隐私政策、日志保留规则、聊天加密、密钥存储和网络端点；README误报声明不构成安全审计证据。",
+          "evidence_status": "未知",
+          "sources": [
+            "mate_readme"
+          ]
+        }
+      ],
+      "strengths": [
+        {
+          "text": "把本地LLM与可替换VRM、3D动作、社区MOD结合，适合研究本地陪伴与用户角色生态，不必每个角色绑定云服务。",
+          "evidence_status": "分析",
+          "sources": [
+            "mate_store_api",
+            "mate_notice",
+            "mate_sdk_inventory"
+          ]
+        }
+      ],
+      "weaknesses": [
+        {
+          "text": "本地小模型对话能力有限；3D与模型复杂度带来资源预算问题，桌面/多显示器稳定性仍有已知问题。许可证是商业再利用的重要阻碍，文档版本不一致增加集成成本。",
+          "evidence_status": "分析",
+          "sources": [
+            "mate_store_api",
+            "mate_releases",
+            "mate_license"
+          ]
+        }
+      ],
+      "engineering_takeaway": "借鉴VRM与对话/动作解耦、离线推理选项和内容SDK；商业项目不要直接把该仓库当可商用底座，优先重新选取清晰授权的引擎、模型、动作和角色资源。"
+    },
+    {
+      "id": "desktop-mate",
+      "name": "Desktop Mate",
+      "owner": "infiniteloop",
+      "official": {
+        "repository": null,
+        "repository_note": "未发现经官网/Steam确认的产品官方源码仓库；不将第三方MOD仓库冒充官方。",
+        "website": "https://www.infiniteloop.co.jp/desktopmate/",
+        "steam": "https://store.steampowered.com/app/3301060/Desktop_Mate/"
+      },
+      "ai_classification": {
+        "category": "non-generative-AI desktop interaction and licensed character ecosystem reference",
+        "core_native_generative_ai": null,
+        "qualification": "所查官方材料仅证实桌面3D角色、鼠标互动、台词语音、闹钟及特定游戏同步；未发现LLM对话声明。按非AI参照纳入，不宣称数学上证明产品不存在任何内部AI。",
+        "dlc_role": "DLC是官方授权角色、台词及专属行为等内容扩展，不是已证实AI模型/聊天DLC。",
+        "evidence": [
+          "desktop_site",
+          "desktop_store_api"
+        ]
+      },
+      "engineering": {
+        "stack": {
+          "text": "商业产品，无已核验公开源码/依赖清单；编程语言、游戏引擎、UI框架、窗口API均未知。不得从3D外观或第三方MOD推断Unity/Electron。",
+          "evidence_status": "未知",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "desktop_rendering": {
+          "text": "官网明确实时3D显示，角色可坐在窗口上、在窗口间跳跃、追随鼠标与被摸头；仅是行为与展示方案声明，透明合成/穿透/坐标实现未知。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "model": {
+          "text": "未有一手证据表明核心包含生成式LLM、本地/云端模型或API选择。",
+          "evidence_status": "未知",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "speech": {
+          "text": "官方商店说明角色在点击/摸头等场景播放voice lines，内容依角色DLC不同；官网FAQ现称现有角色皆有声音。无证据证明ASR或生成式TTS。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "memory": {
+          "text": "没有已验证的聊天历史、长期语义记忆、RAG或向量存储。",
+          "evidence_status": "未知",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "tools": {
+          "text": "内置闹钟，指定Chibi Ichihime DLC可与Mahjong Soul同步游戏动作；这不等于LLM工具调用或通用桌面自动化。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_store_api"
+          ]
+        }
+      },
+      "release_and_maturity": {
+        "query_date": "2026-10-23",
+        "initial_release": {
+          "text": "Steam英文API显示2025-01-07，官网日本日期写2025-01-08；保留来源时区/展示差异，不武断选一日否定另一来源。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_store_api",
+            "desktop_site"
+          ]
+        },
+        "platforms": {
+          "text": "当前Steam和官网均支持Windows与macOS；官网FAQ限定Apple Silicon，Intel Mac/Linux不支持。最低macOS版本在FAQ（Monterey12+）与页面底部（Tahoe+）不一致，购买前应核对Steam当前要求。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "signals": [
+          {
+            "text": "持续发布官方授权角色DLC，官网列2026-10-15 IA发行；商业IP合作入口与使用FAQ完整。只能证明持续发行/生态运营，不可推断销量、市占率。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "desktop_site"
+            ]
+          },
+          {
+            "text": "多角色功能仍beta，官网说最多2个角色且Mac暂不支持；不作全平台同功能承诺。",
+            "evidence_status": "官方声明",
+            "sources": [
+              "desktop_site",
+              "desktop_store_api"
+            ]
+          }
+        ]
+      },
+      "licensing_and_assets": {
+        "code": {
+          "text": "未公开可复用代码许可；按专有商业产品处理。官方第三方EULA全文未取得，不编造条款。",
+          "evidence_status": "未知",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        },
+        "character_sdk": {
+          "text": "官网提供企业角色合作联系入口；未核验面向公众的角色SDK或用户任意VRM导入承诺，不能拿社区MOD当官方开放平台。",
+          "evidence_status": "未知",
+          "sources": [
+            "desktop_site"
+          ]
+        },
+        "assets": {
+          "text": "官网明确DLC为正式授权角色；配信/直播使用须遵循每个角色Steam页面各自指南。购买DLC不等于获得模型导出、再分发、训练或商用再授权。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        }
+      },
+      "privacy_and_security": [
+        {
+          "text": "官网链接公司隐私政策，说明可能收集个人信息用于认证、支持、维护和改进，列出第三方披露与删除/更正联系机制；这不是产品专门的数据流清单。",
+          "evidence_status": "官方声明",
+          "sources": [
+            "desktop_privacy"
+          ]
+        },
+        {
+          "text": "由于闭源和缺少专门数据流材料，遥测、屏幕/窗口信息读取、存储期限、网络端点均未核验；不可宣称完全本地、无采集或比其他产品更安全。",
+          "evidence_status": "未知",
+          "sources": [
+            "desktop_site",
+            "desktop_privacy"
+          ]
+        },
+        {
+          "text": "非官方MOD/模型替换工具与官方授权DLC分属不同信任边界，不能因角色正版就信任第三方注入插件。",
+          "evidence_status": "分析",
+          "sources": [
+            "desktop_site"
+          ]
+        }
+      ],
+      "strengths": [
+        {
+          "text": "正式IP授权、内容发行和桌面角色行为成熟度信号强，适合参考付费角色生态、非打扰交互、动画/台词设计和FAQ支持体系。",
+          "evidence_status": "分析",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        }
+      ],
+      "weaknesses": [
+        {
+          "text": "不适合作为可复用AI代码基座；底层不可审计、公开角色SDK未证实，能力受DLC/角色授权与平台beta差异约束。",
+          "evidence_status": "分析",
+          "sources": [
+            "desktop_site",
+            "desktop_store_api"
+          ]
+        }
+      ],
+      "engineering_takeaway": "用于桌面存在感、交互打磨和角色商业化参照，不用于证明AI模型/记忆/工具架构，也不复制受版权保护的角色资产。"
+    }
+  ],
+  "cross_product_recommendations": [
+    {
+      "topic": "选型定位",
+      "recommendation": "AI工程参照优先研究MateEngine的本地LLM接口，但商业实现重新评估许可；2D宿主/插件参照VPet；IP与桌面表现参照Desktop Mate。"
+    },
+    {
+      "topic": "权限边界",
+      "recommendation": "将角色渲染、模型服务、记忆库、工具执行分离；导入模型不自动授权系统访问，代码插件须单独同意和隔离。"
+    },
+    {
+      "topic": "证据边界",
+      "recommendation": "依赖具备RAG/函数调用不代表产品启用；台词/音效不等于TTS；持久养成存档不等于长期对话记忆；官网宣传轻量不等于性能实测。"
+    },
+    {
+      "topic": "素材边界",
+      "recommendation": "逐项记录代码/模型权重/角色/动画/语音/字体/商标授权，禁止把MIT/Apache等代码许可证扩张到默认角色。"
+    }
+  ],
+  "sources": [
+    {
+      "id": "vpet_repo",
+      "url": "https://github.com/LorisYounger/VPet",
+      "note": "官方仓库；与Steam/官网互链",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_readme",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/README_en.md",
+      "note": "WPF架构、工坊、素材授权；ChatGPT设置目录描述含历史残留",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_project",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/VPet-Simulator.Windows/VPet-Simulator.Windows.csproj",
+      "note": "源码：net10.0-windows7.0、UseWPF、依赖清单",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_window",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/VPet-Simulator.Windows/MainWindow.xaml",
+      "note": "源码：WindowStyle=None、ShowInTaskbar=False、WindowChrome",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_talk",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/VPet-Simulator.Windows.Interface/TalkBox.xaml.cs",
+      "note": "源码：TalkBox抽象类、MainPlugin、Responded/ITalkAPI接口",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_selection",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/VPet-Simulator.Windows/WinDesign/TalkSelect.xaml.cs",
+      "note": "源码：选项式对话列表",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_plugin_loader",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/VPet-Simulator.Windows/Function/CoreMOD.cs",
+      "note": "源码：DLL枚举及Assembly.LoadFrom；宿主执行插件",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_plugin_demo",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet.Plugin.Demo/master/README.md",
+      "note": "开发者插件示例：ChatGPT兼容API、EdgeTTS、番茄钟",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_license",
+      "url": "https://raw.githubusercontent.com/LorisYounger/VPet/main/LICENSE",
+      "note": "Apache License 2.0正文",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_store",
+      "url": "https://store.steampowered.com/app/1920960/VPet/",
+      "note": "Steam正式商店",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_store_api",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1920960&l=english",
+      "note": "发布日、平台字段、官方网址和DLC列表",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_site",
+      "url": "https://www.exlb.net/VPet",
+      "note": "Steam指定官网，指向官方仓库",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_privacy",
+      "url": "https://www.exlb.net/diagnosis/",
+      "note": "官方诊断、反馈与隐私政策",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_ai_removal",
+      "url": "https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=1920960&count=5&maxlength=12000&enddate=1693757306",
+      "note": "官方公告全文字段：gid=5141476355668897891，2023-09-03移除ChatGPT并转工坊插件",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_ai_removal_post",
+      "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/5141476355668897891",
+      "note": "官方API返回的公告原文链接；正文通过Steam API核验",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_recent_news",
+      "url": "https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=1920960&count=2&maxlength=0",
+      "note": "官方最新公告完整正文：跨平台beta、云存档、插件安全事件与治理",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_beta_post",
+      "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1844751498224549",
+      "note": "官方API返回跨平台beta公告链接；正文通过Steam API核验",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_security_post",
+      "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1844115010498257",
+      "note": "官方API返回恶意重上传MOD公告链接；正文通过Steam API核验",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_releases",
+      "url": "https://github.com/LorisYounger/VPet/releases.atom",
+      "note": "已读取发布feed；仅见v1.09，不能据此判断Steam不再维护",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_modmaker",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2639250&l=english",
+      "note": "官方ModMaker DLC说明；不是AI DLC",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "vpet_skin",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2607350&l=english",
+      "note": "官方Pancake Cat皮肤DLC说明；不是AI DLC",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_repo",
+      "url": "https://github.com/shinyflvre/Mate-Engine",
+      "note": "官方仓库及Steam链接",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_readme",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/README.md",
+      "note": "官方项目说明；Qwen、本地聊天、VRM、资产与混合许可声明",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_version",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/ProjectSettings/ProjectVersion.txt",
+      "note": "源码配置：Unity 6000.2.6f2",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_manifest",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/Packages/manifest.json",
+      "note": "源码依赖：UGUI、PostProcessing、Localization等",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_llm_package",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/Assets/LLMUnity/package.json",
+      "note": "源码依赖：LLM for Unity 2.5.1",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_llm_docs",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/Assets/LLMUnity/README.md",
+      "note": "随附依赖文档：llama.cpp、会话保存、远程服务器、RAG；不是产品启用证明",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_voice",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/Assets/MATE%20ENGINE%20-%20Scripts/MEVoicePack.cs",
+      "note": "源码：Unity AudioClip语音包、拖拽/触摸/聊天音效映射",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_sdk_inventory",
+      "url": "https://api.github.com/repos/shinyflvre/Mate-Engine/contents/Assets/MATE%20ENGINE%20-%20Mod%20SDK",
+      "note": "已读取官方SDK目录：MEReceiver、MEManipulator、MEClothes等",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_assets_inventory",
+      "url": "https://api.github.com/repos/shinyflvre/Mate-Engine/contents/Assets",
+      "note": "已读取官方目录：LLMUnity、VRM/模型相关资源、uWindowCapture；目录存在不等于功能启用",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_notice",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/NOTICE.txt",
+      "note": "Qwen 2.5 1.5b声明与模型上游链接",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_license",
+      "url": "https://raw.githubusercontent.com/shinyflvre/Mate-Engine/main/LICENSE.md",
+      "note": "实际MateEngine Pro License v2.1及资产/第三方条款",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_store",
+      "url": "https://store.steampowered.com/app/3625270/MateEngine/",
+      "note": "Steam商店原生小型本地AI说明",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_store_api",
+      "url": "https://store.steampowered.com/api/appdetails?appids=3625270&l=english",
+      "note": "Steam完整描述、Windows平台、发布日期；窗口/VRM条目互相矛盾",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_releases",
+      "url": "https://github.com/shinyflvre/Mate-Engine/releases.atom",
+      "note": "完整feed已读；最新条目Public Release x3.3.0",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "mate_release_330",
+      "url": "https://github.com/shinyflvre/Mate-Engine/releases/tag/Public-Release-X3.3.0",
+      "note": "release feed对应发布链接：实验行走、多显示器已知问题",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "desktop_store",
+      "url": "https://store.steampowered.com/app/3301060/Desktop_Mate/",
+      "note": "官方Steam页面",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "desktop_store_api",
+      "url": "https://store.steampowered.com/api/appdetails?appids=3301060&l=english",
+      "note": "Windows/macOS、infiniteloop官网链接、正式发布及语音/DLC描述",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "desktop_site",
+      "url": "https://www.infiniteloop.co.jp/desktopmate/",
+      "note": "Steam指定官网：3D互动、角色DLC、FAQ、Mac、角色使用指南",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "desktop_privacy",
+      "url": "https://www.infiniteloop.co.jp/privacy/",
+      "note": "官网链接公司隐私政策，2026-02-19修订",
+      "queried_on": "2026-10-23"
+    },
+    {
+      "id": "excluded_index",
+      "url": "https://github.com/Mega-Gorilla/Index",
+      "note": "公开访问404，未证实为相关产品；不推断是否曾存在/私有/改名",
+      "queried_on": "2026-10-23"
+    }
+  ]
+}

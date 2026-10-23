@@ -1,0 +1,48 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建与打包产物
+dist/
+out/
+build/
+release/
+*.tsbuildinfo
+
+# 环境变量与密钥（只提交 .env.example）
+.env
+.env.*
+!.env.example
+
+# 日志与临时文件
+*.log
+logs/
+tmp/
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 模型权重与大文件：通过下载脚本获取，不入库
+models/
+*.onnx
+*.safetensors
+*.pt
+*.ckpt
+
+# 本地用户数据
+userdata/
+
+# 编辑器与系统
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+
+# 可视化报告验收截图
+*.sheet*.png

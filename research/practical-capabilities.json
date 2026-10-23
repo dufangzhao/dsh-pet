@@ -1,0 +1,681 @@
+{
+  "schema_version": "1.0",
+  "title": "实用型多模态电脑助手能力核验",
+  "queried_on": "2026-10-23",
+  "timezone": "Asia/Taipei",
+  "objective": "语音输入/向其他 App 听写、TTS与音色合成/克隆、制作与导入角色、看屏幕、操作鼠标键盘；不按养成和宠物互动评分",
+  "method": {
+    "mode": "官方源码与官方文档静态核验；未下载、安装、启动或执行调研项目",
+    "input_files": [
+      "research/ai-frameworks.json",
+      "research/product-benchmarks.json（仅头部40行，未据此扩展产品结论）"
+    ],
+    "not_read": "research/requested-repos.json 开始时未发现；未等待或推测其内容",
+    "github_access": "先调用 GitHub MCP get_me，401 Bad credentials；公开 REST tree API 返回403后停止该路线，改用官方 raw 与官方文档。",
+    "scope": "沿用已有调研固定主仓提交，补核能力边界；不是全仓穷尽审计。源码存在不等于发布包包含或端到端可靠。",
+    "source_handling": "source_urls使用官方GitHub blob固定提交；实际读取对应raw文件。文档站为查询时可变页面。AIRI长手册返回截断，仅引用读到的角色卡、Hearing、Models章节；其自述对应0.11.3，不能覆盖固定提交全部变化。",
+    "failed_discovery": "若干猜测路径404、GitHub目录HTML截断、直接fetch网络失败，均未作为功能不存在证据。",
+    "runtime_verified": false,
+    "support_level_definition": {
+      "核心实现": "已读本仓源码，看到该能力的数据处理/执行链；可依赖外部模型，不等于全部算法本地或经过运行测试。",
+      "接插件或服务": "已核实适配/服务接入，能力依赖额外引擎、服务或外部工具；不算默认即用。",
+      "仅声明": "本轮只有官方README/操作文档的明确描述，未读到对应执行链。",
+      "未核查": "现有证据不足；绝不等同于不存在。"
+    },
+    "interpretation_rules": [
+      "麦克风对话≠向任意App全局听写。",
+      "能选择TTS供应商/voice ID≠内置克隆创建；克隆注册/参考音频推理≠音色模型训练。",
+      "截图/图像理解≠真实OS输入；MCP协议支持≠已带电脑操控执行器。",
+      "角色卡/人设编辑≠模型资产制作；模型导入≠Live2D绑定/VRM建模工具。",
+      "全局热键≠全局听写；Agent粘贴文字≠低延迟原文听写。"
+    ]
+  },
+  "executive_findings": [
+    {
+      "finding": "没有充分证据证明三者任何一个已经完整覆盖全部目标；专用跨应用听写仍是共同未核查项。",
+      "basis": [
+        "global_dictation_to_other_apps 三项目记录"
+      ]
+    },
+    {
+      "finding": "N.E.K.O 的克隆/设计管理和 PyAutoGUI 电脑控制已从声明提升为源码证实；克隆算法仍是服务或参考音频路径，不是内置本地训练。",
+      "source_urls": [
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_cloning.py",
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_design.py",
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py"
+      ]
+    },
+    {
+      "finding": "AIRI 不应仅以旧 MCP 桥描述：已存在 Electron 托管 AUV runtime，具备受控桌面命令接入。AUV 驱动与完整任务闭环未核。",
+      "source_urls": [
+        "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/index.ts",
+        "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/runtime.ts"
+      ]
+    },
+    {
+      "finding": "Open-LLM-VTuber 有真实本地/外部克隆推理适配，但没有证据表明自带OS执行器；默认MCP例子只是时间与搜索。",
+      "source_urls": [
+        "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/coqui_tts.py",
+        "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/gpt_sovits_tts.py",
+        "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/mcp_servers.json"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "airi",
+      "name": "AIRI",
+      "commit": "3b0672e3668bd1ade1210e579818f379e4f8a224",
+      "capabilities": [
+        {
+          "id": "microphone_conversation",
+          "support_level": "核心实现",
+          "summary": "已核实语音控制器、转录器、VAD、可编辑草稿和聊天提交接线；识别引擎/模型仍须配置。",
+          "data_flow": [
+            "麦克风采集→hearing.createTranscriber()",
+            "Silero VAD/端点与可选重述插件→语音草稿或当前 composer",
+            "提交到聊天会话→模型响应→Speech 管线"
+          ],
+          "gaps": [
+            "未运行，无法给出听写准确率、打断延迟或噪声表现。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/"
+          ]
+        },
+        {
+          "id": "global_dictation_to_other_apps",
+          "support_level": "未核查",
+          "summary": "未证实专用的“全局快捷键录音→转写→恢复原焦点→写入其他 App”闭环；不能把麦克风聊天、全局快捷键或 AUV 输入通道合并当作现成功能。",
+          "data_flow": [
+            "已核实：globalShortcut/uiohook 事件→AIRI 控制回调",
+            "已核实：语音草稿送 AIRI 当前会话；未找到通往外部输入框的专用路由"
+          ],
+          "gaps": [
+            "原窗口/光标定位、录音期间焦点保持、Unicode 输入、剪贴板保存恢复、取消和失败回滚均未核查。",
+            "Apple Speech 的 dictation 引擎名称不等于系统级听写产品。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/electron/global-shortcut.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/runtime.ts"
+          ]
+        },
+        {
+          "id": "tts_and_voice_selection",
+          "support_level": "接插件或服务",
+          "summary": "核心提供音色目录、provider/model/voice 选择及生成接口；实际音频由所选本地或云 TTS 实现。",
+          "data_flow": [
+            "选择 provider/model/voice ID→loadVoiceCatalog/listProviderVoices",
+            "文本→generateSpeech 或 streamSpeech→音频输出"
+          ],
+          "gaps": [
+            "多供应商支持不等于每个 provider 均具备克隆、同样 SSML 或同样离线能力。",
+            "质量、服务费用与语言支持须按所选引擎单独确认。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/speech.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md"
+          ]
+        },
+        {
+          "id": "voice_clone_or_design_workflow",
+          "support_level": "未核查",
+          "summary": "此次核实到的是音色选择与 TTS 调用；没有足够证据证明 AIRI 本身提供录音上传、克隆注册、试听、保存绑定的一体化流程。",
+          "data_flow": [
+            "已核实：使用已存在 voice ID；创建新 voice ID 的界面/接口链未核查"
+          ],
+          "gaps": [
+            "不能因 ElevenLabs/阿里云在供应商列表就宣称内置克隆。",
+            "若服务商预先创建音色后能否完整列出和绑定，需要按具体 provider 复核。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/speech.ts",
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/"
+          ]
+        },
+        {
+          "id": "local_voice_training",
+          "support_level": "未核查",
+          "summary": "未核实录音清洗/标注→训练任务→权重导出→加载的内置音色训练流水线。",
+          "data_flow": [],
+          "gaps": [
+            "参考音频推理、服务商克隆注册、修改音高均不等于本地训练。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/speech.ts",
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/"
+          ]
+        },
+        {
+          "id": "character_model_import",
+          "support_level": "仅声明",
+          "summary": "官方操作手册具体说明 AIRI Card pack 可携带 Live2D/Spine/Tachie/VRM，模型页可选择、导入、配置；本轮未追到导入校验的执行源码。",
+          "data_flow": [
+            "现有模型/角色卡包→导入 manifest 与 CCv3 字段校验（手册）→激活卡片及显示模型"
+          ],
+          "gaps": [
+            "手册对应 0.11.3，非本次提交的严格版本合同。",
+            "字段采用白名单，不是无损 CCv3 备份；额外渲染类型仅作手册声明，不扩大本轮源码验证范围。"
+          ],
+          "source_urls": [
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md"
+          ],
+          "evidence_status": "官方操作文档已读；导入源码未核查"
+        },
+        {
+          "id": "character_persona_editor",
+          "support_level": "仅声明",
+          "summary": "手册明确有角色卡创建/编辑：身份、性格、场景、问候、模块偏好、系统提示词；不同于美术资产编辑器。",
+          "data_flow": [
+            "填写人物与行为字段→Create→手动 Activate→用于聊天"
+          ],
+          "gaps": [
+            "源码确认有 AIRI Editor 窗口入口，但窗口名称不能证明完整建模/绑定能力。"
+          ],
+          "source_urls": [
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/windows/editor/index.ts"
+          ],
+          "evidence_status": "角色卡编辑为官方步骤声明；独立 Editor 仅核到窗口壳"
+        },
+        {
+          "id": "avatar_asset_authoring",
+          "support_level": "未核查",
+          "summary": "未证实内置从绘画/网格到 Live2D 绑定或 VRM 骨骼、材质、动画制作的完整角色资产工具。",
+          "data_flow": [],
+          "gaps": [
+            "导入、卡片编辑、模型位置缩放、Artistry 图像生成都不能直接算 Live2D/VRM 制作。"
+          ],
+          "source_urls": [
+            "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/windows/editor/index.ts"
+          ]
+        },
+        {
+          "id": "screen_understanding",
+          "support_level": "核心实现",
+          "summary": "vision orchestrator 将选定来源 PNG/JPEG data URL 送已配置的视觉模型，并可发布到角色上下文。",
+          "data_flow": [
+            "选定来源帧→processCapture→视觉推理",
+            "可选 publishContext→图像与推理结果进入角色上下文"
+          ],
+          "gaps": [
+            "需要支持图像的 provider/model；未配置会报错。",
+            "屏幕采集 UI、全局隐私过滤和不同 OS 授权效果未实测。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/index.ts"
+          ]
+        },
+        {
+          "id": "os_mouse_keyboard_control",
+          "support_level": "接插件或服务",
+          "summary": "不仅是 MCP 空桥：Electron 启动时注册 computer-use handler，首次调用由 @auv-js/cli 与 @auv-js/sdk 托管独立 AUV daemon，转发真实桌面命令。",
+          "data_flow": [
+            "renderer IPC computerUseRun→校验 argv",
+            "私有 daemon/token→execFile AUV invoke（app/display/screen/window/input/mediaControl）",
+            "返回 JSON/exitCode；截图只能从 AIRI computer-use store 读取"
+          ],
+          "gaps": [
+            "核心集成已源码核实，但 AUV 自身驱动、平台覆盖、安装包完整性和任务规划/UI 入口未端到端验证。",
+            "argv 白名单是命令域约束，不是每一次付款/删除/发送的用户确认。",
+            "源码明确 zero exit code 不等于 UI 效果已验证；需独立读回。",
+            "旧 MCP bridge 是另一接入面，不能仅凭 bridge 判断全部控制实现。"
+          ],
+          "source_urls": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/index.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/index.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/runtime.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/shared/eventa/computer-use.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/mcp-tool-bridge.ts"
+          ],
+          "core_integration": "核心实现",
+          "execution_backend": "AUV 原生组件/服务",
+          "verified_safeguards": [
+            "串行命令队列",
+            "AIRI 管理 endpoint/store，拒绝覆盖相关全局参数",
+            "启动凭据由 stdin 传递",
+            "截图 realpath 边界与格式/大小检查",
+            "退出时中止并停 daemon"
+          ]
+        }
+      ],
+      "practical_fit": "适合愿意做集成的 TypeScript/Electron 团队：角色/音频前端与 AUV 控制接入有价值。若首要目标是开箱即用跨应用听写或本地音色训练，目前证据不足以推荐为现成答案。"
+    },
+    {
+      "id": "open-llm-vtuber",
+      "name": "Open-LLM-VTuber",
+      "commit": "992309c0aa19845960228f880013d4685fde93b5",
+      "capabilities": [
+        {
+          "id": "microphone_conversation",
+          "support_level": "核心实现",
+          "summary": "后端单轮会话调用 ASR，将文字和可选图像交给 Agent，再消费文本/音频输出；这是语音对话链路。",
+          "data_flow": [
+            "音频→process_user_input(context.asr_engine)",
+            "文字+images→create_batch_input→agent_engine.chat",
+            "SentenceOutput→tts_engine/音频任务→WebSocket 前端"
+          ],
+          "gaps": [
+            "识别引擎、语言模型与 TTS 可分别本地部署，但必须逐个配置；不是默认任何组合都离线。",
+            "麦克风前端采集仅继承已有调研/官方声明，当前轮重点核后端。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ]
+        },
+        {
+          "id": "global_dictation_to_other_apps",
+          "support_level": "未核查",
+          "summary": "没有证据证明原生全局听写与外部焦点注入；语音输入目标是项目的会话 Agent。",
+          "data_flow": [
+            "已核实：ASR 文本进入 batch_input，而非 OS 输入法/外部应用焦点"
+          ],
+          "gaps": [
+            "全局录音热键、焦点恢复、外部文字粘贴和取消回滚闭环未核查。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ]
+        },
+        {
+          "id": "tts_and_voice_selection",
+          "support_level": "接插件或服务",
+          "summary": "存在多种 TTS 后端适配，既可调用本地库也可访问外部 HTTP/云服务。",
+          "data_flow": [
+            "会话句子→所选 TTSEngine.generate_audio→音频缓存/输出",
+            "Coqui: TTS(model_name).to(device)→tts_to_file",
+            "GPT-SoVITS: 文本/语言/参考音频路径→外部 API→保存响应音频"
+          ],
+          "gaps": [
+            "各引擎依赖/许可/硬件要求不同；官方文档也提示 Coqui 与 MeloTTS 的依赖冲突。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/coqui_tts.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/gpt_sovits_tts.py",
+            "https://open-llm-vtuber.github.io/docs/user-guide/backend/tts"
+          ]
+        },
+        {
+          "id": "voice_clone_or_design_workflow",
+          "support_level": "接插件或服务",
+          "summary": "克隆并非纯宣传：Coqui 适配把 speaker_wav 传给多说话人模型；GPT-SoVITS 传 ref_audio_path/prompt_text 给外部服务。官方文档让用户在 ElevenLabs 控制台或独立 CosyVoice/GPT-SoVITS 环境完成创建与配置。",
+          "data_flow": [
+            "参考音频+适配模型→Coqui 本地参考音频推理",
+            "或先部署 GPT-SoVITS/CosyVoice→在 conf 配置端点与样本→推理",
+            "或服务商控制台克隆→复制 voice ID→配置本项目"
+          ],
+          "gaps": [
+            "Coqui 分支依赖 self.is_multi_speaker 与 speaker_wav 条件，非任意模型都有克隆能力。",
+            "未核实本项目原生上传/裁剪/训练/音色版本管理 UI。",
+            "文档要求外部工具完成的工作不能算本项目内置训练。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/coqui_tts.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/gpt_sovits_tts.py",
+            "https://open-llm-vtuber.github.io/docs/user-guide/backend/tts"
+          ]
+        },
+        {
+          "id": "local_voice_training",
+          "support_level": "未核查",
+          "summary": "已核到推理适配与外部服务连接，未核到本项目内置训练工作流。",
+          "data_flow": [],
+          "gaps": [
+            "如要微调 GPT-SoVITS，应把其训练环境作为独立组件规划；此处未运行或核验该外部训练项目。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/gpt_sovits_tts.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/coqui_tts.py",
+            "https://open-llm-vtuber.github.io/docs/user-guide/backend/tts"
+          ]
+        },
+        {
+          "id": "character_model_import",
+          "support_level": "核心实现",
+          "summary": "Live2D 配置加载由源码核实；官方文档给出模型导入和表情/点击动作映射步骤。",
+          "data_flow": [
+            "已有模型放入 live2d-models→配置 model_dict.json",
+            "角色配置 live2d_model_name→Live2DModel 读取/查找模型与 emotionMap→前端使用模型信息"
+          ],
+          "gaps": [
+            "该 Python 类只准备 payload，不负责渲染；前端加载兼容性未运行验证。",
+            "文档说明 Cubism 3–5，不支持 Cubism 2；本轮未核到 VRM 支持。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/live2d_model.py",
+            "https://open-llm-vtuber.github.io/docs/user-guide/live2d"
+          ]
+        },
+        {
+          "id": "character_persona_editor",
+          "support_level": "仅声明",
+          "summary": "官方文档说明角色用 conf.yaml/characters 配置与 prompt 定义并可切换配置；本轮未追到人设字段的完整加载链，也未证实一体化图形角色编辑器。",
+          "data_flow": [
+            "编辑角色配置/提示词与模型名→前端选择对应角色"
+          ],
+          "gaps": [
+            "这是配置式制作，不是建模或可视化全套编辑器。"
+          ],
+          "source_urls": [
+            "https://open-llm-vtuber.github.io/docs/user-guide/live2d",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "clarification": "模型配置读取已另行源码核实；这里单列人设编辑能力，仅按官方操作文档计，不把模型读取扩大为图形编辑器证据。"
+        },
+        {
+          "id": "avatar_asset_authoring",
+          "support_level": "接插件或服务",
+          "summary": "官方指南把表情、动作预览/制作指向 VTube Studio、Live2DViewerEx、Cubism Viewer 等外部工具，而不是宣称本项目建模。",
+          "data_flow": [
+            "外部获取/制作 Live2D→外部配置表情动作→导入项目"
+          ],
+          "gaps": [
+            "完整画图、分层、绑定、骨骼/网格制作未在本项目内核实。"
+          ],
+          "source_urls": [
+            "https://open-llm-vtuber.github.io/docs/user-guide/live2d"
+          ]
+        },
+        {
+          "id": "screen_understanding",
+          "support_level": "核心实现",
+          "summary": "后端已核实接收 images 并传入 Agent；官方声明前端支持摄像头、录屏及截图。",
+          "data_flow": [
+            "前端图像（采集入口为官方声明）→single_conversation.images→create_batch_input→Agent/视觉模型"
+          ],
+          "gaps": [
+            "核心确认的是图像数据接入，不是桌面控制。",
+            "前端采集频率、多屏切换、敏感窗口保护与视觉模型适配未核查。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ]
+        },
+        {
+          "id": "os_mouse_keyboard_control",
+          "support_level": "接插件或服务",
+          "summary": "已有 MCP 客户端接入面，但本轮没有证实自带鼠标键盘执行器；默认 MCP 配置仅 time 与 ddg-search。",
+          "data_flow": [
+            "外部 MCP server command/args→stdio 客户端→call_tool→工具结果回 Agent（客户端证据继承已有调研）"
+          ],
+          "gaps": [
+            "必须另外提供 computer-use MCP 服务并核查授权、输入/截图执行与反馈验证。",
+            "README Related Projects 的 full computer control 描述属于其他项目，不能归入本项目。",
+            "未知是否另有上游逐操作授权门；不能把任意 MCP 功能算作默认自带功能。"
+          ],
+          "source_urls": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/mcp_servers.json",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "evidence_status": "当前轮复核默认配置与 README；MCP 客户端调用事实继承 ai-frameworks 调研"
+        }
+      ],
+      "practical_fit": "适合偏 Python、希望把 ASR/LLM/TTS 分开配置和本地化的语音角色前端；对通用电脑控制、音色制作 UI、全局听写需要额外产品层，不能按多模态电脑助手成品选它。"
+    },
+    {
+      "id": "neko",
+      "name": "N.E.K.O",
+      "commit": "c65adc2bb467c812c5fd948c8031aa96d48c0e14",
+      "capabilities": [
+        {
+          "id": "microphone_conversation",
+          "support_level": "核心实现",
+          "summary": "OmniRealtimeClient 接入原生实时音频/转写/中断回调；文本会话和自定义音色另可走外部 TTS。",
+          "data_flow": [
+            "麦克风音频→Realtime provider",
+            "input transcript/音频 delta/结束与中断事件→会话与播放",
+            "克隆或指定外部音色→外部 TTS runtime，非强制所有路径拆成 ASR→LLM→TTS"
+          ],
+          "gaps": [
+            "需要对应 Realtime 或配置的服务；默认完全离线不能从“本地运行”推导。",
+            "具体麦克风前端与多窗口输入焦点未实测。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/tts-pipeline.md",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ]
+        },
+        {
+          "id": "global_dictation_to_other_apps",
+          "support_level": "未核查",
+          "summary": "虽已证实 Computer Use 的文字输入与剪贴板粘贴，但未证明专用全局听写工作流。",
+          "data_flow": [
+            "已核实：Agent 动作 _clipboard_type→pyperclip.copy→Ctrl/Cmd+V",
+            "未核实：录音热键→原文 ASR→原应用焦点→直接插入，不经 Agent 改写/规划"
+          ],
+          "gaps": [
+            "Agent 代打字与“原文听写”不是同一产品能力。",
+            "焦点锁定、剪贴板恢复、录音转写取消与权限升级场景未核查。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py"
+          ]
+        },
+        {
+          "id": "tts_and_voice_selection",
+          "support_level": "接插件或服务",
+          "summary": "有独立 TTS runtime 与 provider 路由；预设原生音色和自定义克隆音色采用不同路径。",
+          "data_flow": [
+            "原生语音会话音色→Realtime provider 音频",
+            "文本或自定义音色→ws_bistream/http_sentence worker→前端播放",
+            "voice catalog/preview/voice_id binding→角色"
+          ],
+          "gaps": [
+            "音色 ID 按 provider/source/reference 解释，不是全局通用。",
+            "不支持原生组合时可能降为 dummy worker，不能承诺任意 provider 任意音色无缝可用。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/tts-pipeline.md",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/api/rest/characters.md"
+          ]
+        },
+        {
+          "id": "voice_clone_or_design_workflow",
+          "support_level": "核心实现",
+          "summary": "已核实内置克隆/音色设计 API 与管理流程，不仅是供应商列表；实际算法仍依赖云端或外部本地 TTS 服务。",
+          "data_flow": [
+            "上传音频→大小/格式/语言等检查→可选静音分析/裁剪→规范化/去重",
+            "云端：MiniMax/ElevenLabs/CosyVoice 等注册/克隆→保存 voice ID 与 provider 元数据",
+            "本地服务：/speakers/register；vLLM-Omni：存参考音频 base64+严格匹配 ref_text，合成时内联",
+            "音色描述→voice_design 或 ElevenLabs preview→create→保存音色→绑定角色/试听"
+          ],
+          "gaps": [
+            "这不是在 N.E.K.O 内训练自有声学模型权重。",
+            "vLLM-Omni 分支注册时仅存样本，代码明确没有远程验证 API，真正合成成功要另验。",
+            "不同 provider 对音频时长、配额、收费、目标模型绑定限制不同；README 的“约5秒”不能推广成通用保证。",
+            "参考音频及 voice metadata 可能涉及云同步/上游上传，应单独审查存储与隐私。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_cloning.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_design.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/tts-pipeline.md",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/api/rest/characters.md",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ],
+          "algorithm_support_level": "接插件或服务",
+          "source_anchors": [
+            "voice_cloning.py:312–319 上传入口",
+            "voice_cloning.py:385–435 本地注册",
+            "voice_cloning.py:644–749 云端与参考音频分支",
+            "voice_design.py:88–295 设计 provider 路由"
+          ]
+        },
+        {
+          "id": "local_voice_training",
+          "support_level": "未核查",
+          "summary": "已核实的是本地/云端克隆注册与参考音频推理，不是内置数据集训练、微调或模型权重导出。",
+          "data_flow": [],
+          "gaps": [
+            "如目标是离线训练专属音色，需要独立训练系统；不要把 /speakers/register 或保存样本称作训练。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_cloning.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/tts-pipeline.md"
+          ]
+        },
+        {
+          "id": "character_model_import",
+          "support_level": "核心实现",
+          "summary": "角色卡保存、含模型打包导出、ZIP/PNG 角色卡导入源码已读；有 Live2D/VRM/MMD/PNGTuber 资源分支。",
+          "data_flow": [
+            "外部已有模型→模型绑定",
+            "角色档案+可选用户模型→导出 PNG/归档",
+            "import-card 接收 ZIP/配置→校验与恢复角色/模型"
+          ],
+          "gaps": [
+            "内置模型和部分非用户来源模型不会被作为完整资源重打包；导出范围应按来源和许可检查。",
+            "未运行验证跨版本卡片兼容与全部渲染器。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/cards.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/__init__.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/api/rest/characters.md"
+          ]
+        },
+        {
+          "id": "character_persona_editor",
+          "support_level": "核心实现",
+          "summary": "角色档案、角色卡保存/导入/导出 API 有实现，官方说明基本/进阶人设编辑；支持角色设置制作，不代表美术模型制作。",
+          "data_flow": [
+            "创建或编辑角色档案→绑定模型与音色→保存/切换→导出角色卡"
+          ],
+          "gaps": [
+            "图形界面的完整易用性未实测；API存在不等于所有页面工作流都顺畅。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/cards.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/api/rest/characters.md",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ]
+        },
+        {
+          "id": "avatar_asset_authoring",
+          "support_level": "未核查",
+          "summary": "可更换模型、调整显示与角色设置；未核实内置 Live2D 绑定、VRM 建模或从零制作完整动态角色资产的编辑器。",
+          "data_flow": [],
+          "gaps": [
+            "仍需准备合法模型/图片，不能把资源管理与卡片工坊算作资产制作工具。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/cards.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/api/rest/characters.md",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ]
+        },
+        {
+          "id": "screen_understanding",
+          "support_level": "核心实现",
+          "summary": "至少在 Computer Use 链中已核实实际桌面截图与视觉模型输入，不只是 README 屏幕理解文案。",
+          "data_flow": [
+            "Electron capture bridge /api/capture/computer-use→失败后 native capture_desktop_screenshot",
+            "压缩帧→VLM（task+history+screenshot）→动作/解释"
+          ],
+          "gaps": [
+            "普通聊天的持续屏幕感知与 CUA 截图是不同入口；前者本轮仅继承 README 声明。",
+            "需配置 agent endpoint/model，并满足桌面捕获权限；截图可能上传所选模型服务。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ]
+        },
+        {
+          "id": "os_mouse_keyboard_control",
+          "support_level": "核心实现",
+          "summary": "已核实直接执行 PyAutoGUI 点击、移动、滚动、拖动、按键与粘贴，并存在截图反馈迭代；不是只有 browser-use 或 pyautogui 依赖。",
+          "data_flow": [
+            "任务→Agent 渠道开关/ready 检查→Computer Use 串行队列",
+            "截图→VLM thought/action/code→整段 AST 验证→白名单动作执行",
+            "坐标映射→真实 OS 输入；循环截图/模型判断→结束或取消"
+          ],
+          "gaps": [
+            "需要模型配置、可用 PyAutoGUI、桌面授权；跨平台/中文输入/多屏/DPI行为未实测。",
+            "执行的 Python 先经过 AST 白名单，不应误报为直接裸 exec 任意模型代码。",
+            "AST 白名单不能阻止合法按键在终端/支付/聊天窗口造成危险效果；逐项敏感操作确认与应用白名单未核查。",
+            "computer.terminate(success) 是模型判断，不是独立业务结果验证。",
+            "取消与按键释放机制存在，但不能撤销已经完成的点击、发送或远程不可逆动作。"
+          ],
+          "source_urls": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/agent-system.md"
+          ],
+          "verified_safeguards": [
+            "整段 AST 检查，仅允许受限动作与字面量",
+            "同一时间单桌面任务",
+            "动作前与模型调用后取消检查",
+            "退出清理 held keys"
+          ],
+          "separate_external_routes": "Browser Use 与 OpenClaw/QwenPaw 等是独立渠道；外部服务 ready 后才成为候选，不能与内置 PyAutoGUI 混为一谈。"
+        }
+      ],
+      "practical_fit": "三者中优先作为现成能力原型验证对象：音色克隆/设计管理和真实桌面执行链证据最具体。但其整体仍偏陪伴产品；实用助手必须另验听写、低干扰交互、权限确认与操作反馈。"
+    }
+  ],
+  "selection_advice": {
+    "recommendation_type": "基于静态证据的场景建议，不是实测排名",
+    "if_choosing_existing_product": "先验证 N.E.K.O：克隆/设计音色管理、角色资源管理与OS执行最接近组合目标。仅在隔离低风险任务上验收，不能把“能操作电脑”当成自动允许发送、删除、付款。",
+    "if_building_custom_assistant": "AIRI 可作为 TypeScript/Electron 角色与语音前端，利用已有 AUV 集成；建议把全局听写、屏幕上下文、带确认的电脑执行分别做成可独立开关的模块。",
+    "if_prioritizing_local_voice_pipeline": "Open-LLM-VTuber 适合 Python 组合式 ASR/LLM/TTS 与可选本地参考音频克隆；要达到电脑助手目标需额外接入执行器与听写产品层。",
+    "if_dictation_is_the_primary_job": "不要先选桌宠再赌听写能力。把专业全局听写模块作为独立验收项；角色只是可选显示层，避免为动画/主动陪伴支付交互复杂度。",
+    "if_authoring_is_primary": "人设/卡片编辑可在这些前端完成一部分；Live2D/VRM资产制作与音色训练另用专门工具，并分别管理资产、权重和声音权利。",
+    "recommended_acceptance_tests_not_executed": [
+      "语音对话：中文/英文/混说、噪声、外放回声、流式打断；记录端到端延迟而非宣传数值。",
+      "全局听写：Word/浏览器/聊天框中按键录音、原焦点保持、原文与润色可选、Unicode正确、剪贴板恢复、取消不插入。",
+      "TTS/克隆：预设音色、本人授权样本、录音规范化、创建/试听/保存/角色绑定、切provider、离线断网；区分注册成功与合成成功。",
+      "屏幕：单窗口/多显示器、高DPI、明确共享范围、敏感窗口排除、云端上传提示。",
+      "控制：仅在测试账户/空白文档做点击输入；对发送/删除/付款显式确认，操作后读回，提供立即停止与按键释放。",
+      "角色：导入自有Live2D/VRM及卡片导出再导入；记录丢失字段和资产许可，不把导入成功当成绑定/动画完整兼容。"
+    ],
+    "privacy_and_rights": [
+      "录音样本、截图与对话是否发送云端，取决于所选provider与同步配置；本地UI不等于数据不出机。",
+      "声音克隆仅使用本人或已获明确许可的样本；审查服务条款、权重许可与角色模型许可。",
+      "主分支提交与安装包可能不同；验收时固定发布版本、模型版本、provider、OS和权限。"
+    ]
+  },
+  "sources": {
+    "a_voice": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+    "a_speech": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/speech.ts",
+    "a_vision": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts",
+    "a_main": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/index.ts",
+    "a_cua": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/index.ts",
+    "a_runtime": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/runtime.ts",
+    "a_result": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/shared/eventa/computer-use.ts",
+    "a_shortcut": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/electron/global-shortcut.ts",
+    "a_mcp": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/mcp-tool-bridge.ts",
+    "a_editor": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/windows/editor/index.ts",
+    "a_manual": "https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/",
+    "a_readme": "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md",
+    "o_conversation": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+    "o_gpt": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/gpt_sovits_tts.py",
+    "o_coqui": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/coqui_tts.py",
+    "o_ttsdoc": "https://open-llm-vtuber.github.io/docs/user-guide/backend/tts",
+    "o_l2ddoc": "https://open-llm-vtuber.github.io/docs/user-guide/live2d",
+    "o_l2d": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/live2d_model.py",
+    "o_mcpconfig": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/mcp_servers.json",
+    "o_mcpclient": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py",
+    "o_readme": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+    "n_realtime": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py",
+    "n_clone": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_cloning.py",
+    "n_design": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_design.py",
+    "n_ttsdoc": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/tts-pipeline.md",
+    "n_charapi": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/api/rest/characters.md",
+    "n_cards": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/cards.py",
+    "n_router": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/__init__.py",
+    "n_cua": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py",
+    "n_agentdoc": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/agent-system.md",
+    "n_readme": "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+  }
+}

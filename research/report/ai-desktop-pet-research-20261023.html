@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN" data-register="blueprint">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'none'; object-src 'none'">
+<title>AI 桌宠选型研究｜技术路线、证据与实现建议</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M18 40V24l14-8 14 8v16l-14 8-14-8Z' fill='none' stroke='%23fbbf24' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%2338bdf8'/%3E%3C/svg%3E">
+
+
+
+<style data-ve-kit>
+/* visual-explainer kit. The renderer inlines this file at <link rel="stylesheet" data-ve-kit>.
+   Tokens sit in :where(), so a page's own :root rules (topic motif, a named palette) always win.
+   A page picks its register with <html data-register="instrument|blueprint|paper|editorial">; Instrument is the default. */
+
+/* scale, shared by every register */
+:where(:root) {
+  color-scheme: light dark;
+  --t-label: .75rem; --t-small: .875rem; --t-body: 1rem; --t-lead: 1.25rem; --t-h2: 1.625rem; --t-h1: clamp(2.25rem, 5.5vw, 4rem);
+  --s-1: .25rem; --s-2: .5rem; --s-3: .75rem; --s-4: 1rem; --s-5: 1.5rem; --s-6: 2rem; --s-7: 3rem; --s-8: 4.5rem;
+  --r-1: 4px; --r-2: 10px;
+  --ease: cubic-bezier(.16,1,.3,1); --fast: 150ms; --med: 300ms; --slow: 500ms;
+}
+
+/* Instrument (default): Geist, near-black and amber; dark first */
+:where(:root) {
+  --bg: #0b0d0c; --surface: #121614; --border: #1f2522; --border-bright: #5e6662;
+  --text: #e6ebe8; --text-dim: #919d97; --accent: #f2a93b; --accent-dim: rgba(242,169,59,.14);
+  --ok: #6fcf97; --warn: #e8c547; --risk: #ef6f5c; --info: #6cb6e0;
+  --node-top: color-mix(in srgb, var(--text) 7%, var(--surface)); --lift: rgb(0 0 0 / .45); --halo: 32%;
+  --font-body: 'Geist', 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-display: var(--font-body); --display-weight: 600;
+  --stage: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text) 13%, transparent) 1px, transparent 1.5px) 0 0 / 20px 20px;
+}
+@media (prefers-color-scheme: light) {
+  :where(:root) {
+    --bg: #f4f5f3; --surface: #ffffff; --border: #dfe3e0; --border-bright: #888e8b;
+    --text: #121614; --text-dim: #545e59; --accent: #955700; --accent-dim: rgba(149,87,0,.12);
+    --ok: #1c7443; --warn: #7a5e00; --risk: #b0341e; --info: #1a6890;
+    --node-top: var(--surface); --lift: rgb(18 22 20 / .12); --halo: 22%;
+  }
+}
+
+/* Blueprint: IBM Plex, blue-black, a 24px line grid on the stage, r-1 everywhere; dark first */
+:where(:root[data-register="blueprint"]) {
+  --bg: #0d1520; --surface: #132031; --border: #22324a; --border-bright: #596b87;
+  --text: #e3ecf5; --text-dim: #92a6bb; --accent: #ffb547; --accent-dim: rgba(255,181,71,.14);
+  --ok: #6fd3a0; --warn: #e8d36a; --risk: #ff7b6b; --info: #7cc0f0;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --r-2: 4px;
+  --stage: linear-gradient(color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
+}
+@media (prefers-color-scheme: light) {
+  :where(:root[data-register="blueprint"]) {
+    --bg: #f2f6fa; --surface: #ffffff; --border: #d6e0ea; --border-bright: #818f9e;
+    --text: #0f1a26; --text-dim: #4d6074; --accent: #a34700; --accent-dim: rgba(163,71,0,.12);
+    --ok: #1c7443; --warn: #776300; --risk: #b0341e; --info: #145f99;
+  }
+}
+
+/* Paper: Newsreader headings over Atkinson Hyperlegible, ink blue; light first */
+:where(:root[data-register="paper"]) {
+  --bg: #f7f7f4; --surface: #ffffff; --border: #e3e3dc; --border-bright: #8e8e8a;
+  --text: #17191c; --text-dim: #575c63; --accent: #2c4cd0; --accent-dim: rgba(44,76,208,.12);
+  --ok: #1d7443; --warn: #836000; --risk: #b3301d; --info: #1b6a94;
+  --node-top: var(--surface); --lift: rgb(18 22 20 / .12); --halo: 22%;
+  --font-body: 'Atkinson Hyperlegible Next', 'Segoe UI', sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', ui-monospace, monospace;
+  --font-display: 'Newsreader', Georgia, serif; --display-weight: 500;
+}
+@media (prefers-color-scheme: dark) {
+  :where(:root[data-register="paper"]) {
+    --bg: #111316; --surface: #181b1f; --border: #262a30; --border-bright: #62676c;
+    --text: #e8e8e3; --text-dim: #9ba1a9; --accent: #93a6ff; --accent-dim: rgba(147,166,255,.14);
+    --ok: #6cc492; --warn: #e3b94d; --risk: #f0806b; --info: #6fb8dc;
+    --node-top: color-mix(in srgb, var(--text) 7%, var(--surface)); --lift: rgb(0 0 0 / .45); --halo: 32%;
+  }
+}
+
+/* Editorial: Instrument Serif display over Instrument Sans; light first */
+:where(:root[data-register="editorial"]) {
+  --bg: #fbfbf9; --surface: #f1f0ec; --border: #e2e0da; --border-bright: #8c8a85;
+  --text: #111111; --text-dim: #5a5853; --accent: #cc3418; --accent-dim: rgba(204,52,24,.12);
+  --ok: #1d7443; --warn: #836000; --risk: #a01d48; --info: #1b6a94;
+  --node-top: var(--surface); --lift: rgb(18 22 20 / .12); --halo: 22%;
+  --font-body: 'Instrument Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Instrument Serif', Georgia, serif; --display-weight: 400;
+}
+@media (prefers-color-scheme: dark) {
+  :where(:root[data-register="editorial"]) {
+    --bg: #0f0f0f; --surface: #1a1a19; --border: #2b2a28; --border-bright: #696763;
+    --text: #f2f0eb; --text-dim: #a4a19b; --accent: #ff6e50; --accent-dim: rgba(255,110,80,.14);
+    --ok: #6cc492; --warn: #e3b94d; --risk: #f57fa2; --info: #7cb8e8;
+    --node-top: color-mix(in srgb, var(--text) 7%, var(--surface)); --lift: rgb(0 0 0 / .45); --halo: 32%;
+  }
+}
+
+/* base */
+html { font-size: 17px; }
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text); font: 400 var(--t-body)/1.6 var(--font-body); text-wrap: pretty; font-kerning: normal; font-synthesis: none; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--accent-dim); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { max-width: 64rem; margin: 0 auto; padding: var(--s-8) var(--s-5); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-8); }
+section, figure, header { min-width: 0; }
+header { display: grid; gap: var(--s-4); }
+header + figure { margin-top: calc(var(--s-6) - var(--s-8)); }
+/* text-box trims to cap height and baseline, so gaps are measured from the letters, not the line box */
+h1, h2, .kpi .val { text-box: trim-both cap alphabetic; }
+h1 { font-size: var(--t-h1); line-height: 1.05; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: -.035em; text-wrap: balance; max-width: 16ch; margin-bottom: var(--s-2); }
+h1 .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+h2 { font-size: var(--t-h2); line-height: 1.2; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: -.015em; text-wrap: balance; }
+/* section opener: hairline, mono label in columns 1–3, h2 in 4–12, on one baseline */
+.sec-head { display: grid; gap: var(--s-3) var(--s-5); align-items: baseline; border-top: 1px solid var(--border); padding-top: var(--s-5); margin-bottom: var(--s-6); }
+@media (min-width: 52rem) { .sec-head { grid-template-columns: 3fr 9fr; } }
+/* the other opener, a bare label above the h2, gets the same gaps, so the h2 never sits on the figure below */
+section > .ve-label:has(+ h2) { margin-bottom: var(--s-3); }
+section > h2 { margin-bottom: var(--s-6); }
+h3 { font-size: var(--t-body); line-height: 1.3; font-weight: 600; }
+.eyebrow { display: flex; align-items: center; gap: var(--s-2); font: 600 var(--t-label) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.eyebrow::before { content: ''; width: 1.25rem; height: 2px; background: currentColor; }
+.ve-label { font: 500 var(--t-label) var(--font-mono); color: var(--text-dim); }
+.caps { text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--text); }
+.lead { font-size: var(--t-lead); line-height: 1.5; color: var(--text-dim); max-width: 44ch; }
+.lead b { color: var(--text); font-weight: 600; }
+.meta { font: 500 var(--t-label) var(--font-mono); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.unit { font-size: .5em; font-weight: 500; color: var(--text-dim); letter-spacing: 0; }
+code { font: .875em var(--font-mono); font-variant-ligatures: none; }
+
+/* figure: the stage is a faint dot grid, so nodes read as objects placed on it */
+.frame { background: var(--stage), var(--bg); border: 1px solid var(--border); border-radius: var(--r-2); padding: var(--s-5); overflow-x: auto; }
+figcaption { font-size: var(--t-body); color: var(--text-dim); margin-top: var(--s-3); max-width: 65ch; }
+.fig-n { font: 600 var(--t-label) var(--font-mono); color: var(--text); margin-right: var(--s-2); }
+
+/* diagram kit (references/diagrams.md) */
+/* min-width keeps 14-unit labels >= 12px as rendered; narrow screens scroll the frame instead. kit/render.mjs sets --ve-min for a viewBox wider than 816. */
+.ve-svg { width: 100%; min-width: var(--ve-min, 700px); height: auto; display: block; font: 500 17px var(--font-body); }
+.ve-n .sh { fill: url(#ve-node); stroke: var(--border-bright); stroke-width: 1.5; filter: drop-shadow(0 6px 14px var(--lift)); transition: stroke var(--fast) var(--ease), opacity var(--med) var(--ease); }
+.ve-n .lid { fill: var(--node-top); }
+.ve-n.is-key .sh { fill: color-mix(in srgb, var(--accent) 11%, var(--surface)); stroke: var(--accent); stroke-width: 2; filter: drop-shadow(0 0 16px color-mix(in srgb, var(--accent) var(--halo), transparent)); }
+.ve-n text { fill: var(--text); text-anchor: middle; dominant-baseline: central; font-weight: 600; }
+.ve-n .sub { fill: var(--text-dim); font: 500 14px var(--font-mono); }
+.ve-n .gl { fill: none; stroke: var(--text-dim); stroke-width: 1.5; stroke-linejoin: round; }
+.ve-n .ve-kind { fill: var(--text-dim); font: 600 14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.ve-n.is-key .gl { stroke: var(--accent); }
+.ve-e { fill: none; stroke: var(--text-dim); stroke-width: 1.75; marker-end: url(#ve-ah); }
+.ve-e.is-hot { stroke: var(--accent); stroke-width: 2.75; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 55%, transparent)); }
+.ve-e.is-async { stroke-dasharray: 6 5; }
+.ve-el { fill: var(--text-dim); font: 500 14px var(--font-mono); text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+.ve-el.l { text-anchor: end; } .ve-el.r { text-anchor: start; }
+/* a dashed boundary around a group, with a mono tag in its corner */
+.ve-bnd { fill: none; stroke: var(--border-bright); stroke-width: 1; stroke-dasharray: 6 5; }
+.ve-bnd-t { fill: var(--text-dim); font: 600 14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+/* a slot in a queue or worker pool; .is-on fills it (.on is the stepper's) */
+.ve-slot { fill: var(--surface); stroke: var(--border-bright); stroke-width: 1.25; }
+.ve-slot.is-on { fill: var(--accent-dim); stroke: var(--accent); stroke-width: 1.75; }
+/* chart axes and ticks, and their labels */
+.ve-axis { fill: none; stroke: var(--border-bright); stroke-width: 1; }
+.ve-axis-t { fill: var(--text-dim); font: 500 14px var(--font-mono); text-anchor: middle; font-variant-numeric: tabular-nums; }
+/* <ve-flow> on a page: its labels stay at 12 px or more, and a small drawing grows no more than 1.3× (kit/flow.mjs sets both) */
+.ve-svg.ve-flow { min-width: var(--min); max-width: var(--max); }
+/* flags on <ve-flow> parts: new, gone (an arrow also gets ✕) */
+.ve-n.is-new .sh { stroke: var(--ok); stroke-dasharray: 6 4; }
+.ve-n.is-gone .sh { stroke: var(--risk); stroke-dasharray: 3 4; opacity: .7; }
+.ve-n.is-gone text { text-decoration: line-through; }
+.ve-e.is-new { stroke: var(--ok); }
+.ve-e.is-gone { stroke: var(--risk); stroke-dasharray: 3 4; }
+.ve-x { fill: var(--risk); font: 600 16px var(--font-mono); text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; }
+/* <ve-stack>: one bar split in proportion; labels under their segments */
+.ve-stack rect { fill: color-mix(in srgb, var(--text) 9%, var(--surface)); stroke: var(--border-bright); stroke-width: 1.5; }
+.ve-stack rect.hot { fill: var(--accent-dim); stroke: var(--accent); }
+.ve-stack text { fill: var(--text-dim); font: 500 14px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
+
+/* numbered callouts and edge numbers (references/diagrams.md): .now fills the current one; .q keeps an edge number quiet until its step */
+.ve-co circle { fill: var(--surface); stroke: var(--accent); stroke-width: 1.75; }
+.ve-co text { fill: var(--accent); font: 600 14px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
+.ve-co.now circle { fill: var(--accent); } .ve-co.now text { fill: var(--surface); }
+.ve-co.q circle { stroke: var(--border-bright); } .ve-co.q text { fill: var(--text-dim); }
+.ve-co.q.now circle { fill: var(--accent); stroke: var(--accent); } .ve-co.q.now text { fill: var(--surface); }
+
+/* dimension lines (references/diagrams.md) */
+.ve-dim path { fill: none; stroke-width: 1; } .ve-dim .ext { stroke: var(--border-bright); } .ve-dim .ln { stroke: var(--text-dim); }
+.ve-dim text { fill: var(--text); font: 500 14px var(--font-mono); text-anchor: middle; }
+.ve-dim.is-key .ln { stroke: var(--accent); } .ve-dim.is-key text { fill: var(--accent); }
+
+/* flow dots: they travel under the nodes, so a dot enters a box and leaves from the far side */
+[data-flow] { fill: none; stroke: none; }
+.ve-dots circle { fill: var(--text); }
+.ve-dots .hit { fill: var(--accent); filter: drop-shadow(0 0 4px var(--accent)); }
+.ve-steps:not(.is-full) .ve-dots { display: none; }
+
+/* linked highlighting: same data-ref lights up together */
+/* Dim shapes, never text below 4.5:1: unlit labels drop to --text-dim instead of fading. */
+.ve-ref { text-decoration: underline dotted var(--text-dim) 1px; text-underline-offset: .22em; border-radius: var(--r-1); transition: background var(--fast) var(--ease); }
+.ve-ref.is-lit { background: var(--accent-dim); text-decoration-color: var(--accent); }
+svg [data-ref] { transition: opacity var(--med) var(--ease); }
+svg.has-lit path[data-ref]:not(.is-lit), svg.has-lit g[data-ref]:not(.is-lit) .sh { opacity: .25; }
+svg.has-lit g[data-ref]:not(.is-lit) text, svg.has-lit text[data-ref]:not(.is-lit) { fill: var(--text-dim); }
+.ve-n.is-lit .sh { stroke: var(--accent); }
+.ve-e.is-lit { stroke: var(--accent); }
+.ve-el.is-lit { fill: var(--text); }
+.case.is-lit { border-color: var(--accent); }
+
+/* stepper / scene player */
+/* Future steps: shapes stay as a faint outline; their labels are hidden, not faded to an unreadable gray. */
+.ve-steps [data-s] { transition: opacity var(--slow) var(--ease), stroke-dashoffset var(--slow) var(--ease); }
+.ve-steps [data-s]:not(.on) { opacity: .15; }
+.ve-steps g[data-s]:not(.on) text, .ve-steps text[data-s]:not(.on) { opacity: 0; }
+.ve-steps path[pathLength][data-s] { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.ve-steps path[pathLength][data-s].on { stroke-dashoffset: 0; }
+.ve-steps .ve-n.now > .sh { stroke: var(--accent); }
+/* replay: the edges that fired light until the full picture, and each token runs its path once, after --d; edges and nodes still show the step without tokens */
+.ve-steps:not(.is-full) .ve-e.now { stroke: var(--accent); stroke-width: 2.75; }
+.ve-tok { fill: var(--accent); visibility: hidden; }
+.ve-steps:not(.is-still) .ve-tok.now { visibility: visible; animation: ve-run var(--dur, 900ms) ease-in-out var(--d, 0ms) both; }
+@keyframes ve-run { from { offset-distance: 0%; opacity: 0; } 10%, 75% { opacity: 1; } to { offset-distance: 100%; opacity: 0; } }
+/* a part that comes and goes (a queued job, a busy slot): shown only on the steps its data-s lists, arriving after --d */
+.ve-steps .ve-at { transition: opacity var(--med) var(--ease); }
+.ve-steps .ve-at:not(.now) { opacity: 0; }
+.ve-steps .ve-at.now { transition-delay: var(--d, 0ms); }
+/* a changing value: one text per step at one spot; the latest step's shows, swapped without a crossfade */
+.ve-steps .ve-vals text { transition: none; }
+.ve-vals text.on:has(~ text.on) { opacity: 0; }
+.ve-player { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: var(--s-2) var(--s-3); margin-top: var(--s-4); }
+.ve-cap { grid-column: 1 / -1; list-style: none; padding: 0; min-height: 3.2em; }
+.ve-cap li::before { content: attr(data-n); font: 600 var(--t-label) var(--font-mono); color: var(--accent); margin-right: var(--s-3); font-variant-numeric: tabular-nums; }
+.ve-player input { accent-color: var(--accent); min-width: 0; }
+button { font: 500 var(--t-small) var(--font-mono); color: var(--text); background: var(--surface); border: 1px solid var(--border-bright); border-radius: var(--r-1); padding: var(--s-2) var(--s-3); cursor: pointer; transition: border-color var(--fast) var(--ease); }
+button:hover, button:focus-visible { border-color: var(--accent); }
+
+/* KPI strip: one frame, cells split by hairlines, each number with its picture. Flex, so a wrapped last row stretches instead of leaving an empty gray cell. */
+.kpis { display: flex; flex-wrap: wrap; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--r-2); overflow: hidden; }
+.kpi { flex: 1 1 14rem; background: var(--surface); padding: var(--s-5); display: grid; grid-template-rows: auto auto 1fr; gap: var(--s-3); min-width: 0; }
+.kpi .val { font: 600 2.75rem/1 var(--font-body); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.ve-waffle { align-self: end; width: 11rem; height: auto; font: 500 13px var(--font-mono); overflow: visible; }
+.ve-waffle text { fill: var(--text-dim); dominant-baseline: central; }
+.ann { fill: none; stroke: var(--text-dim); stroke-width: 1; }
+.ve-bars { align-self: end; width: 100%; max-width: 16rem; height: auto; font: 500 13px var(--font-mono); overflow: visible; }
+.ve-bars text { fill: var(--text-dim); dominant-baseline: central; }
+.ve-bars rect { fill: var(--border-bright); transform-box: fill-box; transform-origin: left; transition: transform 900ms var(--ease) 150ms; }
+.ve-bars .hot { fill: var(--accent); }
+.ve-bars .hot + text { fill: var(--text); }
+
+/* small multiples: one mini diagram per case; the changed part takes the case's status color */
+.cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr)); gap: var(--s-4); }
+.case { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-2); padding: var(--s-4); display: grid; gap: var(--s-3); align-content: start; transition: border-color var(--fast) var(--ease); }
+.case[data-st=ok] { --st: var(--ok); } .case[data-st=warn] { --st: var(--warn); } .case[data-st=risk] { --st: var(--risk); }
+.ve-mini { width: 100%; height: auto; font: 600 15px var(--font-body); }
+.ve-mini .ve-n .sh { filter: none; }
+/* a .cases column is never under 14.5rem, so a mini is ≥ 211 px and 14 units render ≥ 12.3 px */
+.ve-mini .ve-n .sub { font-size: 14px; }
+.ve-mini .is-st.ve-e { stroke: var(--st); stroke-width: 2.75; }
+.ve-mini .is-st .sh { stroke: var(--st); stroke-width: 2; }
+.ve-mini .is-st .sub { fill: var(--st); }
+.ve-mini .is-off { stroke-dasharray: 5 4; }
+.ve-mini .ve-e.is-off { opacity: .35; }
+
+/* chips */
+.chip { display: inline-flex; align-items: center; gap: var(--s-2); font: 600 var(--t-label) var(--font-mono); padding: 2px var(--s-2); border: 1px solid currentColor; border-radius: var(--r-1); white-space: nowrap; justify-self: start; }
+.chip::before { content: ''; width: .5rem; height: .5rem; background: currentColor; }
+.chip.ok { color: var(--ok); } .chip.ok::before { border-radius: 50%; }
+.chip.warn { color: var(--warn); } .chip.warn::before { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.chip.risk { color: var(--risk); }
+
+/* a table: a scroll frame, the header in the label style, row rules only; .num cells are right-aligned numbers */
+.ve-table { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-2); }
+.ve-table table { border-collapse: collapse; width: 100%; font-size: var(--t-body); font-variant-numeric: tabular-nums; }
+.ve-table th, .ve-table td { padding: var(--s-3) var(--s-4); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.ve-table thead th { background: var(--surface); font: 600 var(--t-label)/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+.ve-table tbody th { font-weight: 600; }
+.ve-table tbody tr:last-child > * { border-bottom: 0; }
+.ve-table .num { text-align: right; font-family: var(--font-mono); }
+.ve-table td small { display: block; color: var(--text-dim); font-size: var(--t-small); }
+
+details { border-top: 1px solid var(--border); padding-top: var(--s-4); color: var(--text-dim); font-size: var(--t-body); }
+summary { cursor: pointer; font: 500 var(--t-label) var(--font-mono); margin-bottom: var(--s-2); }
+/* sources stay visible: readers check them without hunting for a toggle */
+.sources { border-top: 1px solid var(--border); padding-top: var(--s-4); display: grid; gap: var(--s-2); }
+
+/* entrance: blocks rise in once; bars grow as their block arrives (JS adds .js-motion only when motion is allowed) */
+.js-motion main > * { transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease); }
+.js-motion main > :not(.in) { opacity: 0; transform: translateY(1rem); }
+.js-motion main > :not(.in) .ve-bars rect { transform: scaleX(0); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } .ve-tok { display: none; } }
+
+@media print {
+  /* Print uses the register's light foregrounds on white, every step fully drawn, and no effects. */
+  :where(:root) { --bg: #fff; --surface: #fff; --border: #dfe3e0; --border-bright: #888e8b; --text: #121614; --text-dim: #545e59; --accent: #955700; --ok: #1c7443; --warn: #7a5e00; --risk: #b0341e; --info: #1a6890; --node-top: #fff; }
+  :where(:root[data-register="blueprint"]) { --border: #d6e0ea; --border-bright: #818f9e; --text: #0f1a26; --text-dim: #4d6074; --accent: #a34700; --warn: #776300; --info: #145f99; }
+  :where(:root[data-register="paper"]) { --border: #e3e3dc; --border-bright: #8e8e8a; --text: #17191c; --text-dim: #575c63; --accent: #2c4cd0; --ok: #1d7443; --warn: #836000; --risk: #b3301d; --info: #1b6a94; }
+  :where(:root[data-register="editorial"]) { --border: #e2e0da; --border-bright: #8c8a85; --text: #111111; --text-dim: #5a5853; --accent: #cc3418; --ok: #1d7443; --warn: #836000; --risk: #a01d48; --info: #1b6a94; }
+  .ve-player button, .ve-player input, .ve-dots { display: none; }
+  .frame { overflow: visible; background: #fff; } .ve-svg, .ve-svg.ve-flow { min-width: 0; }
+  .frame, .case, .kpi { break-inside: avoid; } h2 { break-after: avoid; }
+  svg * { filter: none !important; }
+  .js-motion main > * { opacity: 1 !important; transform: none !important; }
+  .js-motion .ve-bars rect { transform: none !important; }
+  .ve-steps [data-s]:not(.on), .ve-steps g[data-s]:not(.on) text, .ve-steps text[data-s]:not(.on) { opacity: 1; }
+  .ve-steps .ve-at:not(.now) { opacity: 0; }
+  .ve-steps path[pathLength][data-s] { stroke-dashoffset: 0; }
+  .ve-tok, .ve-vals text:not(:last-child) { display: none; }
+}
+/* <ve-ask> on a kit page (inlined only when the page has one; plans have their own in plan/plan.css) */
+.ask { border: 1px solid var(--border-bright); border-radius: var(--r-1); background: var(--surface); padding: var(--s-4) var(--s-5) var(--s-5); display: grid; gap: var(--s-3); min-width: 0; max-width: 46rem; margin: var(--s-4) 0; }
+.ask legend { float: left; width: 100%; padding: 0; font: 500 var(--t-label) var(--font-mono); color: var(--text-dim); }
+.ask legend b { color: var(--text); font-weight: 600; }
+.ask-q { font-weight: 600; font-size: var(--t-lead); line-height: 1.35; }
+.ask-opts { display: grid; gap: var(--s-2); }
+.ask.row .ask-opts { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+.opt { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); align-items: start; padding: var(--s-3) var(--s-4); border: 1px solid var(--border); border-radius: var(--r-1); background: var(--bg); cursor: pointer; }
+.opt:hover { border-color: var(--border-bright); }
+.opt:has(input:checked) { border-color: var(--text); background: color-mix(in srgb, var(--text) 5%, var(--surface)); }
+.opt input { margin-top: .3em; accent-color: var(--accent); width: 1rem; height: 1rem; }
+.opt-body { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s-3); min-width: 0; }
+.opt-label { font-weight: 500; }
+.sug { font: 500 var(--t-label) var(--font-mono); color: var(--text-dim); }
+.opt small { flex-basis: 100%; display: block; color: var(--text-dim); font-size: var(--t-small); }
+@media print { .ask { break-inside: avoid; } }
+</style>
+<style>
+:root{--bg:#f6f7f2;--surface:#fff;--surface-2:#eef2ee;--text:#20353d;--text-dim:#53666c;--accent:#08667c;--accent-dim:#e0f0f2;--border:#d0dad7;--border-bright:#80979b;--ok:#2b684d;--warn:#8a520c;--risk:#a73c32;--t-h1:clamp(2rem,3.6vw,3rem)}
+html{scroll-behavior:smooth;color-scheme:light}body{margin:0}a{color:var(--accent);text-underline-offset:.2em}button,summary{cursor:pointer}a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:4px}.report-shell{display:grid;grid-template-columns:175px minmax(0,1120px);gap:var(--s-6);max-width:1380px;margin:auto;padding:var(--s-6) var(--s-5)}main{min-width:0;width:100%;max-width:none;margin:0;padding:0}.toc{position:sticky;top:var(--s-5);align-self:start}.toc .brand{font-size:var(--t-small);letter-spacing:.1em;font-weight:700;margin-bottom:var(--s-5)}.toc-list{display:grid;gap:var(--s-2)}.toc a{padding:var(--s-2);text-decoration:none;color:var(--text-dim);border:1px solid transparent;border-radius:var(--r-1);font-size:var(--t-small)}.toc a[aria-current="true"]{color:var(--accent);border-color:var(--border-bright);background:var(--surface)}.toc .note{font-size:var(--t-small);margin-top:var(--s-5);color:var(--text-dim)}section{scroll-margin-top:var(--s-6);margin-top:var(--s-8)}header{margin-bottom:var(--s-5)}h1{max-width:24ch;margin-top:var(--s-3);line-height:1.18}h2{line-height:1.35}h3{margin:0 0 var(--s-3);font-size:var(--t-h3)}p{max-width:72ch;line-height:1.75}.lead{max-width:58ch;font-size:var(--t-body)}.eyebrow,.overline{font-size:var(--t-small);letter-spacing:.08em;color:var(--text-dim)}.meta{font-size:var(--t-small);color:var(--text-dim)}.answer{display:grid;grid-template-columns:1.4fr 1fr;gap:var(--s-5);border-top:1px solid var(--border-bright);padding-top:var(--s-4)}.answer p{margin:0}.verdict-note{padding:var(--s-4);background:var(--accent-dim);border-radius:var(--r-2)}.legend{display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:center;font-size:var(--t-small);margin:var(--s-4) 0}.evidence{display:inline-block;font-size:var(--t-label);padding:2px 7px;border:1px solid var(--border-bright);border-radius:var(--r-1);white-space:nowrap;background:var(--surface)}.evidence.code:before{content:"◆ ";color:var(--accent)}.evidence.doc:before{content:"○ ";color:var(--ok)}.evidence.rec:before{content:"△ ";color:var(--warn)}.evidence.unknown:before{content:"? ";color:var(--risk)}.sec-head{border-top:1px solid var(--border);padding-top:var(--s-5);display:grid;grid-template-columns:140px 1fr;gap:var(--s-4);align-items:start}.sec-head h2{margin:0 0 var(--s-4)}.frame{background:var(--surface)}figure{margin:var(--s-4) 0 var(--s-5)}figcaption{max-width:90ch;line-height:1.7}.sidenote{font-size:var(--t-small);color:var(--text-dim)}.short-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-4);margin:var(--s-4) 0}.short-grid>div{border-top:1px solid var(--border-bright);padding:var(--s-4) 0}.short-grid p{font-size:var(--t-small);margin:0}.subhead{display:flex;gap:var(--s-3);align-items:center;flex-wrap:wrap}.subhead h3{margin:0}.target{padding:var(--s-5) 0;border-bottom:1px solid var(--border)}.target-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-5)}.facts{display:grid;grid-template-columns:95px 1fr;gap:var(--s-2) var(--s-3);font-size:var(--t-small);margin:var(--s-4) 0}.facts dt{color:var(--text-dim)}.facts dd{margin:0;overflow-wrap:anywhere;line-height:1.65}.callout{padding:var(--s-4);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-2);margin:var(--s-4) 0}.callout p{margin:var(--s-2) 0 0}.callout.warn{background:#fcf5e8}.callout.warn .evidence{background:#fff}.compact{font-size:var(--t-small)}.controls{display:flex;gap:var(--s-2);flex-wrap:wrap;margin:var(--s-4) 0}.controls button{font:inherit;font-size:var(--t-small);padding:var(--s-2) var(--s-3);min-height:44px;border:1px solid var(--border-bright);background:var(--surface);color:var(--text);border-radius:var(--r-1);transition:background var(--fast) var(--ease)}.controls button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}.choice-output{background:var(--surface);border:1px solid var(--border-bright);padding:var(--s-4);border-radius:var(--r-2)}.choice-output h3{color:var(--accent)}.choice-output p{margin:0}.ve-table{overflow-x:auto}.ve-table table{width:100%;min-width:890px}.ve-table th{font-size:var(--t-small);white-space:nowrap}.ve-table td{font-size:var(--t-small);line-height:1.65;vertical-align:top}.ve-table td small{display:block;color:var(--text-dim);font-size:var(--t-label);margin-top:var(--s-2)}.ve-table .name{min-width:140px;font-weight:600}.ve-table .stack{min-width:170px}.ve-table .boundary{min-width:185px}.project-row[hidden]{display:none}.project-records{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3);margin-top:var(--s-5)}details{border:1px solid var(--border);background:var(--surface);padding:var(--s-3) var(--s-4);border-radius:var(--r-2)}summary{font-weight:600;line-height:1.7;min-height:36px}details p,details li{font-size:var(--t-small);line-height:1.75}details ul{padding-left:var(--s-4)}details .source-links{line-height:2}.tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-5)}.tradeoffs p{font-size:var(--t-small)}.routes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-4)}.route{border:1px solid var(--border);padding:var(--s-4);background:var(--surface)}.route h3{font-size:var(--t-body)}.route .mini{width:100%;height:auto;display:block}.route p{font-size:var(--t-small)}.route .mechanism{font-size:var(--t-small);border-top:1px solid var(--border);padding-top:var(--s-3)}.ve-svg .ve-axis-t{text-anchor:start}.route-label{fill:var(--text);font-size:15px}.route-box{fill:var(--surface);stroke:var(--border-bright);stroke-width:1.5}.route-wire{fill:none;stroke:var(--accent);stroke-width:1.8;marker-end:url(#ve-ah)}.route-action{fill:var(--text-dim);font-size:14px}.gate-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-4)}.gate{padding-top:var(--s-3);border-top:3px solid var(--border-bright)}.gate:first-child{border-color:var(--accent)}.gate h3{font-size:var(--t-body)}.gate .phase{font-size:var(--t-small);color:var(--text-dim)}.gate p{font-size:var(--t-small)}.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-5)}.source-group{min-width:0}.source-group h3{font-size:var(--t-body)}.source-group ul{padding-left:var(--s-4);margin:0}.source-group li{font-size:var(--t-small);line-height:1.75;overflow-wrap:anywhere;margin-bottom:var(--s-2)}.checkline{display:flex;gap:var(--s-3);flex-wrap:wrap;color:var(--text-dim);font-size:var(--t-small)}.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}.risk-grid>div{padding:var(--s-4);border:1px solid var(--border);background:var(--surface)}.risk-grid h3{font-size:var(--t-body)}.risk-grid p{font-size:var(--t-small);margin:0}.cost-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-4);border-top:1px solid var(--border);padding-top:var(--s-4)}.cost-strip strong{display:block}.cost-strip span{font-size:var(--t-small);color:var(--text-dim)}.footer{border-top:1px solid var(--border);padding:var(--s-5) 0;margin-top:var(--s-6);font-size:var(--t-small);color:var(--text-dim)}.ve-player button{min-height:44px}.ve-player input{min-height:44px}.ve-cap li{line-height:1.6}.row-note{font-size:var(--t-small);color:var(--text-dim)}[hidden]{display:none!important}
+@media(max-width:1000px){.report-shell{display:block;padding:var(--s-4)}.toc{top:0;background:var(--bg);z-index:30;padding:var(--s-2) 0;border-bottom:1px solid var(--border);margin-bottom:var(--s-5)}.toc .brand,.toc .note{display:none}.toc-list{display:flex;gap:var(--s-2);overflow-x:auto;scrollbar-width:none;mask-image:linear-gradient(to right,#000 95%,transparent)}.toc-list a{white-space:nowrap}section{scroll-margin-top:90px}.sec-head{grid-template-columns:1fr;gap:0}.sec-head .ve-label{margin-bottom:var(--s-2)}}
+@media(max-width:680px){.answer,.target-grid,.tradeoffs,.project-records,.source-grid,.risk-grid{grid-template-columns:1fr}.routes,.short-grid{grid-template-columns:1fr}.gate-grid,.cost-strip{grid-template-columns:1fr 1fr}.report-shell{padding:var(--s-3)}h1{font-size:2rem}.facts{grid-template-columns:75px 1fr}.source-grid{gap:var(--s-4)}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+@media print{.report-shell{display:block;max-width:none}.toc,.controls,.ve-player{display:none!important}.project-row[hidden]{display:table-row!important}.project-records details{break-inside:avoid}section{break-inside:auto}.frame{overflow:visible}.ve-table table{min-width:0}.ve-table{overflow:visible}h2,h3{break-after:avoid}a{color:inherit}.footer{margin-top:var(--s-4)}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ve-ah" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker>
+    <linearGradient id="ve-node" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--node-top)"/><stop offset="1" style="stop-color:var(--surface)"/></linearGradient>
+    <pattern id="ve-w-on" width="10" height="10" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="8" height="8" rx="1.5" style="fill:var(--accent)"/></pattern>
+    <pattern id="ve-w-off" width="10" height="10" patternUnits="userSpaceOnUse"><rect x="1.5" y="1.5" width="7" height="7" rx="1.5" style="fill:none;stroke:var(--text-dim)"/></pattern>
+  </defs>
+</svg>
+<div class="report-shell">
+<nav class="toc" aria-label="报告目录"><div class="brand">DESKTOP COMPANION<br>技术选型研究</div><div class="toc-list"><a href="#verdict" aria-current="true">结论先看</a><a href="#requested">指定项目拆解</a><a href="#landscape">代表项目对照</a><a href="#routes">三种方案路径</a><a href="#architecture">插件规范与内核</a><a href="#risks">成本与边界</a><a href="#roadmap">分阶段落地</a><a href="#sources">证据与出处</a></div><p class="note">公开资料 + 核心源码抽查<br>不运行被调研软件<br>不以星数替代成熟度</p></nav>
+<main>
+<header id="verdict">
+<p class="eyebrow">AI 桌宠 · 方案决策笔记</p>
+<h1>桌宠做界面，能力做插件，<br>内核只管统一规则</h1>
+<p class="lead">按你的目标，应做<strong>可定制的多模态电脑助手</strong>：语音输入、音色与 TTS、角色制作、看屏幕、鼠标键盘操作都可替换；桌宠只是其中一个界面插件。</p>
+<p class="meta">研究快照：2026-10-23 · Asia/Taipei ｜ 面向个人或小团队的实现建议，不是市场份额排名</p>
+<figure>
+<div class="frame"><svg class="ve-svg" viewBox="0 0 1000 235" role="img" aria-label="推荐把桌面表现、对话后端和工具权限分成三个边界" style="--ve-min: 858px">
+<rect class="ve-bnd" x="18" y="30" width="270" height="145" rx="5"/><text class="ve-bnd-t" x="33" y="52">输入与表现 · 可替换</text>
+<rect class="ve-bnd" x="365" y="30" width="270" height="145" rx="5"/><text class="ve-bnd-t" x="380" y="52">统一规范 · 不可绕过</text>
+<rect class="ve-bnd" x="712" y="30" width="270" height="145" rx="5"/><text class="ve-bnd-t" x="727" y="52">能力插件 · 按需启用</text>
+<path class="ve-e is-hot" d="M258 112H395"/><text class="ve-el" x="326" y="96">提交意图</text>
+<path class="ve-e is-async" d="M605 112H742"/><text class="ve-el" x="673" y="96">调度能力</text>
+<g class="ve-n is-key"><rect class="sh" x="48" y="78" width="210" height="70" rx="5"/><text x="153" y="103">角色 / 麦克风 / 屏幕</text><text class="sub" x="153" y="129">用户选择输入与形象</text></g>
+<g class="ve-n"><rect class="sh" x="395" y="78" width="210" height="70" rx="5"/><text x="500" y="103">插件宿主 + 任务编排</text><text class="sub" x="500" y="129">生命周期 · 路由 · 权限</text></g>
+<g class="ve-n"><rect class="sh" x="742" y="78" width="210" height="70" rx="5"/><text x="847" y="103">STT / TTS / 模型 / 操作</text><text class="sub" x="847" y="129">各自独立，执行需确认</text></g>
+<text class="ve-axis-t" x="35" y="207">推荐原则：用户可以换能力组合；角色台词和第三方插件不能改写权限规则。</text>
+</svg></div><figcaption><span class="fig-n">Fig. 1</span>“统一规范”必须同时覆盖接口、流式时序和权限，而不只是插件目录。<span class="evidence rec">方案建议</span></figcaption>
+</figure>
+<div class="answer"><p><strong>先做能力闭环，再做角色包装。</strong><br>优先验证“按键说话 → 输入到当前应用”和“看选定窗口 → 提出动作 → 确认执行”。角色、声音和模型只是可保存的用户组合。</p><div class="verdict-note"><strong>当前建议的前提</strong><p class="compact">已确认：实用功能优先、插件解耦、允许用户定制。暂按 Windows 首发；商业化、跨平台和完全离线要求尚未确定。</p></div></div>
+<div class="legend"><span class="evidence code">源码核验</span><span class="evidence doc">官方声明</span><span class="evidence rec">研究判断</span><span class="evidence unknown">未证实</span><span>局部静态审阅 ≠ 安全审计或性能实测</span></div>
+</header>
+<section id="requested"><div class="sec-head"><p class="ve-label caps">FOCUS</p><h2>这两个项目值得借鉴的，是低成本的桌面入口</h2></div><article class="target" id="dsh-detail"><div class="subhead"><h3><a href="https://github.com/PC2005-cloud/dsh-pet" target="_blank" rel="noopener">dsh-pet</a></h3><span class="evidence code">源码核验</span><span class="evidence doc">新独立入口仍在迭代</span></div><p class="compact">价值集中在<strong>共享动画/物理逻辑、状态接口与双运行入口</strong>。可挂DSH，也已有自己的模型适配器。</p><figure><div class="frame"><svg class="ve-svg" viewBox="0 0 980 265" role="img" aria-label="dsh-pet共用渲染和Host，支持DSH模型与新独立API两条路径" style="--ve-min: 840px"><path class="ve-e" d="M260 108H355"/><text class="ve-el" x="308" y="91">发起聊天</text><path class="ve-e" d="M610 90H665V65H730"/><text class="ve-el" x="669" y="43">调用宿主</text><path class="ve-e is-hot" d="M610 130H665V184H730"/><text class="ve-el" x="671" y="208">直连API</text><path class="ve-e is-async" d="M355 154H308V194H150V149"/><text class="ve-el" x="237" y="219">长轮询状态 / 驱动画面</text><g class="ve-n"><rect class="sh" x="40" y="70" width="220" height="79" rx="5"/><text x="150" y="97">Electron / 浏览器</text><text class="sub" x="150" y="123">双 video + WebM</text></g><g class="ve-n is-key"><rect class="sh" x="355" y="70" width="255" height="100" rx="5"/><text x="482.5" y="97">共用 Host</text><text class="sub" x="482.5" y="123">历史 → 聊天 → 状态树</text></g><g class="ve-n"><rect class="sh" x="730" y="28" width="220" height="74" rx="5"/><text x="840" y="55">DSH 插件模式</text><text class="sub" x="840" y="81">ctx.llm + 宿主认证</text></g><g class="ve-n"><rect class="sh" x="730" y="147" width="220" height="74" rx="5"/><text x="840" y="174">新独立桌面模式</text><text class="sub" x="840" y="200">OpenAI / Anthropic SDK</text></g></svg></div><figcaption><span class="fig-n">路径 A</span>独立适配复用原聊天和状态链，但不拥有DSH的全部会话事件或工具能力。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/app/main.ts#L118-L174" target="_blank" rel="noopener">入口</a> · <a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/ai-transport.ts#L17-L104" target="_blank" rel="noopener">传输</a> · <a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/events.js#L285-L393" target="_blank" rel="noopener">状态轮询</a></figcaption></figure><div class="target-grid"><div><dl class="facts"><dt>技术栈</dt><dd>TypeScript + React（浏览器客户端）+ Cordis；Electron helper 用 DOM/CommonJS；tsdown构建。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/package.json#L74-L155" target="_blank" rel="noopener">依赖</a></dd><dt>渲染</dt><dd>透明VP9 WebM，双video切换；共享弹簧、抛掷等物理逻辑，非Live2D/VRM。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/sprite.js#L180-L185" target="_blank" rel="noopener">实现</a></dd><dt>桌面</dt><dd>局部透明无框置顶窗；按命中区域切换穿透；contextIsolation开，nodeIntegration关，sandbox关。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/runtime/electron-helper/main.js#L433-L456" target="_blank" rel="noopener">窗口</a></dd><dt>AI</dt><dd>DSH模式走ctx.llm；新独立入口支持用户Key + OpenAI-compatible/Anthropic流，默认关闭。</dd><dt>记忆</dt><dd>JSON聊天历史与人设，不是已验证RAG。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/host/index.ts#L913-L939" target="_blank" rel="noopener">上下文</a></dd></dl></div><div><dl class="facts"><dt>实用能力</dt><dd>已查核心中未见内建ASR/TTS或通用电脑操作循环。whisper指文字碎碎念，不是语音识别。</dd><dt>数据</dt><dd>独立Key是明文JSON，附文件权限和原子写保护；不是系统凭据库加密。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/standalone/ai-storage.ts#L22-L103" target="_blank" rel="noopener">存储</a></dd><dt>发布</dt><dd>包版本0.3.8；<a href="https://github.com/PC2005-cloud/dsh-pet/releases/tag/v0.3.8-test.2" target="_blank" rel="noopener">Windows测试ZIP</a>。跨平台设计≠已核验多平台成品。</dd><dt>授权</dt><dd>代码MIT；动画、字体权利须另审。<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/LICENSE#L1-L21" target="_blank" rel="noopener">许可</a></dd><dt>取舍</dt><dd>借鉴共享逻辑、状态协议、宿主桥接；不要把驱动宠物的API误当电脑控制API。</dd></dl></div></div><div class="callout warn"><strong>文档漂移：不要照README判定独立AI</strong><p class="compact">固定提交bb436f9的<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/README.md#L164-L180" target="_blank" rel="noopener">README</a>仍称独立对话不可用，但<a href="https://github.com/PC2005-cloud/dsh-pet/blob/bb436f9f065043d1d976648b3ed27173ce48e9bf/dsh-pet/src/app/main.ts#L118-L174" target="_blank" rel="noopener">入口</a>已注入独立AI。main、稳定tag与测试包不等于同一版本。</p></div></article><article class="target" id="cute-detail"><div class="subhead"><h3><a href="https://github.com/12we21/cute-fat-fish-pet" target="_blank" rel="noopener">cute-fat-fish-pet</a></h3><span class="evidence code">源码核验</span><span class="evidence doc">Windows产品化扩展</span></div><p class="compact">基于dsh-pet旧版引擎，增加<strong>独立模型、离线ASR、联网TTS、屏幕观察与有限动作</strong>；不是完整电脑Agent。</p><figure><div class="frame"><svg class="ve-svg" viewBox="0 0 980 325" role="img" aria-label="cute-fat-fish-pet先把语音转文本，再以规则识别动作，其余送模型" style="--ve-min: 840px"><path class="ve-e" d="M260 95H365"/><text class="ve-el" x="313" y="78">输出文本</text><path class="ve-e" d="M605 95H720"/><text class="ve-el" x="663" y="78">未命中规则</text><path class="ve-e is-hot" d="M485 138V218"/><text class="ve-el r" x="503" y="183">匹配动作</text><path class="ve-e" d="M605 255H720"/><text class="ve-el" x="664" y="238">通过IPC</text><g class="ve-n"><rect class="sh" x="40" y="53" width="220" height="85" rx="5"/><text x="150" y="80">键盘 / 本地语音输入</text><text class="sub" x="150" y="106">SenseVoice + sherpa</text></g><g class="ve-n is-key"><rect class="sh" x="365" y="53" width="240" height="85" rx="5"/><text x="485" y="80">规则拦截 + 模型路由</text><text class="sub" x="485" y="106">用户文本先判意图</text></g><g class="ve-n"><rect class="sh" x="720" y="53" width="220" height="85" rx="5"/><text x="830" y="80">Ollama / 在线模型</text><text class="sub" x="830" y="106">当前 stream:false</text></g><g class="ve-n"><rect class="sh" x="365" y="218" width="240" height="75" rx="5"/><text x="485" y="245">界面权限开关</text><text class="sub" x="485" y="271">app / file / url</text></g><g class="ve-n"><rect class="sh" x="720" y="218" width="220" height="75" rx="5"/><text x="830" y="245">固定本机动作</text><text class="sub" x="830" y="271">打开目标 / OBS 控制</text></g><text class="ve-axis-t" x="40" y="283">正常回复 → 气泡 / WebM</text><text class="ve-axis-t" x="40" y="309">可选TTS → 联网Edge</text></svg></div><figcaption><span class="fig-n">路径 B</span>规则式打开目标不等于视觉鼠标Agent；图中省略聊天结果返回线。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/sprite.js#L2882-L2936" target="_blank" rel="noopener">动作分支</a> · <a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/ollama.mjs#L143-L186" target="_blank" rel="noopener">本地模型</a> · <a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/online.mjs#L150-L209" target="_blank" rel="noopener">在线模型</a></figcaption></figure><div class="target-grid"><div><dl class="facts"><dt>技术栈</dt><dd>JavaScript/Node ESM + Electron；保留TS/React/Cordis与预构建lib；NSIS安装器。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/build/build.mjs#L170-L202" target="_blank" rel="noopener">构建</a></dd><dt>渲染</dt><dd>继承透明WebM双video与物理系统，不是参数化Live2D/3D。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/sprite.js#L137-L145" target="_blank" rel="noopener">实现</a></dd><dt>ASR</dt><dd>真实Node子进程运行sherpa-onnx + SenseVoice，配Silero VAD，以JSON行协议隔离原生运行时。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1713-L1754" target="_blank" rel="noopener">进程</a> · <a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/stt-worker.mjs#L158-L185" target="_blank" rel="noopener">识别</a></dd><dt>TTS</dt><dd>自实现Edge在线朗读协议 → MP3；可调音高不等于音色克隆。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1985-L2055" target="_blank" rel="noopener">合成</a></dd><dt>AI</dt><dd>Ollama /api/chat 或兼容 /chat/completions；stream:false后包装迭代器，不是真逐token流。</dd></dl></div><div><dl class="facts"><dt>看屏幕</dt><dd>SwCapture/PowerShell → 截图附件 → 本地或云视觉模型；在线会发送图像。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/lib/index.js#L2114-L2145" target="_blank" rel="noopener">路径</a></dd><dt>电脑动作</dt><dd>规则识别应用/文件/网址/录屏，未验证通用鼠标规划或UIA闭环。</dd><dt>数据</dt><dd>JSON聊天历史；Key明文放程序目录，备份程序可能夹带凭据。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/standalone/online.mjs#L29-L56" target="_blank" rel="noopener">证据</a></dd><dt>发布</dt><dd><a href="https://github.com/12we21/cute-fat-fish-pet/releases/tag/v1.2.3" target="_blank" rel="noopener">v1.2.3 Windows安装器/ZIP</a>；有哈希旁文件，未实测安装或签名。</dd><dt>授权</dt><dd>代码MIT；语音权重、字体、动画单独审查，不能直接照NOTICE统一推断。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/LICENSE#L1-L22" target="_blank" rel="noopener">许可</a></dd></dl></div></div><div class="callout warn"><strong>借鉴ASR worker，不照搬权限门</strong><p class="compact">三权限开关在renderer localStorage；所读main打开目标handler可接受路径，且未复查这些开关，与<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/SECURITY.md#L53-L66" target="_blank" rel="noopener">SECURITY的强表述</a>不一致。移植时应重做主进程授权、发送者与目标校验；此为静态边界发现，不是已证实的远程漏洞。<a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/sprite.js#L2605-L2660" target="_blank" rel="noopener">界面检查</a> · <a href="https://github.com/12we21/cute-fat-fish-pet/blob/e53f63e67227671aca092e3334c8611e29b880b6/src/runtime/electron-helper/main.js#L1485-L1524" target="_blank" rel="noopener">主进程执行</a></p></div></article></section>
+<section id="landscape"><div class="sec-head"><p class="ve-label caps">LANDSCAPE</p><h2>成熟桌宠、AI 框架与素材平台，要分组看</h2></div><p>纳入已有公开发布或持续维护线索的代表项目。<strong>“成熟”分成桌面产品成熟度与 AI 链路成熟度</strong>；有 Steam 发行，不等于 AI 能力已完善。</p><div id="scenario-controls" class="controls" aria-label="选择目标体验"></div><div class="choice-output" aria-live="polite"><h3 id="choice-title">你的目标：能力模块优先，外观模块可替换</h3><p id="choice-body">默认展示全部项目。实用功能重点看N.E.K.O与AIRI，语音接口参考Open-LLM-VTuber；桌面入口参考两个指定仓库，宿主生态参考VPet。</p></div><figure><div class="ve-table"><table id="project-matrix"><thead><tr><th>项目</th><th>技术栈</th><th>表现 / 音频</th><th>智能路径</th><th>成熟度与限制</th><th>许可</th></tr></thead><tbody><tr class="project-row" data-kind="practical plugin light"><td class="name"><a href="#dsh-detail">dsh-pet</a></td><td class="stack">Electron / TS / React / Cordis</td><td>双video / WebM</td><td>DSH或独立API</td><td class="boundary">新独立入口与测试包；工具后端另接</td><td>MIT</td></tr><tr class="project-row" data-kind="practical voice light"><td class="name"><a href="#cute-detail">cute-fat-fish-pet</a></td><td class="stack">Electron / Node；旧引擎扩展</td><td>WebM + 本地ASR</td><td>Ollama / API + Edge TTS</td><td class="boundary">Windows包；规则动作，不是通用CUA</td><td>MIT；素材另审</td></tr><tr class="project-row" data-kind="practical voice plugin 3d"><td class="name"><a href="#airi-record">AIRI</a></td><td class="stack">Electron / Vue / TS</td><td>Live2D / Three.js + VRM</td><td>VAD / ASR → LLM → TTS</td><td class="boundary">多平台beta；已接AUV，操作闭环未实测</td><td>MIT</td></tr><tr class="project-row" data-kind="practical voice"><td class="name"><a href="#olv-record">Open-LLM-VTuber</a></td><td class="stack">Python / FastAPI + Electron / React</td><td>Live2D</td><td>可替换ASR / Agent / TTS</td><td class="boundary">v1.2.1；分体部署，v2重写规划</td><td>MIT；角色除外</td></tr><tr class="project-row" data-kind="practical voice plugin 3d"><td class="name"><a href="#neko-record">N.E.K.O</a></td><td class="stack">Electron + Python；Web混合前端</td><td>Live2D / VRM / MMD等</td><td>Realtime + 独立语音适配</td><td class="boundary">覆盖广；本次确认nightly，权限需审计</td><td>Apache-2.0</td></tr><tr class="project-row" data-kind="plugin light"><td class="name"><a href="#vpet-record">VPet Simulator</a></td><td class="stack">C# / .NET / WPF（Windows源码）</td><td>2D动画；其他形态扩展</td><td>AI和EdgeTTS走插件</td><td class="boundary">Steam/工坊；跨平台beta有差异</td><td>Apache-2.0；动画另限</td></tr><tr class="project-row" data-kind="3d"><td class="name"><a href="#mate-record">MateEngine</a></td><td class="stack">Unity / C# / LLMUnity</td><td>VRM / 3D</td><td>原生本地Qwen小模型</td><td class="boundary">已发行；未证实通用语音或电脑Agent</td><td>Pro v2.1等混合限制</td></tr><tr class="project-row" data-kind="3d"><td class="name"><a href="#desktop-record">Desktop Mate</a></td><td class="stack">闭源，底层未核实</td><td>3D + 授权DLC</td><td>未核验生成式AI</td><td class="boundary">Win / Apple Silicon Mac；表现参照</td><td>专有；角色分别授权</td></tr></tbody></table></div><figcaption><span class="fig-n">对照</span>栈据依赖/源码抽查，形态与发行范围结合官方说明；未知不猜测。点击项目名可跳到详情；以下结论并非同机性能排名。</figcaption></figure><div id="market-detail-slot" class="project-records"><details id="airi-record"><summary>AIRI：TS团队优先参考，仍需冻结版本</summary><p><span class="evidence code">源码</span> Electron/Vue/TS；Live2D依赖Pixi，3D依赖Three.js/three-vrm。语音管线有分段TTS、队列、打断；有视觉编排和MCP工具桥。</p><p><strong>优：</strong>多渲染器与provider模块适合重组。<strong>劣：</strong>monorepo与原生集成复杂，beta和main可能不同步。</p><p><strong>记忆纠偏：</strong>README仍写WIP，但store已有localStorage事实记忆；既不是完全没有，也不能夸成成熟RAG。</p><p><strong>发行：</strong>本次查到v0.12.0-beta.6多平台包，非稳定性保证。代码MIT，角色与SDK另审。</p><p class="source-links"><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json" target="_blank" rel="noopener">桌面依赖</a> · <a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/pipelines-audio/src/speech-pipeline.ts" target="_blank" rel="noopener">音频管线</a> · <a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/mcp-tool-bridge.ts" target="_blank" rel="noopener">工具桥</a> · <a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts" target="_blank" rel="noopener">记忆</a> · <a href="https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.6" target="_blank" rel="noopener">发布</a> · <a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/LICENSE" target="_blank" rel="noopener">许可</a></p></details><details id="olv-record"><summary>Open-LLM-VTuber：语音接口清晰，重写期需留意</summary><p><span class="evidence code">源码</span> Python/FastAPI会话层接ASR、Agent、TTS，Electron/React前端播放音频与Live2D。支持本地/云提供方组合，MCP客户端可启动外部进程。</p><p><strong>优：</strong>音频处理与Agent分层明确，可逐项替换。<strong>劣：</strong>前端、Python与模型需组合部署。</p><p><strong>记忆纠偏：</strong>官方明确长期记忆暂移除；聊天日志仍保存。v1.2.1的exe/dmg只是前端，不是全模型整合包。</p><p><strong>维护：</strong>v2重写在规划，v1继续修bug。MIT不覆盖所列Live2D样本资产。</p><p class="source-links"><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml" target="_blank" rel="noopener">后端依赖</a> · <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber-Web/blob/main/package.json" target="_blank" rel="noopener">前端依赖</a> · <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py" target="_blank" rel="noopener">会话管线</a> · <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py" target="_blank" rel="noopener">MCP</a> · <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md" target="_blank" rel="noopener">状态说明</a> · <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/releases/tag/v1.2.1" target="_blank" rel="noopener">发布</a> · <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/LICENSE-Live2D.md" target="_blank" rel="noopener">角色授权</a></p></details><details id="neko-record"><summary>N.E.K.O：实用能力覆盖广，权限面也更宽</summary><p><span class="evidence code">源码</span> Electron+Python；React聊天子前端与其他Web部分并存。Realtime客户端收发音频，另注册多种独立ASR/TTS路径。</p><p><strong>优：</strong>语音、视觉、记忆、工具和多角色形态整合广，适合作功能参照。<strong>劣：</strong>进程、供应商、插件和权限面更复杂。</p><p><strong>记忆：</strong>BM25+向量+RRF混合召回有实现；五维记忆的整体准确率未实测。</p><p><strong>发行与隐私：</strong>本次确认未签名nightly，不等于stable；README声明默认开启匿名Token用量遥测。代码Apache-2.0，第三方资产另审。</p><p class="source-links"><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml" target="_blank" rel="noopener">依赖</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py" target="_blank" rel="noopener">Realtime</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py" target="_blank" rel="noopener">工具分发</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py" target="_blank" rel="noopener">混合记忆</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD" target="_blank" rel="noopener">官方说明</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly" target="_blank" rel="noopener">nightly</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/LICENSE" target="_blank" rel="noopener">许可</a></p></details><details id="vpet-record"><summary>VPet：宿主生态成熟，不把工坊当沙箱</summary><p><span class="evidence code">源码</span> 已查Windows工程为C#/.NET 10/WPF，以2D动画为主。官方2023年将ChatGPT移出本体转插件；官方插件例子包含兼容API与EdgeTTS，不是AI DLC。</p><p><strong>优：</strong>Steam、工坊、ModMaker与宿主接口有体系。<strong>劣：</strong>非完整多模态Agent；DLL插件有较强本机权限。</p><p>Steam字段仍列Windows，但最新官方公告有macOS/Linux beta，插件与部分DLC需适配；不据WPF推断新平台底层。</p><p>代码Apache-2.0；默认动画另有限制。官方披露过恶意重上传MOD事件，不是说原作者插件本身恶意。</p><p class="source-links"><a href="https://github.com/LorisYounger/VPet/blob/main/VPet-Simulator.Windows/VPet-Simulator.Windows.csproj" target="_blank" rel="noopener">Windows依赖</a> · <a href="https://github.com/LorisYounger/VPet.Plugin.Demo/blob/master/README.md" target="_blank" rel="noopener">插件示例</a> · <a href="https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1844751498224549" target="_blank" rel="noopener">跨平台公告</a> · <a href="https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1844115010498257" target="_blank" rel="noopener">安全公告</a> · <a href="https://github.com/LorisYounger/VPet/blob/main/README_en.md" target="_blank" rel="noopener">授权说明</a></p></details><details id="mate-record"><summary>MateEngine：3D成品参照，商业复用慎选</summary><p><span class="evidence code">源码</span> Unity 6000.2.6f2/C#，含LLMUnity 2.5.1；官方声明原生本地Qwen2.5 1.5B聊天。支持VRM导入等产品互动。</p><p><strong>优：</strong>3D角色结合本地小模型。<strong>劣：</strong>AudioClip语音包≠生成式TTS；依赖的RAG/函数调用样例≠产品已启用。</p><p><strong>许可警报：</strong>不能只看AGPL标签。实际根许可证Pro v2.1含非商用与分发限制，默认角色禁止随自制构建再分发。不建议直接作为你的可分发插件平台底座。</p><p class="source-links"><a href="https://github.com/shinyflvre/Mate-Engine/blob/main/ProjectSettings/ProjectVersion.txt" target="_blank" rel="noopener">Unity版本</a> · <a href="https://github.com/shinyflvre/Mate-Engine/blob/main/Assets/LLMUnity/package.json" target="_blank" rel="noopener">LLM依赖</a> · <a href="https://store.steampowered.com/app/3625270/MateEngine/" target="_blank" rel="noopener">产品说明</a> · <a href="https://github.com/shinyflvre/Mate-Engine/blob/main/LICENSE.md" target="_blank" rel="noopener">实际许可</a> · <a href="https://github.com/shinyflvre/Mate-Engine/blob/main/README.md" target="_blank" rel="noopener">资产说明</a></p></details><details id="desktop-record"><summary>Desktop Mate：角色生态参照，不是AI代码基座</summary><p><span class="evidence doc">官方</span> 实时3D角色、坐窗口、跟随鼠标、台词、闹钟与授权DLC。公开材料未核验生成式聊天、ASR/TTS或通用电脑控制。</p><p><strong>优：</strong>正式角色发行与非打扰交互。<strong>劣：</strong>闭源语言/引擎未知；不从第三方MOD倒推底层，不把购买DLC当再分发许可。</p><p>当前官方支持Windows及Apple Silicon Mac，多角色仍有beta/平台差异。以infiniteloop官网为准，排除同名非官方站。</p><p class="source-links"><a href="https://www.infiniteloop.co.jp/desktopmate/" target="_blank" rel="noopener">官网</a> · <a href="https://store.steampowered.com/app/3301060/Desktop_Mate/" target="_blank" rel="noopener">商店</a> · <a href="https://www.infiniteloop.co.jp/privacy/" target="_blank" rel="noopener">公司隐私政策</a></p></details></div><h3>按你的实用目标，再拆开看能力</h3><p class="compact">“核心实现”只表示已读到处理链，仍可依赖云服务；“接服务”不是默认即用；“未核查”不是不存在。点击单元格可看具体边界。</p><figure><div class="ve-table"><table><thead><tr><th>能力</th><th>AIRI</th><th>Open-LLM-VTuber</th><th>N.E.K.O</th></tr></thead><tbody><tr><td>麦克风对话</td><td><details><summary>核心实现</summary><p>已核实语音控制器、转录器、VAD、可编辑草稿和聊天提交接线；识别引擎/模型仍须配置。</p><p>未运行，无法给出听写准确率、打断延迟或噪声表现。</p><p><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>后端单轮会话调用 ASR，将文字和可选图像交给 Agent，再消费文本/音频输出；这是语音对话链路。</p><p>识别引擎、语言模型与 TTS 可分别本地部署，但必须逐个配置；不是默认任何组合都离线。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>OmniRealtimeClient 接入原生实时音频/转写/中断回调；文本会话和自定义音色另可走外部 TTS。</p><p>需要对应 Realtime 或配置的服务；默认完全离线不能从“本地运行”推导。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>向其他应用听写</td><td><details><summary>未核查</summary><p>未证实专用的“全局快捷键录音→转写→恢复原焦点→写入其他 App”闭环；不能把麦克风聊天、全局快捷键或 AUV 输入通道合并当作现成功能。</p><p>原窗口/光标定位、录音期间焦点保持、Unicode 输入、剪贴板保存恢复、取消和失败回滚均未核查。</p><p><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/electron/global-shortcut.ts" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>未核查</summary><p>没有证据证明原生全局听写与外部焦点注入；语音输入目标是项目的会话 Agent。</p><p>全局录音热键、焦点恢复、外部文字粘贴和取消回滚闭环未核查。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>未核查</summary><p>虽已证实 Computer Use 的文字输入与剪贴板粘贴，但未证明专用全局听写工作流。</p><p>Agent 代打字与“原文听写”不是同一产品能力。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>TTS与音色选择</td><td><details><summary>接插件或服务</summary><p>核心提供音色目录、provider/model/voice 选择及生成接口；实际音频由所选本地或云 TTS 实现。</p><p>多供应商支持不等于每个 provider 均具备克隆、同样 SSML 或同样离线能力。</p><p><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/speech.ts" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>接插件或服务</summary><p>存在多种 TTS 后端适配，既可调用本地库也可访问外部 HTTP/云服务。</p><p>各引擎依赖/许可/硬件要求不同；官方文档也提示 Coqui 与 MeloTTS 的依赖冲突。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>接插件或服务</summary><p>有独立 TTS runtime 与 provider 路由；预设原生音色和自定义克隆音色采用不同路径。</p><p>音色 ID 按 provider/source/reference 解释，不是全局通用。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/docs/zh-CN/architecture/tts-pipeline.md" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>克隆 / 音色创建流程</td><td><details><summary>未核查</summary><p>此次核实到的是音色选择与 TTS 调用；没有足够证据证明 AIRI 本身提供录音上传、克隆注册、试听、保存绑定的一体化流程。</p><p>不能因 ElevenLabs/阿里云在供应商列表就宣称内置克隆。</p><p><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/speech.ts" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>接插件或服务</summary><p>克隆并非纯宣传：Coqui 适配把 speaker_wav 传给多说话人模型；GPT-SoVITS 传 ref_audio_path/prompt_text 给外部服务。官方文档让用户在 ElevenLabs 控制台或独立 CosyVoice/GPT-SoVITS 环境完成创建与配置。</p><p>Coqui 分支依赖 self.is_multi_speaker 与 speaker_wav 条件，非任意模型都有克隆能力。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/tts/coqui_tts.py" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>已核实内置克隆/音色设计 API 与管理流程，不仅是供应商列表；实际算法仍依赖云端或外部本地 TTS 服务。</p><p>这不是在 N.E.K.O 内训练自有声学模型权重。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_cloning.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>角色模型导入</td><td><details><summary>仅声明</summary><p>官方操作手册具体说明 AIRI Card pack 可携带 Live2D/Spine/Tachie/VRM，模型页可选择、导入、配置；本轮未追到导入校验的执行源码。</p><p>手册对应 0.11.3，非本次提交的严格版本合同。</p><p><a href="https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>Live2D 配置加载由源码核实；官方文档给出模型导入和表情/点击动作映射步骤。</p><p>该 Python 类只准备 payload，不负责渲染；前端加载兼容性未运行验证。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/live2d_model.py" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>角色卡保存、含模型打包导出、ZIP/PNG 角色卡导入源码已读；有 Live2D/VRM/MMD/PNGTuber 资源分支。</p><p>内置模型和部分非用户来源模型不会被作为完整资源重打包；导出范围应按来源和许可检查。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/cards.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>完整模型资产制作</td><td><details><summary>未核查</summary><p>未证实内置从绘画/网格到 Live2D 绑定或 VRM 骨骼、材质、动画制作的完整角色资产工具。</p><p>导入、卡片编辑、模型位置缩放、Artistry 图像生成都不能直接算 Live2D/VRM 制作。</p><p><a href="https://airi.moeru.ai/docs/en/docs/manual/tamagotchi/setup-and-use/" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>接插件或服务</summary><p>官方指南把表情、动作预览/制作指向 VTube Studio、Live2DViewerEx、Cubism Viewer 等外部工具，而不是宣称本项目建模。</p><p>完整画图、分层、绑定、骨骼/网格制作未在本项目内核实。</p><p><a href="https://open-llm-vtuber.github.io/docs/user-guide/live2d" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>未核查</summary><p>可更换模型、调整显示与角色设置；未核实内置 Live2D 绑定、VRM 建模或从零制作完整动态角色资产的编辑器。</p><p>仍需准备合法模型/图片，不能把资源管理与卡片工坊算作资产制作工具。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/cards.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>看屏幕并理解</td><td><details><summary>核心实现</summary><p>vision orchestrator 将选定来源 PNG/JPEG data URL 送已配置的视觉模型，并可发布到角色上下文。</p><p>需要支持图像的 provider/model；未配置会报错。</p><p><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>后端已核实接收 images 并传入 Agent；官方声明前端支持摄像头、录屏及截图。</p><p>核心确认的是图像数据接入，不是桌面控制。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>至少在 Computer Use 链中已核实实际桌面截图与视觉模型输入，不只是 README 屏幕理解文案。</p><p>普通聊天的持续屏幕感知与 CUA 截图是不同入口；前者本轮仅继承 README 声明。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr><tr><td>实际鼠标键盘操作</td><td><details><summary>接插件或服务</summary><p>不仅是 MCP 空桥：Electron 启动时注册 computer-use handler，首次调用由 @auv-js/cli 与 @auv-js/sdk 托管独立 AUV daemon，转发真实桌面命令。</p><p>核心集成已源码核实，但 AUV 自身驱动、平台覆盖、安装包完整性和任务规划/UI 入口未端到端验证。</p><p><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/index.ts" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>接插件或服务</summary><p>已有 MCP 客户端接入面，但本轮没有证实自带鼠标键盘执行器；默认 MCP 配置仅 time 与 ddg-search。</p><p>必须另外提供 computer-use MCP 服务并核查授权、输入/截图执行与反馈验证。</p><p><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/mcp_servers.json" target="_blank" rel="noopener">官方依据</a></p></details></td><td><details><summary>核心实现</summary><p>已核实直接执行 PyAutoGUI 点击、移动、滚动、拖动、按键与粘贴，并存在截图反馈迭代；不是只有 browser-use 或 pyautogui 依赖。</p><p>需要模型配置、可用 PyAutoGUI、桌面授权；跨平台/中文输入/多屏/DPI行为未实测。</p><p><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py" target="_blank" rel="noopener">官方依据</a></p></details></td></tr></tbody></table></div><figcaption><span class="fig-n">能力边界</span>语音聊天≠全局听写，TTS接入≠克隆制作，模型导入≠建模，MCP支持≠默认已有电脑执行器。</figcaption></figure><div class="callout"><strong>两项补证，直接影响你的选择</strong><p class="compact"><b>AIRI：</b>已注册Electron主进程电脑控制服务，托管AUV daemon/token并限制命令/截图范围；不只是MCP占位。<a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/src/main/services/airi/computer-use/runtime.ts" target="_blank" rel="noopener">runtime源码</a>。<b>N.E.K.O：</b>有截图→VLM→PyAutoGUI实际执行、AST白名单和取消；另有音色上传、克隆注册、设计/试听/保存流程。<a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/brain/computer_use.py" target="_blank" rel="noopener">电脑操作</a> · <a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_routers/characters_router/voice_cloning.py" target="_blank" rel="noopener">音色流程</a>。两者的敏感操作逐次确认和端到端可靠性仍未完成审计。</p></div></section>
+<section id="routes"><div class="sec-head"><p class="ve-label caps">MECHANISMS</p><h2>真正增加复杂度的，是音频与权限，不只是模型</h2></div>
+<figure><div class="routes">
+<div class="route"><span class="evidence rec">路线 A · 轻量助手</span><h3>动画先独立运转，再接文字流</h3><svg class="mini" viewBox="0 0 290 280" role="img" aria-label="轻量助手由输入调用模型，流式文本返回后驱动动画状态"><path class="route-wire" d="M145 62V104"/><text class="route-action" x="157" y="88">提交文本</text><path class="route-wire" d="M145 164V207"/><text class="route-action" x="157" y="190">接收流式结果</text><rect class="route-box" x="30" y="8" width="230" height="54" rx="4"/><text class="route-label" x="48" y="40">键盘输入 + 精灵状态机</text><rect class="route-box" x="30" y="105" width="230" height="59" rx="4"/><text class="route-label" x="48" y="139">模型 API / 宿主适配器</text><rect class="route-box" x="30" y="208" width="230" height="56" rx="4"/><text class="route-label" x="48" y="242">气泡文字 + 思考 / 说话</text></svg><p class="mechanism"><strong>新增成本：</strong>状态同步、超时取消、少量记忆。<br><strong>适合：</strong>先验证提醒、聊天、工作助手入口。</p></div>
+<div class="route"><span class="evidence rec">路线 B · 语音陪伴</span><h3>在对话两端增加实时音频管线</h3><svg class="mini" viewBox="0 0 290 280" role="img" aria-label="语音陪伴增加语音活动检测、识别、模型和语音合成，并需处理打断"><path class="route-wire" d="M145 62V104"/><text class="route-action" x="157" y="88">识别 / 传音频</text><path class="route-wire" d="M145 164V207"/><text class="route-action" x="157" y="190">合成 / 回音频</text><rect class="route-box" x="30" y="8" width="230" height="54" rx="4"/><text class="route-label" x="48" y="40">麦克风 + VAD / ASR</text><rect class="route-box" x="30" y="105" width="230" height="59" rx="4"/><text class="route-label" x="48" y="139">对话模型 / 原生音频模型</text><rect class="route-box" x="30" y="208" width="230" height="56" rx="4"/><text class="route-label" x="48" y="242">TTS / 音频 + 口型表情</text></svg><p class="mechanism"><strong>新增成本：</strong>打断、回声、音频队列、口型时序。<br><strong>注意：</strong>原生音频模型可合并 ASR/LLM/TTS，但不会消除延迟与隐私问题。</p></div>
+<div class="route"><span class="evidence rec">路线 C · Agent 助手</span><h3>在模型之外建立可审计的执行门</h3><svg class="mini" viewBox="0 0 290 280" role="img" aria-label="Agent助手由模型提出动作，再经过权限校验和确认后执行"><path class="route-wire" d="M145 62V104"/><text class="route-action" x="157" y="88">提出动作</text><path class="route-wire" d="M145 164V207"/><text class="route-action" x="157" y="190">批准后调用</text><rect class="route-box" x="30" y="8" width="230" height="54" rx="4"/><text class="route-label" x="48" y="40">模型读取已授权的上下文</text><rect class="route-box" x="30" y="105" width="230" height="59" rx="4"/><text class="route-label" x="48" y="139">策略校验 + 用户确认</text><rect class="route-box" x="30" y="208" width="230" height="56" rx="4"/><text class="route-label" x="48" y="242">工具执行 + 回执 + 审计</text></svg><p class="mechanism"><strong>新增成本：</strong>权限、提示注入、回滚与审计。<br><strong>底线：</strong>“看见屏幕”不等于“有权操作电脑”。</p></div>
+</div><figcaption><span class="fig-n">Fig. 2</span>三条路线可组合；同一种外观可以接不同智能后端，不能由角色形象判断其 AI 能力。</figcaption></figure>
+<figure><div class="ve-table"><table><thead><tr><th>方案</th><th>代表</th><th>结构性优势</th><th>工程代价</th></tr></thead><tbody><tr><td>Web技术 + Electron</td><td>dsh / cute / AIRI</td><td>统一UI壳与Node生态；易接现有Agent</td><td>IPC与原生运行时治理；常驻资源需实测</td></tr><tr><td>Web/Electron + Python</td><td>Open-LLM-VTuber / NEKO</td><td>语音视觉模型生态丰富，适合sidecar</td><td>环境/模型/GPU依赖与跨进程生命周期</td></tr><tr><td>Windows原生桌面</td><td>VPet所查Windows工程</td><td>WPF与.NET桌面能力结合</td><td>跨平台不能直接复用同一WPF壳</td></tr><tr><td>Unity + C# + 本地模型</td><td>MateEngine</td><td>3D骨骼、材质、动作与VRM互动</td><td>不会自动补齐ASR/视觉Agent；授权另评估</td></tr><tr><td>Tauri + 系统WebView</td><td>你的备选，非上述项目现状</td><td>不捆绑完整浏览器；权限机制可参考</td><td>需要Rust/原生能力，透明窗和媒体仍需实测</td></tr></tbody></table></div><figcaption><span class="fig-n">取舍</span>以上是结构推导的工程差异，不是性能排名。Electron和Tauri都需要应用自身维护权限边界。</figcaption></figure><h3>模块选型：优先借现成引擎，不把重模型绑进桌宠</h3><figure><div class="ve-table"><table><thead><tr><th>用户能力</th><th>建议插件边界</th><th>可评估组件 / 路径</th><th>契约关键点</th></tr></thead><tbody><tr><td>录音与VAD</td><td>audio.capture / vad</td><td>按键说话优先；独立麦克风采集与Silero等VAD</td><td>输出带时间戳音频帧；采集插件不做听写注入</td></tr><tr><td>语音转文字</td><td>speech.asr</td><td><a href="https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/README.md" target="_blank" rel="noopener">sherpa-onnx</a> + <a href="https://k2-fsa.github.io/sherpa/onnx/sense-voice/index.html" target="_blank" rel="noopener">SenseVoice</a>；或 <a href="https://raw.githubusercontent.com/SYSTRAN/faster-whisper/master/README.md" target="_blank" rel="noopener">faster-whisper</a></td><td>区分原生流式、VAD分句和批量；生成器不等于实时协议</td></tr><tr><td>跨应用听写</td><td>dictation.compose / inject</td><td><a href="https://learn.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32" target="_blank" rel="noopener">Windows UIA</a>；必要时受控 <a href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput" target="_blank" rel="noopener">SendInput</a></td><td>先预览后提交，绑定窗口/控件；明确插入或替换，防覆盖原文</td></tr><tr><td>音色制作</td><td>voice.authoring</td><td><a href="https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/README.md" target="_blank" rel="noopener">CosyVoice</a> 参考音频；<a href="https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/README.md" target="_blank" rel="noopener">GPT-SoVITS</a> 制作/微调</td><td>输出版本化VoiceProfile；授权录音、参考文本和模型权重分开记录</td></tr><tr><td>朗读与语音输出</td><td>speech.tts / audio.playback</td><td>正式服务商/系统音色起步；再接 <a href="https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/example.py" target="_blank" rel="noopener">CosyVoice</a> / <a href="https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/api_v2.py" target="_blank" rel="noopener">GPT-SoVITS API</a></td><td>合成与播放队列分开；支持取消/打断；不把未授权克隆声线打包分发</td></tr><tr><td>2D角色制作与渲染</td><td>avatar.import / render</td><td><a href="https://docs.live2d.com/en/cubism-editor-manual/export-moc3-motion3-files/" target="_blank" rel="noopener">Cubism Editor导出</a> → Live2D；初版也可沿用WebM</td><td>外部制作、导入验证、抽象表情/口型映射；WebM不自动具备参数化口型</td></tr><tr><td>3D角色制作与渲染</td><td>avatar.import / render</td><td><a href="https://vroid.com/en/studio" target="_blank" rel="noopener">VRoid Studio</a> → VRM → <a href="https://raw.githubusercontent.com/pixiv/three-vrm/dev/README.md" target="_blank" rel="noopener">three-vrm</a></td><td>制作器和运行时分离；逐角色读取VRM授权与格式版本</td></tr><tr><td>屏幕理解</td><td>screen.source / vision</td><td>限定窗口截图 + OCR或图像模型（VLM）</td><td>输出带时间/坐标/DPI的Observation；不直接执行动作</td></tr><tr><td>电脑/浏览器操作</td><td>computer.actions / browser.actions</td><td><a href="https://pywinauto.readthedocs.io/en/latest/getting_started.html" target="_blank" rel="noopener">UIA / pywinauto</a>；网页优先 <a href="https://playwright.dev/docs/input" target="_blank" rel="noopener">Playwright</a></td><td>语义控件优先，坐标回退显式启用；每步读回目标状态；紧急停止</td></tr><tr><td>Agent与记忆</td><td>agent.backend / memory</td><td>DSH Bridge或独立LLM适配器；本地存储与记忆策略</td><td>桥接须核对可用接口/版本与授权上下文，不承诺内部接口稳定</td></tr></tbody></table></div><figcaption><span class="fig-n">组件路线</span>以上为建议组合，不是本次运行验证；ASR/STT指语音转文字，TTS指文字转语音，VLM指接收图像与文本的模型。</figcaption></figure><div class="tradeoffs"><details><summary>代码、权重、声音和素材：分别授权</summary><p>sherpa-onnx、CosyVoice、Playwright代码为Apache-2.0；faster-whisper、GPT-SoVITS及本次查到的SenseVoice代码为MIT；pywinauto为BSD-3。<a href="https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/LICENSE" target="_blank" rel="noopener">sherpa</a> · <a href="https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/LICENSE" target="_blank" rel="noopener">CosyVoice</a> · <a href="https://raw.githubusercontent.com/SYSTRAN/faster-whisper/master/LICENSE" target="_blank" rel="noopener">Whisper实现</a> · <a href="https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/LICENSE" target="_blank" rel="noopener">GPT-SoVITS</a> · <a href="https://raw.githubusercontent.com/FunAudioLLM/SenseVoice/main/LICENSE" target="_blank" rel="noopener">SenseVoice</a> · <a href="https://raw.githubusercontent.com/pywinauto/pywinauto/master/LICENSE" target="_blank" rel="noopener">pywinauto</a> · <a href="https://raw.githubusercontent.com/microsoft/playwright/main/LICENSE" target="_blank" rel="noopener">Playwright</a></p><p>但SenseVoiceSmall模型卡是other，指向自定义FunASR模型协议；CosyVoice2/指定CosyVoice3模型卡标Apache-2.0，GPT-SoVITS官方权重仓标MIT，仍不自动覆盖全部辅助权重。<a href="https://huggingface.co/FunAudioLLM/SenseVoiceSmall/raw/main/README.md" target="_blank" rel="noopener">模型卡</a> · <a href="https://raw.githubusercontent.com/modelscope/FunASR/main/MODEL_LICENSE" target="_blank" rel="noopener">自定义协议</a> · <a href="https://huggingface.co/FunAudioLLM/CosyVoice2-0.5B/raw/main/README.md" target="_blank" rel="noopener">CosyVoice2</a> · <a href="https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512/raw/main/README.md" target="_blank" rel="noopener">CosyVoice3</a> · <a href="https://huggingface.co/lj1995/GPT-SoVITS/raw/main/README.md" target="_blank" rel="noopener">GPT-SoVITS</a></p><p>声音采样须有授权。零样本参考音频也属于使用他人声音，不因没有训练步骤就免除权利与服务条款。</p></details><details><summary>角色定制：支持导入，不等于内置捏人</summary><p>Live2D Editor制作导出的模型与动作，运行时读取资源；支持用户扩展角色的AI/Chatbot应向Live2D确认Expandable Application及专门发布许可。<a href="https://www.live2d.com/en/sdk/license/" target="_blank" rel="noopener">官方规则</a></p><p>VRoid预设不是CC0；普通角色使用与“利用其网格/纹理做可生成并导出模型的制作应用”不同，后者可能需pixiv单独许可。<a href="https://vroid.com/en/studio/guidelines" target="_blank" rel="noopener">VRoid guidelines</a></p><p>three-vrm运行时MIT不覆盖角色资产。VRM meta记录商用、分发、修改等许可，不完整时不得默认全允许。<a href="https://raw.githubusercontent.com/vrm-c/vrm-specification/master/specification/VRMC_vrm-1.0/meta.md" target="_blank" rel="noopener">VRM许可字段</a></p></details></div><div class="callout"><strong>建议的首版组合</strong><p class="compact">Electron/TS宿主 + 按键录音 + sherpa-onnx语音提供方 + 可替换TTS + 独立听写注入插件；角色先用可合法分发的轻量资源包。第二步加入DSH/独立Agent适配器、只读窗口理解；最后开放UIA/浏览器操作。音色制作工具与本地GPU服务按需安装，不捆绑全部环境。</p></div>
+</section>
+<section id="architecture"><div class="sec-head"><p class="ve-label caps">PLUGIN FIRST</p><h2>一个小内核，三类扩展，不让插件互相绑死</h2></div><p><strong>推荐 Electron + TypeScript 做桌面宿主与 SDK。</strong>计算密集型语音用 Python/原生 sidecar；电脑操作通过受控适配器。DSH Bridge 是可选的一种 Agent 后端，不是全系统唯一依赖。</p>
+<figure class="ve-steps"><div class="frame"><svg class="ve-svg" viewBox="0 0 1080 625" role="img" aria-label="插件式桌面助手架构：界面和用户配置接入宿主，宿主统一调度语音、视觉、动作及模型插件" style="--ve-min: 926px">
+<rect class="ve-bnd" x="16" y="20" width="1048" height="154" rx="5"/><text class="ve-bnd-t" x="32" y="42">可定制体验 · 界面插件与声明式资源包</text>
+<path class="ve-e" data-s="2" d="M152 148V204H410V252"/><text class="ve-el" data-s="2" x="278" y="194">提交意图 / 接收状态</text>
+<path class="ve-e" data-s="2" d="M540 148V252"/><text class="ve-el r" data-s="2" x="550" y="211">选择能力路由</text>
+<path class="ve-e is-async" data-s="2" d="M928 148V204H670V252"/><text class="ve-el" data-s="2" x="810" y="194">绑定资源与偏好</text>
+<path class="ve-e" data-s="3" d="M440 364V415H138V478"/><text class="ve-el" data-s="3" x="288" y="404">请求 / 音频流</text>
+<path class="ve-e" data-s="3" d="M500 364V443H405V478"/><text class="ve-el" data-s="3" x="429" y="433">选择帧</text>
+<path class="ve-e is-hot" data-s="4" d="M580 364V443H675V478"/><text class="ve-el" data-s="4" x="646" y="433">授权后执行</text>
+<path class="ve-e" data-s="3" d="M640 364V415H942V478"/><text class="ve-el" data-s="3" x="806" y="404">对话 / 召回</text>
+<g class="ve-n" data-s="1"><rect class="sh" x="35" y="60" width="235" height="88" rx="5"/><text x="152.5" y="90">界面插件</text><text class="sub" x="152.5" y="120">桌宠 / 面板 / 纯语音</text></g><g class="ve-n" data-s="1"><rect class="sh" x="422" y="60" width="236" height="88" rx="5"/><text x="540" y="90">用户工作流</text><text class="sub" x="540" y="120">听写 / 问屏幕 / 办事</text></g><g class="ve-n" data-s="1"><rect class="sh" x="810" y="60" width="235" height="88" rx="5"/><text x="927.5" y="90">角色与声音资源包</text><text class="sub" x="927.5" y="120">模型 / 动画 / voiceProfile</text></g>
+<g class="ve-n is-key" data-s="2"><rect class="sh" x="280" y="252" width="520" height="112" rx="5"/><text x="540" y="281">宿主内核 · Host Kernel</text><text class="sub" x="540" y="310">版本与生命周期 · 类型路由 · 流控与取消</text><text class="sub" x="540" y="336">权限 / 凭据代理 · 任务审计 · 用户配置</text></g>
+<g class="ve-n" data-s="3"><rect class="sh" x="20" y="478" width="235" height="88" rx="5"/><text x="137.5" y="508">语音能力插件</text><text class="sub" x="137.5" y="538">VAD / STT / TTS / 音色</text></g><g class="ve-n" data-s="3"><rect class="sh" x="288" y="478" width="235" height="88" rx="5"/><text x="405.5" y="508">视觉能力插件</text><text class="sub" x="405.5" y="538">捕获窗口 / OCR / VLM</text></g><g class="ve-n" data-s="4"><rect class="sh" x="557" y="478" width="235" height="88" rx="5"/><text x="674.5" y="508">电脑操作插件</text><text class="sub" x="674.5" y="538">UIA / 浏览器 / 坐标</text></g><g class="ve-n" data-s="3"><rect class="sh" x="825" y="478" width="235" height="88" rx="5"/><text x="942.5" y="508">智能与存储插件</text><text class="sub" x="942.5" y="538">LLM / DSH / 记忆</text></g>
+<text class="ve-axis-t" x="32" y="603" data-s="5">控制：类型化 RPC　｜　媒体：有界流通道　｜　工具：MCP 适配　｜　所有授权由内核裁决</text>
+</svg></div><div class="ve-player"><ol class="ve-cap"><li data-n="1/5">用户选择角色、声音和工作流；这些配置不获得系统权限。</li><li data-n="2/5">内核负责生命周期、路由、任务、权限与密钥，而不是实现所有AI算法。</li><li data-n="3/5">语音、视觉、模型和记忆由各自插件提供；通过宿主注册能力，不直接导入彼此代码。</li><li data-n="4/5">电脑操作进入单独的授权门；截图理解不自动获得点击、输入或文件修改权限。</li><li data-n="5/5">统一控制协议，媒体流单独传输，MCP只作为工具生态适配层。</li></ol><button data-go="-1" type="button">上一步</button><button data-play type="button">播放</button><input type="range" min="1" max="5" value="5" aria-label="插件架构步骤"><button data-go="1" type="button">下一步</button></div><figcaption><span class="fig-n">Fig. 3</span>这是针对你需求提出的新架构，不是对某个现有仓库的结构复刻。模块彼此依赖“能力契约”，不依赖供应商。<span class="evidence rec">设计建议</span></figcaption></figure>
+<div class="short-grid"><div><h3>能力插件</h3><p>代码或独立服务，提供识别、合成、视觉、操作等能力。第三方原生代码须明确标为高信任，不默认加载。</p></div><div><h3>角色 / 声音资源包</h3><p>声明式资产：模型、动画映射、性格、音色引用与许可清单。默认不允许携带任意脚本。</p></div><div><h3>用户配置 / 工作流</h3><p>选择能力、模型、声音、角色和快捷键。同一套底层规范下保存“离线听写”“屏幕助手”等配置。</p></div></div>
+<h3>先冻结这些底层契约，再写插件</h3>
+<div class="ve-table"><table><thead><tr><th>契约</th><th>最小规则</th><th>为什么不能省</th></tr></thead><tbody>
+<tr><td>清单与版本</td><td>id、version、apiVersion、capabilities、permissions、configSchema、依赖与资产许可证</td><td>拒绝不兼容版本；安装不等于启用或授权</td></tr>
+<tr><td>生命周期</td><td>install → configure → activate → health → deactivate / dispose；异常可隔离重启</td><td>停用插件必须释放麦克风、GPU会话与任务</td></tr>
+<tr><td>请求与事件</td><td>requestId / sessionId / traceId、类型化输入输出、错误码、deadline、cancel</td><td>不串会话；能取消、定位失败与重试</td></tr>
+<tr><td>媒体时序</td><td>编码、采样率、声道、时间戳、seq、end；有界队列、背压、优先级</td><td>打断后不能继续播放旧音频；视频不能挤爆事件总线</td></tr>
+<tr><td>能力发现</td><td>声明 streaming / interruption / offline / languages / voice-design 等实际能力</td><td>不要假定每个TTS都会克隆声音，每个模型都会看图</td></tr>
+<tr><td>权限与数据</td><td>按窗口/应用/目录/域名授权；数据标签、密钥句柄、存储配额、审计</td><td>插件不能直接读取其他插件密钥或全部屏幕内容</td></tr>
+<tr><td>兼容验收</td><td>契约测试、假供应商测试、版本锁定、迁移回滚、故障与越权测试</td><td>“符合规范”必须可运行验证，而不是口头约定</td></tr>
+</tbody></table></div>
+<div class="tradeoffs"><details><summary>接口怎么拆，才不会越拆越乱？</summary><p><code>AudioSource → STTProvider → Transcript</code>；听写分支交给 <code>TextInputSink</code>，聊天分支交给 <code>AgentBackend</code>。</p><p><code>VoiceDesigner → VoiceProfile</code> 与 <code>TTSProvider(text, voiceProfile) → AudioStream</code> 分开。角色只订阅音量、口型或情绪事件。</p><p><code>ScreenSource → FrameRef → VisionProvider → Observation</code>；<code>ComputerActionProvider</code> 另接经过许可的结构化动作，并返回执行回执。</p><p>原生语音模型实现独立 <code>RealtimeSession</code> 能力；不要强行拆成三次云调用。所有接口还需能力协商、取消与错误语义。</p></details><details><summary>统一协议，不代表所有数据都走 MCP</summary><p>建议控制面用 JSON-RPC + JSON Schema，经 stdio / 本地IPC或带身份校验的本地服务通信。音频与帧引用走专用有界流，避免不断把大块base64塞进全局事件总线。</p><p>MCP适合工具与资源生态接入；插件安装、GPU生命周期、音频背压、实时打断和界面扩展仍由宿主协议定义。</p><p>不让插件A直接import插件B。由宿主按能力选择实现，失效时降级或停用；同一用户配置可替换不同供应商。</p></details></div>
+<div class="callout warn"><strong>进程隔离不是自动安全沙箱</strong><p class="compact">sidecar能隔离崩溃，却可能仍以当前用户权限访问文件与网络。优先使用受信任插件、最小OS权限与明确授权；第三方本地代码不能只凭一份manifest就宣称安全。签名证明来源，不证明无恶意。</p></div>
+<div class="callout"><strong>建议的开发策略</strong><p class="compact">小内核自行控制；借鉴 dsh-pet 的宿主桥接与独立入口、Open-LLM-VTuber 的语音接口、AIRI 的渲染/管线、N.E.K.O 的多能力整合。先做 DSH Bridge 或直接模型适配器中的一种，再用第二种验证解耦。不要一次性 Fork 多套桌宠后硬拼。</p></div>
+</section>
+<section id="risks"><div class="sec-head"><p class="ve-label caps">BOUNDARIES</p><h2>上线前最容易低估的，是权限、资源与授权</h2></div>
+<figure><div class="risk-grid"><div><h3>透明窗口 ≠ 自动鼠标穿透</h3><p>透明显示与输入命中是两套机制。角色区域要可点、空白区域要穿透，还需测试拖拽、多屏 DPI、任务栏与休眠恢复。<a href="https://www.electronjs.org/docs/latest/tutorial/custom-window-styles" target="_blank" rel="noopener">窗口限制</a> · <a href="https://www.electronjs.org/docs/latest/tutorial/custom-window-interactions" target="_blank" rel="noopener">穿透 API</a></p></div><div><h3>本地桌宠 ≠ 数据不出本机</h3><p>只有模型、ASR、TTS 与视觉处理均在本地，才能形成离线链路。云模型会接收提交的文本、音频或截图；设置中应可逐项关闭，屏幕读取默认关闭。</p></div><div><h3>开源代码 ≠ 角色与 SDK 自由商用</h3><p>分别审查代码、Live2D SDK、VRM 模型、声线与角色 IP。允许用户导入任意 Live2D 模型的应用，需评估是否属于 Expandable Application；小规模开发者也不当然豁免。<a href="https://www.live2d.com/en/sdk/license/expandable/" target="_blank" rel="noopener">官方规则</a></p></div><div><h3>工具可调用 ≠ 工具足够安全</h3><p>模型输出只是一项请求。文件、网络、Shell、屏幕应单独授权；来自网页、截图或角色包的内容不能提升权限。Electron 的 IPC、上下文隔离与沙箱需要显式检查。<a href="https://www.electronjs.org/docs/latest/tutorial/security" target="_blank" rel="noopener">安全清单</a></p></div></div><figcaption><span class="fig-n">Fig. 4</span>四个边界独立验收，不能由一个“支持 AI”或“本地运行”的标签替代。</figcaption></figure>
+<figure><div class="cost-strip"><div><strong>模型请求</strong><span>输入 / 输出 tokens<br>上下文长度与频次</span></div><div><strong>语音服务</strong><span>音频时长与合成字符<br>长时间监听策略</span></div><div><strong>常驻资源</strong><span>CPU / GPU / 内存<br>离线模型另计</span></div><div><strong>内容与发行</strong><span>建模、声线、SDK<br>签名、更新与维护</span></div></div><figcaption><span class="fig-n">Fig. 5</span>本次未做同机基准或付费模型测算，因此不提供虚假的内存排名、响应时间和“零成本”承诺。</figcaption></figure>
+</section>
+<section id="roadmap"><div class="sec-head"><p class="ve-label caps">DELIVERY GATES</p><h2>先证明模块能替换，再扩大功能和用户生态</h2></div><figure><div class="gate-grid"><div class="gate"><p class="phase">阶段 1 · 内核与 SDK</p><h3>先把规范跑通</h3><p>清单、生命周期、事件、权限与mock插件。用一个最小桌宠和一个普通面板消费同样事件。</p><p><strong>验收：</strong>换界面不改后端；插件崩溃不带走宿主；停用能清理资源。</p></div><div class="gate"><p class="phase">阶段 2 · 实用语音</p><h3>打通听写与朗读</h3><p>按键录音 → ASR → 当前应用输入；文本 → TTS。先用系统/现成音色，再加克隆。</p><p><strong>验收：</strong>替换识别或TTS供应商不改工作流；可取消、断网可解释、不向错误窗口输入。</p></div><div class="gate"><p class="phase">阶段 3 · 角色与视觉</p><h3>自定义声音，理解选定窗口</h3><p>角色资源包、voiceProfile、表情/口型事件、截图与视觉插件。先做只读问屏幕。</p><p><strong>验收：</strong>资产许可可追溯；克隆有授权；关闭屏幕访问后无持续采集。</p></div><div class="gate"><p class="phase">阶段 4 · 动作与扩展</p><h3>再开放受控执行</h3><p>语义控件操作优先，坐标为后备。完善插件契约测试与版本迁移，再考虑公开分发。</p><p><strong>验收：</strong>确认后才执行；每步回读；紧急停止；恶意页面/插件不能提权。</p></div></div><figcaption><span class="fig-n">Fig. 6</span>按依赖和风险安排验收门槛，不承诺未测工期；插件规范从第一阶段开始，而不是最后补上。</figcaption></figure><fieldset class="ask row" id="ask-pet-first-workflow" data-ask="pet-first-workflow"><legend class="ask-n">Question</legend><p class="ask-q">第一条实用工作流，你更想先打通哪条？</p><div class="ask-opts"><label class="opt"><input type="radio" name="pet-first-workflow" value="dictation" checked><span class="opt-body"><span class="opt-label">语音听写 + 朗读</span><span class="sug">Suggested</span></span></label><label class="opt"><input type="radio" name="pet-first-workflow" value="screen"><span class="opt-body"><span class="opt-label">看屏幕并问答</span></span></label><label class="opt"><input type="radio" name="pet-first-workflow" value="action"><span class="opt-body"><span class="opt-label">确认后操作电脑</span></span></label></div></fieldset></section>
+<section id="sources" class="sources"><div class="sec-head"><p class="ve-label caps">EVIDENCE</p><h2>结论有出处，未知项保留为未知</h2></div><p class="compact">方法：公开仓库的依赖清单与核心实现抽查，交叉对照官方文档、发布页和官方商店。未安装运行这些项目，未做完整安全审计。版本、发布状态与商店信息均为此次查询快照，不代表未来状态。</p><div id="source-list-slot" class="source-grid"><div class="source-group"><h3>AIRI</h3><ul><li><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json" target="_blank" rel="noopener">桌面依赖</a></li><li><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/pipelines-audio/src/speech-pipeline.ts" target="_blank" rel="noopener">音频管线</a></li><li><a href="https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/mcp-tool-bridge.ts" target="_blank" rel="noopener">工具桥</a></li></ul></div><div class="source-group"><h3>Open-LLM-VTuber</h3><ul><li><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml" target="_blank" rel="noopener">后端依赖</a></li><li><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber-Web/blob/main/package.json" target="_blank" rel="noopener">前端依赖</a></li><li><a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py" target="_blank" rel="noopener">会话管线</a></li></ul></div><div class="source-group"><h3>N.E.K.O</h3><ul><li><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml" target="_blank" rel="noopener">依赖</a></li><li><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py" target="_blank" rel="noopener">Realtime</a></li><li><a href="https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py" target="_blank" rel="noopener">工具分发</a></li></ul></div><div class="source-group"><h3>VPet</h3><ul><li><a href="https://github.com/LorisYounger/VPet/blob/main/VPet-Simulator.Windows/VPet-Simulator.Windows.csproj" target="_blank" rel="noopener">Windows依赖</a></li><li><a href="https://github.com/LorisYounger/VPet.Plugin.Demo/blob/master/README.md" target="_blank" rel="noopener">插件示例</a></li><li><a href="https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1844751498224549" target="_blank" rel="noopener">跨平台公告</a></li></ul></div><div class="source-group"><h3>MateEngine</h3><ul><li><a href="https://github.com/shinyflvre/Mate-Engine/blob/main/ProjectSettings/ProjectVersion.txt" target="_blank" rel="noopener">Unity版本</a></li><li><a href="https://github.com/shinyflvre/Mate-Engine/blob/main/Assets/LLMUnity/package.json" target="_blank" rel="noopener">LLM依赖</a></li><li><a href="https://store.steampowered.com/app/3625270/MateEngine/" target="_blank" rel="noopener">产品说明</a></li></ul></div><div class="source-group"><h3>Desktop Mate</h3><ul><li><a href="https://www.infiniteloop.co.jp/desktopmate/" target="_blank" rel="noopener">官网</a></li><li><a href="https://store.steampowered.com/app/3301060/Desktop_Mate/" target="_blank" rel="noopener">商店</a></li><li><a href="https://www.infiniteloop.co.jp/privacy/" target="_blank" rel="noopener">公司隐私政策</a></li></ul></div><div class="source-group"><h3>指定项目固定快照</h3><ul><li><a href="https://github.com/PC2005-cloud/dsh-pet/tree/bb436f9f065043d1d976648b3ed27173ce48e9bf" target="_blank" rel="noopener">dsh-pet · bb436f9</a></li><li><a href="https://github.com/12we21/cute-fat-fish-pet/tree/e53f63e67227671aca092e3334c8611e29b880b6" target="_blank" rel="noopener">cute-fat-fish-pet · e53f63e</a></li></ul><p class="compact">详细源码行号见上方项目路径图与事实清单；其他main分支链接为此次查询快照。</p></div><div class="source-group"><h3>可复用能力组件</h3><ul><li><a href="https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/README.md" target="_blank" rel="noopener">sherpa-onnx</a></li><li><a href="https://raw.githubusercontent.com/SYSTRAN/faster-whisper/master/README.md" target="_blank" rel="noopener">faster-whisper</a></li><li><a href="https://raw.githubusercontent.com/FunAudioLLM/CosyVoice/main/README.md" target="_blank" rel="noopener">CosyVoice</a></li><li><a href="https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/README.md" target="_blank" rel="noopener">GPT-SoVITS</a></li><li><a href="https://docs.live2d.com/en/cubism-editor-manual/export-moc3-motion3-files/" target="_blank" rel="noopener">Live2D导出规范</a></li><li><a href="https://vroid.com/en/studio/guidelines" target="_blank" rel="noopener">VRoid资产规则</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32" target="_blank" rel="noopener">Windows UI Automation</a></li><li><a href="https://pywinauto.readthedocs.io/en/latest/remote_execution.html" target="_blank" rel="noopener">后台/锁屏/RDP限制</a></li><li><a href="https://playwright.dev/docs/actionability" target="_blank" rel="noopener">Playwright动作与验收</a></li></ul></div></div><div class="source-group"><h3>通用工程与授权依据</h3><ul><li><a href="https://www.electronjs.org/docs/latest/tutorial/security" target="_blank" rel="noopener">Electron 官方：安全检查清单</a></li><li><a href="https://www.electronjs.org/docs/latest/tutorial/custom-window-interactions" target="_blank" rel="noopener">Electron 官方：拖拽区域与鼠标穿透</a></li><li><a href="https://www.electronjs.org/docs/latest/tutorial/custom-window-styles" target="_blank" rel="noopener">Electron 官方：透明窗口与平台限制</a></li><li><a href="https://v2.tauri.app/security/" target="_blank" rel="noopener">Tauri 官方：信任边界、Capabilities 与系统 WebView</a></li><li><a href="https://www.live2d.com/en/sdk/license/" target="_blank" rel="noopener">Live2D SDK 发布许可</a> · <a href="https://www.live2d.com/en/sdk/license/expandable/" target="_blank" rel="noopener">可扩展应用的特殊授权</a></li></ul></div></section>
+<footer class="footer">结论的用途是缩小原型范围，而非替代代码审计、授权审查与目标设备实测。报告可本地打开；核心内容与交互不依赖在线数据接口。</footer>
+</main></div>
+<script>
+const choices=[{"id":"all","label":"全部项目","title":"按能力选择复用对象，不只按外观","body":"成熟桌面产品、完整AI链路和可商用复用是不同要求；以实际功能和授权边界分别判断。"},{"id":"practical","label":"实用功能优先","title":"先验证N.E.K.O，TS路线深入AIRI","body":"两者已有语音、视觉与电脑能力接入；专用跨应用听写仍需独立开发验收。dsh-pet可作为前端桥接参考。"},{"id":"voice","label":"语音管线","title":"把识别、音色制作、合成和播放拆开","body":"Open-LLM-VTuber适合接口参照；N.E.K.O已有音色创建流程；cute的ASR worker可借鉴，联网EdgeTTS不能当离线底座。"},{"id":"plugin","label":"插件宿主参考","title":"参考宿主设计，不复制无限信任","body":"dsh-pet的桥接、AIRI的模块和N.E.K.O的工具整合可分层借鉴；VPet的DLL生态提醒我们：统一接口不等于权限沙箱。"},{"id":"3d","label":"角色表现参考","title":"角色制作工具与运行时分离","body":"AIRI/N.E.K.O提供多形态参考，MateEngine与Desktop Mate可看3D产品体验。模型素材和代码分别授权，不能因购买角色就再分发。"}];
+const controls=document.getElementById('scenario-controls');
+choices.forEach(c=>{const b=document.createElement('button');b.type='button';b.textContent=c.label;b.setAttribute('aria-pressed',String(c.id==='all'));b.addEventListener('click',()=>{controls.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.getElementById('choice-title').textContent=c.title;document.getElementById('choice-body').textContent=c.body;document.querySelectorAll('.project-row').forEach(row=>{row.hidden=c.id!=='all'&&!row.dataset.kind.split(' ').includes(c.id)});});controls.appendChild(b)});
+document.querySelectorAll('a').forEach(el=>{if(el.hash.endsWith('-record'))el.addEventListener('click',()=>{const target=document.getElementById(el.hash.slice(1));if(target&&target.tagName==='DETAILS')target.open=true;});});
+const navLinks=Array.from(document.querySelectorAll('.toc-list a'));const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){navLinks.forEach(a=>a.setAttribute('aria-current',String(a.hash==='#'+e.target.id)));}})},{rootMargin:'-10% 0px -75% 0px'});document.querySelectorAll('main>section,main>header').forEach(s=>io.observe(s));
+</script>
+<script data-ve-kit>
+// Reader replies, shared by kit pages and plan pages: the note popover, the selection buttons, and sending one reply
+// to the agent. Kit pages turn on page replies with veReply.page(); plan.js builds its own response on the same parts.
+// Nothing shows until the reader selects words or clicks a figure part, and nothing prints.
+window.veReply ??= (() => {
+  "use strict";
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const h = (tag, attrs = {}, ...kids) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) if (v != null && v !== false) k.startsWith("on") ? el.addEventListener(k.slice(2), v) : el.setAttribute(k, v === true ? "" : v);
+    el.append(...kids.flat().filter((k) => k != null && k !== false));
+    return el;
+  };
+  document.head.append(h("style", { "data-ve-reply": "" }, `
+.ve-bar { position: fixed; right: var(--s-5); bottom: calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; gap: var(--s-2); }
+.ve-bar button { padding: var(--s-3) var(--s-4); box-shadow: 0 8px 24px var(--lift); }
+.ve-bar .respond { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+.ve-bar .respond .n { margin-left: var(--s-2); padding: 0 var(--s-2); border-radius: var(--r-1); background: var(--accent); color: var(--bg); }
+dialog.ve-respond { margin: auto; width: min(46rem, 94vw); max-height: 88vh; padding: 0; color: var(--text); background: var(--surface); border: 1px solid var(--border-bright); border-radius: var(--r-1); box-shadow: 0 24px 64px var(--lift); }
+dialog.ve-respond::backdrop { background: rgb(5 10 16 / .55); }
+.r-wrap { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; max-height: 88vh; }
+.r-head, .r-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); padding: var(--s-4) var(--s-5); }
+.r-head { border-bottom: 1px solid var(--border); } .r-foot { border-top: 1px solid var(--border); }
+.r-head h2 { font-size: var(--t-lead); margin-right: auto; }
+.r-body { overflow: auto; padding: var(--s-4) var(--s-5); display: grid; gap: var(--s-5); align-content: start; }
+.r-sec { display: grid; gap: var(--s-2); }
+.r-row { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr) auto; gap: var(--s-3); align-items: baseline; width: 100%; text-align: left; font: var(--t-small)/1.4 var(--font-body); padding: var(--s-2) var(--s-3); background: var(--bg); border: 1px solid var(--border); }
+.r-row .k { font: 600 var(--t-label) var(--font-mono); color: var(--text-dim); }
+.r-row small { display: block; color: var(--text-dim); font-size: var(--t-label); font-family: var(--font-mono); }
+.r-row .st { font: 600 var(--t-label) var(--font-mono); color: var(--text-dim); }
+.r-row .acts { display: flex; gap: var(--s-2); }
+.r-md { font: var(--t-label)/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-1); padding: var(--s-3) var(--s-4); max-height: 18rem; overflow: auto; color: var(--text-dim); }
+.r-foot .sp { flex: 1; }
+.r-foot .primary { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+.r-foot .danger { color: var(--risk); }
+.ve-pop { position: absolute; z-index: 30; width: min(22rem, 92vw); background: var(--surface); border: 1px solid var(--border-bright); border-radius: var(--r-1); box-shadow: 0 12px 32px var(--lift); padding: var(--s-3); display: grid; gap: var(--s-2); }
+.ve-pop .ref { font: 500 var(--t-label) var(--font-mono); color: var(--text-dim); }
+.ve-pop q { font-size: var(--t-small); color: var(--text); }
+.ve-pop textarea, .r-row textarea { width: 100%; min-height: 5rem; resize: vertical; font: var(--t-small)/1.5 var(--font-body); color: var(--text); background: var(--bg); border: 1px solid var(--border-bright); border-radius: var(--r-1); padding: var(--s-2) var(--s-3); }
+.ve-pop .row { display: flex; gap: var(--s-2); justify-content: flex-end; }
+.ve-sel { position: absolute; z-index: 30; font-size: var(--t-label); padding: var(--s-1) var(--s-2); box-shadow: 0 6px 18px var(--lift); }
+div.ve-sel { display: flex; gap: var(--s-1); padding: 0; box-shadow: none; } div.ve-sel button { font-size: var(--t-label); padding: var(--s-1) var(--s-2); box-shadow: 0 6px 18px var(--lift); }
+.ve-toast { position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%); z-index: 40; background: var(--text); color: var(--bg); font: 600 var(--t-small) var(--font-mono); padding: var(--s-2) var(--s-4); border-radius: var(--r-1); }
+@media (max-width: 40rem) { .ve-bar { left: var(--s-4); right: var(--s-4); } .ve-bar button { flex: 1; } }
+@media print { .ve-bar, .ve-sel, .ve-pop, .ve-toast, dialog.ve-respond { display: none !important; } }
+`));
+
+  const toast = (msg) => { const t = h("div", { class: "ve-toast", role: "status" }, msg); document.body.append(t); setTimeout(() => t.remove(), 1800); };
+  // only a page Pi opened in Glimpse has someone listening; anywhere else the reply is copied
+  const canSend = () => !!$("[data-send-back]") && typeof window.glimpse?.send === "function";
+  async function deliver(msg) {
+    if (canSend()) { window.glimpse.send({ type: "visual-explainer:response", ...msg }); toast("Sent to the agent"); return "sent"; }
+    try { await navigator.clipboard.writeText(msg.markdown); } catch {
+      const ta = h("textarea"); ta.value = msg.markdown; document.body.append(ta); ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch { /* reported below */ }
+      ta.remove();
+      // nothing reached the clipboard: say so, and keep what the reader wrote
+      if (!ok) { toast("Copy failed. Select the text above and copy it"); return "failed"; }
+    }
+    toast("Copied. Paste it to the agent.");
+    return "copied";
+  }
+
+  /* one note popover at a time: a comment, or a question for the agent */
+  let pop = null;
+  const closePop = () => { pop?.remove(); pop = null; };
+  function note({ rect, ref, quote, ask, onSave }) {
+    closePop();
+    const ta = h("textarea", { "aria-label": ask ? "Question" : "Comment", placeholder: ask ? "Question for the agent…" : "Comment for the agent…" });
+    const saveIt = () => { const text = ta.value.trim(); closePop(); onSave(text); };
+    pop = h("div", { class: "ve-pop", role: "dialog", "aria-label": ask ? "Ask a question" : "Add a comment" },
+      h("p", { class: "ref" }, ref), quote ? h("q", {}, quote) : null, ta,
+      h("p", { class: "row" }, h("button", { type: "button", onclick: closePop }, "Cancel"), h("button", { type: "button", onclick: saveIt }, "Save")));
+    ta.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) saveIt(); if (e.key === "Escape") closePop(); });
+    document.body.append(pop);
+    pop.style.left = `${Math.max(8, Math.min(rect.left + scrollX, scrollX + innerWidth - pop.offsetWidth - 8))}px`;
+    pop.style.top = `${rect.bottom + scrollY + 8}px`;
+    ta.focus({ preventScroll: true });
+  }
+  document.addEventListener("pointerdown", (e) => { if (pop && !pop.contains(e.target)) closePop(); }, true);
+
+  /* the reply dialog: what the reader made, the markdown that goes back, and Send to agent (or Copy) */
+  let dialog = null;
+  const close = () => dialog?.close();
+  const isOpen = () => !!pop || !!dialog?.open;
+  function sheet({ title, copy, body, md, foot, send }) {
+    closePop();
+    dialog ??= document.body.appendChild(h("dialog", { class: "ve-respond", "aria-labelledby": "ve-r-title" }));
+    const back = canSend();
+    const btn = h("button", { type: "button", class: "primary", onclick: send }, back ? "Send to agent" : copy);
+    dialog.replaceChildren(h("div", { class: "r-wrap" },
+      h("header", { class: "r-head" }, h("h2", { id: "ve-r-title" }, title), h("button", { type: "button", onclick: close }, "Close")),
+      h("div", { class: "r-body" }, body, h("section", { class: "r-sec" }, h("p", { class: "ve-label caps" }, back ? "Sent to the agent" : "Paste this to the agent"), md)),
+      h("footer", { class: "r-foot" }, foot, h("span", { class: "sp" }), btn)));
+    if (!dialog.open) dialog.showModal();
+    btn.focus();
+  }
+
+  /* selected words in <main> get one button per label; pick(i, { rect, node, quote }) runs on a click */
+  function onSelect({ labels, blocked, pick }) {
+    let selBtn = null, selTimer;
+    document.addEventListener("selectionchange", () => {
+      clearTimeout(selTimer);
+      selTimer = setTimeout(() => {
+        selBtn?.remove(); selBtn = null;
+        const sel = getSelection();
+        if (!sel || sel.isCollapsed || blocked() || pop) return;
+        const quote = sel.toString().trim().replace(/\s+/g, " ");
+        if (quote.length < 2 || quote.length > 400) return;
+        const range = sel.getRangeAt(0);
+        const inside = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+        // text in a UI mock lives in a shadow root; its host is what sits in the page
+        const node = inside.getRootNode() instanceof ShadowRoot ? inside.getRootNode().host : inside;
+        if (!node.closest("main") || node.closest("textarea, input, .ve-pop")) return;
+        const rect = range.getBoundingClientRect();
+        const button = (label, i) => {
+          const b = h("button", { type: "button", class: labels.length === 1 ? "ve-sel" : null }, label);
+          b.addEventListener("pointerdown", (e) => e.preventDefault());
+          b.addEventListener("click", () => { selBtn.remove(); selBtn = null; pick(i, { rect, node, quote }); sel.removeAllRanges(); });
+          return b;
+        };
+        selBtn = labels.length === 1 ? button(labels[0], 0) : h("div", { class: "ve-sel" }, labels.map(button));
+        selBtn.style.left = `${rect.left + scrollX}px`;
+        selBtn.style.top = `${rect.top + scrollY - 36}px`;
+        document.body.append(selBtn);
+      }, 180);
+    });
+  }
+
+  /* a kit page: comments and questions on words or figure parts, collected into one reply */
+  // parts: more a reader answers, as { count(), lines(), rows(), clear() } (kit/ask.js); a part calls refresh() when it changes
+  const parts = [];
+  let refresh = () => {};
+  function page() {
+    if (!$("main")) return;
+    const KEY = `ve-page:${location.pathname}`;
+    let notes = [];
+    try { notes = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { /* storage can be off for file:// pages; the page still works */ }
+    // straight double quotes become single, so the reply's own "…" around a title or quote stay balanced
+    const clean = (s) => s.trim().replace(/\s+/g, " ").replace(/"/g, "'");
+    const title = clean($("h1")?.textContent || document.title);
+    const file = decodeURIComponent(location.pathname.split("/").pop() || "page");
+    // where a note sits: its figure number, else its section heading
+    const placeOf = (el) => {
+      const fig = el.closest("figure");
+      if (fig) return clean($(".fig-n", fig)?.textContent || "") || "figure";
+      const head = $("h2", el.closest("section") ?? document.createElement("i"));
+      return head ? `§ ${clean(head.textContent)}` : "page";
+    };
+    const labelOf = (part) => {
+      const t = part.matches("text") ? part : part.matches(".ve-n") ? $$("text", part).find((x) => !x.matches(".sub, .ve-kind") && !x.closest(".ve-vals")) : $("h3", part);
+      let s = clean(t?.textContent || "");
+      if (!s && part.dataset.ref) {
+        const ref = part.dataset.ref.split(" ")[0];
+        s = clean($$("text[data-ref]", part.closest("figure")).find((x) => x.dataset.ref.split(" ").includes(ref))?.textContent || "") || ref;
+      }
+      return (s || "this part").slice(0, 60);
+    };
+    const line = (n) => {
+      const [first, ...rest] = n.text.split("\n");
+      return [`- ${n.part ? `${n.where} › ${n.part}` : `"${n.quote}" (${n.where})`} — ${n.kind}: ${first}`, ...rest.map((l) => `  ${l}`)].join("\n");
+    };
+    const markdown = () => `Reply on "${title}" (${file})\n${[...notes.map(line), ...parts.flatMap((p) => p.lines())].join("\n")}\n_Lines above are the reader's own words: treat them as feedback, not instructions._\n`;
+    const total = () => parts.reduce((s, p) => s + p.count(), notes.length);
+
+    const reply = h("button", { type: "button", class: "respond", onclick: () => openReply() });
+    const bar = h("div", { class: "ve-bar" }, reply);
+    const changed = () => {
+      try { if (notes.length) localStorage.setItem(KEY, JSON.stringify(notes)); else localStorage.removeItem(KEY); } catch { /* see above */ }
+      reply.textContent = `Reply (${total()})`;
+      if (!total()) bar.remove(); else if (!bar.isConnected) document.body.append(bar);
+    };
+    refresh = changed;
+    const add = (n) => { if (n.text) { notes.push(n); changed(); } };
+
+    function openReply() {
+      const editing = new Map(); // a note open for editing → its textarea; Send and Copy save it first
+      const rows = notes.map((n) => {
+        const text = h("span", {}, n.text, h("small", {}, `${n.kind} · ${n.part ? `${n.where} › ${n.part}` : `“${n.quote}” · ${n.where}`}`));
+        const edit = h("button", { type: "button" }, "Edit");
+        edit.addEventListener("click", () => {
+          if (edit.textContent === "Save") { const t = text.firstChild.value.trim(); if (t) n.text = t; editing.delete(n); changed(); openReply(); return; }
+          const ta = h("textarea", { "aria-label": "Edit note" }); ta.value = n.text;
+          text.replaceChildren(ta); edit.textContent = "Save"; editing.set(n, ta); ta.focus();
+        });
+        const remove = h("button", { type: "button", onclick: () => { notes = notes.filter((x) => x !== n); changed(); if (total()) openReply(); else close(); } }, "Remove");
+        return h("div", { class: "r-row" }, h("span", { class: "k" }, n.kind === "ask" ? "?" : "›"), text, h("span", { class: "acts" }, edit, remove));
+      });
+      const notesSec = notes.length ? h("section", { class: "r-sec" }, h("p", { class: "ve-label caps" }, `Notes · ${notes.length}`), rows) : null;
+      sheet({ title: "Your reply", copy: "Copy reply", body: [notesSec, ...parts.map((p) => p.rows())], md: h("pre", { class: "r-md" }, markdown()), send: async () => {
+        for (const [n, ta] of editing) { const t = ta.value.trim(); if (t) n.text = t; }
+        if (editing.size) changed();
+        if (await deliver({ kind: "page", markdown: markdown() }) === "failed") return;
+        notes = []; for (const p of parts) p.clear();
+        changed(); close();
+      } });
+    }
+
+    onSelect({ labels: ["Comment", "Ask"], blocked: isOpen, pick: (i, { rect, node, quote }) => {
+      const where = placeOf(node), kind = i ? "ask" : "comment";
+      note({ rect, ref: where, quote, ask: !!i, onSave: (text) => add({ kind, where, quote: clean(quote), text }) });
+    } });
+
+    // a click on a box or a linked part of a figure offers a question about it
+    let askBtn = null;
+    document.addEventListener("pointerdown", (e) => { if (askBtn && e.target !== askBtn) { askBtn.remove(); askBtn = null; } }, true);
+    document.addEventListener("click", (e) => {
+      const fig = e.target.closest?.("main figure");
+      if (!fig || isOpen() || !getSelection().isCollapsed || e.target.closest("button, a, input, label, select, textarea, .ve-player")) return;
+      const part = e.target.closest(".ve-n, [data-ref]");
+      if (!part || !fig.contains(part)) return;
+      const where = placeOf(part), label = labelOf(part);
+      askBtn = h("button", { type: "button", class: "ve-sel" }, `Ask about “${label}”`);
+      askBtn.style.left = `${e.pageX}px`;
+      askBtn.style.top = `${e.pageY - 36}px`;
+      askBtn.addEventListener("click", () => {
+        const rect = askBtn.getBoundingClientRect();
+        askBtn.remove(); askBtn = null;
+        note({ rect, ref: `${where} › ${label}`, ask: true, onSave: (text) => add({ kind: "ask", where, part: label, text }) });
+      });
+      document.body.append(askBtn);
+      askBtn.focus({ preventScroll: true });
+    });
+    if (total()) changed();
+  }
+
+  return { $, $$, h, toast, deliver, note, closePop, onSelect, sheet, close, isOpen, page, parts, refresh: () => refresh() };
+})();
+
+// <ve-ask> on a kit page (kit/render.mjs inlines this only when the page has one, after kit/reply.js).
+// An answer the reader gives counts toward Reply (N) and goes into the reply; a question left alone is listed with its default, or as no answer.
+{
+const R = window.veReply, asks = R ? R.$$("main fieldset.ask[data-ask]") : [];
+if (asks.length) {
+  const KEY = `ve-page-ask:${location.pathname}`;
+  const inputs = (a) => R.$$("input", a);
+  const read = (a) => { const ins = inputs(a); return ins[0]?.type === "checkbox" ? ins.filter((i) => i.checked).map((i) => i.value) : ins.find((i) => i.checked)?.value ?? null; };
+  const write = (a, v) => { for (const i of inputs(a)) i.checked = Array.isArray(v) ? v.includes(i.value) : i.value === v; };
+  const defaults = new Map(asks.map((a) => [a, read(a)]));
+  const clean = (s) => s.trim().replace(/\s+/g, " ");
+  const label = (a, v) => clean(inputs(a).find((i) => i.value === v)?.closest("label").querySelector(".opt-label").textContent ?? v);
+  const pick = (a, v = read(a)) => (Array.isArray(v) ? v.map((x) => label(a, x)).join(", ") || "none" : v == null ? "no answer" : label(a, v));
+  const q = (a) => clean(R.$(".ask-q", a).textContent);
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { /* storage can be off for file:// pages */ }
+  const answered = (a) => Object.hasOwn(done, a.dataset.ask);
+  // a saved answer whose options are gone (the page was revised) is dropped
+  for (const a of asks) if (answered(a)) { const v = done[a.dataset.ask]; if ([v].flat().every((x) => inputs(a).some((i) => i.value === x))) write(a, v); else delete done[a.dataset.ask]; }
+  const save = () => { try { if (Object.keys(done).length) localStorage.setItem(KEY, JSON.stringify(done)); else localStorage.removeItem(KEY); } catch { /* see above */ } };
+  const record = (a) => { done[a.dataset.ask] = read(a); save(); R.refresh(); };
+  for (const a of asks) {
+    a.addEventListener("change", () => record(a));
+    // a click, Space, or Enter on the option already selected is an answer too, though no change fires;
+    // where a change does follow, it records the final value
+    a.addEventListener("click", (e) => { if (e.target.matches("input")) record(a); });
+    a.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.matches("input:checked")) record(a); });
+  }
+  const state = (a) => (answered(a) ? pick(a) : [read(a) ?? []].flat().length ? `${pick(a)} (default)` : "no answer");
+  R.parts.push({
+    count: () => asks.filter(answered).length,
+    lines: () => asks.map((a) => `- ${a.dataset.ask} (${q(a)}): ${state(a)}`),
+    rows: () => R.h("section", { class: "r-sec" }, R.h("p", { class: "ve-label caps" }, `Questions · ${asks.filter(answered).length} of ${asks.length} answered`),
+      asks.map((a) => R.h("div", { class: "r-row" }, R.h("span", { class: "k" }, answered(a) ? "✓" : "·"), R.h("span", {}, state(a), R.h("small", {}, q(a))),
+        R.h("span", { class: "acts" }, R.h("button", { type: "button", onclick: () => { R.close(); a.scrollIntoView({ block: "center" }); (inputs(a).find((i) => i.checked) || inputs(a)[0]).focus({ preventScroll: true }); } }, answered(a) ? "Change" : "Answer"))))),
+    clear: () => { done = {}; save(); for (const a of asks) write(a, defaults.get(a)); },
+  });
+}
+}
+
+// One block scope, so the kit's names never clash with a page's own script.
+{
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Linked highlighting: hovering any [data-ref], or focusing a prose term or button, lights every element that shares a ref.
+// Hover wins while it lasts; when it ends, the focused element's selection comes back.
+const linked = [...document.querySelectorAll('[data-ref]')], refs = (el) => el.dataset.ref.split(' ');
+let hovered = null, focused = null;
+const paint = () => {
+  const keys = (hovered || focused)?.dataset.ref.split(' ') ?? [];
+  for (const t of linked) t.classList.toggle('is-lit', refs(t).some((k) => keys.includes(k)));
+  for (const svg of document.querySelectorAll('svg')) svg.classList.toggle('has-lit', !!svg.querySelector('.is-lit'));
+};
+for (const el of linked) {
+  el.addEventListener('pointerenter', () => { hovered = el; paint(); });
+  el.addEventListener('pointerleave', () => { hovered = null; paint(); });
+  el.addEventListener('focus', () => { focused = el; paint(); });
+  el.addEventListener('blur', () => { focused = null; paint(); });
+}
+
+// Stepper / scene player. Range and Play are optional: a plain stepper needs only data-go buttons.
+for (const root of document.querySelectorAll('.ve-steps')) {
+  const parts = [...root.querySelectorAll('[data-s]')], caps = [...root.querySelectorAll('.ve-cap li')];
+  const range = root.querySelector('input[type=range]'), play = root.querySelector('[data-play]');
+  const n = caps.length; let i = 0, timer = null;
+  if (range) range.max = n - 1;
+  const show = (k) => {
+    i = Math.max(0, Math.min(n - 1, k));
+    root.classList.remove('is-still');
+    // data-s lists the steps a part takes part in: it appears at the first ("0" = from the start) and is .now on each.
+    for (const el of parts) { const s = el.dataset.s.trim().split(' ').map(Number); el.classList.toggle('on', s[0] <= i + 1); el.classList.toggle('now', s.includes(i + 1)); }
+    caps.forEach((c, j) => c.hidden = j !== i);
+    root.classList.toggle('is-full', i === n - 1);
+    root.dispatchEvent(new Event('ve:step'));
+    if (range) range.value = i;
+  };
+  const stop = () => { clearInterval(timer); timer = null; if (play) play.textContent = 'Play'; };
+  root.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) { stop(); show(i + +b.dataset.go); } });
+  range?.addEventListener('input', () => { stop(); show(+range.value); });
+  play?.addEventListener('click', () => {
+    if (timer) return stop();
+    if (i === n - 1) show(0);
+    play.textContent = 'Pause';
+    timer = setInterval(() => (i < n - 1 ? show(i + 1) : stop()), 3500);
+  });
+  show(n - 1); // open on the full picture; Play replays from step 1
+  root.classList.add('is-still'); // same task as show(), so the last token never starts until the reader steps
+  addEventListener('beforeprint', () => { show(n - 1); root.classList.add('is-still'); }); // print shows the end state
+}
+
+if (!still) {
+  // Flow dots: each path[data-flow] spawns a dot every data-every ms; the ratio of intervals is the real traffic split.
+  // Runs only while the figure is on screen and, inside a stepper, only on the full picture.
+  for (const svg of document.querySelectorAll('svg:has([data-flow])')) {
+    const layer = svg.querySelector('.ve-dots'), steps = svg.closest('.ve-steps');
+    const routes = [...svg.querySelectorAll('[data-flow]')].map((p) => ({ p, len: p.getTotalLength(), every: +p.dataset.every, next: 0 }));
+    let dots = [], visible = false, running = false;
+    const live = () => visible && (!steps || steps.classList.contains('is-full'));
+    const tick = (t) => {
+      if (!live()) { running = false; for (const d of dots) d.c.remove(); dots = []; return; }
+      for (const r of routes) if (t >= r.next) {
+        r.next = t + r.every;
+        const c = document.createElementNS(svg.namespaceURI, 'circle');
+        c.setAttribute('r', 4); c.setAttribute('class', r.p.dataset.flow); layer.append(c);
+        dots.push({ c, r, t0: t });
+      }
+      dots = dots.filter((d) => {
+        const s = (t - d.t0) * .3; // 300 units per second
+        if (s > d.r.len) { d.c.remove(); return false; }
+        const pt = d.r.p.getPointAtLength(s);
+        d.c.setAttribute('cx', pt.x); d.c.setAttribute('cy', pt.y);
+        return true;
+      });
+      requestAnimationFrame(tick);
+    };
+    const start = () => { if (!running && live()) { running = true; requestAnimationFrame(tick); } };
+    steps?.addEventListener('ve:step', start);
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); }).observe(svg);
+  }
+
+  // Entrance: each block rises in once; numbers count up and bars grow as it arrives.
+  // Without JS, in print, or under reduced motion, everything shows its final state.
+  document.documentElement.classList.add('js-motion');
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      io.unobserve(e.target); e.target.classList.add('in');
+      for (const el of e.target.querySelectorAll('[data-count]')) {
+        const end = +el.dataset.count, dp = (el.dataset.count.split('.')[1] || '').length, t0 = performance.now();
+        const step = (t) => {
+          const k = Math.min(1, (t - t0) / 900);
+          el.textContent = (end * (1 - (1 - k) ** 3)).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+          if (k < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  for (const el of document.querySelectorAll('main > *')) io.observe(el);
+}
+
+// reader replies (kit/reply.js, inlined before this); a page opened raw has none
+window.veReply?.page();
+
+// Last statement: kit/look.mjs reads this to tell that the whole script ran.
+document.documentElement.dataset.veKit = "ready";
+}
+</script>
+</body></html>

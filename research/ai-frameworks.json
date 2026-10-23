@@ -1,0 +1,1007 @@
+{
+  "schema_version": "1.0",
+  "title": "AI 桌宠开源框架选型：AIRI / Open-LLM-VTuber / N.E.K.O",
+  "language": "zh-CN",
+  "snapshot": {
+    "query_started_at": "2026-10-23T15:23:00.479Z",
+    "query_completed_at": "2026-10-23T15:32:57.084Z",
+    "timezone": "Asia/Taipei",
+    "date_local": "2026-10-23",
+    "note": "当前查询时间快照，不代表所有来源更新时间一致；主分支提交与安装包所含代码可能不同。"
+  },
+  "method": {
+    "scope": "仅公开官方仓库 README、许可证、目录元数据、发行记录、少量依赖清单和核心源文件静态抽查。未 clone、未安装、未启动、未执行任何被调研项目。",
+    "github_mcp": "首次调用 get_me 返回 401 Bad credentials；改读 GitHub 官方匿名 REST API 与 raw.githubusercontent.com。后续 REST 403 匿名限流后停止扩扫。",
+    "evidence_levels": {
+      "readme_claim": "官方 README 或维护者描述；不是运行验证",
+      "source_verified": "已阅读指定源码/依赖清单；仅证明所述静态事实，不证明端到端可用",
+      "release_verified": "已读取 GitHub 官方发布元数据/资产列表；未下载或安装验证",
+      "inference": "依据所列证据的选型分析，不是项目官方保证",
+      "unknown": "本次有限抽查没有充分依据，不能作否定或肯定断言"
+    },
+    "limitations": [
+      "部分长响应被截断；仅依据完整读到的片段，不以目录名或依赖存在代替端到端实现证明。",
+      "主仓库来源尽量固定完整 commit；Open-LLM-VTuber 独立前端 package.json 只读到 main，明确作为可变来源，不视为主仓库所锁定 build 子模块的精确对应。",
+      "未测试延迟、打断准确率、回声消除、CPU/GPU/内存占用、安装成功率、安全漏洞、记忆准确率与跨设备同步。",
+      "没有以星数、fork 数、演示视频或宣传语衡量成熟度。",
+      "源代码许可、Live2D SDK许可、角色美术/模型许可、模型权重许可、语音克隆权利、服务商条款必须分别审查。"
+    ]
+  },
+  "projects": [
+    {
+      "id": "airi",
+      "requested_repository": "moeru-ai/airi",
+      "canonical_repository": "moeru-ai/airi",
+      "repository_url": "https://github.com/moeru-ai/airi",
+      "address_check": {
+        "status": "source_verified",
+        "statement": "原给定地址有效，无须纠正。",
+        "sources": [
+          "https://api.github.com/repos/moeru-ai/airi"
+        ],
+        "limitations": []
+      },
+      "commit": "3b0672e3668bd1ade1210e579818f379e4f8a224",
+      "positioning": {
+        "status": "inference",
+        "statement": "适合希望深度定制 Web/Electron 角色、语音链路与多渲染器的 TypeScript 团队；不是仅换皮即可交付的轻量精灵桌宠。",
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md",
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json",
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json"
+        ],
+        "limitations": []
+      },
+      "architecture": [
+        {
+          "status": "source_verified",
+          "statement": "桌面 stage-tamagotchi 使用 Electron / electron-vite / electron-builder；Vue + TypeScript 为主要 UI/编排技术，不应沿用旧资料写成当前 Tauri 桌面壳。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "已抽查 TS voice/store、vision/store 和语音管线；包清单声明 provider、server-sdk、core-agent 等工作区模块。不能据此称其必需独立 Python 后端。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json"
+          ],
+          "limitations": [
+            "独立服务后端的全部语言和每项部署必需服务未逐一验证。"
+          ]
+        },
+        {
+          "status": "readme_claim",
+          "statement": "以 WebGPU、WebAudio、Web Workers、WASM、WebSocket 为基础，支持浏览器和 PWA；原生/非 Web 集成另有扩展。纯浏览器本地 WebGPU 推理在路线图仍未勾选。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L201-L208",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L236-L270"
+          ],
+          "limitations": []
+        }
+      ],
+      "rendering": [
+        {
+          "status": "readme_claim",
+          "statement": "Live2D、VRM，以及眨眼、注视、闲置眼部动作列为已支持。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L258-L270"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "Live2D 包声明 Pixi 系列和 pixi-live2d-display；3D 包声明 Three.js、@pixiv/three-vrm、three-vrm-animation 和 TresJS。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui-live2d/package.json",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui-three/package.json"
+          ],
+          "limitations": [
+            "这是渲染技术依赖与包边界验证，未实测模型兼容性、物理和嘴型效果。"
+          ]
+        }
+      ],
+      "voice": [
+        {
+          "status": "readme_claim",
+          "statement": "客户端识别/说话检测、多服务商 TTS：ElevenLabs、Microsoft/Azure、OpenAI-compatible、阿里云和本地 Kokoro。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L251-L257"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "voice.ts 通过 hearing.createTranscriber() 创建转录器，接入 SileroVad、语音结束判断/草稿提交和 interruption 记录；speech-pipeline 将文本分段交给 options.tts 并排队播放，提供 cancelIntent/interrupt/stopAll。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/pipelines-audio/src/speech-pipeline.ts"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "UI依赖声明 @xsai/stream-text、generate-transcription、stream-transcription、generate-speech、kokoro-js 和浏览器推理组件。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json"
+          ],
+          "limitations": [
+            "服务商清单不是每个接口或本地模型在当前系统均可用的证明。"
+          ]
+        },
+        {
+          "status": "inference",
+          "statement": "可复述的常见路径是麦克风→VAD/端点控制→ASR→文本/对话编排→LLM→分段TTS→音频播放和角色嘴型。不能把“实时对话”直接等同于所有路径均使用端到端 speech-to-speech Realtime API。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/pipelines-audio/src/speech-pipeline.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json"
+          ],
+          "limitations": []
+        }
+      ],
+      "long_term_memory": [
+        {
+          "status": "readme_claim",
+          "statement": "README Memory 与 Memory Alaya 仍为未勾选/WIP；浏览器数据库支持已勾选。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L247-L250"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "memory.ts 已有长期事实条目的 name/description/body/persona/updatedAt；默认 enabled=true，以 localStorage 持久化，按角色筛选/读取/写入/忘记；通用记忆仅由 owner 提升，角色不能忘记通用项。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "文档路线图与当前基础事实记忆实现不完全同步：不能写“完全无长期记忆”，也不能写“成熟自动RAG/长期记忆已完整交付”。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L247-L250",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts"
+          ],
+          "limitations": [
+            "未审计全链路自动记忆提取、召回接线、备份/加密或跨设备同步；只证实存储模块。"
+          ]
+        }
+      ],
+      "screen_and_tools": [
+        {
+          "status": "source_verified",
+          "statement": "vision orchestrator 接收选定来源的 JPEG/PNG data URL，要求已配置 vision provider/model，运行视觉推理并可发布上下文；store 有对话图像/工具截图开关。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/store.ts"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "MCP bridge 定义 listTools/callTool，由 Electron main/preload 注入供 overlay 调用 computer-use MCP 工具；bridge 未设置会抛错。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/mcp-tool-bridge.ts"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "未验证全局截图授权提示、敏感窗口过滤、工具逐次确认、系统级沙箱或命令/网络白名单。桥接接口本身不是安全边界保证。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/mcp-tool-bridge.ts",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "readme_claim",
+          "statement": "Minecraft、Telegram、Discord 列为已支持；Factorio虽勾选仍注明WIP/PoC，不应当作完整游戏代理成熟能力。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md#L240-L249"
+          ],
+          "limitations": []
+        }
+      ],
+      "distribution": [
+        {
+          "status": "release_verified",
+          "statement": "查询 releases?per_page=1 首条为 v0.12.0-beta.6，2026-10-23T06:32:36Z，prerelease=true。资产包括 Windows x64 setup.exe、macOS arm64/x64 dmg/zip、Linux amd64/arm64 deb、aarch64/x86_64 rpm 与 arm64/x64 flatpak；另有 Android APK 和 iOS IPA。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.6",
+            "https://api.github.com/repos/moeru-ai/airi/releases?per_page=1"
+          ],
+          "limitations": [
+            "仅证明资产存在；移动安装、签名/商店发布、各Linux环境透明窗口能力未验证。"
+          ]
+        },
+        {
+          "status": "readme_claim",
+          "statement": "README 提供 Windows winget/Scoop、macOS Homebrew Cask 安装指引及网页入口。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md"
+          ],
+          "limitations": []
+        }
+      ],
+      "licensing": [
+        {
+          "status": "source_verified",
+          "statement": "主仓库代码 MIT，要求保留版权与许可声明。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/LICENSE"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "未取得全部随附角色/VRM/Live2D、美术、语音和外部权重的逐项授权台账。MIT代码许可不自动授权其肖像、角色IP、模型素材或第三方SDK再分发/商用。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/LICENSE",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui-live2d/package.json",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui-three/package.json"
+          ],
+          "limitations": []
+        }
+      ],
+      "maintenance": [
+        {
+          "status": "source_verified",
+          "statement": "未归档。主分支固定提交 3b0672e…，提交时间2026-10-23T10:58:29Z，消息release: v0.12.0；元数据pushed_at为2026-10-23T11:42:41Z。",
+          "sources": [
+            "https://api.github.com/repos/moeru-ai/airi",
+            "https://github.com/moeru-ai/airi/commit/3b0672e3668bd1ade1210e579818f379e4f8a224"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "近期主分支与beta包活跃，但提交消息v0.12.0不等于正式v0.12.0安装包已发布；本次未核实最新stable，不以此宣称生产成熟。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.6",
+            "https://github.com/moeru-ai/airi/commit/3b0672e3668bd1ade1210e579818f379e4f8a224"
+          ],
+          "limitations": []
+        }
+      ],
+      "data_flow": {
+        "level": "inference",
+        "steps": [
+          "音频采集→VAD/转录器→语音草稿/对话输入",
+          "可选屏幕帧→视觉provider→上下文",
+          "对话/工具编排→LLM文本流",
+          "文本分段→TTS→音频队列/打断→Live2D或VRM显示",
+          "角色事实记忆存储可保留跨会话条目；自动写入/召回的全链路未审计"
+        ],
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/pipelines-audio/src/speech-pipeline.ts",
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts",
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts"
+        ]
+      },
+      "pros": [
+        {
+          "status": "inference",
+          "statement": "Vue/TS 与多渲染器/多provider模块便于Web技术团队二次开发，基础事实记忆作用域清晰。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts"
+          ],
+          "limitations": []
+        }
+      ],
+      "cons": [
+        {
+          "status": "inference",
+          "statement": "monorepo及语音/原生集成面较大；路线图和源码存在差异，beta安装包与main不同步，需冻结版本再做验收。",
+          "sources": [
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/README.md",
+            "https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.6",
+            "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json"
+          ],
+          "limitations": []
+        }
+      ]
+    },
+    {
+      "id": "open-llm-vtuber",
+      "requested_repository": "Open-LLM-VTuber/Open-LLM-VTuber",
+      "canonical_repository": "Open-LLM-VTuber/Open-LLM-VTuber",
+      "repository_url": "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber",
+      "address_check": {
+        "status": "source_verified",
+        "statement": "原给定地址有效；独立前端官方仓库由.gitmodules确认为Open-LLM-VTuber/Open-LLM-VTuber-Web。",
+        "sources": [
+          "https://api.github.com/repos/Open-LLM-VTuber/Open-LLM-VTuber",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/.gitmodules"
+        ],
+        "limitations": []
+      },
+      "commit": "992309c0aa19845960228f880013d4685fde93b5",
+      "positioning": {
+        "status": "inference",
+        "statement": "适合以可替换ASR/LLM/TTS链路、本地模型组合和Live2D语音伴侣为主要目标的Python团队。",
+        "sources": [
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py"
+        ],
+        "limitations": []
+      },
+      "architecture": [
+        {
+          "status": "source_verified",
+          "statement": "Python后端声明>=3.10,<3.13，FastAPI、uvicorn、websocket-client等；主仓库frontend是build分支子模块，锁定06a659b114fff788cf0daaa86e484576db4975bf。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/.gitmodules",
+            "https://api.github.com/repos/Open-LLM-VTuber/Open-LLM-VTuber/contents/"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "独立前端main的package.json为Electron+React+TypeScript；含electron-builder和Windows/macOS/Linux构建脚本、React18、electron31。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber-Web/blob/main/package.json"
+          ],
+          "limitations": [
+            "可变main来源，未取得其当前commit；不能断言它与锁定build子模块逐字对应。"
+          ]
+        }
+      ],
+      "rendering": [
+        {
+          "status": "readme_claim",
+          "statement": "Live2D角色、表情映射、触摸/拖动；桌宠模式宣称透明、置顶和鼠标穿透。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "本次未验证VRM支持；未抽查具体Live2D渲染器实现，不能用其它项目的Pixi/Three选择套入。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber-Web/blob/main/package.json"
+          ],
+          "limitations": []
+        }
+      ],
+      "voice": [
+        {
+          "status": "readme_claim",
+          "statement": "支持本地或云LLM（Ollama、OpenAI兼容、Gemini、Claude等），ASR（sherpa-onnx、FunASR、Faster-Whisper/Whisper等），TTS（sherpa-onnx、GPTSoVITS、CosyVoice、Edge、Azure等）；宣称语音打断及本地全离线组合。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "前端声明vad-web和onnxruntime-web；后端single_conversation先process_user_input调用asr_engine，再将文本和images组成batch_input送agent_engine.chat，消费SentenceOutput/AudioOutput，经tts_engine/TTSTaskManager输出WebSocket事件；保存人类和AI聊天记录。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber-Web/blob/main/package.json",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "默认可复述为VAD→ASR→LLM/Agent→句子TTS/音频→前端播放；支持AudioOutput扩展不意味着已完整实现任意端到端Realtime后端。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": [
+            "README把HumeAI/OpenAI Her/Mem0列为可自行实现Agent接口的例子，不应计为现成集成。"
+          ]
+        }
+      ],
+      "long_term_memory": [
+        {
+          "status": "readme_claim",
+          "statement": "明确长期记忆暂时移除（coming back soon）；当前强调聊天日志持久化与恢复旧会话。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "单轮会话实现使用store_message保存输入文本和最终回复。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "会话历史持久化不是事实提取/向量召回型长期记忆；pyproject有letta-client依赖也不足以推翻README或证明默认接通。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py"
+          ],
+          "limitations": []
+        }
+      ],
+      "screen_and_tools": [
+        {
+          "status": "readme_claim",
+          "statement": "视觉输入宣称摄像头、录屏和截图；远程浏览器麦克风需要HTTPS/安全上下文。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "single_conversation接收images并传入agent；mcpp/mcp_client.py按registry中command/args/env/cwd创建StdioServerParameters，启动stdio_client并session.call_tool调用。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "可配置MCP会越出纯聊天边界到外部进程与工具能力；屏幕理解不自动等于具备通用电脑操控。README Related Projects中另一项目的full computer control不能算到本项目头上。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "此MCP客户端中未见逐次用户确认/OS沙箱实现；全项目是否在上游另有授权门、工具级许可限制未审计。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py"
+          ],
+          "limitations": []
+        }
+      ],
+      "distribution": [
+        {
+          "status": "readme_claim",
+          "statement": "Web与桌面模式，宣称Windows/macOS/Linux支持；离线需自行选择并部署本地模型。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "release_verified",
+          "statement": "最新列出v1.2.1，2025-08-26T08:47:08Z，非预发布；资产是Windows setup.exe、macOS dmg及中英文后端zip。发行说明明确exe/dmg是桌面前端，不能当作包含所有Python/模型的全量单包；该发行资产列表未见Linux安装包。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/releases/tag/v1.2.1",
+            "https://api.github.com/repos/Open-LLM-VTuber/Open-LLM-VTuber/releases?per_page=1"
+          ],
+          "limitations": []
+        }
+      ],
+      "licensing": [
+        {
+          "status": "source_verified",
+          "statement": "主代码MIT，但许可证明确排除Live2D sample models。GitHub元数据NOASSERTION不能代替阅读许可证。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/LICENSE",
+            "https://api.github.com/repos/Open-LLM-VTuber/Open-LLM-VTuber"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "LICENSE-Live2D.md区分原创、合作与第三方角色；部分角色禁止设计修改；合作角色不得商用、改动或分发；第三方角色须另循权利方规则，需按实际角色逐项核对。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/LICENSE-Live2D.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "所有用户导入Live2D模型、ASR/LLM/TTS权重、克隆声音的商业/再分发许可未知；前端仓库完整依赖授权未审计。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/LICENSE",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/LICENSE-Live2D.md",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml"
+          ],
+          "limitations": []
+        }
+      ],
+      "maintenance": [
+        {
+          "status": "source_verified",
+          "statement": "仓库未归档；主分支最近固定提交992309c…为2026-05-15T07:18:03Z，内容为README链接修复。",
+          "sources": [
+            "https://api.github.com/repos/Open-LLM-VTuber/Open-LLM-VTuber",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/commit/992309c0aa19845960228f880013d4685fde93b5"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "readme_claim",
+          "statement": "维护者声明聚焦v2完整重写，目前早期讨论规划；请求不再提交v1新功能需求，继续修复v1 bug并处理已有PR。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "v1可作为语音模块参考，但新产品重度依赖v1扩展前应评估v2迁移风险；不是简单以最近提交或人气断言已停更/成熟。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/releases/tag/v1.2.1"
+          ],
+          "limitations": []
+        }
+      ],
+      "data_flow": {
+        "level": "source_verified",
+        "steps": [
+          "前端语音活动检测→音频/文本发送到Python会话层",
+          "ASR输出文字＋可选图像→Agent/LLM聊天流",
+          "SentenceOutput→TTS任务；或直接AudioOutput→WebSocket",
+          "前端音频/Live2D显示；取消会话时清理TTS任务",
+          "人类输入和最终回复→聊天记录；MCP工具结果可回送Agent"
+        ],
+        "sources": [
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber-Web/blob/main/package.json",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py"
+        ],
+        "limitations": [
+          "具体前端网络发送与动画时序未实测；以上为静态调用关系。"
+        ]
+      },
+      "pros": [
+        {
+          "status": "inference",
+          "statement": "ASR/Agent/TTS分层清楚，便于逐模块替换并构建本地离线组合。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py"
+          ],
+          "limitations": []
+        }
+      ],
+      "cons": [
+        {
+          "status": "inference",
+          "statement": "长期记忆不是当前默认完成能力；前后端/模型部署增加运维成本；v2重写使v1定制面临迁移不确定性。",
+          "sources": [
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+            "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/releases/tag/v1.2.1"
+          ],
+          "limitations": []
+        }
+      ]
+    },
+    {
+      "id": "neko",
+      "requested_repository": "Project-N-E-K-O/N.E.K.O",
+      "canonical_repository": "Project-N-E-K-O/N.E.K.O",
+      "repository_url": "https://github.com/Project-N-E-K-O/N.E.K.O",
+      "address_check": {
+        "status": "source_verified",
+        "statement": "当前官方地址与用户给定一致；README仍有wehos/N.E.K.O历史徽章，但不应使用旧地址作为主引用。",
+        "sources": [
+          "https://api.github.com/repos/Project-N-E-K-O/N.E.K.O",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+        ],
+        "limitations": []
+      },
+      "commit": "c65adc2bb467c812c5fd948c8031aa96d48c0e14",
+      "positioning": {
+        "status": "inference",
+        "statement": "偏向主动陪伴、持久记忆、多角色外观、插件与工具整合的产品平台；适合愿意承受Python服务与较宽权限面复杂度的团队。",
+        "sources": [
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py"
+        ],
+        "limitations": []
+      },
+      "architecture": [
+        {
+          "status": "release_verified",
+          "statement": "官方nightly说明明确Desktop App为Electron + Python backend，另有独立Python后端包。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "后端Python==3.11.*，声明FastAPI/uvicorn/websockets及多provider SDK；已读聊天前端子工程React18/TypeScript/Vite清单。不能概括整个前端仅React：仓库同时有static/templates等部分。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/frontend/react-neko-chat/package.json"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "启动器片段引用MAIN_SERVER_PORT/MEMORY_SERVER_PORT/TOOL_SERVER_PORT和Main/Memory/Agent关闭次序。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/launcher_core/runtime.py"
+          ],
+          "limitations": [
+            "该文件raw响应超过长度上限，仅抽查可读前段；未完整审计进程拓扑及Electron壳源码。"
+          ]
+        }
+      ],
+      "rendering": [
+        {
+          "status": "readme_claim",
+          "statement": "宣称Live2D / VRM / MMD / PNGTuber / 猫咪桌宠五种形态，以及动作捕捉与全屏追踪。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD#L30-L43"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "随附第三方notice明确three-mmd、three-mmd-physics-ammo以及嵌入babylon-mmd组件，确认有MMD Web渲染依赖。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/static/libs/THIRD_PARTY_NOTICES.md"
+          ],
+          "limitations": [
+            "未逐一读取Live2D/VRM加载器；其具体渲染版本、全功能兼容性未知。"
+          ]
+        }
+      ],
+      "voice": [
+        {
+          "status": "readme_claim",
+          "statement": "实时语音采用Realtime API，文字采用ChatCompletion；核心语音API须支持Realtime，README推荐阿里云，另宣称14+服务商。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD#L30-L43",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD#L608"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "OmniRealtimeClient组合Audio/Transport/Response/Tooling/Gemini mixins；有发送文字/音频、audio_delta、audio_done和中断回调接口，支持流式音频接收的静态结构已证实。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/__init__.py"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "TTS入口导入Qwen realtime、CosyVoice、Gemini、OpenAI、GPTSoVITS、ElevenLabs、local_cosyvoice等worker；pyproject把faster-whisper列为可选local-asr，不在默认安装/打包内，缺失会报告依赖未满足。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tts_client/__init__.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml"
+          ],
+          "limitations": [
+            "只证实注册/导入与可选依赖声明，未测试每个provider。"
+          ]
+        },
+        {
+          "status": "inference",
+          "statement": "原生Realtime路径无需把每个供应商强行拆成独立ASR+LLM+TTS；另有可选独立ASR/TTS的组合路径，不能把“核心本地运行”写成默认完全离线。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD#L608",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tts_client/__init__.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml"
+          ],
+          "limitations": []
+        }
+      ],
+      "long_term_memory": [
+        {
+          "status": "readme_claim",
+          "statement": "五维记忆为工作/近期/事实/反思/人格；宣称跨场景记忆人格同步，提供memory_browser校对入口。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "hybrid_recall.py有BM25、cosine embedding、RRF融合实现；对事实/反思/归档/人格候选在评分前做subject/scope过滤和可选时间窗口过滤；向量超时可以降级关键词结果。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py#L1309-L1411"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "相比仅保存聊天日志，有可验证的结构化召回实现。但五维写入/压缩/反思生成、同步一致性和长期准确率未全链路验证。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ],
+          "limitations": []
+        }
+      ],
+      "screen_and_tools": [
+        {
+          "status": "readme_claim",
+          "statement": "屏幕理解和主动搭话，支持浏览器/电脑操作、CUA/OpenClaw A2A/插件；不把这些宣称视为本次实测。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD#L30-L43"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "依赖包括pyautogui、browser-use、playwright、mss、Windows dxcam/pywinauto等。它们证明能力依赖面，不证明所有操控入口默认启用。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "ToolRegistry.execute本地直接执行handler(call.arguments)，远程通过remote_dispatcher交给plugin/agent_server；返回ToolResult并支持OpenAI Chat/Realtime/Gemini工具schema。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py#L542-L695"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "工具注册/回调并非OS沙箱。该执行函数未见逐次确认；上游授权门、全局屏幕采集默认状态、敏感操作审查及插件隔离是否足够未知。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py#L610-L664",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "readme_claim",
+          "statement": "README明确默认开启匿名Token用量遥测，并列明声称采集/不采集的字段；“本地核心/数据在手”不应解释成零网络或零遥测。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD#L704-L738"
+          ],
+          "limitations": []
+        }
+      ],
+      "distribution": [
+        {
+          "status": "readme_claim",
+          "statement": "README提供Windows/macOS/Linux一键包和Linux Docker，声明Steam免费上架；iOS/Android仍在适配内测。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "release_verified",
+          "statement": "查询首条为可变tag nightly，published_at=2026-10-02T08:55:52Z，prerelease=true，说明为未签名测试包；构建来源55be86eab316381f3c48f48a2ec324d9e069199d，不是本次main提交。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly",
+            "https://api.github.com/repos/Project-N-E-K-O/N.E.K.O/releases?per_page=1"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "release_verified",
+          "statement": "列有Windows x64便携zip，macOS Intel/Apple Silicon dmg/zip，Linux x64 AppImage/deb/tar.gz；独立Python后端有win/mac/linux及experimental Linux arm64。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly"
+          ],
+          "limitations": [
+            "Steam页面未独立查证平台与当前版本；nightly标签及资产可变，不能当作永久固定发行证据。",
+            "未核实最新stable版本、安装成功率或签名可信度。"
+          ]
+        }
+      ],
+      "licensing": [
+        {
+          "status": "source_verified",
+          "statement": "主代码Apache-2.0；NOTICE保留团队版权并明确第三方组件各自许可。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/LICENSE",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/NOTICE"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "source_verified",
+          "statement": "third-party notices明说不是static/libs全部库的完整清单，根Apache许可不替代这些许可；three-mmd与babylon-mmd为MIT；其中修改过的physics bundle精确最初上游版本未建立。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/static/libs/THIRD_PARTY_NOTICES.md"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "unknown",
+          "statement": "Live2D/VRM/MMD/PNGTuber角色、声音克隆样本、Steam Workshop内容、下载权重的全部商业与再分发授权未逐项查证。免费Steam或UGC分享不构成统一开源授权。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/NOTICE",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/static/libs/THIRD_PARTY_NOTICES.md"
+          ],
+          "limitations": []
+        }
+      ],
+      "maintenance": [
+        {
+          "status": "source_verified",
+          "statement": "未归档，元数据pushed_at=2026-10-23T11:53:02Z；固定main为c65adc2…。该提交的具体提交时间未读取成功，不以pushed_at代替commit date。",
+          "sources": [
+            "https://api.github.com/repos/Project-N-E-K-O/N.E.K.O",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/commit/c65adc2bb467c812c5fd948c8031aa96d48c0e14"
+          ],
+          "limitations": []
+        },
+        {
+          "status": "inference",
+          "statement": "主分支近期更新、发布与Steam分发并存，但本次只验证到nightly，不能用活跃度推断长期运行稳定或正式版成熟。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+          ],
+          "limitations": []
+        }
+      ],
+      "data_flow": {
+        "level": "inference",
+        "steps": [
+          "文字→ChatCompletion路径；音频→本地Realtime客户端→配置的Realtime服务商",
+          "可选视觉输入并入多模态交互；具体屏幕采集同意机制未审计",
+          "事实/反思/人格等记忆候选→作用域过滤→BM25与向量→RRF→模型可读结果",
+          "模型工具调用→ToolRegistry→本地handler或plugin/agent_server远程分发→工具结果回送",
+          "Realtime音频delta或独立TTS worker→前端播放/角色显示"
+        ],
+        "sources": [
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tts_client/__init__.py"
+        ]
+      },
+      "pros": [
+        {
+          "status": "inference",
+          "statement": "主动陪伴与多形态角色产品范围广，长期记忆至少有可检查的混合召回代码；公开nightly包含桌面和独立后端。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly"
+          ],
+          "limitations": []
+        }
+      ],
+      "cons": [
+        {
+          "status": "inference",
+          "statement": "服务商、插件、屏幕/电脑工具和素材授权面更宽；匿名遥测默认开启；未签名nightly与main版本不同，采用前应先关不必要能力并做权限与迁移验收。",
+          "sources": [
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py",
+            "https://github.com/Project-N-E-K-O/N.E.K.O/releases/tag/nightly"
+          ],
+          "limitations": []
+        }
+      ]
+    }
+  ],
+  "comparison_to_sprite_plus_chat": {
+    "baseline_definition": "此处“精灵动画+API聊天桌宠”是用于比较的最小架构假设，不指任何已审计项目：本地透明窗口/帧动画＋文本输入→聊天API→回复气泡。",
+    "differences": [
+      {
+        "dimension": "显示",
+        "baseline": "预制2D帧动画/状态机即可，不一定需要可绑定角色骨骼与嘴型。",
+        "frameworks": "这些平台把角色模型、表情、动作和语音输出纳入交互；AIRI已查到Live2D/VRM渲染依赖，另两者支持范围按README声明。",
+        "status": "inference",
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui-live2d/package.json",
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui-three/package.json",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD"
+        ]
+      },
+      {
+        "dimension": "语音",
+        "baseline": "没有必需的麦克风/VAD/ASR/TTS/打断调度。",
+        "frameworks": "AIRI与OLV可描述为模块化语音管线；NEKO另有原生Realtime流式路径，增加音频权限、延迟、回声与费用问题。",
+        "status": "inference",
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/voice.ts",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/omni_realtime_client/_client.py"
+        ]
+      },
+      {
+        "dimension": "记忆",
+        "baseline": "聊天历史可选，不能自动等于长期记忆。",
+        "frameworks": "AIRI已有基础角色事实存储但路线图不一致；OLV称长期记忆移除；NEKO有混合召回实现。",
+        "status": "inference",
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py"
+        ]
+      },
+      {
+        "dimension": "权限与隐私",
+        "baseline": "通常只需聊天网络请求和桌面窗口权限，具体取决于实现。",
+        "frameworks": "屏幕/麦克风可能发送给外部provider，MCP/插件/电脑工具可越出纯聊天；要另加最小权限、可见开关、逐次敏感操作确认与日志。",
+        "status": "inference",
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/modules/vision/orchestrator.ts",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/mcpp/mcp_client.py",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py"
+        ]
+      },
+      {
+        "dimension": "交付成本",
+        "baseline": "若需求仅动画、提醒和文字聊天，可保持较小依赖与测试面。",
+        "frameworks": "直接采用完整平台可复用语音/模型/provider，但要承担多服务与素材许可、版本升级、工具安全验收，不能认为功能越多就越适合。",
+        "status": "inference",
+        "sources": [
+          "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json",
+          "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml",
+          "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml"
+        ]
+      }
+    ]
+  },
+  "selection_summary": [
+    {
+      "status": "inference",
+      "statement": "若当前目标只是精灵动画+API文字聊天：优先自有轻量桌面壳，把这三者作为能力与模块参考；没有证据表明必须整仓接入。",
+      "sources": [
+        "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/apps/stage-tamagotchi/package.json",
+        "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/pyproject.toml",
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/pyproject.toml"
+      ],
+      "limitations": []
+    },
+    {
+      "status": "inference",
+      "statement": "需要Vue/TS定制、多渲染器与Web/桌面共享：优先评估AIRI，但冻结commit与发行包，特别核对记忆和工具授权。",
+      "sources": [
+        "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/package.json",
+        "https://github.com/moeru-ai/airi/blob/3b0672e3668bd1ade1210e579818f379e4f8a224/packages/stage-ui/src/stores/memory.ts",
+        "https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.6"
+      ],
+      "limitations": []
+    },
+    {
+      "status": "inference",
+      "statement": "需要Python可替换ASR/LLM/TTS、Live2D语音伴侣：优先评估Open-LLM-VTuber；接受当前记忆缺口与v2重写迁移风险。",
+      "sources": [
+        "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/README.md",
+        "https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/992309c0aa19845960228f880013d4685fde93b5/src/open_llm_vtuber/conversations/single_conversation.py"
+      ],
+      "limitations": []
+    },
+    {
+      "status": "inference",
+      "statement": "需要主动陪伴、现成多模态/记忆/插件整合：优先评估N.E.K.O；先审计屏幕/工具权限、遥测与第三方素材，不以“零配置”宣传替代验收。",
+      "sources": [
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/README.MD",
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/memory/hybrid_recall.py",
+        "https://github.com/Project-N-E-K-O/N.E.K.O/blob/c65adc2bb467c812c5fd948c8031aa96d48c0e14/main_logic/tool_calling.py"
+      ],
+      "limitations": []
+    }
+  ],
+  "acceptance_gates": [
+    "先确定必须项：2D帧动画或Live2D/VRM、文字或实时语音、本地或云端、是否真的需要屏幕与工具。",
+    "为候选冻结源码commit、后端/前端版本和模型资产；与发行包分别记录，不直接追main。",
+    "后续另行获准运行时测试目标OS的透明/置顶/穿透、音频打断、资源占用、异常恢复；本次未运行。",
+    "逐项证明记忆保存、作用域、纠错、删除、导出、升级迁移与敏感信息处理。",
+    "先关闭屏幕与执行工具，按需开启；高风险外部操作需要可见确认与可撤销设计，不能用角色对话代替授权。",
+    "建立代码/SDK/角色IP/模型权重/克隆声音五类许可清单；未查明素材不得直接进入商用再分发包。"
+  ]
+}
