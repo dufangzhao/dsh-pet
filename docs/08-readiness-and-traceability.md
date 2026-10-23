@@ -21,6 +21,7 @@
 | Q12=C | 听写一个键两种用法 | [选型清单](01-discovery-plan.md) |
 | Q13=C | 默认直接写入，可切换为预览 | [听写PRD](09-dictation-mvp-prd.md) |
 | Q13b=A | 持续听写说一句写一句 | [听写PRD](09-dictation-mvp-prd.md) |
+| Q14=B | 普通话 + 中英混说 | [听写PRD](09-dictation-mvp-prd.md) |
 
 用户询问AGPL含义并在解释后明确“仅作参考，先不二开”。当前保持MIT，Coopanion仅作交互/架构参考，见[ADR-0006](adr/0006-reference-coopanion-without-fork.md)。不得继续将该问题标为等待回答，也不得把不fork误解为所有基础组件必须自写。
 
@@ -73,6 +74,6 @@
 
 ## 下一轮访谈应先解决什么
 
-许可追问与Q6已解决，首条闭环为[语音听写](09-dictation-mvp-prd.md)。Q7已选择首版完整本地/云双路径；Q8已确定BYOK；Q9进一步确认功能与提供者采用统一单层插件模型。Q10已选择Electron + TypeScript。开工前剩余问题Q11—Q27已按依赖排序列入[选型清单](01-discovery-plan.md)；Q11已按DSH方案确定（[ADR-0012](adr/0012-dsh-style-trust-and-permissions.md)）；Q12已选一个键两种用法；Q13已选默认直接写入；Q13b已选说一句写一句；当前问Q14（首版识别语言）。不要在缺少答案时自动采用推荐项。
+许可追问与Q6已解决，首条闭环为[语音听写](09-dictation-mvp-prd.md)。Q7已选择首版完整本地/云双路径；Q8已确定BYOK；Q9进一步确认功能与提供者采用统一单层插件模型。Q10已选择Electron + TypeScript。开工前剩余问题Q11—Q27已按依赖排序列入[选型清单](01-discovery-plan.md)；Q11已按DSH方案确定（[ADR-0012](adr/0012-dsh-style-trust-and-permissions.md)）；Q12已选一个键两种用法；Q13已选默认直接写入；Q13b已选说一句写一句；Q14已选普通话加中英混说；当前请用户提供Q15（每天打字的软件）。不要在缺少答案时自动采用推荐项。
 
 完成MVP与技术选择后，再把[架构草案中的验证任务](05-architecture-overview.md)转换为可执行工作包。验证原型也需要用户允许；本阶段不启动实现或安装被研究项目。
