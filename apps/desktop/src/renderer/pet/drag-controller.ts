@@ -71,9 +71,11 @@ export class PetDragController {
 
     // 指针捕获：指针移出窗口（甚至拖到屏幕外）时仍能收到 pointerup，
     // 否则 window 的 pointerup 可能收不到，窗口会卡在拖拽态。
+    let captured = false;
     if (target !== null) {
       try {
         target.setPointerCapture(event.pointerId);
+        captured = true;
       } catch {
         // 某些环境下元素尚未插入文档，捕获会抛错；不影响拖拽本身。
       }
@@ -83,6 +85,15 @@ export class PetDragController {
       this.bridge.beginDrag();
     } catch {
       // 主进程调用失败时不能留下“本地在拖拽、主进程不知道”的分裂状态。
+      // 已经取得的 pointer capture 也必须一起还回去：否则元素继续独占该指针，
+      // 后续 pointerup/pointercancel 会被重定向到它，窗口和下层应用都收不到。
+      if (captured && target !== null) {
+        try {
+          target.releasePointerCapture(event.pointerId);
+        } catch {
+          // 系统可能已经隐式释放；释放失败不能掩盖原始失败。
+        }
+      }
       this.active = false;
       this.pointerId = null;
       this.captureTarget = null;

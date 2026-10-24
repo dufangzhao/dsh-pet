@@ -16,7 +16,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "build": "pnpm --filter @pet/desktop build",
-    "dev": "pnpm --filter @pet/desktop build && pnpm --filter @pet/desktop start"
+    "dev": "pnpm --filter @pet/desktop build && pnpm --filter @pet/desktop start",
+    "test:qa": "node --test --test-reporter=spec qa/probes/*.test.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm test:qa && pnpm lint && pnpm format:check && pnpm build"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.5",

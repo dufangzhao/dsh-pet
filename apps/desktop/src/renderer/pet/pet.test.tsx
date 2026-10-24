@@ -246,6 +246,89 @@ describe('拖拽控制器：六条结束路径都要释放', () => {
     expect(() => controller.end('pointerup')).not.toThrow();
   });
 
+  it('beginDrag 抛错时归还已经取得的 pointer capture', () => {
+    // 回归：捕获成功、主进程 beginDrag 失败时，若不释放捕获，
+    // 元素会继续独占该指针，后续 pointerup 被重定向到它，窗口卡在拖拽态。
+    const captured: number[] = [];
+    const released: number[] = [];
+    const target = {
+      setPointerCapture(pointerId: number): void {
+        captured.push(pointerId);
+      },
+      releasePointerCapture(pointerId: number): void {
+        released.push(pointerId);
+      },
+    };
+    const calls: string[] = [];
+    const controller = new PetDragController({
+      bridge: {
+        beginDrag: () => {
+          calls.push('begin');
+          throw new Error('ipc down');
+        },
+        endDrag: () => calls.push('end'),
+      },
+    });
+
+    expect(controller.begin({ button: 0, pointerId: 21 }, target)).toBe(false);
+    expect(captured).toEqual([21]);
+    expect(released).toEqual([21]);
+    expect(controller.isActive()).toBe(false);
+    // 主进程从未进入拖拽态，因此不能补一次 endDrag。
+    expect(calls).toEqual(['begin']);
+    expect(controller.endReason()).toBeNull();
+  });
+
+  it('捕获本身就失败时，beginDrag 抛错不再重复释放', () => {
+    const released: number[] = [];
+    const target = {
+      setPointerCapture(): void {
+        throw new Error('not in document');
+      },
+      releasePointerCapture(pointerId: number): void {
+        released.push(pointerId);
+      },
+    };
+    const controller = new PetDragController({
+      bridge: {
+        beginDrag: () => {
+          throw new Error('ipc down');
+        },
+        endDrag: () => undefined,
+      },
+    });
+    expect(controller.begin({ button: 0, pointerId: 22 }, target)).toBe(false);
+    // 从未捕获成功，就不该假装释放。
+    expect(released).toEqual([]);
+    expect(controller.isActive()).toBe(false);
+  });
+
+  it('beginDrag 抛错后释放失败也不掩盖原始失败，且状态机已复位', () => {
+    const target = {
+      setPointerCapture(): void {},
+      releasePointerCapture(): void {
+        throw new Error('already released');
+      },
+    };
+    const active: boolean[] = [];
+    const controller = new PetDragController({
+      bridge: {
+        beginDrag: () => {
+          throw new Error('ipc down');
+        },
+        endDrag: () => undefined,
+      },
+      onActiveChange: (value) => active.push(value),
+    });
+    expect(() => controller.begin({ button: 0, pointerId: 23 }, target)).not.toThrow();
+    expect(controller.isActive()).toBe(false);
+    expect(active).toEqual([true, false]);
+    // 复位之后可以重新开始，不会永久卡死。
+    const ok = new PetDragController({ bridge: { beginDrag: () => {}, endDrag: () => {} } });
+    expect(ok.begin({ button: 0, pointerId: 24 }, null)).toBe(true);
+    ok.dispose();
+  });
+
   it('记录结束原因，便于排查拖拽为什么中断', () => {
     const { controller, target } = make();
     controller.begin({ button: 0, pointerId: 12 }, target);

@@ -38,7 +38,10 @@ pnpm -r typecheck
 pnpm -r test
 pnpm lint
 pnpm format:check
+pnpm test:qa
 ```
+
+或运行 `pnpm check` 一次完成工作区类型/测试、QA回归、lint、格式与构建；该命令不接管真实鼠标或键盘。
 
 M0-01曾为空跑；当前已有真实工作区测试、下载安全测试与Electron集成探针。
 

@@ -1,0 +1,452 @@
+Expanded check against the pre-fix build (no rebuild was run).
+Exit code: 1
+{
+  "at": "2026-10-24T18:16:06.218Z",
+  "status": "failed",
+  "requestedDeviceScale": 1,
+  "checks": [
+    "secure-window-and-isolated-preload",
+    "five-real-renderer-states"
+  ],
+  "consoleErrors": [],
+  "remoteRequests": [],
+  "screenshots": [
+    ".cache/m0-06-real/pet-idle.png",
+    ".cache/m0-06-real/pet-listening.png",
+    ".cache/m0-06-real/pet-thinking.png",
+    ".cache/m0-06-real/pet-replying.png",
+    ".cache/m0-06-real/pet-error.png"
+  ],
+  "artifacts": [
+    {
+      "path": "dist/main/index.mjs",
+      "bytes": 21229,
+      "sha256": "adf947a91d80076e581dd13aa4ff54a907d643a370b1dc9a9458ca3f6a82de2d"
+    },
+    {
+      "path": "dist/preload/index.cjs",
+      "bytes": 1782,
+      "sha256": "fd6e1ed8120182b21c26244fbbb1afa3fb7c5d333dea83b2991e2a7ad8937a1e"
+    },
+    {
+      "path": "dist/renderer/pet/index.html",
+      "bytes": 807,
+      "sha256": "80eea24cb8cd8fa983b3a9d7486886beb21cdb405edd8be3cc26ef3db23e1afb"
+    },
+    {
+      "path": "dist/renderer/pet/assets/index-X-Uv16n0.js",
+      "bytes": 233397,
+      "sha256": "c94b475a57427c34e305875bcf2b42941cbbd346560861681a60ebe94cbc8e31"
+    },
+    {
+      "path": "dist/renderer/pet/assets/index-zHEUqJIk.css",
+      "bytes": 12725,
+      "sha256": "6ea6e4fa3d0a3e7b57e014b3047eae10f99d456cc23d1b7ae02c7d6a0de6aba7"
+    }
+  ],
+  "window": {
+    "hwnd": "2364212",
+    "visible": true,
+    "topmost": true,
+    "bounds": {
+      "x": 1516,
+      "y": 588,
+      "width": 380,
+      "height": 420
+    },
+    "preferences": {
+      "sandbox": true,
+      "contextIsolation": true,
+      "nodeIntegration": false,
+      "webSecurity": true
+    },
+    "displays": [
+      {
+        "id": 3539006886,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "workArea": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1032
+        },
+        "scaleFactor": 1
+      }
+    ]
+  },
+  "viewport": {
+    "width": 380,
+    "height": 420,
+    "dpr": 1
+  },
+  "startupFocus": "preserved",
+  "bridge": {
+    "require": "undefined",
+    "process": "undefined",
+    "frozen": true,
+    "methods": [
+      "version",
+      "getSnapshot",
+      "setInteraction",
+      "beginDrag",
+      "endDrag",
+      "previewState",
+      "quit",
+      "onSnapshot"
+    ]
+  },
+  "styleSamples": [
+    {
+      "id": "active-button",
+      "color": "rgb(255, 255, 255)",
+      "backgrounds": [
+        "rgb(76, 125, 240)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 257,
+        "y": 287.578125,
+        "width": 52,
+        "height": 32,
+        "bottom": 319.578125,
+        "right": 309
+      }
+    },
+    {
+      "id": "inactive-button",
+      "color": "rgb(28, 36, 48)",
+      "backgrounds": [
+        "rgb(255, 255, 255)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 25,
+        "y": 287.578125,
+        "width": 52,
+        "height": 32,
+        "bottom": 319.578125,
+        "right": 77
+      }
+    },
+    {
+      "id": "title",
+      "color": "rgb(28, 36, 48)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 13,
+      "disabled": false,
+      "rect": {
+        "x": 25,
+        "y": 242.6875,
+        "width": 330,
+        "height": 19.5,
+        "bottom": 262.1875,
+        "right": 355
+      }
+    },
+    {
+      "id": "simulation-notice",
+      "color": "rgb(70, 83, 106)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 11,
+      "disabled": false,
+      "rect": {
+        "x": 25,
+        "y": 264.1875,
+        "width": 330,
+        "height": 15.390625,
+        "bottom": 279.578125,
+        "right": 355
+      }
+    },
+    {
+      "id": "hint",
+      "color": "rgb(70, 83, 106)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 11,
+      "disabled": false,
+      "rect": {
+        "x": 25,
+        "y": 327.578125,
+        "width": 330,
+        "height": 15.390625,
+        "bottom": 342.96875,
+        "right": 355
+      }
+    },
+    {
+      "id": "bubble",
+      "color": "rgb(28, 36, 48)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgb(255, 232, 220)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 13,
+      "disabled": false,
+      "rect": {
+        "x": 69,
+        "y": 175,
+        "width": 258,
+        "height": 37.6875,
+        "bottom": 212.6875,
+        "right": 327
+      }
+    },
+    {
+      "id": "quit",
+      "color": "rgb(194, 65, 12)",
+      "backgrounds": [
+        "rgb(255, 255, 255)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 25,
+        "y": 350.96875,
+        "width": 70,
+        "height": 32,
+        "bottom": 382.96875,
+        "right": 95
+      }
+    }
+  ],
+  "contrast": [
+    {
+      "id": "active-button",
+      "color": "rgb(255, 255, 255)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 3.8188759686347287
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 3.8188759686347287
+        }
+      ],
+      "passed": false
+    },
+    {
+      "id": "inactive-button",
+      "color": "rgb(28, 36, 48)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 15.620283087860223
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 15.620283087860223
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "title",
+      "color": "rgb(28, 36, 48)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 14.952398450420876
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 15.620283087860223
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "simulation-notice",
+      "color": "rgb(70, 83, 106)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 7.429143842431793
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 7.760984319940445
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "hint",
+      "color": "rgb(70, 83, 106)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 7.429143842431793
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 7.760984319940445
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bubble",
+      "color": "rgb(28, 36, 48)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 13.260955742011253
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 13.260955742011253
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "quit",
+      "color": "rgb(194, 65, 12)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 5.178415705888697
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 5.178415705888697
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "error": "All measured text colors must meet 4.5:1"
+}
