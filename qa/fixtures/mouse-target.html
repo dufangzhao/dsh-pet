@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; img-src 'none'; font-src 'none'; media-src 'none'; object-src 'none'; connect-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>桌宠原生鼠标测试底板</title>
+    <link rel="stylesheet" href="./mouse-target.css" />
+    <script src="./mouse-target.js" defer></script>
+  </head>
+  <body>
+    <main class="board">
+      <header class="board__header">
+        <h1 class="board__title">桌宠原生鼠标测试底板</h1>
+        <p class="board__subtitle">只读观测夹具：整页在 document 上被动记录真实鼠标左键事件，不含任何按钮或链接。</p>
+      </header>
+
+      <section class="counts" aria-labelledby="counts-heading">
+        <h2 class="counts__heading" id="counts-heading">已收到的左键事件</h2>
+        <dl class="counts__grid">
+          <div class="count-card">
+            <dt class="count-card__label">pointerdown</dt>
+            <dd class="count-card__value" id="count-downs">0</dd>
+          </div>
+          <div class="count-card">
+            <dt class="count-card__label">pointerup</dt>
+            <dd class="count-card__value" id="count-ups">0</dd>
+          </div>
+          <div class="count-card">
+            <dt class="count-card__label">click</dt>
+            <dd class="count-card__value" id="count-clicks">0</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="detail" aria-labelledby="detail-heading">
+        <h2 class="detail__heading" id="detail-heading">最近事件</h2>
+        <p class="detail__last" id="last-event">尚未收到事件</p>
+        <ol class="detail__recent" id="recent-list"></ol>
+      </section>
+
+      <p class="status" id="status-line" role="status" aria-live="polite">
+        等待真实鼠标左键事件。
+      </p>
+
+      <footer class="board__footer">
+        <p>计数只包含 button=0 且 pointerType=mouse 的 pointer 事件，以及 click 事件；其余事件不记录。</p>
+        <p>页面不读取键盘、不联网、不写文件、不安装依赖，也不改变其他窗口。</p>
+      </footer>
+    </main>
+  </body>
+</html>

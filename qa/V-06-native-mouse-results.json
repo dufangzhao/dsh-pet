@@ -1,0 +1,1560 @@
+{
+  "scope": "Limited single-screen owned-window evidence; no full interaction acceptance",
+  "externalObservation": {
+    "runId": "3152cf23-4f33-4c09-8614-e4cb9db647e8",
+    "status": "closed",
+    "reason": "ten-minute-watchdog",
+    "pid": 19704,
+    "initialPet": {
+      "id": 1,
+      "windowId": 263670,
+      "bounds": {
+        "x": 1516,
+        "y": 588,
+        "width": 380,
+        "height": 420
+      },
+      "visible": true,
+      "focused": false
+    },
+    "finalPet": {
+      "id": 1,
+      "windowId": 263670,
+      "bounds": {
+        "x": 8,
+        "y": 604,
+        "width": 380,
+        "height": 420
+      },
+      "visible": true,
+      "focused": false
+    },
+    "events": [
+      {
+        "type": "pointerdown",
+        "x": 207,
+        "y": 77,
+        "trusted": true,
+        "at": 1792874467629
+      },
+      {
+        "type": "pointerup",
+        "x": 206,
+        "y": 77,
+        "trusted": true,
+        "at": 1792874467968
+      },
+      {
+        "type": "click",
+        "x": 206,
+        "y": 77,
+        "trusted": true,
+        "at": 1792874467969
+      },
+      {
+        "type": "pointerdown",
+        "x": 186,
+        "y": 68,
+        "trusted": true,
+        "at": 1792874568503
+      },
+      {
+        "type": "pointerup",
+        "x": 190,
+        "y": 69,
+        "trusted": true,
+        "at": 1792874569464
+      },
+      {
+        "type": "click",
+        "x": 190,
+        "y": 69,
+        "trusted": true,
+        "at": 1792874569465
+      },
+      {
+        "type": "pointerdown",
+        "x": 165,
+        "y": 108,
+        "trusted": true,
+        "at": 1792874623893
+      },
+      {
+        "type": "pointerup",
+        "x": 165,
+        "y": 108,
+        "trusted": true,
+        "at": 1792874624915
+      },
+      {
+        "type": "click",
+        "x": 165,
+        "y": 108,
+        "trusted": true,
+        "at": 1792874624916
+      },
+      {
+        "type": "pointerdown",
+        "x": 184,
+        "y": 59,
+        "trusted": true,
+        "at": 1792874628350
+      },
+      {
+        "type": "pointerup",
+        "x": 184,
+        "y": 59,
+        "trusted": true,
+        "at": 1792874631342
+      },
+      {
+        "type": "click",
+        "x": 184,
+        "y": 59,
+        "trusted": true,
+        "at": 1792874631342
+      },
+      {
+        "type": "pointerdown",
+        "x": 176,
+        "y": 89,
+        "trusted": true,
+        "at": 1792874712141
+      },
+      {
+        "type": "pointerup",
+        "x": 176,
+        "y": 89,
+        "trusted": true,
+        "at": 1792874713019
+      },
+      {
+        "type": "click",
+        "x": 176,
+        "y": 89,
+        "trusted": true,
+        "at": 1792874713020
+      },
+      {
+        "type": "pointerdown",
+        "x": 206,
+        "y": 82,
+        "trusted": true,
+        "at": 1792874713968
+      },
+      {
+        "type": "pointerup",
+        "x": 206,
+        "y": 82,
+        "trusted": true,
+        "at": 1792874714639
+      },
+      {
+        "type": "click",
+        "x": 206,
+        "y": 82,
+        "trusted": true,
+        "at": 1792874714640
+      },
+      {
+        "type": "pointerdown",
+        "x": 197,
+        "y": 91,
+        "trusted": true,
+        "at": 1792874715610
+      },
+      {
+        "type": "pointerup",
+        "x": 197,
+        "y": 91,
+        "trusted": true,
+        "at": 1792874715958
+      },
+      {
+        "type": "click",
+        "x": 197,
+        "y": 91,
+        "trusted": true,
+        "at": 1792874715958
+      },
+      {
+        "type": "pointerdown",
+        "x": 202,
+        "y": 90,
+        "trusted": true,
+        "at": 1792874889344
+      },
+      {
+        "type": "pointerup",
+        "x": 202,
+        "y": 90,
+        "trusted": true,
+        "at": 1792874890237
+      },
+      {
+        "type": "click",
+        "x": 202,
+        "y": 90,
+        "trusted": true,
+        "at": 1792874890237
+      }
+    ],
+    "samples": [
+      {
+        "at": "2026-10-24T20:39:54.503Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 0,
+        "ups": 0
+      },
+      {
+        "at": "2026-10-24T20:39:56.667Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 0,
+        "ups": 0
+      },
+      {
+        "at": "2026-10-24T20:39:56.979Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 0,
+        "ups": 0
+      },
+      {
+        "at": "2026-10-24T20:41:07.316Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 0,
+        "ups": 0
+      },
+      {
+        "at": "2026-10-24T20:41:07.632Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 1,
+        "ups": 0
+      },
+      {
+        "at": "2026-10-24T20:41:07.937Z",
+        "bounds": {
+          "x": 1509,
+          "y": 265,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 1,
+        "ups": 0
+      },
+      {
+        "at": "2026-10-24T20:41:08.244Z",
+        "bounds": {
+          "x": 1509,
+          "y": 265,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 1,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:40.662Z",
+        "bounds": {
+          "x": 1509,
+          "y": 265,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 1,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:40.971Z",
+        "bounds": {
+          "x": 1509,
+          "y": 265,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 1,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:48.086Z",
+        "bounds": {
+          "x": 1509,
+          "y": 265,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 1,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:48.393Z",
+        "bounds": {
+          "x": 1509,
+          "y": 265,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 1,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:48.709Z",
+        "bounds": {
+          "x": 1543,
+          "y": 146,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 2,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:49.016Z",
+        "bounds": {
+          "x": 1536,
+          "y": 97,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 2,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:49.323Z",
+        "bounds": {
+          "x": 1498,
+          "y": 46,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 2,
+        "ups": 1
+      },
+      {
+        "at": "2026-10-24T20:42:49.631Z",
+        "bounds": {
+          "x": 1498,
+          "y": 43,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 2,
+        "ups": 2
+      },
+      {
+        "at": "2026-10-24T20:43:43.541Z",
+        "bounds": {
+          "x": 1498,
+          "y": 43,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 2,
+        "ups": 2
+      },
+      {
+        "at": "2026-10-24T20:43:44.156Z",
+        "bounds": {
+          "x": 870,
+          "y": 55,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 3,
+        "ups": 2
+      },
+      {
+        "at": "2026-10-24T20:43:44.460Z",
+        "bounds": {
+          "x": 399,
+          "y": 101,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 3,
+        "ups": 2
+      },
+      {
+        "at": "2026-10-24T20:43:44.770Z",
+        "bounds": {
+          "x": 379,
+          "y": 99,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 3,
+        "ups": 2
+      },
+      {
+        "at": "2026-10-24T20:43:45.079Z",
+        "bounds": {
+          "x": 379,
+          "y": 99,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 3,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:48.494Z",
+        "bounds": {
+          "x": 665,
+          "y": 119,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:48.800Z",
+        "bounds": {
+          "x": 1403,
+          "y": 109,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:49.112Z",
+        "bounds": {
+          "x": 1555,
+          "y": 102,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:49.421Z",
+        "bounds": {
+          "x": 585,
+          "y": 136,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:49.730Z",
+        "bounds": {
+          "x": 150,
+          "y": 226,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:50.041Z",
+        "bounds": {
+          "x": 86,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:50.351Z",
+        "bounds": {
+          "x": 24,
+          "y": 644,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:50.663Z",
+        "bounds": {
+          "x": 16,
+          "y": 624,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:50.972Z",
+        "bounds": {
+          "x": 1,
+          "y": 624,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:51.280Z",
+        "bounds": {
+          "x": -47,
+          "y": 612,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 3
+      },
+      {
+        "at": "2026-10-24T20:43:51.589Z",
+        "bounds": {
+          "x": 8,
+          "y": 604,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:44:39.910Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:44:40.838Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:44:42.075Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:44:42.696Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:44:43.007Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:45:11.514Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 4,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:45:12.142Z",
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 5,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:45:12.451Z",
+        "bounds": {
+          "x": 460,
+          "y": 571,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 5,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:45:12.755Z",
+        "bounds": {
+          "x": 457,
+          "y": 571,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 5,
+        "ups": 4
+      },
+      {
+        "at": "2026-10-24T20:45:13.065Z",
+        "bounds": {
+          "x": 457,
+          "y": 571,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 5,
+        "ups": 5
+      },
+      {
+        "at": "2026-10-24T20:45:13.377Z",
+        "bounds": {
+          "x": 457,
+          "y": 571,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 5,
+        "ups": 5
+      },
+      {
+        "at": "2026-10-24T20:45:13.997Z",
+        "bounds": {
+          "x": 457,
+          "y": 571,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 6,
+        "ups": 5
+      },
+      {
+        "at": "2026-10-24T20:45:14.305Z",
+        "bounds": {
+          "x": 193,
+          "y": 582,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 6,
+        "ups": 5
+      },
+      {
+        "at": "2026-10-24T20:45:14.921Z",
+        "bounds": {
+          "x": 193,
+          "y": 582,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 6,
+        "ups": 6
+      },
+      {
+        "at": "2026-10-24T20:45:15.541Z",
+        "bounds": {
+          "x": 193,
+          "y": 582,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 6,
+        "ups": 6
+      },
+      {
+        "at": "2026-10-24T20:45:15.853Z",
+        "bounds": {
+          "x": 125,
+          "y": 582,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 7,
+        "ups": 6
+      },
+      {
+        "at": "2026-10-24T20:45:16.162Z",
+        "bounds": {
+          "x": 120,
+          "y": 582,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 7,
+        "ups": 7
+      },
+      {
+        "at": "2026-10-24T20:48:09.404Z",
+        "bounds": {
+          "x": 120,
+          "y": 582,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 8,
+        "ups": 7
+      },
+      {
+        "at": "2026-10-24T20:48:09.716Z",
+        "bounds": {
+          "x": -30,
+          "y": 562,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 8,
+        "ups": 7
+      },
+      {
+        "at": "2026-10-24T20:48:10.028Z",
+        "bounds": {
+          "x": -17,
+          "y": 634,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": true,
+        "clickThrough": false,
+        "downs": 8,
+        "ups": 7
+      },
+      {
+        "at": "2026-10-24T20:48:10.337Z",
+        "bounds": {
+          "x": 8,
+          "y": 604,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 8,
+        "ups": 8
+      },
+      {
+        "at": "2026-10-24T20:48:10.647Z",
+        "bounds": {
+          "x": 8,
+          "y": 604,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 8,
+        "ups": 8
+      },
+      {
+        "at": "2026-10-24T20:48:16.534Z",
+        "bounds": {
+          "x": 8,
+          "y": 604,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": false,
+        "downs": 8,
+        "ups": 8
+      },
+      {
+        "at": "2026-10-24T20:48:16.843Z",
+        "bounds": {
+          "x": 8,
+          "y": 604,
+          "width": 380,
+          "height": 420
+        },
+        "dragging": false,
+        "clickThrough": true,
+        "downs": 8,
+        "ups": 8
+      }
+    ]
+  },
+  "backgroundBlank": {
+    "runId": "023d40aa-8cd1-4861-b7a5-531a98f92988",
+    "records": [
+      {
+        "at": 1792876876129,
+        "end": 1792876876232,
+        "mode": "background",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "✅ Posted click to Chromium pid 29780 at (1549,621) (background, no foreground swap)."
+            }
+          ],
+          "structuredContent": {
+            "delivery": {
+              "mode": "background"
+            },
+            "effect": "unverifiable",
+            "route": "synthetic_events"
+          }
+        }
+      }
+    ]
+  },
+  "firstGlobalBlank": {
+    "at": 1792876999434,
+    "end": 1792876999603,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "✅ Sent click via SendInput to pid 29780 at (1523,595) (delivery_mode:foreground)."
+        }
+      ],
+      "structuredContent": {
+        "delivery": {
+          "mode": "foreground"
+        },
+        "effect": "unverifiable",
+        "route": "global_input"
+      }
+    }
+  },
+  "settledGlobalReadback": {
+    "driverPostconditionError": "foreground_unavailable after click; actual HWND 0x1005aa equals owned target 1050026",
+    "readback": {
+      "runId": "023d40aa-8cd1-4861-b7a5-531a98f92988",
+      "pid": 29780,
+      "status": "ready",
+      "createdAt": "2026-10-24T21:20:14.171Z",
+      "scope": "Owned prototype + mouse-only target; no OS key injection or system settings",
+      "launchDiagnostics": {
+        "electron": "45.0.0",
+        "node": "24.22.0",
+        "mainApi": true,
+        "hasLabFlag": true,
+        "nodeModeFlag": false
+      },
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "initialPet": {
+        "id": 1,
+        "windowId": 525800,
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "visible": true,
+        "focused": false
+      },
+      "initialTarget": {
+        "id": 2,
+        "windowId": 1050026,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1032
+        },
+        "visible": true,
+        "focused": false
+      },
+      "displays": [
+        {
+          "id": 3539006886,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080
+          },
+          "workArea": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1032
+          },
+          "scaleFactor": 1
+        }
+      ],
+      "avatar": {
+        "x": 114,
+        "y": 4,
+        "width": 152,
+        "height": 152,
+        "dpr": 1
+      },
+      "pet": {
+        "id": 1,
+        "windowId": 525800,
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "visible": true,
+        "focused": false
+      },
+      "target": {
+        "id": 2,
+        "windowId": 1050026,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1032
+        },
+        "visible": true,
+        "focused": false
+      },
+      "petData": {
+        "pointer": {
+          "downs": 3,
+          "ups": 3,
+          "clicks": 3,
+          "events": [
+            {
+              "type": "pointerdown",
+              "x": 33,
+              "y": 33,
+              "trusted": true,
+              "at": 1792876876148
+            },
+            {
+              "type": "pointerup",
+              "x": 33,
+              "y": 33,
+              "trusted": true,
+              "at": 1792876876178
+            },
+            {
+              "type": "click",
+              "x": 33,
+              "y": 33,
+              "trusted": true,
+              "at": 1792876876178
+            },
+            {
+              "type": "pointerdown",
+              "x": 209,
+              "y": 370,
+              "trusted": true,
+              "at": 1792876881958
+            },
+            {
+              "type": "pointerup",
+              "x": 209,
+              "y": 370,
+              "trusted": true,
+              "at": 1792876882087
+            },
+            {
+              "type": "click",
+              "x": 209,
+              "y": 370,
+              "trusted": true,
+              "at": 1792876882087
+            },
+            {
+              "type": "pointerdown",
+              "x": 7,
+              "y": 7,
+              "trusted": true,
+              "at": 1792876999480
+            },
+            {
+              "type": "pointerup",
+              "x": 7,
+              "y": 7,
+              "trusted": true,
+              "at": 1792876999480
+            },
+            {
+              "type": "click",
+              "x": 7,
+              "y": 7,
+              "trusted": true,
+              "at": 1792876999480
+            }
+          ]
+        },
+        "snapshot": {
+          "state": "idle",
+          "bounds": {
+            "x": 1516,
+            "y": 588,
+            "width": 380,
+            "height": 420
+          },
+          "displayId": 3539006886,
+          "displayCount": 1,
+          "scaleFactor": 1,
+          "clickThrough": false,
+          "dragging": false
+        }
+      },
+      "targetData": {
+        "downs": 3,
+        "ups": 3,
+        "clicks": 3,
+        "lastEvent": {
+          "type": "click",
+          "clientX": 1523,
+          "clientY": 595,
+          "button": 0,
+          "isTrusted": true,
+          "time": 1792877084918
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "clientX": 465,
+            "clientY": 13,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876843479
+          },
+          {
+            "type": "pointerup",
+            "clientX": 703,
+            "clientY": 126,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876843871
+          },
+          {
+            "type": "click",
+            "clientX": 703,
+            "clientY": 126,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876843871
+          },
+          {
+            "type": "pointerdown",
+            "clientX": 846,
+            "clientY": 839,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876857238
+          },
+          {
+            "type": "pointerup",
+            "clientX": 846,
+            "clientY": 839,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876857323
+          },
+          {
+            "type": "click",
+            "clientX": 846,
+            "clientY": 839,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876857323
+          },
+          {
+            "type": "pointerdown",
+            "clientX": 1523,
+            "clientY": 595,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792877084915
+          },
+          {
+            "type": "pointerup",
+            "clientX": 1523,
+            "clientY": 595,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792877084917
+          },
+          {
+            "type": "click",
+            "clientX": 1523,
+            "clientY": 595,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792877084918
+          }
+        ]
+      },
+      "updatedAt": "2026-10-24T21:25:07.794Z"
+    }
+  },
+  "automaticDrag": {
+    "runId": "023d40aa-8cd1-4861-b7a5-531a98f92988",
+    "before": {
+      "height": 420,
+      "width": 380,
+      "x": 1516,
+      "y": 588
+    },
+    "records": [
+      {
+        "at": 1792877270681,
+        "mode": "background",
+        "error": "ToolCallError: Background delivery is not available for target window class 'Chrome_WidgetWin_1' on this event kind (mouse_move): background drag cannot reach this target at the start point (1707,669) — it is occluded by another window. Escalate to delivery_mode:\"foreground\".. Retry this action with delivery_mode:\"foreground\"; Cua Driver will activate the target for the action and restore the previous foreground afterward."
+      },
+      {
+        "at": 1792877272359,
+        "end": 1792877273145,
+        "mode": "foreground",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "✅ Sent drag via SendInput on pid 29780 from screen (1707,669) → (1607,619) in 700ms / 25 steps (delivery_mode:foreground)."
+            }
+          ],
+          "structuredContent": {
+            "delivery": {
+              "mode": "foreground"
+            },
+            "effect": "unverifiable",
+            "route": "global_input"
+          }
+        }
+      }
+    ],
+    "verification": {
+      "elapsed_ms": 4922,
+      "predicates": [
+        {
+          "index": 0,
+          "observed_json": "{\"bounds\":{\"height\":420,\"width\":380,\"x\":1516,\"y\":588},\"exists\":true}",
+          "status": "unsatisfied",
+          "unknown_reason": null
+        }
+      ],
+      "samples": 3,
+      "stable": false,
+      "status": "unsatisfied"
+    },
+    "after": {
+      "runId": "023d40aa-8cd1-4861-b7a5-531a98f92988",
+      "pid": 29780,
+      "status": "ready",
+      "createdAt": "2026-10-24T21:20:14.171Z",
+      "scope": "Owned prototype + mouse-only target; no OS key injection or system settings",
+      "launchDiagnostics": {
+        "electron": "45.0.0",
+        "node": "24.22.0",
+        "mainApi": true,
+        "hasLabFlag": true,
+        "nodeModeFlag": false
+      },
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "initialPet": {
+        "id": 1,
+        "windowId": 525800,
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "visible": true,
+        "focused": false
+      },
+      "initialTarget": {
+        "id": 2,
+        "windowId": 1050026,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1032
+        },
+        "visible": true,
+        "focused": false
+      },
+      "displays": [
+        {
+          "id": 3539006886,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080
+          },
+          "workArea": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1032
+          },
+          "scaleFactor": 1
+        }
+      ],
+      "avatar": {
+        "x": 114,
+        "y": 4,
+        "width": 152,
+        "height": 152,
+        "dpr": 1
+      },
+      "pet": {
+        "id": 1,
+        "windowId": 525800,
+        "bounds": {
+          "x": 1516,
+          "y": 588,
+          "width": 380,
+          "height": 420
+        },
+        "visible": true,
+        "focused": false
+      },
+      "target": {
+        "id": 2,
+        "windowId": 1050026,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1032
+        },
+        "visible": true,
+        "focused": false
+      },
+      "petData": {
+        "pointer": {
+          "downs": 3,
+          "ups": 3,
+          "clicks": 3,
+          "events": [
+            {
+              "type": "pointerdown",
+              "x": 33,
+              "y": 33,
+              "trusted": true,
+              "at": 1792876876148
+            },
+            {
+              "type": "pointerup",
+              "x": 33,
+              "y": 33,
+              "trusted": true,
+              "at": 1792876876178
+            },
+            {
+              "type": "click",
+              "x": 33,
+              "y": 33,
+              "trusted": true,
+              "at": 1792876876178
+            },
+            {
+              "type": "pointerdown",
+              "x": 209,
+              "y": 370,
+              "trusted": true,
+              "at": 1792876881958
+            },
+            {
+              "type": "pointerup",
+              "x": 209,
+              "y": 370,
+              "trusted": true,
+              "at": 1792876882087
+            },
+            {
+              "type": "click",
+              "x": 209,
+              "y": 370,
+              "trusted": true,
+              "at": 1792876882087
+            },
+            {
+              "type": "pointerdown",
+              "x": 7,
+              "y": 7,
+              "trusted": true,
+              "at": 1792876999480
+            },
+            {
+              "type": "pointerup",
+              "x": 7,
+              "y": 7,
+              "trusted": true,
+              "at": 1792876999480
+            },
+            {
+              "type": "click",
+              "x": 7,
+              "y": 7,
+              "trusted": true,
+              "at": 1792876999480
+            }
+          ]
+        },
+        "snapshot": {
+          "state": "idle",
+          "bounds": {
+            "x": 1516,
+            "y": 588,
+            "width": 380,
+            "height": 420
+          },
+          "displayId": 3539006886,
+          "displayCount": 1,
+          "scaleFactor": 1,
+          "clickThrough": false,
+          "dragging": false
+        }
+      },
+      "targetData": {
+        "downs": 3,
+        "ups": 3,
+        "clicks": 3,
+        "lastEvent": {
+          "type": "click",
+          "clientX": 1523,
+          "clientY": 595,
+          "button": 0,
+          "isTrusted": true,
+          "time": 1792877084918
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "clientX": 465,
+            "clientY": 13,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876843479
+          },
+          {
+            "type": "pointerup",
+            "clientX": 703,
+            "clientY": 126,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876843871
+          },
+          {
+            "type": "click",
+            "clientX": 703,
+            "clientY": 126,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876843871
+          },
+          {
+            "type": "pointerdown",
+            "clientX": 846,
+            "clientY": 839,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876857238
+          },
+          {
+            "type": "pointerup",
+            "clientX": 846,
+            "clientY": 839,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876857323
+          },
+          {
+            "type": "click",
+            "clientX": 846,
+            "clientY": 839,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792876857323
+          },
+          {
+            "type": "pointerdown",
+            "clientX": 1523,
+            "clientY": 595,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792877084915
+          },
+          {
+            "type": "pointerup",
+            "clientX": 1523,
+            "clientY": 595,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792877084917
+          },
+          {
+            "type": "click",
+            "clientX": 1523,
+            "clientY": 595,
+            "button": 0,
+            "isTrusted": true,
+            "time": 1792877084918
+          }
+        ]
+      },
+      "updatedAt": "2026-10-24T21:28:01.047Z"
+    }
+  },
+  "processExit": {
+    "launcherPid": 16828,
+    "createdAt": "2026-10-24T21:20:14.064Z",
+    "status": "closed",
+    "childPid": 29780,
+    "exitCode": 0
+  },
+  "limitations": [
+    "External events were not generated by the agent; do not attribute them to Cua",
+    "Same-process backing window and stacking affect the scene",
+    "First global click and automatic drag did not satisfy the intended postconditions",
+    "No keyboard injection or system DPI change"
+  ]
+}

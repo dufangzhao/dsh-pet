@@ -1,0 +1,170 @@
+/* 桌宠原生鼠标测试底板：浅色全窗口底板，无任何可点击控件样式。 */
+
+:root {
+  color-scheme: light;
+  --surface: #f4f6f9;
+  --panel: #ffffff;
+  --border: #d6dde6;
+  --text: #1f2933;
+  --muted: #5b6672;
+  --accent: #1d4ed8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+  padding: 28px 32px;
+}
+
+.board__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.board__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.board__subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.counts,
+.detail {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.counts__heading,
+.detail__heading {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.counts__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.count-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.count-card__label {
+  color: var(--muted);
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: 13px;
+}
+
+.count-card__value {
+  margin: 4px 0 0;
+  color: var(--accent);
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: 40px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.detail__last {
+  margin: 0 0 10px;
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.detail__recent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 168px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.detail__recent li {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.board__footer {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.board__footer p {
+  margin: 2px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .counts,
+  .detail,
+  .count-card,
+  .status {
+    border: 1px solid CanvasText;
+  }
+}

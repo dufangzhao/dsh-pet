@@ -1,0 +1,420 @@
+{
+  "analysis": {
+    "status": "captured",
+    "reason": "60s-complete",
+    "runtime": {
+      "electron": "45.0.0",
+      "node": "24.22.0"
+    },
+    "expectedEdges": 22,
+    "observedEdges": 22,
+    "orderedPairsMatch": true,
+    "classificationMatch": false,
+    "holds": [
+      {
+        "index": 1,
+        "windowEventMs": 244,
+        "nativeSampleMs": 264,
+        "windowKind": "tap",
+        "nativeKind": "hold",
+        "downDeltaMs": -8,
+        "upDeltaMs": 12
+      },
+      {
+        "index": 2,
+        "windowEventMs": 147,
+        "nativeSampleMs": 140,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 14,
+        "upDeltaMs": 7
+      },
+      {
+        "index": 3,
+        "windowEventMs": 164,
+        "nativeSampleMs": 154,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 12,
+        "upDeltaMs": 2
+      },
+      {
+        "index": 4,
+        "windowEventMs": 162,
+        "nativeSampleMs": 171,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": -2,
+        "upDeltaMs": 7
+      },
+      {
+        "index": 5,
+        "windowEventMs": 165,
+        "nativeSampleMs": 170,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 3,
+        "upDeltaMs": 8
+      },
+      {
+        "index": 6,
+        "windowEventMs": 170,
+        "nativeSampleMs": 170,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 1,
+        "upDeltaMs": 1
+      },
+      {
+        "index": 7,
+        "windowEventMs": 2194,
+        "nativeSampleMs": 2186,
+        "windowKind": "hold",
+        "nativeKind": "hold",
+        "downDeltaMs": 9,
+        "upDeltaMs": 1
+      },
+      {
+        "index": 8,
+        "windowEventMs": 1679,
+        "nativeSampleMs": 1675,
+        "windowKind": "hold",
+        "nativeKind": "hold",
+        "downDeltaMs": 14,
+        "upDeltaMs": 10
+      },
+      {
+        "index": 9,
+        "windowEventMs": 189,
+        "nativeSampleMs": 186,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 7,
+        "upDeltaMs": 4
+      },
+      {
+        "index": 10,
+        "windowEventMs": 196,
+        "nativeSampleMs": 185,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 11,
+        "upDeltaMs": 0
+      },
+      {
+        "index": 11,
+        "windowEventMs": 170,
+        "nativeSampleMs": 172,
+        "windowKind": "tap",
+        "nativeKind": "tap",
+        "downDeltaMs": 7,
+        "upDeltaMs": 9
+      }
+    ],
+    "gapSummary": {
+      "count": 5505,
+      "p50": 15.497900000002119,
+      "p95": 16.174200000001292,
+      "max": 27.83600000000297
+    },
+    "focusTransitions": [
+      {
+        "focused": true,
+        "at": 1792880077858
+      },
+      {
+        "focused": false,
+        "at": 1792880082642
+      },
+      {
+        "focused": true,
+        "at": 1792880085650
+      }
+    ],
+    "outsideFocusPolls": 495,
+    "limitations": [
+      "Human sample set only; not an arbitrary-short-pulse guarantee",
+      "Event-time deltas compare application event arrival vs polling, not physical hardware latency",
+      "No keyboard injection; only F8 while owned window was foreground"
+    ],
+    "thresholdMs": 250
+  },
+  "raw": {
+    "status": "captured",
+    "key": "F8",
+    "pid": 31540,
+    "createdAt": "2026-10-24T22:14:32.774Z",
+    "expected": [
+      {
+        "type": "down",
+        "at": 1792880098508,
+        "monotonic": 25792.554
+      },
+      {
+        "type": "up",
+        "at": 1792880098752,
+        "monotonic": 26035.9432
+      },
+      {
+        "type": "down",
+        "at": 1792880101365,
+        "monotonic": 28649.5868
+      },
+      {
+        "type": "up",
+        "at": 1792880101512,
+        "monotonic": 28795.9549
+      },
+      {
+        "type": "down",
+        "at": 1792880101676,
+        "monotonic": 28959.8192
+      },
+      {
+        "type": "up",
+        "at": 1792880101840,
+        "monotonic": 29124.3929
+      },
+      {
+        "type": "down",
+        "at": 1792880101986,
+        "monotonic": 29270.6938
+      },
+      {
+        "type": "up",
+        "at": 1792880102148,
+        "monotonic": 29432.7672
+      },
+      {
+        "type": "down",
+        "at": 1792880102319,
+        "monotonic": 29603.1121
+      },
+      {
+        "type": "up",
+        "at": 1792880102484,
+        "monotonic": 29768.5552
+      },
+      {
+        "type": "down",
+        "at": 1792880102675,
+        "monotonic": 29959.166
+      },
+      {
+        "type": "up",
+        "at": 1792880102845,
+        "monotonic": 30129.197
+      },
+      {
+        "type": "down",
+        "at": 1792880104035,
+        "monotonic": 31319.4783
+      },
+      {
+        "type": "up",
+        "at": 1792880106229,
+        "monotonic": 33513.6082
+      },
+      {
+        "type": "down",
+        "at": 1792880107523,
+        "monotonic": 34807.2203
+      },
+      {
+        "type": "up",
+        "at": 1792880109202,
+        "monotonic": 36485.927
+      },
+      {
+        "type": "down",
+        "at": 1792880111424,
+        "monotonic": 38708.0941
+      },
+      {
+        "type": "up",
+        "at": 1792880111613,
+        "monotonic": 38897.5363
+      },
+      {
+        "type": "down",
+        "at": 1792880111809,
+        "monotonic": 39093.7969
+      },
+      {
+        "type": "up",
+        "at": 1792880112005,
+        "monotonic": 39289.3732
+      },
+      {
+        "type": "down",
+        "at": 1792880112261,
+        "monotonic": 39545.6098
+      },
+      {
+        "type": "up",
+        "at": 1792880112431,
+        "monotonic": 39714.8643
+      }
+    ],
+    "scope": "F8 only, owned focused window only; no input injection, no audio",
+    "windowId": 1902456,
+    "workerRuntime": {
+      "electron": "45.0.0",
+      "node": "24.22.0"
+    },
+    "startedAt": "2026-10-24T22:14:58.508Z",
+    "reason": "60s-complete",
+    "observed": {
+      "key": "F8",
+      "periodMs": 10,
+      "edges": [
+        {
+          "type": "down",
+          "at": 1792880098500,
+          "monotonic": 25487.4091
+        },
+        {
+          "type": "up",
+          "at": 1792880098764,
+          "monotonic": 25751.03
+        },
+        {
+          "type": "down",
+          "at": 1792880101379,
+          "monotonic": 28366.3142
+        },
+        {
+          "type": "up",
+          "at": 1792880101519,
+          "monotonic": 28505.8231
+        },
+        {
+          "type": "down",
+          "at": 1792880101688,
+          "monotonic": 28675.1221
+        },
+        {
+          "type": "up",
+          "at": 1792880101842,
+          "monotonic": 28829.7177
+        },
+        {
+          "type": "down",
+          "at": 1792880101984,
+          "monotonic": 28971.0888
+        },
+        {
+          "type": "up",
+          "at": 1792880102155,
+          "monotonic": 29141.662
+        },
+        {
+          "type": "down",
+          "at": 1792880102322,
+          "monotonic": 29309.6061
+        },
+        {
+          "type": "up",
+          "at": 1792880102492,
+          "monotonic": 29479.089
+        },
+        {
+          "type": "down",
+          "at": 1792880102676,
+          "monotonic": 29663.4996
+        },
+        {
+          "type": "up",
+          "at": 1792880102846,
+          "monotonic": 29833.6882
+        },
+        {
+          "type": "down",
+          "at": 1792880104044,
+          "monotonic": 31031.6284
+        },
+        {
+          "type": "up",
+          "at": 1792880106230,
+          "monotonic": 33217.1218
+        },
+        {
+          "type": "down",
+          "at": 1792880107537,
+          "monotonic": 34524.4806
+        },
+        {
+          "type": "up",
+          "at": 1792880109212,
+          "monotonic": 36198.9954
+        },
+        {
+          "type": "down",
+          "at": 1792880111431,
+          "monotonic": 38418.5412
+        },
+        {
+          "type": "up",
+          "at": 1792880111617,
+          "monotonic": 38604.6941
+        },
+        {
+          "type": "down",
+          "at": 1792880111820,
+          "monotonic": 38807.2615
+        },
+        {
+          "type": "up",
+          "at": 1792880112005,
+          "monotonic": 38992.3424
+        },
+        {
+          "type": "down",
+          "at": 1792880112268,
+          "monotonic": 39255.54
+        },
+        {
+          "type": "up",
+          "at": 1792880112440,
+          "monotonic": 39427.5074
+        }
+      ],
+      "polls": 5505,
+      "focusTransitions": [
+        {
+          "focused": true,
+          "at": 1792880077858
+        },
+        {
+          "focused": false,
+          "at": 1792880082642
+        },
+        {
+          "focused": true,
+          "at": 1792880085650
+        }
+      ],
+      "outsideFocusPolls": 495,
+      "gapSummary": {
+        "count": 5505,
+        "p50": 15.497900000002119,
+        "p95": 16.174200000001292,
+        "max": 27.83600000000297
+      }
+    },
+    "finishedAt": "2026-10-24T22:15:58.530Z"
+  },
+  "candidateReview": [
+    {
+      "thresholdMs": 250,
+      "mismatchedObservedDurations": [
+        1
+      ]
+    },
+    {
+      "thresholdMs": 300,
+      "mismatchedObservedDurations": []
+    }
+  ],
+  "candidateReviewLimit": "Candidates are evaluated on the same 11-press sample, not independently validated; window arrival time is not hardware ground truth."
+}

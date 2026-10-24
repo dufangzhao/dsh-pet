@@ -22,7 +22,15 @@ let window: BrowserWindow | undefined;
 let budgetStart = performance.now();
 let requests = 0;
 if (!app.isPackaged) {
-  const profile = path.resolve(here, '../../../../.cache/pet-prototype-profile');
+  const profile = path.resolve(
+    here,
+    '../../../../.cache/',
+    process.argv.includes('--m0-key-lab')
+      ? 'pet-key-lab-profile'
+      : process.argv.includes('--m0-mouse-lab')
+        ? 'pet-mouse-lab-profile'
+        : 'pet-prototype-profile',
+  );
   mkdirSync(profile, { recursive: true });
   app.setPath('userData', profile);
 }
