@@ -5,14 +5,14 @@
 ## 写入分工
 
 - 主会话：contracts中的原型类型、preload桥、主进程IPC处理/来源参数校验、启动与构建集成、QA实测。
-- K3：`apps/desktop/src/main/windows/**` 与 `apps/desktop/src/renderer/pet/**`，含这些目录内的单元测试。不得改包清单、预加载或契约；缺依赖报告主会话。
+- DeepSeek（前端）：`apps/desktop/src/main/windows/**` 与 `apps/desktop/src/renderer/pet/**`，含这些目录内的单元测试。不得改包清单、预加载或契约；缺依赖报告主会话。
 - QA探针与数据由主会话在 `qa/probes/` 与 `qa/` 保留，下载数据/截图只写忽略的 `.cache/`。这补充M0表中省略的可复现验证代码路径，不改变产品决策。
 
 ## 渲染器接口
 
-`window.pet` 类型为[PetPrototypeBridge](../packages/contracts/src/pet-prototype.ts)，暴露version=1、getSnapshot、setInteraction、beginDrag、endDrag、previewState、quit、onSnapshot。所有调用返回显式ok/error；订阅返回解除函数。没有通用send/invoke，也不向渲染器传IpcRendererEvent。通道名由[契约](../packages/contracts/src/pet-prototype.ts)中的PET_IPC固定，K3不注册IPC。
+`window.pet` 类型为[PetPrototypeBridge](../packages/contracts/src/pet-prototype.ts)，暴露version=1、getSnapshot、setInteraction、beginDrag、endDrag、previewState、quit、onSnapshot。所有调用返回显式ok/error；订阅返回解除函数。没有通用send/invoke，也不向渲染器传IpcRendererEvent。通道名由[契约](../packages/contracts/src/pet-prototype.ts)中的PET_IPC固定，DeepSeek（前端）不注册IPC。
 
-## K3 主窗口导出约定
+## DeepSeek（前端） 主窗口导出约定
 
 入口 `apps/desktop/src/main/windows/pet-window.ts` 导出 `createPetWindow(options)`。
 

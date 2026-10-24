@@ -39,15 +39,15 @@
 | --- | --- | --- |
 | 主会话 | 复杂后端与关键路径：宿主内核、插件运行时、能力路由、任务与取消、进程间通信、权限审批、凭据代理、ASR与AI流式协议、云端适配器、安全相关代码；集成、审查、测试、Git提交 | 新会话本身 |
 | DeepSeek | 规格清晰的执行型任务：工程脚手架与配置、按已定接口写类型/Schema/样板代码、单元测试、脚本、参考插件、文档整理 | subagent：provider `workbuddy-subscription`，model `deepseek-v4.1-flash` |
-| K3 | 所有前端任务：桌宠窗口界面与交互、气泡、设置台（React + Tailwind）、插件管理与授权界面、对话面板、原创极简角色、可访问性 | subagent：provider `factory-g`，model `kimi-k3` |
+| DeepSeek（前端） | 所有前端任务：桌宠窗口界面与交互、气泡、设置台（React + Tailwind）、插件管理与授权界面、对话面板、原创极简角色、可访问性 | subagent：provider `workbuddy-subscription`，model `deepseek-v4.1-flash`；用户在K3失败后明确要求前端也改用DeepSeek |
 
 规则：
 
-- 开工前用list_subagent_models确认两个路由在新会话中可用；不可用时告诉用户，不擅自更换模型。
+- 开工前用list_subagent_models确认当前指定路由可用；现工程与前端均为workbuddy-subscription/deepseek-v4.1-flash。不可用时告诉用户，不擅自更换模型。
 - 同时最多3个子代理；写入范围互不重叠。
 - 子代理看不到主会话的上下文，任务说明必须自包含：目标、要读的文档、写入范围、接口约定、完成定义、验证命令、禁止事项。
 - 子代理不执行git提交和推送、不安装全局依赖、不修改写入范围外的文件，完成后汇报改动与验证结果。
-- 前端用到的预加载桥、IPC消息与事件名，由主会话先在packages/contracts或apps/desktop/src/preload中定义，K3按约定使用，不自行增加系统调用。
+- 前端用到的预加载桥、IPC消息与事件名，由主会话先在packages/contracts或apps/desktop/src/preload中定义，前端子代理按约定使用，不自行增加系统调用。
 - 子代理的结果是材料：主会话审查diff并运行验证，不合格退回修改，通过后由主会话提交。
 
 ## 4. 仓库结构（暂定）
@@ -55,16 +55,16 @@
 ```text
 apps/desktop/
   src/main/               Electron主进程：窗口、托盘、启动、宿主进程托管（主会话）
-  src/main/windows/       桌宠窗口创建与行为（K3，与主会话约定接口）
+  src/main/windows/       桌宠窗口创建与行为（DeepSeek前端，与主会话约定接口）
   src/preload/            预加载与受控桥（主会话定义）
-  src/renderer/pet/       桌宠窗口界面（K3）
-  src/renderer/console/   设置台界面（K3）
+  src/renderer/pet/       桌宠窗口界面（DeepSeek前端）
+  src/renderer/console/   设置台界面（DeepSeek前端）
 packages/
   contracts/              能力契约类型、清单Schema、错误分类、IPC消息（主会话定规格，DeepSeek实现）
   host-kernel/            插件管理、路由、任务、配置、凭据、权限审批（主会话）
   plugin-sdk/             插件开发接口（主会话定规格，DeepSeek实现）
   contract-tests/         契约测试套件与参考插件（DeepSeek）
-  ui-kit/                 设置台与插件界面共用组件、主题令牌（K3）
+  ui-kit/                 设置台与插件界面共用组件、主题令牌（DeepSeek前端）
 plugins/
   talk-key/  audio-capture/  asr-local/  asr-cloud/  llm-provider/  chat/  voice-chat/  avatar-default/
 scripts/                  模型下载与校验、打包（DeepSeek）
@@ -82,7 +82,7 @@ qa/                       验证与验收记录
 | M0-03 | 验证V-01：Cordis在插件运行区进程中的启停、依赖注入、dispose清理、激活失败回滚 | 主会话 | M0-02 | qa/V-01.md、packages/host-kernel试验代码 | 结论已记录；不通过则评估替代方案并告知用户 |
 | M0-04 | 验证V-03：sherpa-onnx-node在所选进程模型中加载并识别样本（对照Coopanion使用应用运行时的Node模式子进程） | 主会话 | M0-02 | qa/V-03.md | 两个候选模型都能加载并出结果；记录进程方式 |
 | M0-05 | 验证说话键：Koffi调用GetAsyncKeyState轮询（参照Coopanion的30毫秒周期），长按与轻点判定、快速轻点漏检、CPU占用 | 主会话 | M0-02 | qa/V-key.md | 阈值初值与实测记录 |
-| M0-06 | 桌宠窗口原型：透明无边框置顶、显示不抢焦点、角色区域可点击、空白区域穿透、拖拽、多显示器与缩放 | K3 | M0-02 | src/main/windows、src/renderer/pet | 截图或录屏证据；问题清单 |
+| M0-06 | 桌宠窗口原型：透明无边框置顶、显示不抢焦点、角色区域可点击、空白区域穿透、拖拽、多显示器与缩放 | DeepSeek（前端） | M0-02 | src/main/windows、src/renderer/pet | 截图或录屏证据；问题清单 |
 
 M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验证不通过：先记录证据，再告诉用户可选方案。
 
@@ -104,14 +104,14 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 
 | ID | 工作包 | 负责 | 依赖 | 写入范围 | 完成定义 |
 | --- | --- | --- | --- | --- | --- |
-| M2-01 | 界面组件与主题令牌：按钮、表单、列表、对话框、通知；深浅主题；键盘焦点样式 | K3 | M0-01 | packages/ui-kit | 组件示例页；键盘可达 |
-| M2-02 | 设置台框架：左侧导航；页面：开始、桌宠、语音输入、模型、插件、权限与数据、关于；普通与高级分层（参照Coopanion思路） | K3 | M2-01 | src/renderer/console | 各页面可导航；有空状态与加载状态 |
-| M2-03 | 由配置Schema生成设置表单；显示“立即生效、需重载、需重启”与保存失败 | K3 | M1-01、M2-01 | src/renderer/console | 校验与保存状态显示正确 |
-| M2-04 | 插件管理页：列表、状态、启用停用卸载、权限声明、错误与修复入口 | K3 | M2-02、M1-02接口 | src/renderer/console | 与宿主状态一致；停用后入口消失 |
-| M2-05 | 授权对话框、权限预设切换、审计记录查看（只由宿主渲染） | K3 | M1-07接口 | src/renderer/console | 插件内容无法触发授权（SEC-06） |
+| M2-01 | 界面组件与主题令牌：按钮、表单、列表、对话框、通知；深浅主题；键盘焦点样式 | DeepSeek（前端） | M0-01 | packages/ui-kit | 组件示例页；键盘可达 |
+| M2-02 | 设置台框架：左侧导航；页面：开始、桌宠、语音输入、模型、插件、权限与数据、关于；普通与高级分层（参照Coopanion思路） | DeepSeek（前端） | M2-01 | src/renderer/console | 各页面可导航；有空状态与加载状态 |
+| M2-03 | 由配置Schema生成设置表单；显示“立即生效、需重载、需重启”与保存失败 | DeepSeek（前端） | M1-01、M2-01 | src/renderer/console | 校验与保存状态显示正确 |
+| M2-04 | 插件管理页：列表、状态、启用停用卸载、权限声明、错误与修复入口 | DeepSeek（前端） | M2-02、M1-02接口 | src/renderer/console | 与宿主状态一致；停用后入口消失 |
+| M2-05 | 授权对话框、权限预设切换、审计记录查看（只由宿主渲染） | DeepSeek（前端） | M1-07接口 | src/renderer/console | 插件内容无法触发授权（SEC-06） |
 | M2-06 | 贡献点注册与清理（宿主侧）：设置页、命令、快捷按钮、面板 | 主会话 | M1-02 | packages/host-kernel、src/main | 停用插件后贡献点全部清除 |
-| M2-07 | 原创极简角色与状态动画；气泡（临时文字与最终文字区分）；角色旁快捷按钮 | K3 | M0-06 | plugins/avatar-default、src/renderer/pet | 不使用任何Coopanion素材；负载下按性能目标测量 |
-| M2-08 | 托盘菜单：显示/隐藏、设置、停止全部、退出 | K3（主会话定义命令） | M2-06 | src/main中的托盘部分（与主会话约定） | 一键停止可用 |
+| M2-07 | 原创极简角色与状态动画；气泡（临时文字与最终文字区分）；角色旁快捷按钮 | DeepSeek（前端） | M0-06 | plugins/avatar-default、src/renderer/pet | 不使用任何Coopanion素材；负载下按性能目标测量 |
+| M2-08 | 托盘菜单：显示/隐藏、设置、停止全部、退出 | DeepSeek（前端，主会话定义命令） | M2-06 | src/main中的托盘部分（与主会话约定） | 一键停止可用 |
 
 ### M3 语音输入链路
 
@@ -123,7 +123,7 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 | M3-04 | 模型下载与校验脚本、模型清单（来源、大小、哈希、许可） | DeepSeek | M0-04 | scripts、plugins/asr-local/models.json | 哈希不符时拒绝加载（SEC-08） |
 | M3-05 | 云端识别插件：厂家表；阿里云百炼、火山引擎、OpenAI三个适配器（依据[云端资料](../research/tech-cloud-asr.json)，火山部分字段实施前补核）；自带Key；临时文字只显示，定稿交给对话；取消与晚到丢弃；标注验证状态 | 主会话 | M1-04、M1-06 | plugins/asr-cloud | 模拟服务端测试通过；真实Key验证在M5 |
 | M3-06 | 语音对话插件：长按与轻点判定、录音、识别、送入对话；静音自动结束；回复中再次说话先停止当前回复 | 主会话 | M3-01至M3-03、M4-02 | plugins/voice-chat | AC-VC-01、02、04通过 |
-| M3-07 | 语音输入设置页：设备、热键、识别引擎与厂家、模型下载进度、Key填写（经凭据代理）、数据去向提示 | K3 | M2-03、M3各插件接口 | src/renderer/console | 数据去向显示正确 |
+| M3-07 | 语音输入设置页：设备、热键、识别引擎与厂家、模型下载进度、Key填写（经凭据代理）、数据去向提示 | DeepSeek（前端） | M2-03、M3各插件接口 | src/renderer/console | 数据去向显示正确 |
 
 ### M4 AI对话链路
 
@@ -132,8 +132,8 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 | M4-01 | 模型服务插件：厂家表与协议适配器，先做OpenAI兼容Chat Completions；默认DeepSeek；自带Key；流式；取消；错误分类；拒绝向公网明文HTTP端点发送（参照Coopanion） | 主会话 | M1-04、M1-06 | plugins/llm-provider | 模拟服务端测试通过 |
 | M4-02 | 对话插件：会话、历史（本机保存、可清空）、人设、上下文长度管理、停止 | 主会话 | M4-01 | plugins/chat | 取消与晚到丢弃测试通过 |
 | M4-03 | 厂家表数据：各厂家端点、协议、默认模型字段与官方文档链接 | DeepSeek（主会话给格式） | M4-01 | plugins/llm-provider/vendors | 单元测试通过；链接均为官方文档 |
-| M4-04 | 对话面板与气泡接入流式回复；思考与回答动画 | K3 | M2-07、M4-02接口 | src/renderer | 回复期间拖拽与停止可用 |
-| M4-05 | 模型设置页：厂家、Key、模型名、连通性测试（参照Coopanion开始页） | K3 | M2-03、M4-01接口 | src/renderer/console | 测试结果区分鉴权、网络与模型错误 |
+| M4-04 | 对话面板与气泡接入流式回复；思考与回答动画 | DeepSeek（前端） | M2-07、M4-02接口 | src/renderer | 回复期间拖拽与停止可用 |
+| M4-05 | 模型设置页：厂家、Key、模型名、连通性测试（参照Coopanion开始页） | DeepSeek（前端） | M2-03、M4-01接口 | src/renderer/console | 测试结果区分鉴权、网络与模型错误 |
 
 ### M5 验收与打包
 
@@ -141,16 +141,16 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 | --- | --- | --- | --- | --- | --- |
 | M5-01 | 性能埋点与负载场景测量（[测试策略](14-test-and-acceptance-strategy.md)第3、4节） | 主会话 | M3、M4 | qa | 记录是否达到初始目标 |
 | M5-02 | 故障注入与安全验收 | 主会话 | M3、M4 | qa | 相关AC与SEC均有记录 |
-| M5-03 | 首次使用引导：气泡式，可跳过、可重来（参照Coopanion思路） | K3 | M2、M4 | src/renderer | 可跳过；设置台有重来入口 |
+| M5-03 | 首次使用引导：气泡式，可跳过、可重来（参照Coopanion思路） | DeepSeek（前端） | M2、M4 | src/renderer | 可跳过；设置台有重来入口 |
 | M5-04 | 打包：electron-builder NSIS；模型不打包；第三方许可清单 | DeepSeek | M3、M4 | scripts、打包配置 | 干净环境中安装、启动、卸载有记录 |
 | M5-05 | 用用户的真实Key做端到端验证，更新厂家验证状态 | 主会话（需用户提供Key并同意） | M3-05、M4-01 | qa、厂家表 | 已验证与未验证如实标注 |
 | M5-06 | 用户说明与插件开发说明 | DeepSeek | M1-09、M5-04 | docs | 照说明能安装、能使用、能写出示例插件 |
 
 ## 6. 并行建议
 
-- M0-01（DeepSeek）先行；完成后M0-02至M0-05（主会话）与M0-06（K3）并行。
-- M1以主会话为主；M1-01、M1-08、M1-09交给DeepSeek；同时K3推进M2-01、M2-02。
-- M3与M4的后端由主会话推进；对应设置页与面板由K3并行；脚本与厂家表由DeepSeek并行。
+- M0-01（DeepSeek）先行；完成后M0-02至M0-05（主会话）与M0-06（DeepSeek前端）并行。
+- M1以主会话为主；M1-01、M1-08、M1-09交给DeepSeek；同时DeepSeek前端推进M2-01、M2-02。
+- M3与M4的后端由主会话推进；对应设置页与面板由DeepSeek前端并行；脚本与厂家表由DeepSeek并行。
 - 任一时刻最多3个子代理。
 
 ## 7. 主要风险与应对
@@ -174,7 +174,7 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 
 ## 9. 执行记录
 
-当前暂停：K3子代理异常退出且未返回原因；没有自动换模型或重试。用户重试确认尚未收到；不进入M1。恢复入口见[M0交接](../qa/M0-resume.md)。
+当前已恢复：用户在K3失败后明确要求前端也改用DeepSeek，并恢复目标。执行型任务和前端现均使用workbuddy-subscription/deepseek-v4.1-flash，仍由主会话定义桥、审查与集成；不进入M1。历史暂停记录见[M0交接](../qa/M0-resume.md)。
 
 2026-10-24：指定文档已通读，两个指定子代理路由已核实，环境/仓库基线见[记录](../qa/M0-00-environment.md)。旧草案中与 ADR-0013、首版PRD或本计划第2节不一致的历史表述不作为实施要求。
 
@@ -182,7 +182,7 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 | --- | --- | --- |
 | M0-01 | 通过 | [独立验收](../qa/M0-01.md)；14包检查通过，测试为零用例空跑 |
 | M0-02 | 通过（版本锁定与最小运行时探针） | [版本与理由](../qa/versions.md)；安装不等于原生兼容 |
-| M0-03 | 未实施，等待恢复 | 已阅读Cordis API，尚无生命周期实测 |
+| M0-03 | 通过 | [V-01](../qa/V-01.md)：4个测试及Electron Node模式进程实测通过 |
 | M0-04 | 准备部分完成，未通过 | 模型缓存已校验；[下载草稿审查](../qa/M0-04-download-review.md)发现3个可复现缺陷；未运行识别 |
 | M0-05 | 未实施 | 最小键态调用不等于轮询/漏检/CPU验证 |
 | M0-06 | 委派异常，等待用户决定 | [K3异常记录](../qa/M0-06-dispatch-failure.md)；没有前端文件或窗口证据 |

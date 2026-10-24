@@ -1,0 +1,39 @@
+{
+  "kind": "cordis",
+  "electron": "45.0.0",
+  "node": "24.22.0",
+  "report": {
+    "dependencies": {
+      "cycles": 3,
+      "starts": 3,
+      "stops": 3,
+      "timers": 0,
+      "ticks": 3,
+      "pulses": 3,
+      "external": 3,
+      "residualExternalListeners": 0
+    },
+    "rollback": [
+      {
+        "mode": "sync",
+        "hiddenWhileLoading": true,
+        "residualResources": 0,
+        "latePulses": 0
+      },
+      {
+        "mode": "async",
+        "hiddenWhileLoading": true,
+        "residualResources": 0,
+        "latePulses": 0
+      }
+    ],
+    "disposal": {
+      "order": [
+        "second",
+        "first"
+      ],
+      "idempotent": true,
+      "inactiveEffectRejected": true
+    }
+  }
+}
