@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '../..');
 const probes = {
   cordis: { entry: 'packages/host-kernel/dist/m0/cordis-worker.mjs', timeout: 20000 },
   asr: { entry: 'qa/probes/asr-worker.cjs', timeout: 120000 },
+  key: { entry: 'qa/probes/key-worker.cjs', timeout: 20000 },
 };
 const kind = process.argv[2];
 const selected = probes[kind];

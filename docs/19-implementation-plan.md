@@ -16,7 +16,7 @@
 
 | 事项 | 暂定默认 | 依据 |
 | --- | --- | --- |
-| Q18 首版原生能力 | 只需说话键状态检测：Node/TS + Koffi调用GetAsyncKeyState轮询，在插件运行区进程中执行；跨应用文字输入随听写插件再定 | 首版不写入其他软件（ADR-0013）；参照Coopanion的轮询做法 |
+| Q18 首版原生能力 | 只需说话键状态检测：Node/TS + Koffi调用GetAsyncKeyState轮询，在插件运行区进程中执行；暂定请求周期10ms、长按阈值250ms，真实按压待验；跨应用文字输入随听写插件再定 | 首版不写入其他软件（ADR-0013）；参照Coopanion机制；[V-key实测](../qa/V-key.md)显示30ms请求周期有较大调度间隙，不将合成回放当作真人按压结论 |
 | Q19 插件框架 | @deepseek-ai/cordis锁定精确版本；插件只面对项目SDK，不直接拿宿主内部对象；由M0-03验证 | 用户要求类似DSH；[技术预研](16-technical-recommendations-prep.md) |
 | Q20 界面框架 | React + TypeScript + Tailwind | Coopanion设置台使用React与Tailwind |
 | Q21 首版贡献点 | 设置页（Schema表单）、命令、热键请求、角色旁快捷按钮、对话面板 | [扩展规格](03-extension-product-spec.md)；Coopanion的悬停按钮与设置页 |
@@ -184,7 +184,7 @@ M0验证结论全部记入qa/后，才进入依赖它们的工作包。任一验
 | M0-02 | 通过（版本锁定与最小运行时探针） | [版本与理由](../qa/versions.md)；安装不等于原生兼容 |
 | M0-03 | 通过 | [V-01](../qa/V-01.md)：4个测试及Electron Node模式进程实测通过 |
 | M0-04 | 通过（模型兼容台架） | [V-03](../qa/V-03.md)：两模型真实出结果；下载返修独立复验通过，1项权限跳过如实保留 |
-| M0-05 | 未实施 | 最小键态调用不等于轮询/漏检/CPU验证 |
+| M0-05 | 部分通过；真实按压待验 | [V-key](../qa/V-key.md)：12项逻辑测试与真实轮询/CPU测量；合成回放不当成物理按压 |
 | M0-06 | 委派异常，等待用户决定 | [K3异常记录](../qa/M0-06-dispatch-failure.md)；没有前端文件或窗口证据 |
 
 实现补充：TypeScript 暂定锁定6.0.3，与typescript-eslint 8.72.0的 `<6.1.0` peer范围一致；不盲目升级npm latest 7.0.2。Electron选择当前稳定45.0.0，原生参考版本先保持不变，见[版本记录](../qa/versions.md)。为可复现安装，M0-02写入范围补充workspace catalog/overrides、相关包清单及锁文件；M0验证脚本放qa/probes，窗口桥及主会话集成范围见[原型接口](../qa/M0-06-bridge.md)。这些是实施路径补充，不改变产品决策。

@@ -1,0 +1,120 @@
+{
+  "kind": "key",
+  "electron": "45.0.0",
+  "node": "24.22.0",
+  "report": {
+    "testKey": "F24 read-only; no input injection",
+    "thresholdMs": 250,
+    "intents": [
+      "start",
+      "finish",
+      "start",
+      "finish"
+    ],
+    "polling": [
+      {
+        "periodMs": 30,
+        "elapsedMs": 4014.274,
+        "calls": 121,
+        "observedF24Transitions": 0,
+        "cpuMs": 46,
+        "cpuPercentOfOneCore": 1.146,
+        "gapMs": {
+          "p50": 31.201,
+          "p95": 44.924,
+          "max": 51.339
+        },
+        "syntheticPulseReplay": [
+          {
+            "durationMs": 5,
+            "trials": 3795,
+            "detected": 570,
+            "missed": 3225
+          },
+          {
+            "durationMs": 10,
+            "trials": 3790,
+            "detected": 1140,
+            "missed": 2650
+          },
+          {
+            "durationMs": 20,
+            "trials": 3780,
+            "detected": 2280,
+            "missed": 1500
+          },
+          {
+            "durationMs": 30,
+            "trials": 3770,
+            "detected": 3412,
+            "missed": 358
+          },
+          {
+            "durationMs": 50,
+            "trials": 3750,
+            "detected": 3748,
+            "missed": 2
+          },
+          {
+            "durationMs": 100,
+            "trials": 3700,
+            "detected": 3700,
+            "missed": 0
+          }
+        ]
+      },
+      {
+        "periodMs": 10,
+        "elapsedMs": 4006.81,
+        "calls": 257,
+        "observedF24Transitions": 0,
+        "cpuMs": 63,
+        "cpuPercentOfOneCore": 1.572,
+        "gapMs": {
+          "p50": 15.557,
+          "p95": 16.415,
+          "max": 16.628
+        },
+        "syntheticPulseReplay": [
+          {
+            "durationMs": 5,
+            "trials": 3787,
+            "detected": 1220,
+            "missed": 2567
+          },
+          {
+            "durationMs": 10,
+            "trials": 3782,
+            "detected": 2437,
+            "missed": 1345
+          },
+          {
+            "durationMs": 20,
+            "trials": 3772,
+            "detected": 3772,
+            "missed": 0
+          },
+          {
+            "durationMs": 30,
+            "trials": 3762,
+            "detected": 3762,
+            "missed": 0
+          },
+          {
+            "durationMs": 50,
+            "trials": 3742,
+            "detected": 3742,
+            "missed": 0
+          },
+          {
+            "durationMs": 100,
+            "trials": 3692,
+            "detected": 3692,
+            "missed": 0
+          }
+        ]
+      }
+    ],
+    "limitations": "Pulse replay uses synthetic intervals on real polling times, not physical key presses."
+  }
+}
