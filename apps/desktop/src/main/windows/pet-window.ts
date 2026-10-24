@@ -5,7 +5,9 @@
  * - 不注册 IPC、不创建菜单、不开新窗口、不做外部导航；IPC 由主会话实现。
  * - 拖拽只读主进程 screen.getCursorScreenPoint() 的 DIP 坐标，渲染器不传任何坐标。
  * - 默认 ignoreMouseEvents(true, { forward: true })；只有渲染器上报“指针在角色或按钮的
- *   实际命中区”时才临时关闭穿透；空白区域、失焦、隐藏时恢复穿透。
+ *   实际命中区”时才临时关闭穿透；空白区域、失焦、隐藏时立即恢复穿透。
+ * - 穿透只由“最近一次真实 hover 意图”决定，且释放没有延迟：透明区域上的点击不能被
+ *   一段 120ms 的可交互窗口吞掉（见 qa/V-06-native-mouse.md 的源码核对结论）。
  * - 拖拽用有界轮询 + 看门狗超时，光标停在窗口外也不会卡死；结束、失焦、关闭、dispose
  *   都释放计时器，dispose 后的回调一律不再广播。
  *
@@ -61,15 +63,12 @@ export interface PetWindowDependencies {
   dragTimeoutMs?: number;
   /** 状态事件去重窗口，避免短时间内重复广播。 */
   snapshotDebounceMs?: number;
-  /** 指针离开命中区后延迟恢复穿透，容忍子元素之间的短暂间隙。 */
-  interactionReleaseDelayMs?: number;
 }
 
 export const PET_WINDOW_DEFAULT_SIZE: PetWindowSize = { width: 380, height: 420 };
 export const PET_WINDOW_DRAG_TICK_MS = 16;
 export const PET_WINDOW_DRAG_TIMEOUT_MS = 30_000;
 export const PET_WINDOW_SNAPSHOT_DEBOUNCE_MS = 40;
-export const PET_WINDOW_INTERACTION_RELEASE_MS = 120;
 
 /**
  * 只在真正创建窗口时才加载 electron：单元测试可以完全注入 mock，
@@ -129,8 +128,6 @@ export function createPetWindow(
   const dragTickMs = dependencies.dragTickMs ?? PET_WINDOW_DRAG_TICK_MS;
   const dragTimeoutMs = dependencies.dragTimeoutMs ?? PET_WINDOW_DRAG_TIMEOUT_MS;
   const snapshotDebounceMs = dependencies.snapshotDebounceMs ?? PET_WINDOW_SNAPSHOT_DEBOUNCE_MS;
-  const releaseDelayMs =
-    dependencies.interactionReleaseDelayMs ?? PET_WINDOW_INTERACTION_RELEASE_MS;
 
   const readDisplays = (): DisplayFacade[] => {
     const all = electron.screen.getAllDisplays();
@@ -189,7 +186,6 @@ export function createPetWindow(
   let dragTick: ReturnType<typeof setInterval> | null = null;
   let dragWatchdog: ReturnType<typeof setTimeout> | null = null;
   let snapshotTimer: ReturnType<typeof setTimeout> | null = null;
-  let releaseTimer: ReturnType<typeof setTimeout> | null = null;
 
   function clearTimer(
     handle: ReturnType<typeof setTimeout> | ReturnType<typeof setInterval> | null,
@@ -270,7 +266,6 @@ export function createPetWindow(
    * 快照却仍报 dragging=true，OS 行为与快照矛盾。穿透统一由 stopDrag 恢复。
    */
   function releaseInteraction(): void {
-    releaseTimer = clearTimer(releaseTimer, 'timeout');
     if (!interactive) return;
     interactive = false;
     if (dragging) {
@@ -280,19 +275,6 @@ export function createPetWindow(
     }
     applyClickThrough(true);
     scheduleSnapshot();
-  }
-
-  function scheduleInteractionRelease(): void {
-    if (!interactive || dragging) return;
-    releaseTimer = clearTimer(releaseTimer, 'timeout');
-    if (releaseDelayMs <= 0) {
-      releaseInteraction();
-      return;
-    }
-    releaseTimer = setTimeout(() => {
-      releaseTimer = null;
-      releaseInteraction();
-    }, releaseDelayMs);
   }
 
   /** 拖拽结束后把窗口完整夹回目标屏可见范围；拖拽过程中不调用，避免吸附。 */
@@ -311,13 +293,14 @@ export function createPetWindow(
     dragStartCursor = null;
     // 先恢复几何，再决定穿透，保证最后一条快照里的 bounds 与 OS 一致。
     restoreAfterDrag();
-    // 拖拽结束不抢焦点；指针仍在角色上时保持可交互，否则恢复穿透。
-    if (interactive) {
-      applyClickThrough(false);
-      scheduleInteractionRelease();
-    } else {
-      applyClickThrough(true);
-    }
+    // 拖拽结束不抢焦点；hover 意图仍为真时保持可交互，否则恢复穿透。
+    //
+    // 这里绝不能“延迟释放”：若 120ms 后自动清掉 interactive，渲染器的
+    // interactiveRef 仍为 true，它的移动去重会一直跳过上报，光标停在角色上
+    // 再按下去时窗口已经处于原生穿透态，事件根本到不了渲染器，交互无法重新开启。
+    // 松手后保持真实 hover 意图，离场/失焦/隐藏/看门狗各自显式清理。
+    if (interactive) applyClickThrough(false);
+    else applyClickThrough(true);
     scheduleSnapshot();
   }
 
@@ -393,7 +376,6 @@ export function createPetWindow(
     dragTick = clearTimer(dragTick, 'interval');
     dragWatchdog = clearTimer(dragWatchdog, 'timeout');
     snapshotTimer = clearTimer(snapshotTimer, 'timeout');
-    releaseTimer = clearTimer(releaseTimer, 'timeout');
     dragStartCursor = null;
     dragging = false;
     interactive = false;
@@ -442,7 +424,6 @@ export function createPetWindow(
     setInteraction(next: boolean): void {
       if (disposed) return;
       if (next) {
-        releaseTimer = clearTimer(releaseTimer, 'timeout');
         if (interactive && !dragging) return;
         interactive = true;
         if (!dragging) applyClickThrough(false);
@@ -454,7 +435,6 @@ export function createPetWindow(
     beginDrag(): void {
       if (disposed || dragging) return;
       dragging = true;
-      releaseTimer = clearTimer(releaseTimer, 'timeout');
       dragStartBounds = currentBounds();
       try {
         dragStartCursor = electron.screen.getCursorScreenPoint();
@@ -489,7 +469,6 @@ export function createPetWindow(
       dragTick = clearTimer(dragTick, 'interval');
       dragWatchdog = clearTimer(dragWatchdog, 'timeout');
       snapshotTimer = clearTimer(snapshotTimer, 'timeout');
-      releaseTimer = clearTimer(releaseTimer, 'timeout');
       dragStartCursor = null;
       dragging = false;
       interactive = false;

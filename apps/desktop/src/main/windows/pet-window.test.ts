@@ -245,11 +245,10 @@ describe('交互与穿透切换', () => {
     vi.useRealTimers();
   });
 
-  it('命中区请求交互时关闭穿透，离开后恢复穿透', () => {
+  it('命中区请求交互时关闭穿透，离开后立即恢复穿透（没有延迟窗口）', () => {
     const harness = createHarness();
     const controller = createPetWindow(baseOptions, {
       electron: harness.electron,
-      interactionReleaseDelayMs: 100,
       snapshotDebounceMs: 0,
     });
     const window = harness.windows[0] as MockWindow;
@@ -259,10 +258,13 @@ describe('交互与穿透切换', () => {
     expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: false, options: { forward: true } });
     expect(controller.getSnapshot().clickThrough).toBe(false);
 
+    // 与 qa/V-06-native-mouse.md 记录的源码事实一致：setInteraction(false) 即时 release，
+    // 不是“等 120ms 再穿透”；否则透明区域上的点击会在这段窗口里被白白吞掉。
     controller.setInteraction(false);
-    vi.advanceTimersByTime(100);
     expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: true, options: { forward: true } });
     expect(controller.getSnapshot().clickThrough).toBe(true);
+    vi.advanceTimersByTime(1_000);
+    expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: true, options: { forward: true } });
     controller.dispose();
   });
 
@@ -500,7 +502,7 @@ describe('拖拽期间的穿透不变式', () => {
   }
 
   it('拖拽途中 pointerleave 清零 hover 意图但绝不开启原生穿透', () => {
-    const { controller, snapshots, window } = make({ interactionReleaseDelayMs: 0 });
+    const { controller, snapshots, window } = make();
     controller.setInteraction(true);
     controller.beginDrag();
     window.ignoreMouseCalls.length = 0;
@@ -521,14 +523,14 @@ describe('拖拽期间的穿透不变式', () => {
   });
 
   it('拖拽中 hover 意图被清零后，结束拖拽立即恢复穿透（不再等释放延迟）', () => {
-    const { controller, window } = make({ interactionReleaseDelayMs: 500 });
+    const { controller, window } = make();
     controller.setInteraction(true);
     controller.beginDrag();
     controller.setInteraction(false);
     window.ignoreMouseCalls.length = 0;
 
     controller.endDrag();
-    // 意图已经清零，endDrag 后必须马上恢复穿透，而不是留下 500ms 的可交互窗口。
+    // 意图已经清零，endDrag 后必须马上恢复穿透，不能留下任何“可交互窗口”。
     expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: true, options: { forward: true } });
     expect(controller.getSnapshot().clickThrough).toBe(true);
     vi.advanceTimersByTime(1000);
@@ -536,8 +538,116 @@ describe('拖拽期间的穿透不变式', () => {
     controller.dispose();
   });
 
+  /**
+   * 回归（主会话待证假设）：拖拽结束后的“120ms 自动释放”会让主进程与渲染器分叉。
+   *
+   * 旧实现里 stopDrag() 在 interactive=true 时调用 scheduleInteractionRelease()，
+   * 120ms 后主进程把 interactive 清成 false 并开启原生穿透；渲染器的 interactiveRef
+   * 却仍是 true，它按“命中状态没变”去重、不再上报，光标停在角色上再按下时事件
+   * 根本到不了渲染器。这一组用例锁死“松手后保持真实 hover 意图、显式清理才释放”。
+   */
+  it('松手后保持 hover 意图：超过旧的 120ms 也不会自动清掉交互', () => {
+    const { controller, window } = make();
+    controller.setInteraction(true);
+    controller.beginDrag();
+    window.ignoreMouseCalls.length = 0;
+
+    controller.endDrag();
+    // 指针仍在角色上：拖拽结束后必须保持可交互，且不产生任何 ignore=true。
+    expect(window.ignoreMouseCalls).toEqual([{ ignore: false, options: { forward: true } }]);
+    expect(controller.getSnapshot().dragging).toBe(false);
+    expect(controller.getSnapshot().clickThrough).toBe(false);
+
+    // 旧实现会在 120ms 后悄悄清掉 interactive 并开启穿透；这里必须一条都没有。
+    vi.advanceTimersByTime(5_000);
+    expect(window.ignoreMouseCalls).toEqual([{ ignore: false, options: { forward: true } }]);
+    expect(controller.getSnapshot().clickThrough).toBe(false);
+    controller.dispose();
+  });
+
+  it('松手后重复 beginDrag/endDrag 不叠加计时器，也不改变 hover 意图', () => {
+    const { controller, window } = make({ dragTimeoutMs: 1_000, dragTickMs: 100 });
+    controller.setInteraction(true);
+    controller.beginDrag();
+    controller.endDrag();
+    controller.beginDrag();
+    controller.endDrag();
+    window.ignoreMouseCalls.length = 0;
+
+    // 第二次结束同样按真实意图保持可交互。
+    expect(controller.getSnapshot().dragging).toBe(false);
+    expect(controller.getSnapshot().clickThrough).toBe(false);
+
+    // 计时器必须都已释放：再推进旧的拖拽超时不应产生任何状态变化。
+    const calls = window.ignoreMouseCalls.length;
+    vi.advanceTimersByTime(5_000);
+    expect(controller.getSnapshot().dragging).toBe(false);
+    expect(window.ignoreMouseCalls.length).toBe(calls);
+    expect(vi.getTimerCount()).toBe(0);
+    controller.dispose();
+  });
+
+  it('移出再进入：pointerleave 立即穿透，重新进入立即恢复可交互', () => {
+    const { controller, window } = make();
+    controller.setInteraction(true);
+    controller.beginDrag();
+    controller.endDrag();
+
+    // 渲染器在指针离开命中区时上报 setInteraction(false)：必须即时穿透。
+    controller.setInteraction(false);
+    expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: true, options: { forward: true } });
+    expect(controller.getSnapshot().clickThrough).toBe(true);
+
+    // 重新移回角色：立刻恢复可交互，并且不需要等任何延迟。
+    controller.setInteraction(true);
+    expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: false, options: { forward: true } });
+    expect(controller.getSnapshot().clickThrough).toBe(false);
+    vi.advanceTimersByTime(5_000);
+    expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: false, options: { forward: true } });
+    controller.dispose();
+  });
+
+  it('失焦、看门狗超时、关闭都显式清理 hover 意图', () => {
+    // 失焦
+    {
+      const { controller, window } = make();
+      controller.setInteraction(true);
+      controller.beginDrag();
+      controller.endDrag();
+      window.emit('blur');
+      expect(controller.getSnapshot().clickThrough).toBe(true);
+      expect(window.ignoreMouseCalls.at(-1)).toEqual({ ignore: true, options: { forward: true } });
+      controller.dispose();
+    }
+    // 看门狗：拖拽超时自动结束后，hover 意图仍然有效（指针可能还压在角色上），
+    // 因此保持可交互；之后失焦才释放。
+    {
+      const { controller, window } = make({ dragTimeoutMs: 1_000, dragTickMs: 100 });
+      controller.setInteraction(true);
+      controller.beginDrag();
+      vi.advanceTimersByTime(1_000);
+      expect(controller.getSnapshot().dragging).toBe(false);
+      expect(controller.getSnapshot().clickThrough).toBe(false);
+      window.emit('blur');
+      expect(controller.getSnapshot().clickThrough).toBe(true);
+      controller.dispose();
+    }
+    // 关闭
+    {
+      const { controller, window } = make();
+      controller.setInteraction(true);
+      window.destroy();
+      // 关闭后不再广播，也不允许再改 OS 状态。
+      const calls = window.ignoreMouseCalls.length;
+      controller.setInteraction(false);
+      controller.setInteraction(true);
+      expect(window.ignoreMouseCalls.length).toBe(calls);
+      controller.dispose();
+    }
+  });
+
   it('拖拽中重复 setInteraction(false) 不会累积释放计时器或切换穿透', () => {
-    const { controller, window } = make({ interactionReleaseDelayMs: 100 });
+    const { controller, window } = make();
     controller.setInteraction(true);
     controller.beginDrag();
     window.ignoreMouseCalls.length = 0;
@@ -550,7 +660,7 @@ describe('拖拽期间的穿透不变式', () => {
   });
 
   it('拖拽中失焦走同一路径：先结束拖拽再恢复穿透', () => {
-    const { controller, window } = make({ interactionReleaseDelayMs: 0 });
+    const { controller, window } = make();
     controller.setInteraction(true);
     controller.beginDrag();
     controller.setInteraction(false);

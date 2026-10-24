@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PetPrototypeBridge, PetSnapshot, PetState } from '@pet/contracts';
 
-import { PetApp } from './App.js';
+import { HoverTracker, PetApp, createPetInteractionSession, reconcileHover } from './App.js';
 import { PetAvatar } from './PetAvatar.js';
 import { PetBubble } from './PetBubble.js';
 import { PrototypePanel } from './PrototypePanel.js';
@@ -518,6 +518,396 @@ describe('气泡与原型面板', () => {
       <PrototypePanel state="idle" onPreview={() => {}} onQuit={() => {}} quitDisabled />,
     );
     expect(html).toMatch(/data-testid="pet-quit"[^>]*disabled/);
+  });
+});
+
+/**
+ * 回归（主会话待证假设的渲染器侧）：主进程 stopDrag 之后的“120ms 自动释放”
+ * 会让渲染器的 interactiveRef 停留在 true，移动去重从此永远跳过上报，
+ * 光标停在角色上再按下时事件根本到不了渲染器——表现为“永久点不动”。
+ *
+ * 修复后的不变式：
+ * 1. 命中状态变化才上报（去重仍然保留）；
+ * 2. 拖拽中只记录位置、不切换穿透；
+ * 3. 松手后按最后一次位置重算并重述意图；
+ * 4. 权威快照与本地缓存分叉时能自愈，不需要等一次 pointerleave。
+ */
+describe('hover 意图缓存与权威快照对账', () => {
+  const rect = { left: 20, top: 10, width: 152, height: 152 };
+  const shapes = avatarHitShapes(rect);
+  const center = { x: rect.left + 76, y: rect.top + 76 };
+  const corner = { x: rect.left + 2, y: rect.top + 2 };
+
+  it('同一位置的重复移动只上报一次（pointermove 与 mousemove 会重复到达）', () => {
+    const tracker = new HoverTracker();
+    expect(tracker.move(center, shapes)).toBe(true);
+    expect(tracker.interactive).toBe(true);
+    expect(tracker.move(center, shapes)).toBe(false);
+    expect(tracker.move({ ...center }, shapes)).toBe(false);
+    // 透明角必须回到穿透。
+    expect(tracker.move(corner, shapes)).toBe(true);
+    expect(tracker.interactive).toBe(false);
+  });
+
+  it('拖拽中只记录位置不改变状态，松手后按最后位置重算', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+
+    // 拖拽期间 App 只调用 track()：状态不变，主进程保持非穿透。
+    tracker.track({ x: center.x + 30, y: center.y + 20 });
+    expect(tracker.interactive).toBe(true);
+
+    // 松手：重算后仍然命中角色，且不需要“变化”也能重述意图。
+    expect(tracker.resync(shapes)).toBe(false);
+    expect(tracker.interactive).toBe(true);
+    expect(tracker.lastPoint).toEqual({ x: center.x + 30, y: center.y + 20 });
+  });
+
+  it('松手时指针已经移出角色，重算后必须转为穿透', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    tracker.track(corner);
+    expect(tracker.resync(shapes)).toBe(true);
+    expect(tracker.interactive).toBe(false);
+  });
+
+  it('pointerleave 丢弃位置，松手不会用过期坐标复活交互', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    expect(tracker.leave()).toBe(true);
+    expect(tracker.interactive).toBe(false);
+    expect(tracker.lastPoint).toBeNull();
+    // 没有位置信息时重算一律按穿透处理，不会凭空申请交互。
+    expect(tracker.resync(shapes)).toBe(false);
+    expect(tracker.interactive).toBe(false);
+  });
+
+  it('主进程单方面释放后，forget + 同点移动能重新上报（不再永久点不动）', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    // 主进程失焦/隐藏后释放了交互，权威快照 clickThrough=true。
+    expect(reconcileHover({ clickThrough: true, dragging: false }, tracker.interactive)).toBe(
+      'forget',
+    );
+    tracker.forget();
+    // 关键：同一个点再移动一次必须重新上报 true，否则用户必须先把指针移出去再移回来。
+    expect(tracker.move(center, shapes)).toBe(true);
+    expect(tracker.interactive).toBe(true);
+  });
+
+  it('reconcileHover 只在对账确有分叉时动手，拖拽中与无快照一律不干预', () => {
+    expect(reconcileHover(null, true)).toBe('none');
+    expect(reconcileHover({ clickThrough: false, dragging: true }, false)).toBe('none');
+    expect(reconcileHover({ clickThrough: true, dragging: false }, false)).toBe('none');
+    expect(reconcileHover({ clickThrough: false, dragging: false }, true)).toBe('none');
+    // 主进程已穿透、本地仍以为可交互：只清缓存，不重复发请求。
+    expect(reconcileHover({ clickThrough: true, dragging: false }, true)).toBe('forget');
+    // 主进程仍挡着、指针已经离开：主动释放，避免永久挡住下层应用。
+    expect(reconcileHover({ clickThrough: false, dragging: false }, false)).toBe('release');
+  });
+
+  it('拖拽控制器先通知 inactive 再调用 endDrag，保证重述意图先于主进程决策', () => {
+    const order: string[] = [];
+    const controller = new PetDragController({
+      bridge: {
+        beginDrag: () => order.push('beginDrag'),
+        endDrag: () => order.push('endDrag'),
+      },
+      onActiveChange: (active) => order.push(active ? 'active' : 'inactive'),
+    });
+    controller.begin({ button: 0, pointerId: 31 }, null);
+    controller.end('pointerup');
+    // App 的 onActiveChange 在这里 resync + setInteraction(true)，必须早于 endDrag，
+    // 否则主进程 stopDrag 读到的还是旧意图，光标停在角色上也会被判定为离开。
+    expect(order).toEqual(['active', 'beginDrag', 'inactive', 'endDrag']);
+    controller.dispose();
+  });
+});
+
+/**
+ * 回归（主会话指出的两个边界，均已复现）：
+ *
+ * 边界1 —— 缓存被当成事实。
+ * `forget()` 只把“上次上报值”清成 false，而 `lastPoint` 仍停在角色内。
+ * 若随后收到一条 clickThrough=false 的快照（正是主进程对本地
+ * setInteraction(true) 的回执），拿缓存 false 对账就会判定“指针已经离开”，
+ * 反手发出 release，把仍位于命中区的窗口重新放回穿透。
+ *
+ * 边界2 —— StrictMode 复用已 dispose 的控制器。
+ * `useMemo` 里的控制器在 cleanup 里被 dispose，第二次 setup 拿到的还是同一个
+ * 已失效实例；`unmounting` 也被第一次 cleanup 永久置 true。
+ */
+describe('边界1：缓存值不得冒充真实指针位置', () => {
+  const rect = { left: 20, top: 10, width: 152, height: 152 };
+  const shapes = avatarHitShapes(rect);
+  const center = { x: rect.left + 76, y: rect.top + 76 };
+  const corner = { x: rect.left + 2, y: rect.top + 2 };
+
+  it('确定性序列：旧 clickThrough=true 触发 forget 后，clickThrough=false 回执不得 release', () => {
+    const tracker = new HoverTracker();
+    const applied: string[] = [];
+    /** 复刻 App 里那个对账 effect：只在 release 时下发 setInteraction(false)。 */
+    const reconcile = (snapshot: { clickThrough: boolean; dragging: boolean }): void => {
+      const action = reconcileHover(snapshot, tracker.interactive, tracker.hit);
+      applied.push(action);
+      if (action === 'forget') tracker.forget();
+      if (action === 'release') {
+        tracker.forget();
+        applied.push('setInteraction(false)');
+      }
+    };
+
+    // 1) 指针停在角色上，上报 true，主进程开始挡着。
+    expect(tracker.move(center, shapes)).toBe(true);
+    expect(tracker.interactive).toBe(true);
+    expect(tracker.hit).toBe(true);
+
+    // 2) 主进程因失焦/隐藏单方面释放，先广播一条较旧的 clickThrough=true 快照。
+    reconcile({ clickThrough: true, dragging: false });
+    expect(applied).toEqual(['forget']);
+    expect(tracker.interactive).toBe(false);
+
+    // 3) 指针一步都没动：真实位置仍在角色内，只是去重缓存被清了。
+    expect(tracker.lastPoint).toEqual(center);
+    expect(tracker.hit).toBeNull();
+
+    // 4) 紧接着收到主进程对本地 setInteraction(true) 的回执（clickThrough=false）。
+    //    这一步以前会返回 'release'，把窗口放回穿透。
+    reconcile({ clickThrough: false, dragging: false });
+    expect(applied).toEqual(['forget', 'none']);
+    expect(applied).not.toContain('release');
+    expect(applied).not.toContain('setInteraction(false)');
+  });
+
+  it('反证：只拿缓存 false 对账，同一序列确实会误判 release', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    tracker.forget();
+    expect(tracker.interactive).toBe(false);
+    // 旧签名（第三个参数缺省时退化为缓存值）与显式传缓存，都会得出 release。
+    expect(reconcileHover({ clickThrough: false, dragging: false }, false)).toBe('release');
+    expect(reconcileHover({ clickThrough: false, dragging: false }, false, false)).toBe('release');
+    // 而带上真实命中结果后不再释放：这就是修复点。
+    expect(reconcileHover({ clickThrough: false, dragging: false }, false, true)).toBe('none');
+  });
+
+  it('forget 后真实命中未知，而不是被断言为“在外”', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    tracker.forget();
+    expect(tracker.hit).toBeNull();
+    // 未知不得驱动 release（否则就是凭“没有证据”改变窗口行为）。
+    expect(reconcileHover({ clickThrough: false, dragging: false }, false, tracker.hit)).toBe(
+      'none',
+    );
+    // 但位置仍在，重算即可恢复真实意图，无需等一次 pointerleave。
+    expect(tracker.resync(shapes)).toBe(true);
+    expect(tracker.interactive).toBe(true);
+    expect(tracker.hit).toBe(true);
+  });
+
+  it('修复不能永久挡住底层：指针真实移出命中区后仍必须释放', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    tracker.forget();
+    // 真实移动到透明角：命中结果明确为 false。
+    // 缓存本来就已是 false（刚 forget），因此这次移动不需要再上报。
+    expect(tracker.move(corner, shapes)).toBe(false);
+    expect(tracker.interactive).toBe(false);
+    expect(tracker.hit).toBe(false);
+    // 此时主进程仍挡着 -> 必须主动释放，不能因为“修缓存问题”就一直挡着。
+    expect(
+      reconcileHover({ clickThrough: false, dragging: false }, tracker.interactive, tracker.hit),
+    ).toBe('release');
+  });
+
+  it('pointerleave 仍然是“确实离开”：清位置且命中为 false', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    expect(tracker.leave()).toBe(true);
+    expect(tracker.lastPoint).toBeNull();
+    expect(tracker.hit).toBe(false);
+    expect(tracker.interactive).toBe(false);
+    // 位置未知时重算只清缓存，不凭空申请交互。
+    expect(tracker.resync(shapes)).toBe(false);
+    expect(tracker.interactive).toBe(false);
+  });
+
+  it('拖拽中不参与对账，松手后按真实位置重述', () => {
+    const tracker = new HoverTracker();
+    tracker.move(center, shapes);
+    tracker.forget();
+    // 拖拽中主进程的快照一律不干预。
+    expect(reconcileHover({ clickThrough: true, dragging: true }, false, null)).toBe('none');
+    // 松手时位置仍在角色上：重述 true，主进程据此保持非穿透。
+    expect(tracker.resync(shapes)).toBe(true);
+    expect(tracker.interactive).toBe(true);
+  });
+});
+
+describe('边界2：StrictMode 下会话可重复初始化', () => {
+  function makeHarness(overrides: Partial<Parameters<typeof createPetInteractionSession>[0]> = {}) {
+    const calls: string[] = [];
+    const interactions: boolean[] = [];
+    const dragging: boolean[] = [];
+    let unmounting = false;
+    const session = createPetInteractionSession({
+      beginDrag: () => calls.push('beginDrag'),
+      endDrag: () => calls.push('endDrag'),
+      collectHitShapes: () => [],
+      setInteraction: (value) => interactions.push(value),
+      onDraggingChange: (value) => dragging.push(value),
+      isUnmounting: () => unmounting,
+      ...overrides,
+    });
+    return {
+      session,
+      calls,
+      interactions,
+      dragging,
+      markUnmounting: () => {
+        unmounting = true;
+      },
+    };
+  }
+
+  const target = {
+    setPointerCapture(): void {},
+    releasePointerCapture(): void {},
+  };
+
+  it('dispose 之后契约保持不变：不可再拖拽，也不再产生副作用', () => {
+    const { session, calls, dragging } = makeHarness();
+    session.dispose();
+    expect(session.isActive()).toBe(false);
+    // 未开始过拖拽，dispose 不应凭空调用 endDrag。
+    expect(calls).toEqual([]);
+    expect(dragging).toEqual([]);
+    // dispose 后不可再用：begin 必须拒绝，不能半开一次拖拽。
+    expect(session.begin({ button: 0, pointerId: 1 }, target)).toBe(false);
+    expect(session.isActive()).toBe(false);
+    // 重复 dispose / end / cancel 都是安全空操作。
+    expect(() => session.dispose()).not.toThrow();
+    expect(() => session.end('pointerup')).not.toThrow();
+    expect(() => session.cancel('escape')).not.toThrow();
+    expect(calls).toEqual([]);
+    expect(dragging).toEqual([]);
+  });
+
+  it('拖拽中 dispose 恰好结束一次，之后不可再用', () => {
+    const { session, calls, dragging } = makeHarness();
+    expect(session.begin({ button: 0, pointerId: 7 }, target)).toBe(true);
+    session.dispose();
+    expect(calls).toEqual(['beginDrag', 'endDrag']);
+    expect(dragging).toEqual([true, false]);
+    expect(session.isActive()).toBe(false);
+    expect(session.begin({ button: 0, pointerId: 8 }, target)).toBe(false);
+    expect(calls).toEqual(['beginDrag', 'endDrag']);
+  });
+
+  it('setup→cleanup→setup：第二次 setup 后拖拽与松手重述都仍然有效', () => {
+    const shapes = avatarHitShapes({ left: 0, top: 0, width: 152, height: 152 });
+    const calls: string[] = [];
+    const interactions: boolean[] = [];
+    const dragging: boolean[] = [];
+    // 与 App 的 cleanup 顺序一致：先置卸载标记，再 dispose，第二次 setup 复位。
+    let unmounting = false;
+    const options = {
+      beginDrag: () => calls.push('beginDrag'),
+      endDrag: () => calls.push('endDrag'),
+      collectHitShapes: () => shapes,
+      setInteraction: (value: boolean) => interactions.push(value),
+      onDraggingChange: (value: boolean) => dragging.push(value),
+      isUnmounting: () => unmounting,
+    };
+
+    // ── 第一次 setup ──
+    unmounting = false;
+    const first = createPetInteractionSession(options);
+    first.tracker.track({ x: 76, y: 76 });
+    expect(first.begin({ button: 0, pointerId: 1 }, target)).toBe(true);
+
+    // ── StrictMode 的 cleanup ──
+    unmounting = true;
+    first.dispose();
+    // dispose 期间不得再向主进程申请交互。
+    expect(interactions).toEqual([]);
+
+    // ── 第二次 setup ──
+    unmounting = false;
+    const second = createPetInteractionSession(options);
+    expect(second).not.toBe(first);
+    second.tracker.track({ x: 76, y: 76 });
+    expect(second.begin({ button: 0, pointerId: 2 }, target)).toBe(true);
+    expect(second.isActive()).toBe(true);
+    second.end('pointerup');
+
+    // 关键：第二次拖拽结束后仍会按真实位置重述 hover 意图。
+    // 旧实现里 unmounting 被第一次 cleanup 永久置 true，这一步被整个跳过，
+    // 主进程只能按过期意图决定穿透——光标停在角色上却再也点不动。
+    expect(interactions).toEqual([true]);
+    // 卸载期间的 dispose 不再 setState（所以第一次的 false 被有意跳过），
+    // 第二次会话的 active/inactive 照常上报。
+    expect(dragging).toEqual([true, true, false]);
+    // cleanup 必须结束第一份仍活跃的拖拽；第二份会话随后独立 begin/end。
+    // 卸载禁止重新申请交互和 setState，不等于可以省掉主程资源释放。
+    expect(calls).toEqual(['beginDrag', 'endDrag', 'beginDrag', 'endDrag']);
+  });
+
+  it('复用同一个已 dispose 的会话会永久拖不动（被新工厂取代的旧行为）', () => {
+    const { session, calls } = makeHarness();
+    session.dispose();
+    // 旧实现就是在这里失败：StrictMode 第二次 setup 拿到的还是这个实例。
+    expect(session.begin({ button: 0, pointerId: 3 }, target)).toBe(false);
+    expect(session.isActive()).toBe(false);
+    expect(calls).toEqual([]);
+  });
+
+  it('cleanup 期间（已标记卸载）dispose 不得再申请交互或 setState', () => {
+    const { session, interactions, dragging, markUnmounting } = makeHarness();
+    expect(session.begin({ button: 0, pointerId: 4 }, target)).toBe(true);
+    // 卸载：先置标记再 dispose（与 App 的 cleanup 顺序一致）。
+    markUnmounting();
+    session.dispose();
+    // dispose 会同步回调 active=false，但那一步不能再 setInteraction / setState。
+    expect(interactions).toEqual([]);
+    expect(dragging).toEqual([true]);
+  });
+
+  it('卸载标记在重新 setup 时复位，回调恢复工作', () => {
+    let unmounting = true;
+    const dragging: boolean[] = [];
+    const session = createPetInteractionSession({
+      beginDrag: () => undefined,
+      endDrag: () => undefined,
+      collectHitShapes: () => [],
+      setInteraction: () => undefined,
+      onDraggingChange: (value) => dragging.push(value),
+      isUnmounting: () => unmounting,
+    });
+    // 模拟第二次 setup 把标记复位。
+    unmounting = false;
+    expect(session.begin({ button: 0, pointerId: 5 }, target)).toBe(true);
+    expect(dragging).toEqual([true]);
+    session.dispose();
+    expect(dragging).toEqual([true, false]);
+  });
+
+  it('松手时按真实位置重述意图，且重述早于 endDrag', () => {
+    const order: string[] = [];
+    const shapes = avatarHitShapes({ left: 0, top: 0, width: 152, height: 152 });
+    const session = createPetInteractionSession({
+      beginDrag: () => order.push('beginDrag'),
+      endDrag: () => order.push('endDrag'),
+      collectHitShapes: () => shapes,
+      setInteraction: (value) => order.push(value ? 'interaction(true)' : 'interaction(false)'),
+      onDraggingChange: (value) => order.push(value ? 'active' : 'inactive'),
+      isUnmounting: () => false,
+    });
+    session.tracker.track({ x: 76, y: 76 });
+    expect(session.begin({ button: 0, pointerId: 6 }, target)).toBe(true);
+    session.end('pointerup');
+    expect(order).toEqual(['active', 'beginDrag', 'interaction(true)', 'inactive', 'endDrag']);
   });
 });
 
