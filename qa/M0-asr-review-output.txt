@@ -1,0 +1,66 @@
+Lead review regression output; expected protections, unaccepted downloader draft
+Trailing whitespace normalized only; diagnostic text and failures preserved
+Exit code: 1
+
+✖ reject a junction in an ancestor of the cache root before any download (30.8798ms)
+✖ offline verification rejects a junction in an intermediate sample directory (17.1585ms)
+✖ atomic publication never overwrites a file appearing after the existence check (11.0055ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 172.5087
+
+✖ failing tests:
+
+test at qa\probes\asr-review-regressions.test.mjs:29:1
+✖ reject a junction in an ancestor of the cache root before any download (30.8798ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/%E6%A1%8C%E5%AE%A0/qa/probes/asr-review-regressions.test.mjs:37:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at qa\probes\asr-review-regressions.test.mjs:44:1
+✖ offline verification rejects a junction in an intermediate sample directory (17.1585ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/%E6%A1%8C%E5%AE%A0/qa/probes/asr-review-regressions.test.mjs:57:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at qa\probes\asr-review-regressions.test.mjs:62:1
+✖ atomic publication never overwrites a file appearing after the existence check (11.0055ms)
+  AssertionError [ERR_ASSERTION]: concurrent content must remain intact
+  + actual - expected
+
+  + 'public-review-fixture'
+  - 'other-writer'
+
+      at TestContext.<anonymous> (file:///C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/%E6%A1%8C%E5%AE%A0/qa/probes/asr-review-regressions.test.mjs:77:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'public-review-fixture',
+    expected: 'other-writer',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
