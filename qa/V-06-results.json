@@ -1,0 +1,85 @@
+{
+  "scope": "M0 automated prototype only; not full OS interaction acceptance",
+  "run": {
+    "at": "2026-10-24T16:13:57.742Z",
+    "status": "passed",
+    "checks": [
+      "secure-window-and-isolated-preload",
+      "five-real-renderer-states",
+      "invalid-ipc-payload-rejected",
+      "renderer-hit-test-toggles-native-WS_EX_TRANSPARENT",
+      "keyboard-state-button",
+      "real-ipc-drag-lifecycle",
+      "real-window-offscreen-recovery",
+      "popup-denied"
+    ],
+    "consoleErrors": [],
+    "remoteRequests": [],
+    "screenshots": [
+      ".cache/m0-06-real/pet-idle.png",
+      ".cache/m0-06-real/pet-listening.png",
+      ".cache/m0-06-real/pet-thinking.png",
+      ".cache/m0-06-real/pet-replying.png",
+      ".cache/m0-06-real/pet-error.png"
+    ],
+    "window": {
+      "hwnd": "2233086",
+      "visible": true,
+      "topmost": true,
+      "bounds": {
+        "x": 1516,
+        "y": 588,
+        "width": 380,
+        "height": 420
+      },
+      "preferences": {
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "webSecurity": true
+      },
+      "displays": [
+        {
+          "id": 558076101,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080
+          },
+          "workArea": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1032
+          },
+          "scaleFactor": 1
+        }
+      ]
+    },
+    "startupFocus": "preserved",
+    "bridge": {
+      "require": "undefined",
+      "process": "undefined",
+      "frozen": true,
+      "methods": [
+        "version",
+        "getSnapshot",
+        "setInteraction",
+        "beginDrag",
+        "endDrag",
+        "previewState",
+        "quit",
+        "onSnapshot"
+      ]
+    },
+    "blankNativeTransparent": true,
+    "controlNativeTransparent": false,
+    "limitations": [
+      "CDP pointer actions plus native style readback are not a physical OS click-through test",
+      "Drag lifecycle and offscreen recovery tested; physical cursor-follow drag remains untested",
+      "Only reported actual display configuration covered; no physical display unplug/mixed-DPI sweep",
+      "No screen-reader or keyboard alternative-to-drag acceptance"
+    ]
+  }
+}

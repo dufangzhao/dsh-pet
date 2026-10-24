@@ -11,6 +11,8 @@ export default [
       '**/out/**',
       '**/release/**',
       '**/coverage/**',
+      '**/.cache/**',
+      '**/.model-cache/**',
       'docs/**',
       'research/**',
       'qa/**',

@@ -23,7 +23,7 @@
 
 ## 行为和安全
 
-透明、无边框、置顶；contextIsolation=true、sandbox=true、nodeIntegration=false；默认ignoreMouseEvents(true, {forward:true})，ready-to-show使用showInactive。仅角色/明确按钮的实际命中区请求interactive=true，空白区域恢复穿透。拖拽坐标从主进程screen.getCursorScreenPoint获取，不信任renderer给坐标；所有几何使用DIP，结束、失焦/关闭时释放计时器。多屏负坐标、不同scaleFactor、移除屏幕后可见恢复必须考虑；不能仅以模拟几何测试宣称真机多屏通过。
+透明、无边框、置顶；contextIsolation=true、sandbox=true、nodeIntegration=false；默认ignoreMouseEvents(true, {forward:true})，ready-to-show使用showInactive。仅角色/明确按钮的实际命中区请求interactive=true，空白区域恢复穿透。拖拽坐标从主进程screen.getCursorScreenPoint获取，不信任renderer给坐标；所有几何使用DIP，结束、失焦/关闭时释放计时器。多屏负坐标、不同scaleFactor、移除屏幕后可见恢复必须考虑；不能仅以模拟几何测试宣称真机多屏通过。拖动过程中不吸附，结束拖拽或屏幕变化时，若窗口能完整放入目标屏工作区，则夹回完整可见范围，避免仅有透明边缘留在屏上而实际角色/退出入口丢失。拖拽期间setInteraction(false)只能清除hover意图，不能开启原生穿透；显示器/DPI变化即使bounds未变也要广播新快照。
 
 主会话校验IPC sender/frame与本地文件URL、参数个数及类型；禁止新窗口、外部导航和未授权权限。只有显式用户退出操作才调用quit；不拦截用户其他应用键盘。原型不采集麦克风、不调用云端、不读Key。
 

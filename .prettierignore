@@ -8,6 +8,8 @@ THIRD_PARTY_NOTICES.md
 LICENSE
 
 # 生成物与依赖
+.cache/
+.model-cache/
 node_modules/
 dist/
 out/

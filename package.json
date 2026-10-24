@@ -14,7 +14,9 @@
     "test": "pnpm -r test",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "build": "pnpm --filter @pet/desktop build",
+    "dev": "pnpm --filter @pet/desktop build && pnpm --filter @pet/desktop start"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.5",

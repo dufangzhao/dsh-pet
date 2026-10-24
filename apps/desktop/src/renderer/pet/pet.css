@@ -1,0 +1,527 @@
+/*
+ * 桌宠窗口样式：全部本地，无远端字体/图片。
+ * 透明窗口本身不设背景，只有角色、气泡、面板这些真实元素占据像素，
+ * 其余区域完全透明，配合主进程的 ignoreMouseEvents 实现“空白处穿透”。
+ *
+ * Tailwind 走本地依赖入口（tailwindcss 已安装，构建侧由主会话配置的
+ * @tailwindcss/vite 处理），不引用任何 CDN，也不联网取样式。
+ * 下面的手写规则保留：它们描述的是窗口形态与状态动画，用工具类表达反而更难读。
+ */
+@import 'tailwindcss';
+
+:root {
+  --pet-ink: #1c2430;
+  --pet-ink-soft: #46536a;
+  --pet-surface: rgba(255, 255, 255, 0.94);
+  --pet-surface-strong: rgba(255, 255, 255, 0.98);
+  --pet-border: rgba(28, 36, 48, 0.14);
+  --pet-focus: #1f6feb;
+  --pet-accent: #4c7df0;
+  --pet-body-top: #eef4ff;
+  --pet-body-bottom: #b9cdf2;
+  --pet-face: #f9fcff;
+  --pet-halo: #7fa8ff;
+  --pet-error: #c2410c;
+  --pet-error-soft: #ffe8dc;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  /* 只使用本机已安装的字体，不请求任何远端字体。 */
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    'Microsoft YaHei',
+    'PingFang SC',
+    sans-serif;
+  color: var(--pet-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.pet-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 8px 12px 12px;
+  /* 透明容器不接收鼠标事件，只有子元素的实际命中区参与交互。 */
+  pointer-events: none;
+}
+
+.pet-root__avatar,
+.pet-root__panel {
+  pointer-events: auto;
+}
+
+/* 角色容器整块保持 auto 只是为了不让 CSS 抢先决定命中，
+ * 真正的命中判定在 hit-regions.ts 里按 SVG 实际绘制形状做；
+ * 容器里的透明角由渲染器主动上报 setInteraction(false) 恢复穿透。 */
+.pet-root__avatar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border-radius: 22px;
+}
+
+/* 角色是拖拽手柄（指针操作），键盘焦点交给下面真实的按钮。 */
+
+.pet-root__panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pet-avatar {
+  width: 152px;
+  height: 152px;
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 6px 14px rgba(28, 36, 48, 0.18));
+  /* 抓手光标只给真正可拖的绘制面，不含气泡与透明角，避免误导。 */
+  cursor: grab;
+  /* 拖拽用 pointer capture：阻止触摸滚动/长按选中打断拖拽。 */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pet-root[data-dragging='true'] .pet-avatar {
+  cursor: grabbing;
+}
+
+/* ---------- 角色基础元素 ---------- */
+
+.pet-avatar__eye {
+  fill: var(--pet-ink);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.pet-avatar__brow,
+.pet-avatar__mouth {
+  stroke: var(--pet-ink);
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+  /* SVG 默认以 (0,0) 为变换原点，会让嘴和眉毛在动画时飞出脸部。 */
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.pet-avatar__blush {
+  fill: #ffb8b0;
+  opacity: 0.5;
+}
+
+.pet-avatar__halo {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.pet-avatar__dots {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.pet-avatar__dots circle {
+  fill: var(--pet-accent);
+}
+
+.pet-avatar__error-mark {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.pet-avatar__error-mark circle {
+  fill: var(--pet-error);
+}
+
+.pet-avatar__error-mark path {
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* ---------- 五种状态 ---------- */
+
+.pet-avatar--idle .pet-avatar__body {
+  animation: pet-breathe 4.8s ease-in-out infinite;
+}
+
+.pet-avatar--listening .pet-avatar__halo {
+  opacity: 0.85;
+}
+
+.pet-avatar--listening .pet-avatar__halo circle {
+  opacity: 0.5;
+  stroke-dasharray: 10 7;
+  animation: pet-halo-dash 6s linear infinite;
+}
+
+@keyframes pet-halo-dash {
+  to {
+    stroke-dashoffset: -68;
+  }
+}
+
+.pet-avatar--listening .pet-avatar__ear {
+  animation: pet-perk 1.6s ease-in-out infinite;
+}
+
+.pet-avatar--listening .pet-avatar__eye {
+  transform: scaleY(1.15);
+}
+
+.pet-avatar--thinking .pet-avatar__dots {
+  opacity: 1;
+}
+
+.pet-avatar--thinking .pet-avatar__dots circle {
+  animation: pet-dot 1.4s ease-in-out infinite;
+}
+
+.pet-avatar--thinking .pet-avatar__dots circle:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.pet-avatar--thinking .pet-avatar__dots circle:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+.pet-avatar--thinking .pet-avatar__eye {
+  transform: scaleY(0.45);
+}
+
+.pet-avatar--thinking .pet-avatar__brow {
+  transform: translateY(-2px);
+}
+
+.pet-avatar--replying .pet-avatar__body {
+  animation: pet-float 2.4s ease-in-out infinite;
+}
+
+.pet-avatar--replying .pet-avatar__mouth {
+  animation: pet-talk 520ms ease-in-out infinite;
+}
+
+.pet-avatar--error .pet-avatar__error-mark {
+  opacity: 1;
+}
+
+.pet-avatar--error .pet-avatar__body {
+  animation: pet-shake 2.6s ease-in-out infinite;
+}
+
+.pet-avatar--error .pet-avatar__brow--left {
+  transform: rotate(-12deg);
+}
+
+.pet-avatar--error .pet-avatar__brow--right {
+  transform: rotate(12deg);
+}
+
+.pet-avatar--error .pet-avatar__mouth {
+  transform: translateY(2px) scaleY(-0.6);
+}
+
+@keyframes pet-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pet-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pet-perk {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes pet-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pet-talk {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.6);
+  }
+}
+
+@keyframes pet-shake {
+  0%,
+  92%,
+  100% {
+    transform: translateX(0);
+  }
+  94% {
+    transform: translateX(-2px);
+  }
+  96% {
+    transform: translateX(2px);
+  }
+  98% {
+    transform: translateX(-1px);
+  }
+}
+
+/* ---------- 气泡 ---------- */
+
+.pet-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 300px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--pet-surface);
+  border: 1px solid var(--pet-border);
+  box-shadow: 0 4px 12px rgba(28, 36, 48, 0.12);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.pet-bubble__dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--pet-accent);
+}
+
+.pet-bubble--error {
+  background: var(--pet-error-soft);
+  border-color: rgba(194, 65, 12, 0.3);
+}
+
+.pet-bubble--error .pet-bubble__dot {
+  background: var(--pet-error);
+}
+
+.pet-bubble__text {
+  margin: 0;
+}
+
+/* ---------- 原型面板 ---------- */
+
+.prototype-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--pet-surface-strong);
+  border: 1px solid var(--pet-border);
+  box-shadow: 0 6px 18px rgba(28, 36, 48, 0.14);
+}
+
+.prototype-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prototype-panel__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.prototype-panel__notice {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--pet-ink-soft);
+}
+
+.prototype-panel__states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.prototype-panel__button,
+.prototype-panel__quit {
+  /* 触控目标至少 44×44 的可点区域，视觉上仍保持紧凑。 */
+  min-height: 32px;
+  min-width: 52px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--pet-border);
+  background: #fff;
+  color: var(--pet-ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.prototype-panel__button:hover {
+  border-color: var(--pet-accent);
+}
+
+.prototype-panel__button[data-active='true'] {
+  background: var(--pet-accent);
+  border-color: var(--pet-accent);
+  color: #fff;
+}
+
+.prototype-panel__quit {
+  align-self: flex-start;
+  border-color: rgba(194, 65, 12, 0.35);
+  color: var(--pet-error);
+}
+
+.prototype-panel__quit:hover:not(:disabled) {
+  background: var(--pet-error-soft);
+}
+
+.prototype-panel__quit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 可见焦点：不允许去掉键盘焦点环。 */
+.prototype-panel__button:focus-visible,
+.prototype-panel__quit:focus-visible {
+  outline: 3px solid var(--pet-focus);
+  outline-offset: 2px;
+}
+
+.prototype-panel__hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--pet-ink-soft);
+}
+
+/*
+ * 窗口固定 380×420，出现提示时内容会多出一行，把退出按钮挤出窗口。
+ * 这里只收紧留白并隐藏纯装饰性的操作提示，保证“提示”和“退出”都完整可见；
+ * 不做整体缩放，也不改动角色的可点面积。
+ */
+.pet-root:has(.pet-root__notice) {
+  gap: 6px;
+  padding-bottom: 6px;
+}
+
+.pet-root:has(.pet-root__notice) .pet-root__avatar {
+  gap: 4px;
+}
+
+.pet-root:has(.pet-root__notice) .pet-root__panel {
+  gap: 6px;
+}
+
+.pet-root:has(.pet-root__notice) .prototype-panel {
+  padding: 8px 10px;
+}
+
+.pet-root:has(.pet-root__notice) .prototype-panel__hint {
+  display: none;
+}
+
+.pet-root__notice {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--pet-error-soft);
+  border: 1px solid rgba(194, 65, 12, 0.3);
+  color: var(--pet-error);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ---------- 无障碍：尊重系统减少动态效果 ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-avatar *,
+  .pet-avatar {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .prototype-panel__button,
+  .prototype-panel__quit {
+    transition: none !important;
+  }
+}
+
+/* 高对比度模式下用系统色，避免透明窗口里看不清。 */
+@media (forced-colors: active) {
+  .pet-bubble,
+  .prototype-panel,
+  .pet-root__notice {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .prototype-panel__button:focus-visible,
+  .prototype-panel__quit:focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

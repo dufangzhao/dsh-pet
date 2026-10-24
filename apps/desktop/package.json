@@ -5,7 +5,7 @@
   "description": "Electron 桌面应用（主进程骨架；renderer/preload 由后续工作包实现）",
   "license": "MIT",
   "type": "module",
-  "main": "./src/main/index.ts",
+  "main": "./dist/main/index.mjs",
   "types": "./src/main/index.ts",
   "exports": {
     ".": {
@@ -15,7 +15,9 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "build": "node build.mjs",
+    "start": "node start.mjs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
