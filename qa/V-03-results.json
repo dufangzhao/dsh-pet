@@ -1,0 +1,84 @@
+{
+  "runs": [
+    {
+      "kind": "asr",
+      "electron": "45.0.0",
+      "node": "24.22.0",
+      "report": {
+        "modelId": "sensevoice-small-int8",
+        "sherpa": "1.13.8",
+        "waveDecoder": "JS-owned PCM16 mono 16kHz",
+        "provider": "cpu",
+        "numThreads": 2,
+        "processMode": "Electron RUN_AS_NODE",
+        "hashesVerified": 6,
+        "loadMs": 1723.23,
+        "feedMode": "whole-file",
+        "samples": [
+          {
+            "file": "test_wavs/zh.wav",
+            "audioSeconds": 5.59,
+            "inferenceMs": 243.17,
+            "cpuMs": 438,
+            "characters": 14,
+            "transcriptSha256": "00b0038b0cb4628e0af7bce27e64671a3cac514bfc1158b2c3b3708e20b4adb3",
+            "nonemptyPartialRevisions": 0,
+            "decodeCalls": 1,
+            "rssMiB": 370.31
+          },
+          {
+            "file": "test_wavs/en.wav",
+            "audioSeconds": 7.15,
+            "inferenceMs": 323.74,
+            "cpuMs": 657,
+            "characters": 81,
+            "transcriptSha256": "f1685c2e7e2fe9da177adcb96c4420ae848e82df2952bbf8aef82a5f768d744f",
+            "nonemptyPartialRevisions": 0,
+            "decodeCalls": 1,
+            "rssMiB": 376.89
+          }
+        ]
+      }
+    },
+    {
+      "kind": "asr",
+      "electron": "45.0.0",
+      "node": "24.22.0",
+      "report": {
+        "modelId": "streaming-paraformer-zh-en-int8",
+        "sherpa": "1.13.8",
+        "waveDecoder": "JS-owned PCM16 mono 16kHz",
+        "provider": "cpu",
+        "numThreads": 2,
+        "processMode": "Electron RUN_AS_NODE",
+        "hashesVerified": 6,
+        "loadMs": 1528.12,
+        "feedMode": "100ms chunks faster-than-real-time; 500ms zero tail",
+        "samples": [
+          {
+            "file": "test_wavs/0.wav",
+            "audioSeconds": 10.05,
+            "inferenceMs": 742.49,
+            "cpuMs": 2093,
+            "characters": 51,
+            "transcriptSha256": "e3af85064a8c7926d3b0121c69b8e675ca085ca8fe7c95cd0661b9cc0b04d418",
+            "nonemptyPartialRevisions": 12,
+            "decodeCalls": 17,
+            "rssMiB": 347.33
+          },
+          {
+            "file": "test_wavs/1.wav",
+            "audioSeconds": 5.1,
+            "inferenceMs": 398.16,
+            "cpuMs": 1188,
+            "characters": 29,
+            "transcriptSha256": "ea640ec0c54f152f3168a6993c421233a3f3d2d96901a1c44e7087405a36abbb",
+            "nonemptyPartialRevisions": 7,
+            "decodeCalls": 9,
+            "rssMiB": 348.93
+          }
+        ]
+      }
+    }
+  ]
+}

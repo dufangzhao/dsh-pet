@@ -7,6 +7,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 const probes = {
   cordis: { entry: 'packages/host-kernel/dist/m0/cordis-worker.mjs', timeout: 20000 },
+  asr: { entry: 'qa/probes/asr-worker.cjs', timeout: 120000 },
 };
 const kind = process.argv[2];
 const selected = probes[kind];
@@ -40,6 +41,7 @@ else {
         if (!message || JSON.stringify(message).length > 65536) {
           child.kill(); reject(new Error('invalid probe report')); return;
         }
+        if (message.type === 'm0.stage' && /^[a-z-]{1,60}$/.test(message.stage)) process.stderr.write('M0 stage: ' + message.stage + '\n');
         if (message.type === 'm0.result') report = message.report;
         if (message.type === 'm0.error') problem = message.message;
       });
@@ -50,7 +52,7 @@ else {
         else reject(new Error(problem || 'worker exit without report: ' + code));
       });
     });
-    console.log(JSON.stringify({ kind, electron: process.versions.electron, node: process.versions.node, report: result }, null, 2));
+    console.log(JSON.stringify({ kind, electron: process.versions.electron, node: process.versions.node, report: result }));
     clearTimeout(watchdog);
     app.exit(0);
   }).catch(error => { console.error(error.message); child?.kill(); clearTimeout(watchdog); app.exit(1); });
