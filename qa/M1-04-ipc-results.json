@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "stage": "crash",
+  "checks": [
+    "native-control-rpc",
+    "separate-framed-media",
+    "8-frame-credit-window",
+    "consumer-credit-return",
+    "ordered-9-frame-drain",
+    "cancel-forwarded",
+    "owned-child-exit17-invalidates-rpc"
+  ],
+  "childExitCode": 17,
+  "windowCount": 0,
+  "cleanup": "complete"
+}

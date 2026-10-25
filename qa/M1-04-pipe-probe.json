@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "control": true,
+  "media": true,
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "exitCode": 0
+}

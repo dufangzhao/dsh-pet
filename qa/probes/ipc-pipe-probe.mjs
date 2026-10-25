@@ -1,0 +1,15 @@
+import {spawn} from 'node:child_process';
+import {createRequire} from 'node:module';
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+const require=createRequire(import.meta.url);const packagePath=require.resolve('electron/package.json');const meta=JSON.parse(await fs.readFile(packagePath,'utf8'));if(meta.version!=='45.0.0')throw new Error('Unexpected runtime');
+const env={ELECTRON_RUN_AS_NODE:'1'};for(const name of ['SystemRoot','WINDIR','TEMP','TMP','PATH'])if(process.env[name])env[name]=process.env[name];
+const child=spawn(path.join(path.dirname(packagePath),'dist/electron.exe'),[path.join(root,'qa/probes/ipc-pipe-child.cjs')],{cwd:root,env,stdio:['ignore','inherit','inherit','ipc','pipe'],windowsHide:true});
+const report={status:'starting',control:false,media:false};const media=child.stdio[4];let bytes=Buffer.alloc(0);
+media.on('data',chunk=>{bytes=Buffer.concat([bytes,chunk]);if(bytes.length>4){child.kill();return;}if(bytes.length===4){report.media=bytes.equals(Buffer.from([4,3,2,1]));child.send({type:'stop'});}});
+child.on('message',message=>{if(message.type==='ready'){report.control=true;report.runtime={electron:message.electron,node:message.node};media.write(Buffer.from([1,2,3,4]));}else if(message.type==='unsupported-pipe'){report.status='unsupported';}});
+const timer=setTimeout(()=>{report.status='timeout';child.kill();},10000);
+child.once('error',()=>{clearTimeout(timer);process.exitCode=1;});
+child.once('exit',async code=>{clearTimeout(timer);report.exitCode=code;report.status=code===0&&report.control&&report.media?'passed':'failed';await fs.mkdir(path.join(root,'.cache/m1-ipc'),{recursive:true});await fs.writeFile(path.join(root,'.cache/m1-ipc/pipe-probe.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));if(report.status!=='passed')process.exitCode=1;});
