@@ -31,6 +31,7 @@ export type MediaControl =
   | Omit<StreamCreditMessage, 'protocol' | 'id' | 'sessionId' | 'owner'>
   | Omit<StreamEndMessage, 'protocol' | 'id' | 'sessionId' | 'owner'>;
 export interface MediaPeerOptions {
+  closed?(reference: TaskMediaReference): void;
   signalFor: (owner: OwnerRef, taskId: string) => AbortSignal | null;
   write: (frame: MediaFrame) => Promise<Result<null>>;
   control: (message: MediaControl) => Result<null>;
@@ -116,6 +117,11 @@ export class TaskMediaPeer {
   }
   private remember(record: StreamRecord): void {
     record.detach();
+    try {
+      this.options.closed?.(record.reference);
+    } catch {
+      // Optional host observer is not transport authority; stream cleanup must still finish.
+    }
     this.#streams.delete(record.reference.streamId);
     this.#terminal.set(record.reference.streamId, record.reference.taskId);
     while (this.#terminal.size > 256) this.#terminal.delete(this.#terminal.keys().next().value!);

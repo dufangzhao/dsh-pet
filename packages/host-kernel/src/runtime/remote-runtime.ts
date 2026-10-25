@@ -16,6 +16,7 @@ import { KernelFault } from '../kernel-fault.js';
 import { manifestDigest, parseBootstrap, record, ownerFrom, exactKeys } from './worker-protocol.js';
 import { sameOwner } from './identity.js';
 import { TaskMediaPeer, mediaReference } from '../tasks/media-peer.js';
+import { SensitivePeer } from '../credentials/sensitive-peer.js';
 import type { RuntimeHostPort } from './host-services.js';
 import type { RpcContext } from '../ipc/control-endpoint.js';
 import type { DiscoveryRoot } from './discovery.js';
@@ -63,6 +64,8 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
   readonly #endpoint: ControlEndpoint;
   readonly #media: FramedMediaPort;
   readonly #streams: TaskMediaPeer;
+  readonly #sensitive: SensitivePeer;
+  readonly #sensitivePort: FramedMediaPort;
   readonly #exit: Promise<number | null>;
   readonly #ready: Promise<void>;
   readonly #sessions = new Set<RemoteSession>();
@@ -93,7 +96,7 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     this.#child = spawn(options.executable, [options.workerEntry, JSON.stringify(bootstrap)], {
       cwd: path.dirname(options.workerEntry),
       env,
-      stdio: ['ignore', 'ignore', 'ignore', 'ipc', 'pipe', 'pipe'],
+      stdio: ['ignore', 'ignore', 'ignore', 'ipc', 'pipe', 'pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
     let exited!: (value: number | null) => void;
@@ -104,6 +107,8 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       this.#exited = true;
       this.#streams.close();
       this.#media.close();
+      this.#sensitive.close();
+      this.#sensitivePort.close();
       this.#exitCode = code;
       this.#state = this.#closing ? 'stopped' : 'failed';
       exited(code);
@@ -119,13 +124,19 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     });
     this.#streams = new TaskMediaPeer({
       signalFor: (owner, taskId) => this.options.host?.signalFor(owner, taskId) ?? null,
-      write: (frame) => this.#media.write(frame),
+      write: (frame) =>
+        this.options.host?.allowFrame?.(frame) === false
+          ? Promise.resolve({ ok: false, error: makeError('invalid-input', false) })
+          : this.#media.write(frame),
+      closed: (reference) => this.options.host?.forget?.(reference.streamId),
       control: (message) => this.#endpoint.streamControl(message),
     });
+    this.#sensitive = new SensitivePeer({ write: (frame) => this.#sensitivePort.write(frame) });
     this.#endpoint = new ControlEndpoint(childProcessControl(this.#child), {
       sessionId: bootstrap.sessionId,
       owner: bootstrap.owner,
       live: () => !this.#exited,
+      allowJson: (value) => this.options.host?.allowJson?.(value) !== false,
       handlers: { 'host.api': (context, payload) => this.fromWorker(context, payload) },
       onStreamControl: (message) => {
         const result = this.#streams.control(message);
@@ -155,6 +166,12 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       pipe as Duplex,
       (frame) => this.#streams.receive(frame),
       (error) => this.#streams.close(error),
+    );
+    if (!stdio[6] || !stdio[7]) throw new Error('Missing sensitive pipes');
+    this.#sensitivePort = new FramedMediaPort(
+      Duplex.from({ readable: stdio[7], writable: stdio[6] }),
+      (frame) => this.#sensitive.receive(frame),
+      () => this.#sensitive.close(),
     );
     this.#ready = this.#endpoint
       .request('runtime.info', null, { budgetMs: startupBudget() })
@@ -218,6 +235,28 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       !this.options.host
     )
       return bad('permission-denied');
+    if (body['action'] === 'credentials.use') {
+      const value = record(body['payload']!);
+      const reference = value && mediaReference(value['reference']);
+      if (
+        !value ||
+        !exactKeys(value, ['keyId', 'reference']) ||
+        typeof value['keyId'] !== 'string' ||
+        !reference ||
+        reference.streamId !== context.taskId ||
+        !sameOwner(reference.owner, owner) ||
+        !this.options.host.signalFor(owner, reference.taskId)
+      )
+        return bad('permission-denied');
+      if (!this.options.host.useCredential) return bad('not-ready');
+      return this.options.host.useCredential(
+        owner,
+        reference.taskId,
+        value['keyId'],
+        context.signal,
+        (secret, signal) => this.#sensitive.send(reference, secret, signal),
+      );
+    }
     if (body['action'] === 'media.input' || body['action'] === 'media.output') {
       const reference = mediaReference(body['payload']);
       if (
@@ -459,6 +498,8 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       this.options.stopTimeoutMs ?? 2000,
     );
     this.#streams.close();
+    this.#sensitive.close();
+    this.#sensitivePort.close();
     this.#endpoint.close();
     this.#media.close();
     if (!this.#exited) await bounded(this.#exit, this.options.stopTimeoutMs ?? 2000);

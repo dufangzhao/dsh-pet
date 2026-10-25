@@ -35,6 +35,7 @@ const bad = (code: Parameters<typeof makeError>[0]): Result<JsonValue> => ({
   error: makeError(code, false),
 });
 export interface WorkerServerServices {
+  securityStats?(): JsonValue;
   mediaStats?(): JsonValue;
   create(owner: OwnerRef, signal: AbortSignal): PluginHostServices;
 }
@@ -75,6 +76,7 @@ export class RuntimeWorkerServer {
           issues: this.issueCount,
           instances: this.#instances.size,
           media: this.services?.mediaStats?.() ?? null,
+          security: this.services?.securityStats?.() ?? null,
         },
       }),
       'runtime.activate': (ctx, payload) => this.activate(ctx, payload),

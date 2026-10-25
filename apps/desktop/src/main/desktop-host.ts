@@ -13,6 +13,11 @@ import {
   PluginDataDirectories,
   createRuntimeHostPort,
   type RuntimeHostPort,
+  CredentialBroker,
+  FileCiphertextStore,
+  SecretRedactor,
+  credentialPermissionAuthorizer,
+  type SecretCipher,
 } from '@pet/host-kernel';
 import { makeError, type HostStatus } from '@pet/contracts';
 export class DesktopHost {
@@ -23,6 +28,7 @@ export class DesktopHost {
   readonly dataDirectories: PluginDataDirectories;
   readonly permissions: PermissionService;
   readonly permissionControl: PermissionControl;
+  readonly credentials: CredentialBroker | undefined;
   #closing: Promise<{ exitConfirmed: boolean; forced: boolean }> | undefined;
   private constructor(
     driver: RemoteRuntimeDriver,
@@ -32,6 +38,7 @@ export class DesktopHost {
     permissions: PermissionService,
     permissionControl: PermissionControl,
     tasks: TaskSupervisor,
+    credentials?: CredentialBroker,
   ) {
     this.driver = driver;
     this.configs = configs;
@@ -40,12 +47,14 @@ export class DesktopHost {
     this.tasks = tasks;
     this.permissions = permissions;
     this.permissionControl = permissionControl;
+    this.credentials = credentials;
   }
   static async create(options: {
     executable: string;
     workerEntry: string;
     builtinDirectory: string;
     userDirectory: string;
+    cipher?: SecretCipher;
   }): Promise<DesktopHost> {
     await mkdir(options.userDirectory, { recursive: true });
     const roots: DiscoveryRoot[] = [
@@ -56,17 +65,33 @@ export class DesktopHost {
     const dataRoot = path.join(path.dirname(options.userDirectory), 'plugin-data');
     await mkdir(configRoot, { recursive: true });
     await mkdir(dataRoot, { recursive: true });
+    const vaultRoot = path.join(path.dirname(options.userDirectory), 'vault');
+    if (options.cipher) await mkdir(vaultRoot, { recursive: true });
     const reference: {
       manager?: PluginManager;
       tasks?: TaskSupervisor;
       hostPort?: RuntimeHostPort;
     } = {};
     const permission = createHostPermissions(reference);
+    const credentials = options.cipher
+      ? new CredentialBroker({
+          cipher: options.cipher,
+          store: new FileCiphertextStore(vaultRoot),
+          authorize: credentialPermissionAuthorizer(permission.service),
+          redactor: new SecretRedactor(),
+        })
+      : undefined;
     const driver = new RemoteRuntimeDriver({
       executable: options.executable,
       workerEntry: options.workerEntry,
       roots,
       host: {
+        allowJson: (value) => reference.hostPort?.allowJson?.(value) !== false,
+        allowFrame: (frame) => reference.hostPort?.allowFrame?.(frame) !== false,
+        forget: (streamId) => reference.hostPort?.forget?.(streamId),
+        useCredential: (...args) =>
+          reference.hostPort?.useCredential?.(...args) ??
+          Promise.resolve({ ok: false, error: makeError('not-ready', false) }),
         signalFor: (owner, taskId) => reference.hostPort?.signalFor(owner, taskId) ?? null,
         request: (owner, action, payload, context) =>
           reference.hostPort?.request(owner, action, payload, context) ??
@@ -107,6 +132,7 @@ export class DesktopHost {
       tasks,
       configs,
       permissions: permission.service,
+      ...(credentials ? { credentials } : {}),
     });
     const host = new DesktopHost(
       driver,
@@ -116,6 +142,7 @@ export class DesktopHost {
       permission.service,
       permission.control,
       tasks,
+      credentials,
     );
     try {
       const discovered = await discoverPlugins(roots);
@@ -158,7 +185,10 @@ export class DesktopHost {
     this.tasks.shutdown();
     this.configs.close();
     this.permissions.close();
+    this.credentials?.dispose();
     await this.manager.shutdown();
-    return this.driver.dispose();
+    const stopped = await this.driver.dispose();
+    if (stopped.exitConfirmed) this.credentials?.redactor.clear();
+    return stopped;
   }
 }

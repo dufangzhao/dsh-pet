@@ -341,11 +341,99 @@ function readTask(task: unknown): PluginTask | null {
   return { taskId, signal, deadline };
 }
 
+/** 端口上的可选成员：缺失、被拒绝，或一个可调用的数据属性函数。 */
+type PortMember =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'rejected' }
+  | { readonly kind: 'function'; readonly value: unknown };
+
+/**
+ * 读取端口上的可选 `withSecret`，只认**自有**的数据属性函数。
+ *
+ * 不执行 getter、不触发 Proxy trap：原型链上出现 Proxy 时直接拒绝。继承来的同名字段
+ * 也不算「合法自有」，因此同样按存在但非法处理，而不是静默降级成旧表面。
+ */
+function readPortMember(value: object, key: string): PortMember {
+  let current: object | null = value;
+  let own = true;
+  while (current !== null) {
+    if (types.isProxy(current)) return { kind: 'rejected' };
+    const descriptor = Object.getOwnPropertyDescriptor(current, key);
+    if (descriptor !== undefined) {
+      if (!own || !('value' in descriptor) || typeof descriptor.value !== 'function') {
+        return { kind: 'rejected' };
+      }
+      return { kind: 'function', value: descriptor.value };
+    }
+    own = false;
+    current = Object.getPrototypeOf(current);
+  }
+  return { kind: 'absent' };
+}
+
+/**
+ * 原始凭据文本的最低形状检查，与宿主 broker 的判定保持一致。
+ *
+ * 只接受非空、UTF-8 完整、不超过 16 KiB 且不含控制字符的字符串；失败时不回显内容。
+ */
+function isSecretText(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    value.length > 0 &&
+    Buffer.byteLength(value, 'utf8') <= 16 * 1024 &&
+    Buffer.from(value, 'utf8').toString('utf8') === value &&
+    ![...value].some((character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)
+  );
+}
+
+/**
+ * 已知值的有限旁路防护：当前原始值及其 URL 编码、Base64 形式。
+ *
+ * 只扫描结构预检副本里的实际字符串与键名，不扫描转义后的 JSON 文本。这是有界防护，
+ * 不承诺识别任意编码、拼接或插件自留副本。
+ */
+function knownValueForms(secret: string): readonly string[] {
+  const forms = [
+    secret,
+    encodeURIComponent(secret),
+    Buffer.from(secret, 'utf8').toString('base64'),
+  ];
+  return [...new Set(forms.filter((form) => form.length > 0))];
+}
+
+/** 在已预检的 JSON 树里查找已知值；只读自有数据属性，不执行任何代码。 */
+function containsKnownValue(value: unknown, forms: readonly string[]): boolean {
+  const stack: unknown[] = [value];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (typeof current === 'string') {
+      if (forms.some((form) => current.includes(form))) return true;
+      continue;
+    }
+    if (typeof current !== 'object' || current === null) continue;
+    if (Array.isArray(current)) {
+      for (const item of current) stack.push(item);
+      continue;
+    }
+    for (const [key, item] of Object.entries(current as Record<string, unknown>)) {
+      if (forms.some((form) => key.includes(form))) return true;
+      stack.push(item);
+    }
+  }
+  return false;
+}
+
+/** 包装回调内部拒绝时抛出的固定哨兵；端口拿不到明文，也拿不到原始异常。 */
+const REFUSED = Object.freeze(new Error('credential operation refused'));
+
 /**
  * 把宿主端口包成冻结的 `PluginHostServices`。
  *
  * 端口方法只在创建时读取一次，之后既不重新读取也不外露；每次调用都先校验任务
  * 与 scope 状态，调用后再校验一次，避免取消或超时后交付晚到结果。
+ *
+ * `withSecret` 只在端口提供合法自有数据属性函数时出现；缺失时返回的服务对象仍是
+ * 原来那四个字段，存在但非法则同步抛出固定工厂错误。
  */
 export function createPluginHostServices(
   scope: PluginHostScope,
@@ -369,6 +457,13 @@ export function createPluginHostServices(
   ) {
     throw invalidScope();
   }
+
+  const secretPort = readPortMember(port, 'withSecret');
+  if (secretPort.kind === 'rejected') throw invalidScope();
+  const callWithSecret =
+    secretPort.kind === 'function'
+      ? (secretPort.value as NonNullable<PluginHostPort['withSecret']>)
+      : null;
 
   const scopeOwner = Object.freeze({ ...owner });
   const callGetConfig = getConfig as PluginHostPort['getConfig'];
@@ -472,10 +567,108 @@ export function createPluginHostServices(
     },
   });
 
+  /**
+   * 凭据服务：端口只会拿到**一次性**包装回调，原始值只活在包装内部。
+   *
+   * 只有确认端口真的把 `(secret, signal)` 传进来、只调用一次、并把同一个结果交回时
+   * 才接受成功；跳过、重复调用或伪造 success 的端口一律得到固定错误。回调抛出的
+   * 原始异常、取消、超时和坏结果都收敛成固定 `Result`，不把明文带回给插件。
+   */
+  const credentials =
+    callWithSecret === null
+      ? null
+      : Object.freeze({
+          async withSecret(
+            task: PluginTask,
+            keyId: LocalId,
+            operation: (secret: string, signal: AbortSignal) => Promise<JsonValue>,
+          ): Promise<Result<JsonValue>> {
+            const checked = readTask(task);
+            if (checked === null) return fail('invalid-input');
+            if (typeof keyId !== 'string' || !LOCAL_ID.test(keyId)) return fail('invalid-input');
+            if (typeof operation !== 'function' || types.isProxy(operation)) {
+              return fail('invalid-input');
+            }
+            const before = checkTask(checked);
+            if (before !== null) return fail(before);
+
+            /** 端口侧可见的调用轨迹：是否已调用、拒绝原因、交给端口的冻结结果。 */
+            const trace: {
+              invoked: boolean;
+              finished: boolean;
+              refusals: KernelError['code'][];
+              results: JsonValue[];
+            } = { invoked: false, finished: false, refusals: [], results: [] };
+            const refuse = (code: KernelError['code']): never => {
+              if (trace.refusals.length === 0) trace.refusals.push(code);
+              throw REFUSED;
+            };
+
+            const wrapped = async (secret: string, signal: AbortSignal): Promise<JsonValue> => {
+              // 端口不得跳过或重复使用同一个包装：第二次进入（含并发）一律拒绝。
+              if (trace.finished || trace.invoked) return refuse('unavailable');
+              trace.invoked = true;
+              if (!isSecretText(secret) || !isNativeSignal(signal)) return refuse('invalid-input');
+              const opened = checkTask(checked) ?? (aborted(signal) ? 'cancelled' : null);
+              if (opened !== null) return refuse(opened);
+
+              let raw: unknown;
+              try {
+                raw = await operation(secret, signal);
+              } catch {
+                return refuse('internal');
+              }
+              if (trace.finished) return refuse('unavailable');
+              const closed = checkTask(checked) ?? (aborted(signal) ? 'cancelled' : null);
+              if (closed !== null) return refuse(closed);
+
+              const copied = readJson(raw);
+              if (copied === null) return refuse('invalid-input');
+              if (containsKnownValue(copied.value, knownValueForms(secret))) {
+                return refuse('invalid-input');
+              }
+              const frozen = deepFreeze(copied.value);
+              trace.results.push(frozen);
+              return frozen;
+            };
+
+            let raw: unknown;
+            try {
+              raw = await callWithSecret.call(port, scopeOwner, checked, keyId, wrapped);
+            } catch {
+              const refused = trace.refusals.length > 0 ? trace.refusals[0] : undefined;
+              return fail(refused ?? 'unavailable');
+            } finally {
+              trace.finished = true;
+            }
+            const late = checkTask(checked);
+            if (late !== null) return fail(late);
+            const refused = trace.refusals.length > 0 ? trace.refusals[0] : undefined;
+            if (refused !== undefined) return fail(refused);
+            const expected = trace.results.length === 1 ? trace.results[0] : undefined;
+            if (expected === undefined) {
+              // 端口在交付凭据前就可以合法拒绝（未声明、无授权、未就绪），这类固定失败
+              // 原样透传；但它没有执行包装却报成功，就是伪造，一律拒绝。
+              const failure = readResult(raw, () => null);
+              return failure !== null && !failure.ok
+                ? { ok: false, error: failure.error }
+                : fail('unavailable');
+            }
+            const result = readResult(raw, (value) =>
+              value === expected ? accept(expected) : null,
+            );
+            if (result === null) return fail('unavailable');
+            return result.ok
+              ? { ok: true, value: result.value }
+              : { ok: false, error: result.error };
+          },
+        });
+
   return Object.freeze({
     version: 1 as const,
     config,
     capabilities,
     media,
+    ...(credentials === null ? {} : { credentials }),
   });
 }

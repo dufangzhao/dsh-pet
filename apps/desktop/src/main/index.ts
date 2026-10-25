@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain, session } from 'electron';
+import { app, BrowserWindow, ipcMain, session, safeStorage } from 'electron';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { HOST_IPC, PET_IPC, makeError, type PetSnapshot } from '@pet/contracts';
+import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { HostStatusRequests } from './host-request.js';
 import { createPetWindow, type PetWindowController } from './windows/pet-window.js';
@@ -60,7 +61,14 @@ app
       respond(false),
     );
     session.defaultSession.setPermissionCheckHandler(() => false);
+    let cipher: SecretCipher | undefined;
+    try {
+      cipher = createSafeStorageCipher(safeStorage);
+    } catch {
+      // No approved encryption backend: leave credentials unavailable, never use plaintext.
+    }
     hostStarting = DesktopHost.create({
+      ...(cipher ? { cipher } : {}),
       executable: process.execPath,
       workerEntry: path.resolve(here, '../runtime/worker.cjs'),
       builtinDirectory: app.isPackaged

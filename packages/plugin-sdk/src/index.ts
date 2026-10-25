@@ -61,6 +61,21 @@ export interface PluginMediaReader extends AsyncIterable<Uint8Array> {
   cancel(): void;
 }
 
+/**
+ * 凭据服务：插件唯一能拿到明文的位置。
+ *
+ * 原始值只出现在 `operation` 的参数里，不进 `Result`、不进配置快照、不进日志。
+ * 没有 set/delete/repair/授权/namespace 参数：owner 由宿主工厂绑定，`keyId` 只能是
+ * 本插件已声明的本地标识。这是「已知值」的有限旁路防护，不是同进程恶意代码的沙箱。
+ */
+export interface PluginCredentialServices {
+  withSecret(
+    task: PluginTask,
+    keyId: LocalId,
+    operation: (secret: string, signal: AbortSignal) => Promise<JsonValue>,
+  ): Promise<Result<JsonValue>>;
+}
+
 /** 插件可用的宿主服务。没有任意 request/send，也没有文件、网络、进程或凭据明文接口。 */
 export interface PluginHostServices {
   readonly version: 1;
@@ -79,6 +94,8 @@ export interface PluginHostServices {
     openInput(task: PluginTask): Promise<Result<PluginMediaReader>>;
     openOutput(task: PluginTask): Promise<Result<PluginMediaWriter>>;
   };
+  /** 可选凭据入口：宿主端口没有声明 `withSecret` 时这个字段整体不存在。 */
+  readonly credentials?: PluginCredentialServices;
 }
 
 /**
@@ -98,6 +115,19 @@ export interface PluginHostPort {
   ): Promise<Result<JsonValue>>;
   openInput(owner: OwnerRef, task: PluginTask): Promise<Result<PluginMediaReader>>;
   openOutput(owner: OwnerRef, task: PluginTask): Promise<Result<PluginMediaWriter>>;
+  /**
+   * 可选凭据端口：真正的传输、授权与已知值登记都由宿主完成。
+   *
+   * `operation` 是 SDK 包装过的一次性回调。端口必须原样用 `(secret, signal)`
+   * 调用它一次、等待结果，并在成功时把同一个结果（或 `null`）作为 `value` 返回；
+   * 跳过、重复调用或返回别的值都会被 SDK 拒绝。
+   */
+  withSecret?(
+    owner: OwnerRef,
+    task: PluginTask,
+    keyId: LocalId,
+    operation: (secret: string, signal: AbortSignal) => Promise<JsonValue>,
+  ): Promise<Result<JsonValue>>;
 }
 
 /** 能力方法签名：任务与 JSON 输入，异步返回 JSON。不额外导出，避免扩大 SDK 面。 */

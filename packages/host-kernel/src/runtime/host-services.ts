@@ -1,4 +1,10 @@
-import { makeError, type JsonValue, type OwnerRef, type Result } from '@pet/contracts';
+import {
+  makeError,
+  type JsonValue,
+  type MediaFrame,
+  type OwnerRef,
+  type Result,
+} from '@pet/contracts';
 import type { RpcContext } from '../ipc/control-endpoint.js';
 import type { ConfigService } from '../config/service.js';
 import type { TaskSupervisor } from '../tasks/task-supervisor.js';
@@ -6,6 +12,12 @@ import { capabilityPermissionAuthorizer } from '../permissions/adapters.js';
 import type { PermissionService } from '../permissions/kernel.js';
 import type { PluginManager } from './plugin-manager.js';
 import { jsonPreflight } from '@pet/contracts/validation';
+import {
+  type CredentialBroker,
+  CredentialError,
+  type CredentialClient,
+} from '../credentials/credential-broker.js';
+import { KnownSecretBoundary } from '../credentials/secret-boundary.js';
 import { exactKeys, record } from './worker-protocol.js';
 import type {
   MediaReadEndpoint,
@@ -14,6 +26,16 @@ import type {
 } from '../tasks/media-peer.js';
 export interface RuntimeHostPort {
   signalFor(owner: OwnerRef, taskId: string): AbortSignal | null;
+  allowJson?(value: JsonValue): boolean;
+  allowFrame?(frame: MediaFrame): boolean;
+  forget?(streamId: string): void;
+  useCredential?(
+    owner: OwnerRef,
+    taskId: string,
+    keyId: string,
+    signal: AbortSignal,
+    operation: (secret: string, signal: AbortSignal) => Promise<Result<null>>,
+  ): Promise<Result<null>>;
   request(
     owner: OwnerRef,
     action: string,
@@ -28,12 +50,67 @@ export interface HostServicesOptions {
   tasks: TaskSupervisor;
   configs: ConfigService;
   permissions: PermissionService;
+  credentials?: CredentialBroker;
   input?: RuntimeHostPort['input'];
   output?: RuntimeHostPort['output'];
 }
 /** Main-process adapter only: never passed to plugin code. */
 export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHostPort {
+  const boundary = new KnownSecretBoundary(options.credentials?.redactor);
+  const clients = new Map<string, { owner: OwnerRef; client: CredentialClient }>();
   return Object.freeze({
+    allowJson: (value: JsonValue) => boundary.allowJson(value),
+    allowFrame: (frame: MediaFrame) => boundary.allowFrame(frame),
+    forget: (streamId: string) => boundary.forget(streamId),
+    ...(options.credentials
+      ? {
+          useCredential: async (
+            owner: OwnerRef,
+            taskId: string,
+            keyId: string,
+            signal: AbortSignal,
+            operation: (secret: string, signal: AbortSignal) => Promise<Result<null>>,
+          ): Promise<Result<null>> => {
+            try {
+              const taskSignal = options.tasks.taskSignal(taskId, owner),
+                snapshot = options.manager.get(owner);
+              if (
+                !taskSignal ||
+                !snapshot ||
+                snapshot.owner.generation !== owner.generation ||
+                !options.manager.isLive(owner)
+              )
+                return { ok: false, error: makeError('permission-denied', false) };
+              const id = JSON.stringify([owner.pluginId, owner.instanceId]);
+              let issued = clients.get(id);
+              if (!issued || issued.owner.generation !== owner.generation) {
+                const keys =
+                  snapshot.manifest.permissions?.flatMap((permission) =>
+                    permission.kind === 'credentials' ? permission.keys : [],
+                  ) ?? [];
+                issued = {
+                  owner: { ...owner },
+                  client: options.credentials!.issueClient(owner, [...new Set(keys)]),
+                };
+                clients.set(id, issued);
+              }
+              return await issued.client.withSecret(
+                keyId,
+                { taskId, signal: AbortSignal.any([taskSignal, signal]) },
+                operation,
+              );
+            } catch (error) {
+              return {
+                ok: false,
+                error: makeError(
+                  error instanceof CredentialError ? error.code : 'unavailable',
+                  false,
+                ),
+              };
+            }
+          },
+        }
+      : {}),
     signalFor: (owner: OwnerRef, taskId: string) => options.tasks.taskSignal(taskId, owner),
     request: async (
       owner: OwnerRef,

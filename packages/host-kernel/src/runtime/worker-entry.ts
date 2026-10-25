@@ -1,4 +1,6 @@
 import net from 'node:net';
+import { SensitivePeer } from '../credentials/sensitive-peer.js';
+import { KnownSecretBoundary } from '../credentials/secret-boundary.js';
 import { Duplex } from 'node:stream';
 import { TaskMediaPeer } from '../tasks/media-peer.js';
 import { createWorkerServices } from './worker-services.js';
@@ -22,9 +24,18 @@ export function startRuntimeWorker(): void {
     return;
   }
   let server: RuntimeWorkerServer | undefined;
+  const boundary = new KnownSecretBoundary();
+  const sensitive: SensitivePeer = new SensitivePeer({
+    write: (frame) => sensitivePort.write(frame),
+    observe: (secret) => boundary.observe(secret),
+  });
   const streams: TaskMediaPeer = new TaskMediaPeer({
     signalFor: (owner, taskId) => server?.taskSignal(owner, taskId) ?? null,
-    write: (frame) => media.write(frame),
+    write: (frame) =>
+      boundary.allowFrame(frame)
+        ? media.write(frame)
+        : Promise.resolve({ ok: false, error: makeError('invalid-input', false) }),
+    closed: (reference) => boundary.forget(reference.streamId),
     control: (message) => endpoint.streamControl(message),
   });
   const services = createWorkerServices(
@@ -32,6 +43,7 @@ export function startRuntimeWorker(): void {
     streams,
     (owner, taskId) => server?.taskSignal(owner, taskId) ?? null,
     () => media.snapshot(),
+    { peer: sensitive, boundary },
   );
   const creating = RuntimeWorkerServer.create(bootstrap, services).then((value) => {
     server = value;
@@ -100,10 +112,19 @@ export function startRuntimeWorker(): void {
     },
     (error) => streams.close(error),
   );
+  const sensitivePort: FramedMediaPort = new FramedMediaPort(
+    Duplex.from({
+      readable: new net.Socket({ fd: 6, readable: true, writable: false }),
+      writable: new net.Socket({ fd: 7, readable: false, writable: true }),
+    }),
+    (frame) => sensitive.receive(frame),
+    () => sensitive.close(),
+  );
   const endpoint: ControlEndpoint = new ControlEndpoint(parentProcessControl(), {
     sessionId: bootstrap.sessionId,
     owner: bootstrap.owner,
     live: () => !shutting,
+    allowJson: (value) => boundary.allowJson(value),
     handlers,
     onStreamControl: (message) => {
       const result = streams.control(message);
@@ -115,8 +136,11 @@ export function startRuntimeWorker(): void {
     shutting = true;
     const timer = setTimeout(() => process.exit(1), 3000);
     streams.close();
+    sensitive.close();
+    sensitivePort.close();
     media.close();
     endpoint.close();
+    boundary.clear();
     void creating
       .then((server) => server.shutdown())
       .then(

@@ -270,6 +270,10 @@ export class SensitivePeer {
       return fail('invalid-input');
     }
     const slot = this.#active.get(reference.streamId);
+    if (!slot && header.sequence === 3 && payload.byteLength === 0) {
+      clear();
+      return { ok: true, value: null };
+    }
     if (!slot) {
       const old = this.#terminal.get(reference.streamId) === key(reference);
       clear();
@@ -344,6 +348,18 @@ export class SensitivePeer {
     const ack = await this.write(slot.reference, result.ok ? 1 : 2, new Uint8Array(0), slot.signal);
     if (!ack.ok) this.finish(slot, ack);
     else this.finish(slot, result);
+  }
+  registered(input: SensitiveReference): boolean {
+    const ref = mediaReference(input);
+    const slot = ref && this.#active.get(ref.streamId);
+    return !!slot && !slot.closed && key(slot.reference) === key(ref!);
+  }
+  discard(input: SensitiveReference): void {
+    const reference = mediaReference(input);
+    if (!reference) return;
+    const slot = this.#active.get(reference.streamId);
+    if (slot && key(slot.reference) === key(reference))
+      this.finish(slot, fail('cancelled'), slot.kind === 'out' || slot.delivered);
   }
   close(): void {
     if (this.#closed) return;

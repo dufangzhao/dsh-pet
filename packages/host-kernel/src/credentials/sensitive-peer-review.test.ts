@@ -99,3 +99,33 @@ it('bounds an unanswered registration by its timeout', async () => {
     vi.useRealTimers();
   }
 });
+it('ignores a pre-registration empty cancellation but never authorizes an unknown delivery', () => {
+  const peer = new SensitivePeer({ write: async () => ({ ok: true, value: null }) });
+  expect(
+    peer.receive({
+      header: { ...reference, sequence: 3, byteLength: 0 },
+      payload: new Uint8Array(0),
+    }).ok,
+  ).toBe(true);
+  const payload = Buffer.from('PUBLIC_REVIEW');
+  expect(
+    peer.receive({ header: { ...reference, sequence: 0, byteLength: payload.length }, payload }).ok,
+  ).toBe(false);
+  expect(peer.diagnostics().pending).toBe(0);
+  expect(peer.diagnostics().closed).toBe(false);
+  peer.close();
+});
+it('discards a rejected receive registration without sending an unpaired cancellation', async () => {
+  const write = vi.fn(async () => ({ ok: true as const, value: null }));
+  const peer = new SensitivePeer({ write }),
+    scope = new AbortController(),
+    operation = vi.fn(async () => true);
+  const accepting = peer.accept(reference, scope.signal, operation);
+  peer.discard(reference);
+  expect(await accepting).toMatchObject({ ok: false, error: { code: 'cancelled' } });
+  await peer.drain();
+  expect(write).not.toHaveBeenCalled();
+  expect(operation).not.toHaveBeenCalled();
+  expect(peer.diagnostics().pending).toBe(0);
+  peer.close();
+});

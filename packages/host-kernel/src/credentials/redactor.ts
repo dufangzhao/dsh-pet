@@ -4,6 +4,7 @@ import { types } from 'node:util';
 export class SecretRedactor {
   readonly #values = new Set<string>();
   #bytes = 0;
+  #maxPatternBytes = 0;
 
   add(secret: string): void {
     if (
@@ -22,10 +23,26 @@ export class SecretRedactor {
     ].filter((value) => !this.#values.has(value));
     const extra = additions.reduce((sum, value) => sum + Buffer.byteLength(value, 'utf8'), 0);
     if (this.#bytes + extra > 256 * 1024) throw new Error('Secret redaction capacity exceeded');
-    for (const value of additions) this.#values.add(value);
+    for (const value of additions) {
+      this.#values.add(value);
+      this.#maxPatternBytes = Math.max(this.#maxPatternBytes, Buffer.byteLength(value, 'utf8'));
+    }
     this.#bytes += extra;
   }
 
+  contains(text: string): boolean {
+    for (const value of this.#values) if (text.includes(value)) return true;
+    return false;
+  }
+  containsBytes(bytes: Uint8Array): boolean {
+    const value = Buffer.from(bytes);
+    for (const pattern of this.#values)
+      if (value.includes(Buffer.from(pattern, 'utf8'))) return true;
+    return false;
+  }
+  get maxPatternBytes(): number {
+    return this.#maxPatternBytes;
+  }
   redact(value: unknown): string {
     try {
       let text: string;
@@ -49,6 +66,7 @@ export class SecretRedactor {
   clear(): void {
     this.#values.clear();
     this.#bytes = 0;
+    this.#maxPatternBytes = 0;
     // JS strings cannot be guaranteed to be securely erased from the heap.
   }
 }

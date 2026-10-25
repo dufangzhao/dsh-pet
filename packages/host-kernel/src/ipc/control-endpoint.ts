@@ -34,6 +34,7 @@ export interface RpcOptions {
   readonly signal?: AbortSignal;
   readonly maxPending?: number;
   readonly onClosed?: () => void;
+  readonly allowJson?: (value: JsonValue) => boolean;
   readonly onStreamControl?: (message: StreamCreditMessage | StreamEndMessage) => void;
 }
 interface Outbound {
@@ -117,6 +118,13 @@ export class ControlEndpoint {
       owner: { ...this.#owner },
     };
   }
+  private allowed(value: JsonValue): boolean {
+    try {
+      return this.options.allowJson?.(value) !== false;
+    } catch {
+      return false;
+    }
+  }
   private send(message: ControlMessage): void {
     if (this.#closed) return;
     if (this.#sending >= this.#limit * 2) {
@@ -128,9 +136,19 @@ export class ControlEndpoint {
       this.close();
       return;
     }
+    let safe = parsed.value;
+    if (safe.type === 'response' && safe.result.ok && !this.allowed(safe.result.value))
+      safe = { ...safe, result: { ok: false, error: makeError('invalid-input', false) } };
+    else if (safe.type === 'request' && !this.allowed(safe.payload)) {
+      this.close();
+      return;
+    } else if (safe.type === 'event' && !this.allowed(safe.payload)) {
+      this.close();
+      return;
+    }
     this.#sending++;
     void this.transport
-      .send(parsed.value)
+      .send(safe)
       .catch(() => this.close())
       .finally(() => {
         this.#sending--;
@@ -161,6 +179,10 @@ export class ControlEndpoint {
       return Promise.resolve(parsed);
     }
     const message = parsed.value as RequestMessage;
+    if (!this.allowed(message.payload)) {
+      this.#sequence--;
+      return Promise.resolve({ ok: false, error: makeError('invalid-input', false) });
+    }
     return new Promise((resolve) => {
       const finish = (error: KernelError, reason: CancelReason) => {
         const pending = this.#out.get(message.id);
@@ -226,6 +248,15 @@ export class ControlEndpoint {
       return;
     }
     this.#received++;
+    if (message.type === 'request' && !this.allowed(message.payload)) {
+      this.send({
+        ...this.base(),
+        type: 'response',
+        replyTo: message.id,
+        result: { ok: false, error: makeError('invalid-input', false) },
+      });
+      return;
+    }
     if (message.type === 'response') {
       const pending = this.#out.get(message.replyTo);
       if (!pending) {
@@ -236,7 +267,11 @@ export class ControlEndpoint {
       clearTimeout(pending.timer);
       pending.remove();
       pending.resolve(
-        this.live() ? message.result : { ok: false, error: makeError('stale-owner', false) },
+        !this.live()
+          ? { ok: false, error: makeError('stale-owner', false) }
+          : message.result.ok && !this.allowed(message.result.value)
+            ? { ok: false, error: makeError('invalid-input', false) }
+            : message.result,
       );
       return;
     }
