@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "stage": "activation-failure",
+  "checks": [
+    "real-file-defaults",
+    "migration-only-in-worker",
+    "staged-no-write",
+    "target-schema-validation",
+    "atomic-commit",
+    "new-activation-rejected",
+    "revision-guarded-config-rollback",
+    "fresh-store-roundtrip"
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { KernelFault } from '../kernel-fault.js';
+import { prepareConfigDefinition } from '../config/schema.js';
 import {
   makeError,
   type JsonObject,
@@ -187,6 +188,15 @@ export class PluginManager {
     if (!compatible.ok) {
       entry.state = 'rejected';
       entry.reason = compatible.error;
+    }
+    if (manifest.config) {
+      const keys =
+        manifest.permissions?.filter((p) => p.kind === 'credentials').flatMap((p) => p.keys) ?? [];
+      const config = prepareConfigDefinition(manifest.config, keys);
+      if (!config.ok) {
+        entry.state = 'rejected';
+        entry.reason = config.error;
+      }
     }
     this.#entries.set(key, entry);
     return { ok: true, value: this.snapshot(entry) };

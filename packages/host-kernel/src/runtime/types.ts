@@ -22,6 +22,12 @@ export interface PluginRuntimeContext extends ActivationRegistrar {
   effect(create: () => Disposer): void;
 }
 export interface PluginModule {
+  migrateConfig?(request: {
+    readonly fromVersion: number;
+    readonly toVersion: number;
+    readonly data: Readonly<JsonObject>;
+    readonly signal: AbortSignal;
+  }): Promise<JsonObject>;
   activate(context: PluginRuntimeContext): void | Disposer | Promise<void | Disposer>;
 }
 export interface RuntimeActivation {

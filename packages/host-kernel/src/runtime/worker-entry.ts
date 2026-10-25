@@ -27,6 +27,7 @@ export function startRuntimeWorker(): void {
     'runtime.stop',
     'runtime.invoke',
     'runtime.command',
+    'runtime.migrate',
   ])
     handlers[name] = async (ctx, payload) => {
       const server = await creating;

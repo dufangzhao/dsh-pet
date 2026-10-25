@@ -37,12 +37,15 @@ export class RuntimeWorkerServer {
   readonly #instances = new Map<string, WorkerRecord>();
   readonly #generations = new Map<string, number>();
   readonly #driver: CordisRuntimeDriver;
+  readonly #loader: ReturnType<typeof createVerifiedPluginLoader>;
+  readonly #migrating = new Set<string>();
   #closing = false;
   private constructor(
     private readonly packages: readonly DiscoveredPlugin[],
     readonly issueCount: number,
   ) {
-    this.#driver = new CordisRuntimeDriver(createVerifiedPluginLoader(packages));
+    this.#loader = createVerifiedPluginLoader(packages);
+    this.#driver = new CordisRuntimeDriver(this.#loader);
   }
   static async create(bootstrap: WorkerBootstrap): Promise<RuntimeWorkerServer> {
     const discovered = await discoverPlugins(bootstrap.roots);
@@ -63,6 +66,7 @@ export class RuntimeWorkerServer {
       'runtime.stop': (_ctx, payload) => this.stop(payload),
       'runtime.invoke': (ctx, payload) => this.invoke(ctx, payload, false),
       'runtime.command': (ctx, payload) => this.invoke(ctx, payload, true),
+      'runtime.migrate': (ctx, payload) => this.migrate(ctx, payload),
     };
     return Object.freeze(handlers);
   }
@@ -91,6 +95,7 @@ export class RuntimeWorkerServer {
     );
     if (!candidate) return bad('not-ready');
     const key = instanceKey(owner);
+    if (this.#migrating.has(key)) return bad('not-ready');
     if (this.#instances.size >= 128) return bad('quota-exceeded');
     if (this.#instances.has(key) || owner.generation <= (this.#generations.get(key) ?? 0))
       return bad('stale-owner');
@@ -267,6 +272,67 @@ export class RuntimeWorkerServer {
       return safe.ok ? { ok: true, value: safe.value } : bad('invalid-input');
     } catch {
       return bad(signal.aborted ? 'cancelled' : 'internal');
+    }
+  }
+  private async migrate(context: RpcContext, payload: JsonValue): Promise<Result<JsonValue>> {
+    const body = record(payload);
+    if (
+      this.#closing ||
+      !body ||
+      !exactKeys(body, ['owner', 'entryPath', 'manifestDigest', 'fromVersion', 'toVersion', 'data'])
+    )
+      return bad('invalid-input');
+    const owner = ownerFrom(body['owner']);
+    const data = record(body['data']!);
+    if (
+      !owner ||
+      !data ||
+      typeof body['entryPath'] !== 'string' ||
+      typeof body['manifestDigest'] !== 'string' ||
+      !Number.isSafeInteger(body['fromVersion']) ||
+      !Number.isSafeInteger(body['toVersion']) ||
+      (body['fromVersion'] as number) < 1 ||
+      (body['fromVersion'] as number) >= (body['toVersion'] as number)
+    )
+      return bad('invalid-input');
+    const key = instanceKey(owner);
+    if (this.#instances.has(key) || this.#migrating.has(key) || this.#migrating.size >= 4)
+      return bad('not-ready');
+    const candidate = this.packages.find(
+      (item) =>
+        item.manifest.id === owner.pluginId &&
+        item.manifest.config?.version === body['toVersion'] &&
+        path.resolve(item.directory, item.manifest.entries.runtime) === body['entryPath'] &&
+        manifestDigest(item.manifest) === body['manifestDigest'],
+    );
+    if (!candidate) return bad('not-ready');
+    if (context.signal.aborted) return bad('cancelled');
+    this.#migrating.add(key);
+    try {
+      const module = await this.#loader({
+        owner,
+        manifest: candidate.manifest,
+        entryPath: body['entryPath'],
+        config: {},
+        signal: context.signal,
+      });
+      if (context.signal.aborted) return bad('cancelled');
+      if (typeof module.migrateConfig !== 'function') return bad('not-ready');
+      const migrated = await module.migrateConfig(
+        Object.freeze({
+          fromVersion: body['fromVersion'] as number,
+          toVersion: body['toVersion'] as number,
+          data: Object.freeze(structuredClone(data)),
+          signal: context.signal,
+        }),
+      );
+      if (context.signal.aborted) return bad('cancelled');
+      const safe = jsonPreflight(migrated);
+      return safe.ok && record(safe.value) ? { ok: true, value: safe.value } : bad('invalid-input');
+    } catch {
+      return bad(context.signal.aborted ? 'cancelled' : 'internal');
+    } finally {
+      this.#migrating.delete(key);
     }
   }
   async shutdown(): Promise<void> {

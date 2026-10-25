@@ -14,3 +14,8 @@ export * from './kernel-fault.js';
 export * from './runtime/remote-runtime.js';
 export * from './runtime/worker-entry.js';
 export * from './runtime/worker-protocol.js';
+export * from './config/schema.js';
+export * from './config/store.js';
+export * from './config/file-store.js';
+export * from './config/data-directories.js';
+export * from './config/service.js';

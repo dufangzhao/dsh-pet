@@ -2,7 +2,13 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import type { Duplex } from 'node:stream';
-import { makeError, type JsonValue, type OwnerRef, type Result } from '@pet/contracts';
+import {
+  makeError,
+  type JsonObject,
+  type JsonValue,
+  type OwnerRef,
+  type Result,
+} from '@pet/contracts';
 import { ControlEndpoint } from '../ipc/control-endpoint.js';
 import { childProcessControl } from '../ipc/node-control-transport.js';
 import { FramedMediaPort } from '../ipc/media-port.js';
@@ -283,6 +289,36 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     });
     void ready.catch(() => {});
     return Object.freeze({ ready, stop: remote.stop });
+  }
+  async migrateConfig(
+    activation: Pick<RuntimeActivation, 'owner' | 'manifest' | 'entryPath'>,
+    source: {
+      fromVersion: number;
+      toVersion: number;
+      data: JsonObject;
+      signal: AbortSignal;
+    },
+  ): Promise<JsonObject> {
+    await this.#ready;
+    if (this.#closing || this.#exited || source.signal.aborted) throw new KernelFault('cancelled');
+    const value = record(
+      unwrap(
+        await this.#endpoint.request(
+          'runtime.migrate',
+          {
+            owner: activation.owner,
+            entryPath: activation.entryPath,
+            manifestDigest: manifestDigest(activation.manifest),
+            fromVersion: source.fromVersion,
+            toVersion: source.toVersion,
+            data: source.data,
+          } as unknown as JsonValue,
+          { signal: source.signal, budgetMs: 30000 },
+        ),
+      ),
+    );
+    if (!value) throw new KernelFault('invalid-input');
+    return value;
   }
   private async call(
     method: string,
