@@ -1,0 +1,12 @@
+import {build} from 'esbuild';
+import {spawn} from 'node:child_process';
+import {createRequire} from 'node:module';
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');const directory=path.join(root,'.cache/m1-plugin-runtime');await fs.mkdir(directory,{recursive:true});
+await build({entryPoints:[path.join(root,'qa/probes/plugin-runtime-smoke.ts')],outfile:path.join(directory,'worker.cjs'),bundle:true,platform:'node',format:'cjs',target:'node24'});
+const require=createRequire(import.meta.url);const packagePath=require.resolve('electron/package.json');const metadata=JSON.parse(await fs.readFile(packagePath,'utf8'));if(metadata.version!=='45.0.0')throw new Error('Unexpected runtime');
+const env={ELECTRON_RUN_AS_NODE:'1'};for(const name of ['SystemRoot','WINDIR','TEMP','TMP','PATH'])if(process.env[name])env[name]=process.env[name];
+const child=spawn(path.join(path.dirname(packagePath),'dist/electron.exe'),[path.join(directory,'worker.cjs')],{cwd:root,env,stdio:'inherit',windowsHide:true});
+const timer=setTimeout(()=>child.kill(),30000);child.once('error',()=>{clearTimeout(timer);process.exitCode=1;});child.once('exit',code=>{clearTimeout(timer);process.exitCode=code??1;});

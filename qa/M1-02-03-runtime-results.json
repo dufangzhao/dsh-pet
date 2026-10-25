@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "platform": "win32"
+  },
+  "generations": [
+    3,
+    4,
+    5
+  ],
+  "checks": [
+    "explicit-selection",
+    "fixed-old-binding",
+    "owner-invalidation",
+    "dependency-degradation",
+    "three-enable-disable-cycles",
+    "failed-activation-rollback"
+  ],
+  "residual": {
+    "sessions": 0,
+    "fibers": 0
+  },
+  "cleanup": "complete"
+}

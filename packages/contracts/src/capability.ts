@@ -48,7 +48,6 @@ export function capabilityMajor(value: string): number | null {
 
 /** Whether two identifiers name the same capability *contract* (same major). */
 export function isSameCapability(a: string, b: string): boolean {
-  if (a === b) return true;
   const left = parseCapabilityId(a);
   const right = parseCapabilityId(b);
   if (left === null || right === null) return false;
