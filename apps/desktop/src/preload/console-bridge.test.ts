@@ -17,15 +17,23 @@ const snapshot: ConsoleSnapshot = {
   contributions: [],
   app: { name: 'AI 桌宠', version: '0.0.0', electron: '45', node: '24', platform: 'win32-x64' },
 };
-it('exposes a frozen parameterless snapshot API only', async () => {
+it('exposes only the snapshot and stop actions on a frozen bridge', async () => {
   const invoke = vi.fn(async () => ({ ok: true as const, value: snapshot })),
-    bridge = createConsoleBridge(invoke);
+    bridge = createConsoleBridge(invoke, async () => ({ ok: true, value: snapshot.host }));
   expect(Object.isFrozen(bridge)).toBe(true);
-  expect(Object.keys(bridge)).toEqual(['version', 'getSnapshot']);
+  expect(Object.keys(bridge)).toEqual(['version', 'getSnapshot', 'stopAll']);
   expect(await bridge.getSnapshot()).toEqual({ ok: true, value: snapshot });
   const call = bridge.getSnapshot as (...args: unknown[]) => Promise<Result<ConsoleSnapshot>>;
   expect(await call('extra')).toMatchObject({ ok: false, error: { code: 'invalid-input' } });
   expect(invoke).toHaveBeenCalledOnce();
+});
+it('forwards stopAll without accepting an argument', async () => {
+  const stop = vi.fn(async () => ({ ok: true as const, value: snapshot.host }));
+  const bridge = createConsoleBridge(async () => ({ ok: true, value: snapshot }), stop);
+  expect(await bridge.stopAll()).toEqual({ ok: true, value: snapshot.host });
+  const call = bridge.stopAll as (...args: unknown[]) => Promise<Result<typeof snapshot.host>>;
+  expect(await call('plugin-id')).toMatchObject({ ok: false, error: { code: 'invalid-input' } });
+  expect(stop).toHaveBeenCalledOnce();
 });
 it('exposes only a frozen settings launcher', async () => {
   const invoke = vi.fn(async () => ({ ok: true as const, value: null })),
@@ -42,7 +50,8 @@ it('maps failed transport to one fixed error', async () => {
     throw new Error('PRIVATE_TRANSPORT');
   };
   for (const result of [
-    await createConsoleBridge(fail).getSnapshot(),
+    await createConsoleBridge(fail, fail).getSnapshot(),
+    await createConsoleBridge(fail, fail).stopAll(),
     await createSettingsLauncher(fail).open(),
   ]) {
     expect(result).toMatchObject({ ok: false, error: { code: 'unavailable' } });

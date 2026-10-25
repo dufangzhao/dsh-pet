@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld(
   'petConsole',
   createConsoleBridge(
     () => ipcRenderer.invoke(CONSOLE_IPC.snapshot) as Promise<Result<ConsoleSnapshot>>,
+    () => ipcRenderer.invoke(CONSOLE_IPC.stopAll) as Promise<Result<HostStatus>>,
   ),
 );
 contextBridge.exposeInMainWorld(

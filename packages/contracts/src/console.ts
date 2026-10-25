@@ -10,7 +10,11 @@ export interface ConsoleContribution {
   readonly kind: ContributionKind;
   readonly title: string;
 }
-export const CONSOLE_IPC = { snapshot: 'console:v1:snapshot', open: 'console:v1:open' } as const;
+export const CONSOLE_IPC = {
+  snapshot: 'console:v1:snapshot',
+  open: 'console:v1:open',
+  stopAll: 'console:v1:stop-all',
+} as const;
 export interface ConsolePlugin {
   readonly owner: OwnerRef;
   readonly name: string;
@@ -37,6 +41,7 @@ export interface ConsoleSnapshot {
 export interface ConsoleBridge {
   readonly version: 1;
   getSnapshot(): Promise<Result<ConsoleSnapshot>>;
+  stopAll(): Promise<Result<HostStatus>>;
 }
 export interface SettingsLauncher {
   open(): Promise<Result<null>>;

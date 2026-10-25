@@ -2,31 +2,30 @@ import {
   makeError,
   type ConsoleBridge,
   type ConsoleSnapshot,
+  type HostStatus,
   type Result,
   type SettingsLauncher,
 } from '@pet/contracts';
-export function createConsoleBridge(invoke: () => Promise<Result<ConsoleSnapshot>>): ConsoleBridge {
+function parameterless<T>(invoke: () => Promise<Result<T>>) {
+  return async (...args: unknown[]): Promise<Result<T>> => {
+    if (args.length) return { ok: false, error: makeError('invalid-input', false) };
+    try {
+      return await invoke();
+    } catch {
+      return { ok: false, error: makeError('unavailable', false) };
+    }
+  };
+}
+export function createConsoleBridge(
+  read: () => Promise<Result<ConsoleSnapshot>>,
+  stop: () => Promise<Result<HostStatus>>,
+): ConsoleBridge {
   return Object.freeze({
     version: 1 as const,
-    getSnapshot: async (...args: unknown[]): Promise<Result<ConsoleSnapshot>> => {
-      if (args.length) return { ok: false, error: makeError('invalid-input', false) };
-      try {
-        return await invoke();
-      } catch {
-        return { ok: false, error: makeError('unavailable', false) };
-      }
-    },
+    getSnapshot: parameterless(read),
+    stopAll: parameterless(stop),
   });
 }
-export function createSettingsLauncher(invoke: () => Promise<Result<null>>): SettingsLauncher {
-  return Object.freeze({
-    open: async (...args: unknown[]): Promise<Result<null>> => {
-      if (args.length) return { ok: false, error: makeError('invalid-input', false) };
-      try {
-        return await invoke();
-      } catch {
-        return { ok: false, error: makeError('unavailable', false) };
-      }
-    },
-  });
+export function createSettingsLauncher(open: () => Promise<Result<null>>): SettingsLauncher {
+  return Object.freeze({ open: parameterless(open) });
 }

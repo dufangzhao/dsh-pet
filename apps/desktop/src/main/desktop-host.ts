@@ -175,6 +175,10 @@ export class DesktopHost {
       pendingWork: tasks.pendingWork,
     });
   }
+  stopAll(): HostStatus {
+    this.tasks.cancelAll();
+    return this.status();
+  }
   shutdown(): Promise<{ exitConfirmed: boolean; forced: boolean }> {
     return (this.#closing ??= this.stop());
   }

@@ -20,6 +20,7 @@ void app.whenReady().then(async()=>{
  try{
   ipcMain.handle(CONSOLE_IPC.open,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:pet.webContents.id,mainFrame:event.senderFrame===pet.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(petEntry).href},args,()=>settings.open().then(()=>null)));
   ipcMain.handle(CONSOLE_IPC.snapshot,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:settings.current?.webContents.id??-1,mainFrame:event.senderFrame===settings.current?.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(entry).href},args,()=>consoleSnapshot(host.status(),host.manager.list(),{name:'AI 桌宠',version:app.getVersion(),electron:process.versions.electron!,node:process.versions.node,platform:process.platform+'-'+process.arch},host.manager.contributions())));
+  ipcMain.handle(CONSOLE_IPC.stopAll,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:settings.current?.webContents.id??-1,mainFrame:event.senderFrame===settings.current?.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(entry).href},args,()=>host.stopAll()));
   await pet.loadFile(petEntry);report['stage']='open';
   assert.deepEqual(await pet.webContents.executeJavaScript('window.petSettings.open()'),{ok:true,value:null});
   const first=settings.current!,firstId=first.webContents.id;
@@ -28,20 +29,23 @@ void app.whenReady().then(async()=>{
   assert.equal(snapshot.ok,true);assert.equal(snapshot.value.host.runtime,'ready');assert.equal(snapshot.value.host.installedPlugins,2);assert.equal(snapshot.value.plugins.length,2);
   assert.equal(snapshot.value.plugins.some((p:{name:string})=>p.name==='用户示例'),true);
   assert.equal(JSON.stringify(snapshot).includes('private-entry.mjs'),false);assert.equal(JSON.stringify(snapshot).includes(__dirname),false);
-  assert.deepEqual(await first.webContents.executeJavaScript('Object.keys(window.petConsole)'),['version','getSnapshot']);
+  assert.deepEqual(await first.webContents.executeJavaScript('Object.keys(window.petConsole)'),['version','getSnapshot','stopAll']);
   assert.equal(await first.webContents.executeJavaScript('Object.isFrozen(window.petConsole)'),true);
   assert.equal((await first.webContents.executeJavaScript('window.petConsole.getSnapshot(1)')).error.code,'invalid-input');
+  const stopped=await first.webContents.executeJavaScript('window.petConsole.stopAll()');assert.equal(stopped.ok,true);assert.equal(stopped.value.runningTasks,0);assert.equal(stopped.value.runtime,'ready');assert.equal((await first.webContents.executeJavaScript('window.petConsole.stopAll(1)')).error.code,'invalid-input');
   report['stage']='sources';
   assert.equal((await pet.webContents.executeJavaScript('window.petConsole.getSnapshot()')).error.code,'permission-denied');
+  assert.equal((await pet.webContents.executeJavaScript('window.petConsole.stopAll()')).error.code,'permission-denied');
   foreign=new BrowserWindow({show:false,webPreferences:{preload,sandbox:true,contextIsolation:true,nodeIntegration:false}});await foreign.loadFile(entry);
   assert.equal((await foreign.webContents.executeJavaScript('window.petConsole.getSnapshot()')).error.code,'permission-denied');
+  assert.equal((await foreign.webContents.executeJavaScript('window.petConsole.stopAll()')).error.code,'permission-denied');
   assert.equal(await first.webContents.executeJavaScript('window.open("https://example.com") === null'),true);
   report['stage']='reuse';await pet.webContents.executeJavaScript('window.petSettings.open()');assert.equal(settings.current!.webContents.id,first.webContents.id);
   first.setSize(600,400);const bounds=first.getBounds();assert.ok(bounds.width>=760&&bounds.height>=560);first.setSize(1040,740);
   await fs.writeFile(path.join(__dirname,'window.png'),(await first.webContents.capturePage()).toPNG());
   const closed=once(first,'closed');settings.close();await closed;assert.equal(settings.current,undefined);
   await pet.webContents.executeJavaScript('window.petSettings.open()');assert.notEqual(settings.current!.webContents.id,firstId);
-  report['status']='passed';report['checks']=['real-host-two-plugin-snapshot','production-frozen-preload','owned-window-main-frame-only','extra-args-denied','single-window-reuse','close-and-reopen','native-minimum-size','window-open-denied'];
+  report['status']='passed';report['checks']=['real-host-two-plugin-snapshot','production-frozen-preload','owned-window-main-frame-only','extra-args-denied','single-window-reuse','close-and-reopen','native-minimum-size','window-open-denied','owned-console-stop-all','other-windows-cannot-stop'];
   report['runtime']={electron:process.versions.electron,node:process.versions.node};
  }finally{settings.close();foreign?.destroy();pet.destroy();report['shutdown']=await host.shutdown();}
 }).catch(()=>{report['status']='failed';}).finally(async()=>{await fs.writeFile(path.join(__dirname,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));app.exit(report['status']==='passed'?0:1);});

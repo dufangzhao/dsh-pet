@@ -18,8 +18,9 @@
 
 ## 接口
 
-类型以[console契约](../packages/contracts/src/console.ts)为准。window.petConsole?:ConsoleBridge，仅version和getSnapshot()。返回Result<ConsoleSnapshot>，包含host、plugins、contributions、app；无配置值、文件路径、密钥。
+类型以[console契约](../packages/contracts/src/console.ts)为准。window.petConsole?:ConsoleBridge，version、getSnapshot()与stopAll()。返回Result<ConsoleSnapshot>，包含host、plugins、contributions、app；无配置值、文件路径、密钥。
 window.petSettings?:SettingsLauncher，唯一open()。桌宠PrototypePanel增加设置按钮调用它；不改App拖拽/命中/状态逻辑。缺桥时禁用按钮，失败简短提示。
+stopAll()只取消当前任务并返回HostStatus，不关闭应用；pendingWork非零时仍有工作在结束。
 ConsolePlugin字段为owner/name/version/state/origin/protected/permissions/reason，均为只读展示。贡献条目只有owner/id/kind/title，按owner+id区分，详情由宿主解析。界面只导入contracts根，不导入validation或host-kernel。
 
 ## 分工

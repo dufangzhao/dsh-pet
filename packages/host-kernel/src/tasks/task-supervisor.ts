@@ -358,6 +358,12 @@ export class TaskSupervisor {
       }
     }
   }
+  cancelAll(): number {
+    return [...this.#records.values()].reduce(
+      (count, record) => count + Number(this.cancel(record, 'user')),
+      0,
+    );
+  }
   shutdown(): void {
     this.#closed = true;
     for (const record of this.#records.values()) this.cancel(record, 'shutdown');

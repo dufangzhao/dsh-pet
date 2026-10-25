@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "workerStillHolding": true,
+  "mainSettled": false,
+  "mainWorkPending": true,
+  "exitProofBeforeSettlement": true,
+  "checks": [
+    "cancel-is-logical-only",
+    "actual-worker-hold-retains-main-work-budget",
+    "release-confirms-physical-settlement",
+    "ipc-disconnect-does-not-prove-exit",
+    "forced-owned-worker-exit-reclaims-pending-work",
+    "stop-all-retains-physical-work",
+    "stop-all-keeps-supervisor-usable"
+  ],
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": true
+  }
+}

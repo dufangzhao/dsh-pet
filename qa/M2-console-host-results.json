@@ -10,7 +10,9 @@
     "single-window-reuse",
     "close-and-reopen",
     "native-minimum-size",
-    "window-open-denied"
+    "window-open-denied",
+    "owned-console-stop-all",
+    "other-windows-cannot-stop"
   ],
   "runtime": {
     "electron": "45.0.0",

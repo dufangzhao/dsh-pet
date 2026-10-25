@@ -1,4 +1,11 @@
-import { app, BrowserWindow, ipcMain, session, safeStorage } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  session,
+  safeStorage,
+  type IpcMainInvokeEvent,
+} from 'electron';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -10,7 +17,7 @@ import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { HostStatusRequests } from './host-request.js';
 import { createPetWindow, type PetWindowController } from './windows/pet-window.js';
-import { handlePetRequest, isTrustedPetSource } from './ipc-request.js';
+import { handlePetRequest, isTrustedPetSource, type PetRequestSource } from './ipc-request.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const rendererPath = path.resolve(here, '../renderer/pet/index.html');
@@ -26,6 +33,20 @@ const channels = [
   PET_IPC.preview,
   PET_IPC.quit,
 ];
+function windowSource(
+  event: IpcMainInvokeEvent,
+  target: BrowserWindow | undefined,
+  url: string,
+): PetRequestSource {
+  const frame = event.senderFrame;
+  return {
+    senderId: event.sender.id,
+    expectedId: target?.webContents.id ?? -1,
+    mainFrame: frame !== null && frame === target?.webContents.mainFrame,
+    frameUrl: frame?.url ?? '',
+    expectedUrl: url,
+  };
+}
 let controller: PetWindowController | undefined;
 let window: BrowserWindow | undefined;
 let budgetStart = performance.now();
@@ -40,6 +61,7 @@ function quitWithCode(code: number): void {
   ipcMain.removeHandler(HOST_IPC.status);
   ipcMain.removeHandler(CONSOLE_IPC.open);
   ipcMain.removeHandler(CONSOLE_IPC.snapshot);
+  ipcMain.removeHandler(CONSOLE_IPC.stopAll);
   settings.close();
   controller?.dispose();
   void (async () => {
@@ -112,41 +134,29 @@ app
       }
     });
     ipcMain.handle(CONSOLE_IPC.open, (event, ...args: unknown[]) =>
-      handleConsoleRequest(
-        {
-          senderId: event.sender.id,
-          expectedId: window?.webContents.id ?? -1,
-          mainFrame: event.senderFrame === window?.webContents.mainFrame,
-          frameUrl: event.senderFrame?.url ?? '',
-          expectedUrl,
-        },
-        args,
-        () => settings.open().then(() => null),
+      handleConsoleRequest(windowSource(event, window, expectedUrl), args, () =>
+        settings.open().then(() => null),
       ),
     );
     ipcMain.handle(CONSOLE_IPC.snapshot, (event, ...args: unknown[]) =>
-      handleConsoleRequest(
-        {
-          senderId: event.sender.id,
-          expectedId: settings.current?.webContents.id ?? -1,
-          mainFrame: event.senderFrame === settings.current?.webContents.mainFrame,
-          frameUrl: event.senderFrame?.url ?? '',
-          expectedUrl: consoleUrl,
-        },
-        args,
-        () =>
-          consoleSnapshot(
-            host!.status(),
-            host!.manager.list(),
-            {
-              name: 'AI 桌宠',
-              version: app.getVersion(),
-              electron: process.versions.electron!,
-              node: process.versions.node,
-              platform: process.platform + '-' + process.arch,
-            },
-            host!.manager.contributions(),
-          ),
+      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () =>
+        consoleSnapshot(
+          host!.status(),
+          host!.manager.list(),
+          {
+            name: 'AI 桌宠',
+            version: app.getVersion(),
+            electron: process.versions.electron!,
+            node: process.versions.node,
+            platform: process.platform + '-' + process.arch,
+          },
+          host!.manager.contributions(),
+        ),
+      ),
+    );
+    ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
+      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () =>
+        host!.stopAll(),
       ),
     );
     for (const channel of channels)
