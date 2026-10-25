@@ -1,0 +1,555 @@
+{
+  "at": "2026-10-25T09:00:51.394Z",
+  "status": "passed",
+  "requestedDeviceScale": 1,
+  "checks": [
+    "secure-window-and-isolated-preload",
+    "five-real-renderer-states",
+    "computed-text-contrast-and-notice-layout-fixture",
+    "invalid-ipc-payload-rejected",
+    "renderer-hit-test-toggles-native-WS_EX_TRANSPARENT",
+    "keyboard-state-button",
+    "real-ipc-drag-lifecycle",
+    "real-window-offscreen-recovery",
+    "popup-denied"
+  ],
+  "consoleErrors": [],
+  "remoteRequests": [],
+  "screenshots": [
+    ".cache/m0-06-real/pet-idle.png",
+    ".cache/m0-06-real/pet-listening.png",
+    ".cache/m0-06-real/pet-thinking.png",
+    ".cache/m0-06-real/pet-replying.png",
+    ".cache/m0-06-real/pet-error.png",
+    ".cache/m0-06-real/notice-layout-fixture.png"
+  ],
+  "artifacts": [
+    {
+      "path": "dist/main/index.mjs",
+      "bytes": 35498,
+      "sha256": "e7ed2446edf4b0d997343c9a5dc8dadce8fef7c550a5d87adca040a347200dc9"
+    },
+    {
+      "path": "dist/preload/index.cjs",
+      "bytes": 16761,
+      "sha256": "990af247f66271c904433d8c6c12cbbfd31c5c252bdb8fa96ac06a3498ace47f"
+    },
+    {
+      "path": "dist/renderer/pet/index.html",
+      "bytes": 807,
+      "sha256": "2b7e0f03e1e4215bc95bcbf37567f78f1812f14e74551225f6cc911b20bd2007"
+    },
+    {
+      "path": "dist/renderer/pet/assets/index-CkV6Z4ai.js",
+      "bytes": 235280,
+      "sha256": "9a816de5196d80ef7b2b24a3f1947130e50531f76b72d9fee0851915f871abba"
+    },
+    {
+      "path": "dist/renderer/pet/assets/index-CzqKagcN.css",
+      "bytes": 15312,
+      "sha256": "45aeaa13da1bb3055919f28e231847a7a7d98f45cb87d42c5d5842e158313688"
+    }
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "chrome": "156.0.8078.48",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "window": {
+    "hwnd": "2032886",
+    "visible": true,
+    "topmost": true,
+    "bounds": {
+      "x": 1516,
+      "y": 588,
+      "width": 380,
+      "height": 420
+    },
+    "webZoom": 1,
+    "preferences": {
+      "sandbox": true,
+      "contextIsolation": true,
+      "nodeIntegration": false,
+      "webSecurity": true
+    },
+    "displays": [
+      {
+        "id": 558076101,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "workArea": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1032
+        },
+        "scaleFactor": 1
+      }
+    ]
+  },
+  "viewport": {
+    "width": 380,
+    "height": 420,
+    "dpr": 1
+  },
+  "startupFocus": "preserved",
+  "bridge": {
+    "require": "undefined",
+    "process": "undefined",
+    "frozen": true,
+    "methods": [
+      "version",
+      "getSnapshot",
+      "setInteraction",
+      "beginDrag",
+      "endDrag",
+      "previewState",
+      "quit",
+      "onSnapshot"
+    ]
+  },
+  "styleSamples": [
+    {
+      "id": "active-button",
+      "color": "rgb(255, 255, 255)",
+      "backgrounds": [
+        "rgb(55, 102, 220)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 221,
+        "y": 274.375,
+        "width": 44,
+        "height": 44,
+        "bottom": 318.375,
+        "right": 265
+      }
+    },
+    {
+      "id": "inactive-button",
+      "color": "rgb(28, 36, 48)",
+      "backgrounds": [
+        "rgb(255, 255, 255)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 21,
+        "y": 274.375,
+        "width": 44,
+        "height": 44,
+        "bottom": 318.375,
+        "right": 65
+      }
+    },
+    {
+      "id": "title",
+      "color": "rgb(28, 36, 48)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 13,
+      "disabled": false,
+      "rect": {
+        "x": 21,
+        "y": 219.6875,
+        "width": 338,
+        "height": 19.5,
+        "bottom": 239.1875,
+        "right": 359
+      }
+    },
+    {
+      "id": "simulation-notice",
+      "color": "rgb(70, 83, 106)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 21,
+        "y": 239.1875,
+        "width": 338,
+        "height": 31.1875,
+        "bottom": 270.375,
+        "right": 359
+      }
+    },
+    {
+      "id": "hint",
+      "color": "rgb(70, 83, 106)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 21,
+        "y": 322.375,
+        "width": 338,
+        "height": 31.1875,
+        "bottom": 353.5625,
+        "right": 359
+      }
+    },
+    {
+      "id": "bubble",
+      "color": "rgb(28, 36, 48)",
+      "backgrounds": [
+        "rgba(0, 0, 0, 0)",
+        "rgb(255, 232, 220)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 13,
+      "disabled": false,
+      "rect": {
+        "x": 67,
+        "y": 165,
+        "width": 262,
+        "height": 37.6875,
+        "bottom": 202.6875,
+        "right": 329
+      }
+    },
+    {
+      "id": "quit",
+      "color": "rgb(178, 60, 9)",
+      "backgrounds": [
+        "rgb(255, 255, 255)",
+        "rgba(255, 255, 255, 0.98)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)",
+        "rgba(0, 0, 0, 0)"
+      ],
+      "opacities": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "hiddenAncestors": [],
+      "fontSize": 12,
+      "disabled": false,
+      "rect": {
+        "x": 21,
+        "y": 357.5625,
+        "width": 66,
+        "height": 44,
+        "bottom": 401.5625,
+        "right": 87
+      }
+    }
+  ],
+  "contrast": [
+    {
+      "id": "active-button",
+      "color": "rgb(255, 255, 255)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 5.126383823229722
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 5.126383823229722
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "inactive-button",
+      "color": "rgb(28, 36, 48)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 15.620283087860223
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 15.620283087860223
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "title",
+      "color": "rgb(28, 36, 48)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 14.952398450420876
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 15.620283087860223
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "simulation-notice",
+      "color": "rgb(70, 83, 106)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 7.429143842431793
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 7.760984319940445
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "hint",
+      "color": "rgb(70, 83, 106)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 7.429143842431793
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 7.760984319940445
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bubble",
+      "color": "rgb(28, 36, 48)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 13.260955742011253
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 13.260955742011253
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "quit",
+      "color": "rgb(178, 60, 9)",
+      "minimum": 4.5,
+      "cases": [
+        {
+          "backdrop": "#000000",
+          "ratio": 5.926705979451409
+        },
+        {
+          "backdrop": "#ffffff",
+          "ratio": 5.926705979451409
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "activeHoverContrast": {
+    "id": "active-button-hover",
+    "color": "rgb(255, 255, 255)",
+    "minimum": 4.5,
+    "cases": [
+      {
+        "backdrop": "#000000",
+        "ratio": 6.937087947210717
+      },
+      {
+        "backdrop": "#ffffff",
+        "ratio": 6.937087947210717
+      }
+    ],
+    "passed": true
+  },
+  "quitHoverContrast": {
+    "id": "quit-hover",
+    "color": "rgb(178, 60, 9)",
+    "minimum": 4.5,
+    "cases": [
+      {
+        "backdrop": "#000000",
+        "ratio": 5.031521211705833
+      },
+      {
+        "backdrop": "#ffffff",
+        "ratio": 5.031521211705833
+      }
+    ],
+    "passed": true
+  },
+  "noticeContrast": {
+    "id": "error-notice",
+    "color": "rgb(178, 60, 9)",
+    "minimum": 4.5,
+    "cases": [
+      {
+        "backdrop": "#000000",
+        "ratio": 5.031521211705833
+      },
+      {
+        "backdrop": "#ffffff",
+        "ratio": 5.031521211705833
+      }
+    ],
+    "passed": true
+  },
+  "blankNativeTransparent": true,
+  "controlNativeTransparent": false,
+  "focusContrast": {
+    "id": "focus-ring",
+    "color": "rgb(11, 87, 208)",
+    "minimum": 3,
+    "cases": [
+      {
+        "backdrop": "#000000",
+        "ratio": 6.113178532142783
+      },
+      {
+        "backdrop": "#ffffff",
+        "ratio": 6.386238271761161
+      }
+    ],
+    "passed": true
+  },
+  "limitations": [
+    "CDP pointer actions plus native style readback are not a physical OS click-through test",
+    "Drag lifecycle and offscreen recovery tested; physical cursor-follow drag remains untested",
+    "Process-only forced device scale is not an OS DPI change or a physical mixed-DPI sweep",
+    "Synthetic notice only verifies style/layout, not the React error lifecycle",
+    "No screen-reader or keyboard alternative-to-drag acceptance"
+  ]
+}
