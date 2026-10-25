@@ -1,0 +1,10 @@
+{
+  "status": "failed",
+  "fixtureOnly": true,
+  "stage": "crash",
+  "sharedRuntimeSurvivedCleanupTimeout": true,
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": true
+  }
+}

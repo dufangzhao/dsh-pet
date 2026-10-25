@@ -1,4 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { HOST_IPC, type HostStatus, type Result } from '@pet/contracts';
+import { createHostStatusBridge } from './host-bridge.js';
 import { PET_IPC, type PetPrototypeBridge, type PetReply, type PetSnapshot } from '@pet/contracts';
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<PetReply<T>> {
@@ -37,6 +39,10 @@ const bridge: PetPrototypeBridge = {
   },
 };
 contextBridge.exposeInMainWorld('pet', Object.freeze(bridge));
+contextBridge.exposeInMainWorld(
+  'petHost',
+  createHostStatusBridge(() => ipcRenderer.invoke(HOST_IPC.status) as Promise<Result<HostStatus>>),
+);
 window.addEventListener(
   'unload',
   () => {

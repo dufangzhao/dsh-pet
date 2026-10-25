@@ -34,6 +34,7 @@
   "dependencies": {
     "@pet/contracts": "workspace:*",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "@pet/host-kernel": "workspace:*"
   }
 }

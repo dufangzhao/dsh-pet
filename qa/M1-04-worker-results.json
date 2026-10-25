@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "stage": "crash",
+  "sharedRuntimeSurvivedCleanupTimeout": true,
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "mainPid": 25504,
+    "workerPid": 28604
+  },
+  "checks": [
+    "worker-only-import",
+    "fixed-capability-proxy",
+    "generation-restart",
+    "dependency-degradation",
+    "actual-effect-disposal",
+    "task-deadline-cancellation",
+    "failed-activation-rollback",
+    "single-stuck-plugin-does-not-kill-area",
+    "crash-to-owner-fault"
+  ],
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

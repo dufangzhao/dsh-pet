@@ -12,6 +12,9 @@ await bundle({
   format: 'esm',
   target: 'node24',
   external: ['electron'],
+  banner: {
+    js: "import { createRequire as __petCreateRequire } from 'node:module'; const require = __petCreateRequire(import.meta.url);",
+  },
   sourcemap: true,
 });
 await bundle({
@@ -22,6 +25,15 @@ await bundle({
   format: 'cjs',
   target: 'node24',
   external: ['electron'],
+  sourcemap: true,
+});
+await bundle({
+  entryPoints: [path.join(root, 'src/runtime/worker.ts')],
+  outfile: path.join(root, 'dist/runtime/worker.cjs'),
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node24',
   sourcemap: true,
 });
 await buildRenderer({

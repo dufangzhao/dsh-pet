@@ -10,3 +10,7 @@ export * from './tasks/media-channel.js';
 export * from './tasks/task-supervisor.js';
 export * from './tasks/credit-sender.js';
 export * from './ipc/index.js';
+export * from './kernel-fault.js';
+export * from './runtime/remote-runtime.js';
+export * from './runtime/worker-entry.js';
+export * from './runtime/worker-protocol.js';

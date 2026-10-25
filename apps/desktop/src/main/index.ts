@@ -2,7 +2,9 @@ import { app, BrowserWindow, ipcMain, session } from 'electron';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { PET_IPC, type PetSnapshot } from '@pet/contracts';
+import { HOST_IPC, PET_IPC, makeError, type PetSnapshot } from '@pet/contracts';
+import { DesktopHost } from './desktop-host.js';
+import { HostStatusRequests } from './host-request.js';
 import { createPetWindow, type PetWindowController } from './windows/pet-window.js';
 import { handlePetRequest, isTrustedPetSource } from './ipc-request.js';
 
@@ -21,26 +23,77 @@ let controller: PetWindowController | undefined;
 let window: BrowserWindow | undefined;
 let budgetStart = performance.now();
 let requests = 0;
+let host: DesktopHost | undefined;
+let hostStarting: Promise<DesktopHost> | undefined;
+let quitting = false;
+function quitWithCode(code: number): void {
+  if (quitting) return;
+  quitting = true;
+  for (const channel of channels) ipcMain.removeHandler(channel);
+  ipcMain.removeHandler(HOST_IPC.status);
+  controller?.dispose();
+  void (async () => {
+    const active = host ?? (await hostStarting?.catch(() => undefined));
+    const stopped = await active?.shutdown();
+    app.exit(stopped && !stopped.exitConfirmed ? 1 : code);
+  })().catch(() => app.exit(1));
+}
 if (!app.isPackaged) {
   const profile = path.resolve(
     here,
     '../../../../.cache/',
-    process.argv.includes('--m0-key-lab')
-      ? 'pet-key-lab-profile'
-      : process.argv.includes('--m0-mouse-lab')
-        ? 'pet-mouse-lab-profile'
-        : 'pet-prototype-profile',
+    process.argv.includes('--m1-host-smoke')
+      ? 'pet-host-smoke-profile'
+      : process.argv.includes('--m0-key-lab')
+        ? 'pet-key-lab-profile'
+        : process.argv.includes('--m0-mouse-lab')
+          ? 'pet-mouse-lab-profile'
+          : 'pet-prototype-profile',
   );
   mkdirSync(profile, { recursive: true });
   app.setPath('userData', profile);
 }
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, respond) =>
       respond(false),
     );
     session.defaultSession.setPermissionCheckHandler(() => false);
+    hostStarting = DesktopHost.create({
+      executable: process.execPath,
+      workerEntry: path.resolve(here, '../runtime/worker.cjs'),
+      builtinDirectory: app.isPackaged
+        ? path.join(process.resourcesPath, 'plugins')
+        : path.resolve(here, '../../../../plugins'),
+      userDirectory: path.join(app.getPath('userData'), 'plugins'),
+    });
+    host = await hostStarting;
+    if (quitting) {
+      await host.shutdown();
+      return;
+    }
+    const hostRequests = new HostStatusRequests(() => host!.status());
+    ipcMain.handle(HOST_IPC.status, (event, ...args: unknown[]) => {
+      try {
+        if (!window || window.isDestroyed())
+          return { ok: false, error: makeError('unavailable', false) };
+        const frame = event.senderFrame;
+        return hostRequests.handle(
+          {
+            senderId: event.sender.id,
+            expectedId: window.webContents.id,
+            mainFrame: frame !== null && frame === window.webContents.mainFrame,
+            frameUrl: frame?.url ?? '',
+            expectedUrl,
+          },
+          HOST_IPC.status,
+          args,
+        );
+      } catch {
+        return { ok: false, error: makeError('unavailable', false) };
+      }
+    });
     for (const channel of channels)
       ipcMain.handle(channel, (event, ...args: unknown[]) => {
         try {
@@ -95,16 +148,15 @@ app
     });
     window.webContents.on('did-fail-load', () => {
       console.error('M0 renderer failed to load');
-      app.exit(1);
+      quitWithCode(1);
     });
   })
   .catch(() => {
     console.error('M0 desktop startup failed');
-    controller?.dispose();
-    app.exit(1);
+    quitWithCode(1);
   });
 app.on('window-all-closed', () => app.quit());
-app.on('before-quit', () => {
-  for (const channel of channels) ipcMain.removeHandler(channel);
-  controller?.dispose();
+app.on('before-quit', (event) => {
+  event.preventDefault();
+  quitWithCode(0);
 });

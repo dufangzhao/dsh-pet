@@ -33,6 +33,7 @@ export interface RpcOptions {
   readonly handlers?: Readonly<Record<string, RpcHandler>>;
   readonly signal?: AbortSignal;
   readonly maxPending?: number;
+  readonly onClosed?: () => void;
   readonly onStreamControl?: (message: StreamCreditMessage | StreamEndMessage) => void;
 }
 interface Outbound {
@@ -385,6 +386,11 @@ export class ControlEndpoint {
       pending.controller.abort();
     }
     this.transport.close();
+    try {
+      this.options.onClosed?.();
+    } catch {
+      /* isolated observer */
+    }
   }
   diagnostics(): {
     closed: boolean;

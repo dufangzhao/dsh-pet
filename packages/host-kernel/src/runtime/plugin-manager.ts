@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { KernelFault } from '../kernel-fault.js';
 import {
   makeError,
   type JsonObject,
@@ -360,7 +361,12 @@ export class PluginManager {
       this.refreshDependencies();
       return { ok: true, value: this.snapshot(entry) };
     } catch (error) {
-      const code = error instanceof LifecycleFault ? error.code : 'internal';
+      const code =
+        error instanceof LifecycleFault
+          ? error.code
+          : error instanceof KernelFault
+            ? error.error.code
+            : 'internal';
       const stillOwned = sameOwner(entry.owner, owner);
       if (!stillOwned) return fail('stale-owner');
       const externalStop = entry.state !== 'activating';

@@ -1,0 +1,27 @@
+import {app,BrowserWindow} from 'electron';
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import * as fs from 'node:fs/promises';
+const root=path.resolve(__dirname,'../..');
+const report:Record<string,unknown>={status:'starting'};
+const save=()=>fs.writeFile(path.join(__dirname,'report.json'),JSON.stringify(report,null,2));
+const waitLoaded=(win:BrowserWindow)=>new Promise<void>((resolve,reject)=>{if(!win.webContents.isLoadingMainFrame()&&win.webContents.getURL().startsWith('file:')){resolve();return;}win.webContents.once('did-finish-load',()=>resolve());win.webContents.once('did-fail-load',()=>reject(new Error('Fixture load failed')));});
+let firstResolve!:(win:BrowserWindow)=>void;const first=new Promise<BrowserWindow>(resolve=>{firstResolve=resolve;});
+app.once('browser-window-created',(_event,win)=>firstResolve(win));
+void(async()=>{
+ await import(pathToFileURL(path.join(root,'apps/desktop/dist/main/index.mjs')).href);const win=await first;await waitLoaded(win);report['stage']='bridge';
+ const shape=await win.webContents.executeJavaScript('({keys:Object.keys(window.petHost).sort(),version:window.petHost.version,frozen:Object.isFrozen(window.petHost),petVersion:window.pet.version})');
+ assert.deepEqual(shape,{keys:['getStatus','version'],version:1,frozen:true,petVersion:1});
+ const status=await win.webContents.executeJavaScript('new Promise((resolve,reject)=>{const deadline=performance.now()+5000;const check=async()=>{const r=await window.petHost.getStatus();if(r.ok&&r.value.runtime!=="starting")resolve(r);else if(performance.now()>deadline)reject(new Error("not-ready"));else setTimeout(check,50);};check();})');
+ assert.equal(status.ok,true);assert.equal(status.value.runtime,'ready');assert.equal(status.value.activePlugins,0);assert.equal(status.value.pendingWork,0);report['hostStatus']=status.value;
+ const extra=await win.webContents.executeJavaScript('window.petHost.getStatus("private.execute")');assert.equal(extra.error.code,'invalid-input');
+ report['stage']='untrusted-window';
+ const other=new BrowserWindow({show:false,webPreferences:{preload:path.join(root,'apps/desktop/dist/preload/index.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
+ await other.loadFile(path.join(root,'apps/desktop/dist/renderer/pet/index.html'));
+ const denied=await other.webContents.executeJavaScript('window.petHost.getStatus()');assert.equal(denied.error.code,'permission-denied');other.destroy();
+ report['stage']='rate-limit';const burst=await win.webContents.executeJavaScript('Promise.all(Array.from({length:65},()=>window.petHost.getStatus()))');
+ assert.ok(burst.some((r:{ok:boolean;error?:{code:string}})=>!r.ok&&r.error?.code==='quota-exceeded'));
+ report['checks']=['actual-preload-frozen-bridge','host-ready-no-auto-activation','extra-arguments-refused','other-webcontents-refused','rate-limit','m0-bridge-retained'];
+ report['status']='passed';await save();process.stdout.write(JSON.stringify(report)+String.fromCharCode(10));app.quit();
+})().catch(async()=>{report['status']='failed';await save();process.stdout.write(JSON.stringify(report)+String.fromCharCode(10));app.quit();process.exitCode=1;});

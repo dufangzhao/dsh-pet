@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "stage": "rate-limit",
+  "hostStatus": {
+    "version": 1,
+    "runtime": "ready",
+    "installedPlugins": 0,
+    "activePlugins": 0,
+    "unreadyPlugins": 0,
+    "pendingRestartPlugins": 0,
+    "runningTasks": 0,
+    "pendingWork": 0
+  },
+  "checks": [
+    "actual-preload-frozen-bridge",
+    "host-ready-no-auto-activation",
+    "extra-arguments-refused",
+    "other-webcontents-refused",
+    "rate-limit",
+    "m0-bridge-retained"
+  ]
+}

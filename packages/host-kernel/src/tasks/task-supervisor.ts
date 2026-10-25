@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { KernelFault } from '../kernel-fault.js';
 import {
   makeError,
   type CancelReason,
@@ -219,7 +220,17 @@ export class TaskSupervisor {
       })
       .catch((error) => {
         if (!terminal(record.state))
-          this.finish(record, fail(error instanceof TaskFault ? error.code : 'internal'), 'failed');
+          this.finish(
+            record,
+            fail(
+              error instanceof TaskFault
+                ? error.code
+                : error instanceof KernelFault
+                  ? error.error.code
+                  : 'internal',
+            ),
+            'failed',
+          );
       })
       .finally(() => {
         record.workPending = false;
@@ -351,6 +362,7 @@ export class TaskSupervisor {
     else this.#listeners.clear();
   }
   diagnostics(): {
+    activeTasks: number;
     pendingWork: number;
     retained: number;
     observers: number;
@@ -358,6 +370,7 @@ export class TaskSupervisor {
     cleanupFailures: number;
   } {
     return {
+      activeTasks: [...this.#records.values()].filter((record) => !terminal(record.state)).length,
       pendingWork: this.#pending,
       retained: this.#records.size,
       observers: this.#listeners.size,
@@ -458,7 +471,14 @@ export class TaskSupervisor {
               valid();
               return null;
             } catch (error) {
-              return makeError(error instanceof TaskFault ? error.code : 'internal', false);
+              return makeError(
+                error instanceof TaskFault
+                  ? error.code
+                  : error instanceof KernelFault
+                    ? error.error.code
+                    : 'internal',
+                false,
+              );
             }
           };
           if (lease.signal) {
