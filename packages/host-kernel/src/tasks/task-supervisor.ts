@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { KernelFault } from '../kernel-fault.js';
+import { ownerFrom } from '../runtime/worker-protocol.js';
 import {
   makeError,
   type CancelReason,
@@ -43,6 +44,7 @@ export interface TaskHost {
 interface RecordState {
   id: string;
   owner: OwnerRef;
+  participants: OwnerRef[];
   state: TaskState;
   controller: AbortController;
   result: Promise<Result<JsonValue>>;
@@ -146,6 +148,7 @@ export class TaskSupervisor {
     const record: RecordState = {
       id: randomUUID(),
       owner: freezeJson({ ...checked.value.owner }),
+      participants: [freezeJson({ ...checked.value.owner })],
       state: 'pending',
       controller: new AbortController(),
       result,
@@ -361,6 +364,18 @@ export class TaskSupervisor {
     if (this.#dispatching) this.#clearAfterDispatch = true;
     else this.#listeners.clear();
   }
+  taskSignal(taskId: string, requester: OwnerRef): AbortSignal | null {
+    const owner = ownerFrom(requester);
+    const record = this.#records.get(taskId);
+    return owner &&
+      record &&
+      !terminal(record.state) &&
+      !record.controller.signal.aborted &&
+      record.participants.some((participant) => sameOwner(participant, owner)) &&
+      this.live(owner)
+      ? record.controller.signal
+      : null;
+  }
   diagnostics(): {
     activeTasks: number;
     pendingWork: number;
@@ -402,6 +417,9 @@ export class TaskSupervisor {
     return this.run(
       owner,
       async (context) => {
+        const scoped = this.#records.get(context.taskId)!;
+        if (!scoped.participants.some((owner) => sameOwner(owner, bound.value.provider)))
+          scoped.participants.push(Object.freeze({ ...bound.value.provider }));
         if (!authorize) throw new TaskFault('permission-denied');
         let lease: CapabilityLease | null = null;
         let closed = false;

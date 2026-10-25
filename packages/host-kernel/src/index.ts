@@ -19,3 +19,7 @@ export * from './config/store.js';
 export * from './config/file-store.js';
 export * from './config/data-directories.js';
 export * from './config/service.js';
+export * from './permissions/policy.js';
+export * from './permissions/audit.js';
+export * from './permissions/kernel.js';
+export * from './permissions/adapters.js';

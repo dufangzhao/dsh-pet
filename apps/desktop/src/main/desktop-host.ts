@@ -1,5 +1,7 @@
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { createHostPermissions } from './host-permissions.js';
+import type { PermissionService, PermissionControl } from '@pet/host-kernel';
 import {
   RemoteRuntimeDriver,
   PluginManager,
@@ -17,18 +19,25 @@ export class DesktopHost {
   readonly driver: RemoteRuntimeDriver;
   readonly configs: ConfigService;
   readonly dataDirectories: PluginDataDirectories;
+  readonly permissions: PermissionService;
+  readonly permissionControl: PermissionControl;
   #closing: Promise<{ exitConfirmed: boolean; forced: boolean }> | undefined;
   private constructor(
     driver: RemoteRuntimeDriver,
     manager: PluginManager,
     configs: ConfigService,
     dataDirectories: PluginDataDirectories,
+    permissions: PermissionService,
+    permissionControl: PermissionControl,
+    tasks: TaskSupervisor,
   ) {
     this.driver = driver;
     this.configs = configs;
     this.dataDirectories = dataDirectories;
     this.manager = manager;
-    this.tasks = new TaskSupervisor(manager);
+    this.tasks = tasks;
+    this.permissions = permissions;
+    this.permissionControl = permissionControl;
   }
   static async create(options: {
     executable: string;
@@ -45,7 +54,8 @@ export class DesktopHost {
     const dataRoot = path.join(path.dirname(options.userDirectory), 'plugin-data');
     await mkdir(configRoot, { recursive: true });
     await mkdir(dataRoot, { recursive: true });
-    const reference: { manager?: PluginManager } = {};
+    const reference: { manager?: PluginManager; tasks?: TaskSupervisor } = {};
+    const permission = createHostPermissions(reference);
     const driver = new RemoteRuntimeDriver({
       executable: options.executable,
       workerEntry: options.workerEntry,
@@ -61,6 +71,7 @@ export class DesktopHost {
     const dataDirectories = new PluginDataDirectories(dataRoot);
     const manager = new PluginManager({
       driver,
+      trust: async (snapshot) => permission.isTrusted(snapshot.owner),
       hostApiVersion: '1.0.0',
       platform: 'win32-x64',
       readiness: async (snapshot, candidate) => {
@@ -77,14 +88,26 @@ export class DesktopHost {
       },
     });
     reference.manager = manager;
-    const host = new DesktopHost(driver, manager, configs, dataDirectories);
+    const tasks = new TaskSupervisor(manager);
+    reference.tasks = tasks;
+    const host = new DesktopHost(
+      driver,
+      manager,
+      configs,
+      dataDirectories,
+      permission.service,
+      permission.control,
+      tasks,
+    );
     try {
       const discovered = await discoverPlugins(roots);
       for (const candidate of discovered.plugins) {
-        manager.install(candidate.manifest, {
+        const installed = manager.install(candidate.manifest, {
           directory: candidate.directory,
           origin: candidate.origin,
         });
+        if (!installed.ok || installed.value.state === 'rejected') continue;
+        permission.register(candidate);
         const identity = { pluginId: candidate.manifest.id, instanceId: 'default' };
         if (configs.register(identity, candidate.manifest).ok) await configs.initialize(identity);
       }
@@ -116,6 +139,7 @@ export class DesktopHost {
   private async stop(): Promise<{ exitConfirmed: boolean; forced: boolean }> {
     this.tasks.shutdown();
     this.configs.close();
+    this.permissions.close();
     await this.manager.shutdown();
     return this.driver.dispose();
   }

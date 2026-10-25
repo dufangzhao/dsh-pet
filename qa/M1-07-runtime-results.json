@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "approvalSource": "host-test-channel",
+  "stage": "revocation",
+  "approvals": 3,
+  "checks": [
+    "real-async-safe-storage",
+    "real-task-participant",
+    "two-operations-two-approvals",
+    "revocation-blocks-plaintext-delivery",
+    "metadata-only-audit",
+    "no-window"
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "cleanup": "complete"
+}
