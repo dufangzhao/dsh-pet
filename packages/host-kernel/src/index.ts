@@ -25,3 +25,4 @@ export * from './permissions/kernel.js';
 export * from './permissions/adapters.js';
 export * from './tasks/media-peer.js';
 export * from './runtime/host-services.js';
+export * from './credentials/sensitive-peer.js';

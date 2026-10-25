@@ -1,3 +1,4 @@
+import { types } from 'node:util';
 import type { CiphertextStore } from './ciphertext-store.js';
 import { SecretRedactor } from './redactor.js';
 import { MAX_CIPHERTEXT_BYTES, type SecretCipher } from './secret-cipher.js';
@@ -87,6 +88,48 @@ function secretText(value: unknown): value is string {
     ![...value].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)
   );
 }
+function credentialPayload(plaintext: unknown, owner: CredentialNamespace, keyId: string): string {
+  if (typeof plaintext !== 'string' || Buffer.byteLength(plaintext, 'utf8') > 64 * 1024)
+    throw new CredentialError('unavailable');
+  let value: unknown;
+  try {
+    value = JSON.parse(plaintext);
+  } catch {
+    throw new CredentialError('unavailable');
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw new CredentialError('unavailable');
+  const record = value as Record<string, unknown>,
+    raw = record['owner'];
+  if (
+    record['version'] !== 1 ||
+    record['keyId'] !== keyId ||
+    !raw ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  )
+    throw new CredentialError('unavailable');
+  const stored = raw as Record<string, unknown>;
+  if (
+    Object.keys(record).sort().join(',') !== 'keyId,owner,secret,version' ||
+    Object.keys(stored).sort().join(',') !== 'instanceId,pluginId' ||
+    stored['pluginId'] !== owner.pluginId ||
+    stored['instanceId'] !== owner.instanceId ||
+    !secretText(record['secret'])
+  )
+    throw new CredentialError('permission-denied');
+  return record['secret'];
+}
+const nativeAborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted')!.get!;
+function repairSignal(value: unknown): value is AbortSignal {
+  if (!value || typeof value !== 'object' || types.isProxy(value)) return false;
+  try {
+    nativeAborted.call(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
 function leaseValid(lease: CredentialAuthorizationLease): boolean {
   try {
     return !lease.signal?.aborted && lease.isValid() === true;
@@ -173,6 +216,61 @@ export class CredentialBroker {
     });
   }
 
+  /** Host-only repair; never returns plaintext or silently resets a damaged record. */
+  async repairSecret(
+    owner: CredentialNamespace,
+    keyId: string,
+    signal?: AbortSignal,
+  ): Promise<'repaired' | 'current'> {
+    if (this.#disposed) throw new CredentialError('unavailable');
+    const ns = namespace(owner);
+    if (!localId(keyId) || (signal !== undefined && !repairSignal(signal)))
+      throw new CredentialError('invalid-input');
+    const check = (ticket?: AbortSignal) => {
+      if (this.#disposed) throw new CredentialError('unavailable');
+      if ((signal && nativeAborted.call(signal)) || ticket?.aborted)
+        throw new CredentialError('cancelled');
+    };
+    check();
+    return this.mutateKey(locator(ns, keyId), async (ticket) => {
+      try {
+        check(ticket);
+        const old = await this.dependencies.store.read(locator(ns, keyId));
+        check(ticket);
+        if (!old) throw new CredentialError('not-ready');
+        if (
+          !(old instanceof Uint8Array) ||
+          old.byteLength < 1 ||
+          old.byteLength > MAX_CIPHERTEXT_BYTES
+        )
+          throw new CredentialError('unavailable');
+        const decrypted = await this.dependencies.cipher.decrypt(Uint8Array.from(old));
+        check(ticket);
+        if (!decrypted || typeof decrypted.shouldReEncrypt !== 'boolean')
+          throw new CredentialError('unavailable');
+        const secret = credentialPayload(decrypted.plaintext, ns, keyId);
+        this.redactor.add(secret);
+        check(ticket);
+        if (!decrypted.shouldReEncrypt) return 'current';
+        const encrypted = await this.dependencies.cipher.encrypt(
+          JSON.stringify({ version: 1, owner: ns, keyId, secret }),
+        );
+        check(ticket);
+        if (
+          !(encrypted instanceof Uint8Array) ||
+          encrypted.byteLength < 1 ||
+          encrypted.byteLength > MAX_CIPHERTEXT_BYTES
+        )
+          throw new CredentialError('unavailable');
+        // Atomic storage commit fence: cancellation after write starts cannot undo a commit.
+        await this.dependencies.store.write(locator(ns, keyId), Uint8Array.from(encrypted));
+        return 'repaired';
+      } catch (error) {
+        if (error instanceof CredentialError) throw error;
+        throw new CredentialError('unavailable');
+      }
+    });
+  }
   /** Called by the host manager exactly once for a newly enabled generation. */
   issueClient(owner: CredentialOwner, declaredKeys: readonly string[]): CredentialClient {
     if (this.#disposed) throw new CredentialError('unavailable');
@@ -232,18 +330,19 @@ export class CredentialBroker {
     await this.#writes;
   }
 
-  private mutateKey(key: string, operation: () => Promise<void>): Promise<void> {
+  private mutateKey<T>(key: string, operation: (signal: AbortSignal) => Promise<T>): Promise<T> {
     this.#keyEpochs.get(key)?.abort();
-    this.#keyEpochs.set(key, new AbortController());
+    const epoch = new AbortController();
+    this.#keyEpochs.set(key, epoch);
     this.#pendingWrites.set(key, (this.#pendingWrites.get(key) ?? 0) + 1);
-    return this.serializeWrite(operation).finally(() => {
+    return this.serializeWrite(() => operation(epoch.signal)).finally(() => {
       const remaining = (this.#pendingWrites.get(key) ?? 1) - 1;
       if (remaining) this.#pendingWrites.set(key, remaining);
       else this.#pendingWrites.delete(key);
     });
   }
 
-  private serializeWrite(operation: () => Promise<void>): Promise<void> {
+  private serializeWrite<T>(operation: () => Promise<T>): Promise<T> {
     const current = this.#writes.then(() => {
       if (this.#disposed) throw new CredentialError('unavailable');
       return operation();

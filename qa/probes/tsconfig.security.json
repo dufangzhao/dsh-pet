@@ -16,6 +16,8 @@
   },
   "include": [
     "permission-runtime-smoke.ts",
-    "sdk-runtime-smoke.ts"
+    "sdk-runtime-smoke.ts",
+    "credential-sensitive-smoke.ts",
+    "sensitive-runtime-child.ts"
   ]
 }

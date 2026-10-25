@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "forcedReencryptFlag": true,
+  "stage": "revocation",
+  "checks": [
+    "real-async-dpapi-rewrap-with-fixture-flag",
+    "ciphertext-only-file",
+    "current-no-rewrite",
+    "fd6-fd7-sensitive-only",
+    "metadata-only-control",
+    "one-use-ack",
+    "revocation-cancels-receiver-result",
+    "actual-callback-capacity-released"
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "childExit": 0,
+  "cleanup": "complete"
+}
