@@ -17,6 +17,7 @@ import { freezeJson, instanceKey, sameOwner, type InstanceIdentity } from './ide
 import type {
   CapabilityMethod,
   CapabilityMethods,
+  RegisteredContribution,
   RuntimeDriver,
   RuntimeSession,
 } from './types.js';
@@ -462,12 +463,18 @@ export class PluginManager {
     this.capabilities.forgetConsumer(e.owner);
     return { ok: true, value: null };
   }
-  contributions(): readonly { owner: OwnerRef; id: string }[] {
-    return [...this.#entries.values()]
-      .filter((e) => e.state === 'active')
-      .flatMap((e) =>
-        [...e.contributions.keys()].map((id) => freezeJson({ owner: { ...e.owner }, id })),
-      );
+  contributions(): readonly RegisteredContribution[] {
+    return freezeJson(
+      [...this.#entries.values()]
+        .filter((e) => e.state === 'active')
+        .flatMap((e) =>
+          [...e.contributions.keys()].map((id) => ({
+            owner: { ...e.owner },
+            id,
+            declaration: e.manifest.contributes!.find((item) => item.id === id)!,
+          })),
+        ),
+    );
   }
   async shutdown(): Promise<void> {
     this.#closing = true;

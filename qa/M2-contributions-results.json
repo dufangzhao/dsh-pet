@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "stage": "rollback",
+  "checks": [
+    "real-worker-five-kinds",
+    "atomic-active-publication",
+    "metadata-only-console-projection",
+    "immediate-disable-removal",
+    "fresh-generation-registration",
+    "failed-plugin-rollback",
+    "runtime-fault-removal"
+  ],
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

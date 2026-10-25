@@ -1,5 +1,16 @@
 import type { PluginHostServices } from '@pet/plugin-sdk';
-import type { JsonObject, JsonValue, OwnerRef, PluginManifest } from '@pet/contracts';
+import type {
+  ContributionDeclaration,
+  JsonObject,
+  JsonValue,
+  OwnerRef,
+  PluginManifest,
+} from '@pet/contracts';
+export interface RegisteredContribution {
+  readonly owner: Readonly<OwnerRef>;
+  readonly id: string;
+  readonly declaration: Readonly<ContributionDeclaration>;
+}
 
 export type Disposer = () => void | Promise<void>;
 export interface CapabilityCallContext {

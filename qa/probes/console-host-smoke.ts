@@ -19,7 +19,7 @@ void app.whenReady().then(async()=>{
  let foreign:BrowserWindow|undefined;
  try{
   ipcMain.handle(CONSOLE_IPC.open,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:pet.webContents.id,mainFrame:event.senderFrame===pet.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(petEntry).href},args,()=>settings.open().then(()=>null)));
-  ipcMain.handle(CONSOLE_IPC.snapshot,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:settings.current?.webContents.id??-1,mainFrame:event.senderFrame===settings.current?.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(entry).href},args,()=>consoleSnapshot(host.status(),host.manager.list(),{name:'AI 桌宠',version:app.getVersion(),electron:process.versions.electron!,node:process.versions.node,platform:process.platform+'-'+process.arch})));
+  ipcMain.handle(CONSOLE_IPC.snapshot,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:settings.current?.webContents.id??-1,mainFrame:event.senderFrame===settings.current?.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(entry).href},args,()=>consoleSnapshot(host.status(),host.manager.list(),{name:'AI 桌宠',version:app.getVersion(),electron:process.versions.electron!,node:process.versions.node,platform:process.platform+'-'+process.arch},host.manager.contributions())));
   await pet.loadFile(petEntry);report['stage']='open';
   assert.deepEqual(await pet.webContents.executeJavaScript('window.petSettings.open()'),{ok:true,value:null});
   const first=settings.current!,firstId=first.webContents.id;

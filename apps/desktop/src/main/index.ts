@@ -135,13 +135,18 @@ app
         },
         args,
         () =>
-          consoleSnapshot(host!.status(), host!.manager.list(), {
-            name: 'AI 桌宠',
-            version: app.getVersion(),
-            electron: process.versions.electron!,
-            node: process.versions.node,
-            platform: process.platform + '-' + process.arch,
-          }),
+          consoleSnapshot(
+            host!.status(),
+            host!.manager.list(),
+            {
+              name: 'AI 桌宠',
+              version: app.getVersion(),
+              electron: process.versions.electron!,
+              node: process.versions.node,
+              platform: process.platform + '-' + process.arch,
+            },
+            host!.manager.contributions(),
+          ),
       ),
     );
     for (const channel of channels)

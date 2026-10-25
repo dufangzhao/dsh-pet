@@ -14,6 +14,7 @@ const snapshot: ConsoleSnapshot = {
     pendingWork: 0,
   },
   plugins: [],
+  contributions: [],
   app: { name: 'AI 桌宠', version: '0.0.0', electron: '45', node: '24', platform: 'win32-x64' },
 };
 it('exposes a frozen parameterless snapshot API only', async () => {

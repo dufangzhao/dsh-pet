@@ -21,6 +21,7 @@
     "sensitive-runtime-child.ts",
     "credential-sdk-smoke.ts",
     "task-settlement-smoke.ts",
-    "console-host-smoke.ts"
+    "console-host-smoke.ts",
+    "contribution-runtime-smoke.ts"
   ]
 }
