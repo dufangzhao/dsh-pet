@@ -1,0 +1,14 @@
+import { build } from 'esbuild';
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const out = path.join(root, '.cache/m1-credentials'); await fs.mkdir(path.join(out,'profile'),{recursive:true});
+await build({entryPoints:[path.join(root,'qa/probes/credentials-runtime.ts')],outfile:path.join(out,'smoke-main.cjs'),bundle:true,platform:'node',format:'cjs',target:'node24',external:['electron']});
+const require=createRequire(import.meta.url);const packagePath=require.resolve('electron/package.json');
+const metadata=JSON.parse(await fs.readFile(packagePath,'utf8'));if(metadata.version!=='45.0.0')throw new Error('Wrong Electron package');
+const env={};for(const name of ['SystemRoot','WINDIR','TEMP','TMP','PATH','USERPROFILE','APPDATA','LOCALAPPDATA','HOMEDRIVE','HOMEPATH'])if(process.env[name])env[name]=process.env[name];
+const child=spawn(path.join(path.dirname(packagePath),'dist/electron.exe'),[path.join(out,'smoke-main.cjs')],{cwd:root,env,stdio:'inherit',windowsHide:true});
+const watchdog=setTimeout(()=>child.kill(),30000);child.once('error',()=>{clearTimeout(watchdog);process.exitCode=1;});child.once('exit',code=>{clearTimeout(watchdog);process.exitCode=code??1;});

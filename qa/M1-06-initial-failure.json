@@ -1,0 +1,39 @@
+{
+  "status": "failed",
+  "fixtureOnly": true,
+  "stage": "direct-cipher-read",
+  "cipherShape": {
+    "buffer": true,
+    "view": true,
+    "tag": "[object Uint8Array]",
+    "bytes": 51,
+    "offset": 0,
+    "backingBytes": 51
+  },
+  "bufferComparison": [
+    {
+      "kind": "original",
+      "sameBytes": true,
+      "offset": 0,
+      "backingBytes": 51,
+      "ok": false
+    },
+    {
+      "kind": "pooled-copy",
+      "sameBytes": true,
+      "offset": 24040,
+      "backingBytes": 65536,
+      "ok": false
+    },
+    {
+      "kind": "owned-copy",
+      "sameBytes": true,
+      "offset": 0,
+      "backingBytes": 51,
+      "ok": false
+    }
+  ],
+  "storedBytes": 164,
+  "cleanup": "complete",
+  "failureCode": "fixture-or-adapter-failure"
+}

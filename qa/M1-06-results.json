@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "stage": "revoke",
+  "cipherShape": {
+    "buffer": true,
+    "view": true,
+    "tag": "[object Uint8Array]",
+    "bytes": 51,
+    "offset": 0,
+    "backingBytes": 51
+  },
+  "bufferComparison": [
+    {
+      "kind": "original",
+      "sameBytes": true,
+      "offset": 0,
+      "backingBytes": 51,
+      "ok": true
+    },
+    {
+      "kind": "pooled-copy",
+      "sameBytes": true,
+      "offset": 27368,
+      "backingBytes": 65536,
+      "ok": true
+    },
+    {
+      "kind": "owned-copy",
+      "sameBytes": true,
+      "offset": 0,
+      "backingBytes": 51,
+      "ok": true
+    }
+  ],
+  "storedBytes": 164,
+  "decodedShape": {
+    "string": true,
+    "boundFixture": true,
+    "shouldReEncrypt": false
+  },
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "checks": [
+    "async-DPAPI-roundtrip",
+    "ciphertext-only-disk",
+    "mismatched-namespace-rejected",
+    "revoked-client-rejected"
+  ],
+  "windowCount": 0,
+  "cleanup": "complete"
+}
