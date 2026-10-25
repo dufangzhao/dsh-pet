@@ -1,6 +1,6 @@
 # AI 桌宠项目（暂定名）
 
-当前阶段：M0 已恢复，前端按用户新决定改交 DeepSeek。本次M0开工交付已形成[门槛报告](qa/M0-final-gate.md)：包含原型、有限原生F8/鼠标证据及完整检查；不等于所有环境/体验验收通过，未进入M1，见[执行计划](docs/19-implementation-plan.md#9-执行记录)、[生命周期证据](qa/V-01.md)与[版本记录](qa/versions.md)。首版闭环为跟桌宠语音对话，当前尚不是可用产品。
+当前阶段：M1宿主内核、插件运行区与SDK正在总体验收，见[M1矩阵](qa/M1-acceptance-matrix.md)与[执行记录](qa/M1-status.md)。前端/限定实现交由DeepSeek，主会话负责后端、安全、集成与审查。已具备配置、权限、凭据与取消/流的测试基础，首版语音对话闭环仍未完成，当前尚不是可用产品。M0快速交互/多屏保留项仍见[门槛报告](qa/M0-final-gate.md)，不因M1推进改报通过。
 
 目标是实用、可定制、交互顺畅的独立桌面助手：用户可按需组合语音、声音、角色、屏幕理解与电脑操作能力，而非仅有聊天/养成的桌宠。已确定能力 + 受控UI贡献点；DSH为可选集成，不是运行前提。
 
@@ -33,7 +33,7 @@ Coopanion仅作为交互、设置台与架构参考，本阶段不二开，见[A
 本机已验证 Node 24.18.0 + pnpm 11.24.0。安装依赖时默认不运行第三方构建脚本；后续原生依赖逐项审阅。
 
 ```sh
-pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile --ignore-scripts
 pnpm -r typecheck
 pnpm -r test
 pnpm lint
@@ -44,6 +44,14 @@ pnpm test:qa
 或运行 `pnpm check` 一次完成工作区类型/测试、QA回归、lint、格式与构建；该命令不接管真实鼠标或键盘。
 
 M0-01曾为空跑；当前已有真实工作区测试、下载安全测试与Electron集成探针。
+
+Windows上复跑M1自有原生流程：
+
+```sh
+pnpm test:m1:native
+```
+
+该命令先构建，再顺序验证worker/迁移/权限/SDK流/敏感管道/凭据/只读桥与实际工作结算。会启动并关闭自有Electron测试进程与桥接窗口，不使用用户Key、不调用真实付费服务、不录音或注入键鼠；输出[机器报告](qa/M1-native-acceptance-results.json)。这不是M2授权界面或真实语音闭环验收。
 
 ```sh
 pnpm dev

@@ -1,0 +1,223 @@
+{
+  "status": "passed",
+  "scope": "owned-windows-electron-native-flows-only",
+  "fixtureOnly": true,
+  "startedAt": "2026-10-25T18:29:58.537Z",
+  "results": [
+    {
+      "id": "worker-runtime",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1602,
+      "report": ".cache/m1-worker-runtime/report.json",
+      "fresh": true,
+      "sha256": "d07b8a8f171e2c9e5420c29ec66232060cf70bd031a9469989c1b6bb144c8b5e",
+      "checks": [
+        "worker-only-import",
+        "fixed-capability-proxy",
+        "generation-restart",
+        "dependency-degradation",
+        "actual-effect-disposal",
+        "task-deadline-cancellation",
+        "failed-activation-rollback",
+        "single-stuck-plugin-does-not-kill-area",
+        "crash-to-owner-fault"
+      ],
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0",
+        "mainPid": 33788,
+        "workerPid": 13612
+      },
+      "shutdown": {
+        "exitConfirmed": true,
+        "forced": false
+      },
+      "cleanup": null
+    },
+    {
+      "id": "config-runtime",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1287,
+      "report": ".cache/m1-config-runtime/report.json",
+      "fresh": true,
+      "sha256": "19aaa8602b0883fd2b45ebe9cce1d7e1c2a57c35ab16ca1a94524f3279d6ad72",
+      "checks": [
+        "real-file-defaults",
+        "migration-only-in-worker",
+        "staged-no-write",
+        "target-schema-validation",
+        "atomic-commit",
+        "new-activation-rejected",
+        "revision-guarded-config-rollback",
+        "fresh-store-roundtrip"
+      ],
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "shutdown": {
+        "exitConfirmed": true,
+        "forced": false
+      },
+      "cleanup": null
+    },
+    {
+      "id": "permission-runtime",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 798,
+      "report": ".cache/m1-permission-runtime/report.json",
+      "fresh": true,
+      "sha256": "1c5ba8e2f337dd4eb2d546394b3e0feaa119a250c81a8b7b8dd9de53311d9b67",
+      "checks": [
+        "real-async-safe-storage",
+        "real-task-participant",
+        "two-operations-two-approvals",
+        "revocation-blocks-plaintext-delivery",
+        "metadata-only-audit",
+        "no-window"
+      ],
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "shutdown": null,
+      "cleanup": "complete"
+    },
+    {
+      "id": "sdk-runtime",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1227,
+      "report": ".cache/m1-sdk-runtime/report.json",
+      "fresh": true,
+      "sha256": "f00a0c9699e0c5886029330bfcce13f76568b7f62ccd7e049ddeba41dd08c0a0",
+      "checks": [
+        "bundled-public-sdk",
+        "worker-host-factory",
+        "scoped-config-read",
+        "explicit-nested-capability",
+        "permission-task-participants",
+        "plugin-to-host-nine-frames",
+        "host-to-plugin-nine-frames",
+        "normal-drain-and-task-finish"
+      ],
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "shutdown": {
+        "exitConfirmed": true,
+        "forced": false
+      },
+      "cleanup": null
+    },
+    {
+      "id": "credential-sensitive",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1158,
+      "report": ".cache/m1-credential-sensitive/report.json",
+      "fresh": true,
+      "sha256": "8dedab1d83c014758c491c9cec8316b40675e2761ccfb5680befb011b00e0a90",
+      "checks": [
+        "real-async-dpapi-rewrap-with-fixture-flag",
+        "ciphertext-only-file",
+        "current-no-rewrite",
+        "fd6-fd7-sensitive-only",
+        "metadata-only-control",
+        "one-use-ack",
+        "revocation-cancels-receiver-result",
+        "actual-callback-capacity-released"
+      ],
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "shutdown": null,
+      "cleanup": "complete"
+    },
+    {
+      "id": "credential-sdk",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1404,
+      "report": ".cache/m1-credential-sdk/report.json",
+      "fresh": true,
+      "sha256": "d1515fdb5b262bbedd676bb0710aa493e383fb05e79bc6fbf0bb73270288c0bf",
+      "checks": [
+        "real-runtime-sdk-with-secret",
+        "actual-dpapi-vault",
+        "same-key-id-namespace-isolation",
+        "undeclared-key-denied",
+        "denial-does-not-break-sensitive-peer",
+        "each-use-host-approval",
+        "callback-secret-result-denied",
+        "cached-secret-response-denied",
+        "secret-control-request-denied",
+        "secret-media-bytes-denied",
+        "revocation-no-late-result"
+      ],
+      "runtime": {
+        "electron": "45.0.0",
+        "node": "24.22.0"
+      },
+      "shutdown": {
+        "exitConfirmed": true,
+        "forced": false
+      },
+      "cleanup": "complete"
+    },
+    {
+      "id": "host-bridge",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1041,
+      "report": ".cache/m1-host-bridge/report.json",
+      "fresh": true,
+      "sha256": "b8d16f813b9252892a77220e3c0f1744bccf474a41e48675c1c81715ef409551",
+      "checks": [
+        "actual-preload-frozen-bridge",
+        "host-ready-no-auto-activation",
+        "extra-arguments-refused",
+        "other-webcontents-refused",
+        "rate-limit",
+        "m0-bridge-retained"
+      ],
+      "runtime": null,
+      "shutdown": null,
+      "cleanup": null
+    },
+    {
+      "id": "task-settlement",
+      "exitCode": 0,
+      "status": "passed",
+      "durationMs": 1199,
+      "report": ".cache/m1-task-settlement/report.json",
+      "fresh": true,
+      "sha256": "c2c9bf0519d17b394dcc05283c44928807dc7b2baabf6ab41496dfbb0df8d54e",
+      "checks": [
+        "cancel-is-logical-only",
+        "actual-worker-hold-retains-main-work-budget",
+        "release-confirms-physical-settlement",
+        "ipc-disconnect-does-not-prove-exit",
+        "forced-owned-worker-exit-reclaims-pending-work"
+      ],
+      "runtime": null,
+      "shutdown": {
+        "exitConfirmed": true,
+        "forced": true
+      },
+      "cleanup": null
+    }
+  ],
+  "finishedAt": "2026-10-25T18:30:08.263Z",
+  "artifacts": {
+    "pnpm-lock.yaml": "2ec6fe8561aa8135f821b0c15e835f40a3560acafe8cc9805289fcf43a67866b",
+    "apps/desktop/dist/runtime/worker.cjs": "f9c9d177487203f517cfd152d3c2eae571023e5f67121f103e148316e8ecc43c",
+    "packages/host-kernel/src/ipc/control-endpoint.ts": "88cb8025c2bbd810f6b7834cc85e3fffe460a301c74e7c94efe57d98d7eeaac1",
+    "packages/plugin-sdk/src/host.ts": "7eccdd552f9c230fad809d17dced638509afcd0f255679304306d5a892166974"
+  }
+}

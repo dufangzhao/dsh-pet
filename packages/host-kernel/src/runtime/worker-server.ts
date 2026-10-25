@@ -72,6 +72,7 @@ export class RuntimeWorkerServer {
         ok: true,
         value: {
           version: 1,
+          completion: 'work-v1',
           packages: this.packages.length,
           issues: this.issueCount,
           instances: this.#instances.size,

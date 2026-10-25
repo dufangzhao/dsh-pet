@@ -93,6 +93,7 @@ export function createWorkerServices(
                   });
                   const [host, local] = await Promise.all([requested, accepted]);
                   cancellation.abort();
+                  await credential.peer.drain(reference);
                   if (!local.ok && !['cancelled', 'unavailable'].includes(local.error.code))
                     return local;
                   if (!host.ok) return host;

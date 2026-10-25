@@ -126,6 +126,7 @@ export function startRuntimeWorker(): void {
     live: () => !shutting,
     allowJson: (value) => boundary.allowJson(value),
     handlers,
+    workCompletionMethods: ['runtime.invoke', 'runtime.command'],
     onStreamControl: (message) => {
       const result = streams.control(message);
       if (!result.ok) throw new Error('Invalid stream control');

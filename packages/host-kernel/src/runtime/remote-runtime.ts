@@ -177,7 +177,8 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       .request('runtime.info', null, { budgetMs: startupBudget() })
       .then(async (result) => {
         const value = record(unwrap(result));
-        if (!value || value['version'] !== 1 || this.#exited) throw new KernelFault('unavailable');
+        if (!value || value['version'] !== 1 || value['completion'] !== 'work-v1' || this.#exited)
+          throw new KernelFault('unavailable');
         const sent = await bounded(
           this.#media.write({
             header: {
@@ -480,13 +481,14 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
   ): Promise<JsonValue> {
     const budget = deadline === undefined ? 30000 : Math.floor(deadline - performance.now());
     if (budget < 1) throw new KernelFault('timeout');
-    return unwrap(
-      await this.#endpoint.request(method, payload, {
-        taskId,
-        signal,
-        budgetMs: Math.min(budget, 86400000),
-      }),
-    );
+    const result = await this.#endpoint.request(method, payload, {
+      taskId,
+      signal,
+      budgetMs: Math.min(budget, 86400000),
+      waitForWork: true,
+    });
+    if (!this.#exited && this.#endpoint.diagnostics().closed) await this.#exit;
+    return unwrap(result);
   }
   dispose(): Promise<{ exitConfirmed: boolean; forced: boolean }> {
     return (this.#disposing ??= this.shutdown());

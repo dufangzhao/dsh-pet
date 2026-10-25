@@ -129,3 +129,42 @@ it('discards a rejected receive registration without sending an unpaired cancell
   expect(peer.diagnostics().pending).toBe(0);
   peer.close();
 });
+it('drains one cancelled credential callback without waiting for an unrelated reference', async () => {
+  const peer = new SensitivePeer({ write: async () => ({ ok: true, value: null }) }),
+    a = new AbortController(),
+    b = new AbortController();
+  let releaseA!: () => void, releaseB!: () => void;
+  const gateA = new Promise<void>((r) => {
+      releaseA = r;
+    }),
+    gateB = new Promise<void>((r) => {
+      releaseB = r;
+    });
+  const refB = { ...reference, streamId: 'unrelated' };
+  const acceptedA = peer.accept(reference, a.signal, async () => {
+      await gateA;
+      return true;
+    }),
+    acceptedB = peer.accept(refB, b.signal, async () => {
+      await gateB;
+      return true;
+    });
+  for (const ref of [reference, refB]) {
+    const payload = Buffer.from('PUBLIC_REVIEW');
+    expect(
+      peer.receive({ header: { ...ref, sequence: 0, byteLength: payload.length }, payload }).ok,
+    ).toBe(true);
+  }
+  a.abort();
+  expect((await acceptedA).ok).toBe(false);
+  releaseA();
+  await peer.drain(reference);
+  expect(peer.diagnostics().running).toBe(1);
+  expect(peer.diagnostics().pending).toBe(1);
+  b.abort();
+  await acceptedB;
+  releaseB();
+  await peer.drain();
+  expect(peer.diagnostics().running).toBe(0);
+  peer.close();
+});

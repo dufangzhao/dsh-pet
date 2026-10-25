@@ -35,19 +35,24 @@ export interface RpcOptions {
   readonly maxPending?: number;
   readonly onClosed?: () => void;
   readonly allowJson?: (value: JsonValue) => boolean;
+  readonly workCompletionMethods?: readonly string[];
   readonly onStreamControl?: (message: StreamCreditMessage | StreamEndMessage) => void;
 }
 interface Outbound {
   resolve: (result: Result<JsonValue>) => void;
   taskId: string | undefined;
   remove: () => void;
-  timer: ReturnType<typeof setTimeout>;
+  timer: ReturnType<typeof setTimeout> | undefined;
+  waitForWork: boolean;
+  cancelled: KernelError | undefined;
 }
 interface Inbound {
   controller: AbortController;
   taskId: string | undefined;
   timer: ReturnType<typeof setTimeout>;
   terminal: boolean;
+  waitForWork: boolean;
+  cancelled: KernelError | undefined;
 }
 export class ControlEndpoint {
   readonly #out = new Map<string, Outbound>();
@@ -157,7 +162,12 @@ export class ControlEndpoint {
   request(
     method: string,
     payload: JsonValue,
-    options: { taskId?: string; signal?: AbortSignal; budgetMs?: number } = {},
+    options: {
+      taskId?: string;
+      signal?: AbortSignal;
+      budgetMs?: number;
+      waitForWork?: boolean;
+    } = {},
   ): Promise<Result<JsonValue>> {
     if (!this.live()) return Promise.resolve({ ok: false, error: makeError('unavailable', false) });
     if (this.#out.size >= this.#limit)
@@ -186,7 +196,16 @@ export class ControlEndpoint {
     return new Promise((resolve) => {
       const finish = (error: KernelError, reason: CancelReason) => {
         const pending = this.#out.get(message.id);
-        if (!pending) return;
+        if (!pending || pending.cancelled) return;
+        if (pending.waitForWork) {
+          pending.cancelled = error;
+          clearTimeout(pending.timer);
+          pending.timer = undefined;
+          pending.remove();
+          if (message.taskId)
+            this.send({ ...this.base(), type: 'cancel', taskId: message.taskId, reason });
+          return;
+        }
         this.#out.delete(message.id);
         clearTimeout(pending.timer);
         pending.remove();
@@ -198,6 +217,8 @@ export class ControlEndpoint {
       const timer = setTimeout(() => finish(makeError('timeout', false), 'deadline'), budget);
       this.#out.set(message.id, {
         resolve,
+        waitForWork: options.waitForWork === true,
+        cancelled: undefined,
         taskId: message.taskId,
         remove: () => options.signal?.removeEventListener('abort', abort),
         timer,
@@ -269,15 +290,26 @@ export class ControlEndpoint {
       pending.resolve(
         !this.live()
           ? { ok: false, error: makeError('stale-owner', false) }
-          : message.result.ok && !this.allowed(message.result.value)
-            ? { ok: false, error: makeError('invalid-input', false) }
-            : message.result,
+          : pending.cancelled
+            ? { ok: false, error: pending.cancelled }
+            : message.result.ok && !this.allowed(message.result.value)
+              ? { ok: false, error: makeError('invalid-input', false) }
+              : message.result,
       );
       return;
     }
     if (message.type === 'cancel') {
       for (const [id, pending] of this.#in)
-        if (pending.taskId === message.taskId && !pending.terminal) {
+        if (pending.taskId === message.taskId && !pending.terminal && !pending.cancelled) {
+          pending.cancelled = makeError(
+            message.reason === 'deadline' ? 'timeout' : 'cancelled',
+            false,
+          );
+          if (pending.waitForWork) {
+            clearTimeout(pending.timer);
+            pending.controller.abort();
+            continue;
+          }
           pending.terminal = true;
           clearTimeout(pending.timer);
           pending.controller.abort();
@@ -344,7 +376,12 @@ export class ControlEndpoint {
       controller,
       taskId: message.taskId,
       timer: setTimeout(() => {
-        if (pending.terminal) return;
+        if (pending.terminal || pending.cancelled) return;
+        pending.cancelled = makeError('timeout', false);
+        if (pending.waitForWork) {
+          controller.abort();
+          return;
+        }
         pending.terminal = true;
         controller.abort();
         this.send({
@@ -355,11 +392,23 @@ export class ControlEndpoint {
         });
       }, budget),
       terminal: false,
+      waitForWork: this.options.workCompletionMethods?.includes(message.method) === true,
+      cancelled: undefined,
     };
     this.#in.set(message.id, pending);
     void Promise.resolve()
       .then(async () => {
         if (pending.terminal || this.#closed) return;
+        if (pending.cancelled) {
+          pending.terminal = true;
+          this.send({
+            ...this.base(),
+            type: 'response',
+            replyTo: message.id,
+            result: { ok: false, error: pending.cancelled },
+          });
+          return;
+        }
         if (!this.live()) {
           pending.terminal = true;
           this.send({
@@ -387,7 +436,8 @@ export class ControlEndpoint {
         }
         if (pending.terminal || this.#closed) return;
         pending.terminal = true;
-        if (performance.now() >= deadline)
+        if (pending.cancelled) result = { ok: false, error: pending.cancelled };
+        else if (performance.now() >= deadline)
           result = { ok: false, error: makeError('timeout', false) };
         else if (!this.live()) result = { ok: false, error: makeError('stale-owner', false) };
         const response = { ...this.base(), type: 'response' as const, replyTo: message.id, result };

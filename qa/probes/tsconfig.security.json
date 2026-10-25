@@ -19,6 +19,7 @@
     "sdk-runtime-smoke.ts",
     "credential-sensitive-smoke.ts",
     "sensitive-runtime-child.ts",
-    "credential-sdk-smoke.ts"
+    "credential-sdk-smoke.ts",
+    "task-settlement-smoke.ts"
   ]
 }

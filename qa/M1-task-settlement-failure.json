@@ -1,0 +1,11 @@
+{
+  "status": "failed",
+  "fixtureOnly": true,
+  "workerStillHolding": true,
+  "mainSettled": true,
+  "mainWorkPending": false,
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

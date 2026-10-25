@@ -2,7 +2,7 @@
   "name": "pet",
   "version": "0.0.0",
   "private": true,
-  "description": "AI 桌宠：独立桌面助手，功能以插件提供（M0-01 工程骨架）",
+  "description": "AI 桌宠：独立桌面助手，插件化宿主内核与运行时",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@11.24.0",
@@ -18,7 +18,8 @@
     "build": "pnpm --filter @pet/desktop build",
     "dev": "pnpm --filter @pet/desktop build && pnpm --filter @pet/desktop start",
     "test:qa": "node --test --test-reporter=spec qa/probes/*.test.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm test:qa && pnpm lint && pnpm format:check && pnpm build"
+    "check": "pnpm typecheck && pnpm test && pnpm test:qa && pnpm lint && pnpm format:check && pnpm build",
+    "test:m1:native": "pnpm build && node qa/probes/m1-native-acceptance.mjs"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.5",

@@ -92,7 +92,7 @@ export class SensitivePeer {
   readonly #timeout: number;
   #closed = false;
   #queuedWrites = 0;
-  readonly #work = new Set<Promise<void>>();
+  readonly #work = new Map<Promise<void>, SensitiveReference>();
   #writes = Promise.resolve();
   constructor(private readonly options: SensitivePeerOptions) {
     this.#timeout = options.timeoutMs ?? 30000;
@@ -223,7 +223,7 @@ export class SensitivePeer {
           this.settled(slot);
           this.#work.delete(work);
         });
-      this.#work.add(work);
+      this.#work.set(work, slot.reference);
     } else payload.fill(0);
     return result;
   }
@@ -331,7 +331,7 @@ export class SensitivePeer {
       this.settled(slot);
       this.#work.delete(work);
     });
-    this.#work.add(work);
+    this.#work.set(work, slot.reference);
     return { ok: true, value: null };
   }
   private async operate(slot: Incoming, secret: string): Promise<void> {
@@ -367,9 +367,16 @@ export class SensitivePeer {
     for (const slot of [...this.#active.values()]) this.finish(slot, fail('unavailable'));
     this.#lifetime.abort();
   }
-  async drain(): Promise<void> {
-    await Promise.all([...this.#work]);
-    await this.#writes;
+  async drain(reference?: SensitiveReference): Promise<void> {
+    await Promise.all(
+      [...this.#work]
+        .filter(
+          ([, ref]) =>
+            !reference || (ref.streamId === reference.streamId && key(ref) === key(reference)),
+        )
+        .map(([work]) => work),
+    );
+    if (!reference) await this.#writes;
   }
   diagnostics() {
     return {
