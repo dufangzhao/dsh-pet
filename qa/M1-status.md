@@ -15,4 +15,4 @@
 
 当前完整检查：1054项工作区测试通过（contracts293、SDK97、host-kernel187、desktop209、contract-tests268），QA120通过/1既有权限跳过；类型、lint、格式、构建通过。空包仍明确零测试，不记成功能完成。
 
-M1整体未完成：[可控gate探针](M1-task-settlement-failure.json)确认worker仍执行时主进程settled/workPending结算过早，[修复与当前结果](../docs/31-m1-physical-rpc-settlement.md)已闭合；独立安全整合审查尚待实际结论，不提前标整体完成。未调用真实Key/付费接口，未录音、未注入键盘、未改系统DPI/电源；无远程仓库/推送。凭据实验只使用公开合成串，测试密文已清理。
+M1整体未完成：[可控gate探针](M1-task-settlement-failure.json)确认worker仍执行时主进程settled/workPending结算过早，[修复与当前结果](../docs/31-m1-physical-rpc-settlement.md)已闭合；[独立安全整合审查失败且无结论](M1-security-review-gap.md)，不自动重试/增派，主会话继续复核，不提前标整体完成。未调用真实Key/付费接口，未录音、未注入键盘、未改系统DPI/电源；无远程仓库/推送。凭据实验只使用公开合成串，测试密文已清理。
