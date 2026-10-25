@@ -1,4 +1,5 @@
 import path from 'node:path';
+import type { PluginHostServices } from '@pet/plugin-sdk';
 import { types } from 'node:util';
 import {
   makeError,
@@ -33,7 +34,12 @@ const bad = (code: Parameters<typeof makeError>[0]): Result<JsonValue> => ({
   ok: false,
   error: makeError(code, false),
 });
+export interface WorkerServerServices {
+  mediaStats?(): JsonValue;
+  create(owner: OwnerRef, signal: AbortSignal): PluginHostServices;
+}
 export class RuntimeWorkerServer {
+  readonly #calls = new Map<string, { owner: OwnerRef; signal: AbortSignal }>();
   readonly #instances = new Map<string, WorkerRecord>();
   readonly #generations = new Map<string, number>();
   readonly #driver: CordisRuntimeDriver;
@@ -43,13 +49,21 @@ export class RuntimeWorkerServer {
   private constructor(
     private readonly packages: readonly DiscoveredPlugin[],
     readonly issueCount: number,
+    private readonly services?: WorkerServerServices,
   ) {
     this.#loader = createVerifiedPluginLoader(packages);
     this.#driver = new CordisRuntimeDriver(this.#loader);
   }
-  static async create(bootstrap: WorkerBootstrap): Promise<RuntimeWorkerServer> {
+  static async create(
+    bootstrap: WorkerBootstrap,
+    services?: WorkerServerServices,
+  ): Promise<RuntimeWorkerServer> {
     const discovered = await discoverPlugins(bootstrap.roots);
-    return new RuntimeWorkerServer(discovered.plugins, discovered.issues.length);
+    return new RuntimeWorkerServer(discovered.plugins, discovered.issues.length, services);
+  }
+  taskSignal(owner: OwnerRef, taskId: string): AbortSignal | null {
+    const call = this.#calls.get(JSON.stringify([instanceKey(owner), taskId]));
+    return call && sameOwner(call.owner, owner) && !call.signal.aborted ? call.signal : null;
   }
   handlers(): Readonly<Record<string, RpcHandler>> {
     const handlers: Record<string, RpcHandler> = {
@@ -60,6 +74,7 @@ export class RuntimeWorkerServer {
           packages: this.packages.length,
           issues: this.issueCount,
           instances: this.#instances.size,
+          media: this.services?.mediaStats?.() ?? null,
         },
       }),
       'runtime.activate': (ctx, payload) => this.activate(ctx, payload),
@@ -114,6 +129,7 @@ export class RuntimeWorkerServer {
           entryPath: body['entryPath'],
           config: config as JsonObject,
           signal: controller.signal,
+          ...(this.services ? { host: this.services.create(owner, controller.signal) } : {}),
         },
         {
           provide: (id, implementation) => {
@@ -259,8 +275,12 @@ export class RuntimeWorkerServer {
         ? item.methods.get(body['providerId'])?.[body['method']]
         : undefined;
     if (!method) return bad('invalid-input');
-    const signal = AbortSignal.any([context.signal, item.controller.signal]);
+    const callKey = JSON.stringify([instanceKey(owner), context.taskId]);
+    if (this.#calls.has(callKey)) return bad('not-ready');
+    const callLifetime = new AbortController();
+    const signal = AbortSignal.any([context.signal, item.controller.signal, callLifetime.signal]);
     if (signal.aborted) return bad('cancelled');
+    this.#calls.set(callKey, { owner, signal });
     try {
       const output = await method(
         { taskId: context.taskId, signal, deadline: performance.now() + context.budgetMs },
@@ -272,6 +292,9 @@ export class RuntimeWorkerServer {
       return safe.ok ? { ok: true, value: safe.value } : bad('invalid-input');
     } catch {
       return bad(signal.aborted ? 'cancelled' : 'internal');
+    } finally {
+      this.#calls.delete(callKey);
+      callLifetime.abort();
     }
   }
   private async migrate(context: RpcContext, payload: JsonValue): Promise<Result<JsonValue>> {

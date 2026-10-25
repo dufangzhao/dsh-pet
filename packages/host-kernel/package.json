@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@deepseek-ai/cordis": "4.0.5",
-    "@pet/contracts": "workspace:*"
+    "@pet/contracts": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*"
   }
 }

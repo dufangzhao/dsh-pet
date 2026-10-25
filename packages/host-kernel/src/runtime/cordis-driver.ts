@@ -51,6 +51,7 @@ export class CordisRuntimeDriver implements RuntimeDriver {
           owner: Object.freeze({ ...activation.owner }),
           signal,
           config: freezeJson(structuredClone(activation.config)),
+          ...(activation.host ? { host: activation.host } : {}),
           provide: (id: string, methods: Parameters<ActivationRegistrar['provide']>[1]) => {
             live();
             registrar.provide(id, methods);

@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import type { Duplex } from 'node:stream';
+import { Duplex, type Readable, type Writable } from 'node:stream';
 import {
   makeError,
   type JsonObject,
@@ -13,7 +13,11 @@ import { ControlEndpoint } from '../ipc/control-endpoint.js';
 import { childProcessControl } from '../ipc/node-control-transport.js';
 import { FramedMediaPort } from '../ipc/media-port.js';
 import { KernelFault } from '../kernel-fault.js';
-import { manifestDigest, parseBootstrap, record } from './worker-protocol.js';
+import { manifestDigest, parseBootstrap, record, ownerFrom, exactKeys } from './worker-protocol.js';
+import { sameOwner } from './identity.js';
+import { TaskMediaPeer, mediaReference } from '../tasks/media-peer.js';
+import type { RuntimeHostPort } from './host-services.js';
+import type { RpcContext } from '../ipc/control-endpoint.js';
 import type { DiscoveryRoot } from './discovery.js';
 import type {
   ActivationRegistrar,
@@ -27,6 +31,7 @@ export interface RemoteRuntimeOptions {
   executable: string;
   workerEntry: string;
   roots: readonly DiscoveryRoot[];
+  host?: RuntimeHostPort;
   startupTimeoutMs?: number;
   stopTimeoutMs?: number;
   onFault?: (owner: OwnerRef) => void;
@@ -57,6 +62,7 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
   readonly #child: ChildProcess;
   readonly #endpoint: ControlEndpoint;
   readonly #media: FramedMediaPort;
+  readonly #streams: TaskMediaPeer;
   readonly #exit: Promise<number | null>;
   readonly #ready: Promise<void>;
   readonly #sessions = new Set<RemoteSession>();
@@ -72,6 +78,8 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     for (const value of [options.startupTimeoutMs ?? 5000, options.stopTimeoutMs ?? 2000])
       if (!Number.isSafeInteger(value) || value < 1 || value > 30000)
         throw new Error('Invalid runtime timeout');
+    const startupDeadline = performance.now() + (options.startupTimeoutMs ?? 5000);
+    const startupBudget = () => Math.max(1, Math.floor(startupDeadline - performance.now()));
     const bootstrap = parseBootstrap({
       version: 1,
       sessionId: randomUUID(),
@@ -85,7 +93,7 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     this.#child = spawn(options.executable, [options.workerEntry, JSON.stringify(bootstrap)], {
       cwd: path.dirname(options.workerEntry),
       env,
-      stdio: ['ignore', 'ignore', 'ignore', 'ipc', 'pipe'],
+      stdio: ['ignore', 'ignore', 'ignore', 'ipc', 'pipe', 'pipe'],
       windowsHide: true,
     });
     let exited!: (value: number | null) => void;
@@ -94,6 +102,8 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     });
     this.#child.once('exit', (code) => {
       this.#exited = true;
+      this.#streams.close();
+      this.#media.close();
       this.#exitCode = code;
       this.#state = this.#closing ? 'stopped' : 'failed';
       exited(code);
@@ -107,10 +117,20 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       }
       if (!this.#closing) this.notifyFaults();
     });
+    this.#streams = new TaskMediaPeer({
+      signalFor: (owner, taskId) => this.options.host?.signalFor(owner, taskId) ?? null,
+      write: (frame) => this.#media.write(frame),
+      control: (message) => this.#endpoint.streamControl(message),
+    });
     this.#endpoint = new ControlEndpoint(childProcessControl(this.#child), {
       sessionId: bootstrap.sessionId,
       owner: bootstrap.owner,
       live: () => !this.#exited,
+      handlers: { 'host.api': (context, payload) => this.fromWorker(context, payload) },
+      onStreamControl: (message) => {
+        const result = this.#streams.control(message);
+        if (!result.ok) throw new Error('Invalid stream control');
+      },
       onClosed: () => {
         if (!this.#closing && !this.#exited) {
           this.#state = 'failed';
@@ -126,18 +146,45 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
         }
       },
     });
-    const pipe = this.#child.stdio[4];
-    if (!pipe) throw new Error('Missing runtime media pipe');
+    const stdio = this.#child.stdio as readonly (Readable | Writable | null | undefined)[];
+    const outgoing = stdio[4],
+      incoming = stdio[5];
+    if (!outgoing || !incoming) throw new Error('Missing runtime media pipes');
+    const pipe = Duplex.from({ readable: incoming, writable: outgoing });
     this.#media = new FramedMediaPort(
       pipe as Duplex,
-      () => ({ ok: false, error: makeError('not-ready', false) }),
-      () => {},
+      (frame) => this.#streams.receive(frame),
+      (error) => this.#streams.close(error),
     );
     this.#ready = this.#endpoint
-      .request('runtime.info', null, { budgetMs: options.startupTimeoutMs ?? 5000 })
-      .then((result) => {
+      .request('runtime.info', null, { budgetMs: startupBudget() })
+      .then(async (result) => {
         const value = record(unwrap(result));
         if (!value || value['version'] !== 1 || this.#exited) throw new KernelFault('unavailable');
+        const sent = await bounded(
+          this.#media.write({
+            header: {
+              streamId: bootstrap.sessionId,
+              taskId: 'core-media-ready',
+              owner: bootstrap.owner,
+              sequence: 0,
+              byteLength: 0,
+            },
+            payload: new Uint8Array(0),
+          }),
+          startupBudget(),
+        );
+        if (!sent) throw new KernelFault('timeout');
+        unwrap(sent);
+        const ready = record(
+          unwrap(
+            await this.#endpoint.request('runtime.media-ready', null, {
+              budgetMs: startupBudget(),
+            }),
+          ),
+        );
+        if (!ready || ready['version'] !== 1 || performance.now() >= startupDeadline)
+          throw new KernelFault('timeout');
         this.#state = 'ready';
       })
       .catch(async () => {
@@ -150,6 +197,65 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
         throw new KernelFault('unavailable');
       });
     void this.#ready.catch(() => {});
+  }
+  private async fromWorker(context: RpcContext, payload: JsonValue): Promise<Result<JsonValue>> {
+    const bad = (code: Parameters<typeof makeError>[0]): Result<JsonValue> => ({
+      ok: false,
+      error: makeError(code, false),
+    });
+    const body = record(payload);
+    if (
+      !body ||
+      !exactKeys(body, ['owner', 'action', 'payload']) ||
+      typeof body['action'] !== 'string'
+    )
+      return bad('invalid-input');
+    const owner = ownerFrom(body['owner']);
+    if (
+      !owner ||
+      !this.#sessions.size ||
+      ![...this.#sessions].some((session) => sameOwner(session.owner, owner)) ||
+      !this.options.host
+    )
+      return bad('permission-denied');
+    if (body['action'] === 'media.input' || body['action'] === 'media.output') {
+      const reference = mediaReference(body['payload']);
+      if (
+        !reference ||
+        reference.taskId !== context.taskId ||
+        !sameOwner(reference.owner, owner) ||
+        !this.options.host.signalFor(owner, reference.taskId)
+      )
+        return bad('permission-denied');
+      if (body['action'] === 'media.input') {
+        if (!this.options.host.input) return bad('not-ready');
+        const writer = this.#streams.createWriter(reference);
+        if (!writer.ok) return writer;
+        try {
+          this.options.host.input(reference, writer.value);
+        } catch {
+          writer.value.cancel();
+          return bad('internal');
+        }
+      } else {
+        if (!this.options.host.output) return bad('not-ready');
+        const reader = this.#streams.createReader(reference);
+        if (!reader.ok) return reader;
+        try {
+          this.options.host.output(reference, reader.value);
+          const credit = this.#streams.grantInitial(reference);
+          if (!credit.ok) {
+            reader.value.cancel();
+            return credit;
+          }
+        } catch {
+          reader.value.cancel();
+          return bad('internal');
+        }
+      }
+      return { ok: true, value: reference as unknown as JsonValue };
+    }
+    return this.options.host.request(owner, body['action'], body['payload']!, context);
   }
   private notifyFaults(): void {
     for (const session of this.#sessions)
@@ -173,6 +279,12 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       exitConfirmed: this.#exited,
       forced: this.#forced,
     };
+  }
+  inspectRuntime(): Promise<Result<JsonValue>> {
+    return this.#endpoint.request('runtime.info', null, { budgetMs: 1000 });
+  }
+  mediaStats() {
+    return { ...this.#streams.snapshot(), port: this.#media.snapshot() };
   }
   ready(): Promise<void> {
     return this.#ready;
@@ -346,6 +458,7 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
       Promise.allSettled([...this.#sessions].map((session) => session.stop())),
       this.options.stopTimeoutMs ?? 2000,
     );
+    this.#streams.close();
     this.#endpoint.close();
     this.#media.close();
     if (!this.#exited) await bounded(this.#exit, this.options.stopTimeoutMs ?? 2000);

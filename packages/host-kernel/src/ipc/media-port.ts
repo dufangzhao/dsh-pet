@@ -62,6 +62,11 @@ export class FramedMediaPort {
     if (this.#closed) return;
     this.#closed = true;
     this.#decoder.abort(error);
+    // Paired native pipes may report a final asynchronous error while destroy tears
+    // them down. The port is already failed/closed; keep it handled through close.
+    const closingError = () => {};
+    this.stream.on('error', closingError);
+    this.stream.once('close', () => this.stream.off('error', closingError));
     for (const detach of this.#detach.splice(0)) detach();
     this.#resolveWrite?.({ ok: false, error: makeError(error.code, false) });
     this.#resolveWrite = undefined;

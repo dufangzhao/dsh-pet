@@ -1,0 +1,85 @@
+{
+  "status": "failed",
+  "fixtureOnly": true,
+  "stage": "sdk-flow",
+  "actions": [
+    {
+      "action": "config.get",
+      "ok": true
+    },
+    {
+      "action": "capability.invoke",
+      "ok": true
+    },
+    {
+      "action": "config.get",
+      "ok": true
+    },
+    {
+      "action": "config.get",
+      "ok": true
+    }
+  ],
+  "outputOpened": true,
+  "outputFrames": 9,
+  "peerStats": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "packages": 2,
+      "issues": 0,
+      "instances": 2,
+      "media": {
+        "writesQueued": 8,
+        "writesStarted": 8,
+        "writesDone": 8,
+        "framesReceived": 0,
+        "creditsReceived": 8,
+        "writerCredits": 0,
+        "readerQueued": 0,
+        "streams": 1,
+        "terminalReferences": 0,
+        "closed": false,
+        "port": {
+          "closed": false,
+          "writing": false,
+          "bufferedBytes": 0
+        }
+      }
+    }
+  },
+  "hostMedia": {
+    "writesQueued": 0,
+    "writesStarted": 0,
+    "writesDone": 0,
+    "framesReceived": 8,
+    "creditsReceived": 0,
+    "writerCredits": 0,
+    "readerQueued": 0,
+    "streams": 1,
+    "terminalReferences": 0,
+    "closed": false,
+    "port": {
+      "closed": false,
+      "writing": false,
+      "bufferedBytes": 0
+    }
+  },
+  "inputOpened": true,
+  "taskResult": "ok",
+  "checks": [
+    "bundled-public-sdk",
+    "worker-host-factory",
+    "scoped-config-read",
+    "explicit-nested-capability",
+    "permission-task-participants",
+    "plugin-to-host-nine-frames",
+    "host-to-plugin-nine-frames",
+    "normal-drain-and-task-finish"
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "reason": "uncaught-runtime-error"
+}

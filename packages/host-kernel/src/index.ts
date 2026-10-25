@@ -23,3 +23,5 @@ export * from './permissions/policy.js';
 export * from './permissions/audit.js';
 export * from './permissions/kernel.js';
 export * from './permissions/adapters.js';
+export * from './tasks/media-peer.js';
+export * from './runtime/host-services.js';

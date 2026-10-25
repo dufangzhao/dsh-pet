@@ -1,0 +1,9 @@
+{
+  "status": "failed",
+  "fixtureOnly": true,
+  "stage": "sdk-flow",
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

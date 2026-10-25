@@ -1,3 +1,4 @@
+import type { PluginHostServices } from '@pet/plugin-sdk';
 import type { JsonObject, JsonValue, OwnerRef, PluginManifest } from '@pet/contracts';
 
 export type Disposer = () => void | Promise<void>;
@@ -16,6 +17,7 @@ export interface ActivationRegistrar {
   contribute(contributionId: string, handler?: CapabilityMethod): void;
 }
 export interface PluginRuntimeContext extends ActivationRegistrar {
+  readonly host?: PluginHostServices;
   readonly owner: Readonly<OwnerRef>;
   readonly signal: AbortSignal;
   readonly config: Readonly<JsonObject>;
@@ -31,6 +33,7 @@ export interface PluginModule {
   activate(context: PluginRuntimeContext): void | Disposer | Promise<void | Disposer>;
 }
 export interface RuntimeActivation {
+  readonly host?: PluginHostServices;
   readonly owner: Readonly<OwnerRef>;
   readonly manifest: PluginManifest;
   readonly entryPath: string;

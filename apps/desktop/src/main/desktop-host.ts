@@ -11,6 +11,8 @@ import {
   ConfigService,
   FileConfigStore,
   PluginDataDirectories,
+  createRuntimeHostPort,
+  type RuntimeHostPort,
 } from '@pet/host-kernel';
 import { makeError, type HostStatus } from '@pet/contracts';
 export class DesktopHost {
@@ -54,12 +56,22 @@ export class DesktopHost {
     const dataRoot = path.join(path.dirname(options.userDirectory), 'plugin-data');
     await mkdir(configRoot, { recursive: true });
     await mkdir(dataRoot, { recursive: true });
-    const reference: { manager?: PluginManager; tasks?: TaskSupervisor } = {};
+    const reference: {
+      manager?: PluginManager;
+      tasks?: TaskSupervisor;
+      hostPort?: RuntimeHostPort;
+    } = {};
     const permission = createHostPermissions(reference);
     const driver = new RemoteRuntimeDriver({
       executable: options.executable,
       workerEntry: options.workerEntry,
       roots,
+      host: {
+        signalFor: (owner, taskId) => reference.hostPort?.signalFor(owner, taskId) ?? null,
+        request: (owner, action, payload, context) =>
+          reference.hostPort?.request(owner, action, payload, context) ??
+          Promise.resolve({ ok: false, error: makeError('not-ready', false) }),
+      },
       onFault: (owner) => {
         if (reference.manager) void reference.manager.reportFault(owner);
       },
@@ -90,6 +102,12 @@ export class DesktopHost {
     reference.manager = manager;
     const tasks = new TaskSupervisor(manager);
     reference.tasks = tasks;
+    reference.hostPort = createRuntimeHostPort({
+      manager,
+      tasks,
+      configs,
+      permissions: permission.service,
+    });
     const host = new DesktopHost(
       driver,
       manager,

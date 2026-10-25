@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "stage": "sdk-flow",
+  "actions": [
+    {
+      "action": "config.get",
+      "ok": true
+    },
+    {
+      "action": "capability.invoke",
+      "ok": true
+    }
+  ],
+  "outputOpened": true,
+  "outputFrames": 9,
+  "inputOpened": true,
+  "taskResult": "ok",
+  "finalMediaStreams": 0,
+  "finalWorkerMediaStreams": 0,
+  "checks": [
+    "bundled-public-sdk",
+    "worker-host-factory",
+    "scoped-config-read",
+    "explicit-nested-capability",
+    "permission-task-participants",
+    "plugin-to-host-nine-frames",
+    "host-to-plugin-nine-frames",
+    "normal-drain-and-task-finish"
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

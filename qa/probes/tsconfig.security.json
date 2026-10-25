@@ -15,6 +15,7 @@
     }
   },
   "include": [
-    "permission-runtime-smoke.ts"
+    "permission-runtime-smoke.ts",
+    "sdk-runtime-smoke.ts"
   ]
 }
