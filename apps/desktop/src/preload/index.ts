@@ -1,5 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { HOST_IPC, type HostStatus, type Result } from '@pet/contracts';
+import {
+  CONSOLE_IPC,
+  HOST_IPC,
+  type ConsoleSnapshot,
+  type HostStatus,
+  type Result,
+} from '@pet/contracts';
+import { createConsoleBridge, createSettingsLauncher } from './console-bridge.js';
 import { createHostStatusBridge } from './host-bridge.js';
 import { PET_IPC, type PetPrototypeBridge, type PetReply, type PetSnapshot } from '@pet/contracts';
 
@@ -42,6 +49,16 @@ contextBridge.exposeInMainWorld('pet', Object.freeze(bridge));
 contextBridge.exposeInMainWorld(
   'petHost',
   createHostStatusBridge(() => ipcRenderer.invoke(HOST_IPC.status) as Promise<Result<HostStatus>>),
+);
+contextBridge.exposeInMainWorld(
+  'petConsole',
+  createConsoleBridge(
+    () => ipcRenderer.invoke(CONSOLE_IPC.snapshot) as Promise<Result<ConsoleSnapshot>>,
+  ),
+);
+contextBridge.exposeInMainWorld(
+  'petSettings',
+  createSettingsLauncher(() => ipcRenderer.invoke(CONSOLE_IPC.open) as Promise<Result<null>>),
 );
 window.addEventListener(
   'unload',

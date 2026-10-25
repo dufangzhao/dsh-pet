@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "fixtureOnly": true,
+  "stage": "reuse",
+  "checks": [
+    "real-host-two-plugin-snapshot",
+    "production-frozen-preload",
+    "owned-window-main-frame-only",
+    "extra-args-denied",
+    "single-window-reuse",
+    "close-and-reopen",
+    "native-minimum-size",
+    "window-open-denied"
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

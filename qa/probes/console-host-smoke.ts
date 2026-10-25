@@ -1,0 +1,47 @@
+import {app,BrowserWindow,ipcMain} from 'electron';
+import assert from 'node:assert/strict';
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {once} from 'node:events';
+import {CONSOLE_IPC} from '../../packages/contracts/src/index.js';
+import {DesktopHost} from '../../apps/desktop/src/main/desktop-host.js';
+import {ConsoleWindow} from '../../apps/desktop/src/main/windows/console-window.js';
+import {consoleSnapshot} from '../../apps/desktop/src/main/console-snapshot.js';
+import {handleConsoleRequest} from '../../apps/desktop/src/main/console-request.js';
+const root=path.resolve(__dirname,'../..'),report:Record<string,unknown>={status:'starting',fixtureOnly:true};
+app.setPath('userData',path.join(__dirname,'profile'));
+app.on('window-all-closed',()=>{});
+void app.whenReady().then(async()=>{
+ const entry=path.join(__dirname,'console/index.html'),petEntry=path.join(__dirname,'pet/index.html'),preload=path.join(root,'apps/desktop/dist/preload/index.cjs');
+ const host=await DesktopHost.create({executable:process.execPath,workerEntry:path.join(root,'apps/desktop/dist/runtime/worker.cjs'),builtinDirectory:path.join(__dirname,'builtin'),userDirectory:path.join(__dirname,'plugins')});
+ const settings=new ConsoleWindow(entry,preload),pet=new BrowserWindow({show:false,webPreferences:{preload,sandbox:true,contextIsolation:true,nodeIntegration:false}});
+ let foreign:BrowserWindow|undefined;
+ try{
+  ipcMain.handle(CONSOLE_IPC.open,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:pet.webContents.id,mainFrame:event.senderFrame===pet.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(petEntry).href},args,()=>settings.open().then(()=>null)));
+  ipcMain.handle(CONSOLE_IPC.snapshot,(event,...args:unknown[])=>handleConsoleRequest({senderId:event.sender.id,expectedId:settings.current?.webContents.id??-1,mainFrame:event.senderFrame===settings.current?.webContents.mainFrame,frameUrl:event.senderFrame?.url??'',expectedUrl:pathToFileURL(entry).href},args,()=>consoleSnapshot(host.status(),host.manager.list(),{name:'AI 桌宠',version:app.getVersion(),electron:process.versions.electron!,node:process.versions.node,platform:process.platform+'-'+process.arch})));
+  await pet.loadFile(petEntry);report['stage']='open';
+  assert.deepEqual(await pet.webContents.executeJavaScript('window.petSettings.open()'),{ok:true,value:null});
+  const first=settings.current!,firstId=first.webContents.id;
+  assert.deepEqual(await first.webContents.executeJavaScript('({require:typeof require,process:typeof process})'),{require:'undefined',process:'undefined'});
+  const snapshot=await first.webContents.executeJavaScript('window.petConsole.getSnapshot()');
+  assert.equal(snapshot.ok,true);assert.equal(snapshot.value.host.runtime,'ready');assert.equal(snapshot.value.host.installedPlugins,2);assert.equal(snapshot.value.plugins.length,2);
+  assert.equal(snapshot.value.plugins.some((p:{name:string})=>p.name==='用户示例'),true);
+  assert.equal(JSON.stringify(snapshot).includes('private-entry.mjs'),false);assert.equal(JSON.stringify(snapshot).includes(__dirname),false);
+  assert.deepEqual(await first.webContents.executeJavaScript('Object.keys(window.petConsole)'),['version','getSnapshot']);
+  assert.equal(await first.webContents.executeJavaScript('Object.isFrozen(window.petConsole)'),true);
+  assert.equal((await first.webContents.executeJavaScript('window.petConsole.getSnapshot(1)')).error.code,'invalid-input');
+  report['stage']='sources';
+  assert.equal((await pet.webContents.executeJavaScript('window.petConsole.getSnapshot()')).error.code,'permission-denied');
+  foreign=new BrowserWindow({show:false,webPreferences:{preload,sandbox:true,contextIsolation:true,nodeIntegration:false}});await foreign.loadFile(entry);
+  assert.equal((await foreign.webContents.executeJavaScript('window.petConsole.getSnapshot()')).error.code,'permission-denied');
+  assert.equal(await first.webContents.executeJavaScript('window.open("https://example.com") === null'),true);
+  report['stage']='reuse';await pet.webContents.executeJavaScript('window.petSettings.open()');assert.equal(settings.current!.webContents.id,first.webContents.id);
+  first.setSize(600,400);const bounds=first.getBounds();assert.ok(bounds.width>=760&&bounds.height>=560);first.setSize(1040,740);
+  await fs.writeFile(path.join(__dirname,'window.png'),(await first.webContents.capturePage()).toPNG());
+  const closed=once(first,'closed');settings.close();await closed;assert.equal(settings.current,undefined);
+  await pet.webContents.executeJavaScript('window.petSettings.open()');assert.notEqual(settings.current!.webContents.id,firstId);
+  report['status']='passed';report['checks']=['real-host-two-plugin-snapshot','production-frozen-preload','owned-window-main-frame-only','extra-args-denied','single-window-reuse','close-and-reopen','native-minimum-size','window-open-denied'];
+  report['runtime']={electron:process.versions.electron,node:process.versions.node};
+ }finally{settings.close();foreign?.destroy();pet.destroy();report['shutdown']=await host.shutdown();}
+}).catch(()=>{report['status']='failed';}).finally(async()=>{await fs.writeFile(path.join(__dirname,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));app.exit(report['status']==='passed'?0:1);});

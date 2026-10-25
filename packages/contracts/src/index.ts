@@ -26,3 +26,4 @@ export * from './task.js';
 export * from './media.js';
 export * from './control.js';
 export * from './host-status.js';
+export * from './console.js';
