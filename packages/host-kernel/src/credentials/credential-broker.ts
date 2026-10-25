@@ -33,7 +33,8 @@ export type CredentialErrorCode =
   | 'cancelled'
   | 'not-ready'
   | 'unavailable'
-  | 'internal';
+  | 'internal'
+  | 'quota-exceeded';
 export class CredentialError extends Error {
   constructor(readonly code: CredentialErrorCode) {
     super('Credential operation refused: ' + code);
@@ -47,6 +48,13 @@ export interface CredentialClient {
     operation: (secret: string, signal: AbortSignal) => Promise<T>,
   ): Promise<T>;
 }
+interface CredentialUse {
+  done: boolean;
+  pending: number;
+  settled: Promise<void>;
+  release: () => void;
+}
+export const CREDENTIAL_MAX_USES = 32;
 interface Session {
   readonly owner: CredentialOwner;
   readonly keys: ReadonlySet<string>;
@@ -158,6 +166,7 @@ function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
 /** Host-only authority. Never expose this object or its management methods in a plugin SDK. */
 export class CredentialBroker {
   readonly #sessions = new Map<string, Session>();
+  readonly #uses = new Set<CredentialUse>();
   readonly #generations = new Map<string, number>();
   readonly #keyEpochs = new Map<string, AbortController>();
   readonly #pendingWrites = new Map<string, number>();
@@ -330,6 +339,16 @@ export class CredentialBroker {
     await this.#writes;
   }
 
+  async drainUses(): Promise<void> {
+    await Promise.all([...this.#uses].map((use) => use.settled));
+  }
+  diagnostics() {
+    return {
+      pendingUses: this.#uses.size,
+      pendingWork: [...this.#uses].reduce((sum, use) => sum + use.pending, 0),
+      disposed: this.#disposed,
+    };
+  }
   private mutateKey<T>(key: string, operation: (signal: AbortSignal) => Promise<T>): Promise<T> {
     this.#keyEpochs.get(key)?.abort();
     const epoch = new AbortController();
@@ -395,6 +414,7 @@ export class CredentialBroker {
     if (!authorize) throw new CredentialError('permission-denied');
     const key = locator(session.owner, keyId);
     if (this.#pendingWrites.has(key)) throw new CredentialError('not-ready');
+    if (this.#uses.size >= CREDENTIAL_MAX_USES) throw new CredentialError('quota-exceeded');
     let epoch = this.#keyEpochs.get(key);
     if (!epoch) {
       epoch = new AbortController();
@@ -402,6 +422,29 @@ export class CredentialBroker {
     }
     const keySignal = epoch.signal;
     const signal = AbortSignal.any([task.signal, session.abort.signal, keySignal]);
+    let releaseUse!: () => void;
+    const physicallySettled = new Promise<void>((resolve) => {
+      releaseUse = resolve;
+    });
+    const usage: CredentialUse = {
+      done: false,
+      pending: 0,
+      settled: physicallySettled,
+      release: releaseUse,
+    };
+    this.#uses.add(usage);
+    const track = <TWork>(promise: Promise<TWork>): Promise<TWork> => {
+      usage.pending++;
+      const settled = () => {
+        usage.pending--;
+        if (usage.done && usage.pending === 0) {
+          this.#uses.delete(usage);
+          usage.release();
+        }
+      };
+      void promise.then(settled, settled);
+      return promise;
+    };
     let lease: CredentialAuthorizationLease | null = null;
     let leaseClosed = false;
     const close = (value: CredentialAuthorizationLease): void => {
@@ -433,7 +476,7 @@ export class CredentialBroker {
         },
         () => {},
       );
-      lease = await abortable(pending, signal);
+      lease = await abortable(track(pending), signal);
       this.check(session, task.signal, undefined, keySignal);
       if (
         !lease ||
@@ -444,7 +487,7 @@ export class CredentialBroker {
         throw new CredentialError('permission-denied');
       const useSignal = lease.signal ? AbortSignal.any([signal, lease.signal]) : signal;
       const ciphertext = await abortable(
-        this.dependencies.store.read(locator(session.owner, keyId)),
+        track(this.dependencies.store.read(locator(session.owner, keyId))),
         useSignal,
       );
       this.check(session, task.signal, lease, keySignal);
@@ -456,7 +499,7 @@ export class CredentialBroker {
       )
         throw new CredentialError('unavailable');
       const decrypted = await abortable(
-        this.dependencies.cipher.decrypt(Uint8Array.from(ciphertext)),
+        track(this.dependencies.cipher.decrypt(Uint8Array.from(ciphertext))),
         useSignal,
       );
       this.check(session, task.signal, lease, keySignal);
@@ -499,10 +542,12 @@ export class CredentialBroker {
       let result: T;
       try {
         result = await abortable(
-          Promise.resolve().then(() => {
-            this.check(session, task.signal, lease ?? undefined, keySignal);
-            return operation(secret, useSignal);
-          }),
+          track(
+            Promise.resolve().then(() => {
+              this.check(session, task.signal, lease ?? undefined, keySignal);
+              return operation(secret, useSignal);
+            }),
+          ),
           useSignal,
         );
       } catch {
@@ -516,6 +561,11 @@ export class CredentialBroker {
       if (error instanceof CredentialError) throw error;
       throw new CredentialError('unavailable');
     } finally {
+      usage.done = true;
+      if (usage.pending === 0) {
+        this.#uses.delete(usage);
+        usage.release();
+      }
       if (lease && typeof lease.close === 'function') close(lease);
     }
   }

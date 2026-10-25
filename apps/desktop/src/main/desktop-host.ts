@@ -1,6 +1,7 @@
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { createHostPermissions } from './host-permissions.js';
+import { checkHostReadiness } from './host-readiness.js';
 import type { PermissionService, PermissionControl } from '@pet/host-kernel';
 import {
   RemoteRuntimeDriver,
@@ -111,18 +112,14 @@ export class DesktopHost {
       trust: async (snapshot) => permission.isTrusted(snapshot.owner),
       hostApiVersion: '1.0.0',
       platform: 'win32-x64',
-      readiness: async (snapshot, candidate) => {
-        if (snapshot.manifest.permissions?.length || snapshot.manifest.resources?.length)
-          return makeError('not-ready', false);
-        const identity = {
-          pluginId: snapshot.owner.pluginId,
-          instanceId: snapshot.owner.instanceId,
-        };
-        const definition = configs.definition(identity);
-        if (!definition || !definition.validate(candidate).ok || !(await configs.get(identity)).ok)
-          return makeError('not-ready', false);
-        return null;
-      },
+      readiness: (snapshot, candidate) =>
+        checkHostReadiness(
+          snapshot.owner,
+          snapshot.manifest,
+          candidate,
+          configs,
+          credentials !== undefined,
+        ),
     });
     reference.manager = manager;
     const tasks = new TaskSupervisor(manager);
