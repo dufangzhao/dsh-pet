@@ -1,3 +1,6 @@
+# 用户提供的只读参考仓库，不作为本项目源码收录
+/Coopanion/
+
 # 依赖
 node_modules/
 .pnpm-store/

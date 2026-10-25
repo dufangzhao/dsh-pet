@@ -16,6 +16,7 @@ export default [
       'docs/**',
       'research/**',
       'qa/**',
+      'Coopanion/**', // User-provided reference clone; not this project's source.
     ],
   },
   js.configs.recommended,
