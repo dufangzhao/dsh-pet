@@ -1,6 +1,6 @@
 # 开发文档导航
 
-状态：实现阶段 M0 进行中 · 2026-10-24 · M0-01 已独立验收，见[实现计划执行记录](19-implementation-plan.md#9-执行记录)与[QA记录](../qa/M0-01.md)。原始交接见[开工提示词](20-implementation-kickoff-prompt.md)。
+状态：M1宿主内核与SDK已通过限定验收，见[验收矩阵](../qa/M1-acceptance-matrix.md)。M0保留项不变，下一阶段为M2界面骨架。
 
 ## 开发约定
 

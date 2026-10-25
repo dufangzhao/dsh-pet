@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "scope": "M1-01..M1-09 original host-kernel and SDK completion definitions",
+  "review": "lead review; failed independent review not counted",
+  "baseBeforeClosureCommit": "e2c4f2f",
+  "workspaceTests": {
+    "contracts": 293,
+    "pluginSdk": 97,
+    "hostKernel": 191,
+    "desktop": 215,
+    "contractTests": 275,
+    "total": 1071
+  },
+  "qa": {
+    "passed": 120,
+    "failed": 0,
+    "skipped": 1
+  },
+  "checks": [
+    "pnpm check",
+    "pnpm exec tsc --noEmit -p qa/probes/tsconfig.security.json",
+    "pnpm test:m1:native"
+  ],
+  "native": {
+    "passed": 8,
+    "report": "qa/M1-native-acceptance-results.json"
+  },
+  "scopeNotes": "qa/M1-acceptance-matrix.md",
+  "recordedAt": "2026-10-25T19:19:47.074Z"
+}

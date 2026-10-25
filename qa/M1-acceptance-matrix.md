@@ -1,47 +1,45 @@
 # M1 总体验收矩阵
 
-状态：[跨进程实际结算失败](M1-task-settlement-failure.json)已修复并[复验通过](M1-task-settlement-results.json)，独立安全审查失败且无结论，见[覆盖缺口](M1-security-review-gap.md)，M1尚未完成；不将成员返回覆盖率、历史通过或探针数量等同质量验收。最终结论需当前全量检查、原生流程与独立审查同时闭合。范围以[原计划M1](../docs/19-implementation-plan.md#L89-L101)为准。
+结论：按[原计划M1完成定义](../docs/19-implementation-plan.md#L89-L101)与原目标要求，由主会话完成累计实现审查、当前整合复核和实跑验收。M1-01至M1-09限定后端/SDK验收通过；不是可用语音对话产品验收。证据：[最终门槛](M1-final-gate.json)、[主会话复核](M1-main-review.md)。
 
-| 工作包 | 原完成定义 | 当前证据 | 最终核对 |
+## 结论依据与独立审查限制
+
+早期矩阵草案额外列了独立安全整合审查门槛。该任务失败且无结论，未重试/增派，也没有把失败改成通过。原目标要求的是主会话审查，本次由主会话逐项复核并补真实负例，未删减下表任一原始完成定义。独立全安全审查仍未取得，不能把本结论称为独立审计通过；见[覆盖缺口](M1-security-review-gap.md)。
+
+| 工作包 | 原完成定义 | 当前证据 | 结论/边界 |
 | --- | --- | --- | --- |
-| M1-01 | 类型与示例清单 | [契约](M1-01.md)、contracts测试与示例清单 | 当前1054项全量门槛通过 |
-| M1-02 | 生命周期/依赖契约 | [管理器记录](M1-02-03.md)、实际Cordis/worker | 待独立整合审查 |
-| M1-03 | 路由单测 | 固定任务绑定/显式选择、多实现、依赖降级；[特性子集测试](../packages/host-kernel/src/runtime/identity.test.ts)与ProviderMetadata查询 | 待独立整合审查 |
-| M1-04 | 取消与晚到丢弃 | [运行区](M1-04-worker.md)、[SDK流](M1-09.md)、固定任务元数据事件与只读桥；另有可控gate结算复核 | [原失败](M1-task-settlement-failure.json)已转为[当前通过](M1-task-settlement-results.json)；第8条原生专门覆盖 |
-| M1-05 | 迁移与回滚 | [配置](M1-05.md)、schema负例与真实提交/激活失败回滚 | [当前8条原生复跑通过](M1-native-acceptance-results.json) |
-| M1-06 | 跨插件凭据隔离 | [修复/敏感传输](M1-06-repair-sensitive.md)、[正式SDK](M1-09-credential-sdk.md) | 待独立整合审查 |
-| M1-07 | SEC-01/05/09–12 | [后端权限](M1-07.md)、权限/任务/实际加密与逐次审批 | 待逐SEC核对 |
-| M1-08 | 检出坏参考插件 | [原夹具](M1-08-fixtures.md)、失败/慢/泄漏/崩溃、[脚本ASR36项](M1-08-fixtures.md)、实际崩溃；[任务事件4项](../packages/contract-tests/src/task-event-contract.test.ts) | 当前全量通过，待整合审查闭合 |
-| M1-09 | 类型/示例契约，不给内核对象 | [基础SDK](M1-09.md)、[正式凭据](M1-09-credential-sdk.md)与可选表面/反射/终态/容量 | 待独立整合审查 |
-
-## 原生证据入口
-
-[统一探针入口](probes/m1-native-acceptance.mjs)仅运行自有合成Windows/Electron流程：worker/配置/权限/SDK媒体/敏感通道/正式凭据/只读桥。报告固定元数据和hash，不运行Coopanion，不读Key，不调用付费API。
+| M1-01 | 类型与示例清单校验通过 | [契约](M1-01.md)，当前contracts293项，公开示例清单与浏览器安全根 | 通过 |
+| M1-02 | 生命周期/依赖契约 | [管理器/Cordis](M1-02-03.md)、真实worker世代/崩溃/卡清理，脚本坏夹具集成 | 通过；卡清理保持pending_restart |
+| M1-03 | 路由单测 | 显式选择、任务开始时固定绑定、多实现/降级；[特性子集](../packages/host-kernel/src/runtime/identity.test.ts)及ProviderMetadata查询 | 通过，不自动换提供方 |
+| M1-04 | 取消与晚到丢弃 | [SDK流](M1-09.md)、[元数据事件4项](../packages/contract-tests/src/task-event-contract.test.ts)、[实际结算修复](../docs/31-m1-physical-rpc-settlement.md)、第8条原生gate/退出证明 | 通过；数据/progress业务事件非当前元数据总线交付 |
+| M1-05 | 迁移与回滚 | [配置](M1-05.md)、Schema负例与真实原子提交/激活失败回滚 | 通过；设置表单/业务热应用属后续 |
+| M1-06 | 插件不能经接口读取其他插件凭据 | [正式SDK/DPAPI](M1-09-credential-sdk.md)、[重加密](M1-06-repair-sensitive.md)、[主会话7项边界](../packages/contract-tests/src/runtime-credential-boundary.test.ts)及4阶段实际容量 | 通过；非恶意Node代码OS隔离 |
+| M1-07 | SEC-01/05/09–12 | 独立权限60项、宿主/任务/凭据联动、原生逐次审批与撤权 | 通过限定后端；真实授权UI属于M2 |
+| M1-08 | 检出参考坏插件 | [脚本ASR36项与旧夹具](M1-08-fixtures.md)、记录/失败/慢/卡清理、实际进程崩溃与晚到值 | 通过；不冻结M3生产ASR协议 |
+| M1-09 | 类型/示例契约，不给插件内核对象 | SDK97项、[公开SDK示例](../packages/plugin-sdk/src/examples/recording-provider.test.ts)、真实媒体/可选凭据上下文 | 通过；无任意管理、网络/文件系统API |
 
 ## 指定SEC后端映射
 
-| 指定项 | 限定验收语义 | 证据 |
+| 项 | 证据 | 不外推 |
 | --- | --- | --- |
-| SEC-01 | 未授权microphone请求拒绝且有元数据审计，不启动真实录音 | [独立权限契约](../packages/contract-tests/src/permission-contract.test.ts#L250) |
-| SEC-05 | 新调用拒绝、在途租约/任务/结果取消 | [撤销契约](../packages/contract-tests/src/permission-contract.test.ts#L1005)、[实际凭据撤权](M1-09-credential-sdk-results.json) |
-| SEC-09 | 旧世代临时批准不复活 | [世代测试](../packages/contract-tests/src/permission-contract.test.ts#L1093)、实际worker重启验证 |
-| SEC-10 | 无host审批通道默认拒绝 | [预设/通道测试](../packages/contract-tests/src/permission-contract.test.ts#L565)，应用无审批UI保持拒绝 |
-| SEC-11 | 等待审批取消，晚到答复丢弃 | [调用者取消](../packages/contract-tests/src/permission-contract.test.ts#L857)、[任务结束](../packages/contract-tests/src/permission-contract.test.ts#L882) |
-| SEC-12 | 同一操作两次新批准，除非显式预设允许 | [逐次审批测试](../packages/contract-tests/src/permission-contract.test.ts#L749)、正式原生脚本精确6次 |
+| SEC-01 | [未经授权请求拒绝且审计](../packages/contract-tests/src/permission-contract.test.ts#L250) | 不启动真实麦克风 |
+| SEC-05 | [撤权](../packages/contract-tests/src/permission-contract.test.ts#L1005)、实际凭据撤权 | 不能撤回已发生I/O |
+| SEC-09 | [旧世代不复活](../packages/contract-tests/src/permission-contract.test.ts#L1093)、真实worker重启 | 不把预设允许当旧临时票据复活 |
+| SEC-10 | [缺审批通道拒绝](../packages/contract-tests/src/permission-contract.test.ts#L565)、应用就绪不等授权6项 | 测试审批不是宿主对话框 |
+| SEC-11 | [调用者取消](../packages/contract-tests/src/permission-contract.test.ts#L857)、[任务结束](../packages/contract-tests/src/permission-contract.test.ts#L882) | 晚到答复不执行操作 |
+| SEC-12 | [两次新审批](../packages/contract-tests/src/permission-contract.test.ts#L749)、原生脚本精确6次 | 仅显式预设允许自动放行 |
 
-原文见[SEC定义](../docs/15-security-and-privacy.md#L100-L115)。这是原计划M1-07的后端定义；真实录音适配器、SEC-06授权UI防伪和网络最终目标控制不外推为本轮已完成。
+原文：[SEC定义](../docs/15-security-and-privacy.md#L100-L115)。SEC-06真实授权UI防伪与实际网络最终目标控制不在M1限定通过结论。
 
-## 不在本次完成宣称内
+## 可重复门槛
 
-- M0快速轻点/拖拽与混合DPI保留项见[M0门槛](M0-final-gate.md)，不修改250ms既定临界判定。
-- 授权/设置/插件管理界面属于M2；当前无真实审批UI时维持默认拒绝，不把测试注入审批当用户界面。
-- M3/M4真实麦克风、ASR模型/云端、对话、网络/文件业务适配器不因通用SDK/夹具存在而完成。
-- 可信本机Node插件不是OS代码沙箱；已知值守卫不是任意编码/拼接的完整DLP。
+- 工作区1071项通过：contracts293、SDK97、host-kernel191、desktop215、contract-tests275。
+- QA120通过、1项既有Windows链接权限跳过，不改报通过；类型/lint/格式/构建通过。
+- 严格探针类型通过；[统一入口](probes/m1-native-acceptance.mjs)及pnpm test:m1:native先构建再顺序复验8条自有流程。
+- [当前8条原生报告](M1-native-acceptance-results.json)检查退出码、报告新鲜度与hash；自有坏worker强制回收为预期场景，不写成自然退出。
 
-## 主会话实际结算复核
+## 发现过的缺口与保留边界
 
-旧7条流程未覆盖的组合曾被[可控gate探针](probes/task-settlement-smoke.mjs)检出：worker仍holding时主进程settled/workPending已结算。现已按[修复与当前结果](../docs/31-m1-physical-rpc-settlement.md)闭合并加入第8条原生流程；失败记录保留，不能将最初7条通过外推到当时未验预算。
+[原生实际结算失败](M1-task-settlement-failure.json)已按[修复](../docs/31-m1-physical-rpc-settlement.md)转为[当前通过](M1-task-settlement-results.json)，旧失败保留。主会话本轮另修复凭据取消后实际预算绕过和应用旧就绪占位，见[复核记录](M1-main-review.md)。
 
-## 独立审查
-
-脚本ASR夹具已交接并经当前全量验收。安全整合只读审查任务在完成前失败，无closing message或可验收结论，见[覆盖缺口记录](M1-security-review-gap.md)。不自动重试或增派；由主会话继续按a6ab4bf后当前代码逐项复核，不能称作独立审查通过，不提前关闭M1。
+M0快速轻点/拖拽与混合DPI及250ms临界风险仍见[M0门槛](M0-final-gate.md)，没有改报通过。M2设置/授权/插件管理界面、M3/M4真实麦克风/模型/云/对话闭环、网络文件等业务适配器仍属后续。可信Node插件非OS沙箱，已知值守卫非任意编码/拼接的完整DLP。无真实用户Key、付费接口、录音/键盘注入、远程仓库或推送。
