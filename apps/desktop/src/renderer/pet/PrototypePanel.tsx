@@ -1,8 +1,9 @@
 /**
- * 少量状态模拟按钮 + 退出。按钮都是真实 <button>，键盘可达、有可见焦点。
- * 这些按钮只切换 M0 的模拟状态，不会触发录音、识别或网络请求。
+ * 状态预演与桌面入口。按钮键盘可达、有可见焦点。
+ * 预演只切换 M0 模拟状态；设置打开真实原生窗口。
  */
 import type { PetState } from '@pet/contracts';
+import { useState } from 'react';
 
 import { PET_COPY, PET_STATE_ORDER, stateLabel } from './copy.js';
 
@@ -19,6 +20,24 @@ export function PrototypePanel({
   onQuit,
   quitDisabled,
 }: PrototypePanelProps): React.JSX.Element {
+  const launcher = typeof window === 'undefined' ? undefined : window.petSettings;
+  const [opening, setOpening] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+
+  async function openSettings(): Promise<void> {
+    if (!launcher) return;
+    setOpening(true);
+    setSettingsError(null);
+    try {
+      const result = await launcher.open();
+      if (!result.ok) setSettingsError('设置窗口打开失败。');
+    } catch {
+      setSettingsError('设置窗口打开失败。');
+    } finally {
+      setOpening(false);
+    }
+  }
+
   return (
     <section
       className="prototype-panel"
@@ -59,18 +78,35 @@ export function PrototypePanel({
         </div>
 
         <p className="prototype-panel__hint">{PET_COPY.panelHint}</p>
+        {settingsError && (
+          <p className="prototype-panel__notice" role="alert">
+            {settingsError}
+          </p>
+        )}
       </div>
 
-      <button
-        type="button"
-        className="prototype-panel__quit"
-        data-testid="pet-quit"
-        onClick={onQuit}
-        disabled={quitDisabled}
-        title={PET_COPY.quitHint}
-      >
-        {PET_COPY.quitLabel}
-      </button>
+      <div className="prototype-panel__actions">
+        <button
+          type="button"
+          className="prototype-panel__button"
+          data-testid="pet-settings"
+          onClick={() => void openSettings()}
+          disabled={!launcher || opening}
+          title={launcher ? '打开设置台' : '设置入口不可用'}
+        >
+          {opening ? '打开中…' : '设置'}
+        </button>
+        <button
+          type="button"
+          className="prototype-panel__quit"
+          data-testid="pet-quit"
+          onClick={onQuit}
+          disabled={quitDisabled}
+          title={PET_COPY.quitHint}
+        >
+          {PET_COPY.quitLabel}
+        </button>
+      </div>
     </section>
   );
 }

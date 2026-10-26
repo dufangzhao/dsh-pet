@@ -390,11 +390,15 @@ body:has(dialog.pk-dialog[open]) {
   animation: pk-toast-in 120ms ease-out;
 }
 
-.pk-toast--success {
+.pk-toast--ok {
   border-left-color: var(--pk-ok);
 }
 
-.pk-toast--error {
+.pk-toast--warn {
+  border-left-color: var(--pk-warn);
+}
+
+.pk-toast--danger {
   border-left-color: var(--pk-danger);
 }
 

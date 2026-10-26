@@ -25,6 +25,6 @@ ConsolePlugin字段为owner/name/version/state/origin/protected/permissions/reas
 
 ## 分工
 
-DeepSeek：packages/ui-kit/src/、apps/desktop/src/renderer/console/、renderer/pet/PrototypePanel.tsx及必要小段pet.css。不得改主进程/预加载/契约/包配置/锁。
-主会话：契约、窗口、只读快照、预加载、构建、依赖链接与原生验收。
+DeepSeek：通过 Magpie 普通子代理、max 推理实现 packages/ui-kit/src/ 与 apps/desktop/src/renderer/console/。不得改主进程/预加载/契约/包配置/锁。
+主会话：契约、窗口、只读快照、预加载、构建、依赖链接、桌宠设置按钮、审查、原生验收、QA 与本地提交。当前交付状态与证据见[进展](../qa/M2-status.md)。
 遵循[开发约定](../AGENTS.md)：直接实现，少层次，不重复兜底；每个未完成功能只说明一次。

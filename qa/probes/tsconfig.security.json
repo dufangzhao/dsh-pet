@@ -22,6 +22,7 @@
     "credential-sdk-smoke.ts",
     "task-settlement-smoke.ts",
     "console-host-smoke.ts",
-    "contribution-runtime-smoke.ts"
+    "contribution-runtime-smoke.ts",
+    "console-ui-host.ts"
   ]
 }

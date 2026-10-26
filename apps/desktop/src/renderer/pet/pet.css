@@ -399,6 +399,17 @@ body {
   min-height: 0;
 }
 
+.prototype-panel__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.prototype-panel__button:disabled {
+  color: var(--pet-ink-muted);
+  cursor: not-allowed;
+}
+
 .prototype-panel__header {
   display: flex;
   flex-direction: column;

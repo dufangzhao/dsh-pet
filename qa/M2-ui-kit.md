@@ -8,7 +8,7 @@
 
 ## 验证
 
-- 主会话完整 pnpm check 通过；Dialog 返修后 UI-kit 类型、lint、格式检查再次通过。最终全量回归继续在第二阶段执行。
+- 主会话完整 pnpm check、UI-kit 类型/lint/格式与最终 Electron 复核通过；全量检查汇总见[阶段二验收](M2-console-ui.md)。
 - [真实 Electron 结果](M2-ui-kit-results.json)：Electron 45.0.0 / Node 24.22.0，Playwright 1.64.1，6 组交互检查通过，无页面错误。
 - Field 的 label、描述与错误关联正确；Dialog 初始焦点、7 次 Tab 与 7 次 Shift+Tab、Escape、取消/关闭后焦点恢复通过。发现并修复了原生 dialog 首尾环绕时焦点短暂落到 BODY 的问题。
 - Toast 不抢焦点，手动关闭与 5 秒自动消失通过。浅、深、系统主题各测 26 个文字样本，最低对比度分别为 5.88、5.07、5.07，超过 4.5:1。系统配色改变可即时跟随。

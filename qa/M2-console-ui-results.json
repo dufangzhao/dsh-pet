@@ -1,0 +1,338 @@
+{
+  "status": "passed",
+  "at": "2026-10-26T12:31:47.789Z",
+  "sandboxOverride": true,
+  "checks": [
+    "production-pet-button-opens-built-console",
+    "real-readonly-host-snapshot",
+    "production-preload-and-source-checks",
+    "seven-pages-with-current-navigation-and-screenshots",
+    "sidebar-keyboard-order-visible-focus-and-skip-link",
+    "light-dark-system-live-change-and-persistence",
+    "computed-console-text-contrast",
+    "about-progressive-disclosure-and-real-component-demo",
+    "native-window-reuse-close-reopen-and-minimum-layout",
+    "built-console-missing-bridge-state-and-disabled-host-actions",
+    "real-host-two-active-plugins-and-ten-owned-contributions",
+    "initial-loading-state",
+    "injected-error-and-empty-states-recover-through-refresh",
+    "stop-result-updates-status-without-followup-snapshot",
+    "escape-does-not-stop",
+    "stop-command-busy-state",
+    "real-task-cancelled-with-pending-work-and-host-still-ready",
+    "stop-failure-keeps-task-live-and-can-be-retried",
+    "real-disable-removes-only-owned-contribution-metadata"
+  ],
+  "errors": [],
+  "screenshots": [
+    "qa/screenshots/m2/console-start.png",
+    "qa/screenshots/m2/console-pet.png",
+    "qa/screenshots/m2/console-voice.png",
+    "qa/screenshots/m2/console-models.png",
+    "qa/screenshots/m2/console-plugins.png",
+    "qa/screenshots/m2/console-permissions.png",
+    "qa/screenshots/m2/console-about.png",
+    "qa/screenshots/m2/console-start-dark.png",
+    "qa/screenshots/m2/console-demo-dialog.png",
+    "qa/screenshots/m2/console-minimum-size.png",
+    "qa/screenshots/m2/console-real-plugins.png",
+    "qa/screenshots/m2/console-stopping.png"
+  ],
+  "themes": [
+    {
+      "theme": "light",
+      "measured": 21,
+      "minimum": 6.016692116437308
+    },
+    {
+      "theme": "dark",
+      "measured": 21,
+      "minimum": 5.069804721495689
+    },
+    {
+      "theme": "system",
+      "measured": 21,
+      "minimum": 5.069804721495689
+    }
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "platform": "win32"
+  },
+  "productionSnapshot": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "host": {
+        "version": 1,
+        "runtime": "ready",
+        "installedPlugins": 0,
+        "activePlugins": 0,
+        "unreadyPlugins": 0,
+        "pendingRestartPlugins": 0,
+        "runningTasks": 0,
+        "pendingWork": 0
+      },
+      "app": {
+        "name": "AI 桌宠",
+        "version": "0.0.0",
+        "electron": "45.0.0",
+        "node": "24.22.0",
+        "platform": "win32-x64"
+      },
+      "contributions": [],
+      "plugins": []
+    }
+  },
+  "fixtureSnapshot": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "host": {
+        "version": 1,
+        "runtime": "ready",
+        "installedPlugins": 2,
+        "activePlugins": 2,
+        "unreadyPlugins": 0,
+        "pendingRestartPlugins": 0,
+        "runningTasks": 0,
+        "pendingWork": 0
+      },
+      "app": {
+        "name": "AI 桌宠",
+        "version": "0.0.0",
+        "electron": "45.0.0",
+        "node": "24.22.0",
+        "platform": "win32-x64"
+      },
+      "contributions": [
+        {
+          "owner": {
+            "pluginId": "test.console-ui-one",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "run",
+          "kind": "command",
+          "title": "示例命令"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-one",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "quick",
+          "kind": "shortcut-button",
+          "title": "示例按钮"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-one",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "key",
+          "kind": "hotkey",
+          "title": "示例快捷键"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-one",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "settings",
+          "kind": "settings",
+          "title": "示例设置"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-one",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "panel",
+          "kind": "panel",
+          "title": "示例面板"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-two",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "run",
+          "kind": "command",
+          "title": "示例命令"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-two",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "quick",
+          "kind": "shortcut-button",
+          "title": "示例按钮"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-two",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "key",
+          "kind": "hotkey",
+          "title": "示例快捷键"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-two",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "settings",
+          "kind": "settings",
+          "title": "示例设置"
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-two",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "id": "panel",
+          "kind": "panel",
+          "title": "示例面板"
+        }
+      ],
+      "plugins": [
+        {
+          "owner": {
+            "pluginId": "test.console-ui-one",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "name": "原生示例一",
+          "version": "1.0.0",
+          "state": "active",
+          "origin": "user",
+          "protected": false,
+          "permissions": []
+        },
+        {
+          "owner": {
+            "pluginId": "test.console-ui-two",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "name": "原生示例二",
+          "version": "1.0.0",
+          "state": "active",
+          "origin": "user",
+          "protected": false,
+          "permissions": []
+        }
+      ]
+    }
+  },
+  "stopAccepted": {
+    "stopCalls": 1,
+    "held": {
+      "taskId": "115727e4-d856-4d19-8aff-eb9c965cfba6",
+      "owner": {
+        "pluginId": "test.console-ui-one",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "state": "cancelled",
+      "workPending": true,
+      "cleanupFailed": false
+    },
+    "host": {
+      "version": 1,
+      "runtime": "ready",
+      "installedPlugins": 2,
+      "activePlugins": 2,
+      "unreadyPlugins": 0,
+      "pendingRestartPlugins": 0,
+      "runningTasks": 0,
+      "pendingWork": 1
+    }
+  },
+  "afterSettlement": {
+    "stopCalls": 1,
+    "held": {
+      "taskId": "115727e4-d856-4d19-8aff-eb9c965cfba6",
+      "owner": {
+        "pluginId": "test.console-ui-one",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "state": "cancelled",
+      "workPending": false,
+      "cleanupFailed": false
+    },
+    "host": {
+      "version": 1,
+      "runtime": "ready",
+      "installedPlugins": 2,
+      "activePlugins": 2,
+      "unreadyPlugins": 0,
+      "pendingRestartPlugins": 0,
+      "runningTasks": 0,
+      "pendingWork": 0
+    }
+  },
+  "failedStop": {
+    "stopCalls": 2,
+    "held": {
+      "taskId": "dd059c4c-faea-4caa-9ab5-e8ac18b5747a",
+      "owner": {
+        "pluginId": "test.console-ui-one",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "state": "running",
+      "workPending": true,
+      "cleanupFailed": false
+    },
+    "host": {
+      "version": 1,
+      "runtime": "ready",
+      "installedPlugins": 2,
+      "activePlugins": 2,
+      "unreadyPlugins": 0,
+      "pendingRestartPlugins": 0,
+      "runningTasks": 1,
+      "pendingWork": 1
+    }
+  },
+  "contributionCleanup": {
+    "remaining": 5,
+    "host": {
+      "version": 1,
+      "runtime": "ready",
+      "installedPlugins": 2,
+      "activePlugins": 1,
+      "unreadyPlugins": 0,
+      "pendingRestartPlugins": 0,
+      "runningTasks": 0,
+      "pendingWork": 0
+    }
+  },
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  },
+  "artifacts": {
+    "apps/desktop/dist/main/index.mjs": "c68b6fa233d9340caf668721e635b5fed0bd8f3cd265e1331bbb6d2f47a486a1",
+    "apps/desktop/dist/preload/index.cjs": "b6012c57ff48155299e4b40fbce3b805febb43b95db187bf615011383b133169",
+    "apps/desktop/dist/renderer/console/index.html": "bef6b9cd9bbf202812889107ec71f06bd37c00ba19a76e9ee40aa5fc3c24de8c",
+    "pnpm-lock.yaml": "bb8cd9c475595a4de95679c814388d90e700aa4bda117c20891f42beb25a2258",
+    "apps/desktop/dist/renderer/console/assets/index-BVkSMu73.js": "09e13103bd180d824f39d00e10dc6e191cb5809a991e3a59e2dc20c2cbed6aae",
+    "apps/desktop/dist/renderer/console/assets/index-CSLCwY5b.css": "4379ded4b402da687454633e1fe8ce6a9b1497e88a0ae49933de2cd3e702f566"
+  }
+}

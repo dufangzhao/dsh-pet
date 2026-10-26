@@ -499,7 +499,7 @@ describe('气泡与原型面板', () => {
     expect(html).toContain(PET_COPY.stateBubbles.thinking);
   });
 
-  it('面板提供五个状态按钮与退出按钮', () => {
+  it('面板提供五个状态按钮、设置与退出入口', () => {
     const html = markup(
       <PrototypePanel state="idle" onPreview={() => {}} onQuit={() => {}} quitDisabled={false} />,
     );
@@ -509,8 +509,9 @@ describe('气泡与原型面板', () => {
     }
     expect(html).toContain('data-testid="pet-quit"');
     expect(html).toContain('aria-pressed="true"');
+    expect(html).toMatch(/data-testid="pet-settings"[^>]*disabled/);
     // 按钮是真实 button，键盘可达。
-    expect(html.match(/<button/g)?.length).toBe(PET_STATE_ORDER.length + 1);
+    expect(html.match(/<button/g)?.length).toBe(PET_STATE_ORDER.length + 2);
   });
 
   it('退出按钮在桥不可用时禁用，避免空操作', () => {

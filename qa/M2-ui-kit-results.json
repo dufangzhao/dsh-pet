@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-26T11:58:09.688Z",
+  "at": "2026-10-26T12:28:17.612Z",
   "checks": [
     "field-label-description-error-associations",
     "dialog-initial-focus-tab-trap-escape-cancel-close-restore-in-strict-mode",

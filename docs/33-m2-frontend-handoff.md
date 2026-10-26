@@ -1,5 +1,7 @@
 # M2 前端新会话交接
 
+> 本文保留交接时的历史状态；本轮实施与验收以[M2 进展](../qa/M2-status.md)为准。
+
 ## 当前进度
 
 这是独立的MIT、Windows优先Electron桌宠项目，不依赖DSH运行。工作区为 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠。

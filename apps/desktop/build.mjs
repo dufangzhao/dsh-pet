@@ -36,10 +36,12 @@ await bundle({
   target: 'node24',
   sourcemap: true,
 });
-await buildRenderer({
-  configFile: false,
-  root: path.join(root, 'src/renderer/pet'),
-  base: './',
-  plugins: [tailwindcss()],
-  build: { outDir: path.join(root, 'dist/renderer/pet'), emptyOutDir: true },
-});
+for (const renderer of ['pet', 'console']) {
+  await buildRenderer({
+    configFile: false,
+    root: path.join(root, `src/renderer/${renderer}`),
+    base: './',
+    plugins: renderer === 'pet' ? [tailwindcss()] : [],
+    build: { outDir: path.join(root, `dist/renderer/${renderer}`), emptyOutDir: true },
+  });
+}
