@@ -9,8 +9,8 @@ if not exist "apps\desktop\dist\main\index.mjs" goto missing-build
 if not exist "apps\desktop\dist\renderer\console\index.html" goto missing-build
 
 set "ELECTRON_RUN_AS_NODE="
-echo Starting AI Pet. Click Settings in the pet panel.
-"node_modules\electron\dist\electron.exe" %* "apps\desktop"
+echo Opening AI Pet settings. The pet also stays in the desktop corner.
+"node_modules\electron\dist\electron.exe" %* "apps\desktop" --show-settings
 set "PET_LAUNCH_EXIT=%errorlevel%"
 if "%PET_LAUNCH_EXIT%"=="0" exit /b 0
 rem Both values have occurred during sandbox startup in the dev runner.
@@ -20,9 +20,8 @@ goto failed
 
 :compatibility
 echo.
-echo Standard launch failed. Exit code: %PET_LAUNCH_EXIT%.
-echo Retrying local preview with sandbox disabled for this run.
-"node_modules\electron\dist\electron.exe" --no-sandbox %* "apps\desktop"
+echo Using local compatibility preview; sandbox is disabled for this run.
+"node_modules\electron\dist\electron.exe" --no-sandbox %* "apps\desktop" --show-settings
 set "PET_LAUNCH_EXIT=%errorlevel%"
 if "%PET_LAUNCH_EXIT%"=="0" exit /b 0
 goto failed

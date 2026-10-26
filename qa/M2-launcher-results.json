@@ -1,0 +1,214 @@
+{
+  "status": "passed",
+  "at": "2026-10-26T19:53:00.779Z",
+  "artifacts": {
+    "apps/desktop/src/main/index.ts": "cac9ce47e354fd527624246646138e2dcbac9e2aa2040353c975a09a3bbd58e9",
+    "启动桌宠.cmd": "645b6d9e47277a8b2f3797e0c8b2d56cfdccf09dac4f91aacc5cf58fd1292266",
+    "apps/desktop/dist/main/index.mjs": "931da9bcf7cba339010fcb1d88ef96f137d11fbf0467b20958c0a13d6a04a327"
+  },
+  "launcher": {
+    "at": "2026-10-26T19:43:23.042Z",
+    "checks": [
+      "launcher-opens-native-visible-settings-without-pet-click-or-keyboard-input",
+      "second-launch-restores-same-native-window-and-exits-without-a-second-host",
+      "relaunch-reopens-closed-settings-in-existing-host",
+      "pet-exit-closes-host-and-launcher-cleanly"
+    ],
+    "initialWindow": {
+      "hwnd": "1969732",
+      "title": "AI 桌宠 · 设置",
+      "visible": true,
+      "minimized": false,
+      "foreground": false,
+      "bounds": {
+        "left": 440,
+        "top": 146,
+        "right": 1480,
+        "bottom": 886
+      }
+    },
+    "reusedWindow": {
+      "hwnd": "1969732",
+      "title": "AI 桌宠 · 设置",
+      "visible": true,
+      "minimized": false,
+      "foreground": false,
+      "bounds": {
+        "left": 440,
+        "top": 146,
+        "right": 1480,
+        "bottom": 886
+      }
+    },
+    "sandboxOverride": true
+  },
+  "mouse": {
+    "at": "2026-10-26T19:36:24.577Z",
+    "checks": [
+      "transparent-corner-delivers-native-click-to-separate-owned-underlay",
+      "native-avatar-drag-moves-window-and-releases",
+      "native-settings-button-opens-visible-settings-without-clicking-underlay"
+    ],
+    "input": "Win32 SetCursorPos and SendInput, owned windows only",
+    "sandboxOverride": true,
+    "pet": {
+      "pid": 31240,
+      "hwnd": 1771578,
+      "bounds": {
+        "x": 1516,
+        "y": 588,
+        "width": 380,
+        "height": 420
+      },
+      "scaleFactor": 1
+    },
+    "targetPid": 5308,
+    "drag": {
+      "before": {
+        "left": 1516,
+        "top": 588,
+        "right": 1896,
+        "bottom": 1008
+      },
+      "after": {
+        "left": 1466,
+        "top": 558,
+        "right": 1846,
+        "bottom": 978
+      }
+    },
+    "settings": {
+      "hwnd": 12258520,
+      "visible": true,
+      "focused": true
+    },
+    "pointerRestored": true,
+    "events": [
+      {
+        "type": "pointermove",
+        "x": 5,
+        "y": 5,
+        "trusted": true
+      },
+      {
+        "type": "mousemove",
+        "x": 5,
+        "y": 5,
+        "trusted": true
+      },
+      {
+        "type": "pointermove",
+        "x": 190,
+        "y": 80,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "mousemove",
+        "x": 190,
+        "y": 80,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "pointerdown",
+        "x": 190,
+        "y": 80,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "pointermove",
+        "x": 140,
+        "y": 50,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "pointermove",
+        "x": 190,
+        "y": 80,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "pointerup",
+        "x": 190,
+        "y": 80,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "click",
+        "x": 190,
+        "y": 80,
+        "trusted": true,
+        "target": "pet-avatar"
+      },
+      {
+        "type": "pointermove",
+        "x": 5,
+        "y": 5,
+        "trusted": true
+      },
+      {
+        "type": "mousemove",
+        "x": 5,
+        "y": 5,
+        "trusted": true
+      },
+      {
+        "type": "pointermove",
+        "x": 43,
+        "y": 361,
+        "trusted": true,
+        "target": "pet-settings"
+      },
+      {
+        "type": "mousemove",
+        "x": 43,
+        "y": 361,
+        "trusted": true,
+        "target": "pet-settings"
+      },
+      {
+        "type": "pointerdown",
+        "x": 43,
+        "y": 361,
+        "trusted": true,
+        "target": "pet-settings"
+      },
+      {
+        "type": "pointerup",
+        "x": 43,
+        "y": 361,
+        "trusted": true,
+        "target": "pet-settings"
+      },
+      {
+        "type": "click",
+        "x": 43,
+        "y": 361,
+        "trusted": true,
+        "target": "pet-settings"
+      }
+    ],
+    "coverage": "One current display at scaleFactor 1; no claim for the full M0 mouse/DPI gate."
+  },
+  "handoff": [
+    {
+      "hwnd": "7209578",
+      "title": "AI 桌宠 · 设置",
+      "visible": true,
+      "minimized": false,
+      "foreground": true,
+      "bounds": {
+        "left": 440,
+        "top": 146,
+        "right": 1480,
+        "bottom": 886
+      },
+      "unobscuredAtCenter": true
+    }
+  ]
+}

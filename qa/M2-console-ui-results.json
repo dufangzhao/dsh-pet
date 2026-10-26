@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-26T14:21:28.873Z",
+  "at": "2026-10-26T19:43:25.236Z",
   "sandboxOverride": true,
   "checks": [
     "idle-console-has-no-global-actions",
@@ -253,7 +253,7 @@
   "stopAccepted": {
     "stopCalls": 1,
     "held": {
-      "taskId": "8c407224-dea3-4794-b890-da8abf847e2a",
+      "taskId": "8a8174d6-e6ed-40f0-ae6d-83cb866aae12",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -277,7 +277,7 @@
   "afterSettlement": {
     "stopCalls": 1,
     "held": {
-      "taskId": "8c407224-dea3-4794-b890-da8abf847e2a",
+      "taskId": "8a8174d6-e6ed-40f0-ae6d-83cb866aae12",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -301,7 +301,7 @@
   "failedStop": {
     "stopCalls": 2,
     "held": {
-      "taskId": "8a93427e-4ae9-478c-bacc-01737a82430c",
+      "taskId": "254469c9-06fd-4edc-ad78-fac5d416e98b",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -340,7 +340,7 @@
     "forced": false
   },
   "artifacts": {
-    "apps/desktop/dist/main/index.mjs": "c68b6fa233d9340caf668721e635b5fed0bd8f3cd265e1331bbb6d2f47a486a1",
+    "apps/desktop/dist/main/index.mjs": "931da9bcf7cba339010fcb1d88ef96f137d11fbf0467b20958c0a13d6a04a327",
     "apps/desktop/dist/preload/index.cjs": "b6012c57ff48155299e4b40fbce3b805febb43b95db187bf615011383b133169",
     "apps/desktop/dist/renderer/console/index.html": "65e3d532cf8f8c9205620c8425edab81cb559d5b5e873a7c3aabc2ff8db1d258",
     "pnpm-lock.yaml": "bb8cd9c475595a4de95679c814388d90e700aa4bda117c20891f42beb25a2258",

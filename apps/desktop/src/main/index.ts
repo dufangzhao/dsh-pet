@@ -85,7 +85,8 @@ if (!app.isPackaged) {
   mkdirSync(profile, { recursive: true });
   app.setPath('userData', profile);
 }
-app
+if (!app.requestSingleInstanceLock()) app.exit(0);
+const startup = app
   .whenReady()
   .then(async () => {
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, respond) =>
@@ -220,6 +221,18 @@ app
     console.error('M0 desktop startup failed');
     quitWithCode(1);
   });
+function showSettingsForLaunch(): void {
+  void startup
+    .then(async () => {
+      if (!quitting) await settings.open();
+    })
+    .catch(() => {
+      console.error('Settings window failed to open');
+      quitWithCode(1);
+    });
+}
+app.on('second-instance', showSettingsForLaunch);
+if (process.argv.includes('--show-settings')) showSettingsForLaunch();
 app.on('window-all-closed', () => app.quit());
 app.on('before-quit', (event) => {
   event.preventDefault();

@@ -35,6 +35,14 @@ Escape 不发送停止命令；请求期间键盘再次激活只产生一次调�
 
 2026-10-26 23:07（Asia/Taipei）重新打开当前 Electron 构建核对截图：工具栏数量0，三态 radio 数量3，唯一数据操作“刷新”位于页面内容区。用于聊天交付的[新截图](screenshots/m2/console-current-24cbb0e-20261026T150658772Z.png)和[版本对照](screenshots/m2/console-comparison-9991af0-to-24cbb0e-20261026-2307.png)使用独立文件名，避免重复路径的旧预览；应用代码未变，视觉来源为24cbb0e。
 
+## 启动与桌面鼠标回归
+
+2026-10-27核对用户的两个旧实例：窗口均可见，且完全重叠在(1516,588)-(1896,1008)。已正常关闭旧窗口，并接入单实例与启动器 --show-settings：双击直接显示设置台，重复启动恢复同一窗口，关闭设置后再次启动可重新打开。角色本体仍是拖拽区，单击没有菜单动作。
+
+[启动器检查](probes/launcher-e2e.mjs)的4组真实窗口检查通过：Windows回读的设置窗口可见、未最小化、位于当前屏幕内；再次启动保持同一HWND并从最小化恢复；关闭后重新打开仍属于同一宿主；退出码0。运行 node qa/probes/launcher-e2e.mjs。
+
+[鼠标检查](probes/pet-pointer-e2e.mjs)显式附加 --os-input 才会移动鼠标：使用Windows SendInput，仅向本项目窗口及[独立进程底板](fixtures/pet-pointer-underlay.cjs)投递鼠标，不注入键盘；确认透明角点击由底板接收、角色拖拽(-50,-30)后释放、设置按钮原生点击打开可见窗口且不误点底板，完成后恢复原鼠标位置。覆盖本机当前1块屏幕、1倍缩放；不扩展为全部M0鼠标/DPI门槛通过。机器摘要见[启动与鼠标结果](M2-launcher-results.json)。
+
 ## 复跑与限制
 
 先 pnpm install --ignore-scripts、pnpm check；随后运行上述严格类型检查与 node qa/probes/console-e2e.mjs。当前工具环境必须显式附加 --no-sandbox 才能启动 Electron，报告记录 sandboxOverride:true；标准沙箱启动失败的实际证据和验证范围见[环境说明](M2-ui-kit.md#当前执行环境)。这些结果证明真实界面与接口交互，不代替沙箱隔离安全验收。
