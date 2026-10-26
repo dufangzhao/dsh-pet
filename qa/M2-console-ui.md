@@ -33,6 +33,8 @@ Escape 不发送停止命令；请求期间键盘再次激活只产生一次调�
 
 已保存12张设置台截图，主要视图：[浅色开始](screenshots/m2/console-start.png)、[深色开始](screenshots/m2/console-start-dark.png)、[真实插件](screenshots/m2/console-real-plugins.png)、[最小窗口](screenshots/m2/console-minimum-size.png)、[任务收尾](screenshots/m2/console-stopping.png)。本轮主会话人工查看浅色、深色开始页与最小窗口；七页、任务收尾与示例对话框均已由实际交互脚本留图。
 
+2026-10-26 23:07（Asia/Taipei）重新打开当前 Electron 构建核对截图：工具栏数量0，三态 radio 数量3，唯一数据操作“刷新”位于页面内容区。用于聊天交付的[新截图](screenshots/m2/console-current-24cbb0e-20261026T150658772Z.png)和[版本对照](screenshots/m2/console-comparison-9991af0-to-24cbb0e-20261026-2307.png)使用独立文件名，避免重复路径的旧预览；应用代码未变，视觉来源为24cbb0e。
+
 ## 复跑与限制
 
 先 pnpm install --ignore-scripts、pnpm check；随后运行上述严格类型检查与 node qa/probes/console-e2e.mjs。当前工具环境必须显式附加 --no-sandbox 才能启动 Electron，报告记录 sandboxOverride:true；标准沙箱启动失败的实际证据和验证范围见[环境说明](M2-ui-kit.md#当前执行环境)。这些结果证明真实界面与接口交互，不代替沙箱隔离安全验收。
