@@ -21,8 +21,7 @@ goto failed
 :compatibility
 echo.
 echo Standard launch failed. Exit code: %PET_LAUNCH_EXIT%.
-choice /c YN /n /m "Retry local preview with sandbox disabled for this run? [Y/N] "
-if not "%errorlevel%"=="1" exit /b %PET_LAUNCH_EXIT%
+echo Retrying local preview with sandbox disabled for this run.
 "node_modules\electron\dist\electron.exe" --no-sandbox %* "apps\desktop"
 set "PET_LAUNCH_EXIT=%errorlevel%"
 if "%PET_LAUNCH_EXIT%"=="0" exit /b 0
