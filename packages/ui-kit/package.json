@@ -2,7 +2,7 @@
   "name": "@pet/ui-kit",
   "version": "0.0.0",
   "private": true,
-  "description": "设置台与插件界面共用组件、主题令牌（M2-01 填充；本轮仅预留 DOM/JSX）",
+  "description": "设置台与插件界面共用组件、主题令牌",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
@@ -11,7 +11,9 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./theme.css": "./src/theme.css",
+    "./components.css": "./src/components.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "at": "2026-10-26T11:58:09.688Z",
+  "checks": [
+    "field-label-description-error-associations",
+    "dialog-initial-focus-tab-trap-escape-cancel-close-restore-in-strict-mode",
+    "toast-status-no-focus-steal-manual-and-timed-dismissal",
+    "light-dark-system-theme-and-live-system-change",
+    "computed-text-contrast-at-least-4.5",
+    "visible-keyboard-focus"
+  ],
+  "contrast": [
+    {
+      "theme": "light",
+      "minimum": 5.878782367620348,
+      "measured": 26
+    },
+    {
+      "theme": "dark",
+      "minimum": 5.069804721495689,
+      "measured": 26
+    },
+    {
+      "theme": "system",
+      "minimum": 5.069804721495689,
+      "measured": 26
+    }
+  ],
+  "screenshots": [
+    "qa/screenshots/m2/ui-kit-light.png",
+    "qa/screenshots/m2/ui-kit-dark.png"
+  ],
+  "errors": [],
+  "sandboxOverride": true,
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "artifacts": {
+    "packages/ui-kit/src/index.ts": "c8bcc71c06434ee19b736d9a9c4cff32c19433771de5e2d0eac7c8b4a88d5176",
+    "packages/ui-kit/src/dialog.tsx": "0d7576abbf01e4d870f887eeb2f3fc753ff46cbab93531224ec94d7fe75b75a5",
+    "packages/ui-kit/src/theme.css": "fe4a4d3df2985173d035cdb2a8739c468f446113d7c56d0da3656633a4901793",
+    "pnpm-lock.yaml": "bb8cd9c475595a4de95679c814388d90e700aa4bda117c20891f42beb25a2258"
+  }
+}

@@ -1,0 +1,71 @@
+/*
+ * @pet/ui-kit 主题：精简桌面工具。
+ *
+ * 取值规则：正文与底色 >= 4.5:1，控件边界与焦点环对相邻表面 >= 3:1。
+ * 正文对比度由 qa/probes/ui-kit-e2e.mjs 在真实浏览器中复核。
+ *
+ * 深浅两套值写在 light-dark() 里，切换主题只改 color-scheme（见文件末尾），
+ * 所以每个令牌只有一处定义，跟随系统不需要第二份重复声明。
+ */
+:root {
+  color-scheme: light;
+
+  --pk-font: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --pk-font-mono: 'Cascadia Mono', Consolas, 'Courier New', monospace;
+
+  --pk-bg: light-dark(#ffffff, #15171c);
+  --pk-surface: light-dark(#f7f8fa, #1b1e24);
+  --pk-sunken: light-dark(#f1f3f6, #101216);
+  --pk-text: light-dark(#1b1f26, #e6e9ee);
+  --pk-muted: light-dark(#55606e, #a8b1bd);
+  --pk-border: light-dark(#e2e5ea, #2b2f37);
+  --pk-border-strong: light-dark(#8a929e, #737d8a);
+
+  /* 唯一强调色。--pk-accent-on 同时满足于两种模式的实心填充。 */
+  --pk-accent: light-dark(#2b52bb, #3f68d4);
+  --pk-accent-hover: light-dark(#24439b, #4a70d8);
+  --pk-accent-on: #ffffff;
+  --pk-accent-text: light-dark(#2b52bb, #9db8ff);
+  --pk-accent-soft: light-dark(#eef3ff, #1c2740);
+
+  /* 状态色只做辅助：徽标和提示都带明确文案，颜色不是唯一信息。 */
+  --pk-ok: light-dark(#166534, #8fe0a3);
+  --pk-ok-soft: light-dark(#eaf7ee, #14291c);
+  --pk-warn: light-dark(#7a4a05, #f0c86a);
+  --pk-warn-soft: light-dark(#fdf3e0, #2a2110);
+  --pk-danger: light-dark(#b3261e, #ff9b90);
+  --pk-danger-soft: light-dark(#fdf0ef, #2a1614);
+
+  --pk-ring: light-dark(#0b57d0, #7ea2ff);
+  --pk-shadow-1: 0 1px 2px light-dark(rgba(16, 24, 40, 0.08), rgba(0, 0, 0, 0.5));
+  --pk-shadow-2: 0 16px 40px light-dark(rgba(16, 24, 40, 0.18), rgba(0, 0, 0, 0.6));
+
+  --pk-radius: 6px;
+  --pk-radius-lg: 10px;
+  --pk-transition: 120ms ease;
+
+  font-family: var(--pk-font);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--pk-text);
+  background-color: var(--pk-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 主题偏好由页面写在 <html data-theme="light|dark|system">；缺省按浅色处理。 */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='system'] {
+    color-scheme: dark;
+  }
+}
+
+/* 减少动态：只保留状态变化本身，不做过渡和位移。 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pk-transition: 0ms;
+  }
+}

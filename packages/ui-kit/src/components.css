@@ -1,0 +1,441 @@
+/* 组件样式：只用 theme.css 的语义令牌，不写死颜色。 */
+
+.pk-button,
+.pk-field,
+.pk-list,
+.pk-section,
+.pk-badge,
+.pk-empty,
+.pk-dialog,
+.pk-toast-region,
+.pk-demo {
+  box-sizing: border-box;
+}
+
+/* ---- Button ---- */
+
+.pk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--pk-transition),
+    border-color var(--pk-transition),
+    color var(--pk-transition);
+}
+
+.pk-button:hover {
+  background: var(--pk-surface);
+}
+
+.pk-button:active {
+  background: var(--pk-sunken);
+}
+
+/* 焦点环画在元素外侧，落在页面底色上，因此对任何按钮样式都保持 3:1 以上。 */
+.pk-button:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.pk-button:disabled {
+  background: var(--pk-surface);
+  border-color: var(--pk-border);
+  color: var(--pk-muted);
+  cursor: not-allowed;
+}
+
+.pk-button--primary {
+  background: var(--pk-accent);
+  border-color: var(--pk-accent);
+  color: var(--pk-accent-on);
+}
+
+.pk-button--primary:hover {
+  background: var(--pk-accent-hover);
+  border-color: var(--pk-accent-hover);
+}
+
+.pk-button--primary:active {
+  background: var(--pk-accent-hover);
+}
+
+.pk-button--primary:disabled {
+  background: var(--pk-border);
+  border-color: var(--pk-border);
+  color: var(--pk-muted);
+}
+
+.pk-button--quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--pk-accent-text);
+}
+
+.pk-button--quiet:hover {
+  background: var(--pk-accent-soft);
+}
+
+.pk-button--quiet:active {
+  background: var(--pk-accent-soft);
+}
+
+.pk-button--quiet:disabled {
+  background: transparent;
+  color: var(--pk-muted);
+}
+
+.pk-button--small {
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.pk-button--block {
+  width: 100%;
+}
+
+/* ---- Field ---- */
+
+.pk-field {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.pk-field__label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pk-field__description,
+.pk-field__error {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.pk-field__description {
+  color: var(--pk-muted);
+}
+
+.pk-field__error {
+  color: var(--pk-danger);
+}
+
+/* 由使用方渲染在 Field 内部的输入控件；Schema 表单后续直接复用这个类。 */
+.pk-input {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.pk-input:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 1px;
+}
+
+.pk-input[aria-invalid='true'] {
+  border-color: var(--pk-danger);
+}
+
+/* ---- List ---- */
+
+.pk-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--pk-border);
+}
+
+.pk-list__item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.pk-list__text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pk-list__title {
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.pk-list__description {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+/* 等宽数字，纵向扫读时编号不会跳动。 */
+.pk-list__meta {
+  font-size: 13px;
+  color: var(--pk-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-list__trailing {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---- Section ---- */
+
+.pk-section {
+  display: grid;
+  gap: 8px;
+}
+
+.pk-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pk-section__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pk-section__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pk-section__description {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+.pk-section__body {
+  display: grid;
+  gap: 12px;
+}
+
+/* ---- StatusBadge ---- */
+
+.pk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--pk-border);
+  border-radius: 999px;
+  background: var(--pk-surface);
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 圆点只帮助扫读分组，含义仍由文字承担。 */
+.pk-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.pk-badge--ok {
+  border-color: transparent;
+  background: var(--pk-ok-soft);
+  color: var(--pk-ok);
+}
+
+.pk-badge--warn {
+  border-color: transparent;
+  background: var(--pk-warn-soft);
+  color: var(--pk-warn);
+}
+
+.pk-badge--danger {
+  border-color: transparent;
+  background: var(--pk-danger-soft);
+  color: var(--pk-danger);
+}
+
+/* ---- EmptyState ---- */
+
+.pk-empty {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 12px 0 16px;
+}
+
+.pk-empty__title {
+  margin: 0;
+  font-size: 14px;
+  color: var(--pk-text);
+}
+
+.pk-empty__description {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+.pk-empty__action {
+  margin-top: 6px;
+}
+
+/* ---- Dialog ---- */
+
+.pk-dialog {
+  width: min(440px, calc(100vw - 48px));
+  padding: 0;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  box-shadow: var(--pk-shadow-2);
+}
+
+/* 遮罩不受主题影响：它只负责压暗背后的界面。 */
+.pk-dialog::backdrop {
+  background: rgba(12, 16, 24, 0.45);
+}
+
+.pk-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 12px 8px 16px;
+}
+
+.pk-dialog__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pk-dialog__content {
+  padding: 0 16px 4px;
+  font-size: 14px;
+}
+
+.pk-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px;
+}
+
+/* 模态打开时页面不再滚动，避免背后的内容跟着动。 */
+body:has(dialog.pk-dialog[open]) {
+  overflow: hidden;
+}
+
+/* ---- Toast ---- */
+
+.pk-toast-region {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 20;
+  width: min(320px, calc(100vw - 32px));
+}
+
+.pk-toast-region__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pk-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--pk-border);
+  border-left: 3px solid var(--pk-accent);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  box-shadow: var(--pk-shadow-2);
+  animation: pk-toast-in 120ms ease-out;
+}
+
+.pk-toast--success {
+  border-left-color: var(--pk-ok);
+}
+
+.pk-toast--error {
+  border-left-color: var(--pk-danger);
+}
+
+.pk-toast__text {
+  flex: 1;
+  margin: 0;
+  padding-top: 3px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+@keyframes pk-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-toast {
+    animation: none;
+  }
+}
+
+/* ---- 组件示例 ---- */
+
+.pk-demo {
+  display: grid;
+  gap: 28px;
+  max-width: 720px;
+}
+
+.pk-demo__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pk-demo__text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--pk-muted);
+}
