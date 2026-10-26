@@ -6,6 +6,7 @@ import { List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
 
 import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
+import { COPY } from '../copy.js';
 import { contributionKind, ownerKey, pluginOrigin, pluginState } from '../labels.js';
 
 export interface PluginsPageProps {
@@ -16,7 +17,7 @@ export interface PluginsPageProps {
   onRetry: () => void;
 }
 
-/** 插件页：真实插件列表与贡献目录，全部只读。 */
+/** 插件页：真实插件列表与贡献目录，全部只读。刷新贴着数据出现。 */
 export function PluginsPage({
   snapshot,
   loading,
@@ -25,21 +26,42 @@ export function PluginsPage({
   onRetry,
 }: PluginsPageProps): JSX.Element {
   return (
-    <ConsolePane title="插件" summary="宿主已加载的插件，以及它们向界面注册的条目。">
+    <ConsolePane title="插件">
       <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
-        {snapshot === null ? null : <PluginContent snapshot={snapshot} />}
+        {snapshot === null ? null : (
+          <PluginContent snapshot={snapshot} loading={loading} onRetry={onRetry} />
+        )}
       </ConsoleStatus>
     </ConsolePane>
   );
 }
 
-function PluginContent({ snapshot }: { snapshot: ConsoleSnapshot }): JSX.Element {
+interface PluginContentProps {
+  snapshot: ConsoleSnapshot;
+  loading: boolean;
+  onRetry: () => void;
+}
+
+function PluginContent({ snapshot, loading, onRetry }: PluginContentProps): JSX.Element {
   // 贡献条目只带 owner，按 owner 找显示名；找不到时退回技术 id。
   const names = new Map(snapshot.plugins.map((plugin) => [ownerKey(plugin.owner), plugin.name]));
 
   return (
     <>
-      <Section title="已安装" description="按宿主报告的加载状态列出，不在这里启停或卸载。">
+      <Section
+        title="已安装"
+        actions={
+          <button
+            type="button"
+            className="console-action"
+            data-testid="console-refresh"
+            onClick={onRetry}
+            disabled={loading}
+          >
+            {loading ? COPY.refreshing : COPY.refresh}
+          </button>
+        }
+      >
         {snapshot.plugins.length === 0 ? (
           <p className="console-muted">尚未安装插件。</p>
         ) : (
@@ -66,7 +88,7 @@ function PluginContent({ snapshot }: { snapshot: ConsoleSnapshot }): JSX.Element
         )}
       </Section>
 
-      <Section title="贡献目录" description="插件注册的命令与面板，详情由宿主解析。">
+      <Section title="贡献目录">
         {snapshot.contributions.length === 0 ? (
           <p className="console-muted">没有插件注册界面条目。</p>
         ) : (

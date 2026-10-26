@@ -8,6 +8,16 @@ export const THEMES = ['light', 'dark', 'system'] as const;
 
 export type Theme = (typeof THEMES)[number];
 
+/**
+ * 可见文字与完整名称分开：侧栏只有约 210px，三段各约 49px，
+ * “跟随系统”放不下会折行；标签用两字，读屏名称仍是完整含义。
+ */
+const THEME_SHORT_LABELS: Readonly<Record<Theme, string>> = {
+  light: '浅色',
+  dark: '深色',
+  system: '系统',
+};
+
 const THEME_LABELS: Readonly<Record<Theme, string>> = {
   light: '浅色',
   dark: '深色',
@@ -16,7 +26,13 @@ const THEME_LABELS: Readonly<Record<Theme, string>> = {
 
 const STORAGE_KEY = 'pet.console.theme';
 
+/** 控件里显示的两字标签。 */
 export function themeLabel(theme: Theme): string {
+  return THEME_SHORT_LABELS[theme];
+}
+
+/** 无障碍与提示用的完整名称。 */
+export function themeAriaLabel(theme: Theme): string {
   return THEME_LABELS[theme];
 }
 

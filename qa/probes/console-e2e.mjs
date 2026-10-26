@@ -24,9 +24,19 @@ const watch = page => {
   page.on('pageerror', error => report.errors.push(error.message));
   page.on('request', request => { if (/^https?:/.test(request.url())) report.errors.push('Remote request: ' + request.url()); });
 };
-const capture = async (page, name) => { const file = path.join(shots, name + '.png'); await page.screenshot({ path: file }); report.screenshots.push(path.relative(root, file).split(path.sep).join('/')); };
+const capture = async (page, name) => { const file = path.join(shots, name + '.png'); await page.screenshot({ path: file, animations: 'disabled' }); report.screenshots.push(path.relative(root, file).split(path.sep).join('/')); };
 const snapshot = page => page.evaluate(() => window.petConsole.getSnapshot());
-const refresh = async page => { await page.getByTestId('console-refresh').click(); await expect(page.getByTestId('console-refresh')).toBeEnabled(); };
+const refresh = async page => {
+  const action = page.getByTestId('console-refresh');
+  if (await action.count()) await action.click();
+  else await page.getByRole('button', { name: '重新读取', exact: true }).click();
+  await expect(page.getByText('正在读取宿主状态…', { exact: true })).toHaveCount(0);
+};
+const chooseTheme = async (page, theme) => {
+  const option = page.getByTestId('theme-select').locator('input[value="' + theme + '"]');
+  await option.check();
+  await expect(option).toBeChecked();
+};
 const nav = [['start','开始'],['pet','桌宠'],['voice','语音输入'],['models','模型'],['plugins','插件'],['permissions','权限与数据'],['about','关于']];
 let app, fixture;
 try {
@@ -44,6 +54,11 @@ try {
   assert.equal(report.runtime.electron, '45.0.0');
   report.productionSnapshot = await snapshot(page);
   assert.equal(report.productionSnapshot.ok, true);
+  await expect(page.getByTestId('console-stop-all')).toHaveCount(0);
+  const titleBottom = await page.getByRole('heading', { level: 1, name: '开始', exact: true }).evaluate(el => el.getBoundingClientRect().bottom);
+  const actionTops = await page.getByRole('main').locator('button').evaluateAll(nodes => nodes.filter(el => el.checkVisibility()).map(el => el.getBoundingClientRect().top));
+  assert.ok(actionTops.every(top => top > titleBottom), 'Global actions must not sit above or beside the page title');
+  report.checks.push('idle-console-has-no-global-actions');
   const bridge = await page.evaluate(() => ({ frozen: Object.isFrozen(window.petConsole), keys: Object.keys(window.petConsole), require: typeof window.require, process: typeof window.process }));
   assert.deepEqual(bridge, { frozen: true, keys: ['version','getSnapshot','stopAll'], require: 'undefined', process: 'undefined' });
   const unauthorized = await pet.evaluate(() => window.petConsole.stopAll());
@@ -51,7 +66,33 @@ try {
   assert.equal(unauthorized.error.code, 'permission-denied');
   report.checks.push('production-pet-button-opens-built-console', 'real-readonly-host-snapshot', 'production-preload-and-source-checks');
 
-  await page.getByTestId('theme-select').selectOption('light');
+  await chooseTheme(page, 'light');
+  const themeGroup = page.getByTestId('theme-select');
+  await themeGroup.locator('input[value="light"]').press('ArrowRight');
+  await expect(themeGroup.locator('input[value="dark"]')).toBeChecked();
+  await themeGroup.locator('input[value="dark"]').press('ArrowRight');
+  await expect(themeGroup.locator('input[value="system"]')).toBeChecked();
+  await themeGroup.locator('input[value="system"]').press('ArrowRight');
+  await expect(themeGroup.locator('input[value="light"]')).toBeChecked();
+  const segmentFocus = await themeGroup.locator('input:focus + .console-segmented__text').evaluate(el => { const style = getComputedStyle(el); return { width: parseFloat(style.outlineWidth), style: style.outlineStyle }; });
+  assert.ok(segmentFocus.width >= 2 && segmentFocus.style !== 'none');
+  report.checks.push('theme-segment-native-radio-keyboard-cycle');
+
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const thumb = page.locator('.console-segmented__thumb');
+  await expect.poll(() => thumb.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41)).toBeCloseTo(0, 0);
+  const segmentWidth = (await thumb.boundingBox()).width;
+  const normalDuration = await thumb.evaluate(el => parseFloat(getComputedStyle(el).transitionDuration));
+  assert.ok(normalDuration > 0 && normalDuration <= 0.3);
+  await chooseTheme(page, 'dark');
+  await expect.poll(() => thumb.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41)).toBeCloseTo(segmentWidth, 0);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await chooseTheme(page, 'system');
+  const reduced = await thumb.evaluate(el => ({ seconds: parseFloat(getComputedStyle(el).transitionDuration), running: el.getAnimations().filter(a => a.playState === 'running').length }));
+  assert.deepEqual(reduced, { seconds: 0, running: 0 });
+  report.motion = { normalDuration, movedPixels: segmentWidth, reduced };
+  await chooseTheme(page, 'light');
+  report.checks.push('theme-segment-motion-and-reduced-motion');
   for (const [id, title] of nav) {
     await page.getByTestId('nav-' + id).click();
     await expect(page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
@@ -73,7 +114,7 @@ try {
   await page.getByTestId('nav-start').click();
   for (const theme of ['light','dark','system']) {
     await page.emulateMedia({ colorScheme: theme === 'light' ? 'light' : 'dark', reducedMotion: 'reduce' });
-    await page.getByTestId('theme-select').selectOption(theme);
+    await chooseTheme(page, theme);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
     const scheme = await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme);
     assert.equal(scheme, theme === 'light' ? 'light' : 'dark');
@@ -85,11 +126,11 @@ try {
   }
   await page.emulateMedia({ colorScheme: 'light' });
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme), 'light');
-  await page.getByTestId('theme-select').selectOption('dark');
+  await chooseTheme(page, 'dark');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.getByTestId('theme-select')).toHaveValue('dark');
-  await page.getByTestId('theme-select').selectOption('light');
+  await expect(page.getByTestId('theme-select').locator('input[value="dark"]')).toBeChecked();
+  await chooseTheme(page, 'light');
   report.checks.push('light-dark-system-live-change-and-persistence', 'computed-console-text-contrast');
 
   await page.getByTestId('nav-about').click();
@@ -129,10 +170,10 @@ try {
   }, path.join(root,'apps/desktop/dist/renderer/console/index.html'));
   const missing = await absentBridge; watch(missing);
   await expect(missing.getByRole('main')).toContainText(/未连.*宿主|不可用|无法读取/);
-  await expect(missing.getByTestId('console-refresh')).toBeDisabled();
-  await expect(missing.getByTestId('console-stop-all')).toBeDisabled();
+  await expect(missing.getByTestId('console-refresh')).toHaveCount(0);
+  await expect(missing.getByTestId('console-stop-all')).toHaveCount(0);
   await (await app.browserWindow(missing)).evaluate(w => w.destroy());
-  report.checks.push('built-console-missing-bridge-state-and-disabled-host-actions');
+  report.checks.push('built-console-missing-bridge-state-and-no-host-actions');
   await app.close(); app = undefined;
 
   for (const name of ['profile','builtin','plugins']) await fs.mkdir(path.join(out, name), { recursive:true });
@@ -224,6 +265,16 @@ try {
   await fixture.evaluate(() => globalThis.m2ConsoleQA.releaseTask());
   await refresh(controlled);
   report.checks.push('stop-failure-keeps-task-live-and-can-be-retried');
+
+  await fixture.evaluate(() => globalThis.m2ConsoleQA.beginTask());
+  await refresh(controlled);
+  await controlled.getByTestId('console-stop-all').click();
+  await fixture.evaluate(() => globalThis.m2ConsoleQA.releaseTask());
+  await controlled.getByRole('dialog').getByRole('button', { name: /停止/ }).click();
+  await expect(controlled.getByRole('dialog')).toBeHidden();
+  await expect(controlled.getByTestId('console-stop-all')).toHaveCount(0);
+  assert.ok(await controlled.getByRole('main').evaluate(el => el.contains(document.activeElement)), 'Focus must stay in the task area when the stop action disappears');
+  report.checks.push('finished-task-hides-stop-and-retains-keyboard-focus');
 
   await fixture.evaluate(() => globalThis.m2ConsoleQA.disablePlugin());
   await refresh(controlled);

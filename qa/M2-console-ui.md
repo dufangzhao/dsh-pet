@@ -4,20 +4,22 @@
 
 ## 交付
 
-[设置台](../apps/desktop/src/renderer/console/console-app.tsx)包含开始、桌宠、语音输入、模型、插件、权限与数据、关于七页。210px 侧栏与单栏内容，系统字体、中性色、单一强调色；支持浅色/深色/系统主题并保存本机偏好，关于页与插件页以原生 details 收纳高级内容。
+[设置台](../apps/desktop/src/renderer/console/console-app.tsx)包含开始、桌宠、语音输入、模型、插件、权限与数据、关于七页。210px 侧栏与单栏内容，系统字体、中性色、单一强调色；浅色/深色/系统主题改为原生 radio 分段控件，滑块平移并保存本机偏好，关于页与插件页以原生 details 收纳高级内容。
 
 [构建](../apps/desktop/build.mjs)输出 dist/renderer/console/index.html；[桌宠设置按钮](../apps/desktop/src/renderer/pet/PrototypePanel.tsx)真实调用 petSettings.open()。UI-kit 的 React 声明和 desktop 引用沿用既有版本，补齐显式样式出口。未新增宿主 API、未放宽来源校验。
 
-getSnapshot() 提供真实宿主/插件/贡献/版本数据；stopAll() 成功后直接合并返回的 HostStatus，不另取快照。停止确认、进行中防重复、失败提示和恢复均已接入。尚未实现的配置保存、插件写操作、审批和数据管理用简短空状态展示。
+getSnapshot() 提供真实宿主/插件/贡献/版本数据；stopAll() 成功后直接合并返回的 HostStatus，不另取快照。右上角全局工具栏与分隔线已删除：刷新收为数据区旁的轻量文字操作，停止仅在任务运行或收尾时出现在任务行旁。停止确认、防重复、失败恢复保留；入口因归零而消失时焦点移交任务行。尚未实现的配置保存、插件写操作、审批和数据管理用简短空状态展示。
+
+本轮沿用 ui-ux-pro-max 的交互与动效规范，参考[Uiverse 分段选择模式](https://uiverse.io/Spacious74/lovely-goose-53)，按项目令牌重写 CSS；没有复制该作品的固定绿色、外凹圆角或 display:none 输入结构。导航指示线、文字下划线与主题滑块使用统一0.16s反馈，减少动态时直接完成；没有新增动画依赖。三页空状态移除重复小标题，关于页去掉重复许可说明。
 
 ## 验证
 
 - 最终 pnpm check 通过：1096 项工作区测试；QA 120 通过、1 项既有 Windows 符号链接权限跳过；类型、lint、格式及双入口构建通过。
 - pnpm exec tsc --noEmit -p qa/probes/tsconfig.security.json 通过，包含新增受控原生宿主夹具。
-- [真实设置台报告](M2-console-ui-results.json)：Electron 45.0.0 / Node 24.22.0 / Playwright 1.64.1，19 组交互检查通过，无页面错误和远程请求。
+- [真实设置台报告](M2-console-ui-results.json)：Electron 45.0.0 / Node 24.22.0 / Playwright 1.64.1，23 组交互检查通过，无页面错误和远程请求。
 - [组件报告](M2-ui-kit-results.json)：6 组交互检查通过；Dialog 14 步双向 Tab、Escape/取消/关闭恢复焦点、Toast、字段关联和三态主题通过。
 
-设置台验收覆盖：七页导航且来源 URL 始终不变；侧栏键盘顺序、跳至内容与可见焦点；主题持久化和系统配色实时改变；版本/示例高级分层；窗口复用、关闭重开和760×560最小窗口；缺桥、加载、Result 错误、空状态及刷新恢复；两插件和十条同名贡献的归属展示。三种主题各测21个文字样本，最低对比度为6.02/5.07/5.07。
+设置台验收覆盖：七页导航且来源 URL 始终不变；侧栏键盘顺序、跳至内容与可见焦点；主题持久化和系统配色实时改变；版本/示例高级分层；窗口复用、关闭重开和760×560最小窗口；缺桥、加载、Result 错误、空状态及刷新恢复；两插件和十条同名贡献的归属展示。三种主题各测19个文字样本，最低对比度为6.02/7.70/7.70。新增验证空闲无全局操作、三态 radio 方向键循环、选中滑块实际位移与 reduced-motion、确认期间任务自然结束后入口消失且焦点留在 main。滑块实测0.16s、位移59.66px；减少动态时 transition 为0s、无运行中动画。
 
 停止命令使用真实 DesktopHost/TaskSupervisor 与插件运行区，受控工作暂缓清理以验证 pendingWork：
 
@@ -29,7 +31,7 @@ getSnapshot() 提供真实宿主/插件/贡献/版本数据；stopAll() 成功�
 
 Escape 不发送停止命令；请求期间键盘再次激活只产生一次调用；成功不再取快照（即使下一次快照读取会失败，状态仍正确更新）；失败后可重试。停用一个插件后贡献列表由10条变为5条，另一个插件仍运行；最终 shutdown 为 exitConfirmed:true、forced:false。故障/空状态由受控夹具注入，其余数据来自真实运行区。
 
-已保存12张设置台截图，主要视图：[浅色开始](screenshots/m2/console-start.png)、[深色开始](screenshots/m2/console-start-dark.png)、[真实插件](screenshots/m2/console-real-plugins.png)、[最小窗口](screenshots/m2/console-minimum-size.png)、[任务收尾](screenshots/m2/console-stopping.png)。已人工查看深浅主题、插件、权限、关于、语音空状态、最小窗口与收尾状态。
+已保存12张设置台截图，主要视图：[浅色开始](screenshots/m2/console-start.png)、[深色开始](screenshots/m2/console-start-dark.png)、[真实插件](screenshots/m2/console-real-plugins.png)、[最小窗口](screenshots/m2/console-minimum-size.png)、[任务收尾](screenshots/m2/console-stopping.png)。本轮主会话人工查看浅色、深色开始页与最小窗口；七页、任务收尾与示例对话框均已由实际交互脚本留图。
 
 ## 复跑与限制
 

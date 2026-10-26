@@ -23,26 +23,21 @@ export function AboutPage({
   onRetry,
 }: AboutPageProps): JSX.Element {
   return (
-    <ConsolePane title="关于" summary="AI 桌宠是本机运行的桌面助手，不依赖网络也能启动。">
+    <ConsolePane title="关于">
       <Section title="版本">
         <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
           {snapshot === null ? null : <VersionList snapshot={snapshot} />}
         </ConsoleStatus>
       </Section>
 
-      <Section title="许可">
-        <p className="console-muted">本项目以 MIT 许可发布。</p>
-      </Section>
-
       <details className="console-advanced">
         <summary className="console-advanced__summary">高级</summary>
         <div className="console-advanced__body">
-          <Section title="技术信息" description="用于排查问题，普通使用不需要关注。">
+          <Section title="技术信息" description="排查问题时使用，平时不必关注。">
             {snapshot === null ? (
               <p className="console-muted">读取到宿主信息后显示。</p>
             ) : (
               <List label="技术信息">
-                <ListItem title="应用版本" meta={snapshot.app.version} />
                 <ListItem title="Electron" meta={snapshot.app.electron} />
                 <ListItem title="Node" meta={snapshot.app.node} />
                 <ListItem title="平台" meta={snapshot.app.platform} />
@@ -51,7 +46,7 @@ export function AboutPage({
             )}
           </Section>
 
-          <Section title="组件演示" description="设置台共用的基础组件，在这里可以直接试用。">
+          <Section title="组件演示" description="设置台共用的基础组件，可以直接试用。">
             <UiKitDemo />
           </Section>
         </div>
@@ -60,6 +55,7 @@ export function AboutPage({
   );
 }
 
+/** 普通区的版本行：应用名、版本、许可各出现一次。 */
 function VersionList({ snapshot }: { snapshot: ConsoleSnapshot }): JSX.Element {
   return (
     <List label="应用信息">

@@ -1,5 +1,5 @@
 import type { HostStatus } from '@pet/contracts';
-import { useCallback, useRef, useState, type JSX } from 'react';
+import { useCallback, useRef, useState, type CSSProperties, type JSX } from 'react';
 
 import { Button, Dialog, Toast, useToastStore } from '@pet/ui-kit';
 
@@ -16,7 +16,7 @@ import { VoicePage } from './pages/voice.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { useStopAll } from './use-stop-all.js';
 import { useTheme } from './use-theme.js';
-import { THEMES, themeLabel, type Theme } from './theme.js';
+import { THEMES, themeAriaLabel, themeLabel, type Theme } from './theme.js';
 
 const STOP_ALL = {
   title: '停止全部任务',
@@ -83,40 +83,8 @@ export function ConsoleApp(): JSX.Element {
         </div>
       </aside>
 
+      {/* 没有全局工具条：每个操作都在使用它的那块数据旁边（见各页）。 */}
       <main className="console-main" id="console-main" ref={mainRef} tabIndex={-1}>
-        <div className="console-toolbar">
-          <div className="console-toolbar__actions">
-            <Button
-              size="small"
-              data-testid="console-refresh"
-              onClick={snapshotState.refresh}
-              disabled={!snapshotState.available || snapshotState.loading}
-            >
-              {snapshotState.loading ? COPY.refreshing : COPY.refresh}
-            </Button>
-            {/*
-              停止按钮在请求进行中保持可聚焦，只标记 aria-disabled：
-              Dialog 关闭后会把焦点还给它，按钮一旦 disabled 就会聚焦失败并掉到 body。
-              重复点击由 onClick 里的 busy 判断挡住。
-            */}
-            <Button
-              size="small"
-              variant="primary"
-              data-testid="console-stop-all"
-              aria-disabled={stopAll.busy}
-              aria-busy={stopAll.busy}
-              onClick={() => {
-                if (!stopAll.busy) {
-                  setConfirming(true);
-                }
-              }}
-              disabled={!snapshotState.available || snapshotState.snapshot === null}
-            >
-              {stopAll.busy ? '正在停止…' : '停止全部任务'}
-            </Button>
-          </div>
-        </div>
-
         {renderPage()}
       </main>
 
@@ -153,7 +121,18 @@ export function ConsoleApp(): JSX.Element {
 
     switch (page) {
       case 'start':
-        return <StartPage {...shared} />;
+        return (
+          <StartPage
+            {...shared}
+            stopping={stopAll.busy}
+            onRequestStopAll={() => {
+              // 请求进行中重复点击不重复开框。
+              if (!stopAll.busy) {
+                setConfirming(true);
+              }
+            }}
+          />
+        );
       case 'pet':
         return <PetPage />;
       case 'voice':
@@ -170,7 +149,11 @@ export function ConsoleApp(): JSX.Element {
   }
 }
 
-/** 主题用原生 select：只有一个选择、选项互斥，比三个 toggle 更少概念。 */
+/**
+ * 主题三态用原生 radio 组分段控件：三个选项互斥且都可见，
+ * 比下拉少一次点击就能看清全部状态。滑块由 CSS 按选中项翻译定位。
+ * 原生 radio 保留 Tab 进入、方向键切换、屏幕阅读器播报与可见焦点。
+ */
 function ThemePicker({
   theme,
   onChange,
@@ -178,29 +161,38 @@ function ThemePicker({
   theme: Theme;
   onChange: (next: Theme) => void;
 }): JSX.Element {
+  const activeIndex = THEMES.indexOf(theme);
+
   return (
     <div className="console-theme">
-      <label className="console-theme__label" htmlFor="console-theme">
+      <span className="console-theme__label" id="console-theme-label">
         {COPY.themeLabel}
-      </label>
-      <select
-        id="console-theme"
-        className="console-theme__select"
+      </span>
+      <div
+        className="console-segmented"
+        role="radiogroup"
+        aria-labelledby="console-theme-label"
         data-testid="theme-select"
-        value={theme}
-        onChange={(event) => {
-          const next = THEMES.find((candidate) => candidate === event.target.value);
-          if (next !== undefined) {
-            onChange(next);
-          }
-        }}
+        style={{ '--segment-index': activeIndex } as CSSProperties}
       >
+        {/* 滑块只是视觉指示，选中状态由原生 radio 自己表达。 */}
+        <span className="console-segmented__thumb" aria-hidden="true" />
         {THEMES.map((candidate) => (
-          <option key={candidate} value={candidate}>
-            {themeLabel(candidate)}
-          </option>
+          <label key={candidate} className="console-segmented__option">
+            <input
+              type="radio"
+              name="console-theme"
+              value={candidate}
+              aria-label={themeAriaLabel(candidate)}
+              checked={candidate === theme}
+              onChange={() => onChange(candidate)}
+            />
+            <span className="console-segmented__text" aria-hidden="true">
+              {themeLabel(candidate)}
+            </span>
+          </label>
         ))}
-      </select>
+      </div>
     </div>
   );
 }

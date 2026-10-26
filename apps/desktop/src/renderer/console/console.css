@@ -70,9 +70,10 @@ body {
 }
 
 .console-nav__button {
+  position: relative;
   width: 100%;
   min-height: 32px;
-  padding: 0 10px;
+  padding: 0 10px 0 14px;
   border: 1px solid transparent;
   border-radius: var(--pk-radius);
   background: transparent;
@@ -81,21 +82,47 @@ body {
   font-size: 14px;
   text-align: left;
   cursor: pointer;
+  /* 反馈只用 0.16s 的底色与强调色变化：菜单切换要快到不打断视线。 */
   transition:
-    background-color var(--pk-transition),
-    color var(--pk-transition);
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .console-nav__button:hover {
   background: var(--pk-bg);
+  border-color: var(--pk-border);
 }
 
-/* 当前页用字重和左侧竖线一起标出，不只靠颜色。 */
+/*
+ * 当前页的竖线用一个从中心展开的伪元素，和悬停用同一套时长；
+ * 状态仍由 aria-current 表达，动画只是视觉确认。
+ */
+.console-nav__button::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--pk-accent);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition:
+    height 0.16s ease,
+    opacity 0.16s ease;
+}
+
 .console-nav__button[aria-current='page'] {
   background: var(--pk-bg);
   color: var(--pk-accent-text);
   font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--pk-accent);
+}
+
+.console-nav__button[aria-current='page']::before {
+  height: 16px;
+  opacity: 1;
 }
 
 .console-nav__button:focus-visible {
@@ -116,30 +143,83 @@ body {
 
 .console-theme__label {
   margin-left: 8px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--pk-muted);
 }
 
-.console-theme__select {
-  width: 100%;
-  min-height: 30px;
-  padding: 0 8px;
+/*
+ * 主题分段控件：三个等宽选项，滑块是一整块左移右移的背景。
+ * --segment-index 由 React 按当前值给出，CSS 只负责把它翻译成位置。
+ * 原生 radio 用 appearance:none 隐去圆点但仍在 DOM 与焦点顺序里，
+ * 这样方向键切换、读屏播报和焦点环都保持原生行为。
+ */
+.console-segmented {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 2px;
   border: 1px solid var(--pk-border-strong);
   border-radius: var(--pk-radius);
-  background: var(--pk-bg);
-  color: var(--pk-text);
-  font: inherit;
-  font-size: 13px;
+  background: var(--pk-sunken);
 }
 
-.console-theme__select:focus-visible {
+.console-segmented__thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / 3);
+  border-radius: calc(var(--pk-radius) - 2px);
+  background: var(--pk-bg);
+  box-shadow: var(--pk-shadow-1);
+  transform: translateX(calc(var(--segment-index) * 100%));
+  transition: transform 0.16s ease;
+}
+
+.console-segmented__option {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+/* 视觉隐藏但保留焦点与读屏：不用 display:none，否则键盘与朗读都会丢失。 */
+.console-segmented__option input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.console-segmented__text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  /* 侧栏只有 210px，三个选项必须挤在同一行，「跟随系统」不能折行。 */
+  padding: 0 2px;
+  border-radius: calc(var(--pk-radius) - 2px);
+  color: var(--pk-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  text-align: center;
+  transition: color 0.16s ease;
+}
+
+.console-segmented__option input:checked + .console-segmented__text {
+  color: var(--pk-text);
+  font-weight: 600;
+}
+
+/* 焦点画在被选中项的文字上，与滑块位置一致。 */
+.console-segmented__option input:focus-visible + .console-segmented__text {
   outline: 2px solid var(--pk-ring);
-  outline-offset: 1px;
+  outline-offset: -1px;
 }
 
 .console-main {
   min-width: 0;
-  padding: 20px 28px 32px;
+  padding: 28px 32px 40px;
   overflow-y: auto;
 }
 
@@ -148,53 +228,148 @@ body {
   outline: none;
 }
 
-/* 工具条只放全局操作：页面名由 h1 承担，避免同一屏出现两遍标题。 */
-.console-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  max-width: 720px;
-  padding-bottom: 12px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--pk-border);
-}
-
-.console-toolbar__actions {
-  display: flex;
-  gap: 8px;
-}
-
+/*
+ * 页面头部只靠字号和留白建立层级，不画线、不放按钮：
+ * 线会把“工具条”又变回来，而操作应该贴着它作用的数据。
+ */
 .console-pane {
   display: grid;
-  gap: 8px;
-  max-width: 720px;
+  gap: 28px;
+  max-width: 680px;
 }
+
+.console-pane__header {
+  display: grid;
+  gap: 6px;
+}
+
+/*
+ * 切页不做入场动画：整片内容淡入会在主题切换、截图和低性能机器上留下半透明中间帧，
+ * 而导航本身已经用 0.16s 的选中反馈说明了“换页了”。
+ */
 
 .console-pane__title {
   margin: 0;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .console-pane__summary {
-  margin: 0 0 8px;
-  max-width: 62ch;
+  margin: 0;
+  max-width: 60ch;
   font-size: 14px;
   color: var(--pk-muted);
 }
 
+/* 页内分块之间靠留白分隔；标题与内容贴得比块间距更近。 */
 .console-pane__body {
   display: grid;
-  gap: 28px;
+  gap: 32px;
+}
+
+.console-status {
+  display: grid;
+  gap: 8px;
 }
 
 .console-lead {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   font-size: 16px;
+}
+
+/* 任务行：一句话在左，低强调操作在右，与这句话直接相关。 */
+.console-task {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.console-task__text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--pk-muted);
+}
+
+/*
+ * 数据区的刷新是低强调文字操作，紧贴区块标题出现。
+ * ui-kit 的 Section 把 actions 推到右端；这里只在 console 内改成跟在标题后面，
+ * 不改变共享组件在其他页面的行为。
+ */
+.console-pane .pk-section__header {
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.console-pane .pk-section__actions {
+  margin-left: 0;
+}
+
+/*
+ * 页内低强调文字操作（刷新、停止全部）：悬停时用一条从左侧展开的细下划线确认可点，
+ * 时长与导航一致。停止在请求中也保留这个按钮，所以禁用态要单独收拾。
+ */
+.console-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--pk-accent-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.console-action::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.16s ease;
+}
+
+.console-action:hover::after,
+.console-action:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.console-action:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.console-action[aria-disabled='true'] {
+  color: var(--pk-muted);
+  cursor: default;
+}
+
+.console-action[aria-disabled='true']::after {
+  content: none;
+}
+
+.console-action:disabled {
+  color: var(--pk-muted);
+  cursor: default;
+}
+
+.console-action:disabled::after {
+  content: none;
 }
 
 .console-muted {
@@ -235,6 +410,30 @@ body {
   }
 
   .console-main {
-    padding: 16px 18px 28px;
+    padding: 22px 20px 32px;
+  }
+
+  .console-pane__title {
+    font-size: 24px;
+  }
+}
+
+/*
+ * 减少动态：去掉位移与展开动画，保留颜色变化这种不产生运动的反馈。
+ * 键盘焦点环不受影响。
+ */
+@media (prefers-reduced-motion: reduce) {
+  .console-nav__button,
+  .console-nav__button::before,
+  .console-segmented__thumb,
+  .console-segmented__text,
+  .console-action,
+  .console-action::after {
+    transition: none;
+  }
+
+  .console-action:hover::after,
+  .console-action:focus-visible::after {
+    transform: none;
   }
 }

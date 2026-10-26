@@ -1,18 +1,21 @@
 {
   "status": "passed",
-  "at": "2026-10-26T12:31:47.789Z",
+  "at": "2026-10-26T14:21:28.873Z",
   "sandboxOverride": true,
   "checks": [
+    "idle-console-has-no-global-actions",
     "production-pet-button-opens-built-console",
     "real-readonly-host-snapshot",
     "production-preload-and-source-checks",
+    "theme-segment-native-radio-keyboard-cycle",
+    "theme-segment-motion-and-reduced-motion",
     "seven-pages-with-current-navigation-and-screenshots",
     "sidebar-keyboard-order-visible-focus-and-skip-link",
     "light-dark-system-live-change-and-persistence",
     "computed-console-text-contrast",
     "about-progressive-disclosure-and-real-component-demo",
     "native-window-reuse-close-reopen-and-minimum-layout",
-    "built-console-missing-bridge-state-and-disabled-host-actions",
+    "built-console-missing-bridge-state-and-no-host-actions",
     "real-host-two-active-plugins-and-ten-owned-contributions",
     "initial-loading-state",
     "injected-error-and-empty-states-recover-through-refresh",
@@ -21,6 +24,7 @@
     "stop-command-busy-state",
     "real-task-cancelled-with-pending-work-and-host-still-ready",
     "stop-failure-keeps-task-live-and-can-be-retried",
+    "finished-task-hides-stop-and-retains-keyboard-focus",
     "real-disable-removes-only-owned-contribution-metadata"
   ],
   "errors": [],
@@ -41,18 +45,18 @@
   "themes": [
     {
       "theme": "light",
-      "measured": 21,
+      "measured": 19,
       "minimum": 6.016692116437308
     },
     {
       "theme": "dark",
-      "measured": 21,
-      "minimum": 5.069804721495689
+      "measured": 19,
+      "minimum": 7.702933902594037
     },
     {
       "theme": "system",
-      "measured": 21,
-      "minimum": 5.069804721495689
+      "measured": 19,
+      "minimum": 7.702933902594037
     }
   ],
   "runtime": {
@@ -83,6 +87,14 @@
       },
       "contributions": [],
       "plugins": []
+    }
+  },
+  "motion": {
+    "normalDuration": 0.16,
+    "movedPixels": 59.65625,
+    "reduced": {
+      "seconds": 0,
+      "running": 0
     }
   },
   "fixtureSnapshot": {
@@ -241,7 +253,7 @@
   "stopAccepted": {
     "stopCalls": 1,
     "held": {
-      "taskId": "115727e4-d856-4d19-8aff-eb9c965cfba6",
+      "taskId": "8c407224-dea3-4794-b890-da8abf847e2a",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -265,7 +277,7 @@
   "afterSettlement": {
     "stopCalls": 1,
     "held": {
-      "taskId": "115727e4-d856-4d19-8aff-eb9c965cfba6",
+      "taskId": "8c407224-dea3-4794-b890-da8abf847e2a",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -289,7 +301,7 @@
   "failedStop": {
     "stopCalls": 2,
     "held": {
-      "taskId": "dd059c4c-faea-4caa-9ab5-e8ac18b5747a",
+      "taskId": "8a93427e-4ae9-478c-bacc-01737a82430c",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -330,9 +342,9 @@
   "artifacts": {
     "apps/desktop/dist/main/index.mjs": "c68b6fa233d9340caf668721e635b5fed0bd8f3cd265e1331bbb6d2f47a486a1",
     "apps/desktop/dist/preload/index.cjs": "b6012c57ff48155299e4b40fbce3b805febb43b95db187bf615011383b133169",
-    "apps/desktop/dist/renderer/console/index.html": "bef6b9cd9bbf202812889107ec71f06bd37c00ba19a76e9ee40aa5fc3c24de8c",
+    "apps/desktop/dist/renderer/console/index.html": "65e3d532cf8f8c9205620c8425edab81cb559d5b5e873a7c3aabc2ff8db1d258",
     "pnpm-lock.yaml": "bb8cd9c475595a4de95679c814388d90e700aa4bda117c20891f42beb25a2258",
-    "apps/desktop/dist/renderer/console/assets/index-BVkSMu73.js": "09e13103bd180d824f39d00e10dc6e191cb5809a991e3a59e2dc20c2cbed6aae",
-    "apps/desktop/dist/renderer/console/assets/index-CSLCwY5b.css": "4379ded4b402da687454633e1fe8ce6a9b1497e88a0ae49933de2cd3e702f566"
+    "apps/desktop/dist/renderer/console/assets/index-Do3VIolG.js": "98181759c17db130e73a200581601fc0c86dfcf56a25212a4d190ba10c9dd20c",
+    "apps/desktop/dist/renderer/console/assets/index-DvebpfOW.css": "66ddc1f38f052720a1daa7c73ad06bf6a3e5306baab68d93c3862ba18b90f41d"
   }
 }
