@@ -1,4 +1,11 @@
-import type { ContributionKind, HostRuntimeState, PluginLifecycleState } from '@pet/contracts';
+import type {
+  AccessMode,
+  ContributionKind,
+  FileScope,
+  HostRuntimeState,
+  PermissionDeclaration,
+  PluginLifecycleState,
+} from '@pet/contracts';
 import type { Tone } from '@pet/ui-kit';
 
 /**
@@ -38,6 +45,55 @@ const CONTRIBUTION_KIND: Readonly<Record<ContributionKind, string>> = {
 
 export function contributionKind(kind: ContributionKind): string {
   return CONTRIBUTION_KIND[kind];
+}
+
+/*
+ * 枚举本身是给宿主看的，直接摆给用户既难判断也不准确：
+ * 剪贴板 access=read 会被读成"读写"。三张表把枚举翻成动作，类型保证不漏项。
+ */
+const FILE_SCOPE_TEXT: Readonly<Record<FileScope, string>> = {
+  'plugin-data': '插件数据目录',
+  resources: '插件资源',
+  'user-selected': '用户选择的文件',
+};
+
+const FILE_ACCESS_TEXT: Readonly<Record<AccessMode, string>> = {
+  read: '只读',
+  write: '写入',
+  'read-write': '读写',
+};
+
+const CLIPBOARD_TEXT: Readonly<Record<AccessMode, string>> = {
+  read: '读取剪贴板',
+  write: '写入剪贴板',
+  'read-write': '读写剪贴板',
+};
+
+/**
+ * 一件权限声明的人话描述。具体参数（来源、键名）一并列出：
+ * 用户要判断的是"它到底能碰什么"，含糊的概括反而会藏住信息。
+ */
+export function describePermission(permission: PermissionDeclaration): string {
+  switch (permission.kind) {
+    case 'capability-use':
+      return `使用能力 ${permission.capability}`;
+    case 'microphone':
+      return '使用麦克风';
+    case 'screen-capture':
+      return '截取屏幕';
+    case 'text-input':
+      return '模拟键盘输入';
+    case 'network':
+      return `访问网络：${permission.origins.join('、')}`;
+    case 'credentials':
+      return `使用凭据：${permission.keys.join('、')}`;
+    case 'files':
+      return `访问文件（${FILE_SCOPE_TEXT[permission.scope]}，${FILE_ACCESS_TEXT[permission.access]}）`;
+    case 'process':
+      return `启动工作进程：${permission.workers.join('、')}`;
+    case 'clipboard':
+      return CLIPBOARD_TEXT[permission.access];
+  }
 }
 
 const PLUGIN_ORIGIN: Readonly<Record<'builtin' | 'user', string>> = {

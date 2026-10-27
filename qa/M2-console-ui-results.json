@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-27T12:25:29.720Z",
+  "at": "2026-10-27T14:10:02.935Z",
   "sandboxOverride": true,
   "checks": [
     "idle-console-has-no-global-actions",
@@ -91,7 +91,7 @@
   },
   "motion": {
     "normalDuration": 0.16,
-    "movedPixels": 59.65624809265137,
+    "movedPixels": 59.65625,
     "reduced": {
       "seconds": 0,
       "running": 0
@@ -253,7 +253,7 @@
   "stopAccepted": {
     "stopCalls": 1,
     "held": {
-      "taskId": "822828b9-0890-4c2c-8e0b-afc0564db304",
+      "taskId": "145dbb44-ad19-4362-be3b-4f75561a2b98",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -277,7 +277,7 @@
   "afterSettlement": {
     "stopCalls": 1,
     "held": {
-      "taskId": "822828b9-0890-4c2c-8e0b-afc0564db304",
+      "taskId": "145dbb44-ad19-4362-be3b-4f75561a2b98",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -301,7 +301,7 @@
   "failedStop": {
     "stopCalls": 2,
     "held": {
-      "taskId": "d6fdb09d-06fd-4111-b496-6d4f51a00c41",
+      "taskId": "e7041e5f-c9ec-4dbe-a69a-a2466e68af4d",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -340,11 +340,11 @@
     "forced": false
   },
   "artifacts": {
-    "apps/desktop/dist/main/index.mjs": "e37aaf4c2e5509ce0f2b6cf01154ef9c0d2edbd5174d43fca85a1b93ed349a78",
-    "apps/desktop/dist/preload/index.cjs": "92f5be3998c917e5bd289074e64e4359adebaf6585818dbfe8e718f4a182940b",
-    "apps/desktop/dist/renderer/console/index.html": "9dbfc181d19f9d95654146809b4ee8048acb605827a342983ad1b6b3e857aec8",
+    "apps/desktop/dist/main/index.mjs": "5fd0b397d29af1043d398f8c1409eef0f9f9bd89efbd0456ee5d1f53c68af09e",
+    "apps/desktop/dist/preload/index.cjs": "2e5e59691f17e1794899874782921398a501a99157d3d4ada4b28d95703f27e8",
+    "apps/desktop/dist/renderer/console/index.html": "f4e58e8df81be5cf25a221c3f8fb69d9baa6ec118df3afcff84f94e684142e07",
     "pnpm-lock.yaml": "bb8cd9c475595a4de95679c814388d90e700aa4bda117c20891f42beb25a2258",
-    "apps/desktop/dist/renderer/console/assets/index-B73R7Pqy.js": "050f5ad551df6782a93f2da5dcd4be25aafb7a1a64cb5f9affc1309a108d4602",
-    "apps/desktop/dist/renderer/console/assets/index-DLyH_cg9.css": "64d5d51af3916d7ecdf95bbe038040e285ad91b60e387afb36264907addc0f9c"
+    "apps/desktop/dist/renderer/console/assets/index-BnLmzRgc.css": "eec1e5a87ac44ed0466831d1e22e0302cc21c7ae432538d9ba4cfe0a4b425a71",
+    "apps/desktop/dist/renderer/console/assets/index-DQXlFB8C.js": "c65585890e48c869449c9343c40a8df54b175c6a16839e1a9b991e74abae0f4b"
   }
 }

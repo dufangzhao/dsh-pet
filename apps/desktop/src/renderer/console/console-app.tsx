@@ -1,4 +1,4 @@
-import type { ConsolePlugin, HostStatus } from '@pet/contracts';
+import type { ConsolePlugin, ConsolePluginAction, HostStatus } from '@pet/contracts';
 import { useCallback, useRef, useState, type CSSProperties, type JSX } from 'react';
 
 import { Button, Dialog, Toast, useToastStore } from '@pet/ui-kit';
@@ -15,6 +15,7 @@ import { PluginsPage } from './pages/plugins.js';
 import { StartPage } from './pages/start.js';
 import { VoicePage } from './pages/voice.js';
 import { ownerKey } from './labels.js';
+import { actionLabel, usePluginActions } from './use-plugin-actions.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { useStopAll } from './use-stop-all.js';
 import { useTheme } from './use-theme.js';
@@ -31,6 +32,30 @@ const STOP_ALL = {
       : '已停止当前任务，宿主继续运行。',
 } as const;
 
+/**
+ * 需要确认的动作。启用是可逆的日常操作，点一下就做；
+ * 停用会取消任务并隐藏入口，卸载会删除代码包，两者都必须问一次。
+ */
+const CONFIRM: Readonly<
+  Record<
+    'disable' | 'uninstall',
+    { title: (name: string) => string; body: string; confirm: string }
+  >
+> = {
+  disable: {
+    title: (name) => `停用 ${name}？`,
+    body: '正在运行的任务会被取消，插件注册的入口会立即消失。配置、凭据和数据都保留在本机。',
+    confirm: '确认停用',
+  },
+  uninstall: {
+    title: (name) => `卸载 ${name}？`,
+    body: '这会删除插件的代码包，不能撤销。配置、凭据和插件数据保留在本机。再次安装或启用时仍要重新确认信任，之前批准过的不会自动恢复。',
+    confirm: '确认卸载',
+  },
+};
+
+const CANCEL = '取消';
+
 /** 设置台外壳：导航、主题、真实快照与停止命令的唯一持有者。 */
 export function ConsoleApp(): JSX.Element {
   // 页面只用 React 状态：宿主按完整 URL 校验请求来源，改 hash 会让后续请求被拒。
@@ -40,11 +65,20 @@ export function ConsoleApp(): JSX.Element {
   const [configuring, setConfiguring] = useState<ConsolePlugin | null>(null);
   /** 表单里还有没保存的改动时，切页或返回列表前先问一次。 */
   const [discarding, setDiscarding] = useState<(() => void) | null>(null);
+  /** 等待确认的插件动作；null 表示没有确认框。 */
+  const [confirmAction, setConfirmAction] = useState<{
+    plugin: ConsolePlugin;
+    action: 'disable' | 'uninstall';
+  } | null>(null);
   const dirtyRef = useRef(false);
   const toasts = useToastStore();
   const { theme, setTheme } = useTheme();
   const snapshotState = useConsoleSnapshot();
   const stopAll = useStopAll();
+  const pluginActions = usePluginActions({
+    applySnapshot: snapshotState.applySnapshot,
+    markUncertain: snapshotState.markUncertain,
+  });
   const mainRef = useRef<HTMLElement>(null);
 
   /**
@@ -83,6 +117,53 @@ export function ConsoleApp(): JSX.Element {
   const skipToContent = useCallback(() => {
     mainRef.current?.focus();
   }, []);
+
+  /**
+   * 执行一次插件动作，结果只报事实：达成说做了，没达成说为什么。
+   * 快照由 hook 直接应用，这里不再补读。
+   */
+  const runPluginAction = useCallback(
+    async (plugin: ConsolePlugin, action: ConsolePluginAction) => {
+      const outcome = await pluginActions.run(plugin, action);
+      if (outcome.ok) {
+        toasts.push(`已${actionLabel(action)} ${plugin.name}。`, 'ok');
+        return;
+      }
+      /*
+       * 失败一律 danger（role=alert）：措辞只说事实、不声称已回滚，
+       * 但颜色与播报不因此降级。
+       * 未确认时页面已经由 markUncertain 收起旧数据，只有手动重新读取才恢复；
+       * 这里不自动重试。
+       */
+      toasts.push(`${actionLabel(action)} ${plugin.name}：${outcome.error}`, 'danger');
+    },
+    [pluginActions, toasts],
+  );
+
+  /**
+   * 行上的按钮先到这里。停用与卸载要确认，启用直接做；
+   * 但无论哪条路径都要穿过 guard，未保存的配置不能因为一次插件操作被丢掉。
+   */
+  const requestPluginAction = useCallback(
+    (plugin: ConsolePlugin, action: ConsolePluginAction) => {
+      guard(() => {
+        if (action === 'enable') {
+          void runPluginAction(plugin, action);
+          return;
+        }
+        setConfirmAction({ plugin, action });
+      });
+    },
+    [guard, runPluginAction],
+  );
+
+  const confirmPluginAction = useCallback(async () => {
+    const request = confirmAction;
+    setConfirmAction(null);
+    if (request !== null) {
+      await runPluginAction(request.plugin, request.action);
+    }
+  }, [confirmAction, runPluginAction]);
 
   const afterStopAll = useCallback(
     (status: HostStatus | null, error: string | null) => {
@@ -140,6 +221,32 @@ export function ConsoleApp(): JSX.Element {
         }
       >
         正在运行的任务会被取消，宿主和插件保持运行。已经完成的工作不会回滚。
+      </Dialog>
+
+      <Dialog
+        open={confirmAction !== null}
+        title={
+          confirmAction === null
+            ? ''
+            : CONFIRM[confirmAction.action].title(confirmAction.plugin.name)
+        }
+        onClose={() => setConfirmAction(null)}
+        footer={
+          <>
+            <Button data-autofocus onClick={() => setConfirmAction(null)}>
+              {CANCEL}
+            </Button>
+            <Button
+              variant="danger"
+              data-testid="plugin-action-confirm"
+              onClick={() => void confirmPluginAction()}
+            >
+              {confirmAction === null ? '' : CONFIRM[confirmAction.action].confirm}
+            </Button>
+          </>
+        }
+      >
+        {confirmAction === null ? null : CONFIRM[confirmAction.action].body}
       </Dialog>
 
       <Dialog
@@ -203,7 +310,13 @@ export function ConsoleApp(): JSX.Element {
         return <ModelsPage />;
       case 'plugins':
         return configuring === null ? (
-          <PluginsPage {...shared} onOpenConfig={(plugin) => openConfig(plugin)} />
+          <PluginsPage
+            {...shared}
+            onOpenConfig={(plugin) => openConfig(plugin)}
+            onOpenPermissions={() => select('permissions')}
+            pending={pluginActions.pending}
+            onAction={requestPluginAction}
+          />
         ) : (
           <PluginConfigPanel
             key={ownerKey(configuring.owner)}

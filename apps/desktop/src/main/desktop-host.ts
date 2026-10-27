@@ -2,6 +2,7 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { createHostPermissions } from './host-permissions.js';
 import { checkHostReadiness } from './host-readiness.js';
+import { removeUserPlugin } from './plugin-removal.js';
 import type { PermissionService, PermissionControl } from '@pet/host-kernel';
 import {
   RemoteRuntimeDriver,
@@ -56,6 +57,7 @@ export class DesktopHost {
     builtinDirectory: string;
     userDirectory: string;
     cipher?: SecretCipher;
+    protectedPackages?: Readonly<Record<string, string>>;
   }): Promise<DesktopHost> {
     await mkdir(options.userDirectory, { recursive: true });
     const roots: DiscoveryRoot[] = [
@@ -109,9 +111,18 @@ export class DesktopHost {
     const dataDirectories = new PluginDataDirectories(dataRoot);
     const manager = new PluginManager({
       driver,
+      ...(options.protectedPackages ? { protectedPackages: options.protectedPackages } : {}),
       trust: async (snapshot) => permission.isTrusted(snapshot.owner),
       hostApiVersion: '1.0.0',
       platform: 'win32-x64',
+      removeInstallation: async (snapshot, installation) => {
+        if (!(await removeUserPlugin(options.userDirectory, snapshot, installation))) return false;
+        permission.forget({
+          pluginId: snapshot.owner.pluginId,
+          instanceId: snapshot.owner.instanceId,
+        });
+        return true;
+      },
       readiness: (snapshot, candidate) =>
         checkHostReadiness(
           snapshot.owner,

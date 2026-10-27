@@ -1,0 +1,178 @@
+{
+  "status": "passed",
+  "at": "2026-10-27T13:35:55.773Z",
+  "bridgeOnly": true,
+  "sandboxOverride": true,
+  "checks": [
+    "real-owned-window-and-payload-boundary",
+    "protected-host-rejects-stop-and-removal",
+    "real-configured-enable-and-stale-owner-rejection",
+    "untrusted-plugin-is-not-approved",
+    "owner-contributions-cleaned-on-disable",
+    "real-package-uninstalled",
+    "uninstall-retains-config-data-vault-and-revokes-trust",
+    "removed-code-is-not-rediscovered"
+  ],
+  "errors": [],
+  "screenshots": [],
+  "themes": [],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "platform": "win32"
+  },
+  "finalSnapshot": {
+    "version": 1,
+    "host": {
+      "version": 1,
+      "runtime": "ready",
+      "installedPlugins": 3,
+      "activePlugins": 1,
+      "unreadyPlugins": 1,
+      "pendingRestartPlugins": 0,
+      "runningTasks": 0,
+      "pendingWork": 0
+    },
+    "app": {
+      "name": "AI 桌宠",
+      "version": "0.0.0",
+      "electron": "45.0.0",
+      "node": "24.22.0",
+      "platform": "win32-x64"
+    },
+    "contributions": [
+      {
+        "owner": {
+          "pluginId": "test.manage-core",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "id": "run",
+        "kind": "command",
+        "title": "示例命令"
+      },
+      {
+        "owner": {
+          "pluginId": "test.manage-core",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "id": "quick",
+        "kind": "shortcut-button",
+        "title": "示例按钮"
+      },
+      {
+        "owner": {
+          "pluginId": "test.manage-core",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "id": "key",
+        "kind": "hotkey",
+        "title": "示例快捷键"
+      },
+      {
+        "owner": {
+          "pluginId": "test.manage-core",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "id": "settings",
+        "kind": "settings",
+        "title": "示例设置"
+      },
+      {
+        "owner": {
+          "pluginId": "test.manage-core",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "id": "panel",
+        "kind": "panel",
+        "title": "示例面板"
+      }
+    ],
+    "plugins": [
+      {
+        "owner": {
+          "pluginId": "test.manage-core",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "name": "受保护基础插件",
+        "version": "1.0.0",
+        "state": "active",
+        "origin": "builtin",
+        "protected": true,
+        "permissions": []
+      },
+      {
+        "owner": {
+          "pluginId": "test.manage-blocked",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "name": "待确认来源插件",
+        "version": "1.0.0",
+        "state": "unready",
+        "origin": "user",
+        "protected": false,
+        "permissions": [
+          {
+            "kind": "microphone"
+          },
+          {
+            "kind": "network",
+            "origins": [
+              "https://example.com"
+            ]
+          },
+          {
+            "kind": "credentials",
+            "keys": [
+              "key-ref"
+            ]
+          },
+          {
+            "kind": "files",
+            "scope": "plugin-data",
+            "access": "read-write"
+          },
+          {
+            "kind": "clipboard",
+            "access": "read"
+          }
+        ],
+        "reason": {
+          "code": "permission-denied",
+          "messageKey": "errors.permission-denied",
+          "retryable": false
+        }
+      },
+      {
+        "owner": {
+          "pluginId": "test.manage-fail",
+          "instanceId": "default",
+          "generation": 1
+        },
+        "name": "首次失败插件",
+        "version": "1.0.0",
+        "state": "disabled",
+        "origin": "user",
+        "protected": false,
+        "permissions": []
+      }
+    ]
+  },
+  "artifacts": {
+    "apps/desktop/dist/main/index.mjs": "5fd0b397d29af1043d398f8c1409eef0f9f9bd89efbd0456ee5d1f53c68af09e",
+    "apps/desktop/dist/preload/index.cjs": "2e5e59691f17e1794899874782921398a501a99157d3d4ada4b28d95703f27e8",
+    "apps/desktop/dist/renderer/console/index.html": "7a7a4599948334d51b8c72f6ddd3679ba1a19a0b631062541bf3cc41bd13f58c",
+    "apps/desktop/dist/renderer/console/assets/index-BnLmzRgc.css": "eec1e5a87ac44ed0466831d1e22e0302cc21c7ae432538d9ba4cfe0a4b425a71",
+    "apps/desktop/dist/renderer/console/assets/index-CQN4PGkK.js": "9c0e4c395466cf005f9b67f8da62fa7893dc19df6fa86019c62213aa6a1f8b4e"
+  },
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

@@ -5,6 +5,7 @@ import {
   type PluginManager,
   type TaskSupervisor,
   type DiscoveredPlugin,
+  type InstanceIdentity,
 } from '@pet/host-kernel';
 export function createHostPermissions(reference: {
   manager?: PluginManager;
@@ -43,6 +44,13 @@ export function createHostPermissions(reference: {
         manifest: candidate.manifest,
         digest,
       });
+    },
+    forget: (identity: InstanceIdentity) => {
+      const key = JSON.stringify([identity.pluginId, identity.instanceId]);
+      const source = catalog.get(key);
+      if (source) kernel.control.confirmTrust(identity, source.digest, false);
+      kernel.control.revoke(identity);
+      catalog.delete(key);
     },
     isTrusted: (owner: OwnerRef) => {
       const source = describe(owner);

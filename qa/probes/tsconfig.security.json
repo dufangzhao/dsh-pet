@@ -24,6 +24,7 @@
     "console-host-smoke.ts",
     "contribution-runtime-smoke.ts",
     "console-ui-host.ts",
-    "config-ui-host.ts"
+    "config-ui-host.ts",
+    "plugin-ui-host.ts"
   ]
 }

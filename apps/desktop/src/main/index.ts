@@ -14,6 +14,7 @@ import { ConsoleWindow } from './windows/console-window.js';
 import { consoleSnapshot } from './console-snapshot.js';
 import { handleConsoleRequest } from './console-request.js';
 import { handleConsoleConfigRequest } from './console-config-request.js';
+import { ConsolePluginRequests } from './console-plugin-request.js';
 import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { HostStatusRequests } from './host-request.js';
@@ -65,6 +66,7 @@ function quitWithCode(code: number): void {
   ipcMain.removeHandler(CONSOLE_IPC.stopAll);
   ipcMain.removeHandler(CONSOLE_IPC.inspectConfig);
   ipcMain.removeHandler(CONSOLE_IPC.saveConfig);
+  ipcMain.removeHandler(CONSOLE_IPC.pluginAction);
   settings.close();
   controller?.dispose();
   void (async () => {
@@ -142,21 +144,25 @@ const startup = app
         settings.open().then(() => null),
       ),
     );
+    const snapshot = () =>
+      consoleSnapshot(
+        host!.status(),
+        host!.manager.list(),
+        {
+          name: 'AI 桌宠',
+          version: app.getVersion(),
+          electron: process.versions.electron!,
+          node: process.versions.node,
+          platform: process.platform + '-' + process.arch,
+        },
+        host!.manager.contributions(),
+      );
     ipcMain.handle(CONSOLE_IPC.snapshot, (event, ...args: unknown[]) =>
-      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () =>
-        consoleSnapshot(
-          host!.status(),
-          host!.manager.list(),
-          {
-            name: 'AI 桌宠',
-            version: app.getVersion(),
-            electron: process.versions.electron!,
-            node: process.versions.node,
-            platform: process.platform + '-' + process.arch,
-          },
-          host!.manager.contributions(),
-        ),
-      ),
+      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, snapshot),
+    );
+    const pluginRequests = new ConsolePluginRequests(host!, snapshot);
+    ipcMain.handle(CONSOLE_IPC.pluginAction, (event, ...args: unknown[]) =>
+      pluginRequests.handle(windowSource(event, settings.current, consoleUrl), args),
     );
     ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
       handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () =>

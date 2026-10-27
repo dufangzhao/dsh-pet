@@ -4,6 +4,10 @@ import { makeError, type ConsoleSnapshot, type Result } from '@pet/contracts';
 const config = {
   inspectConfig: vi.fn(async () => ({ ok: false as const, error: makeError('not-ready', false) })),
   saveConfig: vi.fn(async () => ({ ok: false as const, error: makeError('conflict', false) })),
+  runPluginAction: vi.fn(async () => ({
+    ok: true as const,
+    value: { snapshot, operationError: null },
+  })),
 };
 const snapshot: ConsoleSnapshot = {
   version: 1,
@@ -31,6 +35,7 @@ it('exposes only the snapshot and stop actions on a frozen bridge', async () => 
     'stopAll',
     'inspectConfig',
     'saveConfig',
+    'runPluginAction',
   ]);
   expect(await bridge.getSnapshot()).toEqual({ ok: true, value: snapshot });
   const call = bridge.getSnapshot as (...args: unknown[]) => Promise<Result<ConsoleSnapshot>>;
@@ -72,6 +77,33 @@ it('forwards one settings payload, preserves conflicts and rejects wrong arity',
     });
   }
 });
+it('forwards one management request and its operation error without wrapping it again', async () => {
+  const request = {
+    owner: { pluginId: 'test.config', instanceId: 'default', generation: 1 },
+    action: 'enable' as const,
+  };
+  const run = vi.fn(async () => ({
+    ok: true as const,
+    value: { snapshot, operationError: makeError('permission-denied', false) },
+  }));
+  const bridge = createConsoleBridge(
+    async () => ({ ok: true, value: snapshot }),
+    async () => ({ ok: true, value: snapshot.host }),
+    { ...config, runPluginAction: run },
+  );
+  expect(await bridge.runPluginAction(request)).toMatchObject({
+    ok: true,
+    value: { operationError: { code: 'permission-denied' }, snapshot },
+  });
+  expect(run).toHaveBeenCalledWith(request);
+  const invoke = bridge.runPluginAction as (...args: unknown[]) => Promise<unknown>;
+  expect(await invoke()).toMatchObject({ ok: false, error: { code: 'invalid-input' } });
+  expect(await invoke(request, 'extra')).toMatchObject({
+    ok: false,
+    error: { code: 'invalid-input' },
+  });
+  expect(run).toHaveBeenCalledOnce();
+});
 it('exposes only a frozen settings launcher', async () => {
   const invoke = vi.fn(async () => ({ ok: true as const, value: null })),
     bridge = createSettingsLauncher(invoke);
@@ -87,15 +119,31 @@ it('maps failed transport to one fixed error', async () => {
     throw new Error('PRIVATE_TRANSPORT');
   };
   for (const result of [
-    await createConsoleBridge(fail, fail, { inspectConfig: fail, saveConfig: fail }).getSnapshot(),
-    await createConsoleBridge(fail, fail, { inspectConfig: fail, saveConfig: fail }).stopAll(),
+    await createConsoleBridge(fail, fail, {
+      inspectConfig: fail,
+      saveConfig: fail,
+      runPluginAction: fail,
+    }).getSnapshot(),
+    await createConsoleBridge(fail, fail, {
+      inspectConfig: fail,
+      saveConfig: fail,
+      runPluginAction: fail,
+    }).stopAll(),
     await createSettingsLauncher(fail).open(),
-    await createConsoleBridge(fail, fail, { inspectConfig: fail, saveConfig: fail }).inspectConfig({
+    await createConsoleBridge(fail, fail, {
+      inspectConfig: fail,
+      saveConfig: fail,
+      runPluginAction: fail,
+    }).inspectConfig({
       pluginId: 'test.config',
       instanceId: 'default',
       generation: 1,
     }),
-    await createConsoleBridge(fail, fail, { inspectConfig: fail, saveConfig: fail }).saveConfig({
+    await createConsoleBridge(fail, fail, {
+      inspectConfig: fail,
+      saveConfig: fail,
+      runPluginAction: fail,
+    }).saveConfig({
       owner: { pluginId: 'test.config', instanceId: 'default', generation: 1 },
       expectedRevision: 0,
       data: {},

@@ -5,6 +5,7 @@ import {
   type ConsoleSnapshot,
   type ConfigInspection,
   type ConfigSave,
+  type ConsolePluginChange,
   type HostStatus,
   type Result,
 } from '@pet/contracts';
@@ -62,6 +63,10 @@ contextBridge.exposeInMainWorld(
         ipcRenderer.invoke(CONSOLE_IPC.inspectConfig, owner) as Promise<Result<ConfigInspection>>,
       saveConfig: (request) =>
         ipcRenderer.invoke(CONSOLE_IPC.saveConfig, request) as Promise<Result<ConfigSave>>,
+      runPluginAction: (request) =>
+        ipcRenderer.invoke(CONSOLE_IPC.pluginAction, request) as Promise<
+          Result<ConsolePluginChange>
+        >,
     },
   ),
 );

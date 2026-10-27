@@ -29,7 +29,7 @@ void app.whenReady().then(async()=>{
   assert.equal(snapshot.ok,true);assert.equal(snapshot.value.host.runtime,'ready');assert.equal(snapshot.value.host.installedPlugins,2);assert.equal(snapshot.value.plugins.length,2);
   assert.equal(snapshot.value.plugins.some((p:{name:string})=>p.name==='用户示例'),true);
   assert.equal(JSON.stringify(snapshot).includes('private-entry.mjs'),false);assert.equal(JSON.stringify(snapshot).includes(__dirname),false);
-  assert.deepEqual(await first.webContents.executeJavaScript('Object.keys(window.petConsole)'),['version','getSnapshot','stopAll','inspectConfig','saveConfig']);
+  assert.deepEqual(await first.webContents.executeJavaScript('Object.keys(window.petConsole)'),['version','getSnapshot','stopAll','inspectConfig','saveConfig','runPluginAction']);
   assert.equal(await first.webContents.executeJavaScript('Object.isFrozen(window.petConsole)'),true);
   assert.equal((await first.webContents.executeJavaScript('window.petConsole.getSnapshot(1)')).error.code,'invalid-input');
   const stopped=await first.webContents.executeJavaScript('window.petConsole.stopAll()');assert.equal(stopped.ok,true);assert.equal(stopped.value.runningTasks,0);assert.equal(stopped.value.runtime,'ready');assert.equal((await first.webContents.executeJavaScript('window.petConsole.stopAll(1)')).error.code,'invalid-input');

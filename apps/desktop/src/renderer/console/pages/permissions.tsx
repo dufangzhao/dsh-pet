@@ -1,11 +1,11 @@
-import type { ConsoleSnapshot, PermissionDeclaration } from '@pet/contracts';
+import type { ConsoleSnapshot } from '@pet/contracts';
 import type { JSX } from 'react';
 
 import { EmptyState, List, ListItem, Section } from '@pet/ui-kit';
 
 import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
-import { ownerKey } from '../labels.js';
+import { describePermission, ownerKey } from '../labels.js';
 
 export interface PermissionsPageProps {
   snapshot: ConsoleSnapshot | null;
@@ -55,36 +55,15 @@ function collect(snapshot: ConsoleSnapshot): DeclaredPermission[] {
   );
 }
 
-/** 一件权限声明的人话描述；具体参数（来源、键名）一并列出，因为是只读展示。 */
-function describePermission(permission: PermissionDeclaration): string {
-  switch (permission.kind) {
-    case 'capability-use':
-      return `使用能力 ${permission.capability}`;
-    case 'microphone':
-      return '使用麦克风';
-    case 'screen-capture':
-      return '截取屏幕';
-    case 'text-input':
-      return '模拟键盘输入';
-    case 'network':
-      return `访问网络：${permission.origins.join('、')}`;
-    case 'credentials':
-      return `使用凭据：${permission.keys.join('、')}`;
-    case 'files':
-      return `访问文件（${permission.scope}，${permission.access}）`;
-    case 'process':
-      return `启动工作进程：${permission.workers.join('、')}`;
-    case 'clipboard':
-      return `读写剪贴板（${permission.access}）`;
-  }
-}
-
 function PermissionContent({ snapshot }: { snapshot: ConsoleSnapshot }): JSX.Element {
   const declared = collect(snapshot);
 
   return (
     <>
-      <Section title="插件声明">
+      <Section
+        title="插件声明"
+        description="这是插件提出的请求，不是已经得到的授权。当前版本还没有授权对话框：需要审批的能力一律拒绝。"
+      >
         {declared.length === 0 ? (
           <EmptyState
             title="没有插件声明权限"

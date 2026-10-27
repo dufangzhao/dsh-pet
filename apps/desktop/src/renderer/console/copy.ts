@@ -8,6 +8,12 @@ export function describeError(error: KernelError): string {
 /** 调用被拒绝（Promise reject）时的统一文案：桥本身没按约定返回 Result。 */
 export const CALL_REJECTED = '设置台没有响应，请稍后重试。';
 
+/**
+ * 写操作没能确认结果时替换掉整页数据：旧快照可能已经和宿主不一致，
+ * 继续展示等于把过期状态当成现状。只有重新读取能恢复。
+ */
+export const UNCERTAIN = '结果未确认，请重新读取插件状态。';
+
 export const COPY = {
   appName: 'AI 桌宠',
   contentSkip: '跳到主要内容',
@@ -22,6 +28,15 @@ export const COPY = {
   /** 插件行里打开配置的入口；配置面板里回到列表用 backToPlugins。 */
   config: '配置',
   backToPlugins: '返回插件列表',
+  enable: '启用',
+  disable: '停用',
+  uninstall: '卸载',
+  enabling: '正在启用…',
+  disabling: '正在停用…',
+  uninstalling: '正在卸载…',
+  retryEnable: '重试启用',
+  repairConfig: '查看配置',
+  goPermissions: '前往权限与数据',
   discardTitle: '放弃未保存的改动？',
   discardBody: '离开这个页面会丢掉还没有保存的配置。',
   discardConfirm: '放弃改动',

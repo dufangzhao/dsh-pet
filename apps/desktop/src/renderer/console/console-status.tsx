@@ -13,8 +13,11 @@ export interface ConsoleStatusProps {
 }
 
 /**
- * 三态外壳：缺桥、加载中、读取失败都给出简短说明，只有拿到真实数据才渲染 children。
- * 失败时明确说明失败原因，不把空数据渲染成“正常”。
+ * 三态外壳：缺桥、加载中、数据不可信都给出简短说明，只有拿到真实数据才渲染 children。
+ *
+ * error 有两个来源：读取失败，以及写操作没能确认结果（旧快照可能已经过期）。
+ * 两者对用户是同一件事——手上的数据不能代表现状——所以共用这个外壳；
+ * 具体原因由 description 说明，标题不再断言"读取"失败。
  */
 export function ConsoleStatus({
   loading,
@@ -32,7 +35,7 @@ export function ConsoleStatus({
   if (error !== null) {
     return (
       <EmptyState
-        title="读取失败"
+        title="状态不可用"
         description={error}
         action={
           <Button onClick={onRetry} disabled={loading}>

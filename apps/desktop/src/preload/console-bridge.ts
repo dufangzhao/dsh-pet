@@ -29,7 +29,7 @@ function unary<A, T>(invoke: (input: A) => Promise<Result<T>>) {
 export function createConsoleBridge(
   read: () => Promise<Result<ConsoleSnapshot>>,
   stop: () => Promise<Result<HostStatus>>,
-  config: Pick<ConsoleBridge, 'inspectConfig' | 'saveConfig'>,
+  config: Pick<ConsoleBridge, 'inspectConfig' | 'saveConfig' | 'runPluginAction'>,
 ): ConsoleBridge {
   return Object.freeze({
     version: 1 as const,
@@ -37,6 +37,7 @@ export function createConsoleBridge(
     stopAll: parameterless(stop),
     inspectConfig: unary(config.inspectConfig),
     saveConfig: unary(config.saveConfig),
+    runPluginAction: unary(config.runPluginAction),
   });
 }
 export function createSettingsLauncher(open: () => Promise<Result<null>>): SettingsLauncher {

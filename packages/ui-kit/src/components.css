@@ -96,6 +96,31 @@
   color: var(--pk-muted);
 }
 
+/*
+ * 不可撤销操作的确认按钮：借用危险色做描边与文字，不做实心填充。
+ * 实心红会抢走整页注意力，而这个按钮始终出现在确认框里，上下文已说明风险；
+ * --pk-danger 在两种主题下都是可读的前景色。
+ */
+.pk-button--danger {
+  background: transparent;
+  border-color: var(--pk-danger);
+  color: var(--pk-danger);
+}
+
+.pk-button--danger:hover {
+  background: var(--pk-danger-soft);
+}
+
+.pk-button--danger:active {
+  background: var(--pk-danger-soft);
+}
+
+.pk-button--danger:disabled {
+  background: transparent;
+  border-color: var(--pk-border);
+  color: var(--pk-muted);
+}
+
 .pk-button--small {
   min-height: 26px;
   padding: 0 8px;
@@ -204,7 +229,7 @@
   color: var(--pk-muted);
 }
 
-/* 等宽数字，纵向扫读时编号不会跳动。 */
+/* 右侧的短信息，等宽数字排版，纵向扫读时编号不会跳动。 */
 .pk-list__meta {
   font-size: 13px;
   color: var(--pk-muted);

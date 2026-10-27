@@ -7,6 +7,16 @@ import type { ContributionKind } from './contribution.js';
 import type { ConfigInspection, ConfigSave } from './config.js';
 import type { JsonObject } from './json.js';
 
+export type ConsolePluginAction = 'enable' | 'disable' | 'uninstall';
+export interface ConsolePluginRequest {
+  readonly owner: OwnerRef;
+  readonly action: ConsolePluginAction;
+}
+export interface ConsolePluginChange {
+  readonly snapshot: ConsoleSnapshot;
+  /** A valid request can fail after changing lifecycle state; always apply its snapshot. */
+  readonly operationError: KernelError | null;
+}
 export interface ConsoleConfigSaveRequest {
   readonly owner: OwnerRef;
   /** Zero creates the first record; positive revisions compare an existing record. */
@@ -25,6 +35,7 @@ export const CONSOLE_IPC = {
   stopAll: 'console:v1:stop-all',
   inspectConfig: 'console:v1:inspect-config',
   saveConfig: 'console:v1:save-config',
+  pluginAction: 'console:v1:plugin-action',
 } as const;
 export interface ConsolePlugin {
   readonly owner: OwnerRef;
@@ -55,6 +66,7 @@ export interface ConsoleBridge {
   stopAll(): Promise<Result<HostStatus>>;
   inspectConfig(owner: OwnerRef): Promise<Result<ConfigInspection>>;
   saveConfig(request: ConsoleConfigSaveRequest): Promise<Result<ConfigSave>>;
+  runPluginAction(request: ConsolePluginRequest): Promise<Result<ConsolePluginChange>>;
 }
 export interface SettingsLauncher {
   open(): Promise<Result<null>>;
