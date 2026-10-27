@@ -4,6 +4,15 @@ import type { OwnerRef } from './ids.js';
 import type { PluginLifecycleState } from './lifecycle.js';
 import type { PermissionDeclaration } from './permission.js';
 import type { ContributionKind } from './contribution.js';
+import type { ConfigInspection, ConfigSave } from './config.js';
+import type { JsonObject } from './json.js';
+
+export interface ConsoleConfigSaveRequest {
+  readonly owner: OwnerRef;
+  /** Zero creates the first record; positive revisions compare an existing record. */
+  readonly expectedRevision: number;
+  readonly data: JsonObject;
+}
 export interface ConsoleContribution {
   readonly owner: OwnerRef;
   readonly id: string;
@@ -14,6 +23,8 @@ export const CONSOLE_IPC = {
   snapshot: 'console:v1:snapshot',
   open: 'console:v1:open',
   stopAll: 'console:v1:stop-all',
+  inspectConfig: 'console:v1:inspect-config',
+  saveConfig: 'console:v1:save-config',
 } as const;
 export interface ConsolePlugin {
   readonly owner: OwnerRef;
@@ -42,6 +53,8 @@ export interface ConsoleBridge {
   readonly version: 1;
   getSnapshot(): Promise<Result<ConsoleSnapshot>>;
   stopAll(): Promise<Result<HostStatus>>;
+  inspectConfig(owner: OwnerRef): Promise<Result<ConfigInspection>>;
+  saveConfig(request: ConsoleConfigSaveRequest): Promise<Result<ConfigSave>>;
 }
 export interface SettingsLauncher {
   open(): Promise<Result<null>>;

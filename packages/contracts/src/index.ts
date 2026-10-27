@@ -27,3 +27,4 @@ export * from './media.js';
 export * from './control.js';
 export * from './host-status.js';
 export * from './console.js';
+export * from './config.js';

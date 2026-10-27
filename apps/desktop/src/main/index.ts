@@ -13,6 +13,7 @@ import { CONSOLE_IPC, HOST_IPC, PET_IPC, makeError, type PetSnapshot } from '@pe
 import { ConsoleWindow } from './windows/console-window.js';
 import { consoleSnapshot } from './console-snapshot.js';
 import { handleConsoleRequest } from './console-request.js';
+import { handleConsoleConfigRequest } from './console-config-request.js';
 import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { HostStatusRequests } from './host-request.js';
@@ -62,6 +63,8 @@ function quitWithCode(code: number): void {
   ipcMain.removeHandler(CONSOLE_IPC.open);
   ipcMain.removeHandler(CONSOLE_IPC.snapshot);
   ipcMain.removeHandler(CONSOLE_IPC.stopAll);
+  ipcMain.removeHandler(CONSOLE_IPC.inspectConfig);
+  ipcMain.removeHandler(CONSOLE_IPC.saveConfig);
   settings.close();
   controller?.dispose();
   void (async () => {
@@ -160,6 +163,18 @@ const startup = app
         host!.stopAll(),
       ),
     );
+    for (const [channel, action] of [
+      [CONSOLE_IPC.inspectConfig, 'inspect'],
+      [CONSOLE_IPC.saveConfig, 'save'],
+    ] as const)
+      ipcMain.handle(channel, (event, ...args: unknown[]) =>
+        handleConsoleConfigRequest(
+          windowSource(event, settings.current, consoleUrl),
+          action,
+          args,
+          host!,
+        ),
+      );
     for (const channel of channels)
       ipcMain.handle(channel, (event, ...args: unknown[]) => {
         try {

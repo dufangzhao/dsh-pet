@@ -60,7 +60,7 @@ try {
   assert.ok(actionTops.every(top => top > titleBottom), 'Global actions must not sit above or beside the page title');
   report.checks.push('idle-console-has-no-global-actions');
   const bridge = await page.evaluate(() => ({ frozen: Object.isFrozen(window.petConsole), keys: Object.keys(window.petConsole), require: typeof window.require, process: typeof window.process }));
-  assert.deepEqual(bridge, { frozen: true, keys: ['version','getSnapshot','stopAll'], require: 'undefined', process: 'undefined' });
+  assert.deepEqual(bridge, { frozen: true, keys: ['version','getSnapshot','stopAll','inspectConfig','saveConfig'], require: 'undefined', process: 'undefined' });
   const unauthorized = await pet.evaluate(() => window.petConsole.stopAll());
   assert.equal(unauthorized.ok, false);
   assert.equal(unauthorized.error.code, 'permission-denied');

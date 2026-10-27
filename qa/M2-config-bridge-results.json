@@ -1,0 +1,227 @@
+{
+  "status": "passed",
+  "at": "2026-10-27T11:57:04.882Z",
+  "bridgeOnly": true,
+  "sandboxOverride": true,
+  "checks": [
+    "real-disabled-plugin-first-inspection-is-pure-data-and-does-not-write",
+    "real-preload-stale-owner-invalid-candidate-and-foreign-window-rejected",
+    "same-window-with-changed-url-cannot-inspect-or-write",
+    "real-preload-first-save-and-concurrent-cas-one-winner",
+    "real-file-reopen-persists-and-bad-or-old-record-never-becomes-empty"
+  ],
+  "errors": [],
+  "screenshots": [],
+  "themes": [],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "platform": "win32"
+  },
+  "artifacts": {
+    "apps/desktop/dist/main/index.mjs": "921cbd5a1c4ec31b83bdc64c8cbd45ce7213336fbddfa360d449b63dfeb1e3d9",
+    "apps/desktop/dist/preload/index.cjs": "92f5be3998c917e5bd289074e64e4359adebaf6585818dbfe8e718f4a182940b",
+    "apps/desktop/dist/renderer/console/index.html": "0fd51560579a0f50b3b64616eaa62ee447e5acbda81a4f3d496aa9ed47f8d7a8",
+    "apps/desktop/dist/renderer/console/assets/index-18yUYxt1.js": "875f480ce66365241e7bb2d4649ee587d072d0791ea1781140b442eda2ef0536",
+    "apps/desktop/dist/renderer/console/assets/index-DvebpfOW.css": "66ddc1f38f052720a1daa7c73ad06bf6a3e5306baab68d93c3862ba18b90f41d"
+  },
+  "finalInspection": {
+    "ok": true,
+    "value": {
+      "definition": {
+        "version": 1,
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "engine",
+            "options",
+            "tags",
+            "credential",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "显示名称",
+              "minLength": 2,
+              "maxLength": 12
+            },
+            "engine": {
+              "type": "string",
+              "title": "识别模型",
+              "enum": [
+                "sensevoice",
+                "paraformer"
+              ],
+              "default": "sensevoice",
+              "maxLength": 4096
+            },
+            "options": {
+              "type": "object",
+              "title": "识别选项",
+              "additionalProperties": false,
+              "required": [
+                "enabled",
+                "threads"
+              ],
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "启用",
+                  "default": false
+                },
+                "threads": {
+                  "type": "integer",
+                  "title": "线程数",
+                  "default": 2,
+                  "minimum": 1,
+                  "maximum": 4
+                }
+              }
+            },
+            "tags": {
+              "type": "array",
+              "title": "词条",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "default": [
+                "桌宠"
+              ],
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10
+              }
+            },
+            "credential": {
+              "type": "string",
+              "title": "服务凭据引用",
+              "format": "credential-ref",
+              "enum": [
+                "asr-key"
+              ],
+              "default": "asr-key",
+              "maxLength": 4096
+            },
+            "note": {
+              "type": "string",
+              "title": "备注",
+              "maxLength": 20
+            },
+            "ratio": {
+              "type": "number",
+              "title": "比例",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "empty": {
+              "type": "null",
+              "title": "空值项"
+            },
+            "version": {
+              "type": "string",
+              "title": "配置版本",
+              "const": "m2",
+              "default": "m2",
+              "maxLength": 4096
+            }
+          }
+        },
+        "defaults": {
+          "engine": "sensevoice",
+          "tags": [
+            "桌宠"
+          ],
+          "credential": "asr-key",
+          "version": "m2"
+        },
+        "fields": [
+          {
+            "pointer": "/name",
+            "type": "string",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/engine",
+            "type": "string",
+            "apply": "reload"
+          },
+          {
+            "pointer": "/options",
+            "type": "object",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/options/enabled",
+            "type": "boolean",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/options/threads",
+            "type": "integer",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/tags",
+            "type": "array",
+            "apply": "restart"
+          },
+          {
+            "pointer": "/credential",
+            "type": "string",
+            "apply": "reload"
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/ratio",
+            "type": "number",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/empty",
+            "type": "null",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/version",
+            "type": "string",
+            "apply": "immediate"
+          }
+        ]
+      },
+      "snapshot": {
+        "pluginId": "test.schema-form",
+        "instanceId": "default",
+        "schemaVersion": 1,
+        "revision": 2,
+        "data": {
+          "name": "并发配置甲",
+          "engine": "sensevoice",
+          "options": {
+            "enabled": false,
+            "threads": 2
+          },
+          "tags": [
+            "桌宠"
+          ],
+          "credential": "asr-key",
+          "version": "m2"
+        }
+      }
+    }
+  },
+  "recordFiles": [
+    "a50b44300b7ddb4046c7468db4b7e8eb644eebedc7f6da51356478a815a1f444.config.json"
+  ],
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

@@ -3,6 +3,8 @@ import {
   CONSOLE_IPC,
   HOST_IPC,
   type ConsoleSnapshot,
+  type ConfigInspection,
+  type ConfigSave,
   type HostStatus,
   type Result,
 } from '@pet/contracts';
@@ -55,6 +57,12 @@ contextBridge.exposeInMainWorld(
   createConsoleBridge(
     () => ipcRenderer.invoke(CONSOLE_IPC.snapshot) as Promise<Result<ConsoleSnapshot>>,
     () => ipcRenderer.invoke(CONSOLE_IPC.stopAll) as Promise<Result<HostStatus>>,
+    {
+      inspectConfig: (owner) =>
+        ipcRenderer.invoke(CONSOLE_IPC.inspectConfig, owner) as Promise<Result<ConfigInspection>>,
+      saveConfig: (request) =>
+        ipcRenderer.invoke(CONSOLE_IPC.saveConfig, request) as Promise<Result<ConfigSave>>,
+    },
   ),
 );
 contextBridge.exposeInMainWorld(

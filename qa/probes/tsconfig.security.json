@@ -23,6 +23,7 @@
     "task-settlement-smoke.ts",
     "console-host-smoke.ts",
     "contribution-runtime-smoke.ts",
-    "console-ui-host.ts"
+    "console-ui-host.ts",
+    "config-ui-host.ts"
   ]
 }

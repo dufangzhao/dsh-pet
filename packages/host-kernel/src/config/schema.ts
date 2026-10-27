@@ -1,6 +1,7 @@
 import {
   makeError,
   type ConfigApplyMode,
+  type ConfigDefinition,
   type JsonObject,
   type JsonValue,
   type Result,
@@ -8,16 +9,8 @@ import {
 import { jsonPreflight } from '@pet/contracts/validation';
 import { freezeJson } from '../runtime/identity.js';
 export const CONFIG_MAX_VALUE_BYTES = 48 * 1024;
-export interface ConfigField {
-  readonly pointer: string;
-  readonly type: string;
-  readonly apply: ConfigApplyMode;
-}
-export interface PreparedConfigDefinition {
-  readonly version: number;
-  readonly schema: JsonObject;
-  readonly defaults: JsonObject;
-  readonly fields: readonly ConfigField[];
+export type { ConfigField } from '@pet/contracts';
+export interface PreparedConfigDefinition extends ConfigDefinition {
   validate(value: unknown): Result<JsonObject>;
   changeMode(before: JsonObject, after: JsonObject): ConfigApplyMode | null;
 }

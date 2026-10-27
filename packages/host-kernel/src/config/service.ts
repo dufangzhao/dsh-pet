@@ -1,6 +1,8 @@
 import {
   makeError,
-  type ConfigApplyMode,
+  type ConfigInspection,
+  type ConfigSnapshot,
+  type ConfigSave,
   type JsonObject,
   type OwnerRef,
   type PluginManifest,
@@ -10,17 +12,7 @@ import { freezeJson, instanceKey, type InstanceIdentity } from '../runtime/ident
 import { ownerFrom } from '../runtime/worker-protocol.js';
 import { prepareConfigDefinition, type PreparedConfigDefinition } from './schema.js';
 import { configIdentity, type ConfigStore, type StoredConfig } from './store.js';
-export interface ConfigSnapshot {
-  readonly pluginId: string;
-  readonly instanceId: string;
-  readonly schemaVersion: number;
-  readonly revision: number;
-  readonly data: JsonObject;
-}
-export interface ConfigSave {
-  readonly snapshot: ConfigSnapshot;
-  readonly changeMode: ConfigApplyMode | null;
-}
+export type { ConfigSnapshot, ConfigSave } from '@pet/contracts';
 export type ConfigMigrator = (source: {
   readonly fromVersion: number;
   readonly toVersion: number;
@@ -118,7 +110,7 @@ export class ConfigService {
       if (this.#locks.get(key) === tail) this.#locks.delete(key);
     }
   }
-  async get(identity: InstanceIdentity): Promise<Result<ConfigSnapshot>> {
+  async inspect(identity: InstanceIdentity): Promise<Result<ConfigInspection>> {
     const id = configIdentity(identity);
     if (!id || this.#closed) return failure('not-ready');
     const definition = this.#definitions.get(instanceKey(id));
@@ -128,15 +120,29 @@ export class ConfigService {
       if (
         this.#closed ||
         this.#definitions.get(instanceKey(id)) !== definition ||
-        !value ||
-        value.schemaVersion !== definition.prepared.version ||
-        !definition.prepared.validate(value.data).ok
+        (value !== null &&
+          (value.schemaVersion !== definition.prepared.version ||
+            !definition.prepared.validate(value.data).ok))
       )
         return failure('not-ready');
-      return { ok: true, value: snap(value) };
+      const { version, schema, defaults, fields } = definition.prepared;
+      return {
+        ok: true,
+        value: freezeJson({
+          definition: { version, schema, defaults, fields },
+          snapshot: value === null ? null : snap(value),
+        }),
+      };
     } catch {
       return failure('unavailable');
     }
+  }
+  async get(identity: InstanceIdentity): Promise<Result<ConfigSnapshot>> {
+    const inspected = await this.inspect(identity);
+    if (!inspected.ok) return inspected;
+    return inspected.value.snapshot
+      ? { ok: true, value: inspected.value.snapshot }
+      : failure('not-ready');
   }
   initialize(identity: InstanceIdentity, signal?: AbortSignal): Promise<Result<ConfigSnapshot>> {
     return this.locked(
@@ -176,7 +182,7 @@ export class ConfigService {
   ): Promise<Result<ConfigSave>> {
     const id = configIdentity(identity),
       definition = id && this.#definitions.get(instanceKey(id));
-    if (!id || !definition || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1)
+    if (!id || !definition || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0)
       return Promise.resolve(failure('invalid-input'));
     const validated = definition.prepared.validate(input);
     if (!validated.ok) return Promise.resolve(validated);
@@ -186,22 +192,25 @@ export class ConfigService {
         if (current !== definition) return failure('not-ready');
         const previous = await this.store.read(id);
         if (
-          !previous ||
-          previous.revision !== expectedRevision ||
-          previous.schemaVersion !== current.prepared.version
+          previous &&
+          (previous.schemaVersion !== current.prepared.version ||
+            !current.prepared.validate(previous.data).ok)
         )
           return failure('not-ready');
-        const changeMode = current.prepared.changeMode(previous.data, validated.value);
-        if (changeMode === null)
+        if ((previous?.revision ?? 0) !== expectedRevision) return failure('conflict');
+        const changeMode = current.prepared.changeMode(previous?.data ?? {}, validated.value);
+        if (previous && changeMode === null)
           return { ok: true, value: { snapshot: snap(previous), changeMode: null } };
-        if (signal?.aborted) return failure('cancelled');
+        if (signal.aborted) return failure('cancelled');
         const value: StoredConfig = {
-          ...previous,
-          revision: previous.revision + 1,
+          format: 1,
+          ...id,
+          schemaVersion: current.prepared.version,
+          revision: expectedRevision + 1,
           data: validated.value,
         };
-        if (!(await this.store.compareAndSet(id, previous.revision, value, signal)))
-          return failure('not-ready');
+        if (!(await this.store.compareAndSet(id, previous?.revision ?? null, value, signal)))
+          return failure('conflict');
         return { ok: true, value: { snapshot: snap(value), changeMode } };
       },
       signal,

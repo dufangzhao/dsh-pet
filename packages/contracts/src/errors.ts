@@ -19,6 +19,7 @@ export const KERNEL_ERROR_CODES = [
   'internal',
   'permission-denied',
   'stale-owner',
+  'conflict',
 ] as const;
 
 export type KernelErrorCode = (typeof KERNEL_ERROR_CODES)[number];
@@ -42,6 +43,7 @@ export const ERROR_MESSAGES: Readonly<Record<KernelErrorCode, string>> = Object.
   internal: '内部错误',
   'permission-denied': '没有获得授权',
   'stale-owner': '插件实例已失效',
+  conflict: '配置已被更新，请重新读取后保存',
 });
 
 /** Whether a code is worth retrying when the caller does not decide explicitly. */
@@ -58,6 +60,7 @@ export const RETRYABLE_BY_DEFAULT: Readonly<Record<KernelErrorCode, boolean>> = 
   internal: false,
   'permission-denied': false,
   'stale-owner': false,
+  conflict: false,
 });
 
 export interface KernelError {

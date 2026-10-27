@@ -60,6 +60,7 @@ interface Entry {
   state: PluginLifecycleState;
   reason: KernelError | undefined;
   abort: AbortController;
+  ownerAbort: AbortController;
   session: RuntimeSession | undefined;
   enablePromise: Promise<Result<PluginSnapshot>> | undefined;
   stopPromise: Promise<boolean> | undefined;
@@ -172,6 +173,7 @@ export class PluginManager {
       state: 'disabled',
       reason: undefined,
       abort: new AbortController(),
+      ownerAbort: new AbortController(),
       session: undefined,
       enablePromise: undefined,
       stopPromise: undefined,
@@ -227,6 +229,13 @@ export class PluginManager {
     const e = this.#entries.get(instanceKey(owner));
     return e && sameOwner(e.owner, owner) ? e.abort.signal : null;
   }
+  /** Configuration survives stop, but no request may cross an owner generation. */
+  ownerSignal(owner: OwnerRef): AbortSignal | null {
+    const entry = this.#entries.get(instanceKey(owner));
+    return !this.#closing && entry && sameOwner(entry.owner, owner)
+      ? entry.ownerAbort.signal
+      : null;
+  }
   select(
     consumer: InstanceIdentity,
     capability: string,
@@ -266,6 +275,8 @@ export class PluginManager {
     entry.desired = true;
     entry.state = 'activating';
     entry.reason = undefined;
+    entry.ownerAbort.abort();
+    entry.ownerAbort = new AbortController();
     entry.abort = new AbortController();
     entry.stopPromise = undefined;
     entry.providers.clear();
@@ -459,6 +470,7 @@ export class PluginManager {
       e.state = 'disabled';
       return fail('unavailable');
     }
+    e.ownerAbort.abort();
     this.#entries.delete(instanceKey(e.owner));
     this.capabilities.forgetConsumer(e.owner);
     return { ok: true, value: null };
@@ -478,6 +490,7 @@ export class PluginManager {
   }
   async shutdown(): Promise<void> {
     this.#closing = true;
+    for (const entry of this.#entries.values()) entry.ownerAbort.abort();
     await Promise.all([...this.#entries.values()].map((e) => this.stop(e)));
   }
   async reconcile(): Promise<void> {

@@ -8,6 +8,7 @@
 | React 与工作区依赖 | 沿用 React19.3.1；UI-kit peer/开发依赖、desktop 引用和样式出口齐备；安装使用 --ignore-scripts |
 | M2-01 组件与主题 | [阶段一验收](M2-ui-kit.md)通过，包含 Dialog 焦点返修与真实截图 |
 | M2-02 七页设置台 | [阶段二验收](M2-console-ui.md)通过；本轮删除右上角工具栏，加入统一轻量动效与三态主题滑块，更新12张真实截图 |
+| M2-03 Schema 表单与保存 | 2026-10-27：配置首次保存、受控设置桥及世代取消回归通过，真实 Electron 桥检查通过；DeepSeek max 正在实现表单，见[阶段记录](M2-config.md) |
 | 设置窗口与预加载 | 正式设置台已接线；历史[临时探针](M2-console-host-results.json)只证明早期窗口和接口接线 |
 | M2-06 宿主贡献注册与清理 | [记录](M2-contributions.md)通过；本轮真实页面再次验证双插件十条贡献与按 owner 清理 |
 | M2-08 宿主停止命令 | [停止全部](M2-stop-all.md)通过；本轮真实页面验证确认/取消、重复激活、失败重试、pendingWork 与宿主继续运行；托盘未实现 |
