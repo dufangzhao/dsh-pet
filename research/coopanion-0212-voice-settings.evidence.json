@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-10-27T09:10:49.279Z",
+  "scope": "Read-only shipped artifacts, reference source and official documentation; no product implementation",
+  "implementationBaseline": "669da39",
+  "installed": {
+    "version": "0.2.12",
+    "root": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app",
+    "license": "AGPL-3.0-or-later",
+    "fingerprints": [
+      {
+        "path": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app/package.json",
+        "sha256": "6a26d83cad320983a61c131277c38c8fc327cecd0bd2534cb661e1aaf459d43e",
+        "bytes": 836,
+        "lineCount": 30
+      },
+      {
+        "path": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app/node_modules/cortico-world-desktop-pet/src/config.ts",
+        "sha256": "e34bc45597b1111492ab4456a72905d63c92e712c4a67271fa167ff1cc2a34f8",
+        "bytes": 23602,
+        "lineCount": 386
+      },
+      {
+        "path": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app/node_modules/cortico-world-desktop-pet/src/runtime/store.ts",
+        "sha256": "250a68b0a92f7eed9f536e0fb81410d96a9f053c41e4cd7e43e51ca57856c50e",
+        "bytes": 13448,
+        "lineCount": 292
+      },
+      {
+        "path": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app/node_modules/cortico-world-desktop-pet/src/asr/sherpa.ts",
+        "sha256": "650dfbfa0800a2cc2458229354aeef6dfdaf8a056db6484b128b0a377b72ea8a",
+        "bytes": 12035,
+        "lineCount": 286
+      },
+      {
+        "path": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app/node_modules/cortico-world-desktop-pet/src/world.ts",
+        "sha256": "ee723b5e80251f38a42c5a44e56a875a51ddb921792317e37dd4f75406e92472",
+        "bytes": 105934,
+        "lineCount": 2153
+      }
+    ]
+  },
+  "referenceCheckout": {
+    "version": "0.2.10",
+    "commit": "4afc70898ac1065dd4559d891a2ce0bebd1261f8",
+    "origin": "https://github.com/Pal-AI-Lab/Coopanion",
+    "workingTree": "clean at observation"
+  },
+  "sourceRanges": {
+    "engineSelection": [
+      "config.ts:131-155",
+      "config.ts:290-299",
+      "world.ts:644-667",
+      "world.ts:1370-1391"
+    ],
+    "modelSources": [
+      "runtime/store.ts:45-70",
+      "runtime/store.ts:200-292"
+    ],
+    "localRecognition": [
+      "asr/sherpa.ts:62-99",
+      "asr/sherpa.ts:123-133",
+      "asr/sherpa.ts:168-207"
+    ],
+    "referenceUi": [
+      "Coopanion/console/features/home/index.ts:50-180",
+      "Coopanion/console/features/home/model.ts:1-22",
+      "Coopanion/console/features/voice/index.ts:1-27"
+    ],
+    "firstConfiguration": [
+      "packages/host-kernel/src/config/service.ts:121-208",
+      "packages/host-kernel/src/config/store.ts:12-19",
+      "packages/host-kernel/src/config/store.ts:80-93"
+    ]
+  },
+  "officialSources": [
+    "https://k2-fsa.github.io/sherpa/onnx/javascript-api/install.html",
+    "https://raw.githubusercontent.com/FunAudioLLM/SenseVoice/main/README.md",
+    "https://raw.githubusercontent.com/modelscope/FunASR/main/MODEL_LICENSE",
+    "https://modelscope.cn/api/v1/models/pengzhendong/sherpa-onnx-sense-voice-zh-en-ja-ko-yue/repo/files?Revision=73eca47697f980daa3d16112404174b6b950b514&Recursive=true"
+  ],
+  "modelRecommendation": {
+    "source": "ModelScope first, fixed revision and SHA-256",
+    "runtime": "Existing sherpa-onnx-node 1.13.8",
+    "candidates": [
+      {
+        "id": "sensevoice-small-int8",
+        "bytes": 239549735,
+        "mode": "utterance/offline"
+      },
+      {
+        "id": "streaming-paraformer-zh-en-int8",
+        "bytes": 237202501,
+        "mode": "native streaming"
+      }
+    ]
+  },
+  "expertReviews": [
+    {
+      "expert": "AI Engineer",
+      "scope": "Local ASR and ModelScope research",
+      "status": "completed"
+    },
+    {
+      "expert": "Backend Architect",
+      "scope": "Configuration inspection and first-save review",
+      "status": "completed; recovered existing report after timeout"
+    }
+  ],
+  "rea": {
+    "version": "6.4.0",
+    "target": "C:/Users/ASUS/AppData/Local/Programs/Coopanion/resources/app/node_modules/cortico-world-desktop-pet",
+    "producerExitCode": 0,
+    "rawArtifact": ".cache/coopanion-0212-pet-rea.json",
+    "reviewed": false,
+    "limitation": "Full graph exceeds file-tool read budget; findings below rely on independently read source ranges, not unreviewed graph content."
+  },
+  "notPerformed": [
+    "front-end implementation",
+    "back-end implementation",
+    "Coopanion code or user-data modification",
+    "microphone recording",
+    "model download or fresh inference",
+    "real paid API calls",
+    "complete application reverse engineering"
+  ]
+}
