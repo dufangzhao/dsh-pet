@@ -19,4 +19,11 @@ export const COPY = {
   refreshing: '读取中…',
   themeLabel: '主题',
   advanced: '高级',
+  /** 插件行里打开配置的入口；配置面板里回到列表用 backToPlugins。 */
+  config: '配置',
+  backToPlugins: '返回插件列表',
+  discardTitle: '放弃未保存的改动？',
+  discardBody: '离开这个页面会丢掉还没有保存的配置。',
+  discardConfirm: '放弃改动',
+  discardCancel: '继续编辑',
 } as const;

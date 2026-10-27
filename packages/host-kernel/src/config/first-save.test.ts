@@ -113,6 +113,59 @@ it('never treats schema mismatch, invalid data or a read error as an empty confi
     error: { code: 'unavailable' },
   });
 });
+it('keeps publication outside an open inspection to avoid Windows replacement sharing failures', async () => {
+  const { service, store } = setup();
+  await service.save(id, { name: 'before' }, 0);
+  const write = vi.spyOn(store, 'compareAndSet'),
+    read = store.read.bind(store);
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const began = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  vi.spyOn(store, 'read').mockImplementationOnce(async (identity) => {
+    const value = await read(identity);
+    entered();
+    await gate;
+    return value;
+  });
+  const inspecting = service.inspect(id);
+  await began;
+  const saving = service.save(id, { name: 'after' }, 1);
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  const writesWhileReading = write.mock.calls.length;
+  release();
+  const [inspected, saved] = await Promise.all([inspecting, saving]);
+  expect(writesWhileReading).toBe(0);
+  expect(inspected).toMatchObject({ ok: true, value: { snapshot: { revision: 1 } } });
+  expect(saved).toMatchObject({ ok: true, value: { snapshot: { revision: 2 } } });
+});
+it('does not report a cancelled unchanged save as successful after a pending read', async () => {
+  const { service, store } = setup();
+  await service.save(id, { name: 'kept' }, 0);
+  const abort = new AbortController();
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const began = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const read = store.read.bind(store);
+  vi.spyOn(store, 'read').mockImplementationOnce(async (identity) => {
+    entered();
+    await gate;
+    return read(identity);
+  });
+  const pending = service.save(id, { name: 'kept' }, 1, abort.signal);
+  await began;
+  abort.abort();
+  release();
+  expect(await pending).toMatchObject({ ok: false, error: { code: 'cancelled' } });
+  expect((await store.read(id))?.revision).toBe(1);
+});
 it('does not create a first record after cancellation', async () => {
   const { service, store } = setup();
   const abort = new AbortController();

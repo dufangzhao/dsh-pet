@@ -1,0 +1,74 @@
+{
+  "status": "fixed",
+  "at": "2026-10-27T12:40:56.179Z",
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "platform": "win32"
+  },
+  "operation": "atomic configuration replacement",
+  "observed": [
+    {
+      "operation": "rename",
+      "code": "EPERM",
+      "file": "a50b44300b7ddb4046c7468db4b7e8eb644eebedc7f6da51356478a815a1f444.994bc101-537d-4402-a18b-3a505297db09.tmp",
+      "readersAtStart": 0,
+      "readersAtFailure": 1
+    }
+  ],
+  "serviceResult": {
+    "ok": false,
+    "error": {
+      "code": "unavailable",
+      "messageKey": "errors.unavailable",
+      "retryable": false
+    }
+  },
+  "remedy": "Serialize inspect and save with the existing per-instance ConfigService lock; no retries.",
+  "postFix": [
+    {
+      "attempt": 1,
+      "at": "2026-10-27T12:43:56.108Z",
+      "status": "passed",
+      "checks": 17,
+      "diagnostics": {
+        "saveCalls": 12,
+        "ioErrors": [],
+        "serviceFailures": []
+      }
+    },
+    {
+      "attempt": 2,
+      "at": "2026-10-27T12:44:01.375Z",
+      "status": "passed",
+      "checks": 17,
+      "diagnostics": {
+        "saveCalls": 12,
+        "ioErrors": [],
+        "serviceFailures": []
+      }
+    },
+    {
+      "attempt": 3,
+      "at": "2026-10-27T12:44:06.840Z",
+      "status": "passed",
+      "checks": 17,
+      "diagnostics": {
+        "saveCalls": 12,
+        "ioErrors": [],
+        "serviceFailures": []
+      }
+    },
+    {
+      "attempt": 4,
+      "at": "2026-10-27T12:44:12.033Z",
+      "status": "passed",
+      "checks": 17,
+      "diagnostics": {
+        "saveCalls": 12,
+        "ioErrors": [],
+        "serviceFailures": []
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-27T11:57:04.882Z",
+  "at": "2026-10-27T12:49:11.173Z",
   "bridgeOnly": true,
   "sandboxOverride": true,
   "checks": [
@@ -19,11 +19,28 @@
     "platform": "win32"
   },
   "artifacts": {
-    "apps/desktop/dist/main/index.mjs": "921cbd5a1c4ec31b83bdc64c8cbd45ce7213336fbddfa360d449b63dfeb1e3d9",
+    "apps/desktop/dist/main/index.mjs": "c073e0ee435424eb62022e948e87e4ea7ddb514c4422ac301c0a6611d9fddebf",
     "apps/desktop/dist/preload/index.cjs": "92f5be3998c917e5bd289074e64e4359adebaf6585818dbfe8e718f4a182940b",
-    "apps/desktop/dist/renderer/console/index.html": "0fd51560579a0f50b3b64616eaa62ee447e5acbda81a4f3d496aa9ed47f8d7a8",
-    "apps/desktop/dist/renderer/console/assets/index-18yUYxt1.js": "875f480ce66365241e7bb2d4649ee587d072d0791ea1781140b442eda2ef0536",
-    "apps/desktop/dist/renderer/console/assets/index-DvebpfOW.css": "66ddc1f38f052720a1daa7c73ad06bf6a3e5306baab68d93c3862ba18b90f41d"
+    "apps/desktop/dist/renderer/console/index.html": "4f34df9546a213dd7eba7da6ab10666ba3edb228fb04617032962d0ce7e36c67",
+    "apps/desktop/dist/renderer/console/assets/index-D5AX61PV.js": "c09ff9b753ba17c2ef4c168ffff685f2a4e46c0b1fb854c7223c763ff481f0b9",
+    "apps/desktop/dist/renderer/console/assets/index-DLyH_cg9.css": "64d5d51af3916d7ecdf95bbe038040e285ad91b60e387afb36264907addc0f9c"
+  },
+  "saveDiagnostics": {
+    "saveCalls": 8,
+    "serviceFailures": [
+      {
+        "call": 7,
+        "injectedFailure": false,
+        "result": {
+          "ok": false,
+          "error": {
+            "code": "unavailable",
+            "messageKey": "errors.unavailable",
+            "retryable": false
+          }
+        }
+      }
+    ]
   },
   "finalInspection": {
     "ok": true,
@@ -109,17 +126,20 @@
             "note": {
               "type": "string",
               "title": "备注",
-              "maxLength": 20
+              "maxLength": 20,
+              "default": ""
             },
             "ratio": {
               "type": "number",
               "title": "比例",
               "minimum": 0,
-              "maximum": 1
+              "maximum": 1,
+              "default": 0
             },
             "empty": {
               "type": "null",
-              "title": "空值项"
+              "title": "空值项",
+              "default": null
             },
             "version": {
               "type": "string",
@@ -136,6 +156,9 @@
             "桌宠"
           ],
           "credential": "asr-key",
+          "note": "",
+          "ratio": 0,
+          "empty": null,
           "version": "m2"
         },
         "fields": [

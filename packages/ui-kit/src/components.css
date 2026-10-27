@@ -114,9 +114,22 @@
   max-width: 420px;
 }
 
+/* 标签与 hint 同一行：hint 是补充信息，不能挤进 label 的可访问名称。 */
+.pk-field__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
 .pk-field__label {
   font-size: 14px;
   font-weight: 600;
+}
+
+.pk-field__hint {
+  font-size: 12px;
+  color: var(--pk-muted);
 }
 
 .pk-field__description,

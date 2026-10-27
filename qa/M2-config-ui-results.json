@@ -1,0 +1,274 @@
+{
+  "status": "passed",
+  "at": "2026-10-27T12:53:32.728Z",
+  "bridgeOnly": false,
+  "sandboxOverride": true,
+  "checks": [
+    "real-disabled-plugin-first-inspection-is-pure-data-and-does-not-write",
+    "real-preload-stale-owner-invalid-candidate-and-foreign-window-rejected",
+    "same-window-with-changed-url-cannot-inspect-or-write",
+    "real-schema-fields-nested-array-optional-defaults-and-credential-reference",
+    "client-errors-focus-and-description-without-write",
+    "unicode-input-and-number-array-validation",
+    "ui-first-save-creates-revision-one-with-valid-empty-values",
+    "optional-unset-is-distinct-from-empty",
+    "returned-immediate-reload-restart-modes-without-activation",
+    "save-failure-retains-draft-and-retry",
+    "busy-form-rejects-duplicate-submit",
+    "conflict-keeps-draft-without-overwrite-and-explicit-reload",
+    "failed-reload-does-not-leave-stale-editable-form",
+    "unsaved-navigation-escape-keeps-draft-and-confirm-discards",
+    "three-theme-config-contrast-and-reduced-motion",
+    "minimum-window-form-scroll-and-save-reachability",
+    "real-form-window-reopen-restores-file-snapshot"
+  ],
+  "errors": [],
+  "screenshots": [
+    "qa/screenshots/m2-config/first-config-2026-10-27T12-53-32-727Z.png",
+    "qa/screenshots/m2-config/validation-errors-2026-10-27T12-53-32-727Z.png",
+    "qa/screenshots/m2-config/conflict-2026-10-27T12-53-32-727Z.png",
+    "qa/screenshots/m2-config/saved-dark-2026-10-27T12-53-32-727Z.png",
+    "qa/screenshots/m2-config/minimum-size-2026-10-27T12-53-32-727Z.png",
+    "qa/screenshots/m2-config/persisted-config-2026-10-27T12-53-32-727Z.png"
+  ],
+  "themes": [
+    {
+      "theme": "light",
+      "measured": 42,
+      "minimum": 6.016692116437308
+    },
+    {
+      "theme": "dark",
+      "measured": 42,
+      "minimum": 5.069804721495689
+    },
+    {
+      "theme": "system",
+      "measured": 42,
+      "minimum": 5.069804721495689
+    }
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0",
+    "platform": "win32"
+  },
+  "artifacts": {
+    "apps/desktop/dist/main/index.mjs": "c073e0ee435424eb62022e948e87e4ea7ddb514c4422ac301c0a6611d9fddebf",
+    "apps/desktop/dist/preload/index.cjs": "92f5be3998c917e5bd289074e64e4359adebaf6585818dbfe8e718f4a182940b",
+    "apps/desktop/dist/renderer/console/index.html": "3a4b0d69d4b761f3bcc0b973aae48eae0049d89a970fdaef8aabf200c25eaf6d",
+    "apps/desktop/dist/renderer/console/assets/index-BGssvtUt.js": "cdee2947383137915847eac6437cd8fa3e43bc0a1d6cf93310babe473ce15564",
+    "apps/desktop/dist/renderer/console/assets/index-DLyH_cg9.css": "64d5d51af3916d7ecdf95bbe038040e285ad91b60e387afb36264907addc0f9c"
+  },
+  "saveDiagnostics": {
+    "saveCalls": 12,
+    "serviceFailures": []
+  },
+  "finalInspection": {
+    "ok": true,
+    "value": {
+      "definition": {
+        "version": 1,
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "engine",
+            "options",
+            "tags",
+            "credential",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "显示名称",
+              "minLength": 2,
+              "maxLength": 12
+            },
+            "engine": {
+              "type": "string",
+              "title": "识别模型",
+              "enum": [
+                "sensevoice",
+                "paraformer"
+              ],
+              "default": "sensevoice",
+              "maxLength": 4096
+            },
+            "options": {
+              "type": "object",
+              "title": "识别选项",
+              "additionalProperties": false,
+              "required": [
+                "enabled",
+                "threads"
+              ],
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "启用",
+                  "default": false
+                },
+                "threads": {
+                  "type": "integer",
+                  "title": "线程数",
+                  "default": 2,
+                  "minimum": 1,
+                  "maximum": 4
+                }
+              }
+            },
+            "tags": {
+              "type": "array",
+              "title": "词条",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "default": [
+                "桌宠"
+              ],
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10
+              }
+            },
+            "credential": {
+              "type": "string",
+              "title": "服务凭据引用",
+              "format": "credential-ref",
+              "enum": [
+                "asr-key"
+              ],
+              "default": "asr-key",
+              "maxLength": 4096
+            },
+            "note": {
+              "type": "string",
+              "title": "备注",
+              "maxLength": 20,
+              "default": ""
+            },
+            "ratio": {
+              "type": "number",
+              "title": "比例",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0
+            },
+            "empty": {
+              "type": "null",
+              "title": "空值项",
+              "default": null
+            },
+            "version": {
+              "type": "string",
+              "title": "配置版本",
+              "const": "m2",
+              "default": "m2",
+              "maxLength": 4096
+            }
+          }
+        },
+        "defaults": {
+          "engine": "sensevoice",
+          "tags": [
+            "桌宠"
+          ],
+          "credential": "asr-key",
+          "note": "",
+          "ratio": 0,
+          "empty": null,
+          "version": "m2"
+        },
+        "fields": [
+          {
+            "pointer": "/name",
+            "type": "string",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/engine",
+            "type": "string",
+            "apply": "reload"
+          },
+          {
+            "pointer": "/options",
+            "type": "object",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/options/enabled",
+            "type": "boolean",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/options/threads",
+            "type": "integer",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/tags",
+            "type": "array",
+            "apply": "restart"
+          },
+          {
+            "pointer": "/credential",
+            "type": "string",
+            "apply": "reload"
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/ratio",
+            "type": "number",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/empty",
+            "type": "null",
+            "apply": "immediate"
+          },
+          {
+            "pointer": "/version",
+            "type": "string",
+            "apply": "immediate"
+          }
+        ]
+      },
+      "snapshot": {
+        "pluginId": "test.schema-form",
+        "instanceId": "default",
+        "schemaVersion": 1,
+        "revision": 8,
+        "data": {
+          "name": "显式重填",
+          "engine": "paraformer",
+          "options": {
+            "enabled": false,
+            "threads": 2
+          },
+          "tags": [
+            "新词条"
+          ],
+          "credential": "asr-key",
+          "ratio": 0,
+          "empty": null,
+          "version": "m2"
+        }
+      }
+    }
+  },
+  "recordFiles": [
+    "a50b44300b7ddb4046c7468db4b7e8eb644eebedc7f6da51356478a815a1f444.config.json"
+  ],
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

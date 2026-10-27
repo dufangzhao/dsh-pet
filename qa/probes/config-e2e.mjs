@@ -23,6 +23,7 @@ for (const name of ['SystemRoot', 'WINDIR', 'TEMP', 'TMP', 'PATH', 'USERPROFILE'
 const report = { status: 'running', at: new Date().toISOString(), bridgeOnly, sandboxOverride, checks: [], errors: [], screenshots: [], themes: [] };
 let app;
 const capture = async (page, name) => {
+  if (process.argv.includes('--no-screenshots')) return;
   const file = path.join(shots, name + '-' + stamp + '.png');
   await page.screenshot({ path: file, animations: 'disabled' });
   report.screenshots.push(path.relative(root, file).split(path.sep).join('/'));
@@ -37,9 +38,9 @@ const schema = {
       properties: { enabled: { type: 'boolean', title: '启用', default: false }, threads: { type: 'integer', title: '线程数', default: 2, minimum: 1, maximum: 4 } } },
     tags: { type: 'array', title: '词条', minItems: 1, maxItems: 3, uniqueItems: true, default: ['桌宠'], items: { type: 'string', minLength: 1, maxLength: 10 } },
     credential: { type: 'string', title: '服务凭据引用', format: 'credential-ref', enum: ['asr-key'], default: 'asr-key' },
-    note: { type: 'string', title: '备注', maxLength: 20 },
-    ratio: { type: 'number', title: '比例', minimum: 0, maximum: 1 },
-    empty: { type: 'null', title: '空值项' },
+    note: { type: 'string', title: '备注', maxLength: 20, default: '' },
+    ratio: { type: 'number', title: '比例', minimum: 0, maximum: 1, default: 0 },
+    empty: { type: 'null', title: '空值项', default: null },
     version: { type: 'string', title: '配置版本', const: 'm2', default: 'm2' },
   },
 };
@@ -131,17 +132,168 @@ try {
   }
 
   if (!bridgeOnly) {
-    // UI assertions continue below after the DeepSeek form integration.
-    await page.getByTestId('nav-plugins').click();
-    await expect(page.getByRole('main')).toContainText('Schema 验收插件');
-    await page.getByRole('button', { name: '配置', exact: true }).click();
-    await expect(page.getByLabel('显示名称', { exact: false })).toBeVisible();
+    const openConfig = async () => {
+      await page.getByTestId('nav-plugins').click();
+      await expect(page.getByRole('main')).toContainText('Schema 验收插件');
+      await page.getByRole('button', { name: '配置 Schema 验收插件', exact: true }).click();
+      await expect(page.getByLabel('显示名称', { exact: true })).toBeVisible();
+    };
+    const name = () => page.getByLabel('显示名称', { exact: true });
+    const save = () => page.getByTestId('config-save');
+    const revision = async value => expect.poll(async () => {
+      const result = await inspect(); return result.ok ? result.value.snapshot?.revision ?? 0 : -1;
+    }).toBe(value);
+    const chooseTheme = async theme => page.getByTestId('theme-select').locator('input[value="' + theme + '"]').check();
+    await openConfig();
+    await expect(page.getByLabel('线程数', { exact: true })).toHaveValue('2');
+    await expect(page.getByLabel('词条 1', { exact: true })).toHaveValue('桌宠');
+    await expect(page.getByLabel('启用', { exact: true })).not.toBeChecked();
+    await expect(page.getByLabel('备注', { exact: true })).toHaveValue('');
+    await expect(page.getByLabel('比例', { exact: true })).toHaveValue('0');
+    await expect(page.getByRole('main')).toContainText('这里不输入也不验证真实 Key');
+    assert.equal(await page.locator('input[type=password]').count(), 0);
+    await expect(page.locator('[data-config-field="/version"]').first()).toContainText('m2');
+    await expect(page.locator('[data-config-field="/version"] input')).toHaveCount(0);
     await capture(page, 'first-config');
+    report.checks.push('real-schema-fields-nested-array-optional-defaults-and-credential-reference');
+
+    const beforeInvalid = (await app.evaluate(() => globalThis.m2ConfigQA.diagnostics())).saveCalls;
+    await save().click();
+    await expect(name()).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('[role=alert][tabindex="-1"]')).toBeFocused();
+    const association = await name().evaluate(el => {
+      const ids = (el.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
+      return { count: ids.length, valid: ids.every(id => document.getElementById(id)), text: ids.map(id => document.getElementById(id)?.textContent).join(' ') };
+    });
+    assert.ok(association.count > 0 && association.valid && /2/.test(association.text));
+    assert.equal((await app.evaluate(() => globalThis.m2ConfigQA.diagnostics())).saveCalls, beforeInvalid);
+    await capture(page, 'validation-errors');
+    await name().fill('😀😀😀😀😀😀😀');
+    await expect(name()).toHaveValue('😀😀😀😀😀😀😀');
+    await name().fill('首次配置');
+    await page.getByLabel('线程数', { exact: true }).fill('5');
+    await save().click();
+    await expect(page.getByLabel('线程数', { exact: true })).toHaveAttribute('aria-invalid', 'true');
+    await page.getByLabel('线程数', { exact: true }).fill('2');
+    await page.getByRole('button', { name: '添加词条', exact: true }).click();
+    await page.getByLabel('词条 2', { exact: true }).fill('桌宠');
+    await save().click();
+    await expect(page.locator('[data-config-field="/tags"]').first()).toContainText('重复');
+    await page.getByRole('button', { name: '删除词条 2', exact: true }).click();
+    await page.getByRole('button', { name: '删除词条 1', exact: true }).click();
+    await save().click();
+    await expect(page.locator('[data-config-field="/tags"]').first()).toContainText('至少');
+    for (const [index, value] of ['桌宠', '唤醒', '语音'].entries()) {
+      await page.getByRole('button', { name: '添加词条', exact: true }).click();
+      await page.getByLabel('词条 ' + (index + 1), { exact: true }).fill(value);
+    }
+    await expect(page.getByRole('button', { name: '添加词条', exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: '删除词条 3', exact: true }).click();
+    await page.getByRole('button', { name: '删除词条 2', exact: true }).click();
+    await save().click(); await revision(1);
+    const first = (await inspect()).value.snapshot;
+    assert.deepEqual(first.data, { name: '首次配置', engine: 'sensevoice', options: { enabled: false, threads: 2 }, tags: ['桌宠'], credential: 'asr-key', note: '', ratio: 0, empty: null, version: 'm2' });
+    await expect(page.getByRole('status')).toContainText('重启');
+    report.checks.push('client-errors-focus-and-description-without-write', 'unicode-input-and-number-array-validation', 'ui-first-save-creates-revision-one-with-valid-empty-values');
+
+    await name().fill('立即改动');
+    await page.getByRole('checkbox', { name: '备注：设置此项', exact: true }).uncheck();
+    await expect(page.getByLabel('备注', { exact: true })).toHaveCount(0);
+    await save().click(); await revision(2);
+    assert.equal(Object.hasOwn((await inspect()).value.snapshot.data, 'note'), false);
+    await expect(page.getByRole('status')).toContainText('立即');
+    await page.getByLabel('识别模型', { exact: true }).selectOption({ label: 'paraformer' });
+    await save().click(); await revision(3);
+    await expect(page.getByRole('status')).toContainText('重载');
+    await page.getByLabel('词条 1', { exact: true }).fill('新词条');
+    await save().click(); await revision(4);
+    await expect(page.getByRole('status')).toContainText('重启');
+    assert.equal((await app.evaluate(() => globalThis.m2ConfigQA.diagnostics())).plugins[0].state, 'disabled');
+    report.checks.push('optional-unset-is-distinct-from-empty', 'returned-immediate-reload-restart-modes-without-activation');
+
+    await app.evaluate(() => globalThis.m2ConfigQA.setSaveFailure(true));
+    await name().fill('失败草稿'); await save().click();
+    await expect(page.getByRole('alert')).toContainText('保存失败');
+    await expect(name()).toHaveValue('失败草稿');
+    assert.equal((await inspect()).value.snapshot.revision, 4);
+    await app.evaluate(() => globalThis.m2ConfigQA.setSaveFailure(false));
+    await save().click(); await revision(5);
+    const beforeBusy = (await app.evaluate(() => globalThis.m2ConfigQA.diagnostics())).saveCalls;
+    await app.evaluate(() => globalThis.m2ConfigQA.holdSave());
+    await name().fill('延迟保存'); await save().click();
+    await expect(save()).toBeDisabled(); await expect(name()).toBeDisabled();
+    await page.locator('form.config-form').evaluate(form => { form.requestSubmit(); form.requestSubmit(); });
+    assert.equal((await app.evaluate(() => globalThis.m2ConfigQA.diagnostics())).saveCalls, beforeBusy + 1);
+    await app.evaluate(() => globalThis.m2ConfigQA.releaseSave()); await revision(6);
+    report.checks.push('save-failure-retains-draft-and-retry', 'busy-form-rejects-duplicate-submit');
+
+    await app.evaluate(async () => {
+      const qa = globalThis.m2ConfigQA, result = await qa.inspect();
+      if (!result.ok || !result.value.snapshot) throw new Error('Missing fixture record');
+      const row = result.value.snapshot;
+      const saved = await qa.save({ ...row.data, name: '外部更新' }, row.revision);
+      if (!saved.ok) throw new Error('Competing save failed');
+    });
+    await name().fill('本地草稿'); await save().click();
+    await expect(page.getByRole('alert')).toContainText('重新读取');
+    await expect(name()).toHaveValue('本地草稿'); await expect(save()).toBeDisabled();
+    assert.equal((await inspect()).value.snapshot.data.name, '外部更新');
+    await capture(page, 'conflict');
+    await app.evaluate(() => globalThis.m2ConfigQA.setInspectFailure(true));
+    await page.getByRole('button', { name: '重新读取', exact: true }).click();
+    await expect(page.getByRole('main')).toContainText('读取配置失败');
+    assert.equal(await save().count() === 0 || await save().isDisabled(), true);
+    await app.evaluate(() => globalThis.m2ConfigQA.setInspectFailure(false));
+    await page.getByRole('button', { name: '重新读取', exact: true }).click();
+    await expect(name()).toHaveValue('外部更新');
+    await name().fill('显式重填'); await save().click(); await revision(8);
+    report.checks.push('conflict-keeps-draft-without-overwrite-and-explicit-reload', 'failed-reload-does-not-leave-stale-editable-form');
+
+    await name().fill('不保存草稿'); await page.getByTestId('nav-voice').click();
+    await expect(page.getByRole('dialog')).toBeVisible(); await page.keyboard.press('Escape');
+    await expect(name()).toHaveValue('不保存草稿');
+    await page.getByTestId('nav-voice').click();
+    await page.getByRole('dialog').getByRole('button', { name: '放弃改动', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: '语音输入', exact: true })).toBeVisible();
+    await openConfig(); await expect(name()).toHaveValue('显式重填');
+    report.checks.push('unsaved-navigation-escape-keeps-draft-and-confirm-discards');
+
+    for (const theme of ['light', 'dark', 'system']) {
+      await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' }); await chooseTheme(theme);
+      const samples = await page.locator('h1,h2,p,label,legend,button:not(:disabled),input:not([type=checkbox]):not([type=radio]),select').evaluateAll(nodes => nodes.filter(el => el.checkVisibility()).map((el, index) => {
+        const style = getComputedStyle(el), backgrounds = [], opacities = [];
+        for (let parent = el; parent; parent = parent.parentElement) { const css = getComputedStyle(parent); backgrounds.push(css.backgroundColor); opacities.push(css.opacity); }
+        return { id: el.tagName + '-' + index, color: style.color, backgrounds, opacities };
+      }));
+      const results = samples.map(sample => checkContrast(sample));
+      assert.ok(results.length > 15 && results.every(result => result.passed), 'Config contrast: ' + JSON.stringify(results.filter(result => !result.passed)));
+      report.themes.push({ theme, measured: results.length, minimum: Math.min(...results.flatMap(result => result.cases.map(test => test.ratio))) });
+      if (theme === 'dark') await capture(page, 'saved-dark');
+    }
+    await chooseTheme('light');
+    await (await app.browserWindow(page)).evaluate(window => window.setSize(760, 560));
+    await save().scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    const bounds = await save().boundingBox(), viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+    assert.ok(bounds && bounds.x >= 0 && bounds.x + bounds.width <= viewport.width && bounds.y >= 0 && bounds.y + bounds.height <= viewport.height);
+    await capture(page, 'minimum-size');
+    await (await app.browserWindow(page)).evaluate(window => window.setSize(1040, 740));
+    report.checks.push('three-theme-config-contrast-and-reduced-motion', 'minimum-window-form-scroll-and-save-reachability');
+    const reopened = app.waitForEvent('window'); await app.evaluate(() => globalThis.m2ConfigQA.reopen());
+    page = await reopened; watch(page); await page.waitForURL('**/console/index.html');
+    await openConfig(); await expect(name()).toHaveValue('显式重填');
+    await capture(page, 'persisted-config');
+    report.checks.push('real-form-window-reopen-restores-file-snapshot');
   }
   const artifacts = ['apps/desktop/dist/main/index.mjs', 'apps/desktop/dist/preload/index.cjs', 'apps/desktop/dist/renderer/console/index.html'];
   for (const name of await fs.readdir(path.join(root, 'apps/desktop/dist/renderer/console/assets')))
     artifacts.push('apps/desktop/dist/renderer/console/assets/' + name);
   report.artifacts = Object.fromEntries(await Promise.all(artifacts.map(async file => [file, createHash('sha256').update(await fs.readFile(path.join(root, file))).digest('hex')])));
+  report.saveDiagnostics = await app.evaluate(() => {
+    const diagnostics = globalThis.m2ConfigQA.diagnostics();
+    return { saveCalls: diagnostics.saveCalls,
+      serviceFailures: diagnostics.saveAttempts.filter(attempt => !attempt.injectedFailure && attempt.result?.error?.code === 'unavailable') };
+  });
   report.finalInspection = await inspect();
   report.recordFiles = await fs.readdir(configDirectory);
   report.status = 'passed';
@@ -151,7 +303,7 @@ try {
 } catch (error) {
   report.status = 'failed'; report.failure = error.stack ?? String(error);
   if (app) {
-    try { const page = app.windows()[0]; if (page && !bridgeOnly) await capture(page, 'failure'); } catch {}
+    try { const page = app.windows()[0]; if (page && !bridgeOnly) { await capture(page, 'failure'); report.failurePage = await page.getByRole('main').innerText(); report.diagnostics = await app.evaluate(() => globalThis.m2ConfigQA.diagnostics()); } } catch {}
     try { report.shutdown = await app.evaluate(() => globalThis.m2ConfigQA.shutdown()); } catch {}
   }
   process.exitCode = 1;

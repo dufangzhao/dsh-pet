@@ -1,8 +1,8 @@
-import type { ConsoleSnapshot } from '@pet/contracts';
+import type { ConsolePlugin, ConsoleSnapshot } from '@pet/contracts';
 import { errorMessage } from '@pet/contracts';
 import type { JSX } from 'react';
 
-import { List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
+import { Button, List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
 
 import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
@@ -15,21 +15,29 @@ export interface PluginsPageProps {
   error: string | null;
   available: boolean;
   onRetry: () => void;
+  /** 打开某个插件的配置面板；不传就不渲染入口。 */
+  onOpenConfig: ((plugin: ConsolePlugin) => void) | undefined;
 }
 
-/** 插件页：真实插件列表与贡献目录，全部只读。刷新贴着数据出现。 */
+/** 插件页：真实插件列表与贡献目录，只读；配置入口由 onOpenConfig 决定。 */
 export function PluginsPage({
   snapshot,
   loading,
   error,
   available,
   onRetry,
+  onOpenConfig,
 }: PluginsPageProps): JSX.Element {
   return (
     <ConsolePane title="插件">
       <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
         {snapshot === null ? null : (
-          <PluginContent snapshot={snapshot} loading={loading} onRetry={onRetry} />
+          <PluginContent
+            snapshot={snapshot}
+            loading={loading}
+            onRetry={onRetry}
+            onOpenConfig={onOpenConfig}
+          />
         )}
       </ConsoleStatus>
     </ConsolePane>
@@ -40,9 +48,15 @@ interface PluginContentProps {
   snapshot: ConsoleSnapshot;
   loading: boolean;
   onRetry: () => void;
+  onOpenConfig: ((plugin: ConsolePlugin) => void) | undefined;
 }
 
-function PluginContent({ snapshot, loading, onRetry }: PluginContentProps): JSX.Element {
+function PluginContent({
+  snapshot,
+  loading,
+  onRetry,
+  onOpenConfig,
+}: PluginContentProps): JSX.Element {
   // 贡献条目只带 owner，按 owner 找显示名；找不到时退回技术 id。
   const names = new Map(snapshot.plugins.map((plugin) => [ownerKey(plugin.owner), plugin.name]));
 
@@ -80,7 +94,21 @@ function PluginContent({ snapshot, loading, onRetry }: PluginContentProps): JSX.
                     </>
                   }
                   meta={plugin.version}
-                  trailing={<StatusBadge tone={state.tone}>{state.text}</StatusBadge>}
+                  trailing={
+                    <>
+                      <StatusBadge tone={state.tone}>{state.text}</StatusBadge>
+                      {onOpenConfig === undefined ? null : (
+                        <Button
+                          size="small"
+                          data-testid={`plugin-config-${plugin.owner.pluginId}`}
+                          aria-label={`配置 ${plugin.name}`}
+                          onClick={() => onOpenConfig(plugin)}
+                        >
+                          {COPY.config}
+                        </Button>
+                      )}
+                    </>
+                  }
                 />
               );
             })}

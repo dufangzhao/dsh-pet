@@ -110,16 +110,13 @@ export class ConfigService {
       if (this.#locks.get(key) === tail) this.#locks.delete(key);
     }
   }
-  async inspect(identity: InstanceIdentity): Promise<Result<ConfigInspection>> {
-    const id = configIdentity(identity);
-    if (!id || this.#closed) return failure('not-ready');
-    const definition = this.#definitions.get(instanceKey(id));
-    if (!definition) return failure('not-ready');
-    try {
-      const value = await this.store.read(id);
+  inspect(identity: InstanceIdentity): Promise<Result<ConfigInspection>> {
+    // Windows replacement must not overlap this host's open read handles.
+    return this.locked<ConfigInspection>(identity, async (definition) => {
+      const value = await this.store.read(definition.identity);
       if (
         this.#closed ||
-        this.#definitions.get(instanceKey(id)) !== definition ||
+        this.#definitions.get(instanceKey(definition.identity)) !== definition ||
         (value !== null &&
           (value.schemaVersion !== definition.prepared.version ||
             !definition.prepared.validate(value.data).ok))
@@ -133,9 +130,7 @@ export class ConfigService {
           snapshot: value === null ? null : snap(value),
         }),
       };
-    } catch {
-      return failure('unavailable');
-    }
+    });
   }
   async get(identity: InstanceIdentity): Promise<Result<ConfigSnapshot>> {
     const inspected = await this.inspect(identity);
@@ -191,6 +186,7 @@ export class ConfigService {
       async (current, signal) => {
         if (current !== definition) return failure('not-ready');
         const previous = await this.store.read(id);
+        if (signal.aborted) return failure('cancelled');
         if (
           previous &&
           (previous.schemaVersion !== current.prepared.version ||
@@ -201,7 +197,6 @@ export class ConfigService {
         const changeMode = current.prepared.changeMode(previous?.data ?? {}, validated.value);
         if (previous && changeMode === null)
           return { ok: true, value: { snapshot: snap(previous), changeMode: null } };
-        if (signal.aborted) return failure('cancelled');
         const value: StoredConfig = {
           format: 1,
           ...id,

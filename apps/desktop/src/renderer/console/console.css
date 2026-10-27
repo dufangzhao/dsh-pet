@@ -437,3 +437,187 @@ body {
     transform: none;
   }
 }
+
+/* ---- 配置表单 ---- */
+
+.config-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.config-toolbar__state {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+.config-form {
+  display: grid;
+  gap: 20px;
+  max-width: 560px;
+}
+
+.config-form__body {
+  display: grid;
+  gap: 18px;
+}
+
+/* 每个字段独占一行；嵌套对象与数组用 fieldset 表达分组，不做卡片。 */
+.config-field {
+  display: block;
+}
+
+.config-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.config-group__legend {
+  padding: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.config-group__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+
+.config-group__description {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pk-muted);
+}
+
+.config-group__body {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+  padding-left: 14px;
+  border-left: 1px solid var(--pk-border);
+}
+
+/* 数组项：控件在左，删除在右；两者在同一行对齐。 */
+.config-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 12px;
+}
+
+.config-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.config-unset {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pk-muted);
+}
+
+.config-static {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.config-static__label {
+  font-weight: 600;
+}
+
+.config-static__value {
+  color: var(--pk-muted);
+}
+
+/* "设置此项"是可选字段的开关，排在标签同一行，不与生效方式抢注意力。 */
+.config-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--pk-muted);
+  cursor: pointer;
+}
+
+.pk-check {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--pk-accent);
+}
+
+.pk-check:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.config-apply {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+.config-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.config-count {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+/* 提示条：一句话加一个动作，不用卡片。 */
+.config-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius);
+  font-size: 14px;
+}
+
+.config-banner__text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.config-banner--warn {
+  border-color: var(--pk-warn);
+  background: var(--pk-warn-soft);
+  color: var(--pk-warn);
+}
+
+.config-banner--danger {
+  border-color: var(--pk-danger);
+  background: var(--pk-danger-soft);
+  color: var(--pk-danger);
+}
+
+.config-banner--ok {
+  border-color: var(--pk-ok);
+  background: var(--pk-ok-soft);
+  color: var(--pk-ok);
+}
+
+.config-banner:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 1px;
+}

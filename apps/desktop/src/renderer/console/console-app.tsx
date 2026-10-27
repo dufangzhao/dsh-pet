@@ -1,4 +1,4 @@
-import type { HostStatus } from '@pet/contracts';
+import type { ConsolePlugin, HostStatus } from '@pet/contracts';
 import { useCallback, useRef, useState, type CSSProperties, type JSX } from 'react';
 
 import { Button, Dialog, Toast, useToastStore } from '@pet/ui-kit';
@@ -10,9 +10,11 @@ import { ModelsPage } from './pages/models.js';
 import { DEFAULT_PAGE, type PageId } from './pages.js';
 import { PermissionsPage } from './pages/permissions.js';
 import { PetPage } from './pages/pet.js';
+import { PluginConfigPanel } from './pages/plugin-config.js';
 import { PluginsPage } from './pages/plugins.js';
 import { StartPage } from './pages/start.js';
 import { VoicePage } from './pages/voice.js';
+import { ownerKey } from './labels.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { useStopAll } from './use-stop-all.js';
 import { useTheme } from './use-theme.js';
@@ -34,15 +36,49 @@ export function ConsoleApp(): JSX.Element {
   // 页面只用 React 状态：宿主按完整 URL 校验请求来源，改 hash 会让后续请求被拒。
   const [page, setPage] = useState<PageId>(DEFAULT_PAGE);
   const [confirming, setConfirming] = useState(false);
+  /** 正在编辑配置的插件；null 表示停在插件列表。 */
+  const [configuring, setConfiguring] = useState<ConsolePlugin | null>(null);
+  /** 表单里还有没保存的改动时，切页或返回列表前先问一次。 */
+  const [discarding, setDiscarding] = useState<(() => void) | null>(null);
+  const dirtyRef = useRef(false);
   const toasts = useToastStore();
   const { theme, setTheme } = useTheme();
   const snapshotState = useConsoleSnapshot();
   const stopAll = useStopAll();
   const mainRef = useRef<HTMLElement>(null);
 
-  const select = useCallback((next: PageId) => {
-    setPage(next);
+  /**
+   * 有未保存改动时先挂起目标动作，确认后才执行。
+   * 目标动作存成函数而不是"待确认的页面"，这样返回列表和切页共用一套确认。
+   */
+  const guard = useCallback((action: () => void) => {
+    if (dirtyRef.current) {
+      setDiscarding(() => action);
+      return;
+    }
+    action();
   }, []);
+
+  const select = useCallback(
+    (next: PageId) => {
+      guard(() => {
+        setConfiguring(null);
+        setPage(next);
+      });
+    },
+    [guard],
+  );
+
+  const openConfig = useCallback(
+    (plugin: ConsolePlugin) => {
+      guard(() => setConfiguring(plugin));
+    },
+    [guard],
+  );
+
+  const closeConfig = useCallback(() => {
+    guard(() => setConfiguring(null));
+  }, [guard]);
 
   const skipToContent = useCallback(() => {
     mainRef.current?.focus();
@@ -106,6 +142,32 @@ export function ConsoleApp(): JSX.Element {
         正在运行的任务会被取消，宿主和插件保持运行。已经完成的工作不会回滚。
       </Dialog>
 
+      <Dialog
+        open={discarding !== null}
+        title={COPY.discardTitle}
+        onClose={() => setDiscarding(null)}
+        footer={
+          <>
+            <Button data-autofocus onClick={() => setDiscarding(null)}>
+              {COPY.discardCancel}
+            </Button>
+            <Button
+              variant="primary"
+              data-testid="discard-confirm"
+              onClick={() => {
+                const action = discarding;
+                setDiscarding(null);
+                action?.();
+              }}
+            >
+              {COPY.discardConfirm}
+            </Button>
+          </>
+        }
+      >
+        {COPY.discardBody}
+      </Dialog>
+
       <Toast items={toasts.items} onDismiss={toasts.dismiss} />
     </div>
   );
@@ -140,7 +202,19 @@ export function ConsoleApp(): JSX.Element {
       case 'models':
         return <ModelsPage />;
       case 'plugins':
-        return <PluginsPage {...shared} />;
+        return configuring === null ? (
+          <PluginsPage {...shared} onOpenConfig={(plugin) => openConfig(plugin)} />
+        ) : (
+          <PluginConfigPanel
+            key={ownerKey(configuring.owner)}
+            owner={configuring.owner}
+            pluginName={configuring.name}
+            onBack={closeConfig}
+            onDirtyChange={(dirty) => {
+              dirtyRef.current = dirty;
+            }}
+          />
+        );
       case 'permissions':
         return <PermissionsPage {...shared} />;
       case 'about':

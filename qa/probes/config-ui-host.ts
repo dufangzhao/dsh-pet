@@ -23,6 +23,8 @@ void app.whenReady().then(async () => {
   const settings = new ConsoleWindow(entry, preload);
   const identity = { pluginId: 'test.schema-form', instanceId: 'default' };
   let saveFails = false, inspectFails = false, saveCalls = 0;
+  let lastSave: unknown = null, lastRequest: unknown = null;
+  const saveAttempts: unknown[] = [];
   let gate: Promise<void> | undefined, release: (() => void) | undefined;
   let foreign: BrowserWindow | undefined;
   const source = (event: IpcMainInvokeEvent) => ({
@@ -41,9 +43,13 @@ void app.whenReady().then(async () => {
     : handleConsoleConfigRequest(source(event), 'inspect', args, host));
   ipcMain.handle(CONSOLE_IPC.saveConfig, async (event, ...args: unknown[]) => {
     saveCalls++;
+    lastRequest = args[0];
     if (gate) await gate;
-    if (saveFails) return { ok: false, error: makeError('unavailable', false) };
-    return handleConsoleConfigRequest(source(event), 'save', args, host);
+    const injectedFailure = saveFails;
+    lastSave = injectedFailure ? { ok: false, error: makeError('unavailable', false) }
+      : await handleConsoleConfigRequest(source(event), 'save', args, host);
+    saveAttempts.push({ call: saveCalls, injectedFailure, result: lastSave,  });
+    return lastSave;
   });
   Object.assign(globalThis, { m2ConfigQA: {
     host, settings, snapshot,
@@ -53,7 +59,7 @@ void app.whenReady().then(async () => {
     setInspectFailure(value: boolean) { inspectFails = value; },
     holdSave() { gate = new Promise<void>(resolve => { release = resolve; }); },
     releaseSave() { release?.(); release = undefined; gate = undefined; },
-    diagnostics() { return { saveCalls, plugins: host.manager.list().map(p => ({ owner: p.owner, state: p.state })) }; },
+    diagnostics() { return { saveCalls, lastRequest, lastSave, saveAttempts, plugins: host.manager.list().map(p => ({ owner: p.owner, state: p.state })) }; },
     async foreignWindow() {
       foreign = new BrowserWindow({ show: false, webPreferences: { preload, sandbox: true, contextIsolation: true, nodeIntegration: false } });
       await foreign.loadFile(entry); return foreign.webContents.id;
