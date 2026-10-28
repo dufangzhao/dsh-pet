@@ -2,10 +2,10 @@
 {"file":"docs/adr/0001-controlled-ui-contributions.md","reason":"Controlled host UI and cleanup boundary."}
 {"file":"docs/adr/0010-unified-plugin-model.md","reason":"One owned plugin standard with delegated integration roles."}
 {"file":"docs/adr/0014-cortico-agent-runtime.md","reason":"Accepted pinned MIT agent-framework reuse and pet-first boundary."}
-{"file":".trellis/tasks/10-28-plugin-settings-redesign/research/cortico-reuse.md","reason":"Verified public Core/World/Persona/provider/page contracts, distribution and runtime gates; supersedes custom page/agent proposal."}
-{"file":".trellis/tasks/10-28-plugin-settings-redesign/research/visual-direction.md","reason":"Selected pet-first views, actionable bubbles, full prompt and unified interaction projection."}
+{"file":".trellis/tasks/archive/2026-10/10-28-plugin-settings-redesign/research/cortico-reuse.md","reason":"Verified public Core/World/Persona/provider/page contracts, distribution and runtime gates; supersedes custom page/agent proposal."}
+{"file":".trellis/tasks/archive/2026-10/10-28-plugin-settings-redesign/research/visual-direction.md","reason":"Selected pet-first views, actionable bubbles, full prompt and unified interaction projection."}
 {"file":"docs/14-test-and-acceptance-strategy.md","reason":"Meaningful regressions and honest runtime/visual acceptance."}
-{"file":".trellis/tasks/10-28-plugin-settings-redesign/research/cortico-release.md","reason":"Verified npm release/gitHead/export layout and six source hashes; actual runtime gate has passed."}
+{"file":".trellis/tasks/archive/2026-10/10-28-plugin-settings-redesign/research/cortico-release.md","reason":"Verified npm release/gitHead/export layout and six source hashes; actual runtime gate has passed."}
 {"file":".trellis/spec/frontend/index.md","reason":"Current frontend pre-development and quality checklist."}
 {"file":".trellis/spec/frontend/project-patterns.md","reason":"Actual UI primitives, config drafts, fixed bridges and shared recording/session ordering."}
 {"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Verified executable application/plugin/state and input contracts."}

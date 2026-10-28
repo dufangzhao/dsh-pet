@@ -12,4 +12,4 @@ Electron侧负责原生桌宠窗口、实际表情/触碰、音频与ASR、气�
 
 桌宠气泡和设置台是同一角色、同一会话、同一份互动记录及配置的两个入口。对话页显示实际聊天、触碰、表情/动作、引导及通知的投影；人设页包含完整可编辑人设提示词和完整生效提示词预览。初始化在未配置模型时仍可用本地气泡流程完成；更新和权限选择须反映真实状态。
 
-本决定具体化[能力中心架构](0004-capability-centered-host.md)中的Agent实现，沿用[统一插件模型](0010-unified-plugin-model.md)与[受控界面边界](0001-controlled-ui-contributions.md)。Core已通过实际Electron的TS/ESM、provider加载、完整模型结果与工具循环、取消和停止/重启验证，并通过普通插件宿主及共享应用服务的原生探针。运行时使用受支持的tsx加载，禁用非必要的共享磁盘变换缓存；不改写上游框架。证据与实施边界见[Trellis研究](../../.trellis/tasks/10-28-plugin-settings-redesign/research/cortico-reuse.md)。
+本决定具体化[能力中心架构](0004-capability-centered-host.md)中的Agent实现，沿用[统一插件模型](0010-unified-plugin-model.md)与[受控界面边界](0001-controlled-ui-contributions.md)。Core已通过实际Electron的TS/ESM、provider加载、完整模型结果与工具循环、取消和停止/重启验证，并通过普通插件宿主及共享应用服务的原生探针。运行时使用受支持的tsx加载，禁用非必要的共享磁盘变换缓存；不改写上游框架。证据与实施边界见[Trellis研究](../../.trellis/tasks/archive/2026-10/10-28-plugin-settings-redesign/research/cortico-reuse.md)。
