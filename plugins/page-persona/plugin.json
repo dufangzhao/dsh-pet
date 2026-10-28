@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.page-persona",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "人设",
+    "en": "persona"
+  },
+  "description": {
+    "zh-CN": "桌宠人设页面"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "contributes": [
+    {
+      "id": "page",
+      "kind": "panel",
+      "title": {
+        "zh-CN": "人设"
+      },
+      "entry": "ui/page.json"
+    }
+  ]
+}

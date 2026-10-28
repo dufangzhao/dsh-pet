@@ -36,6 +36,7 @@ export interface RemoteRuntimeOptions {
   startupTimeoutMs?: number;
   stopTimeoutMs?: number;
   onFault?: (owner: OwnerRef) => void;
+  dataDirectory?: (owner: OwnerRef) => Promise<string | undefined>;
 }
 interface RemoteSession {
   owner: OwnerRef;
@@ -358,6 +359,7 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     this.#sessions.add(remote);
     const ready = this.#ready.then(async () => {
       if (activation.signal.aborted) throw new KernelFault('cancelled');
+      const dataDirectory = await this.options.dataDirectory?.(owner);
       const description = record(
         unwrap(
           await this.#endpoint.request(
@@ -367,6 +369,7 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
               entryPath: activation.entryPath,
               manifestDigest: manifestDigest(activation.manifest),
               config: activation.config,
+              ...(dataDirectory ? { dataDirectory } : {}),
             } as unknown as JsonValue,
             { signal: activation.signal, budgetMs: this.options.startupTimeoutMs ?? 5000 },
           ),

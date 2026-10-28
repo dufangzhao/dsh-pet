@@ -1,0 +1,256 @@
+{
+  "status": "passed",
+  "at": "2026-10-28T16:17:07.481Z",
+  "profileId": "ui-1793204227481",
+  "sandboxException": ".trellis/spec/shared/project-baseline.md:29; no OS-sandbox claim",
+  "checks": [
+    {
+      "name": "pet-only-guide",
+      "status": "passed",
+      "elapsedMs": 2012
+    },
+    {
+      "name": "dynamic-pages-and-fonts",
+      "status": "passed",
+      "elapsedMs": 934
+    },
+    {
+      "name": "composer-shared-history",
+      "status": "passed",
+      "elapsedMs": 671
+    },
+    {
+      "name": "explicit-prompt-save",
+      "status": "passed",
+      "elapsedMs": 667
+    },
+    {
+      "name": "appearance-and-native-window",
+      "status": "passed",
+      "elapsedMs": 3656
+    },
+    {
+      "name": "real-poke-and-blush",
+      "status": "passed",
+      "elapsedMs": 1788
+    },
+    {
+      "name": "themes-minimum-keyboard-zoom",
+      "status": "passed",
+      "elapsedMs": 1262
+    },
+    {
+      "name": "automatic-public-WAV",
+      "status": "passed",
+      "elapsedMs": 26585
+    },
+    {
+      "name": "restart",
+      "status": "passed",
+      "elapsedMs": 3191
+    }
+  ],
+  "pageerrors": [],
+  "consoleErrors": [],
+  "remoteRequests": [],
+  "screenshots": [
+    "qa/screenshots/application/guide-complete.png",
+    "qa/screenshots/application/normal-start.png",
+    "qa/screenshots/application/normal-persona.png",
+    "qa/screenshots/application/normal-appearance.png",
+    "qa/screenshots/application/normal-conversation.png",
+    "qa/screenshots/application/normal-voice.png",
+    "qa/screenshots/application/shared-timeline.png",
+    "qa/screenshots/application/persona-applied.png",
+    "qa/screenshots/application/hidden-pet-preview.png",
+    "qa/screenshots/application/pet-applied-blush.png",
+    "qa/screenshots/application/minimum-dark.png",
+    "qa/screenshots/application/minimum-light.png",
+    "qa/screenshots/application/minimum-zoom-in.png",
+    "qa/screenshots/application/capture-after-navigation.png",
+    "qa/screenshots/application/recognized-public-WAV.png"
+  ],
+  "shutdown": [
+    {
+      "exitConfirmed": true,
+      "exitCode": 0,
+      "signal": null,
+      "forced": false
+    },
+    {
+      "exitConfirmed": true,
+      "exitCode": 0,
+      "signal": null,
+      "forced": false
+    }
+  ],
+  "uncertainties": [],
+  "assumptions": [
+    "Windows x64; current built Electron app and native ASR artifacts already exist.",
+    "The public SenseVoice WAV, model.int8.onnx and tokens.txt are already cached; no download is attempted.",
+    "An isolated --demo-acceptance profile has no Key; every reply uses the explicitly selected offline script.",
+    "Playwright pointer input targets real controls; it does not prove physical OS click-through or dragging.",
+    "Font checks establish the declared stack and installed-font availability, not per-glyph font attribution."
+  ],
+  "pages": [
+    {
+      "title": "开始",
+      "plugin": "pet.page-start"
+    },
+    {
+      "title": "人设",
+      "plugin": "pet.page-persona"
+    },
+    {
+      "title": "装扮",
+      "plugin": "pet.page-appearance"
+    },
+    {
+      "title": "对话",
+      "plugin": "pet.page-conversation"
+    },
+    {
+      "title": "语音输入",
+      "plugin": "pet.page-voice"
+    }
+  ],
+  "fonts": [
+    {
+      "window": "settings",
+      "segoe": true,
+      "yahei": true,
+      "samples": [
+        {
+          "selector": "body",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": "h1",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": ".pk-row__description",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": "input",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": "textarea",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": "button",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        }
+      ]
+    },
+    {
+      "window": "pet",
+      "segoe": true,
+      "yahei": true,
+      "samples": [
+        {
+          "selector": "body",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": ".pet-menu__name",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": ".pet-bubble__text",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": "input",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        },
+        {
+          "selector": "button",
+          "family": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei\", \"PingFang SC\", sans-serif"
+        }
+      ]
+    }
+  ],
+  "typed": {
+    "inputEntries": 1,
+    "replyEntries": 1,
+    "mode": "demo"
+  },
+  "prompt": {
+    "characters": 4765,
+    "revision": 4,
+    "appliedRevision": 4
+  },
+  "appearance": {
+    "figures": [
+      "minimal",
+      "round"
+    ],
+    "palettes": [
+      "morning",
+      "lavender",
+      "pine",
+      "orange"
+    ],
+    "sizes": [
+      "small",
+      "normal",
+      "large"
+    ]
+  },
+  "appliedBlush": {
+    "status": "passed",
+    "pokeReceipts": 1,
+    "blushReceipts": 1,
+    "returnedToNeutral": true
+  },
+  "layout": [
+    {
+      "theme": "dark",
+      "background": "rgb(21, 23, 28)"
+    },
+    {
+      "theme": "light",
+      "background": "rgb(255, 255, 255)"
+    }
+  ],
+  "zoom": {
+    "shortcuts": [
+      "Ctrl+Shift+=",
+      "Ctrl+-",
+      "Ctrl+0"
+    ],
+    "base": 1,
+    "larger": 1.2,
+    "reset": 1
+  },
+  "audio": {
+    "publicFixture": ".cache/asr-models/sensevoice-small-int8/test_wavs/zh.wav",
+    "captureMs": 19853,
+    "permissionDecisions": 9,
+    "permissionKinds": [
+      "capability-use",
+      "capability-use",
+      "files",
+      "process",
+      "microphone",
+      "capability-use",
+      "capability-use",
+      "capability-use",
+      "capability-use"
+    ],
+    "calls": 1,
+    "trackStates": [
+      "ended"
+    ],
+    "transcriptCharacters": 48,
+    "successfulFinishes": 1
+  },
+  "persistence": {
+    "profileRevision": 19,
+    "retainedHistoryEntries": 30
+  }
+}

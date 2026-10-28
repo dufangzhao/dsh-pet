@@ -1,0 +1,13 @@
+{
+  "id": "world:pet.page-voice",
+  "kind": "world",
+  "label": "语音输入",
+  "availability": "active",
+  "panels": [
+    {
+      "id": "main",
+      "title": "语音输入",
+      "builtin": "pet.voice"
+    }
+  ]
+}

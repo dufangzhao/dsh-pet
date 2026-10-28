@@ -112,3 +112,32 @@ it('does not choose a fallback directory for a missing source', async () => {
   expect(report.complete).toBe(false);
   expect(report.plugins).toEqual([]);
 });
+it('includes declared page artifacts in the source identity and rejects changed panel data', async () => {
+  const r = await root();
+  const p = await pack(r);
+  await fs.writeFile(
+    path.join(p, 'page.json'),
+    JSON.stringify({ id: 'world:sample', kind: 'world', label: 'Sample', availability: 'active' }),
+  );
+  await fs.writeFile(
+    path.join(p, 'plugin.json'),
+    JSON.stringify({
+      ...manifest,
+      contributes: [{ id: 'page', kind: 'panel', title: { 'zh-CN': '页面' }, entry: 'page.json' }],
+    }),
+  );
+  const report = await discoverPlugins([{ directory: r, origin: 'user' }]);
+  expect(report.plugins[0]?.files.some((f) => f.relativePath === 'page.json')).toBe(true);
+  const candidate = report.plugins[0]!;
+  const loader = createVerifiedPluginLoader(report.plugins);
+  await fs.writeFile(path.join(p, 'page.json'), '{"label":"changed"}');
+  await expect(
+    loader({
+      owner: { pluginId: manifest.id, instanceId: 'default', generation: 1 },
+      manifest: candidate.manifest,
+      entryPath: path.join(p, 'index.mjs'),
+      config: {},
+      signal: new AbortController().signal,
+    }),
+  ).rejects.toThrow('Package changed');
+});

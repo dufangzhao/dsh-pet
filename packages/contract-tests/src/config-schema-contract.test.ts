@@ -440,8 +440,15 @@ describe('string bounds and Unicode length', () => {
     expectRejected(prepared.validate({ text: '😀'.repeat(4097) }));
   });
 
+  it('supports an explicitly bounded full prompt while retaining the value byte limit', () => {
+    const prompt = preparedOf(closedObject({ text: { type: 'string', maxLength: 16384 } }));
+    unwrap(prompt.validate({ text: 'a'.repeat(16384) }));
+    expectRejected(prompt.validate({ text: 'a'.repeat(16385) }));
+    expectRejected(prompt.validate({ text: '😀'.repeat(16384) }));
+  });
+
   it('rejects out-of-range or inconsistent length bounds', () => {
-    expectRejected(prepare(closedObject({ s: { type: 'string', maxLength: 4097 } })));
+    expectRejected(prepare(closedObject({ s: { type: 'string', maxLength: 16385 } })));
     expectRejected(prepare(closedObject({ s: { type: 'string', minLength: -1 } })));
     expectRejected(prepare(closedObject({ s: { type: 'string', minLength: 1.5 } })));
     expectRejected(prepare(closedObject({ s: { type: 'string', minLength: 5, maxLength: 2 } })));

@@ -13,6 +13,7 @@ export function demoReadiness(modelRoot: string): HostAdapterAvailability {
       }
     },
     permission: (permission, manifest) => {
+      if (permission.kind === 'files' && permission.scope === 'plugin-data') return true;
       if (manifest.id === DEMO_PLUGIN_IDS.asr)
         return (
           (permission.kind === 'files' &&

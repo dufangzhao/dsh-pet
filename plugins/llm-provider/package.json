@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "@pet/contracts": "workspace:*",
-    "@pet/plugin-sdk": "workspace:*"
+    "@pet/plugin-sdk": "workspace:*",
+    "cortico": "0.2.7",
+    "tsx": "4.23.15"
   }
 }

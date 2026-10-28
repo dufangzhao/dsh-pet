@@ -4,13 +4,13 @@ import { useCallback, useEffect, useRef, type JSX } from 'react';
 import { Button, EmptyState, Section } from '@pet/ui-kit';
 
 import { ConfigForm } from '../config-form.js';
-import { ConsolePane } from '../console-pane.js';
 import { COPY } from '../copy.js';
 import { usePluginConfig } from '../use-config.js';
 
 export interface PluginConfigPanelProps {
   owner: OwnerRef;
-  pluginName: string;
+  /** 返回入口的文字：从扩展列表和从应用页面进来，回去的地方不一样。 */
+  backLabel?: string | undefined;
   onBack: () => void;
   /** 让外壳知道有未保存改动，切页与返回列表前才能先确认。 */
   onDirtyChange: (dirty: boolean) => void;
@@ -24,7 +24,7 @@ export interface PluginConfigPanelProps {
  */
 export function PluginConfigPanel({
   owner,
-  pluginName,
+  backLabel = COPY.backToPlugins,
   onBack,
   onDirtyChange,
 }: PluginConfigPanelProps): JSX.Element {
@@ -53,13 +53,13 @@ export function PluginConfigPanel({
 
   if (!state.available) {
     return (
-      <ConsolePane title={pluginName}>
+      <>
         <EmptyState
           title={COPY.missingBridge}
           description="请从桌宠的“设置”重新打开窗口。"
           action={<Button onClick={onBack}>{COPY.backToPlugins}</Button>}
         />
-      </ConsolePane>
+      </>
     );
   }
 
@@ -67,13 +67,13 @@ export function PluginConfigPanel({
   const saved = inspected?.snapshot ?? null;
 
   return (
-    <ConsolePane
-      title={pluginName}
-      summary="配置由插件声明。保存只会写入配置，不会自动启用插件或让模型变为可用。"
-    >
+    <>
+      <p className="console-muted">
+        配置由扩展自己声明。保存只会写入配置，不会自动启用它，也不会让模型变为可用。
+      </p>
       <div className="config-toolbar">
         <Button size="small" variant="quiet" onClick={onBack}>
-          {COPY.backToPlugins}
+          {backLabel}
         </Button>
         <span className="config-toolbar__state">
           {inspected === null
@@ -175,6 +175,6 @@ export function PluginConfigPanel({
           </form>
         </Section>
       )}
-    </ConsolePane>
+    </>
   );
 }

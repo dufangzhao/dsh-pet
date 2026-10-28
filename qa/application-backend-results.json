@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "checks": [
+    "pinned-ordinary-pages-profile-and-Core-start-without-a-Key",
+    "pet-only-guide-directly-saves-name-appearance-and-mode-and-rejects-replay",
+    "native-input-adapter-and-settings-project-the-same-Core-messages",
+    "canonical-voice-disabled-prevents-recording-with-ready-ASR",
+    "full-prompt-above-old-bound-is-saved-with-CAS",
+    "bounded-history-pages-cover-earlier-records-and-delta-cursor-without-gaps",
+    "clear-removes-the-one-canonical-conversation",
+    "stopped-agent-does-not-prevent-application-recovery-and-reattaches-on-enable",
+    "external-owned-page-config-action-disable-fault-and-generation-recovery"
+  ],
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  },
+  "exitCode": 0,
+  "stderr": ""
+}

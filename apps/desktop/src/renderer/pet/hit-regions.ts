@@ -7,7 +7,12 @@
  * 外接矩形（更别说再套一层含气泡的容器）里有大量完全透明的角，
  * 用矩形做命中会让这些空白也吃掉鼠标，违背“透明处穿透”的约定。
  * 因此这里按 viewBox 里真实画出来的图形做命中：椭圆 + 三角形多边形。
+ *
+ * 形态（figure）来自 @pet/contracts 的 ApplicationPreferences['figure']：
+ * 两种形态共用同一个 160×160 viewBox，绘制面不同，命中区必须跟着不同。
  */
+import type { ApplicationPreferences } from '@pet/contracts';
+
 export interface HitRect {
   left: number;
   top: number;
@@ -42,11 +47,22 @@ export const HIT_PADDING_PX = 4;
 /** 角色 SVG 的绘制坐标系，必须与 PetAvatar.tsx 的 viewBox 保持一致。 */
 export const PET_AVATAR_VIEWBOX = { width: 160, height: 160 } as const;
 
-/** 躯干椭圆（略大于描边本体，保证视觉上按到哪就是哪）。 */
-export const PET_AVATAR_BODY: HitEllipse = { cx: 80, cy: 80, rx: 53, ry: 49 };
+/** 渲染器里用到的形态/配色/尺寸别名，全部来自冻结 DTO，不自造取值。 */
+export type PetFigure = ApplicationPreferences['figure'];
+export type PetPalette = ApplicationPreferences['palette'];
+export type PetSize = ApplicationPreferences['size'];
+
+/**
+ * 躯干（略大于描边本体，保证视觉上按到哪就是哪）。
+ * 键与 DTO 的 figure 枚举一一对应；圆头形态是正圆，简约形态带耳朵。
+ */
+export const PET_AVATAR_BODIES: Readonly<Record<PetFigure, HitEllipse>> = {
+  minimal: { cx: 80, cy: 80, rx: 53, ry: 49 },
+  round: { cx: 80, cy: 80, rx: 56, ry: 56 },
+};
 
 /** 两只耳朵的三角形，与 PetAvatar 的 path 顶点一致。 */
-export const PET_AVATAR_EARS: readonly HitPolygon[] = [
+const PET_AVATAR_EARS: readonly HitPolygon[] = [
   {
     points: [
       { x: 44, y: 44 },
@@ -62,6 +78,12 @@ export const PET_AVATAR_EARS: readonly HitPolygon[] = [
     ],
   },
 ];
+
+/** 每种形态在躯干之外真实画出来的附加图形：简约=两只耳朵，圆头=没有。 */
+export const PET_AVATAR_EXTRAS: Readonly<Record<PetFigure, readonly HitPolygon[]>> = {
+  minimal: PET_AVATAR_EARS,
+  round: [],
+};
 
 export function toHitRect(rect: {
   left: number;
@@ -187,25 +209,29 @@ function mapPoint(point: PointLike, mapping: ViewBoxMapping): PointLike {
  * 角色在视口里的真实命中形状：只有躯干椭圆与两只耳朵。
  * 气泡、透明角落、装饰性圆点都不参与，指针落在那里应保持穿透。
  */
-export function avatarHitShapes(rect: {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}): HitShape[] {
+export function avatarHitShapes(
+  rect: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  },
+  figure: PetFigure = 'minimal',
+): HitShape[] {
   const mapping = mapViewBox(rect);
   if (mapping.scale <= 0) return [];
-  const center = mapPoint({ x: PET_AVATAR_BODY.cx, y: PET_AVATAR_BODY.cy }, mapping);
+  const body = PET_AVATAR_BODIES[figure];
+  const center = mapPoint({ x: body.cx, y: body.cy }, mapping);
   const shapes: HitShape[] = [
     {
       kind: 'ellipse',
       cx: center.x,
       cy: center.y,
-      rx: PET_AVATAR_BODY.rx * mapping.scale,
-      ry: PET_AVATAR_BODY.ry * mapping.scale,
+      rx: body.rx * mapping.scale,
+      ry: body.ry * mapping.scale,
     },
   ];
-  for (const ear of PET_AVATAR_EARS) {
+  for (const ear of PET_AVATAR_EXTRAS[figure]) {
     shapes.push({
       kind: 'polygon',
       points: ear.points.map((point) => mapPoint(point, mapping)),

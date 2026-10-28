@@ -1,0 +1,556 @@
+/*
+ * 设置台外壳与行式设置的排版。
+ *
+ * 颜色、字号基准、圆角、过渡与焦点环全部取自 @pet/ui-kit 的语义令牌，
+ * 这里不写死任何配色：浅色、深色与跟随系统由页面写在 <html data-theme> 上决定。
+ * 结构只有两件事：236px 安静侧栏，居中不超过 1120px 的内容；
+ * 值与控件右端对齐到同一条 260px 轨，行之间用细线，不做卡片墙。
+ */
+
+.pk-settings {
+  /* 右轨宽度集中在一处，需要更宽的轨（例如带预览的分组）在分组上覆盖它。 */
+  --pk-track: 260px;
+
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  height: 100%;
+  color: var(--pk-text);
+  letter-spacing: 0;
+}
+
+.pk-settings *,
+.pk-settings *::before,
+.pk-settings *::after {
+  box-sizing: inherit;
+}
+
+/*
+ * 表单控件不继承字体族：不显式写这一行，Windows 上的输入框会换成另一套回退，
+ * 中文正文和输入内容看起来不像同一个界面。
+ */
+.pk-settings :is(input, textarea, select, button) {
+  font-family: inherit;
+}
+
+/*
+ * 中文正文统一 1.6 行高、strict 断行与 pretty 换行；只列设置台自己的文本块，
+ * 不写 .pk-settings p 这种宽选择器——那会盖掉 ui-kit 组件内部的字号与颜色。
+ */
+.pk-settings__summary,
+.pk-row__description,
+.pk-row__error,
+.pk-prompt__prefix-title,
+.pk-prompt__prefix-note,
+.pk-prompt__segment-text,
+.pk-prompt .pk-field__description,
+.pk-prompt .pk-field__error {
+  margin: 0;
+  line-height: 1.6;
+  line-break: strict;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+/* ---- 跳转与侧栏 ---- */
+
+/* 跳转目标在内容区内部，用按钮而不是锚点：改 URL 会让宿主的来源校验失败。 */
+.pk-settings__skip {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 30;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: top var(--pk-transition);
+}
+
+.pk-settings__skip:focus-visible {
+  top: 8px;
+}
+
+.pk-settings__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px 12px;
+  border-right: 1px solid var(--pk-border);
+  background: var(--pk-surface);
+  overflow-y: auto;
+}
+
+.pk-settings__brand {
+  margin: 0 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pk-muted);
+}
+
+.pk-settings__nav {
+  display: grid;
+  gap: 8px;
+}
+
+.pk-settings__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 恢复类入口挂在日常入口下面，一条细线分开：可达，但不参与日常视觉重心。 */
+.pk-settings__list--quiet {
+  padding-top: 8px;
+  border-top: 1px solid var(--pk-border);
+}
+
+.pk-settings__nav-button {
+  position: relative;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 10px 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--pk-radius);
+  background: transparent;
+  color: var(--pk-text);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.pk-settings__nav-button:hover {
+  background: var(--pk-bg);
+  border-color: var(--pk-border);
+}
+
+/* 当前页用一条从中心展开的竖线确认；状态本身已经由 aria-current 表达。 */
+.pk-settings__nav-button::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--pk-accent);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition:
+    height 0.16s ease,
+    opacity 0.16s ease;
+}
+
+.pk-settings__nav-button[aria-current='page'] {
+  background: var(--pk-bg);
+  color: var(--pk-accent-text);
+  font-weight: 600;
+}
+
+.pk-settings__nav-button[aria-current='page']::before {
+  height: 16px;
+  opacity: 1;
+}
+
+.pk-settings__footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--pk-border);
+}
+
+/* ---- 内容区 ---- */
+
+.pk-settings__main {
+  min-width: 0;
+  padding: 28px clamp(20px, 4vw, 40px) 40px;
+  overflow-y: auto;
+}
+
+/* 跳转目标本身不描边（内容区整块亮起没有意义），但键盘仍然能回到这里；
+   这条要写在文件末尾的通用焦点环之后。 */
+
+/* 提示条贴在滚动区顶部：停在任何入口都看得到，内容从它下面滚过。 */
+.pk-settings__notice {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 16px;
+}
+
+.pk-settings__pane {
+  display: grid;
+  gap: 28px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* 页面头部只靠字号和留白建立层级：不画线、不放按钮，操作贴着它作用的数据。 */
+.pk-settings__header {
+  display: grid;
+  gap: 6px;
+}
+
+.pk-settings__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.pk-settings__summary {
+  max-width: 60ch;
+  font-size: 14px;
+  color: var(--pk-muted);
+}
+
+.pk-settings__body {
+  display: grid;
+  gap: 28px;
+}
+
+/* ---- 行 ---- */
+
+.pk-rows {
+  display: grid;
+  border-top: 1px solid var(--pk-border);
+}
+
+.pk-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--pk-track, 260px));
+  align-items: center;
+  gap: 2px 24px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.pk-row__label {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pk-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.pk-row__name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pk-row__hint {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+.pk-row__description {
+  max-width: 62ch;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+.pk-row__error {
+  max-width: 62ch;
+  font-size: 13px;
+  color: var(--pk-danger);
+}
+
+/* 控件与当前值统一右端对齐到同一条轨上。 */
+.pk-row__value {
+  display: grid;
+  justify-items: end;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pk-row__value :is(input, select, textarea) {
+  width: 100%;
+}
+
+/* ---- 人设完整提示词 ---- */
+
+.pk-prompt {
+  display: grid;
+  gap: 14px;
+}
+
+/* 长文按可读行长排，不铺满 1120px；Field 的堆叠结构继续复用。 */
+.pk-prompt .pk-field {
+  max-width: min(68ch, 100%);
+}
+
+.pk-prompt__input {
+  min-height: 220px;
+  padding: 10px 12px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font-size: 14px;
+  line-height: 1.6;
+  line-break: strict;
+  resize: vertical;
+  overflow-wrap: anywhere;
+}
+
+.pk-prompt__input[aria-invalid='true'] {
+  border-color: var(--pk-danger);
+}
+
+.pk-prompt__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.pk-prompt__count,
+.pk-prompt__draft,
+.pk-prompt__segment-note {
+  font-size: 12px;
+  color: var(--pk-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-prompt__count--over {
+  color: var(--pk-danger);
+}
+
+.pk-prompt__status {
+  display: inline-flex;
+}
+
+.pk-prompt__prefix {
+  display: grid;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.pk-prompt__prefix-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pk-prompt__prefix-note {
+  max-width: 68ch;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+.pk-prompt__segments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--pk-border);
+}
+
+.pk-prompt__segment {
+  display: grid;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.pk-prompt__segment-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.pk-prompt__segment-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 只读段原样保留换行与空白：这里看到的就是发出去的那段文本。 */
+.pk-prompt__segment-text {
+  padding: 8px 10px;
+  border-radius: var(--pk-radius);
+  background: var(--pk-sunken);
+  font: inherit;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+/*
+ * 焦点环统一取 --pk-ring：按钮与文字操作画在元素外侧，输入类控件贴一点，
+ * 与 ui-kit 的 .pk-button、.pk-input 取值一致，
+ * 这样父级放进右轨的任何控件（自定义选择器、链接、可编程聚焦区域）都有可见焦点。
+ */
+.pk-settings :is(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.pk-settings :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 1px;
+}
+
+.pk-settings__main:focus,
+.pk-settings__main:focus-visible {
+  outline: none;
+}
+
+@media (max-width: 860px) {
+  .pk-settings__title {
+    font-size: 24px;
+  }
+}
+
+/* 减少动态：去掉位移与过渡，保留颜色变化；焦点环不受影响。 */
+@media (prefers-reduced-motion: reduce) {
+  .pk-settings__skip,
+  .pk-settings__nav-button,
+  .pk-settings__nav-button::before {
+    transition: none;
+  }
+}
+
+/* ---- 右轨里的选择 ---- */
+
+/* 选项横排成 chips：两三个状态一眼看完，比下拉少一次点击。 */
+.pk-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.pk-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: 999px;
+  color: var(--pk-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.pk-choice input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--pk-accent);
+}
+
+/* 选中不只靠颜色：文字变粗，边框变色，读屏另有原生 radio 语义。 */
+.pk-choice:has(input:checked) {
+  border-color: var(--pk-accent);
+  background: var(--pk-accent-soft);
+  color: var(--pk-accent-text);
+  font-weight: 600;
+}
+
+.pk-choice:has(input:focus-visible) {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.pk-choice:has(input:disabled) {
+  border-color: var(--pk-border);
+  color: var(--pk-muted);
+  cursor: not-allowed;
+}
+
+/* 一行右轨放不下时（长列表、说明文字），整行退成上下两段。 */
+.pk-row--stack {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.pk-row--stack .pk-row__value {
+  justify-items: start;
+  width: 100%;
+}
+
+/* 文本草稿的显式保存条：贴着它作用的那组行，不飘到页面顶部。 */
+.pk-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-top: 4px;
+}
+
+.pk-draft-actions__state {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-choice {
+    transition: none;
+  }
+}
+
+/* ---- 并排的一栏（预览台）---- */
+
+/* 宽窗口时行与预览并排；1180px 以下预览退成页顶一段，不挤压值轨。 */
+.pk-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .pk-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 配色的小色块：读的是预览同一张表，不在这儿再写一遍颜色。 */
+.pk-choice__swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: 50%;
+}
+
+/* ---- 外部页面声明的操作 ---- */
+
+.pk-action-list {
+  display: grid;
+  gap: 10px;
+}
+
+.pk-action {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+/* 录音条停在提示区里：只要一条底边把它和页面分开，控件本身由 ui-kit 负责。 */
+.pk-settings__recording {
+  padding-top: 10px;
+  border-top: 1px solid var(--pk-border);
+  background: var(--pk-bg);
+}

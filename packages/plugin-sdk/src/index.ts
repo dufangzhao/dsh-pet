@@ -8,6 +8,7 @@
 
 import type {
   CapabilityId,
+  ConfigSave,
   JsonObject,
   JsonValue,
   LocalId,
@@ -81,6 +82,11 @@ export interface PluginHostServices {
   readonly version: 1;
   readonly config: {
     get(): Promise<Result<PluginConfigSnapshot>>;
+    save?(
+      task: PluginTask,
+      data: JsonObject,
+      expectedRevision: number,
+    ): Promise<Result<ConfigSave>>;
   };
   readonly capabilities: {
     invoke(
@@ -106,6 +112,12 @@ export interface PluginHostServices {
  */
 export interface PluginHostPort {
   getConfig(owner: OwnerRef): Promise<Result<PluginConfigSnapshot>>;
+  saveConfig?(
+    owner: OwnerRef,
+    task: PluginTask,
+    data: JsonObject,
+    expectedRevision: number,
+  ): Promise<Result<ConfigSave>>;
   invoke(
     owner: OwnerRef,
     task: PluginTask,
@@ -140,6 +152,8 @@ type Disposer = () => void | Promise<void>;
  * 激活上下文。`provide`/`contribute` 都是同步注册：只登记，不执行。
  */
 export interface PluginContext {
+  /** Persistent path supplied only for declared plugin-data access. */
+  readonly dataDirectory?: string;
   readonly owner: Readonly<OwnerRef>;
   readonly signal: AbortSignal;
   readonly config: Readonly<JsonObject>;

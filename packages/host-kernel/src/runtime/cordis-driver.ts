@@ -49,6 +49,7 @@ export class CordisRuntimeDriver implements RuntimeDriver {
         };
         const api: PluginRuntimeContext = Object.freeze({
           owner: Object.freeze({ ...activation.owner }),
+          ...(activation.dataDirectory ? { dataDirectory: activation.dataDirectory } : {}),
           signal,
           config: freezeJson(structuredClone(activation.config)),
           ...(activation.host ? { host: activation.host } : {}),

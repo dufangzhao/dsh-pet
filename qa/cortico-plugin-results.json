@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "checks": [
+    "ordinary-profile-and-agent-plugins-discovered-verified-and-enabled",
+    "plugin-own-config-save-obeys-file-lease-and-CAS",
+    "Cortico-uses-canonical-profile-and-real-binary-media-output",
+    "chat-poke-and-applied-blush-share-one-cursor-history",
+    "manager-stop-restart-revokes-generation-and-preserves-Core-history"
+  ],
+  "electron": "45.0.0",
+  "node": "24.22.0",
+  "diagnostics": {
+    "activeTasks": 0,
+    "pendingWork": 1,
+    "retained": 10,
+    "observers": 0,
+    "observerFailures": 0,
+    "cleanupFailures": 0
+  },
+  "close": {
+    "exitConfirmed": true,
+    "forced": false
+  },
+  "exitCode": 0,
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  },
+  "stderr": ""
+}

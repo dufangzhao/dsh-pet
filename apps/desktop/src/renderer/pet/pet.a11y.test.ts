@@ -277,31 +277,28 @@ describe('普通文字对比度：读真实 token', () => {
 
   it('禁用态文字 --pet-ink-muted 在禁用底色上仍 >= 4.5（不再用 opacity 压暗）', () => {
     const muted = color('--pet-ink-muted');
-    const disabledBackground = declarationColor('.prototype-panel__quit:disabled', 'background');
+    const disabledBackground = declarationColor('.pet-menu__quit:disabled', 'background');
     const ratio = contrastRatio(muted, disabledBackground);
     expect(ratio, describeContrast('禁用文字', ratio, TEXT_MIN)).toBeGreaterThanOrEqual(TEXT_MIN);
   });
 
-  it('选中按钮文字（真实规则 color）对真实背景 --pet-accent >= 4.5', () => {
-    const active = declarationColor('.prototype-panel__button[data-active="true"]', 'color');
-    const background = declarationColor(
-      '.prototype-panel__button[data-active="true"]',
-      'background',
-    );
+  it('主选项文字（真实规则 color）对真实背景 --pet-accent >= 4.5', () => {
+    const primary = '.pet-dialog__choice[data-primary="true"]';
+    const active = declarationColor(primary, 'color');
+    const background = declarationColor(primary, 'background');
     const ratio = contrastRatio(active, background);
-    expect(ratio, describeContrast('选中按钮文字', ratio, TEXT_MIN)).toBeGreaterThanOrEqual(
-      TEXT_MIN,
-    );
+    expect(ratio, describeContrast('主选项文字', ratio, TEXT_MIN)).toBeGreaterThanOrEqual(TEXT_MIN);
   });
 
-  it('选中按钮悬停底色上的文字仍 >= 4.5', () => {
-    const active = declarationColor('.prototype-panel__button[data-active="true"]', 'color');
+  it('主选项悬停底色上的文字仍 >= 4.5', () => {
+    const primary = '.pet-dialog__choice[data-primary="true"]';
+    const active = declarationColor(primary, 'color');
     const hoverBackground = declarationColor(
-      '.prototype-panel__button[data-active="true"]:hover',
+      '.pet-dialog__choice[data-primary="true"]:hover:not(:disabled)',
       'background',
     );
     const ratio = contrastRatio(active, hoverBackground);
-    expect(ratio, describeContrast('选中按钮悬停文字', ratio, TEXT_MIN)).toBeGreaterThanOrEqual(
+    expect(ratio, describeContrast('主选项悬停文字', ratio, TEXT_MIN)).toBeGreaterThanOrEqual(
       TEXT_MIN,
     );
   });
@@ -328,8 +325,8 @@ describe('普通文字对比度：读真实 token', () => {
   it('notice 与 hint 的真实 color 对真实 background 都 >= 4.5', () => {
     const pairs: [string, string, string][] = [
       ['.pet-root__notice', 'color', 'background'],
-      ['.prototype-panel__notice', 'color', '--panel'],
-      ['.prototype-panel__hint', 'color', '--panel'],
+      ['.pet-menu__error', 'color', 'background'],
+      ['.pet-dialog__hint', 'color', '--panel'],
     ];
     const panel = composite(color('--pet-surface-strong'), OPAQUE_BLACK);
     for (const [selector, colorProperty, backgroundProperty] of pairs) {
@@ -355,7 +352,7 @@ describe('非文本对比度：控件边界与焦点环', () => {
   });
 
   it('退出按钮边界对白底与错误软底都 >= 3', () => {
-    const line = declarationColor('.prototype-panel__quit', 'border-color');
+    const line = declarationColor('.pet-menu__quit', 'border-color');
     const onWhite = contrastRatio(line, OPAQUE_WHITE);
     expect(
       onWhite,
@@ -369,14 +366,14 @@ describe('非文本对比度：控件边界与焦点环', () => {
   });
 
   it('禁用按钮边界对自身底色仍 >= 3（禁用不等于看不见）', () => {
-    const line = declarationColor('.prototype-panel__quit:disabled', 'border-color');
-    const background = declarationColor('.prototype-panel__quit:disabled', 'background');
+    const line = declarationColor('.pet-menu__quit:disabled', 'border-color');
+    const background = declarationColor('.pet-menu__quit:disabled', 'background');
     const ratio = contrastRatio(line, background);
     expect(ratio, describeContrast('禁用边界', ratio, NON_TEXT_MIN)).toBeGreaterThanOrEqual(
       NON_TEXT_MIN,
     );
     // 也不能靠 opacity 把整块压暗来“表示禁用”。
-    const disabledRule = rulesFor('.prototype-panel__quit:disabled')[0];
+    const disabledRule = rulesFor('.pet-menu__quit:disabled')[0];
     expect(disabledRule?.declarations['opacity']).toBeUndefined();
   });
 
@@ -392,13 +389,13 @@ describe('非文本对比度：控件边界与焦点环', () => {
   });
 
   it('焦点环是 outline 且 offset 为正，环落在按钮外侧的面板底色上', () => {
-    const outline = declaration('.prototype-panel__button:focus-visible', 'outline');
+    const outline = declaration('.pet-menu__button:focus-visible', 'outline');
     expect(outline).toContain('solid');
     // outline 简写里的第一段是宽度。
     const widthMatch = /^(\d+(?:\.\d+)?)px/.exec(outline);
     expect(widthMatch, '焦点环宽度无法解析：' + outline).not.toBeNull();
     expect(Number.parseFloat(widthMatch?.[1] ?? '0')).toBeGreaterThanOrEqual(2);
-    const offset = declarationPx('.prototype-panel__button:focus-visible', 'outline-offset');
+    const offset = declarationPx('.pet-menu__button:focus-visible', 'outline-offset');
     expect(offset).toBeGreaterThan(0);
     // 焦点环颜色必须来自 --pet-focus（已单独校验对比度），不能是随手写的色值。
     expect(outline).toContain('var(--pet-focus)');
@@ -426,8 +423,14 @@ describe('颜色方向与语义 token 约束', () => {
 });
 
 describe('可点区域与字号：读真实声明', () => {
-  it('状态按钮与退出按钮的 min-height / min-width 实际达到 44px', () => {
-    for (const selector of ['.prototype-panel__button', '.prototype-panel__quit']) {
+  it('每类真实控件的 min-height / min-width 实际达到 44px', () => {
+    for (const selector of [
+      '.pet-dialog__choice',
+      '.pet-menu__button',
+      '.pet-menu__quit',
+      '.pet-composer__send',
+      '.pet-root__retry',
+    ]) {
       const minHeight = declarationPx(selector, 'min-height');
       const minWidth = declarationPx(selector, 'min-width');
       expect(minHeight, selector + ' 的 min-height').toBeGreaterThanOrEqual(44);
@@ -443,11 +446,12 @@ describe('可点区域与字号：读真实声明', () => {
   it('所有可见文字字号 >= 12px', () => {
     const selectors = [
       '.pet-bubble',
-      '.prototype-panel__title',
-      '.prototype-panel__notice',
-      '.prototype-panel__hint',
-      '.prototype-panel__button',
-      '.prototype-panel__quit',
+      '.pet-composer__label',
+      '.pet-dialog__title',
+      '.pet-dialog__hint',
+      '.pet-menu__name',
+      '.pet-menu__button',
+      '.pet-menu__quit',
       '.pet-root__notice',
     ];
     for (const selector of selectors) {
@@ -471,6 +475,28 @@ describe('可点区域与字号：读真实声明', () => {
     );
     for (const [, value] of forcedColors) {
       expect(value).toMatch(/CanvasText|GrayText|Highlight|Canvas/);
+    }
+  });
+
+  it('腮红出现时一定看得见：没有规则把它藏掉（含减少动画档）', () => {
+    const blushRules = rules.filter((rule) =>
+      normalizeSelector(rule.selector).includes('.pet-avatar__blush'),
+    );
+    expect(blushRules.length, '缺少 .pet-avatar__blush 规则').toBeGreaterThan(0);
+    for (const rule of blushRules) {
+      const condition = rule.conditions.join(' ') || '无条件';
+      expect(
+        rule.declarations['display'],
+        rule.selector + ' 在 ' + condition + ' 下用 display 藏掉了腮红',
+      ).not.toBe('none');
+      expect(
+        rule.declarations['visibility'],
+        rule.selector + ' 在 ' + condition + ' 下用 visibility 藏掉了腮红',
+      ).not.toBe('hidden');
+      expect(
+        rule.declarations['opacity'],
+        rule.selector + ' 在 ' + condition + ' 下把腮红压成全透明',
+      ).not.toBe('0');
     }
   });
 
@@ -627,7 +653,7 @@ describe('气泡在任何视口都必须真实可见', () => {
  * 与气泡同理：这些不是装饰，不能为了腾空间被 display:none 掉。
  */
 describe('退出按钮与错误提示在任何视口都不得隐藏', () => {
-  const PROTECTED = ['.prototype-panel__quit', '.pet-root__notice'];
+  const PROTECTED = ['.pet-menu__quit', '.pet-root__notice'];
 
   it('受保护元素没有被任何规则设成 display:none / visibility:hidden', () => {
     for (const rule of rules) {
@@ -662,10 +688,11 @@ describe('退出按钮与错误提示在任何视口都不得隐藏', () => {
 
 /**
  * 253×280 档（CSS 视口 < 280px）的取舍必须写死在样式里，而不是靠人记住：
- * 空间确实装不下，于是面板内部滚动 + 退出 sticky 吸底，保证退出始终可达。
- * 如果以后有人把 sticky 去掉又没换别的兜底，这条会失败。
+ * 空间确实装不下全部内容，于是可操作提示（.pet-dialog）自己限高滚动，
+ * 菜单与退出留在滚动区外，角色缩到 56px 与气泡并排。若以后有人把提示的
+ * 自身滚动去掉，这里会失败。
  */
-describe('极小视口：内容区滚动 + 退出固定页脚，而不是隐藏内容', () => {
+describe('极小视口：只有提示自己滚动，菜单与退出不藏', () => {
   function narrowRules(selector: string): CssRule[] {
     return rules.filter(
       (rule) =>
@@ -680,30 +707,42 @@ describe('极小视口：内容区滚动 + 退出固定页脚，而不是隐藏�
     );
   });
 
-  it('极小视口只让面板内容区滚动，内容不会被顶出窗口', () => {
-    const body = narrowRules('.prototype-panel__body');
-    expect(body.length, '279px 档缺少 .prototype-panel__body 规则').toBeGreaterThan(0);
-    expect(body.some((rule) => rule.declarations['overflow-y'] === 'auto')).toBe(true);
+  it('提示自己限高并纵向滚动，内容不会被顶出窗口', () => {
+    const base = rulesFor('.pet-dialog')[0];
+    expect(base?.declarations['overflow-y']).toBe('auto');
+    expect(base?.declarations['max-height']).toMatch(/^\d+px$/);
+    // 窄档只调预算，不换滚动方式：提示仍是可滚动的整块。
+    const narrow = narrowRules('.pet-dialog');
+    expect(narrow.length, '279px 档缺少 .pet-dialog 规则').toBeGreaterThan(0);
+    expect(narrow.some((rule) => rule.declarations['max-height'] === '210px')).toBe(true);
   });
 
-  it('面板本身不滚动，滚动只发生在内容区', () => {
-    // 若面板自己滚动，退出按钮会被卷进滚动内容里，或需要 sticky 才能留住。
-    const panel = narrowRules('.prototype-panel');
-    expect(panel.some((rule) => rule.declarations['overflow-y'] === 'auto')).toBe(false);
+  it('菜单自己不是滚动容器，退出按钮不会随内容被卷走', () => {
+    for (const selector of ['.pet-menu', '.pet-root__panel']) {
+      for (const rule of rules) {
+        if (normalizeSelector(rule.selector) !== selector) continue;
+        expect(
+          rule.declarations['overflow-y'],
+          selector + ' 自己开了纵向滚动，退出按钮会被卷进滚动内容里',
+        ).not.toBe('auto');
+      }
+    }
+    // 窄档必须允许面板被压缩，并把高度让给提示自己的滚动。
+    expect(
+      narrowRules('.pet-root__panel').some((rule) => rule.declarations['min-height'] === '0'),
+    ).toBe(true);
   });
 
-  it('退出按钮不用 sticky/absolute/fixed 浮起来盖住状态按钮', () => {
-    // 回归：sticky 吸底会让退出按钮浮在滚动内容上方。实测 230×240 时
-    // elementFromPoint 命中第一个状态按钮中心得到的是 prototype-panel__quit，
-    // 即按钮被退出挡住，等于降低点击目标。
+  it('退出按钮不用 sticky/absolute/fixed 浮起来盖住提示', () => {
+    // 回归：sticky 吸底会让退出按钮浮在滚动内容上方，等于降低点击目标。
     for (const rule of rules) {
-      if (normalizeSelector(rule.selector) !== '.prototype-panel__quit') continue;
+      if (normalizeSelector(rule.selector) !== '.pet-menu__quit') continue;
       const condition = rule.conditions.join(' ') || '无条件';
       const position = rule.declarations['position'];
       if (position === undefined) continue;
       expect(
         ['sticky', 'absolute', 'fixed'],
-        '.prototype-panel__quit 在 ' +
+        '.pet-menu__quit 在 ' +
           condition +
           ' 下用 position: ' +
           position +
@@ -712,30 +751,41 @@ describe('极小视口：内容区滚动 + 退出固定页脚，而不是隐藏�
     }
   });
 
-  it('矮视口（宽而矮）也有滚动兜底，不靠按宽度分档漏掉', () => {
-    // 回归：281×280、360×280 这类视口既不命中 279px 档，又装不下全部内容，
-    // 曾经把面板与错误提示顶出窗口。按高度补一档，只开滚动，不改布局形态。
+  it('矮视口（宽而矮）也有兜底，不靠按宽度分档漏掉', () => {
+    // 回归：281×280、360×280 这类视口既不命中 279px 档，又装不下全部内容。
+    // 按高度补一档，只收紧高度预算，不改布局形态。
     const shortTier = rules.filter((rule) =>
       rule.conditions.some((condition) => condition.includes('max-height: 380px')),
     );
     expect(shortTier.length, '缺少矮视口兜底媒体查询').toBeGreaterThan(0);
-    const body = shortTier.filter(
-      (rule) => normalizeSelector(rule.selector) === '.prototype-panel__body',
+    const panel = shortTier.filter(
+      (rule) => normalizeSelector(rule.selector) === '.pet-root__panel',
     );
     expect(
-      body.some((rule) => rule.declarations['overflow-y'] === 'auto'),
-      '矮视口下内容区没有开启滚动',
+      panel.some((rule) => rule.declarations['min-height'] === '0'),
+      '矮视口下菜单面板仍不可压缩',
+    ).toBe(true);
+    const dialog = shortTier.filter((rule) => normalizeSelector(rule.selector) === '.pet-dialog');
+    expect(
+      dialog.some((rule) => rule.declarations['max-height'] === '190px'),
+      '矮视口下提示没有收紧高度预算',
     ).toBe(true);
     // 正常 380×420 的高度是 420 > 380，这一档不会命中，正常窗口行为不受影响。
     expect(380).toBeLessThan(420);
   });
 
-  it('内容区与退出按钮是同一 flex 列里的兄弟，退出始终占着底部一行', () => {
-    const panel = rulesFor('.prototype-panel')[0];
-    expect(panel?.declarations['display']).toBe('flex');
-    expect(panel?.declarations['flex-direction']).toBe('column');
-    // 内容区必须能被压缩，否则它会把退出按钮顶出面板。
-    const body = rulesFor('.prototype-panel__body')[0];
-    expect(body?.declarations['min-height']).toBe('0');
+  it('角色与菜单是同一个 flex 列里的两块，菜单永远排在最下面', () => {
+    const root = rulesFor('.pet-root')[0];
+    expect(root?.declarations['display']).toBe('flex');
+    expect(root?.declarations['flex-direction']).toBe('column');
+    // 面板自己也是 flex 列：菜单、提示条、重读按钮纵向排布并允许收缩。
+    const panel = rulesFor('.pet-root__panel');
+    expect(
+      panel.some(
+        (rule) =>
+          rule.declarations['display'] === 'flex' &&
+          rule.declarations['flex-direction'] === 'column',
+      ),
+    ).toBe(true);
   });
 });

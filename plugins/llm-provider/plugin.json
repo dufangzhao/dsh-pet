@@ -28,6 +28,20 @@
           ]
         }
       }
+    },
+    {
+      "id": "responses",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [
+            {
+              "kind": "network",
+              "origins": ["https://api.deepseek.com"]
+            }
+          ]
+        }
+      }
     }
   ],
   "permissions": [

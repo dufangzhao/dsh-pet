@@ -1,12 +1,17 @@
 /**
  * 桌宠窗口的 React 根组件。
  *
- * 角色状态与气泡文字来自宿主 Demo（window.petDemo，只读快照 + 停止）；
- * 没连上或还没读到快照时，沿用窗口原型自己的状态，不伪造真实内容。
+ * 三条数据来源，各自职责不重叠，也不互相冒充：
+ * - window.pet（PetPrototypeBridge）：窗口本身的状态、穿透与拖拽。
+ * - window.petApplication（ApplicationBridge）：同一份 profile（名字/形态/配色/大小/
+ *   减少动画/允许拖动）与宿主给的可操作提示 ApplicationDialog。
+ * - window.petDemo（DemoBridge）：录音与回复的真实阶段，直到 Core 桥接完成前都保留。
+ * 没读到快照时沿用窗口原型自己的状态，不伪造真实内容。
  *
  * 交互约束（对应 qa/M0-06-bridge.md）：
- * - 窗口默认鼠标穿透，只有指针落在角色实际绘制的形状或真实按钮上才 setInteraction(true)。
- *   角色的外接矩形（更别说含气泡的容器）里有大量透明角，不能拿来当命中区。
+ * - 窗口默认鼠标穿透，只有指针落在角色实际绘制的形状、真实按钮或提示的真实矩形上
+ *   才 setInteraction(true)。角色的外接矩形（更别说含气泡的容器）里有大量透明角，
+ *   不能拿来当命中区。
  * - 角色按住拖动：按下 beginDrag()，松开 endDrag()；坐标完全由主进程读取，渲染器不传。
  * - 拖拽用 pointer capture，并在 pointerup/pointercancel/lostpointercapture/blur/
  *   Escape/超时六条路径上都释放，避免窗口卡在拖拽态。
@@ -17,14 +22,22 @@
  * 主进程可能在失焦/隐藏/故障时单方面释放交互，此时本地不能继续声称“可交互”，
  * 否则再也不会重新上报，窗口要么永久挡住下层，要么永久点不动。因此：
  * - 拖拽结束先用最近一次指针位置重算意图，再 endDrag（主进程据此决定穿透）；
- * - 每次权威快照都做一次对账，发现分叉立即自愈（只清缓存或主动释放，不重复加锁）。
+ * - 每次权威快照都做一次对账，发现分叉立即自愈（只清缓存或主动释放，不重复加锁）；
+ * - 提示出现/消失、角色换尺寸时同样重算一次，静止的指针也能覆盖到新矩形。
+ *
+ * 触碰记录：只有真的做完一个物理动作才向宿主记一条事件（戳/摸/拖动完成），
+ * 判断依据是主进程给的 bounds 是否真的变过与按住时长；证据不足就什么都不记。
+ * 表情（脸红）只在它真的画到屏幕之后才回报一次：时间线见 expression.ts，
+ * 隐藏窗口不回报，旧的计时也不能替新的一次记事件。
  */
-import type { PetSnapshot, PetState } from '@pet/contracts';
+import type { PetBounds, PetSnapshot } from '@pet/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { PetAvatar } from './PetAvatar.js';
 import { PetBubble } from './PetBubble.js';
-import { PrototypePanel } from './PrototypePanel.js';
+import { PetComposer } from './PetComposer.js';
+import { PetDialog } from './PetDialog.js';
+import { PetMenu } from './PetMenu.js';
 import { PET_COPY } from './copy.js';
 import {
   PetDragController,
@@ -36,8 +49,17 @@ import {
   isPointInHitShapes,
   toHitRect,
   type HitShape,
+  type PetFigure,
   type PointLike,
 } from './hit-regions.js';
+import { ExpressionTimeline, type PetExpression } from './expression.js';
+import { classifyGesture, type PetGesture } from './pet-gesture.js';
+import {
+  applicationSnapshotErrorText,
+  readApplicationBridge,
+  useApplication,
+  type ApplicationView,
+} from './use-application.js';
 import { readBridge, usePetBridge } from './use-pet-bridge.js';
 import { useDemoStatus } from './use-demo-status.js';
 
@@ -205,6 +227,8 @@ export interface PetInteractionSessionOptions {
 export interface PetInteractionSession {
   tracker: HoverTracker;
   isActive(): boolean;
+  /** 最近一次结束原因；用于只在真正松手（pointerup）时记录触碰。 */
+  endReason(): DragEndReason | null;
   begin(event: { button: number; pointerId: number }, target: PointerCaptureTarget | null): boolean;
   end(reason?: DragEndReason): void;
   cancel(reason: DragEndReason): void;
@@ -251,6 +275,7 @@ export function createPetInteractionSession(
   return {
     tracker,
     isActive: () => !disposed && controller.isActive(),
+    endReason: () => controller.endReason(),
     begin: (event, target) => (disposed ? false : controller.begin(event, target)),
     end: (reason) => {
       if (!disposed) controller.end(reason);
@@ -266,40 +291,111 @@ export function createPetInteractionSession(
   };
 }
 
+/** 一次按压的证据：按下时刻、按下时的窗口边界、是否真的发起了拖拽。 */
+export interface PressRecord {
+  at: number;
+  before: PetBounds | null;
+  startedDrag: boolean;
+  /** 已经看到过主进程确认 dragging=true，才可能判定“拖动完成”。 */
+  sawDragging: boolean;
+}
+
+/**
+ * 决定这次按压要不要向宿主记一条触碰事件（纯函数，便于单测）。
+ *
+ * 只在“主进程确认过这次真的在拖，且现在结束了”之后判定；
+ * 没确认过就继续等，被 Esc/失焦打断则整条证据作废——那不是用户做完的一次拖动。
+ */
+export function gestureAfterDrag(
+  press: PressRecord,
+  snapshot: { dragging: boolean; bounds: PetBounds },
+  now: number,
+): { next: PressRecord | null; gesture: PetGesture | null } {
+  if (snapshot.dragging) return { next: { ...press, sawDragging: true }, gesture: null };
+  if (!press.sawDragging) return { next: press, gesture: null };
+  return {
+    next: null,
+    gesture: classifyGesture({
+      startedDrag: true,
+      before: press.before,
+      after: snapshot.bounds,
+      heldMs: now - press.at,
+    }),
+  };
+}
+
 export interface PetAppProps {
   /** 测试注入；正常运行时从 window.pet 读取。 */
   bridge?: unknown;
+  /** 测试注入；正常运行时从 window.petApplication 读取。 */
+  application?: unknown;
 }
 
-export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
+/** 提示的存在会改变矩形集合，尺寸/形态也一样。 */
+function geometryKey(dialogId: string | null, figure: PetFigure, size: string): string {
+  return (dialogId ?? 'none') + ':' + figure + ':' + size;
+}
+
+export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Element {
   const view = usePetBridge({
     bridge: bridge === undefined ? readBridge() : readBridge({ pet: bridge }),
     missingNotice: PET_COPY.bridgeMissing,
     failureNotice: PET_COPY.bridgeError,
     quitFailureNotice: PET_COPY.quitFailed,
   });
-  const { setInteraction, beginDrag, endDrag, previewState, quit } = view;
-  // 宿主 Demo 是真实状态来源；没读到快照时沿用窗口原型自己的状态。
+  const app: ApplicationView = useApplication({
+    bridge:
+      application === undefined
+        ? readApplicationBridge()
+        : readApplicationBridge({ petApplication: application }),
+  });
+  const { setInteraction, beginDrag, endDrag, quit } = view;
+  const { interact: recordReaction } = app;
+  // 宿主 Demo 是录音与回复的真实来源；没读到快照时沿用窗口原型自己的状态。
   const demo = useDemoStatus();
   const state = demo.state ?? view.state;
 
+  // 同一份 profile 描述的就是桌面上这一只；没读到就沿用窗口原型自带的形态。
+  const profile = app.profile;
+  const figure: PetFigure = profile?.figure ?? 'minimal';
+  const palette = profile?.palette ?? 'morning';
+  const size = profile?.size ?? 'normal';
+  const reducedMotion = profile?.reducedMotion ?? false;
+  const draggable = profile?.draggable ?? true;
+  const petName = profile?.petName ?? null;
+  const dialog = app.dialog;
+
   const avatarRef = useRef<SVGSVGElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const bubbleRef = useRef<HTMLDivElement | null>(null);
+  const pressRef = useRef<PressRecord | null>(null);
   const unmounting = useRef(false);
   const [dragging, setDragging] = useState(false);
+  // 短时表情与 window 状态正交：状态说它在做什么，表情说刚刚真的发生了什么。
+  const [expression, setExpression] = useState<PetExpression>('neutral');
+  const expressionTimeline = useRef<ExpressionTimeline | null>(null);
 
-  /** 收集当前窗口内真实可交互的形状：角色实际绘制面 + 面板矩形。 */
+  /** 收集当前窗口内真实可交互的形状：角色绘制面 + 提示矩形 + 面板矩形。 */
+  const composing = dialog === null && demo.available;
   const collectHitShapes = useCallback((): HitShape[] => {
     const shapes: HitShape[] = [];
     const avatar = avatarRef.current;
     if (avatar !== null) {
       const rect = avatar.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) shapes.push(...avatarHitShapes(rect));
+      if (rect.width > 0 && rect.height > 0) shapes.push(...avatarHitShapes(rect, figure));
     }
     const panel = rectToHitRect(panelRef.current);
     if (panel !== null) shapes.push({ kind: 'rect', ...panel });
+    // 气泡只有在装配了真实控件（发送框）时才是命中区；纯文字气泡保持穿透。
+    if (composing) {
+      const bubble = rectToHitRect(bubbleRef.current);
+      if (bubble !== null) shapes.push({ kind: 'rect', ...bubble });
+    }
+    const dialogue = rectToHitRect(dialogRef.current);
+    if (dialogue !== null) shapes.push({ kind: 'rect', ...dialogue });
     return shapes;
-  }, []);
+  }, [figure, composing]);
 
   // 桥方法每帧都可能变化，用 ref 固定，避免拖拽控制器被反复重建。
   const bridgeMethods = useRef({ beginDrag, endDrag });
@@ -344,8 +440,30 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       unmounting.current = true;
       if (sessionRef.current === session) sessionRef.current = null;
       session.dispose();
+      // 卸载前那次没判定完的按压不再补记：窗口都没了，事件也无从核实。
+      pressRef.current = null;
     };
   }, [createSession]);
+
+  /**
+   * 短时表情的时序：戳一下之后脸红，两帧之后才向宿主回报一次。
+   *
+   * 只建一份，StrictMode 的 cleanup 会整份作废；第二次 setup 拿到新的。
+   * 拆成独立对象是为了让“只回报一次、隐藏窗口不回报、旧计时不得收回新表情”
+   * 这三条能在没有浏览器的环境里直接测（见 expression.test.ts）。
+   */
+  useEffect(() => {
+    const timeline = new ExpressionTimeline({
+      onApply: setExpression,
+      onVisible: () => recordReaction('blush'),
+      isVisible: () => typeof document !== 'undefined' && document.visibilityState === 'visible',
+    });
+    expressionTimeline.current = timeline;
+    return () => {
+      expressionTimeline.current = null;
+      timeline.dispose();
+    };
+  }, [recordReaction]);
 
   /**
    * 与主进程的权威快照对账，避免“没有事件就永久挡/透”。
@@ -359,7 +477,7 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
     if (session === null) return;
     const tracker = session.tracker;
     // 第三个参数是“按最后真实位置推导的命中”，不是去重缓存：缓存 false
-    // 可能只是刚被 forget 清掉，拿它当“指针在外”会发出相反的 release。
+    // 可能只是刚被 forget 清掉，拿它当“指针在外面”会发出相反的 release。
     const action = reconcileHover(view.snapshot, tracker.interactive, tracker.hit);
     if (action === 'forget') {
       tracker.forget();
@@ -368,6 +486,52 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       setInteraction(false);
     }
   }, [view.snapshot, setInteraction]);
+
+  /**
+   * 触碰记录：只有真的做完一个物理动作才记一条，判定依据全是真实证据。
+   * 失败由 use-application 收敛成带来源的提示，不静默丢弃。
+   *
+   * 戳一下同时是这套短时表情的唯一触发点：先让红晕真的画到屏幕上，
+   * 再由 ExpressionTimeline 在可见帧之后回报一次 blush；摸和拖动不装脸红。
+   */
+  const recordGesture = useCallback(
+    (gesture: PetGesture | null): void => {
+      if (gesture === null) return;
+      recordReaction(gesture);
+      if (gesture === 'poke') expressionTimeline.current?.blush();
+    },
+    [recordReaction],
+  );
+
+  /**
+   * 拖拽路径的判定入口：等主进程的权威快照。
+   *
+   * beginDrag 的回执里 dragging=true，endDrag 的回执里才是最终 bounds；
+   * 中间可能先到一条“还没开始拖”的快照，所以必须见过 dragging=true 才判定，
+   * 否则一次快速点击会被误记成“没拖动”，真的拖动却一条都不记。
+   */
+  useEffect(() => {
+    const press = pressRef.current;
+    const snapshot = view.snapshot;
+    if (press === null || !press.startedDrag || snapshot === null) return;
+    const outcome = gestureAfterDrag(press, snapshot, Date.now());
+    pressRef.current = outcome.next;
+    if (outcome.gesture === null) return;
+    // 被 Esc / 失焦 / 超时打断的拖拽不是“完成的一次拖动”，不记。
+    if (sessionRef.current?.endReason() !== 'pointerup') return;
+    recordGesture(outcome.gesture);
+  }, [view.snapshot, recordGesture]);
+
+  /**
+   * 命中几何变了就重述一次意图：提示出现/消失、换形态或换尺寸时，
+   * 指针可能一动不动，但它的命中结果已经不一样了。
+   */
+  const geometry = geometryKey(dialog?.id ?? null, figure, size) + (composing ? ':compose' : '');
+  useEffect(() => {
+    const session = sessionRef.current;
+    if (session === null || session.isActive()) return;
+    if (session.tracker.resync(collectHitShapes())) setInteraction(session.tracker.interactive);
+  }, [geometry, collectHitShapes, setInteraction]);
 
   /** 指针在窗口内移动时上报命中状态；离开窗口一律恢复穿透。 */
   useEffect(() => {
@@ -396,14 +560,43 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       if (session.tracker.leave()) setInteraction(false);
     };
 
+    const finishPress = (completed: boolean): void => {
+      const press = pressRef.current;
+      if (press === null) return;
+      // 没发起拖拽的按压（不允许拖动，或 beginDrag 失败）：松手就是全部证据。
+      if (!press.startedDrag) {
+        pressRef.current = null;
+        if (completed)
+          recordGesture(
+            classifyGesture({
+              startedDrag: false,
+              before: null,
+              after: null,
+              heldMs: Date.now() - press.at,
+            }),
+          );
+        return;
+      }
+      // 发起过拖拽的交给权威快照判定；被打断时整条证据作废。
+      if (!completed) pressRef.current = null;
+    };
+
     const handlePointerUp = (): void => {
-      sessionRef.current?.end('pointerup');
+      const session = sessionRef.current;
+      if (session === null) return;
+      if (session.isActive()) {
+        session.end('pointerup');
+        return;
+      }
+      finishPress(true);
     };
     const handlePointerCancel = (): void => {
       sessionRef.current?.cancel('pointercancel');
+      finishPress(false);
     };
     const handleLostCapture = (): void => {
       sessionRef.current?.cancel('lostpointercapture');
+      finishPress(false);
     };
     const handleBlur = (): void => {
       // 先清 hover 意图再结束拖拽：失焦时主进程已经释放交互，若反过来先
@@ -411,6 +604,7 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       handleLeave();
       // 窗口失焦必须同时结束渲染器侧拖拽状态，否则松手后仍在拖拽态。
       sessionRef.current?.cancel('blur');
+      finishPress(false);
     };
 
     window.addEventListener('pointermove', handleMove);
@@ -429,9 +623,9 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       window.removeEventListener('lostpointercapture', handleLostCapture);
       window.removeEventListener('blur', handleBlur);
     };
-  }, [collectHitShapes, setInteraction]);
+  }, [collectHitShapes, setInteraction, recordGesture]);
 
-  /** Esc 取消拖拽或退出交互，不拦截其他应用的按键。 */
+  /** 焦点不在提示里时，Esc 取消拖拽或退出交互，不拦截其他应用的按键。 */
   useEffect(() => {
     const handleKey = (event: KeyboardEvent): void => {
       if (event.key !== 'Escape') return;
@@ -439,6 +633,13 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       if (session === null) return;
       if (session.isActive()) {
         session.cancel('escape');
+        pressRef.current = null;
+        return;
+      }
+      // Esc 落在提示的控件里时不退出交互：那会把用户正在用的按钮和输入框
+      // 放回穿透态，等于用一个没有取消语义的键把这次操作打断。
+      const active = typeof document === 'undefined' ? null : document.activeElement;
+      if (dialogRef.current !== null && active !== null && dialogRef.current.contains(active)) {
         return;
       }
       if (!session.tracker.interactive) return;
@@ -456,23 +657,33 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       // 会话已 dispose（StrictMode 的 cleanup 或卸载）时不再接受新的拖拽。
       if (session === null) return;
       // 只在实际画出来的角色形状上开始拖拽，透明角不吞事件。
-      const inside = isPointInHitShapes({ x: event.clientX, y: event.clientY }, collectHitShapes());
-      if (!inside) return;
+      const point = { x: event.clientX, y: event.clientY };
+      const shapes = collectHitShapes();
+      if (!isPointInHitShapes(point, shapes)) return;
       // 确认命中后才阻止默认行为，避免误伤透明区域的下层交互。
-      event.preventDefault();
+      const target = event.currentTarget;
       // 按下前先把真实 hover 意图重述给主进程：若上一次权威快照已经释放交互
       // （失焦/隐藏/故障），这里必须先重新关闭穿透，否则 beginDrag 之后
       // 指针事件仍然到不了渲染器，拖拽会半途失效。setInteraction(true) 是幂等的。
-      session.tracker.track({ x: event.clientX, y: event.clientY });
-      session.tracker.resync(collectHitShapes());
+      session.tracker.track(point);
+      session.tracker.resync(shapes);
       setInteraction(session.tracker.interactive);
-      const target = event.currentTarget;
-      session.begin(
+      pressRef.current = {
+        at: Date.now(),
+        before: view.snapshot?.bounds ?? null,
+        startedDrag: false,
+        sawDragging: false,
+      };
+      if (!draggable) return;
+      event.preventDefault();
+      const started = session.begin(
         { button: event.button, pointerId: event.pointerId },
         typeof target.setPointerCapture === 'function' ? target : null,
       );
+      if (started && pressRef.current !== null)
+        pressRef.current = { ...pressRef.current, startedDrag: true };
     },
-    [collectHitShapes, setInteraction],
+    [collectHitShapes, setInteraction, draggable, view.snapshot],
   );
 
   /** 元素级兜底：即使 window 上收不到，系统抢走捕获时也结束拖拽。 */
@@ -480,18 +691,25 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
     sessionRef.current?.cancel('lostpointercapture');
   }, []);
 
-  const handlePreview = useCallback(
-    (next: PetState): void => {
-      previewState(next);
-    },
-    [previewState],
-  );
-
   const handleQuit = useCallback((): void => {
     quit();
   }, [quit]);
 
-  const notice = view.notice ?? demo.notice;
+  const handleAnswer = useCallback(
+    (choice: string, text?: string): void => {
+      if (dialog === null) return;
+      app.answer(dialog, choice, text);
+    },
+    [app, dialog],
+  );
+
+  // 一次只有一条提示在前台：有 ApplicationDialog 时它取代只读气泡，
+  // 没有才显示宿主 Demo 的真实文本，不并排两块、也不留第二个聊天入口。
+  const notice =
+    app.failure !== null
+      ? app.failure.text
+      : (applicationSnapshotErrorText(app.snapshot) ?? view.notice ?? demo.notice);
+  const canRetryRead = app.available && app.failure?.source === 'read';
 
   return (
     <div
@@ -499,29 +717,77 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       data-testid="pet-stage"
       data-dragging={dragging ? 'true' : 'false'}
       data-state={state}
+      data-figure={figure}
+      data-palette={palette}
+      data-size={size}
+      data-reduced-motion={reducedMotion ? 'true' : 'false'}
+      data-dialog={dialog === null ? 'false' : 'true'}
     >
       <div className="pet-root__avatar">
         <PetAvatar
           state={state}
+          expression={expression}
+          figure={figure}
+          name={petName}
           svgRef={avatarRef}
           onPointerDown={handleAvatarPointerDown}
           onLostPointerCapture={handleLostPointerCapture}
         />
-        <PetBubble state={state} text={demo.bubble} />
+        {dialog === null ? (
+          <PetBubble
+            state={state}
+            text={demo.bubble}
+            register={(element) => {
+              bubbleRef.current = element;
+            }}
+            composer={
+              demo.available ? (
+                <PetComposer canSend={demo.canSend} sending={demo.sending} onSend={demo.send} />
+              ) : undefined
+            }
+          />
+        ) : (
+          <PetDialog
+            dialog={dialog}
+            state={state}
+            pending={app.answerBusy}
+            onAnswer={handleAnswer}
+            register={(element) => {
+              dialogRef.current = element;
+            }}
+          />
+        )}
       </div>
 
       <div className="pet-root__panel" ref={panelRef}>
-        <PrototypePanel
-          state={view.state}
-          onPreview={handlePreview}
-          onQuit={handleQuit}
+        <PetMenu
+          name={petName}
+          canStop={demo.canStop}
+          stopping={demo.stopping}
+          onStop={demo.stop}
+          guideDisabled={!app.available}
+          guideBusy={app.guideBusy}
+          onGuide={app.startGuide}
           quitDisabled={!view.available}
-          demo={demo}
+          onQuit={handleQuit}
         />
+
         {notice !== null ? (
           <p className="pet-root__notice" role="alert" data-testid="pet-notice">
             {notice}
           </p>
+        ) : null}
+        {canRetryRead ? (
+          <button
+            type="button"
+            className="pet-menu__button pet-root__retry"
+            data-testid="pet-reload"
+            onClick={app.reload}
+            disabled={app.readBusy}
+            title="再向宿主读一次当前状态"
+          >
+            {app.readBusy ? PET_COPY.app.reloading : PET_COPY.app.reload}
+          </button>
         ) : null}
       </div>
     </div>

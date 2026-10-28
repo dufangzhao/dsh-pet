@@ -15,6 +15,8 @@ import {
   PLUGIN_ID_PATTERN,
   makeError,
   type CapabilityId,
+  type ConfigSave,
+  type JsonObject,
   type JsonValue,
   type KernelError,
   type LocalId,
@@ -458,6 +460,13 @@ export function createPluginHostServices(
     throw invalidScope();
   }
 
+  const savePort = readPortMember(port, 'saveConfig');
+  if (savePort.kind === 'rejected') throw invalidScope();
+  const callSaveConfig =
+    savePort.kind === 'function'
+      ? (savePort.value as NonNullable<PluginHostPort['saveConfig']>)
+      : null;
+
   const secretPort = readPortMember(port, 'withSecret');
   if (secretPort.kind === 'rejected') throw invalidScope();
   const callWithSecret =
@@ -480,6 +489,58 @@ export function createPluginHostServices(
   };
 
   const config = Object.freeze({
+    ...(callSaveConfig
+      ? {
+          async save(
+            task: PluginTask,
+            data: JsonObject,
+            expectedRevision: number,
+          ): Promise<Result<ConfigSave>> {
+            const checked = readTask(task);
+            const candidate = readJson(data);
+            if (
+              !checked ||
+              !candidate ||
+              !candidate.value ||
+              typeof candidate.value !== 'object' ||
+              Array.isArray(candidate.value) ||
+              !Number.isSafeInteger(expectedRevision) ||
+              expectedRevision < 0
+            )
+              return fail('invalid-input');
+            const before = checkTask(checked);
+            if (before) return fail(before);
+            let raw: unknown;
+            try {
+              raw = await callSaveConfig.call(
+                port,
+                scopeOwner,
+                checked,
+                candidate.value as JsonObject,
+                expectedRevision,
+              );
+            } catch {
+              return fail('unavailable');
+            }
+            const after = checkTask(checked);
+            if (after) return fail(after);
+            const result = readResult(raw, (value) => {
+              if (!isPlainReflectable(value) || !hasExactOwnKeys(value, 'changeMode,snapshot'))
+                return null;
+              const snapshot = readSnapshot(readDataValue(value, 'snapshot'), owner);
+              const mode = readDataValue(value, 'changeMode');
+              if (
+                !snapshot ||
+                (mode !== null && mode !== 'immediate' && mode !== 'reload' && mode !== 'restart')
+              )
+                return null;
+              const saved: ConfigSave = { snapshot: snapshot.value, changeMode: mode };
+              return accept(deepFreeze(saved));
+            });
+            return result ?? fail('unavailable');
+          },
+        }
+      : {}),
     async get(): Promise<Result<PluginConfigSnapshot>> {
       if (aborted(signal)) return fail('cancelled');
       let raw: unknown;

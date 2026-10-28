@@ -1,79 +1,126 @@
-import type { DemoSnapshot } from '@pet/contracts';
 import { useState, type JSX } from 'react';
+
+import type { DemoSnapshot } from '@pet/contracts';
 
 import { Button, Section, StatusBadge } from '@pet/ui-kit';
 
-import { ConsolePane } from '../console-pane.js';
+import { saveChoice } from '../app-views.js';
 import { ConsoleStatus } from '../console-status.js';
 import { describeError } from '../copy.js';
+import { demoPhase } from '../labels.js';
+import { SettingsRow, SettingsRows } from '../settings-shell.js';
+import type { ApplicationState } from '../use-application.js';
 import type { DemoState } from '../use-demo.js';
 import { useDemoSettings } from '../use-demo-settings.js';
 import { DemoRecorder } from './demo-console.js';
 
 export interface VoicePageProps {
-  /** Demo 的阶段、模型与设置都来自宿主那一份快照。 */
+  app: ApplicationState;
   demo: DemoState;
   notify: (message: string, tone: 'ok' | 'danger') => void;
-  /** 去模型页填 DeepSeek Key。 */
-  onGoToModels: () => void;
+  /** 填 Key 在开始页；这里只把它作为出口，不复制一份表单。 */
+  onGoToStart: () => void;
 }
 
 /**
- * 语音输入页：本地识别模型、录音与识别、回复方式。
+ * 语音输入页：能不能用语音、用哪个模型识别、说完之后怎么处理。
  *
- * 控件的值一律由宿主快照渲染，本机不另存一份"将要生效的值"：
- * 保存失败时界面自然回到真实的那一个，不会把没生效的选择显示成已生效。
+ * 控件的值一律来自宿主那一份快照（偏好或 Demo 设置），本机不存"将要生效的值"：
+ * 写失败时这一行自然回到真实的值。录音会话只有 useDemo 那一份，切页不会关麦。
  */
-export function VoicePage({ demo, notify, onGoToModels }: VoicePageProps): JSX.Element {
+export function VoicePage({ app, demo, notify, onGoToStart }: VoicePageProps): JSX.Element {
   const settings = useDemoSettings();
   const [saving, setSaving] = useState<string | null>(null);
-  const snapshot = demo.snapshot;
 
   return (
-    <ConsolePane
-      title="语音输入"
-      summary="模型与回复方式都存在本机设置里，选完立即写入；不会自动启用插件，也不会调用付费服务。"
+    <ConsoleStatus
+      loading={demo.loading}
+      error={demo.error}
+      available={demo.available}
+      onRetry={demo.refresh}
     >
-      <ConsoleStatus
-        loading={demo.loading}
-        error={demo.error}
-        available={demo.available}
-        onRetry={demo.refresh}
-      >
-        {snapshot === null ? null : (
-          <>
-            <ModelSection
-              snapshot={snapshot}
-              demo={demo}
-              settings={settings}
-              saving={saving}
-              setSaving={setSaving}
-              notify={notify}
-            />
-            <Section
-              title="录音与识别"
-              description="说完点「结束并识别」才开始识别；录音与识别都只在本机完成。"
-            >
-              <DemoRecorder demo={demo} />
-            </Section>
-            <ReplySection
-              snapshot={snapshot}
-              demo={demo}
-              settings={settings}
-              saving={saving}
-              setSaving={setSaving}
-              notify={notify}
-              onGoToModels={onGoToModels}
-            />
-          </>
-        )}
-      </ConsoleStatus>
-    </ConsolePane>
+      {demo.snapshot === null ? null : (
+        <>
+          <Section title="语音输入" description="录音与识别都只在本机完成，不联网，也不自动发送。">
+            <SettingsRows>
+              {app.values === null ? null : (
+                <SettingsRow
+                  label="用语音说话"
+                  description="关掉后仍然可以打字对话；录音入口会跟着收起来。"
+                >
+                  <label className="pk-choice">
+                    <input
+                      type="checkbox"
+                      checked={app.values.voiceEnabled}
+                      disabled={app.saving}
+                      data-testid="pref-voice-enabled"
+                      onChange={(event) =>
+                        void saveChoice(app, notify, { voiceEnabled: event.target.checked })
+                      }
+                    />
+                    {app.values.voiceEnabled ? '开着' : '关着'}
+                  </label>
+                </SettingsRow>
+              )}
+              <ModelRow
+                snapshot={demo.snapshot}
+                demo={demo}
+                settings={settings}
+                saving={saving}
+                setSaving={setSaving}
+                notify={notify}
+              />
+            </SettingsRows>
+          </Section>
+
+          <Section
+            title="回复与发送"
+            description="离线脚本演示不联网、不调用模型；真实 DeepSeek 用你自己的 Key。"
+          >
+            <SettingsRows>
+              <ReplyRow
+                snapshot={demo.snapshot}
+                demo={demo}
+                settings={settings}
+                saving={saving}
+                setSaving={setSaving}
+                notify={notify}
+              />
+            </SettingsRows>
+            {!demo.snapshot.keyConfigured ? (
+              <div className="demo-check__actions">
+                <Button
+                  size="small"
+                  variant="quiet"
+                  data-testid="demo-go-start"
+                  onClick={onGoToStart}
+                >
+                  去开始页填 Key
+                </Button>
+              </div>
+            ) : null}
+          </Section>
+
+          <Section title="录音与识别" description="说完点「结束并识别」才开始识别。">
+            <p className="demo-phase">
+              <StatusBadge tone={demoPhase(demo.snapshot.phase).tone}>
+                {demoPhase(demo.snapshot.phase).text}
+              </StatusBadge>
+            </p>
+            <DemoRecorder demo={demo} />
+            {demo.snapshot.error === null ? null : (
+              <p className="config-banner config-banner--danger" role="alert">
+                这次没有完成：{describeError(demo.snapshot.error)}
+              </p>
+            )}
+          </Section>
+        </>
+      )}
+    </ConsoleStatus>
   );
 }
 
-interface SectionProps {
-  /** 由外层收敛过 null 的那一份宿主快照，控件的值只认它。 */
+interface RowProps {
   snapshot: DemoSnapshot;
   demo: DemoState;
   settings: ReturnType<typeof useDemoSettings>;
@@ -82,62 +129,50 @@ interface SectionProps {
   notify: (message: string, tone: 'ok' | 'danger') => void;
 }
 
-function writeFailure(notify: SectionProps['notify'], error: string | null): void {
+function writeFailure(notify: RowProps['notify'], error: string | null): void {
   notify(`这个选择没有写进去：${error ?? '未知原因'}`, 'danger');
 }
 
-function ModelSection({
-  snapshot,
-  demo,
-  settings,
-  saving,
-  setSaving,
-  notify,
-}: SectionProps): JSX.Element {
+/** 识别模型：值与可选项都来自宿主，读不到配置时如实说明并给出重试。 */
+function ModelRow({ snapshot, demo, settings, saving, setSaving, notify }: RowProps): JSX.Element {
   const { asrOwner, asrRevision, modelId, readError } = snapshot.settings;
   const busy = settings.pending.has('asr');
   const blocked = asrOwner === null || readError !== null;
+  const chosen = snapshot.models.find((model) => model.id === modelId) ?? null;
 
   const choose = async (id: string): Promise<void> => {
     setSaving(`model:${id}`);
     const outcome = await settings.saveAsrModel(asrOwner, asrRevision, id);
     demo.refresh();
     setSaving(null);
-    if (outcome.ok) {
-      notify(outcome.notice ?? '已保存所选模型。', 'ok');
-    } else {
-      writeFailure(notify, outcome.error);
-    }
+    // 选中本身就是回执：成功不弹全局提示，连点模型不会堆一串“已保存”。
+    if (!outcome.ok) writeFailure(notify, outcome.error);
   };
 
+  const state =
+    readError !== null
+      ? `读不到当前配置：${describeError(readError)}。刷新后可重试。`
+      : asrOwner === null
+        ? '本机还没有可写入的识别插件。'
+        : modelId === null
+          ? '还没选模型：文字对话不需要它，录音前先选一个。'
+          : chosen === null
+            ? `已选 ${modelId}，但它不在当前列表里。`
+            : chosen.cached
+              ? `已选 ${chosen.name} · 已在本机`
+              : `已选 ${chosen.name} · 还没有下载`;
+
   return (
-    <Section
-      title="本地识别模型"
-      description="随应用发布的识别模型，标出来源、是否已下载、是否支持流式。"
-    >
-      {snapshot.models.length === 0 ? (
-        <p className="console-muted">还没有可用的识别模型。</p>
-      ) : (
-        <fieldset className="preset-group">
-          <legend className="preset-group__legend">识别模型</legend>
-          <p className="plugin-row__hint">
-            {modelId === null
-              ? '还没选模型：文字对话不需要它，录音前请选一个。'
-              : '已选 ' + (snapshot.models.find((item) => item.id === modelId)?.name ?? modelId)}
-          </p>
-          {readError !== null ? (
-            <p className="plugin-row__hint">
-              读不到当前配置：{describeError(readError)}。刷新后可重试。
-            </p>
-          ) : null}
-          {asrOwner === null ? (
-            <p className="plugin-row__hint">还没有识别插件，模型暂时没处可写。</p>
+    <SettingsRow label="识别模型" labelFor="group" description={state}>
+      {({ labelledBy }) => (
+        <div className="pk-choices" role="radiogroup" aria-labelledby={labelledBy}>
+          {snapshot.models.length === 0 ? (
+            <span className="pk-draft-actions__state">还没有可用的识别模型。</span>
           ) : null}
           {snapshot.models.map((model) => (
-            <label className="preset-option" key={model.id}>
+            <label className="pk-choice" key={model.id}>
               <input
                 type="radio"
-                className="preset-option__radio"
                 name="demo-asr-model"
                 value={model.id}
                 checked={modelId === model.id}
@@ -145,38 +180,19 @@ function ModelSection({
                 data-testid={`asr-model-${model.id}`}
                 onChange={() => void choose(model.id)}
               />
-              <span className="preset-option__body">
-                <span className="preset-option__label">
-                  {model.name}
-                  <StatusBadge tone={model.cached ? 'ok' : 'warn'}>
-                    {model.cached ? '已下载' : '未下载'}
-                  </StatusBadge>
-                  <StatusBadge tone={model.streaming ? 'ok' : 'neutral'}>
-                    {model.streaming ? '支持流式' : '只整段'}
-                  </StatusBadge>
-                </span>
-                <span className="preset-option__text">
-                  {`${model.source} · ${model.id}`}
-                  {model.cached ? '' : ' · 选了还要先下载。'}
-                </span>
-              </span>
+              {model.name}
+              {model.cached ? null : '（未下载）'}
+              {model.streaming ? null : '（只整段）'}
             </label>
           ))}
-        </fieldset>
+        </div>
       )}
-    </Section>
+    </SettingsRow>
   );
 }
 
-function ReplySection({
-  snapshot,
-  demo,
-  settings,
-  saving,
-  setSaving,
-  notify,
-  onGoToModels,
-}: SectionProps & { onGoToModels: () => void }): JSX.Element {
+/** 回复来源与说完之后的做法：两个都写同一份 voice 配置，一次写整个对象。 */
+function ReplyRow({ snapshot, demo, settings, saving, setSaving, notify }: RowProps): JSX.Element {
   const { voiceOwner, voiceRevision, replyMode, autoSend, readError } = snapshot.settings;
   const busy = settings.pending.has('voice');
   const blocked = voiceOwner === null || readError !== null;
@@ -187,77 +203,69 @@ function ReplySection({
     const outcome = await settings.saveVoice(voiceOwner, voiceRevision, nextMode, nextAuto);
     demo.refresh();
     setSaving(null);
-    if (outcome.ok) {
-      notify(outcome.notice ?? '已保存回复方式。', 'ok');
-    } else {
-      writeFailure(notify, outcome.error);
-    }
+    // 同上：这份配置是立即生效的，选项自己就是回执，只有失败才值得一条提示。
+    if (!outcome.ok) writeFailure(notify, outcome.error);
   };
 
   return (
-    <Section
-      title="回复方式"
-      description="离线脚本演示不联网、不调用模型；真实 DeepSeek 要用你自己的 Key。"
-    >
-      <fieldset className="preset-group">
-        <legend className="preset-group__legend">回复来源</legend>
-        <label className="preset-option">
-          <input
-            type="radio"
-            className="preset-option__radio"
-            name="demo-reply-mode"
-            value="demo"
-            checked={mode === 'demo'}
-            disabled={blocked || busy || saving !== null}
-            data-testid="reply-mode-demo"
-            onChange={() => void write('demo', autoSend)}
-          />
-          <span className="preset-option__body">
-            <span className="preset-option__label">离线脚本演示，非 AI</span>
-            <span className="preset-option__text">回复由本机脚本生成，不联网。</span>
-          </span>
-        </label>
-        <label className="preset-option">
-          <input
-            type="radio"
-            className="preset-option__radio"
-            name="demo-reply-mode"
-            value="deepseek"
-            checked={mode === 'deepseek'}
-            disabled={blocked || busy || saving !== null}
-            data-testid="reply-mode-deepseek"
-            onChange={() => void write('deepseek', autoSend)}
-          />
-          <span className="preset-option__body">
-            <span className="preset-option__label">真实 DeepSeek</span>
-            <span className="preset-option__text">
-              用你的 Key 联网请求。
-              {snapshot.keyConfigured
-                ? '已存有 Key（保存过不等于已验证）。'
-                : '还没有 Key：选了也发不出去。'}
-            </span>
-          </span>
-        </label>
-      </fieldset>
+    <>
+      <SettingsRow
+        label="回复来源"
+        labelFor="group"
+        description={
+          readError !== null
+            ? `读不到当前设置：${describeError(readError)}。`
+            : blocked
+              ? '本机还没有可写入的回复设置。'
+              : mode === 'deepseek'
+                ? snapshot.keyConfigured
+                  ? '真实 DeepSeek：已存有 Key（保存过不等于已验证）。'
+                  : '选了真实 DeepSeek，但还没有 Key：选了也发不出去。'
+                : '离线脚本演示（不是 AI）：不需要 Key，也不联网。'
+        }
+      >
+        {({ labelledBy }) => (
+          <div className="pk-choices" role="radiogroup" aria-labelledby={labelledBy}>
+            <label className="pk-choice">
+              <input
+                type="radio"
+                name="demo-reply-mode"
+                value="demo"
+                checked={mode === 'demo'}
+                disabled={blocked || busy || saving !== null}
+                data-testid="reply-mode-demo"
+                onChange={() => void write('demo', autoSend)}
+              />
+              离线脚本演示，非 AI
+            </label>
+            <label className="pk-choice">
+              <input
+                type="radio"
+                name="demo-reply-mode"
+                value="deepseek"
+                checked={mode === 'deepseek'}
+                disabled={blocked || busy || saving !== null}
+                data-testid="reply-mode-deepseek"
+                onChange={() => void write('deepseek', autoSend)}
+              />
+              真实 DeepSeek
+            </label>
+          </div>
+        )}
+      </SettingsRow>
 
-      <label className="pk-check demo-check">
-        <input
-          type="checkbox"
-          checked={autoSend}
-          disabled={blocked || busy || saving !== null}
-          data-testid="demo-auto-send"
-          onChange={(event) => void write(mode, event.target.checked)}
-        />
-        <span>说完自动发送（不勾就停在识别结果上，等你确认后再发）</span>
-      </label>
-
-      {!snapshot.keyConfigured ? (
-        <div className="demo-check__actions">
-          <Button size="small" variant="quiet" data-testid="demo-go-models" onClick={onGoToModels}>
-            去模型页填 Key
-          </Button>
-        </div>
-      ) : null}
-    </Section>
+      <SettingsRow label="说完自动发送" description="不勾就停在识别结果上，等你确认后再发。">
+        <label className="pk-choice">
+          <input
+            type="checkbox"
+            checked={autoSend}
+            disabled={blocked || busy || saving !== null}
+            data-testid="demo-auto-send"
+            onChange={(event) => void write(mode, event.target.checked)}
+          />
+          {autoSend ? '自动发送' : '等我确认'}
+        </label>
+      </SettingsRow>
+    </>
   );
 }

@@ -46,9 +46,10 @@ export default definePlugin({
         }
         if (!transcript || body['autoSend'] === false)
           return { transcript, reply: '', mode, errorCode: null };
-        const answered = await ctx.host.capabilities.invoke(task, 'llm.chat@1', 'respond', {
+        const answered = await ctx.host.capabilities.invoke(task, 'agent.conversation@1', 'turn', {
           text: transcript,
-          context: Array.isArray(body['context']) ? body['context'] : [],
+          mode,
+          via: body['kind'] === 'voice' ? 'voice' : 'console',
         });
         if (!answered.ok) return { transcript, reply: '', mode, errorCode: answered.error.code };
         const response = object(answered.value);

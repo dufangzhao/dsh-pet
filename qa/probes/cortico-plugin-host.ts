@@ -1,0 +1,76 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import { DesktopHost } from '../../apps/desktop/src/main/desktop-host.js';
+import { demoReadiness } from '../../apps/desktop/src/main/demo-readiness.js';
+import { capabilityPermissionAuthorizer } from '../../packages/host-kernel/src/permissions/adapters.js';
+import type { JsonValue, OwnerRef } from '@pet/contracts';
+const root = path.resolve(__dirname, '../..');
+void (async () => {
+  let host: DesktopHost | undefined;
+  const report: Record<string, unknown> = { status: 'failed', checks: [], electron: process.versions.electron, node: process.versions.node };
+  const checks = report['checks'] as string[];
+  const output: string[] = [];
+  try {
+    host = await DesktopHost.create({ executable: process.execPath, workerEntry: path.join(root, 'apps/desktop/dist/runtime/worker.cjs'), builtinDirectory: path.join(root, 'plugins'), userDirectory: path.join(__dirname, 'profile/plugins'), adapters: demoReadiness(path.join(root, '.cache/asr-models')), media: { output: async (_ref, reader) => { for await (const frame of reader) output.push(new TextDecoder().decode(frame)); } } });
+    const enable = async (pluginId: string) => {
+      const row = host!.manager.get({ pluginId, instanceId: 'default' });
+      assert.ok(row, 'Plugin discovered: ' + pluginId);
+      const source = host!.describeTrust(row.owner);
+      assert.ok(source);
+      assert.equal(host!.permissionControl.confirmTrust({ pluginId, instanceId: 'default' }, source.digest, true), true);
+      assert.equal(host!.permissionControl.setPreset({ pluginId, instanceId: 'default' }, 'local'), true);
+      const config = await host!.configs.get({ pluginId, instanceId: 'default' });
+      assert.ok(config.ok);
+      const active = await host!.manager.enable({ pluginId, instanceId: 'default' }, config.value.data);
+      assert.ok(active.ok, JSON.stringify(active));
+      assert.equal(active.value.state, 'active', JSON.stringify(active));
+      return active.value.owner;
+    };
+    await enable('pet.profile');
+    host.manager.capabilities.select({ pluginId: 'pet.agent-cortico', instanceId: 'default' }, 'app.profile@1', { pluginId: 'pet.profile', instanceId: 'default', providerId: 'profile' });
+    host.manager.capabilities.select({ pluginId: 'pet.agent-cortico', instanceId: 'default' }, 'agent.conversation@1', { pluginId: 'pet.agent-cortico', instanceId: 'default', providerId: 'conversation' });
+    const owner = await enable('pet.agent-cortico');
+    checks.push('ordinary-profile-and-agent-plugins-discovered-verified-and-enabled');
+    const invoke = async (consumer: OwnerRef, capability: string, method: string, input: JsonValue) => {
+      const result = host!.tasks.invokeCapability(host!.manager, consumer, capability, method, input, capabilityPermissionAuthorizer(host!.permissions, host!.manager), { timeoutMs: 20000 });
+      assert.ok(result.ok, JSON.stringify(result));
+      const finished = await result.value.result;
+      assert.ok(finished.ok, JSON.stringify(finished));
+      return finished.value as Record<string, JsonValue>;
+    };
+    const first = await invoke(owner, 'app.profile@1', 'read', null);
+    assert.equal(first['revision'], 1);
+    const changed = await invoke(owner, 'app.profile@1', 'change', { expectedRevision: 1, patch: { petName: '小星', userName: '朋友' } });
+    assert.equal(changed['revision'], 2, JSON.stringify(changed));
+    const conflict = await invoke(owner, 'app.profile@1', 'change', { expectedRevision: 1, patch: { petName: '覆盖' } });
+    assert.equal(conflict['errorCode'], 'conflict');
+    checks.push('plugin-own-config-save-obeys-file-lease-and-CAS');
+    const reply = await invoke(owner, 'agent.conversation@1', 'turn', { text: '你好', mode: 'demo', via: 'console' });
+    assert.equal(reply['errorCode'], null, JSON.stringify(reply));
+    assert.match(reply['text'] as string, /朋友/);
+    const state = await invoke(owner, 'agent.conversation@1', 'state', null);
+    assert.equal(state['revision'], 2);
+    assert.equal(state['promptState'], 'applied');
+    assert.match(JSON.stringify(state['segments']), /小星/);
+    assert.ok(output.some(frame => frame.includes('reply')));
+    checks.push('Cortico-uses-canonical-profile-and-real-binary-media-output');
+    await invoke(owner, 'agent.conversation@1', 'interact', { kind: 'poke' });
+    await invoke(owner, 'agent.conversation@1', 'interact', { kind: 'blush' });
+    const history = await invoke(owner, 'agent.conversation@1', 'history', null);
+    assert.ok(Array.isArray(history['items']));
+    const items = history['items'] as unknown as Array<{ cursor: number; kind: string; text: string }>;
+    assert.deepEqual(items.map(i => i.kind), ['user', 'pet', 'interaction', 'interaction']);
+    assert.ok(items.every((i, index) => index === 0 || i.cursor > items[index - 1]!.cursor));
+    checks.push('chat-poke-and-applied-blush-share-one-cursor-history');
+    const disabled = await host.manager.disable({ pluginId: owner.pluginId, instanceId: owner.instanceId });
+    assert.ok(disabled.ok);
+    assert.equal(host.manager.isActive(owner), false);
+    const restarted = await enable('pet.agent-cortico');
+    const restored = await invoke(restarted, 'agent.conversation@1', 'history', null);
+    assert.equal((restored['items'] as JsonValue[]).length, items.length);
+    checks.push('manager-stop-restart-revokes-generation-and-preserves-Core-history');
+    report['diagnostics'] = host.tasks.diagnostics();
+    report['status'] = 'passed';
+  } catch (error) { report['failure'] = error instanceof Error ? error.message : String(error); process.exitCode = 1; }
+  finally { if (host) { const closed = await host.shutdown(); report['close'] = closed; } process.send?.(report); }
+})();

@@ -1,3 +1,4 @@
+import { APPLICATION_PLUGIN_IDS as APP } from '@pet/contracts';
 import { randomUUID } from 'node:crypto';
 import {
   DEMO_PLUGIN_IDS as ID,
@@ -9,7 +10,6 @@ import {
   type DemoCaptureTicket,
   type DemoMessage,
   type DemoPhase,
-  type DemoReplyMode,
   type DemoSettings,
   type DemoSnapshot,
   type JsonValue,
@@ -26,7 +26,7 @@ import {
   type TaskMediaReference,
 } from '@pet/host-kernel';
 import type { DesktopHost } from './desktop-host.js';
-import { DemoHistory } from './demo-history.js';
+import { readLegacyDemoHistory } from './demo-history.js';
 import { modelPresent } from '../../../../plugins/asr-local/src/model-store.js';
 const sameOwner = (a: OwnerRef, b: OwnerRef) =>
   a.pluginId === b.pluginId && a.instanceId === b.instanceId && a.generation === b.generation;
@@ -40,7 +40,7 @@ const object = (value: JsonValue) =>
 interface Intent {
   readonly id: string;
   readonly settings: DemoSettings;
-  readonly voice: OwnerRef;
+  readonly owner: OwnerRef;
   readonly asr: OwnerRef | null;
   readonly reply: OwnerRef | null;
   readonly abort: AbortController;
@@ -81,10 +81,10 @@ export class DemoController {
   #closing = false;
   private constructor(
     private readonly host: DesktopHost,
-    private readonly history: DemoHistory,
+    private readonly legacy: readonly DemoMessage[],
     private readonly changed: () => void,
   ) {
-    this.#messages = [...history.messages];
+    this.#messages = [];
   }
   static async create(
     host: DesktopHost,
@@ -93,7 +93,11 @@ export class DemoController {
   ): Promise<DemoController> {
     const directory = await host.dataDirectories.get(identity(ID.voice));
     if (!directory.ok) throw new Error('Demo data unavailable');
-    const instance = new DemoController(host, await DemoHistory.create(directory.value), changed);
+    const instance = new DemoController(
+      host,
+      await readLegacyDemoHistory(directory.value),
+      changed,
+    );
     instance.#models = await Promise.all(
       LOCAL_ASR_MODELS.map(async (model) => ({
         id: model.id,
@@ -168,7 +172,7 @@ export class DemoController {
         blocked: policy?.blocked ?? false,
       };
     });
-    const reply = settings.replyMode === 'deepseek' ? ID.cloud : ID.demo;
+    const reply = settings.replyMode === 'deepseek' ? ID.cloud : APP.agent;
     const ready = (id: string) => {
       const plugin = plugins.find((p) => p.pluginId === id);
       return (
@@ -178,10 +182,13 @@ export class DemoController {
     const configured = settings.replyMode !== null && settings.readError === null;
     const canSend =
       configured &&
-      ready(ID.voice) &&
-      ready(reply) &&
+      !!this.owner(APP.agent) &&
+      (settings.replyMode === 'demo' || ready(reply)) &&
       (settings.replyMode !== 'deepseek' || (keyAvailable && keyConfigured));
-    const canRecord = configured && ready(ID.voice) && ready(ID.asr) && settings.modelId !== null;
+    const profile = await this.host.configs.get(identity(APP.profile));
+    const voiceEnabled = profile.ok && profile.value.data['voiceEnabled'] === true;
+    const canRecord =
+      voiceEnabled && configured && ready(ID.voice) && ready(ID.asr) && settings.modelId !== null;
     return {
       version: 1,
       phase: this.#phase === 'setup' && (canSend || canRecord) ? 'idle' : this.#phase,
@@ -223,7 +230,9 @@ export class DemoController {
     if (
       parent &&
       this.current(parent.intent) &&
-      ['speech.asr@1', 'llm.chat@1', 'chat.session@1'].includes(capability)
+      ['speech.asr@1', 'agent.conversation@1', 'llm.responses@1', 'chat.session@1'].includes(
+        capability,
+      )
     )
       this.track(child, parent.intent, capability, method);
   }
@@ -258,7 +267,7 @@ export class DemoController {
     const expected =
       route?.capability === 'speech.asr@1'
         ? route.intent.asr
-        : route?.capability === 'llm.chat@1'
+        : route?.capability === 'agent.conversation@1'
           ? route.intent.reply
           : null;
     if (
@@ -280,8 +289,10 @@ export class DemoController {
             this.#partialTranscript = text;
             this.#phase = 'recognizing';
           } else {
-            if ([...(this.#partialReply + text)].length > 4000) throw new Error('Text limit');
-            this.#partialReply += text;
+            const packet = object(JSON.parse(text) as JsonValue);
+            const reply = typeof packet?.['text'] === 'string' ? packet['text'] : '';
+            if ([...(this.#partialReply + reply)].length > 4000) throw new Error('Text limit');
+            this.#partialReply += reply;
             this.#phase = 'responding';
           }
           this.emit();
@@ -321,16 +332,16 @@ export class DemoController {
     this.emit();
     return this.snapshot();
   }
-  private begin(settings: DemoSettings): Intent {
+  private begin(settings: DemoSettings, kind: 'voice' | 'text' = 'voice'): Intent {
     this.cancelCurrent();
-    const voice = this.owner(ID.voice);
-    if (!voice || !settings.replyMode) throw new KernelFault('not-ready');
+    const owner = this.owner(kind === 'text' ? APP.agent : ID.voice);
+    if (!owner || !settings.replyMode) throw new KernelFault('not-ready');
     const intent: Intent = {
       id: randomUUID(),
       settings,
-      voice,
+      owner,
       asr: this.owner(ID.asr),
-      reply: this.owner(settings.replyMode === 'deepseek' ? ID.cloud : ID.demo),
+      reply: this.owner(APP.agent),
       abort: new AbortController(),
       tasks: new Set(),
       audio: [],
@@ -343,17 +354,17 @@ export class DemoController {
     return intent;
   }
   private invoke(intent: Intent, method: string, input: JsonValue): TaskHandle {
-    const consumer = identity(ID.voice);
-    for (const [capability, pluginId, providerId] of [
-      ['chat.session@1', ID.voice, 'voice'],
-      ['speech.asr@1', ID.asr, 'local'],
-      [
-        'llm.chat@1',
-        intent.settings.replyMode === 'deepseek' ? ID.cloud : ID.demo,
-        intent.settings.replyMode === 'deepseek' ? 'deepseek' : 'demo',
-      ],
-    ] as const) {
-      if (!this.owner(pluginId)) continue;
+    const direct = intent.owner.pluginId === APP.agent;
+    const consumer = identity(intent.owner.pluginId);
+    const mappings = direct
+      ? [['agent.conversation@1', APP.agent, 'conversation']]
+      : [
+          ['chat.session@1', ID.voice, 'voice'],
+          ['speech.asr@1', ID.asr, 'local'],
+          ['agent.conversation@1', APP.agent, 'conversation'],
+        ];
+    for (const [capability, pluginId, providerId] of mappings) {
+      if (!capability || !pluginId || !providerId || !this.owner(pluginId)) continue;
       const selected = this.host.manager.select(consumer, capability, {
         pluginId,
         instanceId: 'default',
@@ -361,18 +372,87 @@ export class DemoController {
       });
       if (!selected.ok) throw new KernelFault(selected.error.code);
     }
+    const capability = direct ? 'agent.conversation@1' : 'chat.session@1';
+    const body = object(input);
+    const payload =
+      direct && method === 'turn'
+        ? {
+            text: body?.['text'] ?? '',
+            mode: body?.['mode'] ?? 'demo',
+            via: body?.['via'] ?? 'console',
+          }
+        : input;
     const task = this.host.tasks.invokeCapability(
       this.host.manager,
-      intent.voice,
-      'chat.session@1',
+      intent.owner,
+      capability,
       method,
-      input,
+      payload,
       capabilityPermissionAuthorizer(this.host.permissions, this.host.manager),
       { signal: intent.abort.signal, timeoutMs: 120000 },
     );
     if (!task.ok) throw new KernelFault(task.error.code);
-    this.track(task.value, intent, 'chat.session@1', method);
+    this.track(task.value, intent, capability, method);
     return task.value;
+  }
+  private async queryAgent(method: string, input: JsonValue): Promise<JsonValue> {
+    const owner = this.owner(APP.agent);
+    if (!owner) throw new KernelFault('not-ready');
+    const task = this.host.tasks.invokeCapability(
+      this.host.manager,
+      owner,
+      'agent.conversation@1',
+      method,
+      input,
+      capabilityPermissionAuthorizer(this.host.permissions, this.host.manager),
+      { timeoutMs: 30000 },
+    );
+    if (!task.ok) throw new KernelFault(task.error.code);
+    try {
+      const done = await task.value.result;
+      if (!done.ok) throw new KernelFault(done.error.code);
+      return done.value;
+    } finally {
+      task.value.release();
+    }
+  }
+  private async readMessages(): Promise<void> {
+    if (!this.owner(APP.agent)) {
+      this.#messages = [];
+      return;
+    }
+    const result = object(await this.queryAgent('history', null));
+    if (!Array.isArray(result?.['items'])) throw new KernelFault('unavailable');
+    this.#messages = result['items']
+      .filter((row) => {
+        const item = object(row);
+        return item?.['kind'] === 'user' || item?.['kind'] === 'pet';
+      })
+      .map<DemoMessage>((row) => {
+        const item = object(row)!;
+        return {
+          id: item['id'] as string,
+          role: item['kind'] === 'user' ? 'user' : 'assistant',
+          text: item['text'] as string,
+          at: item['at'] as number,
+          mode: item['mode'] === 'deepseek' ? 'deepseek' : 'demo',
+        };
+      })
+      .slice(-20);
+  }
+  async attachAgent(importLegacy: boolean): Promise<void> {
+    if (importLegacy && this.legacy.length) {
+      for (let offset = 0; offset < this.legacy.length; offset += 4) {
+        const result = object(
+          await this.queryAgent('importLegacy', {
+            messages: this.legacy.slice(offset, offset + 4).map((m) => ({ ...m })),
+          }),
+        );
+        if (result?.['errorCode']) throw new KernelFault('unavailable');
+      }
+    }
+    await this.queryAgent('reload', null);
+    await this.readMessages();
   }
   async beginRecording(frameId: number): Promise<Result<DemoCaptureTicket>> {
     const state = await this.snapshot();
@@ -400,10 +480,10 @@ export class DemoController {
           }
         };
         const task = this.host.tasks.run(
-          intent.voice,
+          intent.owner,
           async (context) => {
             const run = await this.host.permissions.run(
-              intent.voice,
+              intent.owner,
               context.taskId,
               { kind: 'microphone' },
               async (signal) => {
@@ -577,34 +657,33 @@ export class DemoController {
     );
     return { ok: true, value: null };
   }
-  async sendText(text: string): Promise<Result<null>> {
+  async sendText(text: string, via: 'console' | 'bubble' = 'console'): Promise<Result<null>> {
     if (!text.trim() || [...text].length > 4000) return fail('invalid-input');
     const state = await this.snapshot();
     if (!state.canSend) return fail('not-ready');
-    const intent = this.begin(state.settings);
+    const intent = this.begin(state.settings, 'text');
     this.#phase = 'thinking';
     this.emit();
-    void this.runTurn(intent, 'text', text.trim());
+    void this.runTurn(intent, 'text', text.trim(), via);
     return { ok: true, value: null };
   }
-  private async runTurn(intent: Intent, kind: 'voice' | 'text', text = ''): Promise<void> {
+  private async runTurn(
+    intent: Intent,
+    kind: 'voice' | 'text',
+    text = '',
+    via: 'console' | 'bubble' = 'console',
+  ): Promise<void> {
     if (!this.current(intent)) return;
     const task = this.host.tasks.run(
-      intent.voice,
+      intent.owner,
       async (context) => {
-        const contextMessages = this.#messages
-          .filter((message) => message.mode === intent.settings.replyMode)
-          .slice(-4)
-          .map((message) => ({ role: message.role, content: message.text }));
-        while (Buffer.byteLength(JSON.stringify(contextMessages), 'utf8') > 16000)
-          contextMessages.shift();
         const call = this.invoke(intent, 'turn', {
           kind,
+          via: kind === 'voice' ? 'voice' : via,
           model: intent.settings.modelId,
           mode: intent.settings.replyMode,
           autoSend: kind === 'text' || intent.settings.autoSend,
           text,
-          context: contextMessages,
         });
         const abort = () => call.cancel();
         context.signal.addEventListener('abort', abort, { once: true });
@@ -627,37 +706,10 @@ export class DemoController {
             this.emit();
             return null;
           }
-          const at = Date.now(),
-            mode = intent.settings.replyMode as DemoReplyMode;
-          const entries: DemoMessage[] = [
-            { id: randomUUID(), role: 'user', text: data['transcript'], mode, at },
-          ];
-          if (data['reply'])
-            entries.push({
-              id: randomUUID(),
-              role: 'assistant',
-              text: data['reply'],
-              mode,
-              at: Date.now(),
-            });
-          this.#messages = [...this.#messages, ...entries].slice(-20);
-          this.#phase = 'saving';
-          this.#partialReply = '';
-          this.#partialTranscript = '';
-          this.emit();
-          const saved = await this.host.permissions.run(
-            intent.voice,
-            context.taskId,
-            { kind: 'files', scope: 'plugin-data', access: 'write' },
-            async (signal) => {
-              await this.history.replace(this.#messages, signal);
-              return null;
-            },
-            context.signal,
-          );
-          if (!saved.ok) throw new KernelFault(saved.error.code);
+          await this.readMessages();
           if (this.current(intent)) {
-            this.#messages = [...this.history.messages];
+            this.#partialReply = data['reply'];
+            this.#partialTranscript = '';
             this.#phase = 'idle';
             this.emit();
           }
@@ -688,7 +740,8 @@ export class DemoController {
   }
   async clearHistory(): Promise<DemoSnapshot> {
     this.cancelCurrent();
-    await this.history.replace([]);
+    const cleared = object(await this.queryAgent('clear', null));
+    if (cleared?.['errorCode']) throw new KernelFault('unavailable');
     this.#messages = [];
     this.#transcript = '';
     this.#phase = 'idle';
@@ -708,6 +761,13 @@ export class DemoController {
     await this.host.credentials.deleteSecret(identity(ID.cloud), 'api-key');
     this.emit();
     return this.snapshot();
+  }
+  onVoiceDisabled(): void {
+    if (this.#intent?.owner.pluginId === ID.voice || this.#capture) {
+      this.cancelCurrent();
+      this.#phase = 'idle';
+      this.emit();
+    }
   }
   onConsoleClosed(): void {
     if (this.#capture || this.#phase === 'preparing' || this.#phase === 'arming') {

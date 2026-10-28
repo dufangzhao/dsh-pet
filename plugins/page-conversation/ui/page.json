@@ -1,0 +1,13 @@
+{
+  "id": "world:pet.page-conversation",
+  "kind": "world",
+  "label": "对话",
+  "availability": "active",
+  "panels": [
+    {
+      "id": "main",
+      "title": "对话",
+      "builtin": "pet.conversation"
+    }
+  ]
+}

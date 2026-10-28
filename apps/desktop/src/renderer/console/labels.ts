@@ -1,5 +1,9 @@
 import type {
   AccessMode,
+  ApplicationInteraction,
+  ApplicationInteractionKind,
+  ApplicationPreferences,
+  ApplicationSnapshot,
   AuditEvent,
   AuditSource,
   ContributionKind,
@@ -292,4 +296,97 @@ export function clockTime(at: number): string {
   const date = new Date(at);
   const pad = (value: number): string => String(value).padStart(2, '0');
   return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+/* ---- 应用偏好、代理状态与统一记录 ---- */
+
+/*
+ * 枚举是给宿主看的，界面只说用户能判断的那几个词。
+ * 值的含义（生效方式、会不会自动发送）由所在那一行的说明承担，不靠颜色表达。
+ */
+const REPLY_LANGUAGE: Readonly<Record<ApplicationPreferences['replyLanguage'], string>> = {
+  'zh-CN': '简体中文',
+  en: 'English',
+};
+
+export function replyLanguage(value: ApplicationPreferences['replyLanguage']): string {
+  return REPLY_LANGUAGE[value];
+}
+
+const STYLE: Readonly<Record<ApplicationPreferences['style'], string>> = {
+  quiet: '安静',
+  natural: '默认',
+  lively: '活泼',
+};
+
+export function styleLabel(value: ApplicationPreferences['style']): string {
+  return STYLE[value];
+}
+
+const FIGURE: Readonly<Record<ApplicationPreferences['figure'], string>> = {
+  minimal: '简约',
+  round: '圆头',
+};
+
+export function figureLabel(value: ApplicationPreferences['figure']): string {
+  return FIGURE[value];
+}
+
+const PALETTE: Readonly<Record<ApplicationPreferences['palette'], string>> = {
+  morning: '晨蓝',
+  lavender: '雪青',
+  pine: '松墨',
+  orange: '柿橙',
+};
+
+export function paletteLabel(value: ApplicationPreferences['palette']): string {
+  return PALETTE[value];
+}
+
+const SIZE: Readonly<Record<ApplicationPreferences['size'], string>> = {
+  small: '小巧',
+  normal: '适中',
+  large: '放大',
+};
+
+export function sizeLabel(value: ApplicationPreferences['size']): string {
+  return SIZE[value];
+}
+
+const AGENT_STATE: Readonly<Record<ApplicationSnapshot['agent']['state'], ToneText>> = {
+  starting: { text: '正在准备', tone: 'warn' },
+  ready: { text: '运行中', tone: 'ok' },
+  stopped: { text: '已停止', tone: 'neutral' },
+  error: { text: '出错', tone: 'danger' },
+};
+
+export function agentState(state: ApplicationSnapshot['agent']['state']): ToneText {
+  return AGENT_STATE[state];
+}
+
+/* 时间线一行只有四种说法，与桌宠那边共用同一套词：含义靠文字，颜色只做辅助。 */
+const INTERACTION_KIND: Readonly<Record<ApplicationInteractionKind, string>> = {
+  user: '我说',
+  pet: '桌宠说',
+  interaction: '动作',
+  application: '状态',
+};
+
+export function interactionKind(kind: ApplicationInteractionKind): string {
+  return INTERACTION_KIND[kind];
+}
+
+const INTERACTION_VIA: Readonly<Record<NonNullable<ApplicationInteraction['via']>, string>> = {
+  bubble: '气泡里',
+  console: '设置台里',
+  voice: '用语音',
+};
+
+export function interactionVia(via: NonNullable<ApplicationInteraction['via']>): string {
+  return INTERACTION_VIA[via];
+}
+
+/* 离线回复必须带着「离线」两个字：这是承诺的一部分，不含糊过去。 */
+export function interactionMode(mode: NonNullable<ApplicationInteraction['mode']>): string {
+  return mode === 'demo' ? '离线' : '真实 DeepSeek';
 }

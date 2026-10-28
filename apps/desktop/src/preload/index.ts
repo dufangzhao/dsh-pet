@@ -1,3 +1,5 @@
+import { createApplicationBridge } from './application-bridge.js';
+import { APPLICATION_IPC } from '@pet/contracts';
 import { contextBridge, ipcRenderer } from 'electron';
 import {
   CONSOLE_IPC,
@@ -133,4 +135,28 @@ window.addEventListener(
     ipcRenderer.removeListener(PET_IPC.changed, receive);
   },
   { once: true },
+);
+const applicationListeners = new Set<() => void>();
+ipcRenderer.on(APPLICATION_IPC.changed, () => {
+  for (const listener of applicationListeners) {
+    try {
+      listener();
+    } catch {
+      /* Isolate view subscribers. */
+    }
+  }
+});
+contextBridge.exposeInMainWorld(
+  'petApplication',
+  createApplicationBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => {
+      if (applicationListeners.size >= 32)
+        throw new RangeError('Too many application subscriptions');
+      applicationListeners.add(listener);
+      return () => {
+        applicationListeners.delete(listener);
+      };
+    },
+  ),
 );

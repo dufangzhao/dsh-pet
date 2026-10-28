@@ -1,3 +1,6 @@
+import { ApplicationController } from './application-controller.js';
+import { handleApplicationRequest } from './application-request.js';
+import { APPLICATION_IPC, APPLICATION_DEFAULTS, type ApplicationPreferences } from '@pet/contracts';
 import {
   app,
   BrowserWindow,
@@ -34,7 +37,6 @@ const expectedUrl = pathToFileURL(rendererPath).href;
 const consolePath = path.resolve(here, '../renderer/console/index.html');
 const consoleUrl = pathToFileURL(consolePath).href;
 const settings = new ConsoleWindow(consolePath, path.resolve(here, '../preload/index.cjs'), () => {
-  host?.approvals.clear();
   demo?.onConsoleClosed();
 });
 const channels = [
@@ -65,6 +67,8 @@ let budgetStart = performance.now();
 let requests = 0;
 let host: DesktopHost | undefined;
 let demo: DemoController | undefined;
+let application: ApplicationController | undefined;
+let preferences: Readonly<ApplicationPreferences> = APPLICATION_DEFAULTS;
 let tray: ReturnType<typeof createDemoTray> | undefined;
 let hostStarting: Promise<DesktopHost> | undefined;
 let quitting = false;
@@ -79,6 +83,8 @@ function quitWithCode(code: number): void {
   ipcMain.removeHandler(CONSOLE_IPC.inspectConfig);
   ipcMain.removeHandler(CONSOLE_IPC.saveConfig);
   ipcMain.removeHandler(CONSOLE_IPC.pluginAction);
+  for (const channel of Object.values(APPLICATION_IPC))
+    if (channel !== APPLICATION_IPC.changed) ipcMain.removeHandler(channel);
   for (const channel of Object.values(DEMO_IPC))
     if (channel !== DEMO_IPC.changed) ipcMain.removeHandler(channel);
   for (const channel of [
@@ -92,6 +98,7 @@ function quitWithCode(code: number): void {
     ipcMain.removeHandler(channel);
   tray?.destroy();
   tray = undefined;
+  application?.close();
   demo?.close();
   settings.close();
   controller?.dispose();
@@ -143,17 +150,29 @@ const startup = app
       if (!window || window.isDestroyed()) return;
       const avatar = host?.manager.get({ pluginId: DEMO_PLUGIN_IDS.avatar, instanceId: 'default' });
       const enabled =
-        !!avatar && avatar.origin === 'builtin' && host!.manager.isActive(avatar.owner);
+        preferences.visible &&
+        !!avatar &&
+        avatar.origin === 'builtin' &&
+        host!.manager.isActive(avatar.owner);
       if (enabled && !window.isVisible()) window.showInactive();
       if (!enabled && window.isVisible()) window.hide();
     };
+    const notifyApplication = () => {
+      for (const target of [window, settings.current])
+        if (target && !target.isDestroyed()) target.webContents.send(APPLICATION_IPC.changed);
+    };
     const notifyDemo = () => {
       syncAvatar();
+      notifyApplication();
       for (const target of [window, settings.current])
         if (target && !target.isDestroyed()) target.webContents.send(DEMO_IPC.changed);
     };
     hostStarting = DesktopHost.create({
       adapters: demoReadiness(modelRoot),
+      onChanged: () => {
+        if (application) void application.refreshPreferences().catch(() => notifyApplication());
+        else notifyApplication();
+      },
       media: {
         input: (reference, writer) => {
           if (demo) demo.input(reference, writer);
@@ -180,6 +199,31 @@ const startup = app
       return;
     }
     demo = await DemoController.create(host!, modelRoot, notifyDemo);
+    application = await ApplicationController.create(
+      host!,
+      demo,
+      app.getPath('userData'),
+      notifyApplication,
+      (next) => {
+        preferences = next;
+        if (!next.draggable) controller?.endDrag();
+        if (window && !window.isDestroyed()) window.setAlwaysOnTop(next.alwaysOnTop);
+        syncAvatar();
+      },
+    );
+    for (const [action, channel] of Object.entries(APPLICATION_IPC))
+      if (action !== 'changed') {
+        ipcMain.handle(channel, (event, ...args: unknown[]) => {
+          const source = windowSource(event, settings.current, consoleUrl);
+          return handleApplicationRequest(
+            isTrustedPetSource(source) ? source : windowSource(event, window, expectedUrl),
+            action,
+            args,
+            application!,
+          );
+        });
+      }
+
     installDemoMediaPermission(session.defaultSession, settings, consoleUrl, demo);
     const acceptanceTrace: Array<Record<string, unknown>> | undefined = process.argv.some(
       (arg) => arg === '--demo-acceptance' || arg.startsWith('--demo-acceptance='),
@@ -268,21 +312,17 @@ const startup = app
       ipcMain.handle(channel, (event, ...args: unknown[]) =>
         securityRequests.handle(windowSource(event, settings.current, consoleUrl), action, args),
       );
-    host!.approvals.subscribe(() => {
-      if (host!.approvals.snapshot().length)
-        void settings
-          .open()
-          .then(notifySecurity)
-          .catch(() => host!.approvals.clear());
-      else notifySecurity();
-    });
+    host!.approvals.subscribe(notifySecurity);
     const pluginRequests = new ConsolePluginRequests(host!, snapshot);
     ipcMain.handle(CONSOLE_IPC.pluginAction, async (event, ...args: unknown[]) => {
       const result = await pluginRequests.handle(
         windowSource(event, settings.current, consoleUrl),
         args,
       );
-      if (result.ok) notifySecurity();
+      if (result.ok) {
+        await application?.recordPluginStates();
+        notifySecurity();
+      }
       return result;
     });
     ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
@@ -330,7 +370,9 @@ const startup = app
           return handlePetRequest(source, channel, args, {
             getSnapshot: () => pet.getSnapshot(),
             setInteraction: (value) => pet.setInteraction(value),
-            beginDrag: () => pet.beginDrag(),
+            beginDrag: () => {
+              if (preferences.draggable) pet.beginDrag();
+            },
             endDrag: () => pet.endDrag(),
             setState: (value) => pet.setState(value),
             quit: () => {
@@ -351,6 +393,7 @@ const startup = app
     });
     if (!(controller.window instanceof BrowserWindow)) throw new Error('Invalid window controller');
     window = controller.window;
+    window.setAlwaysOnTop(preferences.alwaysOnTop);
     syncAvatar();
     tray = createDemoTray({
       showPet: () => {

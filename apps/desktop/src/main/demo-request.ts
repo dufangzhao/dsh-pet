@@ -30,7 +30,7 @@ export async function handleDemoRequest(
   });
   if (
     !isTrustedPetSource(source) ||
-    (source.role !== 'console' && action !== 'snapshot' && action !== 'cancel')
+    (source.role !== 'console' && !['snapshot', 'cancel', 'send'].includes(action))
   )
     return fail('permission-denied');
   try {
@@ -48,7 +48,7 @@ export async function handleDemoRequest(
     if (!body) return fail('invalid-input');
     if (action === 'send')
       return exactKeys(body, ['text']) && typeof body['text'] === 'string'
-        ? await demo.sendText(body['text'])
+        ? await demo.sendText(body['text'], source.role === 'pet' ? 'bubble' : 'console')
         : fail('invalid-input');
     if (action === 'key')
       return exactKeys(body, ['value']) && typeof body['value'] === 'string'

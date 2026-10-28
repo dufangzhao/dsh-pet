@@ -1,13 +1,20 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { PetPrototypeBridge, PetSnapshot, PetState } from '@pet/contracts';
+import {
+  PET_STATES,
+  type ApplicationDialog,
+  type PetPrototypeBridge,
+  type PetSnapshot,
+} from '@pet/contracts';
 
 import { HoverTracker, PetApp, createPetInteractionSession, reconcileHover } from './App.js';
 import { PetAvatar } from './PetAvatar.js';
 import { PetBubble } from './PetBubble.js';
-import { PrototypePanel } from './PrototypePanel.js';
-import { PET_COPY, PET_STATE_ORDER, stateLabel, stateTestId } from './copy.js';
+import { PetComposer } from './PetComposer.js';
+import { PetDialog, dialogFocusTarget, planDialogSubmit } from './PetDialog.js';
+import { PetMenu } from './PetMenu.js';
+import { PET_COPY, stateBubble } from './copy.js';
 import { PetDragController, RENDERER_DRAG_TIMEOUT_MS } from './drag-controller.js';
 import {
   avatarHitShapes,
@@ -28,22 +35,27 @@ function markup(element: React.ReactElement): string {
   return renderToStaticMarkup(element);
 }
 
+/** 按 data-testid 取出真实渲染出来的标签，用于断言 disabled 之类逐元素属性。 */
+function tag(html: string, testId: string): string {
+  const match = new RegExp('<[a-z]+[^>]*data-testid="' + testId + '"[^>]*>').exec(html);
+  expect(match, '找不到 data-testid=' + testId + ' 的元素').not.toBeNull();
+  return match?.[0] ?? '';
+}
+
 describe('文案与状态标识', () => {
-  it('五种状态各有中文标签与稳定的 testid', () => {
-    expect(PET_STATE_ORDER).toEqual(['idle', 'listening', 'thinking', 'replying', 'error']);
-    for (const state of PET_STATE_ORDER) {
-      expect(stateLabel(state)).not.toBe('');
-      expect(stateTestId(state)).toBe(`state-${state}`);
+  it('五种状态都有面向用户的中文气泡文案', () => {
+    expect(PET_STATES).toEqual(['idle', 'listening', 'thinking', 'replying', 'error']);
+    for (const state of PET_STATES) {
+      expect(stateBubble(state)).not.toBe('');
     }
   });
 
-  it('明确标注 M0 为模拟，不声称已录音或联网', () => {
-    const notice = PET_COPY.simulationNotice;
-    expect(notice).toContain('M0');
-    expect(notice).toContain('模拟');
-    expect(notice).toMatch(/不录音|不联网/);
-    expect(PET_COPY.stateBubbles.listening).toContain('模拟');
-    expect(PET_COPY.stateBubbles.replying).toContain('模拟');
+  it('产品文案里没有开发期的模拟或预览说明', () => {
+    // 桌宠窗口只讲真实发生的事：脚本演示仍要标注，M0 模拟与面板预览已从产品移除。
+    const copy = JSON.stringify(PET_COPY);
+    expect(copy).not.toContain('M0');
+    expect(copy).not.toMatch(/模拟/);
+    expect(PET_COPY.replyTag).toBe('脚本演示｜');
   });
 });
 
@@ -485,13 +497,24 @@ describe('角色渲染', () => {
     expect(html).not.toMatch(/url\(['"]?https?:/);
   });
 
-  it.each(PET_STATE_ORDER)('状态 %s 有独立的外观钩子', (state: PetState) => {
+  it.each(PET_STATES)('状态 %s 有独立的外观钩子', (state) => {
     const html = markup(<PetAvatar state={state} />);
     expect(html).toContain(`pet-avatar--${state}`);
   });
+
+  it('平时不画腮红，只有短时表情才画出来', () => {
+    const neutral = markup(<PetAvatar state="idle" />);
+    expect(neutral).toContain('data-expression="neutral"');
+    // 红晕是一次回应，不是角色一直带着的妆：没戳过就不该有这两个椭圆。
+    expect(neutral).not.toContain('pet-avatar__blush');
+
+    const blush = markup(<PetAvatar state="idle" expression="blush" />);
+    expect(blush).toContain('data-expression="blush"');
+    expect(blush.match(/pet-avatar__blush/g)?.length).toBe(2);
+  });
 });
 
-describe('气泡与原型面板', () => {
+describe('气泡、提示与菜单', () => {
   it('气泡用 status 角色播报状态文案', () => {
     const html = markup(<PetBubble state="thinking" />);
     expect(html).toContain('role="status"');
@@ -508,82 +531,135 @@ describe('气泡与原型面板', () => {
     );
   });
 
-  it('读到宿主快照时收起模拟按钮，保留停止、设置与退出', () => {
+  it('菜单只有真实入口：设置、引导、停止（宿主说能停才出现）与退出', () => {
     const html = markup(
-      <PrototypePanel
-        state="idle"
-        onPreview={() => {}}
-        onQuit={() => {}}
+      <PetMenu
+        name="小蓝"
+        canStop
+        stopping={false}
+        onStop={() => {}}
+        guideDisabled={false}
+        guideBusy={false}
+        onGuide={() => {}}
         quitDisabled={false}
-        demo={{
-          live: true,
-          state: 'listening',
-          bubble: '正在听你说话……',
-          title: PET_COPY.demo.panelTitle,
-          lines: [PET_COPY.demo.phasePrefix + '正在录音'],
-          canStop: true,
-          stopping: false,
-          notice: null,
-          stop: () => {},
-        }}
+        onQuit={() => {}}
       />,
     );
+    expect(html).toContain('data-testid="pet-menu"');
+    expect(html).toContain('data-testid="pet-name"');
+    expect(html).toContain('小蓝');
+    for (const id of ['pet-settings', 'pet-guide', 'pet-stop', 'pet-quit']) {
+      expect(html).toContain(`data-testid="${id}"`);
+    }
+    // 开发期的状态预览按钮不属于产品界面。
     expect(html).not.toContain('data-testid="state-idle"');
-    expect(html).toContain('data-testid="pet-stop"');
-    expect(html).toContain('data-testid="pet-settings"');
-    expect(html).toContain('data-testid="pet-quit"');
-    expect(html).toContain(PET_COPY.demo.panelTitle);
-    // 状态说明带 testid，方便真实窗口验收定位。
-    expect(html).toContain('data-testid="demo-status"');
+    expect(html.match(/<button/g)?.length).toBe(4);
   });
 
-  it('没有宿主快照时保留 M0 模拟按钮，不给停止入口', () => {
+  it('宿主说不能停时不画停止按钮，没读到名字就留空，不可用的入口禁用', () => {
     const html = markup(
-      <PrototypePanel
-        state="idle"
-        onPreview={() => {}}
+      <PetMenu
+        name={null}
+        canStop={false}
+        stopping={false}
+        onStop={() => {}}
+        guideDisabled
+        guideBusy={false}
+        onGuide={() => {}}
+        quitDisabled
         onQuit={() => {}}
-        quitDisabled={false}
-        demo={{
-          live: false,
-          state: null,
-          bubble: null,
-          title: PET_COPY.panelTitle,
-          lines: [PET_COPY.simulationNotice, PET_COPY.demo.disconnected],
-          canStop: false,
-          stopping: false,
-          notice: null,
-          stop: () => {},
-        }}
       />,
     );
-    for (const candidate of PET_STATE_ORDER) {
-      expect(html).toContain(`data-testid="state-${candidate}"`);
-    }
     expect(html).not.toContain('data-testid="pet-stop"');
-    expect(html).toContain(PET_COPY.demo.disconnected);
+    expect(html).not.toContain('data-testid="pet-name"');
+    expect(tag(html, 'pet-guide')).toContain('disabled');
+    expect(tag(html, 'pet-quit')).toContain('disabled');
   });
 
-  it('面板提供五个状态按钮、设置与退出入口', () => {
+  it('提示渲染宿主给的标题、正文与选项，主选项有唯一标记', () => {
+    const dialog: ApplicationDialog = {
+      id: 'guide-1',
+      step: 'name',
+      title: '怎么称呼你',
+      text: '这个名字会出现在气泡里。',
+      choices: [
+        { id: 'keep', label: '就叫小蓝', primary: true },
+        { id: 'later', label: '稍后再说' },
+      ],
+      busy: false,
+    };
     const html = markup(
-      <PrototypePanel state="idle" onPreview={() => {}} onQuit={() => {}} quitDisabled={false} />,
+      <PetDialog dialog={dialog} state="idle" pending={false} onAnswer={() => {}} />,
     );
-    expect(html).toContain('data-testid="prototype-panel"');
-    for (const state of PET_STATE_ORDER) {
-      expect(html).toContain(`data-testid="state-${state}"`);
-    }
-    expect(html).toContain('data-testid="pet-quit"');
-    expect(html).toContain('aria-pressed="true"');
-    expect(html).toMatch(/data-testid="pet-settings"[^>]*disabled/);
-    // 按钮是真实 button，键盘可达。
-    expect(html.match(/<button/g)?.length).toBe(PET_STATE_ORDER.length + 2);
+    expect(html).toContain('data-testid="pet-dialog"');
+    expect(html).toContain('怎么称呼你');
+    expect(html).toContain('这个名字会出现在气泡里。');
+    expect(tag(html, 'pet-dialog-choice-keep')).toContain('data-primary="true"');
+    expect(tag(html, 'pet-dialog-choice-later')).toContain('data-primary="false"');
+    // 没有输入框就没有掩码字段，界面上不多出一个假入口。
+    expect(html).not.toContain('pet-dialog-input');
   });
 
-  it('退出按钮在桥不可用时禁用，避免空操作', () => {
+  it('掩码输入只跟着能承载文本的选项，其余选项不带值', () => {
+    const dialog: ApplicationDialog = {
+      id: 'guide-2',
+      step: 'key',
+      title: '填写密钥',
+      text: '只交给宿主保存。',
+      choices: [
+        { id: 'save', label: '保存', primary: true },
+        { id: 'cancel', label: '取消' },
+      ],
+      input: { kind: 'secret', label: '密钥' },
+      busy: true,
+    };
+    const plan = planDialogSubmit(dialog);
+    expect(plan.carrier?.id).toBe('save');
+    expect(plan.plain.map((choice) => choice.id)).toEqual(['cancel']);
+    expect(plan.inputUsable).toBe(true);
     const html = markup(
-      <PrototypePanel state="idle" onPreview={() => {}} onQuit={() => {}} quitDisabled />,
+      <PetDialog dialog={dialog} state="idle" pending={false} onAnswer={() => {}} />,
     );
-    expect(html).toMatch(/data-testid="pet-quit"[^>]*disabled/);
+    expect(html).toContain('type="password"');
+    expect(html).toContain(PET_COPY.dialog.secretHint);
+    // 宿主说这一步还在处理：控件全部禁用，界面不假装已经提交。
+    expect(tag(html, 'pet-dialog-choice-save')).toContain('disabled');
+    expect(html).toContain('data-testid="pet-dialog-busy"');
+    // 有输入框时焦点先落在输入上，不用 Tab 穿过选项。
+    expect(dialogFocusTarget(dialog)).toBe('input');
+  });
+
+  it('没有可承载文本的选项时不假装能输入', () => {
+    const dialog: ApplicationDialog = {
+      id: 'guide-3',
+      step: 'ask',
+      title: '补充一句',
+      text: '这一步没有选项。',
+      choices: [],
+      input: { kind: 'text', label: '说明' },
+      busy: false,
+    };
+    expect(planDialogSubmit(dialog).inputUsable).toBe(false);
+    const html = markup(
+      <PetDialog dialog={dialog} state="idle" pending={false} onAnswer={() => {}} />,
+    );
+    expect(html).toContain('data-testid="pet-dialog-unusable"');
+    expect(PET_COPY.dialog.noChoice).toContain('设置');
+    expect(tag(html, 'pet-dialog-input-text')).toContain('disabled');
+  });
+
+  it('空白不给发送，但输入框仍可编辑；宿主不能发时才禁用输入', () => {
+    const ready = markup(<PetComposer canSend sending={false} onSend={async () => true} />);
+    expect(tag(ready, 'pet-composer-input')).not.toContain('disabled');
+    // 空输入只禁用发送按钮，输入框照样能打字。
+    expect(tag(ready, 'pet-composer-send')).toContain('disabled');
+    expect(ready).toContain(PET_COPY.sendPlaceholder);
+
+    const blocked = markup(
+      <PetComposer canSend={false} sending={false} onSend={async () => true} />,
+    );
+    expect(tag(blocked, 'pet-composer-input')).toContain('disabled');
+    expect(tag(blocked, 'pet-composer-send')).toContain('disabled');
   });
 });
 
@@ -978,11 +1054,11 @@ describe('边界2：StrictMode 下会话可重复初始化', () => {
 });
 
 describe('页面骨架', () => {
-  it('无桥时仍渲染舞台、角色与面板，并给出说明', () => {
+  it('无桥时仍渲染舞台、角色与菜单，并给出说明', () => {
     const html = markup(<PetApp bridge={null} />);
     expect(html).toContain('data-testid="pet-stage"');
     expect(html).toContain('data-testid="pet-avatar"');
-    expect(html).toContain('data-testid="prototype-panel"');
+    expect(html).toContain('data-testid="pet-menu"');
     expect(html).toContain('data-testid="pet-notice"');
     expect(html).toContain(PET_COPY.bridgeMissing);
   });

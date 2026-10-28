@@ -28,6 +28,7 @@ export interface ActivationRegistrar {
   contribute(contributionId: string, handler?: CapabilityMethod): void;
 }
 export interface PluginRuntimeContext extends ActivationRegistrar {
+  readonly dataDirectory?: string;
   readonly host?: PluginHostServices;
   readonly owner: Readonly<OwnerRef>;
   readonly signal: AbortSignal;
@@ -44,6 +45,7 @@ export interface PluginModule {
   activate(context: PluginRuntimeContext): void | Disposer | Promise<void | Disposer>;
 }
 export interface RuntimeActivation {
+  readonly dataDirectory?: string;
   readonly host?: PluginHostServices;
   readonly owner: Readonly<OwnerRef>;
   readonly manifest: PluginManifest;

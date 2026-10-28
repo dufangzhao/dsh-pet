@@ -34,6 +34,19 @@ export class ConsoleWindow {
       },
     });
     this.#window = window;
+    window.webContents.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown' || !input.control || input.alt || input.meta) return;
+      const reset = input.code === 'Digit0' || input.code === 'Numpad0';
+      const direction = ['Equal', 'NumpadAdd'].includes(input.code)
+        ? 1
+        : ['Minus', 'NumpadSubtract'].includes(input.code)
+          ? -1
+          : 0;
+      if (!reset && !direction) return;
+      event.preventDefault();
+      const next = reset ? 1 : window.webContents.getZoomFactor() * 1.2 ** direction;
+      window.webContents.setZoomFactor(Math.max(0.75, Math.min(2, next)));
+    });
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event) => event.preventDefault());
     window.webContents.on('will-redirect', (event) => event.preventDefault());

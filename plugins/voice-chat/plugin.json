@@ -30,7 +30,7 @@
       "optional": true
     },
     {
-      "capability": "llm.chat@1",
+      "capability": "agent.conversation@1",
       "optional": true
     }
   ],
@@ -45,7 +45,7 @@
     },
     {
       "kind": "capability-use",
-      "capability": "llm.chat@1"
+      "capability": "agent.conversation@1"
     },
     {
       "kind": "microphone"

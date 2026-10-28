@@ -102,6 +102,7 @@ async function inspectPackage(
   const entries = [
     manifest.entries.runtime,
     ...(manifest.entries.ui ? [manifest.entries.ui] : []),
+    ...(manifest.contributes ?? []).flatMap((c) => (c.kind === 'panel' ? [c.entry] : [])),
     ...Object.values(manifest.entries.workers ?? {}),
   ];
   const unique = [...new Set(entries)];

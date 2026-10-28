@@ -1,0 +1,13 @@
+{
+  "id": "persona:pet.page-persona",
+  "kind": "persona",
+  "label": "人设",
+  "availability": "active",
+  "panels": [
+    {
+      "id": "main",
+      "title": "人设",
+      "builtin": "pet.persona"
+    }
+  ]
+}

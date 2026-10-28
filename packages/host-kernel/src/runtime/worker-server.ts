@@ -93,7 +93,13 @@ export class RuntimeWorkerServer {
     if (
       this.#closing ||
       !body ||
-      !exactKeys(body, ['owner', 'entryPath', 'manifestDigest', 'config'])
+      !exactKeys(body, [
+        'owner',
+        'entryPath',
+        'manifestDigest',
+        'config',
+        ...(Object.hasOwn(body, 'dataDirectory') ? ['dataDirectory'] : []),
+      ])
     )
       return bad('invalid-input');
     const owner = ownerFrom(body['owner']);
@@ -102,7 +108,11 @@ export class RuntimeWorkerServer {
       !owner ||
       !config ||
       typeof body['entryPath'] !== 'string' ||
-      typeof body['manifestDigest'] !== 'string'
+      typeof body['manifestDigest'] !== 'string' ||
+      (body['dataDirectory'] !== undefined &&
+        (typeof body['dataDirectory'] !== 'string' ||
+          body['dataDirectory'].length > 2048 ||
+          !path.isAbsolute(body['dataDirectory'])))
     )
       return bad('invalid-input');
     const candidate = this.packages.find(
@@ -112,6 +122,11 @@ export class RuntimeWorkerServer {
         manifestDigest(item.manifest) === body['manifestDigest'],
     );
     if (!candidate) return bad('not-ready');
+    if (
+      body['dataDirectory'] !== undefined &&
+      !candidate.manifest.permissions?.some((p) => p.kind === 'files' && p.scope === 'plugin-data')
+    )
+      return bad('permission-denied');
     const key = instanceKey(owner);
     if (this.#migrating.has(key)) return bad('not-ready');
     if (this.#instances.size >= 128) return bad('quota-exceeded');
@@ -131,6 +146,9 @@ export class RuntimeWorkerServer {
           manifest: candidate.manifest,
           entryPath: body['entryPath'],
           config: config as JsonObject,
+          ...(typeof body['dataDirectory'] === 'string'
+            ? { dataDirectory: body['dataDirectory'] }
+            : {}),
           signal: controller.signal,
           ...(this.services ? { host: this.services.create(owner, controller.signal) } : {}),
         },

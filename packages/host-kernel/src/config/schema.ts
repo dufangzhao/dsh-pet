@@ -205,8 +205,8 @@ export function prepareConfigDefinition(
         if (raw['uniqueItems'] !== undefined && typeof raw['uniqueItems'] !== 'boolean')
           throw new Error('Invalid uniqueness');
       } else if (type === 'string') {
-        bound('minLength', 4096);
-        bound('maxLength', 4096, 4096);
+        bound('minLength', 16384);
+        bound('maxLength', 16384, 4096);
         if (((schema['minLength'] as number) ?? 0) > (schema['maxLength'] as number))
           throw new Error('Invalid length');
         if (raw['format'] !== undefined) {

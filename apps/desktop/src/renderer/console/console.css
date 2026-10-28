@@ -9,6 +9,23 @@ body,
   height: 100%;
 }
 
+/*
+ * 字体与桌宠窗口同一套：system-ui 取系统 UI 字体，中文落到微软雅黑。
+ * smoke 截图里设置台正文整片是宋体（衬线、细横），与桌宠窗口不一致，
+ * 因此这里直接写字面量，不再只靠 ui-kit 经变量给根元素定字体——
+ * 两个窗口的外观必须由同一条明确的声明决定。
+ */
+html,
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    'Microsoft YaHei',
+    'PingFang SC',
+    sans-serif;
+}
+
 body {
   margin: 0;
   background: var(--pk-bg);
@@ -902,6 +919,18 @@ body {
 
 /* ---- Demo 控制台：阶段一行、录音区、输入区与准备向导 ---- */
 
+/*
+ * 更早的记录补在列表前面：按钮与失败原因同一行，窄时各占一行。
+ * 读失败不动已有记录，所以这里只用一行提示，不收起列表。
+ */
+.history-earlier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .demo-phase {
   display: flex;
   flex-wrap: wrap;
@@ -949,6 +978,13 @@ body {
 .demo-key-state {
   margin: 0 0 8px;
   font-size: 13px;
+}
+
+/* Key 的两个按钮同一行并排；容器变窄时各自折到下一行，不去挤输入框。 */
+.demo-key__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* 向导里一行就是一次明确决定：勾、名称、完整指纹、声明的权限要能连着读。 */

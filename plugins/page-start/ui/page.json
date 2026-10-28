@@ -1,0 +1,13 @@
+{
+  "id": "world:pet.page-start",
+  "kind": "world",
+  "label": "开始",
+  "availability": "active",
+  "panels": [
+    {
+      "id": "main",
+      "title": "开始",
+      "builtin": "pet.start"
+    }
+  ]
+}

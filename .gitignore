@@ -52,3 +52,7 @@ Thumbs.db
 
 # 可视化报告验收截图
 *.sheet*.png
+
+# Local diagnostic screenshots; accepted native evidence is under qa/screenshots/application
+qa/application-*-smoke.png
+qa/screenshots/application/failure-*.png

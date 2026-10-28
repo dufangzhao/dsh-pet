@@ -18,9 +18,9 @@ import {
   BUBBLE_TEXT_LIMIT,
   clipBubbleText,
   demoBubbleText,
-  demoStatusLines,
   describeDemo,
   phaseToPetState,
+  replyBubble,
 } from './demo-status.js';
 import { isDemoBridge, readDemoBridge } from './use-demo-status.js';
 
@@ -93,7 +93,7 @@ describe('气泡只显示宿主给的内容', () => {
   it('错误优先，并且用固定文案，不回显任何原始内容', () => {
     expect(
       demoBubbleText(snapshot({ phase: 'error', error: makeError('microphone-denied') })),
-    ).toBe(`${PET_COPY.demo.errorPrefix}${'麦克风访问被拒绝，请检查系统权限'}`);
+    ).toBe(`${PET_COPY.errorPrefix}${'麦克风访问被拒绝，请检查系统权限'}`);
   });
 
   it('正在识别时显示 partialTranscript 的最新一段', () => {
@@ -108,7 +108,7 @@ describe('气泡只显示宿主给的内容', () => {
 
   it('演示模式的部分回复带着「脚本演示」标签，真实模式不带', () => {
     expect(demoBubbleText(snapshot({ phase: 'responding', partialReply: '今天阴天' }))).toBe(
-      `${PET_COPY.demo.replyTag}今天阴天`,
+      `${PET_COPY.replyTag}今天阴天`,
     );
     expect(
       demoBubbleText(
@@ -132,13 +132,13 @@ describe('气泡只显示宿主给的内容', () => {
         ],
       }),
     );
-    expect(shown).toBe(`${PET_COPY.demo.replyTag}后面这条才是最新的`);
+    expect(shown).toBe(`${PET_COPY.replyTag}后面这条才是最新的`);
   });
 
-  it('什么内容都没有时按状态给一句话，保留模拟标注以外的说法', () => {
-    expect(demoBubbleText(snapshot({ phase: 'recording' }))).toBe(PET_COPY.demo.bubbles.listening);
-    expect(demoBubbleText(snapshot({ phase: 'error' }))).toBe(PET_COPY.demo.bubbles.error);
-    expect(demoBubbleText(snapshot())).toBe(PET_COPY.demo.bubbles.idle);
+  it('什么内容都没有时按状态给一句话，不谎称在录音', () => {
+    expect(demoBubbleText(snapshot({ phase: 'recording' }))).toBe(PET_COPY.stateBubbles.listening);
+    expect(demoBubbleText(snapshot({ phase: 'error' }))).toBe(PET_COPY.stateBubbles.error);
+    expect(demoBubbleText(snapshot())).toBe(PET_COPY.stateBubbles.idle);
     expect(demoBubbleText(snapshot())).not.toContain('模拟');
   });
 
@@ -148,60 +148,29 @@ describe('气泡只显示宿主给的内容', () => {
     expect(clipped.endsWith('…')).toBe(true);
     expect(clipBubbleText('短句子', 'head')).toBe('短句子');
   });
-});
 
-describe('面板状态行', () => {
-  it('说清阶段与回复来源，演示模式明写不是 AI', () => {
-    const lines = demoStatusLines(snapshot({ phase: 'recording' }));
-    expect(lines[0]).toBe(`${PET_COPY.demo.phasePrefix}正在录音`);
-    expect(lines[1]).toContain('离线脚本演示');
-    expect(lines[1]).toContain('不是 AI');
-  });
-
-  it('回复来源未设置与真实模式各有说法', () => {
-    const unset = demoStatusLines(
-      snapshot({ settings: { ...snapshot().settings, replyMode: null as DemoReplyMode | null } }),
-    );
-    expect(unset[1]).toBe(`${PET_COPY.demo.sourcePrefix}未设置`);
-    const real = demoStatusLines(
-      snapshot({ settings: { ...snapshot().settings, replyMode: 'deepseek' } }),
-    );
-    expect(real[1]).toContain('真实 DeepSeek');
-  });
-
-  it('avatarEnabled=false 时说明没有启用角色形象，不冒充', () => {
-    expect(demoStatusLines(snapshot({ avatarEnabled: true }))).toHaveLength(2);
-    const off = demoStatusLines(snapshot({ avatarEnabled: false }));
-    expect(off).toHaveLength(3);
-    expect(off[2]).toBe(PET_COPY.demo.avatarOff);
-    expect(off[2]).toContain('设置台');
+  it('只有演示模式的回复才贴标签', () => {
+    expect(replyBubble('demo', '一句话')).toBe(`${PET_COPY.replyTag}一句话`);
+    expect(replyBubble('deepseek', '一句话')).toBe('一句话');
+    expect(replyBubble(null, '一句话')).toBe('一句话');
   });
 });
 
 describe('没有快照时不伪造', () => {
-  it('未连接：不 live，说明里写清未连接', () => {
-    const status = describeDemo(null, false);
+  it('未读到快照：不 live，不给状态、文本与任何发送/停止入口', () => {
+    const status = describeDemo(null);
     expect(status.live).toBe(false);
     expect(status.state).toBeNull();
     expect(status.bubble).toBeNull();
     expect(status.canStop).toBe(false);
-    expect(status.lines).toHaveLength(1);
-    expect(status.lines[0]).toContain('未连接');
-    expect(status.lines[0]).toContain('M0');
+    expect(status.canSend).toBe(false);
   });
 
-  it('已连接但还没读到快照：仍然是模拟，并说明正在读取', () => {
-    const status = describeDemo(null, true);
-    expect(status.live).toBe(false);
-    expect(status.lines).toEqual([PET_COPY.demo.reading]);
-  });
-
-  it('读到快照：live、状态、气泡与标题都跟着宿主', () => {
-    const status = describeDemo(snapshot({ phase: 'responding', partialReply: '你好' }), true);
+  it('读到快照：live、状态与气泡都跟着宿主', () => {
+    const status = describeDemo(snapshot({ phase: 'responding', partialReply: '你好' }));
     expect(status.live).toBe(true);
     expect(status.state).toBe('replying');
-    expect(status.title).toBe(PET_COPY.demo.panelTitle);
-    expect(status.bubble).toBe(`${PET_COPY.demo.replyTag}你好`);
+    expect(status.bubble).toBe(`${PET_COPY.replyTag}你好`);
   });
 
   it('只有进行中的阶段才给停止', () => {
@@ -214,11 +183,16 @@ describe('没有快照时不伪造', () => {
       'responding',
       'saving',
     ] as const) {
-      expect(describeDemo(snapshot({ phase }), true).canStop).toBe(true);
+      expect(describeDemo(snapshot({ phase })).canStop).toBe(true);
     }
     for (const phase of ['setup', 'idle', 'stopping', 'error'] as const) {
-      expect(describeDemo(snapshot({ phase }), true).canStop).toBe(false);
+      expect(describeDemo(snapshot({ phase })).canStop).toBe(false);
     }
+  });
+
+  it('发送入口只认宿主的 canSend，不按阶段猜', () => {
+    expect(describeDemo(snapshot({ canSend: true })).canSend).toBe(true);
+    expect(describeDemo(snapshot({ canSend: false })).canSend).toBe(false);
   });
 });
 
@@ -242,5 +216,13 @@ describe('Demo 桥的边界校验', () => {
     expect(isDemoBridge(null)).toBe(false);
     expect(readDemoBridge({})).toBeNull();
     expect(readDemoBridge(null)).toBeNull();
+  });
+});
+
+describe('回复模式只翻译宿主给的值', () => {
+  it('演示与真实模式的标签只在演示那一侧出现', () => {
+    const mode: DemoReplyMode = 'demo';
+    expect(replyBubble(mode, '内容')).toContain(PET_COPY.replyTag);
+    expect(replyBubble('deepseek', '内容')).not.toContain(PET_COPY.replyTag);
   });
 });

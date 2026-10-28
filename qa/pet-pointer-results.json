@@ -1,0 +1,152 @@
+{
+  "status": "passed",
+  "at": "2026-10-28T16:09:56.198Z",
+  "input": "Win32 SetCursorPos and SendInput, owned windows only",
+  "checks": [
+    "transparent-corner-delivers-native-click-to-separate-owned-underlay",
+    "native-avatar-drag-moves-window-and-releases",
+    "native-settings-button-opens-visible-settings-without-clicking-underlay"
+  ],
+  "pet": {
+    "pid": 6648,
+    "hwnd": 3215556,
+    "bounds": {
+      "x": 1516,
+      "y": 588,
+      "width": 380,
+      "height": 420
+    },
+    "scaleFactor": 1
+  },
+  "targetPid": 24664,
+  "drag": {
+    "before": {
+      "left": 1516,
+      "top": 588,
+      "right": 1896,
+      "bottom": 1008
+    },
+    "after": {
+      "left": 1466,
+      "top": 558,
+      "right": 1846,
+      "bottom": 978
+    }
+  },
+  "settings": {
+    "hwnd": 76353814,
+    "visible": true,
+    "focused": true
+  },
+  "events": [
+    {
+      "type": "pointermove",
+      "x": 5,
+      "y": 5,
+      "trusted": true
+    },
+    {
+      "type": "mousemove",
+      "x": 5,
+      "y": 5,
+      "trusted": true
+    },
+    {
+      "type": "pointermove",
+      "x": 190,
+      "y": 56,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "mousemove",
+      "x": 190,
+      "y": 56,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "pointerdown",
+      "x": 190,
+      "y": 56,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "pointermove",
+      "x": 140,
+      "y": 26,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "pointermove",
+      "x": 190,
+      "y": 56,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "pointerup",
+      "x": 190,
+      "y": 56,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "click",
+      "x": 190,
+      "y": 56,
+      "trusted": true,
+      "target": "pet-avatar"
+    },
+    {
+      "type": "pointermove",
+      "x": 5,
+      "y": 5,
+      "trusted": true
+    },
+    {
+      "type": "mousemove",
+      "x": 5,
+      "y": 5,
+      "trusted": true
+    },
+    {
+      "type": "pointermove",
+      "x": 43,
+      "y": 300,
+      "trusted": true,
+      "target": "pet-settings"
+    },
+    {
+      "type": "mousemove",
+      "x": 43,
+      "y": 300,
+      "trusted": true,
+      "target": "pet-settings"
+    },
+    {
+      "type": "pointerdown",
+      "x": 43,
+      "y": 300,
+      "trusted": true,
+      "target": "pet-settings"
+    },
+    {
+      "type": "pointerup",
+      "x": 43,
+      "y": 300,
+      "trusted": true,
+      "target": "pet-settings"
+    },
+    {
+      "type": "click",
+      "x": 43,
+      "y": 300,
+      "trusted": true,
+      "target": "pet-settings"
+    }
+  ],
+  "pointerRestored": true
+}

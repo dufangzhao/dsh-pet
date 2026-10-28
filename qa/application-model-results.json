@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "checks": [
+    "ordinary-Core-and-profile-with-reviewed-offline-fixture-and-no-credential-broker",
+    "actual-profile-own-write-approval-rejects-wrongnonce-replay-and-stale-CAS-then-applies-prefix",
+    "new-request-denial-keeps-profile-and-acknowledged-prefix-unchanged-and-replies-from-failure-receipt",
+    "full-Generation-tool-receipts-next-batch-prefix-all-media-bytes-and-private-canary-exclusion"
+  ],
+  "electron": "45.0.0",
+  "node": "24.22.0",
+  "modelRequests": 4,
+  "decisions": [
+    {
+      "id": "681da623-49de-4000-8b2e-e51e13fe363e",
+      "step": "862cfee9c8f73edf2dcd2fdc4a0db1aec12bd0424eb4dc9d80d9ad9693c679b1"
+    },
+    {
+      "id": "81457592-63d1-47bd-9ea0-491d52b36d49",
+      "step": "862cfee9c8f73edf2dcd2fdc4a0db1aec12bd0424eb4dc9d80d9ad9693c679b1"
+    }
+  ],
+  "profileRevision": 2,
+  "hostShutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  },
+  "exitCode": 0,
+  "processExit": {
+    "confirmed": true,
+    "forced": false,
+    "signal": null
+  },
+  "stderr": ""
+}

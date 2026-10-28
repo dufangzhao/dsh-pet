@@ -1,6 +1,6 @@
 /*
  * 桌宠窗口样式：全部本地，无远端字体/图片。
- * 透明窗口本身不设背景，只有角色、气泡、面板这些真实元素占据像素，
+ * 透明窗口本身不设背景，只有角色、气泡、提示、菜单这些真实元素占据像素，
  * 其余区域完全透明，配合主进程的 ignoreMouseEvents 实现“空白处穿透”。
  *
  * Tailwind 走本地依赖入口（tailwindcss 已安装，构建侧由主会话配置的
@@ -11,9 +11,9 @@
 
 /*
  * 语义 token 的取值不是随手挑的，每一组都有硬性下限（WCAG 2.2，sRGB）：
- * - 承载文字的底色（--pet-accent / --pet-error-soft / 面板与气泡）必须让对应前景 >= 4.5:1；
+ * - 承载文字的底色（--pet-accent / --pet-error-soft / 面板、气泡与提示）必须让对应前景 >= 4.5:1；
  * - 控件边界与焦点环是“非文本”，对相邻表面 >= 3:1；
- * - 面板与气泡是半透明的，必须按黑底与白底两种极端合成后再算，不能只看纯白。
+ * - 面板、气泡与提示是半透明的，必须按黑底与白底两种极端合成后再算，不能只看纯白。
  * 这些数字由 pet.a11y.test.ts 直接读取本文件的真实声明复算，改色不改测试会失败。
  * 色相保持不变：蓝色系主色 + 暖橙错误色，只是整体压深到满足对比度。
  */
@@ -80,6 +80,48 @@ body {
   padding: 4px 10px 6px;
   /* 透明容器不接收鼠标事件，只有子元素的实际命中区参与交互。 */
   pointer-events: none;
+  /* 角色尺寸由 profile 的 size 决定，窄视口档再往回压（见下面的媒体查询）。 */
+  --pet-avatar-size: 152px;
+}
+
+.pet-root[data-size='small'] {
+  --pet-avatar-size: 120px;
+}
+
+.pet-root[data-size='large'] {
+  --pet-avatar-size: 176px;
+}
+
+/*
+ * 四种配色就是 DTO 里那四个取值，改的只有角色自己的四个变量：
+ * 脸上始终保持浅色底，眼睛与眉毛用的 --pet-ink 才不会掉到 4.5:1 以下。
+ */
+.pet-root[data-palette='morning'] {
+  --pet-body-top: #eef4ff;
+  --pet-body-bottom: #b9cdf2;
+  --pet-face: #f9fcff;
+  --pet-halo: #7fa8ff;
+}
+
+.pet-root[data-palette='lavender'] {
+  --pet-body-top: #f3efff;
+  --pet-body-bottom: #c8baf0;
+  --pet-face: #faf7ff;
+  --pet-halo: #a48fe6;
+}
+
+.pet-root[data-palette='pine'] {
+  --pet-body-top: #e2f1e9;
+  --pet-body-bottom: #9cc3b0;
+  --pet-face: #f4fbf7;
+  --pet-halo: #5f9d81;
+}
+
+.pet-root[data-palette='orange'] {
+  --pet-body-top: #fff1e2;
+  --pet-body-bottom: #f4c49a;
+  --pet-face: #fff8f1;
+  --pet-halo: #e8944f;
 }
 
 .pet-root__avatar,
@@ -110,8 +152,8 @@ body {
 }
 
 .pet-avatar {
-  width: 152px;
-  height: 152px;
+  width: var(--pet-avatar-size);
+  height: var(--pet-avatar-size);
   display: block;
   overflow: visible;
   filter: drop-shadow(0 6px 14px rgba(28, 36, 48, 0.18));
@@ -150,9 +192,11 @@ body {
   transition: transform 180ms ease;
 }
 
+/* 腮红只在戳过之后的短时表情里才画出来（见 PetAvatar 的 expression）；
+ * 它是一次回应，不是角色一直带着的妆，所以平时 DOM 里根本没有这两个椭圆。 */
 .pet-avatar__blush {
   fill: #ffb8b0;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .pet-avatar__halo {
@@ -335,15 +379,129 @@ body {
   }
 }
 
-/* ---------- 气泡 ---------- */
+/* ---------- 控件基础：一处定义，四个地方复用 ---------- */
+
+/*
+ * 触控目标：实际达到 44×44（min-height + padding 撑出来，字号保持 12px，
+ * 不靠缩字换空间）。提示里的选项、菜单按钮、发送按钮与重读按钮共用这套规则，
+ * 所以它们的边界、焦点环与禁用态是同一个说法，不会各写一份慢慢漂移。
+ */
+.pet-dialog__choice,
+.pet-menu__button,
+.pet-menu__quit,
+.pet-composer__send,
+.pet-root__retry {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  /* 控件边界属于非文本对比要求（>=3:1），装饰性的 --pet-border 不够。 */
+  border: 1px solid var(--pet-control-line);
+  background: #fff;
+  color: var(--pet-ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.pet-dialog__choice:hover:not(:disabled),
+.pet-menu__button:hover:not(:disabled),
+.pet-composer__send:hover:not(:disabled),
+.pet-root__retry:hover:not(:disabled) {
+  background: var(--pet-accent-wash);
+  border-color: var(--pet-accent);
+}
+
+.pet-dialog__choice[data-primary='true'] {
+  background: var(--pet-accent);
+  border-color: var(--pet-accent);
+  /* 选中态白字对 #3766dc 为 5.13:1，满足普通文字 4.5:1。 */
+  color: #fff;
+}
+
+.pet-dialog__choice[data-primary='true']:hover:not(:disabled) {
+  background: var(--pet-accent-strong);
+  border-color: var(--pet-accent-strong);
+}
+
+.pet-menu__quit {
+  border-color: var(--pet-error-line);
+  color: var(--pet-error);
+}
+
+.pet-menu__quit:hover:not(:disabled) {
+  background: var(--pet-error-soft);
+  border-color: var(--pet-error-line);
+}
+
+/*
+ * 禁用态不用 opacity: 0.5 把文字压到 2.5:1 左右，
+ * 改成实色 --pet-ink-muted + 浅底，既看得出禁用又不牺牲可读性。
+ */
+.pet-dialog__choice:disabled,
+.pet-menu__button:disabled,
+.pet-menu__quit:disabled,
+.pet-composer__send:disabled,
+.pet-root__retry:disabled {
+  background: #f1f3f7;
+  /* 禁用态边界仍要 >= 3:1（对自身底色 3.12、对白底 3.47），
+   * 否则“看得出是按钮但按不动”这件事只能靠颜色以外的线索猜。 */
+  border-color: #828a9a;
+  color: var(--pet-ink-muted);
+  cursor: not-allowed;
+}
+
+.pet-dialog__input:disabled,
+.pet-composer__input:disabled {
+  background: #f1f3f7;
+  border-color: #828a9a;
+  color: var(--pet-ink-muted);
+}
+
+/*
+ * 可见焦点：不允许去掉键盘焦点环。
+ * 环用 outline-offset: 2px 画在控件外侧，相邻表面是面板底色而不是控件自己的
+ * 选中蓝，因此 --pet-focus 对白底 6.39:1、对黑底合成后的面板 6.12:1 直接成立，
+ * 不需要再叠一层白色内环（那会在高对比度模式下反而看不清）。
+ */
+.pet-dialog__choice:focus-visible,
+.pet-dialog__input:focus-visible,
+.pet-menu__button:focus-visible,
+.pet-menu__quit:focus-visible,
+.pet-composer__send:focus-visible,
+.pet-composer__input:focus-visible,
+.pet-root__retry:focus-visible {
+  outline: 3px solid var(--pet-focus);
+  outline-offset: 2px;
+}
+
+.pet-dialog__input,
+.pet-composer__input {
+  min-height: 44px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--pet-control-line);
+  background: #fff;
+  color: var(--pet-ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+/* ---------- 只读气泡（带日常文字输入） ---------- */
 
 .pet-bubble {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: 300px;
-  /* 气泡只承载文字：不参与命中，指针落在那里也不改变穿透与拖拽判定。 */
-  pointer-events: none;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 340px;
   padding: 5px 10px;
   border-radius: 14px;
   background: var(--pet-surface);
@@ -352,6 +510,19 @@ body {
   font-size: 13px;
   line-height: 1.45;
   text-align: left;
+  /* 纯文字的气泡不参与命中与拖拽；装上真实输入框后才要指针。 */
+  pointer-events: none;
+}
+
+.pet-bubble[data-compose='true'] {
+  pointer-events: auto;
+}
+
+.pet-bubble__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
 }
 
 .pet-bubble__dot {
@@ -373,17 +544,126 @@ body {
 }
 
 .pet-bubble__text {
-  margin: 0;
   /* 真实文本长度不可控：长串要在现有窗口里断开，而不是顶出视口。 */
   overflow-wrap: anywhere;
 }
 
-/* ---------- 原型面板 ---------- */
+.pet-bubble__compose {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
 
-.prototype-panel {
+.pet-composer__field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.pet-composer__label {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--pet-ink-soft);
+}
+
+.pet-composer__send {
+  flex: 0 0 auto;
+}
+
+/* ---------- 可操作提示（宿主的 ApplicationDialog） ---------- */
+
+/*
+ * 提示取代只读气泡，一个窗口里同时只有一块。内容全部来自宿主：
+ * 标题、正文、1-3 个选项、可选的输入框、真实 busy 与真实 error。
+ * 高度受窗口限制，超出时只有这一块自己滚，控件不藏、退出也不藏。
+ */
+.pet-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 340px;
+  max-height: 300px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--pet-surface-strong);
+  border: 1px solid var(--pet-border);
+  box-shadow: 0 6px 18px rgba(28, 36, 48, 0.14);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  /* 提示里全是真实控件，指针必须落在它身上；命中区由 App 量出的矩形决定。 */
+  pointer-events: auto;
+}
+
+.pet-dialog__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pet-dialog__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pet-ink);
+  overflow-wrap: anywhere;
+}
+
+.pet-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pet-dialog__label {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--pet-ink-soft);
+}
+
+.pet-dialog__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--pet-ink-soft);
+}
+
+.pet-dialog__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pet-dialog__error {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: var(--pet-error-soft);
+  border: 1px solid var(--pet-error-line);
+  color: var(--pet-error);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.pet-dialog__busy {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--pet-ink-soft);
+}
+
+/* ---------- 菜单 ---------- */
+
+.pet-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
   padding: 6px 10px;
   border-radius: 14px;
   background: var(--pet-surface-strong);
@@ -391,140 +671,47 @@ body {
   box-shadow: 0 6px 18px rgba(28, 36, 48, 0.14);
 }
 
-/*
- * 面板内容区：正常窗口下不滚动（min-height: 0 只是让它在 flex 列里能被压缩）。
- * 极小视口把 overflow-y 打开，滚动只发生在这里，退出按钮作为页脚留在外面，
- * 因此“允许滚动”不会让退出浮起来盖住状态按钮。
- */
-.prototype-panel__body {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 0;
-}
-
-.prototype-panel__actions {
-  display: flex;
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.prototype-panel__button:disabled {
-  color: var(--pet-ink-muted);
-  cursor: not-allowed;
-}
-
-.prototype-panel__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.prototype-panel__title {
+.pet-menu__name {
   margin: 0;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.01em;
 }
 
-/* 11px 是原稿尺寸，低于“正文尽量 12px”的下限；这里提到 12px 并压紧行高。 */
-.prototype-panel__notice {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.3;
-  color: var(--pet-ink-soft);
-}
-
-.prototype-panel__states {
+.pet-menu__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-/*
- * 触控目标：实际达到 44×44（不是注释里宣称的 44，而 min-height 只有 32）。
- * 高度靠 min-height + padding 撑出来，字号保持 12px，不靠缩字换空间。
- */
-.prototype-panel__button,
-.prototype-panel__quit {
-  min-height: 44px;
-  min-width: 44px;
-  /* 左右内边距压到 8px，让 5 个按钮在 380 宽窗口里保持一行，避免多出一行挤掉退出。 */
-  padding: 6px 8px;
-  border-radius: 10px;
-  /* 控件边界属于非文本对比要求（>=3:1），装饰性的 --pet-border 不够。 */
-  border: 1px solid var(--pet-control-line);
-  background: #fff;
-  color: var(--pet-ink);
-  font: inherit;
-  font-size: 12px;
-  line-height: 1.2;
-  cursor: pointer;
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease;
-}
-
-.prototype-panel__button:hover:not([data-active='true']),
-.prototype-panel__quit:hover:not(:disabled) {
-  background: var(--pet-accent-wash);
-  border-color: var(--pet-accent);
-}
-
-.prototype-panel__button[data-active='true'] {
-  background: var(--pet-accent);
-  border-color: var(--pet-accent);
-  /* 选中态白字对 #3766dc 为 5.13:1，满足普通文字 4.5:1。 */
-  color: #fff;
-}
-
-.prototype-panel__button[data-active='true']:hover {
-  background: var(--pet-accent-strong);
-  border-color: var(--pet-accent-strong);
-}
-
-.prototype-panel__quit {
-  align-self: flex-start;
-  border-color: var(--pet-error-line);
-  color: var(--pet-error);
-}
-
-.prototype-panel__quit:hover:not(:disabled) {
-  background: var(--pet-error-soft);
-  border-color: var(--pet-error-line);
-}
-
-/*
- * 禁用态不再用 opacity: 0.5 把文字压到 2.5:1 左右，
- * 改成实色 --pet-ink-muted + 浅底，既看得出禁用又不牺牲可读性。
- */
-.prototype-panel__quit:disabled {
-  background: #f1f3f7;
-  /* 禁用态边界仍要 >= 3:1（对自身底色 3.12、对白底 3.47），
-   * 否则“看得出是按钮但按不动”这件事只能靠颜色以外的线索猜。 */
-  border-color: #828a9a;
-  color: var(--pet-ink-muted);
-  cursor: not-allowed;
-}
-
-/*
- * 可见焦点：不允许去掉键盘焦点环。
- * 环用 outline-offset: 2px 画在按钮外侧，相邻表面是面板底色而不是按钮自己的
- * 选中蓝，因此 --pet-focus 对白底 6.39:1、对黑底合成后的面板 6.12:1 直接成立，
- * 不需要再叠一层白色内环（那会在高对比度模式下反而看不清）。
- */
-.prototype-panel__button:focus-visible,
-.prototype-panel__quit:focus-visible {
-  outline: 3px solid var(--pet-focus);
-  outline-offset: 2px;
-}
-
-.prototype-panel__hint {
+.pet-menu__error {
   margin: 0;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: var(--pet-error-soft);
+  border: 1px solid var(--pet-error-line);
+  color: var(--pet-error);
   font-size: 12px;
   line-height: 1.3;
-  color: var(--pet-ink-soft);
+}
+
+/* ---------- 失败提示 ---------- */
+
+.pet-root__notice {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: var(--pet-error-soft);
+  border: 1px solid var(--pet-error-line);
+  color: var(--pet-error);
+  font-size: 12px;
+  line-height: 1.3;
+  /* 提示条要能读完整一句：允许断行，不截断。 */
+  overflow-wrap: anywhere;
+}
+
+.pet-root__retry {
+  align-self: flex-start;
 }
 
 /*
@@ -537,20 +724,29 @@ body {
  * CSS 视口才会真的缩到 304×336 / 253×280。所以真实判据只能是读回的
  * innerWidth/innerHeight，不能假定“DPI 变高 → CSS 视口一定缩小”。
  *
- * 每一档只压缩留白与装饰元素，不缩字号、不藏退出、不藏气泡：
+ * 每一档只压缩留白与装饰元素，不缩字号、不藏退出、不藏气泡与提示：
  * - 角色按档缩小（仍是可拖动的绘制面，命中区由 SVG 实际形状计算，不依赖 CSS 尺寸）；
- * - 角色与气泡改成横排，把纵向堆叠浪费的空白还回去，高度让给面板与错误提示；
- * - 气泡永远完整换行可见，不用省略号、更不用 1×1 + clip-path 视觉隐藏
+ *   档里同时写全三个 size 选择器，否则 .pet-root[data-size] 的特异性更高，
+ *   用户选的尺寸会把紧凑档彻底盖掉；
+ * - 角色与气泡改成横排，把纵向堆叠浪费的空白还回去，高度让给提示与菜单；
+ * - 气泡与提示永远完整换行可见，不用省略号、更不用 1×1 + clip-path 视觉隐藏
  *   （aria-live 只是附加播报通道，不能代替视觉反馈）；
- * - 只隐藏纯装饰的“操作提示”，它不承载唯一信息。
+ * - 只隐藏纯装饰的元素，它不承载唯一信息。
  */
 @media (max-width: 379px) {
+  .pet-root,
+  .pet-root[data-size='small'],
+  .pet-root[data-size='normal'],
+  .pet-root[data-size='large'] {
+    --pet-avatar-size: 104px;
+  }
+
   .pet-root {
     gap: 3px;
     padding: 4px 8px 5px;
   }
 
-  /* 横排：角色在左、气泡在右，纵向省下的高度全部留给面板与错误提示。 */
+  /* 横排：角色在左、气泡或提示在右，纵向省下的高度全部留给菜单与提示条。 */
   .pet-root__avatar {
     flex-direction: row;
     flex-wrap: wrap;
@@ -564,20 +760,26 @@ body {
 
   .pet-avatar {
     flex: 0 0 auto;
-    width: 104px;
-    height: 104px;
   }
 
   /*
-   * 气泡的 flex-basis 是 150px：宽度够时和角色并排，不够时（见下面 279px 档）
-   * 自动折到下一行并占满整行宽度——两种情形下气泡都完整换行显示，不截断。
-   * min-width: 0 是 flex 子项允许收缩的前提，否则内容宽度会把气泡撑出视口。
+   * 气泡与提示的 flex-basis 都是 150px：宽度够时和角色并排，不够时自动折到
+   * 下一行并占满整行宽度——两种情形下都完整换行显示，不截断。
+   * min-width: 0 是 flex 子项允许收缩的前提，否则内容宽度会把它们撑出视口。
    */
-  .pet-bubble {
+  .pet-bubble,
+  .pet-dialog {
     flex: 1 1 150px;
     min-width: 0;
     max-width: none;
+  }
+
+  .pet-bubble {
     padding: 4px 8px;
+  }
+
+  .pet-dialog {
+    padding: 6px 8px;
   }
 
   /* 长串（如 window.pet）也要能在窄列里断开，不能撑出横向溢出。 */
@@ -585,37 +787,27 @@ body {
     overflow-wrap: anywhere;
   }
 
-  .prototype-panel {
-    gap: 3px;
+  .pet-menu {
     padding: 5px 8px;
-  }
-
-  .prototype-panel__hint {
-    display: none;
   }
 }
 
 /* CSS 视口窄于 320px（页面缩放约 125% 时读回 304×336）：再压一档，仍不缩字号、不藏退出。 */
 @media (max-width: 319px) {
+  .pet-root,
+  .pet-root[data-size='small'],
+  .pet-root[data-size='normal'],
+  .pet-root[data-size='large'] {
+    --pet-avatar-size: 88px;
+  }
+
   .pet-root {
     gap: 3px;
     padding: 3px 8px 4px;
   }
 
-  /* 角色让位：88px 在这个档位仍约 110 物理像素，足够看清表情与可拖面积。 */
-  .pet-avatar {
-    width: 88px;
-    height: 88px;
-  }
-
-  .prototype-panel {
-    gap: 3px;
+  .pet-menu {
     padding: 5px 8px;
-  }
-
-  .prototype-panel__notice {
-    font-size: 12px;
-    line-height: 1.25;
   }
 }
 
@@ -623,18 +815,23 @@ body {
  * CSS 视口窄于 280px（页面缩放约 150% 时读回 253×280）：可用宽度只有 227px。
  *
  * 这一档的硬约束是三条，任何布局都必须同时满足：
- * 1. 气泡是已确认的视觉反馈，**必须真实可见**——不允许 1×1 / clip-path /
+ * 1. 气泡与提示是已确认的视觉反馈，**必须真实可见**——不允许 1×1 / clip-path /
  *    display:none / visibility:hidden / text-indent 之类的视觉隐藏，也不允许
- *    只剩 aria-live；只有 aria-live 不算“气泡可见”。
+ *    只剩 aria-live；只有 aria-live 不算“可见”。
  * 2. 字号（>= 12px）、对比度、44×44 点击目标一律不降。
  * 3. 退出按钮与必要错误信息必须始终可见可达。
  *
- * 因此这里不再试图把角色、气泡、标题、模拟说明、5 个按钮、退出全部塞进一屏，
- * 而是承认 280px 高装不下：角色缩到 56px 与气泡并排（省掉一整行），面板的
- * __body 允许纵向滚动，退出按钮作为固定页脚留在滚动区外——滚不滚动它都在底部
- * 且不覆盖任何内容。气泡不参与滚动，永远完整可见。
+ * 因此这里不试图把角色、气泡、提示、四个按钮全部塞进一屏：
+ * 提示自己限制高度并可纵向滚动，菜单留在滚动区外，角色缩到 56px 与气泡并排（省掉一整行）。
  */
 @media (max-width: 279px) {
+  .pet-root,
+  .pet-root[data-size='small'],
+  .pet-root[data-size='normal'],
+  .pet-root[data-size='large'] {
+    --pet-avatar-size: 56px;
+  }
+
   .pet-root {
     gap: 2px;
     padding: 2px 4px 3px;
@@ -645,102 +842,100 @@ body {
   }
 
   .pet-root__panel {
-    /* min-height: 0 让面板能在 flex 列里收缩，滚动才轮得到面板内部而不是整页。 */
+    /* min-height: 0 让面板能在 flex 列里被压缩，提示的滚动才轮得到它自己。 */
     min-height: 0;
     gap: 2px;
   }
 
-  .pet-avatar {
-    width: 56px;
-    height: 56px;
-  }
-
-  /* 气泡：显式声明可见与完整换行，防止被上面的横排规则或后续改动挤没。 */
-  .pet-bubble {
+  /* 气泡与提示：显式声明可见与完整换行，防止被上面的横排规则或后续改动挤没。 */
+  .pet-bubble,
+  .pet-dialog {
     flex: 1 1 140px;
     min-width: 0;
-    padding: 3px 6px;
-    overflow: visible;
-    clip-path: none;
+    overflow-wrap: anywhere;
   }
 
-  .pet-bubble__text {
+  .pet-bubble {
+    padding: 3px 6px;
+  }
+
+  .pet-dialog {
+    /* 更矮的可用高度：能滚，但绝不裁掉整块。 */
+    max-height: 210px;
+    padding: 4px 6px;
+  }
+
+  .pet-bubble__text,
+  .pet-dialog__text {
     overflow: visible;
     white-space: normal;
     text-overflow: clip;
   }
 
-  /*
-   * 空间不够时只让内容区滚动，而不是让内容顶出窗口。
-   * 滚动的是 __body（标题 / 模拟说明 / 五个状态按钮 / 提示），退出按钮在它外面。
-   * 不用 sticky 吸底：sticky 会浮在滚动内容上方，把状态按钮的点击区域盖住，
-   * 那等于用另一个缺陷换这个缺陷。
-   */
-  .prototype-panel {
-    /* 作为 .pet-root__panel 的 flex 子项必须允许收缩，否则内容一多就把退出顶出窗口。 */
+  .pet-menu {
     min-height: 0;
     gap: 2px;
     padding: 3px 4px;
   }
 
-  .prototype-panel__body {
-    /* 同上：滚动区自己也要能缩，overflow 才会真正生效。 */
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+  .pet-menu__actions {
+    gap: 2px;
   }
 
-  /* 面板内边距收到 4px：这是让 5 个 44×44 按钮仍排成一行、省下一整行高度的关键。 */
-  .prototype-panel__states {
-    gap: 1px;
-  }
-
-  .prototype-panel__button,
-  .prototype-panel__quit {
+  /* 面板内边距收到 4px：这是让 44×44 按钮仍尽量排成一行、省下一整行高度的关键。 */
+  .pet-dialog__choice,
+  .pet-menu__button,
+  .pet-menu__quit,
+  .pet-composer__send,
+  .pet-root__retry {
     padding: 6px 4px;
-  }
-
-  /* 模拟说明保留（不能因为缩放就把“不录音不联网”的声明藏掉）。 */
-  .prototype-panel__notice {
-    font-size: 12px;
-    line-height: 1.25;
   }
 }
 
 /*
  * 矮视口兜底：宽度够但高度不够时（例如窗口被主进程压矮、或宽屏低分辨率缩放），
  * 只按宽度分档会漏掉——281×280、360×280 这类"宽而矮"的视口既不命中 279px 档，
- * 又装不下全部内容，面板与错误提示会被顶出窗口。
+ * 又装不下全部内容，菜单与错误提示会被顶出窗口。
  *
- * 这里只补"允许滚动"这一件事，布局形态与配色都不变：
- * 面板内容区可纵向滚动，退出按钮作为固定页脚留在滚动区外，气泡不参与滚动。
- * 380×420 不会命中（420 > 380），因此正常窗口的行为不受影响。
+ * 这里只补"允许滚动"这一件事，布局形态与配色都不变：提示自己滚，
+ * 菜单留在它外面，退出始终可达。380×420 不会命中（420 > 380），正常窗口不受影响。
  */
 @media (max-height: 380px) {
   .pet-root__panel {
     min-height: 0;
   }
 
-  .prototype-panel {
-    min-height: 0;
-  }
-
-  .prototype-panel__body {
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+  .pet-dialog {
+    max-height: 190px;
   }
 }
 
 /*
- * 出现错误提示时同样进入紧凑档（提示本身要占一行）。
+ * 有提示在前时收一点留白，让提示、菜单和退出同时都在窗口里。
  * 提示条不截断、不隐藏，退出按钮始终保留。
  *
  * 只作用于正常 380 宽窗口：这一档的留白预算按 380×420 反推，用在这里刚好装下。
  * 窄视口档有自己更紧的留白预算，若让这两条 :has() 规则（特异性 0,3,0）盖过去，
- * 反而会把 253×280 里的面板内边距顶回 5px 8px，把提示条挤出视口。
+ * 反而会把 253×280 里的内边距顶回去，把提示挤出视口。
  */
 @media (min-width: 380px) {
+  .pet-root:has(.pet-dialog) {
+    gap: 3px;
+    padding-bottom: 4px;
+  }
+
+  .pet-root:has(.pet-dialog) .pet-root__avatar {
+    gap: 2px;
+  }
+
+  /* 提示在前时角色让位：把高度还给真正要点的控件。 */
+  .pet-root[data-dialog='true'],
+  .pet-root[data-dialog='true'][data-size='small'],
+  .pet-root[data-dialog='true'][data-size='normal'],
+  .pet-root[data-dialog='true'][data-size='large'] {
+    --pet-avatar-size: 104px;
+  }
+
   .pet-root:has(.pet-root__notice) {
     gap: 3px;
     padding-bottom: 4px;
@@ -754,28 +949,13 @@ body {
     gap: 3px;
   }
 
-  .pet-root:has(.pet-root__notice) .prototype-panel {
+  .pet-root:has(.pet-root__notice) .pet-menu {
     gap: 3px;
     padding: 5px 8px;
   }
-
-  .pet-root:has(.pet-root__notice) .prototype-panel__hint {
-    display: none;
-  }
 }
 
-.pet-root__notice {
-  margin: 0;
-  padding: 4px 8px;
-  border-radius: 10px;
-  background: var(--pet-error-soft);
-  border: 1px solid var(--pet-error-line);
-  color: var(--pet-error);
-  font-size: 12px;
-  line-height: 1.3;
-}
-
-/* ---------- 无障碍：尊重系统减少动态效果 ---------- */
+/* ---------- 无障碍：尊重系统减少动态效果，也尊重 profile 的显式选择 ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .pet-avatar *,
@@ -784,35 +964,62 @@ body {
     transition: none !important;
   }
 
-  .prototype-panel__button,
-  .prototype-panel__quit {
+  .pet-dialog__choice,
+  .pet-menu__button,
+  .pet-menu__quit,
+  .pet-composer__send,
+  .pet-root__retry {
     transition: none !important;
   }
+}
+
+.pet-root[data-reduced-motion='true'] .pet-avatar,
+.pet-root[data-reduced-motion='true'] .pet-avatar * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.pet-root[data-reduced-motion='true'] .pet-dialog__choice,
+.pet-root[data-reduced-motion='true'] .pet-menu__button,
+.pet-root[data-reduced-motion='true'] .pet-menu__quit,
+.pet-root[data-reduced-motion='true'] .pet-composer__send,
+.pet-root[data-reduced-motion='true'] .pet-root__retry {
+  transition: none !important;
 }
 
 /* 高对比度模式下用系统色，避免透明窗口里看不清。 */
 @media (forced-colors: active) {
   .pet-bubble,
-  .prototype-panel,
-  .pet-root__notice {
+  .pet-dialog,
+  .pet-menu,
+  .pet-root__notice,
+  .pet-menu__error {
     border: 1px solid CanvasText;
     background: Canvas;
     color: CanvasText;
   }
 
-  .prototype-panel__button:focus-visible,
-  .prototype-panel__quit:focus-visible {
+  .pet-dialog__choice:focus-visible,
+  .pet-dialog__input:focus-visible,
+  .pet-menu__button:focus-visible,
+  .pet-menu__quit:focus-visible,
+  .pet-composer__send:focus-visible,
+  .pet-composer__input:focus-visible,
+  .pet-root__retry:focus-visible {
     outline: 3px solid Highlight;
   }
 
   /* 高对比度模式下系统色优先级更高，去掉给蓝底做的那层白环。 */
-  .prototype-panel__button[data-active='true']:focus-visible {
+  .pet-dialog__choice[data-primary='true']:focus-visible {
     box-shadow: none;
     outline: 3px solid Highlight;
   }
 
-  .prototype-panel__button:disabled,
-  .prototype-panel__quit:disabled {
+  .pet-dialog__choice:disabled,
+  .pet-menu__button:disabled,
+  .pet-menu__quit:disabled,
+  .pet-composer__send:disabled,
+  .pet-root__retry:disabled {
     background: Canvas;
     border-color: GrayText;
     color: GrayText;

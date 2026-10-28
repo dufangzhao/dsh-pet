@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.agent-cortico",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "Cortico 智能体",
+    "en": "Cortico agent"
+  },
+  "description": {
+    "zh-CN": "统一日常互动、上下文和工具调用",
+    "en": "Shared everyday interaction and tool execution"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "conversation",
+      "capability": "agent.conversation@1"
+    }
+  ],
+  "consumes": [
+    {
+      "capability": "app.profile@1",
+      "optional": false
+    },
+    {
+      "capability": "llm.responses@1",
+      "optional": true
+    },
+    {
+      "capability": "agent.conversation@1",
+      "optional": true
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "files",
+      "scope": "plugin-data",
+      "access": "read-write"
+    },
+    {
+      "kind": "capability-use",
+      "capability": "app.profile@1"
+    },
+    {
+      "kind": "capability-use",
+      "capability": "llm.responses@1"
+    },
+    {
+      "kind": "capability-use",
+      "capability": "agent.conversation@1"
+    }
+  ]
+}

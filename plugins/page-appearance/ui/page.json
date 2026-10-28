@@ -1,0 +1,13 @@
+{
+  "id": "world:pet.page-appearance",
+  "kind": "world",
+  "label": "装扮",
+  "availability": "active",
+  "panels": [
+    {
+      "id": "main",
+      "title": "装扮",
+      "builtin": "pet.appearance"
+    }
+  ]
+}

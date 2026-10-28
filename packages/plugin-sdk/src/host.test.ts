@@ -660,3 +660,59 @@ describe('media endpoints keep bytes out of the JSON channel', () => {
     });
   });
 });
+
+describe('owned configuration writes', () => {
+  it('does not expose save without an explicitly supplied host port', () => {
+    const services = createPluginHostServices(
+      { owner, signal: new AbortController().signal },
+      makePort(),
+    );
+    expect(services.config.save).toBeUndefined();
+  });
+  it('rejects a successful write response from another configuration owner', async () => {
+    const services = createPluginHostServices(
+      { owner, signal: new AbortController().signal },
+      makePort({
+        saveConfig: async () => ({
+          ok: true,
+          value: { snapshot: snapshot({ pluginId: 'foreign.plugin' }), changeMode: null },
+        }),
+      }),
+    );
+    expect(await services.config.save?.(task(), { name: 'changed' }, 3)).toMatchObject({
+      ok: false,
+      error: { code: 'unavailable' },
+    });
+  });
+  it('preserves the exact candidate while a caller mutates its original object', async () => {
+    let release!: () => void;
+    const wait = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let received: JsonValue | undefined;
+    const services = createPluginHostServices(
+      { owner, signal: new AbortController().signal },
+      makePort({
+        saveConfig: async (_who, _task, data) => {
+          received = data;
+          await wait;
+          return {
+            ok: true,
+            value: { snapshot: snapshot({ revision: 4, data }), changeMode: 'immediate' },
+          };
+        },
+      }),
+    );
+    const data = { name: 'chosen' };
+    const pending = services.config.save!(task(), data, 3);
+    data.name = 'mutated';
+    release();
+    const saved = await pending;
+    expect(received).toEqual({ name: 'chosen' });
+    expect(saved).toMatchObject({
+      ok: true,
+      value: { snapshot: { revision: 4, data: { name: 'chosen' } } },
+    });
+    if (saved.ok) expect(Object.isFrozen(saved.value.snapshot.data)).toBe(true);
+  });
+});

@@ -1,0 +1,204 @@
+{
+  "status": "passed",
+  "checks": [
+    "five-real-plugin-pages-and-one-Core-ready",
+    "pet-text-enters-same-Core-history-without-Key"
+  ],
+  "errors": [],
+  "sandboxOverride": true,
+  "initial": {
+    "version": 1,
+    "profile": {
+      "owner": {
+        "pluginId": "pet.profile",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "revision": 1,
+      "data": {
+        "petName": "小蓝",
+        "userName": "你",
+        "replyLanguage": "zh-CN",
+        "style": "natural",
+        "personaPrompt": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions.",
+        "figure": "minimal",
+        "palette": "morning",
+        "size": "normal",
+        "visible": true,
+        "alwaysOnTop": true,
+        "draggable": true,
+        "reducedMotion": false,
+        "voiceEnabled": true
+      }
+    },
+    "pages": [
+      {
+        "id": "pet.page-start/default/page",
+        "owner": {
+          "pluginId": "pet.page-start",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "title": "开始",
+        "order": 10,
+        "manifest": {
+          "id": "world:pet.page-start",
+          "kind": "world",
+          "label": "开始",
+          "availability": "active",
+          "panels": [
+            {
+              "id": "main",
+              "title": "开始",
+              "builtin": "pet.start"
+            }
+          ]
+        }
+      },
+      {
+        "id": "pet.page-persona/default/page",
+        "owner": {
+          "pluginId": "pet.page-persona",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "title": "人设",
+        "order": 20,
+        "manifest": {
+          "id": "persona:pet.page-persona",
+          "kind": "persona",
+          "label": "人设",
+          "availability": "active",
+          "panels": [
+            {
+              "id": "main",
+              "title": "人设",
+              "builtin": "pet.persona"
+            }
+          ]
+        }
+      },
+      {
+        "id": "pet.page-appearance/default/page",
+        "owner": {
+          "pluginId": "pet.page-appearance",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "title": "装扮",
+        "order": 30,
+        "manifest": {
+          "id": "world:pet.page-appearance",
+          "kind": "world",
+          "label": "装扮",
+          "availability": "active",
+          "panels": [
+            {
+              "id": "main",
+              "title": "装扮",
+              "builtin": "pet.appearance"
+            }
+          ]
+        }
+      },
+      {
+        "id": "pet.page-conversation/default/page",
+        "owner": {
+          "pluginId": "pet.page-conversation",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "title": "对话",
+        "order": 40,
+        "manifest": {
+          "id": "world:pet.page-conversation",
+          "kind": "world",
+          "label": "对话",
+          "availability": "active",
+          "panels": [
+            {
+              "id": "main",
+              "title": "对话",
+              "builtin": "pet.conversation"
+            }
+          ]
+        }
+      },
+      {
+        "id": "pet.page-voice/default/page",
+        "owner": {
+          "pluginId": "pet.page-voice",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "title": "语音输入",
+        "order": 50,
+        "manifest": {
+          "id": "world:pet.page-voice",
+          "kind": "world",
+          "label": "语音输入",
+          "availability": "active",
+          "panels": [
+            {
+              "id": "main",
+              "title": "语音输入",
+              "builtin": "pet.voice"
+            }
+          ]
+        }
+      }
+    ],
+    "history": [],
+    "cursor": 0,
+    "prompt": {
+      "state": "applied",
+      "appliedRevision": 1,
+      "segments": [
+        {
+          "id": "persona.identity",
+          "label": "名字与表达",
+          "text": "Your name is 小蓝. Address the user as 你. Reply language: zh-CN. Style: natural."
+        },
+        {
+          "id": "persona.body",
+          "label": "完整人设正文",
+          "text": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions."
+        },
+        {
+          "id": "world.desktop",
+          "label": "桌面交互说明",
+          "text": "Use pet_say for visible speech. Use configure_pet only for a requested permitted settings change. User interaction history and application guidance share this desktop World. Only report actions that succeeded."
+        }
+      ]
+    },
+    "dialog": {
+      "id": "2cda684c-13d8-441b-8691-229b4eaff88c",
+      "step": "welcome",
+      "busy": false,
+      "title": "一起开始",
+      "text": "我已经在桌面上了。先取个名字，再选喜欢的样子。还没有模型 Key 也能完成这些设置。",
+      "choices": [
+        {
+          "id": "next",
+          "label": "开始设置",
+          "primary": true
+        },
+        {
+          "id": "later",
+          "label": "稍后再说"
+        }
+      ]
+    },
+    "agent": {
+      "owner": {
+        "pluginId": "pet.agent-cortico",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "state": "ready",
+      "label": "日常互动已就绪"
+    },
+    "error": null
+  },
+  "mainLog": "Debugger ending on ws://127.0.0.1:53874/ec1279f6-1433-48a3-80ff-54f3384f7edc\r\nFor help, see: https://nodejs.org/learn/getting-started/debugging\r\n"
+}

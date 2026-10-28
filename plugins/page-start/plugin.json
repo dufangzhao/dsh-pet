@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.page-start",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "开始",
+    "en": "start"
+  },
+  "description": {
+    "zh-CN": "桌宠开始页面"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "contributes": [
+    {
+      "id": "page",
+      "kind": "panel",
+      "title": {
+        "zh-CN": "开始"
+      },
+      "entry": "ui/page.json"
+    }
+  ]
+}

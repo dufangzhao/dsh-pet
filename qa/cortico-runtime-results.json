@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "electron": "45.0.0",
+  "node": "24.22.0",
+  "checks": [
+    "published-typescript-core-and-provider-registry-import-on-electron",
+    "one-core-event-tools-config-result-and-presented-reply",
+    "input-and-output-receipt-share-monotonic-event-store",
+    "stop-aborts-provider-call-and-closes-world",
+    "same-history-reconstructs-after-core-restart"
+  ],
+  "networkCalls": 0,
+  "calls": 3,
+  "receiptCursor": 2,
+  "exitCode": 0,
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

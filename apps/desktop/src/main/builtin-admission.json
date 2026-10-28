@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "plugins": {
+    "pet.agent-cortico": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "9aef938e1cfe9e98aa7efb29d4a49d85cf66fc96ffaf3f7926f65e83b9660ec2",
+          "bytes": 1150
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "b760c72ec401eecdc3f28aa3c53d5c5fe567e6f79d4237eb195bd9cffd7ab33f",
+          "bytes": 38789
+        }
+      ]
+    },
+    "pet.asr-local": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "a7a53a39c8b2c0fb6d108fb013ec473725a138e344e4427676777cab2d32baac",
+          "bytes": 2853
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "206e853ca55b8ff780a38ef7ebeac5832e6cad6870411cf1196c9c3cf43f0c21",
+          "bytes": 31957
+        },
+        {
+          "relativePath": "dist/asr-worker.cjs",
+          "sha256": "a63436a2ea82f944caa737da9342fa476c4bf0f743223ee435acd2b9b3e18aaa",
+          "bytes": 38560
+        }
+      ]
+    },
+    "pet.avatar-default": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "2e68d5c7eb1014fba994c1da4a391f8264800ba765422ec9a6c851acde72f698",
+          "bytes": 514
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "f969f0b74647e02f5d6a8f3d055d1657870483599455d579e2ee27f23cdd2380",
+          "bytes": 1628
+        }
+      ]
+    },
+    "pet.chat": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "b73932b80620f3d5f642cc6e7eafda6b13412bcb64865366f7ce157184000b03",
+          "bytes": 747
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "8648df2437869d5742209d10f78ff92d854bcd31d2a193cb3791d85aa72bdeb3",
+          "bytes": 3129
+        }
+      ]
+    },
+    "pet.llm-provider": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "0b959fe6b0ed472a5821f16ddcecee1fe8ffd120725134adabb72808606fa649",
+          "bytes": 1471
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "30a813f8fd18481411039363452112ff8e5667f35abc07a53d7c797581b501ba",
+          "bytes": 9668
+        }
+      ]
+    },
+    "pet.page-appearance": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "9bddcee01eebd17ca07cfda62030e3679da240f7861d63ce586531cfb74d2452",
+          "bytes": 489
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "97b23a9f52d8da9a243d8324639ab931eba248939e3f20ea39f4540024fe7b92",
+          "bytes": 1474
+        },
+        {
+          "relativePath": "ui/page.json",
+          "sha256": "b27fbc1485e02123e2b1016d9ef148bbe6892ab3872ea18d4591d114613c9985",
+          "bytes": 218
+        }
+      ]
+    },
+    "pet.page-conversation": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "afe8f9a00ec6079efcec42f9816b9b435be4d09bfd0ac3c759d1f710e57b8b78",
+          "bytes": 493
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "b16233e97b2ea4719ab7a40fd44555ff11029bfaaa0223f2331cacc2e10ef57e",
+          "bytes": 1476
+        },
+        {
+          "relativePath": "ui/page.json",
+          "sha256": "e2fae6330e1ba25afb02b2ec82c4e1b1e5ec58fc83bd991913d74f858a8b8a5e",
+          "bytes": 222
+        }
+      ]
+    },
+    "pet.page-persona": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "3646be1855aa5b0daecb145c6536f1f746aff989ba8183f54b1e04b6b0ef398a",
+          "bytes": 483
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "6575f095d514f3ec473c476632dba46ca9bd2f2b383d844d75a9f6a9d0dbf1ef",
+          "bytes": 1471
+        },
+        {
+          "relativePath": "ui/page.json",
+          "sha256": "097333b6c0668db6ebc2e033c5228ea6c7d89131b19dfdce68009130e0a856b9",
+          "bytes": 216
+        }
+      ]
+    },
+    "pet.page-start": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "75bb8db31b31b13fc66e91f3b123a01c62c364af0bd1d2b5a6f746c6696bf498",
+          "bytes": 479
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "d8c855253b4c166022ffe26eb8d1860b354d2b88ceb0d74cbe0b7a319e1ce8a4",
+          "bytes": 1469
+        },
+        {
+          "relativePath": "ui/page.json",
+          "sha256": "4fe854fd035868317c03dc2caef0150e7e63cc806e2c9d7ff500490a7037c2b7",
+          "bytes": 208
+        }
+      ]
+    },
+    "pet.page-voice": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "31980a59c1faa9a42e5897a06d1729ac018d36946d10f75acbfc383b56257192",
+          "bytes": 497
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "cd1905750a54bdd1b60c3cebfac99ced0233676ad63608882bcaaf1773abb206",
+          "bytes": 1469
+        },
+        {
+          "relativePath": "ui/page.json",
+          "sha256": "a3541ba8e3579715fa6b7602800c4a00718e5d4856edef1fd432e1228b1ec20d",
+          "bytes": 220
+        }
+      ]
+    },
+    "pet.profile": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "763c0d3f7ec0874802b7dc47e797da12bcea3a05d8367b1936fa8cb90254c3eb",
+          "bytes": 3093
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "9ee06e8ba0a9411481a788d633aef2ad8eb03d1c27442ea72c353457ecee466a",
+          "bytes": 2821
+        }
+      ]
+    },
+    "pet.voice-chat": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "719d6efc3519531bb422d2d3aebc40df8cd70610190e1cdd9cf7b174630cdaca",
+          "bytes": 1609
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "2c7b854d834a45255f768585bf71f2b803ccf2d911fb592c0065c2801ee3c607",
+          "bytes": 4017
+        }
+      ]
+    }
+  }
+}

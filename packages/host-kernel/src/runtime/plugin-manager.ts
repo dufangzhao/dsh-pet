@@ -475,6 +475,16 @@ export class PluginManager {
     this.capabilities.forgetConsumer(e.owner);
     return { ok: true, value: null };
   }
+  resolveCommand(owner: OwnerRef, id: string): Result<CapabilityMethod> {
+    const entry = this.#entries.get(instanceKey(owner));
+    if (!entry || !this.isActive(owner))
+      return { ok: false, error: makeError('stale-owner', false) };
+    const declared = entry.manifest.contributes?.find((c) => c.id === id && c.kind === 'command');
+    const method = entry.contributions.get(id);
+    return declared && method
+      ? { ok: true, value: method }
+      : { ok: false, error: makeError('not-ready', false) };
+  }
   contributions(): readonly RegisteredContribution[] {
     return freezeJson(
       [...this.#entries.values()]

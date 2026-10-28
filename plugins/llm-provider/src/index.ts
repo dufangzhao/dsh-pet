@@ -1,9 +1,52 @@
+import { respondCompatible } from './responses.mjs';
 import { definePlugin } from '@pet/plugin-sdk';
 import type { JsonValue } from '@pet/contracts';
 const object = (value: JsonValue) =>
   value && typeof value === 'object' && !Array.isArray(value) ? value : null;
 export default definePlugin({
   activate(ctx) {
+    ctx.provide('responses', {
+      describe: async () => {
+        const cfg = await ctx.host.config.get();
+        return cfg.ok ? { model: cfg.value.data['model'] ?? null } : { errorCode: cfg.error.code };
+      },
+      respond: async (task, input) => {
+        const body = object(input);
+        const request = object(body?.['request'] ?? null);
+        if (!request) return { errorCode: 'invalid-input' };
+        const config = await ctx.host.config.get();
+        if (!config.ok || typeof config.value.data['model'] !== 'string')
+          return { errorCode: config.ok ? 'not-ready' : config.error.code };
+        if (!ctx.host.credentials) return { errorCode: 'credential-unavailable' };
+        const used = await ctx.host.credentials.withSecret(
+          task,
+          'api-key',
+          async (secret, signal) => {
+            try {
+              return await respondCompatible(
+                secret,
+                config.value.data['model'] as string,
+                request,
+                signal,
+              );
+            } catch (error) {
+              const status =
+                error !== null && typeof error === 'object' && 'status' in error
+                  ? error.status
+                  : undefined;
+              return {
+                errorCode: signal.aborted
+                  ? 'cancelled'
+                  : status === 401 || status === 403
+                    ? 'auth-failed'
+                    : 'network',
+              };
+            }
+          },
+        );
+        return used.ok ? used.value : { errorCode: used.error.code };
+      },
+    });
     ctx.provide('deepseek', {
       respond: async (task, input) => {
         const body = object(input);

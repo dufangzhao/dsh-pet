@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.profile",
+  "version": "0.1.0",
+  "displayName": { "zh-CN": "桌宠偏好", "en": "Pet preferences" },
+  "description": {
+    "zh-CN": "人设与桌面外观的统一设置",
+    "en": "Shared persona and appearance settings"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [{ "id": "profile", "capability": "app.profile@1" }],
+  "permissions": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "petName",
+        "userName",
+        "replyLanguage",
+        "style",
+        "personaPrompt",
+        "figure",
+        "palette",
+        "size",
+        "visible",
+        "alwaysOnTop",
+        "draggable",
+        "reducedMotion",
+        "voiceEnabled"
+      ],
+      "properties": {
+        "petName": {
+          "type": "string",
+          "title": "桌宠名字",
+          "minLength": 1,
+          "maxLength": 40,
+          "default": "小蓝"
+        },
+        "userName": {
+          "type": "string",
+          "title": "称呼你",
+          "minLength": 1,
+          "maxLength": 40,
+          "default": "你"
+        },
+        "replyLanguage": {
+          "type": "string",
+          "title": "回复语言",
+          "enum": ["zh-CN", "en"],
+          "default": "zh-CN"
+        },
+        "style": {
+          "type": "string",
+          "title": "表达方式",
+          "enum": ["quiet", "natural", "lively"],
+          "default": "natural"
+        },
+        "personaPrompt": {
+          "type": "string",
+          "title": "完整人设提示词",
+          "minLength": 1,
+          "maxLength": 16384,
+          "default": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions."
+        },
+        "figure": {
+          "type": "string",
+          "title": "形象",
+          "enum": ["minimal", "round"],
+          "default": "minimal"
+        },
+        "palette": {
+          "type": "string",
+          "title": "配色",
+          "enum": ["morning", "lavender", "pine", "orange"],
+          "default": "morning"
+        },
+        "size": {
+          "type": "string",
+          "title": "大小",
+          "enum": ["small", "normal", "large"],
+          "default": "normal"
+        },
+        "visible": { "type": "boolean", "title": "在桌面显示", "default": true },
+        "alwaysOnTop": { "type": "boolean", "title": "保持置顶", "default": true },
+        "draggable": { "type": "boolean", "title": "允许拖动", "default": true },
+        "reducedMotion": { "type": "boolean", "title": "减少动画", "default": false },
+        "voiceEnabled": { "type": "boolean", "title": "语音输入", "default": true }
+      }
+    },
+    "apply": { "personaPrompt": "reload" }
+  }
+}

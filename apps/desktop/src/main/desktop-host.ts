@@ -42,6 +42,7 @@ export class DesktopHost {
   readonly builtins: BuiltinRegistry;
   readonly registerSource: ReturnType<typeof createHostPermissions>['register'];
   readonly describeTrust: ReturnType<typeof createHostPermissions>['describeTrust'];
+  readonly getPackage: ReturnType<typeof createHostPermissions>['getPackage'];
   readonly verifyTrust: ReturnType<typeof createHostPermissions>['verifyTrust'];
   readonly credentials: CredentialBroker | undefined;
   #closing: Promise<{ exitConfirmed: boolean; forced: boolean }> | undefined;
@@ -69,11 +70,13 @@ export class DesktopHost {
     this.builtins = builtins;
     this.registerSource = source.register;
     this.describeTrust = source.describeTrust;
+    this.getPackage = source.getPackage;
     this.verifyTrust = source.verifyTrust;
     this.credentials = credentials;
   }
   static async create(options: {
     executable: string;
+    onChanged?: () => void;
     workerEntry: string;
     builtinDirectory: string;
     userDirectory: string;
@@ -92,6 +95,7 @@ export class DesktopHost {
     const dataRoot = path.join(path.dirname(options.userDirectory), 'plugin-data');
     await mkdir(configRoot, { recursive: true });
     await mkdir(dataRoot, { recursive: true });
+    const dataDirectories = new PluginDataDirectories(dataRoot);
     const vaultRoot = path.join(path.dirname(options.userDirectory), 'vault');
     if (options.cipher) await mkdir(vaultRoot, { recursive: true });
     const reference: {
@@ -114,6 +118,21 @@ export class DesktopHost {
       executable: options.executable,
       workerEntry: options.workerEntry,
       roots,
+      dataDirectory: async (owner) => {
+        const snapshot = reference.manager?.get(owner);
+        if (
+          !snapshot?.manifest.permissions?.some(
+            (p) => p.kind === 'files' && p.scope === 'plugin-data',
+          )
+        )
+          return undefined;
+        const allocated = await dataDirectories.get({
+          pluginId: owner.pluginId,
+          instanceId: owner.instanceId,
+        });
+        if (!allocated.ok) throw new Error('Plugin data directory unavailable');
+        return allocated.value;
+      },
       host: {
         allowJson: (value) => reference.hostPort?.allowJson?.(value) !== false,
         allowFrame: (frame) => reference.hostPort?.allowFrame?.(frame) !== false,
@@ -143,14 +162,14 @@ export class DesktopHost {
           Promise.resolve({ ok: false, error: makeError('not-ready', false) }),
       },
       onFault: (owner) => {
-        if (reference.manager) void reference.manager.reportFault(owner);
+        if (reference.manager)
+          void reference.manager.reportFault(owner).then(() => options.onChanged?.());
       },
     });
     const configs = new ConfigService(
       new FileConfigStore(configRoot),
       (owner) => reference.manager?.isLive(owner) === true,
     );
-    const dataDirectories = new PluginDataDirectories(dataRoot);
     const manager = new PluginManager({
       driver,
       ...(options.protectedPackages ? { protectedPackages: options.protectedPackages } : {}),
@@ -187,6 +206,7 @@ export class DesktopHost {
       tasks,
       configs,
       permissions: permission.service,
+      ...(options.onChanged ? { changed: options.onChanged } : {}),
       ...options.media,
       ...(credentials ? { credentials } : {}),
     });

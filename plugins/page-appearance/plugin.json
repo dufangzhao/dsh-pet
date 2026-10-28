@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.page-appearance",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "装扮",
+    "en": "appearance"
+  },
+  "description": {
+    "zh-CN": "桌宠装扮页面"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "contributes": [
+    {
+      "id": "page",
+      "kind": "panel",
+      "title": {
+        "zh-CN": "装扮"
+      },
+      "entry": "ui/page.json"
+    }
+  ]
+}

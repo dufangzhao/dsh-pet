@@ -4,7 +4,6 @@ import type { JSX } from 'react';
 
 import { Button, List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
 
-import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
 import { COPY } from '../copy.js';
 import {
@@ -45,7 +44,7 @@ export function PluginsPage({
   onAction,
 }: PluginsPageProps): JSX.Element {
   return (
-    <ConsolePane title="插件">
+    <>
       <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
         {snapshot === null ? null : (
           <PluginContent
@@ -59,7 +58,7 @@ export function PluginsPage({
           />
         )}
       </ConsoleStatus>
-    </ConsolePane>
+    </>
   );
 }
 

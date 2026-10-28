@@ -1,0 +1,118 @@
+/*
+ * 预览台：比纸低半格的浅面 + 一条地平线，彩色只由角色自己承担。
+ * 界面底色与文字取 --pk-* 令牌；角色配色是这个产品唯一的第二色族，
+ * 四个 --pv-* 值就是「配色」这一项设置本身，深浅主题下都用同一组浅色身体。
+ */
+
+.pet-preview {
+  box-sizing: border-box;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.pet-preview__stage {
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  padding: 16px 16px 0;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  background: var(--pk-sunken);
+}
+
+.pet-preview__figure {
+  display: block;
+  /* 大小这一项设置真的改变预览尺寸；外接矩形保持稳定，不跟着抖动。 */
+  height: var(--pv-size, 152px);
+  width: auto;
+}
+
+.pet-preview[data-size='small'] {
+  --pv-size: 104px;
+}
+
+.pet-preview[data-size='normal'] {
+  --pv-size: 152px;
+}
+
+.pet-preview[data-size='large'] {
+  --pv-size: 188px;
+}
+
+/* 地平线：角色的立足点，也是预览台唯一的一条线。 */
+.pet-preview__stage::after {
+  content: '';
+  grid-row: 2;
+  width: 62%;
+  height: 1px;
+  margin-bottom: 14px;
+  background: var(--pk-border-strong);
+  opacity: 0.5;
+}
+
+.pet-preview__ears path {
+  fill: var(--pv-bottom);
+}
+
+.pet-preview__face {
+  fill: var(--pv-face);
+}
+
+.pet-preview__eyes ellipse {
+  fill: #1c2430;
+  transition: ry var(--pk-transition);
+}
+
+.pet-preview__mouth {
+  fill: none;
+  stroke: #1c2430;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.pet-preview__blush {
+  fill: var(--pv-halo);
+  opacity: 0.45;
+}
+
+.pet-preview__caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.pet-preview__name {
+  font-weight: 600;
+}
+
+.pet-preview__facts,
+.pet-preview__note,
+.pet-preview__label {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+.pet-preview__note {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.pet-preview__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-preview__eyes ellipse {
+    transition: none;
+  }
+}

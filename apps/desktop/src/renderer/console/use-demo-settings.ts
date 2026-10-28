@@ -1,8 +1,7 @@
-import type { ConfigApplyMode, DemoReplyMode, JsonObject, OwnerRef } from '@pet/contracts';
+import type { DemoReplyMode, JsonObject, OwnerRef } from '@pet/contracts';
 import { useCallback, useRef, useState } from 'react';
 
 import { CALL_REJECTED, COPY, describeError } from './copy.js';
-import { savedText } from './use-config.js';
 
 /** Demo 的两条本机配置：各自的 owner 与 revision 都来自宿主快照。 */
 export type DemoSetting = 'asr' | 'voice';
@@ -10,8 +9,6 @@ export type DemoSetting = 'asr' | 'voice';
 export interface SettingOutcome {
   ok: boolean;
   error: string | null;
-  /** 保存成功后的生效方式；只有 ok 才有内容。 */
-  notice: string | null;
 }
 
 export interface DemoSettingsState {
@@ -32,7 +29,7 @@ export interface DemoSettingsState {
 }
 
 function failure(error: string): SettingOutcome {
-  return { ok: false, error, notice: null };
+  return { ok: false, error };
 }
 
 /**
@@ -71,8 +68,8 @@ export function useDemoSettings(): DemoSettingsState {
             ? failure(CONFLICT_TEXT)
             : failure(describeError(result.error));
         }
-        const mode: ConfigApplyMode | null = result.value.changeMode;
-        return { ok: true, error: null, notice: savedText(mode) };
+        // 这两份配置都是立即生效的，成功没有额外要说的：选项本身就是回执。
+        return { ok: true, error: null };
       } catch {
         return failure(CALL_REJECTED);
       } finally {

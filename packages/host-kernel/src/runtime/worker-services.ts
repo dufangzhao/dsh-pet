@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { createPluginHostServices } from '@pet/plugin-sdk/host';
 import type { PluginHostServices, PluginTask, PluginConfigSnapshot } from '@pet/plugin-sdk';
-import { makeError, type JsonValue, type OwnerRef, type Result } from '@pet/contracts';
+import {
+  makeError,
+  type JsonValue,
+  type OwnerRef,
+  type Result,
+  type ConfigSave,
+} from '@pet/contracts';
 import type { ControlEndpoint } from '../ipc/control-endpoint.js';
 import type { TaskMediaPeer } from '../tasks/media-peer.js';
 import type { SensitivePeer } from '../credentials/sensitive-peer.js';
@@ -103,6 +109,17 @@ export function createWorkerServices(
             : {}),
           getConfig: async (who) =>
             (await request(who, 'config.get', null, lifetime)) as Result<PluginConfigSnapshot>,
+          saveConfig: async (who, task, data, expectedRevision) => {
+            const signal = scope(who, task);
+            if (!signal) return fail('permission-denied');
+            return (await request(
+              who,
+              'config.save',
+              { data, expectedRevision },
+              signal,
+              task,
+            )) as Result<ConfigSave>;
+          },
           invoke: async (who, task, capability, method, input) => {
             const signal = scope(who, task);
             if (!signal) return fail('permission-denied');

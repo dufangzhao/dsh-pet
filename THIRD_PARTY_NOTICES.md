@@ -21,3 +21,8 @@
 6. 独立第三方插件不因遵守SDK就自动采用MIT；兼容、分发和产品内安装政策另行制定。
 
 以上是工程合规边界，不替代具体分发场景的法律审查。
+
+## 智能体底层与加载器
+
+- Cortico 0.2.7：MIT，Copyright (c) 2026 Phantivia，发布提交 cb9ddbd685bcccba1f29905098648f46a79b3862。保留随包 LICENSE；来源 https://github.com/Pal-AI-Lab/Cortico 。此依赖不包含 Coopanion 产品代码或角色资产。
+- tsx 4.23.15：MIT，作者 privatenumber，用于 Cortico TypeScript/ESM 加载。保留随包许可；来源 https://github.com/privatenumber/tsx 。

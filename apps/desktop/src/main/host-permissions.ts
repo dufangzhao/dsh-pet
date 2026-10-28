@@ -41,6 +41,7 @@ export function createHostPermissions(
   return Object.freeze({
     service: kernel.service,
     control: kernel.control,
+    getPackage: (owner: OwnerRef): DiscoveredPlugin | null => describe(owner)?.candidate ?? null,
     register: (candidate: DiscoveredPlugin, instanceId = 'default') => {
       const digest = createHash('sha256')
         .update(

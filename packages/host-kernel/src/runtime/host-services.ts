@@ -46,6 +46,7 @@ export interface RuntimeHostPort {
   output?(reference: TaskMediaReference, reader: MediaReadEndpoint): void;
 }
 export interface HostServicesOptions {
+  changed?: () => void;
   manager: PluginManager;
   tasks: TaskSupervisor;
   configs: ConfigService;
@@ -131,6 +132,37 @@ export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHost
           if (payload !== null) return { ok: false, error: makeError('invalid-input', false) };
           const result = await options.configs.issueClient(owner).get();
           return result as Result<JsonValue>;
+        }
+        if (action === 'config.save') {
+          const body = record(payload);
+          const taskSignal = context.taskId
+            ? options.tasks.taskSignal(context.taskId, owner)
+            : null;
+          if (
+            !body ||
+            !taskSignal ||
+            !context.taskId ||
+            !exactKeys(body, ['data', 'expectedRevision']) ||
+            !record(body['data']!) ||
+            !Number.isSafeInteger(body['expectedRevision']) ||
+            (body['expectedRevision'] as number) < 0
+          )
+            return { ok: false, error: makeError('permission-denied', false) };
+          const permitted = await options.permissions.run(
+            owner,
+            context.taskId,
+            { kind: 'files', scope: 'plugin-data', access: 'read-write' },
+            (signal) =>
+              options.configs.save(
+                { pluginId: owner.pluginId, instanceId: owner.instanceId },
+                body['data'],
+                body['expectedRevision'] as number,
+                signal,
+              ),
+            AbortSignal.any([taskSignal, context.signal]),
+          );
+          if (permitted.ok && permitted.value.ok) options.changed?.();
+          return (permitted.ok ? permitted.value : permitted) as Result<JsonValue>;
         }
         if (action !== 'capability.invoke' || !context.taskId)
           return { ok: false, error: makeError('invalid-input', false) };

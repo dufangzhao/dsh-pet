@@ -12,7 +12,6 @@ import { useCallback, useEffect, useState, type JSX } from 'react';
 
 import { Button, Dialog, EmptyState, List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
 
-import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
 import {
   auditEvent,
@@ -123,10 +122,7 @@ export function PermissionsPage({
   const names = namesOf(security);
 
   return (
-    <ConsolePane
-      title="权限与数据"
-      summary="插件声明的权限是请求，不是授权。审批只放行一次，预设决定哪些操作还需要问。"
-    >
+    <>
       <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
         {security === null ? null : (
           <>
@@ -221,7 +217,7 @@ export function PermissionsPage({
         onClose={() => setRestoring(null)}
         onConfirm={confirmRestore}
       />
-    </ConsolePane>
+    </>
   );
 }
 

@@ -3,7 +3,6 @@ import type { JSX } from 'react';
 
 import { List, ListItem, Section, UiKitDemo } from '@pet/ui-kit';
 
-import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
 
 export interface AboutPageProps {
@@ -23,7 +22,7 @@ export function AboutPage({
   onRetry,
 }: AboutPageProps): JSX.Element {
   return (
-    <ConsolePane title="关于">
+    <>
       <Section title="版本">
         <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
           {snapshot === null ? null : <VersionList snapshot={snapshot} />}
@@ -51,7 +50,7 @@ export function AboutPage({
           </Section>
         </div>
       </details>
-    </ConsolePane>
+    </>
   );
 }
 
