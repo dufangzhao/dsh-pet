@@ -41,10 +41,7 @@ export class ConsolePluginRequests {
       });
       if (!current || current.owner.generation !== owner.generation)
         return reply(makeError('stale-owner', false));
-      if (
-        (action !== 'enable' && current.protected) ||
-        (action === 'uninstall' && current.origin !== 'user')
-      )
+      if (action !== 'enable' && current.protected)
         return reply(makeError('permission-denied', false));
       const key = JSON.stringify([owner.pluginId, owner.instanceId]);
       if (this.#pending.has(key)) return reply(makeError('rate-limited', false));

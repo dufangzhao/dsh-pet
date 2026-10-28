@@ -28,3 +28,6 @@ export * from './control.js';
 export * from './host-status.js';
 export * from './console.js';
 export * from './config.js';
+export * from './security.js';
+export * from './local-asr.js';
+export * from './demo.js';

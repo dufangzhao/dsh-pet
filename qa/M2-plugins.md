@@ -8,11 +8,11 @@
 
 [处理器](../apps/desktop/src/main/console-plugin-request.ts)只接受当前设置窗口、主frame和固定URL，校验精确参数与完整OwnerRef。按稳定实例身份拒绝并行动作，启用读取持久化配置，并在等待配置时检查世代有效性。未信任插件不因点击启用而获得批准；管理操作不构成敏感权限授权。
 
-[用户包移除](../apps/desktop/src/main/plugin-removal.ts)只接受宿主登记的用户根目录直接子目录，检查规范路径与目录联接；内置、受保护、越界目录均拒绝。PluginManager先停用并清理贡献，只有明确清理成功才移除代码包；失败保留条目，允许用户明确重试。配置、凭据和插件数据位于其他根目录，卸载不删除它们；移除成功清理信任登记并撤销现有权限。
+[用户包移除](../apps/desktop/src/main/plugin-removal.ts)只接受宿主登记的用户根目录直接子目录，检查规范路径与目录联接；内置、受保护、越界目录均不经此物理删除路径。内置功能由[M2-05登记表](../apps/desktop/src/main/builtin-registry.ts)持久记录逻辑移除与恢复。PluginManager先停用并清理贡献，只有明确清理成功才移除代码包；失败保留条目，允许用户明确重试。配置、凭据和插件数据位于其他根目录，卸载不删除它们；移除成功清理信任登记并撤销现有权限。
 
 ## 管理页
 
-[插件页](../apps/desktop/src/renderer/console/pages/plugins.tsx)按真实生命周期显示动作、来源、版本、保护标记、错误与修复导航。受保护插件不显示停用/卸载，内置包不显示卸载；unready/failed仍可明确停用，pending_restart提示重启完成清理，不再提供启停卸载。权限明细明确是声明而非授权，文件范围与访问模式使用中文，剪贴板只读不会显示成读写。
+[插件页](../apps/desktop/src/renderer/console/pages/plugins.tsx)按真实生命周期显示动作、来源、版本、保护标记、错误与修复导航。受保护插件不显示停用/卸载；未保护的内置功能现支持逻辑移除与显式恢复，修正记录见[M2-05](M2-security.md)；unready/failed仍可明确停用，pending_restart提示重启完成清理，不再提供启停卸载。权限明细明确是声明而非授权，文件范围与访问模式使用中文，剪贴板只读不会显示成读写。
 
 停用和卸载使用宿主Dialog，取消为默认焦点，Escape取消；确认按钮使用既有危险色令牌。请求期间按owner防重复，Schema草稿守卫保留。外层不可用或回包丢失时，复用[快照错误状态](../apps/desktop/src/renderer/console/use-snapshot.ts)持续显示“结果未确认”，收起旧插件操作，用户明确重新读取后恢复，不自动重试或声称回滚。
 

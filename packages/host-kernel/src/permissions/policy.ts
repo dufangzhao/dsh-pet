@@ -3,13 +3,13 @@ import {
   LOCAL_ID_PATTERN,
   HTTPS_ORIGIN_PATTERN,
   type PermissionDeclaration,
+  type PermissionPreset,
 } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 const local = new RegExp(LOCAL_ID_PATTERN),
   capability = new RegExp(CAPABILITY_ID_PATTERN),
   origin = new RegExp(HTTPS_ORIGIN_PATTERN);
-export const PERMISSION_PRESETS = ['ask', 'deny', 'local'] as const;
-export type PermissionPreset = (typeof PERMISSION_PRESETS)[number];
+export { PERMISSION_PRESETS, type PermissionPreset } from '@pet/contracts';
 export function normalizePermission(input: unknown): PermissionDeclaration | null {
   const safe = jsonPreflight(input);
   if (!safe.ok || !safe.value || typeof safe.value !== 'object' || Array.isArray(safe.value))
@@ -124,7 +124,9 @@ export function presetDecision(
   if (preset === 'ask') return 'ask';
   if (permission.kind === 'network') return 'deny';
   return ['capability-use', 'microphone', 'process'].includes(permission.kind) ||
-    (permission.kind === 'files' && permission.scope === 'plugin-data')
+    (permission.kind === 'files' &&
+      (permission.scope === 'plugin-data' ||
+        (permission.scope === 'resources' && permission.access === 'read')))
     ? 'allow'
     : 'ask';
 }

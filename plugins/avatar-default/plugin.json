@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.avatar-default",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "原创简约桌宠"
+  },
+  "description": {
+    "zh-CN": "提供原创SVG角色的启用状态与基本形态"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "default",
+      "capability": "avatar.render@1",
+      "features": {
+        "renderer": "original-minimal-svg"
+      }
+    }
+  ]
+}

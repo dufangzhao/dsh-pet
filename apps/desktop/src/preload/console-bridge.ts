@@ -6,6 +6,7 @@ import {
   type Result,
   type SettingsLauncher,
 } from '@pet/contracts';
+import type { SecurityBridge } from './security-bridge.js';
 function parameterless<T>(invoke: () => Promise<Result<T>>) {
   return async (...args: unknown[]): Promise<Result<T>> => {
     if (args.length) return { ok: false, error: makeError('invalid-input', false) };
@@ -30,6 +31,7 @@ export function createConsoleBridge(
   read: () => Promise<Result<ConsoleSnapshot>>,
   stop: () => Promise<Result<HostStatus>>,
   config: Pick<ConsoleBridge, 'inspectConfig' | 'saveConfig' | 'runPluginAction'>,
+  security: SecurityBridge,
 ): ConsoleBridge {
   return Object.freeze({
     version: 1 as const,
@@ -38,6 +40,7 @@ export function createConsoleBridge(
     inspectConfig: unary(config.inspectConfig),
     saveConfig: unary(config.saveConfig),
     runPluginAction: unary(config.runPluginAction),
+    ...security,
   });
 }
 export function createSettingsLauncher(open: () => Promise<Result<null>>): SettingsLauncher {

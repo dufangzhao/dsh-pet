@@ -1,9 +1,15 @@
 import type {
   AccessMode,
+  AuditEvent,
+  AuditSource,
   ContributionKind,
+  DemoPhase,
+  DemoReplyMode,
   FileScope,
   HostRuntimeState,
   PermissionDeclaration,
+  PermissionKind,
+  PermissionPreset,
   PluginLifecycleState,
 } from '@pet/contracts';
 import type { Tone } from '@pet/ui-kit';
@@ -134,13 +140,13 @@ export function hostSummary(
   if (installedPlugins === 0) {
     switch (runtime) {
       case 'ready':
-        return '宿主已就绪，尚未安装插件。';
+        return '已经就绪，尚未安装插件。';
       case 'starting':
-        return '宿主正在启动，尚未安装插件。';
+        return '正在启动，尚未安装插件。';
       case 'failed':
-        return '宿主启动失败。';
+        return '应用启动失败。';
       case 'stopped':
-        return '宿主已停止。';
+        return '已经停止。';
     }
   }
   const counts = `已安装 ${installedPlugins} 个插件，其中 ${activePlugins} 个运行中。`;
@@ -148,11 +154,11 @@ export function hostSummary(
     case 'ready':
       return counts;
     case 'starting':
-      return `宿主正在启动，状态可能还会变化。${counts}`;
+      return `正在启动，状态可能还会变化。${counts}`;
     case 'failed':
-      return `宿主启动失败。${counts}`;
+      return `应用启动失败。${counts}`;
     case 'stopped':
-      return `宿主已停止。${counts}`;
+      return `已经停止。${counts}`;
   }
 }
 
@@ -172,4 +178,118 @@ export function taskSummary(runningTasks: number, pendingWork: number): string {
     return `${runningTasks} 个任务在运行。`;
   }
   return `${runningTasks} 个任务在运行，共 ${pendingWork} 项工作尚未结束。`;
+}
+
+/* ---- 权限、预设与审计 ---- */
+
+/*
+ * 审计只记 kind，不记声明本身，所以这里要一份短名：
+ * 列表一行里塞不下 describePermission 那种完整句子。
+ */
+const PERMISSION_KIND: Readonly<Record<PermissionKind, string>> = {
+  'capability-use': '能力调用',
+  microphone: '麦克风',
+  'screen-capture': '屏幕截取',
+  'text-input': '键盘输入',
+  network: '网络',
+  credentials: '凭据',
+  files: '文件',
+  process: '工作进程',
+  clipboard: '剪贴板',
+};
+
+export function permissionKind(kind: PermissionKind): string {
+  return PERMISSION_KIND[kind];
+}
+
+const PRESET_LABEL: Readonly<Record<PermissionPreset, string>> = {
+  ask: '每次询问',
+  deny: '全部拒绝',
+  local: '本地放行',
+};
+
+export function presetLabel(preset: PermissionPreset): string {
+  return PRESET_LABEL[preset];
+}
+
+const AUDIT_EVENT: Readonly<Record<AuditEvent, string>> = {
+  requested: '请求',
+  approved: '已同意',
+  denied: '已拒绝',
+  cancelled: '已取消',
+  started: '开始执行',
+  completed: '完成',
+  failed: '失败',
+  closed: '结束',
+  revoked: '已撤回',
+};
+
+export function auditEvent(event: AuditEvent): string {
+  return AUDIT_EVENT[event];
+}
+
+const AUDIT_SOURCE: Readonly<Record<AuditSource, string>> = {
+  preset: '按预设',
+  approval: '按审批',
+  undeclared: '未声明',
+  invalid: '请求无效',
+  stale: '已失效',
+  unavailable: '通道不可用',
+  control: '控制操作',
+};
+
+export function auditSource(source: AuditSource): string {
+  return AUDIT_SOURCE[source];
+}
+
+/** 指纹只用来比对“是不是同一份”，列表里给前 8 位就够；完整值在确认对话框里。 */
+export function shortDigest(digest: string): string {
+  return digest.slice(0, 8);
+}
+
+/* ---- Demo 控制台 ---- */
+
+const DEMO_PHASE: Readonly<Record<DemoPhase, ToneText>> = {
+  setup: { text: '还没准备好', tone: 'warn' },
+  idle: { text: '等待输入', tone: 'neutral' },
+  preparing: { text: '正在准备', tone: 'warn' },
+  arming: { text: '正在开启录音', tone: 'warn' },
+  recording: { text: '正在录音', tone: 'warn' },
+  recognizing: { text: '正在识别', tone: 'warn' },
+  thinking: { text: '正在生成回复', tone: 'warn' },
+  responding: { text: '正在回复', tone: 'warn' },
+  saving: { text: '正在保存记录', tone: 'warn' },
+  stopping: { text: '正在停止', tone: 'warn' },
+  error: { text: '出错', tone: 'danger' },
+};
+
+/** 阶段只翻译，不推测：宿主说 responding 就是正在回复，页面不替它算进度。 */
+export function demoPhase(phase: DemoPhase): ToneText {
+  return DEMO_PHASE[phase];
+}
+
+/** 「离线脚本演示」这几个字是承诺的一部分：它不是 AI，界面不能含糊过去。 */
+const DEMO_REPLY_MODE: Readonly<Record<DemoReplyMode, string>> = {
+  demo: '离线脚本演示（不是 AI）',
+  deepseek: '真实 DeepSeek',
+};
+
+export function demoReplyMode(mode: DemoReplyMode): string {
+  return DEMO_REPLY_MODE[mode];
+}
+
+const DEMO_PLUGIN_STATE: Readonly<Record<PluginLifecycleState | 'missing', ToneText>> = {
+  ...PLUGIN_STATE,
+  missing: { text: '本机没有', tone: 'danger' },
+};
+
+export function demoPluginState(state: PluginLifecycleState | 'missing'): ToneText {
+  return DEMO_PLUGIN_STATE[state];
+}
+
+/** 审计时间只到秒；不用 Intl，避免区域设置影响排序与截图。 */
+export function clockTime(at: number): string {
+  const date = new Date(at);
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }

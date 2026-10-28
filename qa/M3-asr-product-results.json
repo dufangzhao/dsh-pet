@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "reports": [
+    {
+      "modelId": "sensevoice-small-int8",
+      "modelPrepared": true,
+      "audioSeconds": 5.592,
+      "readyMs": 2736.3604,
+      "totalMs": 3006.3211,
+      "characters": 14,
+      "transcriptSha256": "00b0038b0cb4628e0af7bce27e64671a3cac514bfc1158b2c3b3708e20b4adb3",
+      "partialFrames": 1,
+      "finalMatches": true
+    },
+    {
+      "modelId": "streaming-paraformer-zh-en-int8",
+      "modelPrepared": true,
+      "audioSeconds": 10.053125,
+      "readyMs": 1702.7218000000003,
+      "totalMs": 2404.3864000000003,
+      "characters": 51,
+      "transcriptSha256": "e3af85064a8c7926d3b0121c69b8e675ca085ca8fe7c95cd0661b9cc0b04d418",
+      "partialFrames": 13,
+      "finalMatches": true
+    }
+  ],
+  "closed": true
+}

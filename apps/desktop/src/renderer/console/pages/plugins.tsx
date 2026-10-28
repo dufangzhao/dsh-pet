@@ -214,7 +214,8 @@ function PluginRow({
           <Button
             key={action}
             size="small"
-            variant={action === 'uninstall' ? 'danger' : 'secondary'}
+            /* 内置功能的卸载可以恢复，不用危险色把两件事说成同一件。 */
+            variant={action === 'uninstall' && plugin.origin === 'user' ? 'danger' : 'secondary'}
             disabled={busy}
             data-testid={`plugin-${action}-${plugin.owner.pluginId}`}
             onClick={() => onAction(plugin, action)}
@@ -241,9 +242,9 @@ function PluginRow({
 /**
  * 这个状态下能做的动作；顺序就是界面顺序。
  *
- * 两条互不替代的限制，宿主也分别拒绝：
- * - 受保护的内置包不能停用，也不能卸载；
- * - 其余内置包可以停用，但不能卸载（它是应用自身的一部分）。
+ * 只有一条限制：受保护的包既不能停用也不能卸载，宿主也分别拒绝。
+ * 其余内置功能可以卸载——按 ADR-0010 那是“从当前与后续启动中移除”，
+ * 应用代码还在，之后能从权限页恢复；用户插件卸载才会删代码包。
  *
  * 未就绪与失败都同时给启用和停用：未就绪可能只是依赖缺失（运行区还在，
  * 只能靠停用释放），也可能压根没激活起来（要再启用一次）。只给其中一个，
@@ -251,8 +252,7 @@ function PluginRow({
  */
 function actionsFor(plugin: ConsolePlugin): ConsolePluginAction[] {
   const stop: ConsolePluginAction[] = plugin.protected ? [] : ['disable'];
-  const remove: ConsolePluginAction[] =
-    plugin.origin === 'user' && !plugin.protected ? ['uninstall'] : [];
+  const remove: ConsolePluginAction[] = plugin.protected ? [] : ['uninstall'];
   switch (plugin.state) {
     case 'disabled':
       return ['enable', ...remove];
@@ -302,7 +302,7 @@ function PluginRepair({
   if (plugin.state === 'rejected') {
     return (
       <p className="plugin-row__hint">
-        这个插件与当前宿主版本或平台不兼容，无法启用；需要安装兼容的版本。
+        这个插件与当前应用版本或平台不兼容，无法启用；需要安装兼容的版本。
       </p>
     );
   }
@@ -319,7 +319,7 @@ function PluginRepair({
   return (
     <p className="plugin-row__hint">
       {untrusted
-        ? '启用被拒绝：还没有确认这个插件包可信。'
+        ? '启用被拒绝：还没有确认这个插件包可信。确认后可以重试启用。'
         : plugin.state === 'unready'
           ? '没有就绪，可能缺少依赖或配置；可以重试启用，或停用后重新配置。'
           : '启用没有完成，可以重试。'}

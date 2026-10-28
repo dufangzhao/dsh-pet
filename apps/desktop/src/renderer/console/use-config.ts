@@ -25,7 +25,7 @@ const SAVED = {
   unchanged: '已保存，内容没有变化。',
 } as const;
 
-function savedText(mode: ConfigApplyMode | null): string {
+export function savedText(mode: ConfigApplyMode | null): string {
   return mode === null ? SAVED.unchanged : SAVED[mode];
 }
 

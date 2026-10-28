@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.llm-provider",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "DeepSeek 回复服务"
+  },
+  "description": {
+    "zh-CN": "使用独立安全保存的Key，仅向DeepSeek发送文本"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "deepseek",
+      "capability": "llm.chat@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [
+            {
+              "kind": "network",
+              "origins": ["https://api.deepseek.com"]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "credentials",
+      "keys": ["api-key"]
+    },
+    {
+      "kind": "network",
+      "origins": ["https://api.deepseek.com"]
+    }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string",
+          "title": "模型名称",
+          "default": "deepseek-chat",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

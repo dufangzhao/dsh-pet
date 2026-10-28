@@ -1,0 +1,319 @@
+{
+  "status": "passed",
+  "at": "2026-10-28T06:43:42.772Z",
+  "sandboxOverride": true,
+  "checks": [
+    "security-read-is-host-owned-and-other-window-denied",
+    "trust-dialog-review-cancel-and-exact-fingerprint-confirm",
+    "live-plugin-work-waits-for-single-allow-and-cross-page-notice",
+    "explicit-denial-and-replayed-decision-never-runs-work",
+    "task-cancel-removes-pending-decision-and-view",
+    "kernel-timeout-withdraws-request-and-refuses-late-allow",
+    "actual-deny-and-local-presets-match-permission-content",
+    "trust-revocation-stops-owner-and-invalidates-running-lease",
+    "audit-shows-only-metadata-and-real-decisions",
+    "builtin-removal-keeps-packaged-code-and-restore-requires-new-trust",
+    "changed-package-cannot-inherit-reviewed-trust"
+  ],
+  "errors": [],
+  "screenshots": [
+    "qa/screenshots/m2-security/trust-confirm-2026-10-28T06-43-42-771Z.png",
+    "qa/screenshots/m2-security/approval-2026-10-28T06-43-42-771Z.png",
+    "qa/screenshots/m2-security/security-audit-2026-10-28T06-43-42-771Z.png"
+  ],
+  "finalSecurity": {
+    "sessionOnly": true,
+    "availableBuiltins": [],
+    "plugins": [
+      {
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 3
+        },
+        "name": "授权验收插件",
+        "version": "1.0.0",
+        "state": "disabled",
+        "origin": "builtin",
+        "protected": false,
+        "permissions": [
+          {
+            "kind": "capability-use",
+            "capability": "test.echo@1"
+          }
+        ],
+        "digest": "e2702c819067d0a2bb4827fecb53f48abcd9a5e2769546c81f89a03f3ec16098",
+        "trusted": false,
+        "preset": "ask",
+        "blocked": true
+      }
+    ],
+    "pending": []
+  },
+  "audit": {
+    "entries": [
+      {
+        "id": "32eab484-af10-429d-a00f-b407e4fcaef1",
+        "at": 1793169824385,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "08819019-1584-4a6d-afcf-844258f11a63",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "32eab484-af10-429d-a00f-b407e4fcaef1",
+        "at": 1793169824494,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "08819019-1584-4a6d-afcf-844258f11a63",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "approved",
+        "source": "approval"
+      },
+      {
+        "id": "32eab484-af10-429d-a00f-b407e4fcaef1",
+        "at": 1793169824498,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "08819019-1584-4a6d-afcf-844258f11a63",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "closed",
+        "source": "approval"
+      },
+      {
+        "id": "b5b9205b-fcbf-4a1e-b325-c96e4af9ce69",
+        "at": 1793169824508,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "8ff9d865-ac7a-4e72-b131-161ba1e53643",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "b5b9205b-fcbf-4a1e-b325-c96e4af9ce69",
+        "at": 1793169824529,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "8ff9d865-ac7a-4e72-b131-161ba1e53643",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "denied",
+        "source": "approval",
+        "errorCode": "permission-denied"
+      },
+      {
+        "id": "22468444-039c-48d1-870b-b6bf04d4856c",
+        "at": 1793169824543,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "17aad22a-c0af-4b07-b868-2bbecd163814",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "22468444-039c-48d1-870b-b6bf04d4856c",
+        "at": 1793169824551,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "17aad22a-c0af-4b07-b868-2bbecd163814",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "cancelled",
+        "source": "approval",
+        "errorCode": "cancelled"
+      },
+      {
+        "id": "90c11e12-0ab1-4e46-af84-026b74a5c586",
+        "at": 1793169824560,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "055de17f-8c10-49ef-befa-d10b290d4074",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "90c11e12-0ab1-4e46-af84-026b74a5c586",
+        "at": 1793169829570,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "055de17f-8c10-49ef-befa-d10b290d4074",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "denied",
+        "source": "approval",
+        "errorCode": "timeout"
+      },
+      {
+        "id": "a124a473-c87c-4200-b160-8c9a872659e3",
+        "at": 1793169830530,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "68827f8d-e2b9-4da0-a555-19f9ce5b9a8d",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "a124a473-c87c-4200-b160-8c9a872659e3",
+        "at": 1793169830531,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "68827f8d-e2b9-4da0-a555-19f9ce5b9a8d",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "denied",
+        "source": "preset",
+        "errorCode": "permission-denied"
+      },
+      {
+        "id": "482ceae8-8e0d-47eb-a7ba-e703a78c8177",
+        "at": 1793169830559,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "db5c7c20-70e2-4ef9-9bd0-b66cb216faa8",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "482ceae8-8e0d-47eb-a7ba-e703a78c8177",
+        "at": 1793169830559,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "db5c7c20-70e2-4ef9-9bd0-b66cb216faa8",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "approved",
+        "source": "preset"
+      },
+      {
+        "id": "482ceae8-8e0d-47eb-a7ba-e703a78c8177",
+        "at": 1793169830560,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "db5c7c20-70e2-4ef9-9bd0-b66cb216faa8",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "closed",
+        "source": "preset"
+      },
+      {
+        "id": "9e4d187b-b1a7-4983-8a24-daea57f7cc47",
+        "at": 1793169830589,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "c14df3cf-0e66-42f8-9ce7-48c1a4a4e010",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "requested",
+        "source": "control"
+      },
+      {
+        "id": "9e4d187b-b1a7-4983-8a24-daea57f7cc47",
+        "at": 1793169830615,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "c14df3cf-0e66-42f8-9ce7-48c1a4a4e010",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "approved",
+        "source": "approval"
+      },
+      {
+        "id": "9e4d187b-b1a7-4983-8a24-daea57f7cc47",
+        "at": 1793169830680,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "c14df3cf-0e66-42f8-9ce7-48c1a4a4e010",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "revoked",
+        "source": "approval"
+      },
+      {
+        "id": "9e4d187b-b1a7-4983-8a24-daea57f7cc47",
+        "at": 1793169830680,
+        "owner": {
+          "pluginId": "test.security",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "taskId": "c14df3cf-0e66-42f8-9ce7-48c1a4a4e010",
+        "kind": "capability-use",
+        "targetHash": "76b86c110f86a4442669cfe6af1f727ed81a58949b2c3bd3c62465081a0a42b7",
+        "event": "closed",
+        "source": "approval"
+      }
+    ],
+    "total": 18,
+    "dropped": 0
+  },
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

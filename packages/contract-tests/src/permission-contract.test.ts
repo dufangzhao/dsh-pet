@@ -590,12 +590,13 @@ describe('presets (SEC-10, SEC-12)', () => {
     ).toBe(true);
   });
 
-  it('auto-allows declared capability, microphone, worker and plugin-data requests under local', async () => {
+  it('auto-allows declared capability, microphone, worker, plugin-data and readonly resources under local', async () => {
     const permissions: PermissionDeclaration[] = [
       { kind: 'capability-use', capability: 'demo.echo@1' },
       microphone,
       { kind: 'process', workers: ['worker-a'] },
       { kind: 'files', scope: 'plugin-data', access: 'read-write' },
+      { kind: 'files', scope: 'resources', access: 'read' },
     ];
     const approval = recordingApproval();
     const h = setup({ permissions, preset: 'local', approval });
@@ -627,12 +628,11 @@ describe('presets (SEC-10, SEC-12)', () => {
     expect(approval.request).not.toHaveBeenCalled();
   });
 
-  it('still asks for screen capture, text input, clipboard and non-plugin-data files under local', async () => {
+  it('still asks for screen capture, text input, clipboard and user-selected files under local', async () => {
     const permissions: PermissionDeclaration[] = [
       { kind: 'screen-capture' },
       { kind: 'text-input' },
       { kind: 'clipboard', access: 'read' },
-      { kind: 'files', scope: 'resources', access: 'read' },
       { kind: 'files', scope: 'user-selected', access: 'read' },
     ];
     const approval = recordingApproval();
@@ -1207,12 +1207,20 @@ describe('surface isolation', () => {
     ]);
     expect(Object.keys(h.kernel.control).sort()).toEqual([
       'confirmTrust',
+      'inspect',
       'resume',
       'revoke',
       'setPreset',
       'snapshotAudit',
     ]);
-    for (const name of ['confirmTrust', 'setPreset', 'revoke', 'resume', 'snapshotAudit'])
+    for (const name of [
+      'confirmTrust',
+      'inspect',
+      'setPreset',
+      'revoke',
+      'resume',
+      'snapshotAudit',
+    ])
       expect(Object.hasOwn(h.kernel.service, name)).toBe(false);
     expect(Object.isFrozen(h.kernel.service)).toBe(true);
     expect(Object.isFrozen(h.kernel.control)).toBe(true);

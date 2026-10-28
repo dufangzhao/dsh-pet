@@ -1,7 +1,7 @@
 @echo off
 rem ASCII avoids UTF-8 batch prompts being truncated after Electron exits.
 setlocal
-title AI Pet - Preview
+title AI Pet - Demo
 cd /d "%~dp0"
 
 if not exist "node_modules\electron\dist\electron.exe" goto missing-runtime

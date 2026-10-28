@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-27T14:09:57.888Z",
+  "at": "2026-10-28T07:18:56.407Z",
   "bridgeOnly": false,
   "sandboxOverride": true,
   "checks": [
@@ -24,12 +24,12 @@
   ],
   "errors": [],
   "screenshots": [
-    "qa/screenshots/m2-config/first-config-2026-10-27T12-53-32-727Z.png",
-    "qa/screenshots/m2-config/validation-errors-2026-10-27T12-53-32-727Z.png",
-    "qa/screenshots/m2-config/conflict-2026-10-27T12-53-32-727Z.png",
-    "qa/screenshots/m2-config/saved-dark-2026-10-27T12-53-32-727Z.png",
-    "qa/screenshots/m2-config/minimum-size-2026-10-27T12-53-32-727Z.png",
-    "qa/screenshots/m2-config/persisted-config-2026-10-27T12-53-32-727Z.png"
+    "qa/screenshots/m2-config/first-config-2026-10-28T07-18-56-406Z.png",
+    "qa/screenshots/m2-config/validation-errors-2026-10-28T07-18-56-406Z.png",
+    "qa/screenshots/m2-config/conflict-2026-10-28T07-18-56-406Z.png",
+    "qa/screenshots/m2-config/saved-dark-2026-10-28T07-18-56-406Z.png",
+    "qa/screenshots/m2-config/minimum-size-2026-10-28T07-18-56-406Z.png",
+    "qa/screenshots/m2-config/persisted-config-2026-10-28T07-18-56-406Z.png"
   ],
   "themes": [
     {
@@ -54,11 +54,12 @@
     "platform": "win32"
   },
   "artifacts": {
-    "apps/desktop/dist/main/index.mjs": "5fd0b397d29af1043d398f8c1409eef0f9f9bd89efbd0456ee5d1f53c68af09e",
-    "apps/desktop/dist/preload/index.cjs": "2e5e59691f17e1794899874782921398a501a99157d3d4ada4b28d95703f27e8",
-    "apps/desktop/dist/renderer/console/index.html": "f4e58e8df81be5cf25a221c3f8fb69d9baa6ec118df3afcff84f94e684142e07",
-    "apps/desktop/dist/renderer/console/assets/index-BnLmzRgc.css": "eec1e5a87ac44ed0466831d1e22e0302cc21c7ae432538d9ba4cfe0a4b425a71",
-    "apps/desktop/dist/renderer/console/assets/index-DQXlFB8C.js": "c65585890e48c869449c9343c40a8df54b175c6a16839e1a9b991e74abae0f4b"
+    "apps/desktop/dist/main/index.mjs": "6ada8fcd985fd1d3d4e07b54ce54ac4233b0a4855ec8a8a420f25539d76bf206",
+    "apps/desktop/dist/preload/index.cjs": "4e963a1b646b2d8ac04058616f539442e4cc0cafa1526564cd659023030dde28",
+    "apps/desktop/dist/renderer/console/index.html": "8b220f4116e8c3370721469796040347f147327de07e815476f174753531b720",
+    "apps/desktop/dist/renderer/console/assets/capture-worklet-46cQJGH7.js": "8d33d5d8e948a777f72dc129ee800544feda97d856dd589f12acf8c285cb5216",
+    "apps/desktop/dist/renderer/console/assets/index-DDVglkGX.js": "a266230bee4d5d54a802353b5a575750e3b83b844ac63ab9d9625b0b268088c4",
+    "apps/desktop/dist/renderer/console/assets/index-De7cM21O.css": "7c4df750cfecf99d397435134373929eed354936f0c400a676f6d4f6e2c5d44d"
   },
   "saveDiagnostics": {
     "saveCalls": 12,

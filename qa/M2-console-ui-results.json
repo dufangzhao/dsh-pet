@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-27T14:10:02.935Z",
+  "at": "2026-10-28T06:49:54.474Z",
   "sandboxOverride": true,
   "checks": [
     "idle-console-has-no-global-actions",
@@ -45,18 +45,18 @@
   "themes": [
     {
       "theme": "light",
-      "measured": 19,
+      "measured": 54,
       "minimum": 6.016692116437308
     },
     {
       "theme": "dark",
-      "measured": 19,
-      "minimum": 7.702933902594037
+      "measured": 54,
+      "minimum": 5.069804721495689
     },
     {
       "theme": "system",
-      "measured": 19,
-      "minimum": 7.702933902594037
+      "measured": 54,
+      "minimum": 5.069804721495689
     }
   ],
   "runtime": {
@@ -71,7 +71,7 @@
       "host": {
         "version": 1,
         "runtime": "ready",
-        "installedPlugins": 0,
+        "installedPlugins": 5,
         "activePlugins": 0,
         "unreadyPlugins": 0,
         "pendingRestartPlugins": 0,
@@ -86,7 +86,128 @@
         "platform": "win32-x64"
       },
       "contributions": [],
-      "plugins": []
+      "plugins": [
+        {
+          "owner": {
+            "pluginId": "pet.asr-local",
+            "instanceId": "default",
+            "generation": 1
+          },
+          "name": "本地语音识别",
+          "version": "0.1.0",
+          "state": "disabled",
+          "origin": "builtin",
+          "protected": false,
+          "permissions": [
+            {
+              "kind": "files",
+              "scope": "resources",
+              "access": "read"
+            },
+            {
+              "kind": "process",
+              "workers": [
+                "recognizer"
+              ]
+            },
+            {
+              "kind": "capability-use",
+              "capability": "speech.asr@1"
+            }
+          ]
+        },
+        {
+          "owner": {
+            "pluginId": "pet.avatar-default",
+            "instanceId": "default",
+            "generation": 1
+          },
+          "name": "原创简约桌宠",
+          "version": "0.1.0",
+          "state": "disabled",
+          "origin": "builtin",
+          "protected": false,
+          "permissions": []
+        },
+        {
+          "owner": {
+            "pluginId": "pet.chat",
+            "instanceId": "default",
+            "generation": 1
+          },
+          "name": "离线演示回复",
+          "version": "0.1.0",
+          "state": "disabled",
+          "origin": "builtin",
+          "protected": false,
+          "permissions": [
+            {
+              "kind": "capability-use",
+              "capability": "llm.chat@1"
+            }
+          ]
+        },
+        {
+          "owner": {
+            "pluginId": "pet.llm-provider",
+            "instanceId": "default",
+            "generation": 1
+          },
+          "name": "DeepSeek 回复服务",
+          "version": "0.1.0",
+          "state": "disabled",
+          "origin": "builtin",
+          "protected": false,
+          "permissions": [
+            {
+              "kind": "credentials",
+              "keys": [
+                "api-key"
+              ]
+            },
+            {
+              "kind": "network",
+              "origins": [
+                "https://api.deepseek.com"
+              ]
+            }
+          ]
+        },
+        {
+          "owner": {
+            "pluginId": "pet.voice-chat",
+            "instanceId": "default",
+            "generation": 1
+          },
+          "name": "语音与对话",
+          "version": "0.1.0",
+          "state": "disabled",
+          "origin": "builtin",
+          "protected": false,
+          "permissions": [
+            {
+              "kind": "capability-use",
+              "capability": "chat.session@1"
+            },
+            {
+              "kind": "capability-use",
+              "capability": "speech.asr@1"
+            },
+            {
+              "kind": "capability-use",
+              "capability": "llm.chat@1"
+            },
+            {
+              "kind": "microphone"
+            },
+            {
+              "kind": "files",
+              "scope": "plugin-data",
+              "access": "read-write"
+            }
+          ]
+        }
+      ]
     }
   },
   "motion": {
@@ -253,7 +374,7 @@
   "stopAccepted": {
     "stopCalls": 1,
     "held": {
-      "taskId": "145dbb44-ad19-4362-be3b-4f75561a2b98",
+      "taskId": "79b6ad6f-029a-4db4-a8aa-3b74b01e2cd4",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -277,7 +398,7 @@
   "afterSettlement": {
     "stopCalls": 1,
     "held": {
-      "taskId": "145dbb44-ad19-4362-be3b-4f75561a2b98",
+      "taskId": "79b6ad6f-029a-4db4-a8aa-3b74b01e2cd4",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -301,7 +422,7 @@
   "failedStop": {
     "stopCalls": 2,
     "held": {
-      "taskId": "e7041e5f-c9ec-4dbe-a69a-a2466e68af4d",
+      "taskId": "b68bcb28-6eb2-4f97-a99c-e3ba0a2771b8",
       "owner": {
         "pluginId": "test.console-ui-one",
         "instanceId": "default",
@@ -340,11 +461,12 @@
     "forced": false
   },
   "artifacts": {
-    "apps/desktop/dist/main/index.mjs": "5fd0b397d29af1043d398f8c1409eef0f9f9bd89efbd0456ee5d1f53c68af09e",
-    "apps/desktop/dist/preload/index.cjs": "2e5e59691f17e1794899874782921398a501a99157d3d4ada4b28d95703f27e8",
-    "apps/desktop/dist/renderer/console/index.html": "f4e58e8df81be5cf25a221c3f8fb69d9baa6ec118df3afcff84f94e684142e07",
-    "pnpm-lock.yaml": "bb8cd9c475595a4de95679c814388d90e700aa4bda117c20891f42beb25a2258",
-    "apps/desktop/dist/renderer/console/assets/index-BnLmzRgc.css": "eec1e5a87ac44ed0466831d1e22e0302cc21c7ae432538d9ba4cfe0a4b425a71",
-    "apps/desktop/dist/renderer/console/assets/index-DQXlFB8C.js": "c65585890e48c869449c9343c40a8df54b175c6a16839e1a9b991e74abae0f4b"
+    "apps/desktop/dist/main/index.mjs": "e95b8fed59272f28bd94d77f0e5cdc54c78e09c5ce37db1cfb2ed911356e1b7a",
+    "apps/desktop/dist/preload/index.cjs": "4e963a1b646b2d8ac04058616f539442e4cc0cafa1526564cd659023030dde28",
+    "apps/desktop/dist/renderer/console/index.html": "6fad69abd96c640651ceaffb8bbb8c92e2975f7846d754ebfb5540832e61ec2b",
+    "pnpm-lock.yaml": "ac539eb020ca41ad5e92bd5427cef1ea2d8e948fb7ec8e2ecfbfbf911d5aecdf",
+    "apps/desktop/dist/renderer/console/assets/capture-worklet-46cQJGH7.js": "8d33d5d8e948a777f72dc129ee800544feda97d856dd589f12acf8c285cb5216",
+    "apps/desktop/dist/renderer/console/assets/index-BLxQOEf-.js": "7e9cc2e298a724a412447eb93777211e893533b380b4fdc622d84aa304ad0ec6",
+    "apps/desktop/dist/renderer/console/assets/index-De7cM21O.css": "7c4df750cfecf99d397435134373929eed354936f0c400a676f6d4f6e2c5d44d"
   }
 }

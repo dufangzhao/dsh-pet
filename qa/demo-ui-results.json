@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "at": "2026-10-28T07:37:28.049Z",
+  "sandboxOverride": true,
+  "fakeAudioDevice": true,
+  "checks": [
+    "real-app-starts-five-plugins-two-cached-models-and-fixed-bridge",
+    "first-model-choice-is-explicit-and-persists-through-real-config",
+    "reviewed-source-and-explicit-local-preset-enable-real-functions",
+    "real-text-message-scripted-reply-and-live-pet-bubble",
+    "owned-binary-pcm-roundtrip-and-invalid-sample-rejection",
+    "getusermedia-worklet-normalized-f32-native-asr-reply-and-track-release",
+    "browser-microphone-denied-without-live-capture-lease",
+    "pet-stop-cancels-actual-recording-and-releases-tracks",
+    "ask-approvals-across-navigation-preserve-single-capture-and-global-cancel",
+    "twenty-second-limit-ends-once-recognizes-and-releases-hardware",
+    "real-encrypted-key-presence-and-removal-without-any-provider-call",
+    "history-and-model-survive-restart-while-source-trust-remains-session-only",
+    "explicit-clear-removes-real-persisted-history"
+  ],
+  "errors": [],
+  "screenshots": [
+    "qa/screenshots/demo/pet-listening.png",
+    "qa/screenshots/demo/demo-conversation.png",
+    "qa/screenshots/demo/pet-reply.png"
+  ],
+  "voice": {
+    "characters": 14,
+    "replyMode": "demo"
+  },
+  "approvals": 5,
+  "automaticStopMs": 21410,
+  "messagesBeforeRestart": 6
+}

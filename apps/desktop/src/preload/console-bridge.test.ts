@@ -1,5 +1,20 @@
 import { expect, it, vi } from 'vitest';
-import { createConsoleBridge, createSettingsLauncher } from './console-bridge.js';
+import {
+  createConsoleBridge as createFullConsoleBridge,
+  createSettingsLauncher,
+} from './console-bridge.js';
+import { createSecurityBridge } from './security-bridge.js';
+const security = createSecurityBridge(
+  async () => ({ ok: false, error: makeError('not-ready', false) }),
+  () => () => {},
+);
+function createConsoleBridge(
+  read: Parameters<typeof createFullConsoleBridge>[0],
+  stop: Parameters<typeof createFullConsoleBridge>[1],
+  config: Parameters<typeof createFullConsoleBridge>[2],
+) {
+  return createFullConsoleBridge(read, stop, config, security);
+}
 import { makeError, type ConsoleSnapshot, type Result } from '@pet/contracts';
 const config = {
   inspectConfig: vi.fn(async () => ({ ok: false as const, error: makeError('not-ready', false) })),
@@ -36,6 +51,13 @@ it('exposes only the snapshot and stop actions on a frozen bridge', async () => 
     'inspectConfig',
     'saveConfig',
     'runPluginAction',
+    'getSecurity',
+    'setTrust',
+    'setPermissionPreset',
+    'answerApproval',
+    'getAudit',
+    'restoreBuiltin',
+    'onSecurityChanged',
   ]);
   expect(await bridge.getSnapshot()).toEqual({ ok: true, value: snapshot });
   const call = bridge.getSnapshot as (...args: unknown[]) => Promise<Result<ConsoleSnapshot>>;

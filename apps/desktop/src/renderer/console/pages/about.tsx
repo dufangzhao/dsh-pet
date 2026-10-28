@@ -35,7 +35,7 @@ export function AboutPage({
         <div className="console-advanced__body">
           <Section title="技术信息" description="排查问题时使用，平时不必关注。">
             {snapshot === null ? (
-              <p className="console-muted">读取到宿主信息后显示。</p>
+              <p className="console-muted">读取到应用信息后显示。</p>
             ) : (
               <List label="技术信息">
                 <ListItem title="Electron" meta={snapshot.app.electron} />

@@ -1,28 +1,6 @@
-import type { KernelErrorCode, OwnerRef, PermissionKind } from '@pet/contracts';
+import type { AuditEntry } from '@pet/contracts';
 import { freezeJson } from '../runtime/identity.js';
-export type AuditEvent =
-  | 'requested'
-  | 'approved'
-  | 'denied'
-  | 'cancelled'
-  | 'started'
-  | 'completed'
-  | 'failed'
-  | 'closed'
-  | 'revoked';
-export type AuditSource =
-  'preset' | 'approval' | 'undeclared' | 'invalid' | 'stale' | 'unavailable' | 'control';
-export interface AuditEntry {
-  readonly id: string;
-  readonly at: number;
-  readonly owner: OwnerRef;
-  readonly taskId: string;
-  readonly kind: PermissionKind;
-  readonly targetHash: string;
-  readonly event: AuditEvent;
-  readonly source: AuditSource;
-  readonly errorCode?: KernelErrorCode;
-}
+export type { AuditEntry, AuditEvent, AuditSource } from '@pet/contracts';
 /** Metadata only. No file IO and no payload/result fields by design. */
 export class PermissionAudit {
   readonly #entries: AuditEntry[] = [];

@@ -6,18 +6,29 @@ import {
   type TaskSupervisor,
   type DiscoveredPlugin,
   type InstanceIdentity,
+  type ApprovalChannel,
+  verifyDiscoveredPlugin,
 } from '@pet/host-kernel';
-export function createHostPermissions(reference: {
-  manager?: PluginManager;
-  tasks?: TaskSupervisor;
-}) {
-  const catalog = new Map<string, { manifest: PluginManifest; digest: string }>();
+export function createHostPermissions(
+  reference: {
+    manager?: PluginManager;
+    tasks?: TaskSupervisor;
+  },
+  approval?: ApprovalChannel,
+  approvalTimeoutMs?: number,
+) {
+  const catalog = new Map<
+    string,
+    { manifest: PluginManifest; digest: string; candidate: DiscoveredPlugin }
+  >();
   const describe = (owner: OwnerRef) => {
     const snapshot = reference.manager?.get(owner);
     const source = catalog.get(JSON.stringify([owner.pluginId, owner.instanceId]));
     return snapshot && snapshot.owner.generation === owner.generation && source ? source : null;
   };
   const kernel = createPermissionKernel({
+    ...(approval ? { approval } : {}),
+    ...(approvalTimeoutMs !== undefined ? { approvalTimeoutMs } : {}),
     host: {
       fingerprint: (identity) =>
         catalog.get(JSON.stringify([identity.pluginId, identity.instanceId]))?.digest ?? null,
@@ -43,6 +54,7 @@ export function createHostPermissions(reference: {
       catalog.set(JSON.stringify([candidate.manifest.id, instanceId]), {
         manifest: candidate.manifest,
         digest,
+        candidate,
       });
     },
     forget: (identity: InstanceIdentity) => {
@@ -51,6 +63,26 @@ export function createHostPermissions(reference: {
       if (source) kernel.control.confirmTrust(identity, source.digest, false);
       kernel.control.revoke(identity);
       catalog.delete(key);
+    },
+    describeTrust: (owner: OwnerRef) => {
+      const source = describe(owner);
+      return source
+        ? {
+            digest: source.digest,
+            trusted: kernel.service.isTrusted(
+              { pluginId: owner.pluginId, instanceId: owner.instanceId },
+              source.digest,
+            ),
+          }
+        : null;
+    },
+    verifyTrust: async (owner: OwnerRef, expectedDigest: string) => {
+      const source = describe(owner);
+      return (
+        !!source &&
+        source.digest === expectedDigest &&
+        (await verifyDiscoveredPlugin(source.candidate))
+      );
     },
     isTrusted: (owner: OwnerRef) => {
       const source = describe(owner);

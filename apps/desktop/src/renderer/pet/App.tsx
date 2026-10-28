@@ -1,6 +1,9 @@
 /**
  * 桌宠窗口的 React 根组件。
  *
+ * 角色状态与气泡文字来自宿主 Demo（window.petDemo，只读快照 + 停止）；
+ * 没连上或还没读到快照时，沿用窗口原型自己的状态，不伪造真实内容。
+ *
  * 交互约束（对应 qa/M0-06-bridge.md）：
  * - 窗口默认鼠标穿透，只有指针落在角色实际绘制的形状或真实按钮上才 setInteraction(true)。
  *   角色的外接矩形（更别说含气泡的容器）里有大量透明角，不能拿来当命中区。
@@ -36,6 +39,7 @@ import {
   type PointLike,
 } from './hit-regions.js';
 import { readBridge, usePetBridge } from './use-pet-bridge.js';
+import { useDemoStatus } from './use-demo-status.js';
 
 /** 拖拽兜底：与主进程看门狗一致，避免指针事件丢失后卡在拖拽态。 */
 export { RENDERER_DRAG_TIMEOUT_MS } from './drag-controller.js';
@@ -275,6 +279,9 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
     quitFailureNotice: PET_COPY.quitFailed,
   });
   const { setInteraction, beginDrag, endDrag, previewState, quit } = view;
+  // 宿主 Demo 是真实状态来源；没读到快照时沿用窗口原型自己的状态。
+  const demo = useDemoStatus();
+  const state = demo.state ?? view.state;
 
   const avatarRef = useRef<SVGSVGElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -484,21 +491,23 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
     quit();
   }, [quit]);
 
+  const notice = view.notice ?? demo.notice;
+
   return (
     <div
       className="pet-root"
       data-testid="pet-stage"
       data-dragging={dragging ? 'true' : 'false'}
-      data-state={view.state}
+      data-state={state}
     >
       <div className="pet-root__avatar">
         <PetAvatar
-          state={view.state}
+          state={state}
           svgRef={avatarRef}
           onPointerDown={handleAvatarPointerDown}
           onLostPointerCapture={handleLostPointerCapture}
         />
-        <PetBubble state={view.state} />
+        <PetBubble state={state} text={demo.bubble} />
       </div>
 
       <div className="pet-root__panel" ref={panelRef}>
@@ -507,10 +516,11 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
           onPreview={handlePreview}
           onQuit={handleQuit}
           quitDisabled={!view.available}
+          demo={demo}
         />
-        {view.notice !== null ? (
+        {notice !== null ? (
           <p className="pet-root__notice" role="alert" data-testid="pet-notice">
-            {view.notice}
+            {notice}
           </p>
         ) : null}
       </div>

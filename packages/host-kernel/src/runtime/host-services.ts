@@ -7,7 +7,7 @@ import {
 } from '@pet/contracts';
 import type { RpcContext } from '../ipc/control-endpoint.js';
 import type { ConfigService } from '../config/service.js';
-import type { TaskSupervisor } from '../tasks/task-supervisor.js';
+import type { TaskSupervisor, TaskHandle } from '../tasks/task-supervisor.js';
 import { capabilityPermissionAuthorizer } from '../permissions/adapters.js';
 import type { PermissionService } from '../permissions/kernel.js';
 import type { PluginManager } from './plugin-manager.js';
@@ -53,6 +53,12 @@ export interface HostServicesOptions {
   credentials?: CredentialBroker;
   input?: RuntimeHostPort['input'];
   output?: RuntimeHostPort['output'];
+  capabilityTask?: (
+    parentTaskId: string,
+    child: TaskHandle,
+    capability: string,
+    method: string,
+  ) => void;
 }
 /** Main-process adapter only: never passed to plugin code. */
 export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHostPort {
@@ -146,13 +152,20 @@ export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHost
           body['capability'],
           body['method'],
           input.value,
-          capabilityPermissionAuthorizer(options.permissions),
+          capabilityPermissionAuthorizer(options.permissions, options.manager),
           {
             signal: AbortSignal.any([parent, context.signal]),
             timeoutMs: Math.min(context.budgetMs, 30000),
           },
         );
-        return task.ok ? await task.value.result : task;
+        if (!task.ok) return task;
+        try {
+          options.capabilityTask?.(context.taskId, task.value, body['capability'], body['method']);
+        } catch {
+          task.value.cancel();
+          return { ok: false, error: makeError('internal', false) };
+        }
+        return await task.value.result;
       } catch {
         return { ok: false, error: makeError('internal', false) };
       }

@@ -342,6 +342,8 @@ body {
   align-items: flex-start;
   gap: 8px;
   max-width: 300px;
+  /* 气泡只承载文字：不参与命中，指针落在那里也不改变穿透与拖拽判定。 */
+  pointer-events: none;
   padding: 5px 10px;
   border-radius: 14px;
   background: var(--pet-surface);
@@ -372,6 +374,8 @@ body {
 
 .pet-bubble__text {
   margin: 0;
+  /* 真实文本长度不可控：长串要在现有窗口里断开，而不是顶出视口。 */
+  overflow-wrap: anywhere;
 }
 
 /* ---------- 原型面板 ---------- */

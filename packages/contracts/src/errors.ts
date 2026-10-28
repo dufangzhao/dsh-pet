@@ -20,6 +20,14 @@ export const KERNEL_ERROR_CODES = [
   'permission-denied',
   'stale-owner',
   'conflict',
+  'package-changed',
+  'model-missing',
+  'model-integrity',
+  'asr-failed',
+  'no-speech',
+  'microphone-denied',
+  'microphone-missing',
+  'audio-format',
 ] as const;
 
 export type KernelErrorCode = (typeof KERNEL_ERROR_CODES)[number];
@@ -44,6 +52,14 @@ export const ERROR_MESSAGES: Readonly<Record<KernelErrorCode, string>> = Object.
   'permission-denied': '没有获得授权',
   'stale-owner': '插件实例已失效',
   conflict: '配置已被更新，请重新读取后保存',
+  'package-changed': '插件代码包已改变，请重新启动后检查',
+  'model-missing': '本地模型文件缺失，请检查缓存',
+  'model-integrity': '本地模型校验失败，请重新获取固定版本',
+  'asr-failed': '本地识别失败，请重试或重置识别器',
+  'no-speech': '没有识别到语音，请靠近麦克风后重试',
+  'microphone-denied': '麦克风访问被拒绝，请检查系统权限',
+  'microphone-missing': '没有可用的麦克风设备',
+  'audio-format': '录音格式不可用，需要16kHz单声道音频',
 });
 
 /** Whether a code is worth retrying when the caller does not decide explicitly. */
@@ -61,6 +77,14 @@ export const RETRYABLE_BY_DEFAULT: Readonly<Record<KernelErrorCode, boolean>> = 
   'permission-denied': false,
   'stale-owner': false,
   conflict: false,
+  'package-changed': false,
+  'model-missing': false,
+  'model-integrity': false,
+  'asr-failed': false,
+  'no-speech': false,
+  'microphone-denied': false,
+  'microphone-missing': false,
+  'audio-format': false,
 });
 
 export interface KernelError {

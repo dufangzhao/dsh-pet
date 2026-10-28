@@ -1,10 +1,17 @@
-import type { ConsolePlugin, ConsolePluginAction, HostStatus } from '@pet/contracts';
+import type {
+  ConsolePlugin,
+  ConsolePluginAction,
+  ConsoleSecurityChange,
+  HostStatus,
+} from '@pet/contracts';
 import { useCallback, useRef, useState, type CSSProperties, type JSX } from 'react';
 
 import { Button, Dialog, Toast, useToastStore } from '@pet/ui-kit';
 
+import { ApprovalNotice } from './console-approvals.js';
 import { ConsoleNav } from './console-nav.js';
 import { COPY } from './copy.js';
+import { DemoRecorder } from './pages/demo-console.js';
 import { AboutPage } from './pages/about.js';
 import { ModelsPage } from './pages/models.js';
 import { DEFAULT_PAGE, type PageId } from './pages.js';
@@ -16,6 +23,8 @@ import { StartPage } from './pages/start.js';
 import { VoicePage } from './pages/voice.js';
 import { ownerKey } from './labels.js';
 import { actionLabel, usePluginActions } from './use-plugin-actions.js';
+import { useDemo } from './use-demo.js';
+import { useSecurity } from './use-security.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { useStopAll } from './use-stop-all.js';
 import { useTheme } from './use-theme.js';
@@ -29,27 +38,41 @@ const STOP_ALL = {
   accepted: (pendingWork: number): string =>
     pendingWork > 0
       ? `已停止当前任务，还有 ${pendingWork} 项工作正在结束。`
-      : '已停止当前任务，宿主继续运行。',
+      : '已停止当前任务，应用继续运行。',
 } as const;
+
+/** 卸载之后共同的两件事：本机数据还在，信任却不会跟着回来——恢复或重装后仍要重新确认。 */
+const KEPT_AFTER_UNINSTALL =
+  '配置、凭据和数据保留在本机；信任不随卸载保留，恢复或重装后仍要重新确认。';
 
 /**
  * 需要确认的动作。启用是可逆的日常操作，点一下就做；
- * 停用会取消任务并隐藏入口，卸载会删除代码包，两者都必须问一次。
+ * 停用会取消任务并隐藏入口，卸载会改动安装结果，两者都必须问一次。
+ *
+ * 卸载的后果按来源分开说：内置功能只是从当前与后续启动中移除，代码还在，
+ * 能从权限页恢复；用户插件卸载会删掉代码包，不能撤销。同一句话套两种后果就是骗人。
  */
 const CONFIRM: Readonly<
   Record<
     'disable' | 'uninstall',
-    { title: (name: string) => string; body: string; confirm: string }
+    {
+      title: (name: string) => string;
+      body: (plugin: ConsolePlugin) => string;
+      confirm: string;
+    }
   >
 > = {
   disable: {
     title: (name) => `停用 ${name}？`,
-    body: '正在运行的任务会被取消，插件注册的入口会立即消失。配置、凭据和数据都保留在本机。',
+    body: () => '正在运行的任务会被取消，插件注册的入口会立即消失。配置、凭据和数据都保留在本机。',
     confirm: '确认停用',
   },
   uninstall: {
     title: (name) => `卸载 ${name}？`,
-    body: '这会删除插件的代码包，不能撤销。配置、凭据和插件数据保留在本机。再次安装或启用时仍要重新确认信任，之前批准过的不会自动恢复。',
+    body: (plugin) =>
+      plugin.origin === 'builtin'
+        ? `这是应用自带的功能。卸载结果会保存下来：它从当前和后续启动中移除，重启后也不会自己回来；应用代码仍在，之后可以在「权限与数据」里恢复。${KEPT_AFTER_UNINSTALL}`
+        : `这会删除插件的代码包，不能撤销。${KEPT_AFTER_UNINSTALL}`,
     confirm: '确认卸载',
   },
 };
@@ -74,12 +97,46 @@ export function ConsoleApp(): JSX.Element {
   const toasts = useToastStore();
   const { theme, setTheme } = useTheme();
   const snapshotState = useConsoleSnapshot();
+  const securityState = useSecurity();
   const stopAll = useStopAll();
   const pluginActions = usePluginActions({
     applySnapshot: snapshotState.applySnapshot,
     markUncertain: snapshotState.markUncertain,
   });
   const mainRef = useRef<HTMLElement>(null);
+
+  /*
+   * 安全写操作返回两份真实快照：先都采用，再由调用方判断 operationError。
+   * 只应用其中一份会让页面一半新一半旧。
+   */
+  const applySecurityChange = useCallback(
+    (change: ConsoleSecurityChange) => {
+      snapshotState.applySnapshot(change.snapshot);
+      securityState.applySecurity(change.security);
+    },
+    [snapshotState, securityState],
+  );
+
+  /** 结果未确认时两份都可能过期，一起收起，等用户自己重新读取。 */
+  const markUncertainAll = useCallback(() => {
+    snapshotState.markUncertain();
+    securityState.markUncertain();
+  }, [snapshotState, securityState]);
+
+  const notify = useCallback(
+    (message: string, tone: 'ok' | 'danger') => {
+      toasts.push(message, tone);
+    },
+    [toasts],
+  );
+
+  const demoState = useDemo({ notify });
+
+  /** 准备向导走同一条插件动作通道；启用不需要确认框。 */
+  const enablePlugin = useCallback(
+    (plugin: ConsolePlugin) => pluginActions.run(plugin, 'enable'),
+    [pluginActions.run],
+  );
 
   /**
    * 有未保存改动时先挂起目标动作，确认后才执行。
@@ -202,6 +259,19 @@ export function ConsoleApp(): JSX.Element {
 
       {/* 没有全局工具条：每个操作都在使用它的那块数据旁边（见各页）。 */}
       <main className="console-main" id="console-main" ref={mainRef} tabIndex={-1}>
+        {/* 待审批提示停在所有页面上；它只负责导航，答复永远在权限页逐项做。 */}
+        {page === 'permissions' ? null : (
+          <ApprovalNotice
+            count={securityState.security?.pending.length ?? 0}
+            onOpen={() => select('permissions')}
+          />
+        )}
+        {/* 录音会话是全场的：在别的页审批也看得见，也能结束或取消。 */}
+        {demoState.recording === null || page === 'start' || page === 'voice' ? null : (
+          <div className="console-recording">
+            <DemoRecorder demo={demoState} />
+          </div>
+        )}
         {renderPage()}
       </main>
 
@@ -220,7 +290,7 @@ export function ConsoleApp(): JSX.Element {
           </>
         }
       >
-        正在运行的任务会被取消，宿主和插件保持运行。已经完成的工作不会回滚。
+        正在运行的任务会被取消，应用与插件继续运行。已经完成的工作不会回滚。
       </Dialog>
 
       <Dialog
@@ -246,7 +316,7 @@ export function ConsoleApp(): JSX.Element {
           </>
         }
       >
-        {confirmAction === null ? null : CONFIRM[confirmAction.action].body}
+        {confirmAction === null ? null : CONFIRM[confirmAction.action].body(confirmAction.plugin)}
       </Dialog>
 
       <Dialog
@@ -293,6 +363,14 @@ export function ConsoleApp(): JSX.Element {
         return (
           <StartPage
             {...shared}
+            demo={demoState}
+            security={securityState.security}
+            onRefreshSecurity={securityState.refresh}
+            onApplyChange={applySecurityChange}
+            onUncertain={markUncertainAll}
+            notify={notify}
+            onEnable={enablePlugin}
+            onGoTo={select}
             stopping={stopAll.busy}
             onRequestStopAll={() => {
               // 请求进行中重复点击不重复开框。
@@ -305,9 +383,9 @@ export function ConsoleApp(): JSX.Element {
       case 'pet':
         return <PetPage />;
       case 'voice':
-        return <VoicePage />;
+        return <VoicePage demo={demoState} notify={notify} onGoToModels={() => select('models')} />;
       case 'models':
-        return <ModelsPage />;
+        return <ModelsPage demo={demoState} notify={notify} onGoToVoice={() => select('voice')} />;
       case 'plugins':
         return configuring === null ? (
           <PluginsPage
@@ -329,7 +407,25 @@ export function ConsoleApp(): JSX.Element {
           />
         );
       case 'permissions':
-        return <PermissionsPage {...shared} />;
+        /*
+         * 安全快照单独一路：读失败只收起这一页，不牵连插件页。
+         * 写操作的结果未确认时才把两份一起收起。
+         */
+        return (
+          <PermissionsPage
+            security={securityState.security}
+            loading={shared.loading || securityState.loading}
+            error={shared.error ?? securityState.error}
+            available={shared.available}
+            onRetry={() => {
+              snapshotState.refresh();
+              securityState.refresh();
+            }}
+            onApplyChange={applySecurityChange}
+            onUncertain={markUncertainAll}
+            notify={notify}
+          />
+        );
       case 'about':
         return <AboutPage {...shared} />;
     }

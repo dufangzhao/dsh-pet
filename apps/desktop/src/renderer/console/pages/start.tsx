@@ -1,12 +1,22 @@
-import type { ConsoleSnapshot } from '@pet/contracts';
+import type {
+  ConsolePlugin,
+  ConsoleSecurityChange,
+  ConsoleSecuritySnapshot,
+  ConsoleSnapshot,
+} from '@pet/contracts';
 import { useEffect, useRef, type JSX } from 'react';
 
-import { List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
+import { Section, StatusBadge } from '@pet/ui-kit';
 
 import { ConsolePane } from '../console-pane.js';
 import { ConsoleStatus } from '../console-status.js';
 import { COPY } from '../copy.js';
-import { hostSummary, hostRuntime, ownerKey, pluginState, taskSummary } from '../labels.js';
+import { hostSummary, hostRuntime, taskSummary } from '../labels.js';
+import type { PageId } from '../pages.js';
+import type { PluginActionOutcome } from '../use-plugin-actions.js';
+import type { DemoState } from '../use-demo.js';
+import { DemoConsole } from './demo-console.js';
+import { DemoPrep } from './demo-prep.js';
 
 export interface StartPageProps {
   snapshot: ConsoleSnapshot | null;
@@ -17,6 +27,15 @@ export interface StartPageProps {
   /** 打开停止确认框；只有真的存在工作时才会渲染入口。 */
   onRequestStopAll: () => void;
   stopping: boolean;
+  /** Demo 控制台独立一路：它读失败只收起下面两块，不牵连宿主状态行。 */
+  demo: DemoState;
+  security: ConsoleSecuritySnapshot | null;
+  onRefreshSecurity: () => void;
+  onApplyChange: (change: ConsoleSecurityChange) => void;
+  onUncertain: () => void;
+  notify: (message: string, tone: 'ok' | 'danger') => void;
+  onEnable: (plugin: ConsolePlugin) => Promise<PluginActionOutcome>;
+  onGoTo: (page: PageId) => void;
 }
 
 /** 开始页：一句状态、任务行、插件摘要。操作只贴在这两处数据旁。 */
@@ -28,9 +47,17 @@ export function StartPage({
   onRetry,
   onRequestStopAll,
   stopping,
+  demo,
+  security,
+  onRefreshSecurity,
+  onApplyChange,
+  onUncertain,
+  notify,
+  onEnable,
+  onGoTo,
 }: StartPageProps): JSX.Element {
   return (
-    <ConsolePane title="开始">
+    <ConsolePane title="开始" summary="先看准备清单，再在下面的对话里直接试一次。">
       <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
         {snapshot === null ? null : (
           <StartContent
@@ -40,6 +67,28 @@ export function StartPage({
             onRequestStopAll={onRequestStopAll}
             stopping={stopping}
           />
+        )}
+      </ConsoleStatus>
+      <ConsoleStatus
+        loading={demo.loading}
+        error={demo.error}
+        available={demo.available}
+        onRetry={demo.refresh}
+      >
+        {demo.snapshot === null ? null : (
+          <>
+            <DemoPrep
+              demo={demo}
+              security={security}
+              onRefreshSecurity={onRefreshSecurity}
+              onApplyChange={onApplyChange}
+              onUncertain={onUncertain}
+              notify={notify}
+              onEnable={onEnable}
+              onGoTo={onGoTo}
+            />
+            <DemoConsole demo={demo} notify={notify} />
+          </>
         )}
       </ConsoleStatus>
     </ConsolePane>
@@ -64,7 +113,6 @@ function StartContent({
   const { host } = snapshot;
   const runtime = hostRuntime(host.runtime);
   const busy = host.runningTasks > 0 || host.pendingWork > 0;
-  const hasPlugins = snapshot.plugins.length > 0;
   const taskRef = useRef<HTMLDivElement>(null);
   const hadStopRef = useRef(busy);
 
@@ -113,9 +161,8 @@ function StartContent({
           ) : null}
         </div>
       </div>
-
       <Section
-        title="插件"
+        title="运行状态"
         actions={
           <button
             type="button"
@@ -128,33 +175,13 @@ function StartContent({
           </button>
         }
       >
-        {/*
-          只报确切的两个计数。unreadyPlugins 不含 failed，所以任何"均已加载完成"
-          之类的结论都会在存在失败插件时说假话，这里一律不下结论。
-        */}
+        {/* 只报确切的两个计数：存在失败插件时任何"均已加载完成"都是假话。 */}
         {host.unreadyPlugins > 0 || host.pendingRestartPlugins > 0 ? (
           <p className="console-muted">
             {host.unreadyPlugins} 个插件未就绪，{host.pendingRestartPlugins} 个插件需要重启后生效。
           </p>
         ) : null}
-        {hasPlugins ? (
-          <List label="插件状态摘要">
-            {snapshot.plugins.slice(0, 3).map((plugin) => {
-              const state = pluginState(plugin.state);
-              return (
-                <ListItem
-                  key={ownerKey(plugin.owner)}
-                  title={plugin.name}
-                  description={`版本 ${plugin.version}`}
-                  trailing={<StatusBadge tone={state.tone}>{state.text}</StatusBadge>}
-                />
-              );
-            })}
-          </List>
-        ) : (
-          <p className="console-muted">尚未安装任何插件。</p>
-        )}
-      </Section>
+      </Section>{' '}
     </>
   );
 }

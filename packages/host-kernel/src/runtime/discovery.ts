@@ -113,6 +113,16 @@ async function inspectPackage(
   verified.add(value);
   return value;
 }
+/** Rechecks the same discovered code package without evaluating it. */
+export async function verifyDiscoveredPlugin(candidate: DiscoveredPlugin): Promise<boolean> {
+  if (!verified.has(candidate)) return false;
+  try {
+    const current = await inspectPackage(candidate.directory, candidate.origin);
+    return JSON.stringify(current.files) === JSON.stringify(candidate.files);
+  } catch {
+    return false;
+  }
+}
 /** Lists immediate package directories only. No import, install, network or fallback root. */
 export async function discoverPlugins(roots: readonly DiscoveryRoot[]): Promise<DiscoveryReport> {
   const plugins: DiscoveredPlugin[] = [];

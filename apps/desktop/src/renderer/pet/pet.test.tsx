@@ -499,6 +499,71 @@ describe('气泡与原型面板', () => {
     expect(html).toContain(PET_COPY.stateBubbles.thinking);
   });
 
+  it('气泡优先显示宿主给的真实文本', () => {
+    const html = markup(<PetBubble state="listening" text="今天阴天，适合写代码。" />);
+    expect(html).toContain('今天阴天，适合写代码。');
+    expect(html).toContain('role="status"');
+    expect(markup(<PetBubble state="listening" text={null} />)).toContain(
+      PET_COPY.stateBubbles.listening,
+    );
+  });
+
+  it('读到宿主快照时收起模拟按钮，保留停止、设置与退出', () => {
+    const html = markup(
+      <PrototypePanel
+        state="idle"
+        onPreview={() => {}}
+        onQuit={() => {}}
+        quitDisabled={false}
+        demo={{
+          live: true,
+          state: 'listening',
+          bubble: '正在听你说话……',
+          title: PET_COPY.demo.panelTitle,
+          lines: [PET_COPY.demo.phasePrefix + '正在录音'],
+          canStop: true,
+          stopping: false,
+          notice: null,
+          stop: () => {},
+        }}
+      />,
+    );
+    expect(html).not.toContain('data-testid="state-idle"');
+    expect(html).toContain('data-testid="pet-stop"');
+    expect(html).toContain('data-testid="pet-settings"');
+    expect(html).toContain('data-testid="pet-quit"');
+    expect(html).toContain(PET_COPY.demo.panelTitle);
+    // 状态说明带 testid，方便真实窗口验收定位。
+    expect(html).toContain('data-testid="demo-status"');
+  });
+
+  it('没有宿主快照时保留 M0 模拟按钮，不给停止入口', () => {
+    const html = markup(
+      <PrototypePanel
+        state="idle"
+        onPreview={() => {}}
+        onQuit={() => {}}
+        quitDisabled={false}
+        demo={{
+          live: false,
+          state: null,
+          bubble: null,
+          title: PET_COPY.panelTitle,
+          lines: [PET_COPY.simulationNotice, PET_COPY.demo.disconnected],
+          canStop: false,
+          stopping: false,
+          notice: null,
+          stop: () => {},
+        }}
+      />,
+    );
+    for (const candidate of PET_STATE_ORDER) {
+      expect(html).toContain(`data-testid="state-${candidate}"`);
+    }
+    expect(html).not.toContain('data-testid="pet-stop"');
+    expect(html).toContain(PET_COPY.demo.disconnected);
+  });
+
   it('面板提供五个状态按钮、设置与退出入口', () => {
     const html = markup(
       <PrototypePanel state="idle" onPreview={() => {}} onQuit={() => {}} quitDisabled={false} />,

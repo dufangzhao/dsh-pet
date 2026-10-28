@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { makeError, type ConsolePluginChange, type ConsoleSnapshot } from '@pet/contracts';
 
 import { UNCERTAIN } from './copy.js';
-import { actionLabel, isConfirmedRejection, pluginActionOutcome } from './use-plugin-actions.js';
+import { actionLabel, isConfirmedRejection, operationOutcome } from './use-plugin-actions.js';
 
 const snapshot: ConsoleSnapshot = {
   version: 1,
@@ -33,11 +33,11 @@ const change = (operationError: ConsolePluginChange['operationError']): ConsoleP
  */
 describe('插件动作结果', () => {
   it('operationError 为 null 才算达成', () => {
-    expect(pluginActionOutcome(change(null))).toEqual({ ok: true, error: null, unknown: false });
+    expect(operationOutcome(change(null))).toEqual({ ok: true, error: null, unknown: false });
   });
 
   it('operationError 非空时给出固定文案，不当作成功，也不说成未确认', () => {
-    const outcome = pluginActionOutcome(change(makeError('permission-denied', false)));
+    const outcome = operationOutcome(change(makeError('permission-denied', false)));
     expect(outcome).toEqual({ ok: false, error: '没有获得授权', unknown: false });
   });
 

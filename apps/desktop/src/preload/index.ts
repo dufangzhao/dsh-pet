@@ -10,6 +10,9 @@ import {
   type Result,
 } from '@pet/contracts';
 import { createConsoleBridge, createSettingsLauncher } from './console-bridge.js';
+import { createSecurityBridge } from './security-bridge.js';
+import { createDemoBridge } from './demo-bridge.js';
+import { DEMO_IPC } from '@pet/contracts';
 import { createHostStatusBridge } from './host-bridge.js';
 import { PET_IPC, type PetPrototypeBridge, type PetReply, type PetSnapshot } from '@pet/contracts';
 
@@ -53,6 +56,41 @@ contextBridge.exposeInMainWorld(
   'petHost',
   createHostStatusBridge(() => ipcRenderer.invoke(HOST_IPC.status) as Promise<Result<HostStatus>>),
 );
+const demoListeners = new Set<() => void>();
+const receiveDemo = () => {
+  for (const listener of demoListeners) {
+    try {
+      listener();
+    } catch {
+      /* Isolate UI subscribers. */
+    }
+  }
+};
+ipcRenderer.on(DEMO_IPC.changed, receiveDemo);
+contextBridge.exposeInMainWorld(
+  'petDemo',
+  createDemoBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => {
+      if (demoListeners.size >= 32) throw new RangeError('Too many demo subscriptions');
+      demoListeners.add(listener);
+      return () => {
+        demoListeners.delete(listener);
+      };
+    },
+  ),
+);
+const securityListeners = new Set<() => void>();
+const receiveSecurity = () => {
+  for (const listener of securityListeners) {
+    try {
+      listener();
+    } catch {
+      /* Isolate UI subscribers. */
+    }
+  }
+};
+ipcRenderer.on(CONSOLE_IPC.securityChanged, receiveSecurity);
 contextBridge.exposeInMainWorld(
   'petConsole',
   createConsoleBridge(
@@ -68,6 +106,16 @@ contextBridge.exposeInMainWorld(
           Result<ConsolePluginChange>
         >,
     },
+    createSecurityBridge(
+      (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+      (listener) => {
+        if (securityListeners.size >= 32) throw new RangeError('Too many security subscriptions');
+        securityListeners.add(listener);
+        return () => {
+          securityListeners.delete(listener);
+        };
+      },
+    ),
   ),
 );
 contextBridge.exposeInMainWorld(
@@ -78,6 +126,10 @@ window.addEventListener(
   'unload',
   () => {
     listeners.clear();
+    securityListeners.clear();
+    demoListeners.clear();
+    ipcRenderer.removeListener(DEMO_IPC.changed, receiveDemo);
+    ipcRenderer.removeListener(CONSOLE_IPC.securityChanged, receiveSecurity);
     ipcRenderer.removeListener(PET_IPC.changed, receive);
   },
   { once: true },

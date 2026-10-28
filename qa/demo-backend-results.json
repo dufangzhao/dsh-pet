@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "electron": "45.0.0",
+  "node": "24.22.0",
+  "realPlugins": [
+    "pet.asr-local",
+    "pet.chat",
+    "pet.voice-chat",
+    "pet.avatar-default"
+  ],
+  "publicPcmSeconds": 5.592,
+  "voiceCharacters": 14,
+  "replyMode": "demo",
+  "messages": 4,
+  "phases": [
+    "preparing",
+    "recognizing",
+    "saving",
+    "idle",
+    "responding"
+  ],
+  "micLeaseReleased": true,
+  "permissions": {
+    "pending": 0,
+    "leases": 0,
+    "closed": false
+  },
+  "auditRecords": 51,
+  "pendingWork": 0,
+  "shutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  }
+}

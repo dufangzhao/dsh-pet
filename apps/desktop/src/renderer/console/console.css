@@ -710,3 +710,267 @@ body {
   outline: 2px solid var(--pk-ring);
   outline-offset: 1px;
 }
+
+/* ---- 安全与审批 ---- */
+
+/*
+ * 待审批提示贴在滚动区顶部：停在任何页面都看得到，内容从它下面滚过。
+ * 底色不透明，否则滚动时会和下面的文字叠在一起。
+ */
+.console-notice {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 20px;
+  padding: 10px 12px;
+  border: 1px solid var(--pk-warn);
+  border-radius: var(--pk-radius);
+  background: var(--pk-warn-soft);
+  color: var(--pk-warn);
+  font-size: 14px;
+}
+
+.console-notice__text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/*
+ * 待审批队列与插件行同一套分隔线和密度：都是"一个主体 + 说明 + 贴着它的操作"，
+ * 换一套样式只会让同一页里出现两种列表。
+ */
+.approval-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--pk-border);
+}
+
+.approval-row {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.approval-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.approval-row__name {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* 倒计时用等宽数字，秒数变化时不会左右抖动。 */
+.approval-row__deadline {
+  font-size: 12px;
+  color: var(--pk-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.approval-row__permission {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.approval-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 预设：三档纵向排列，说明紧跟在名字后面；原生 radio 保留键盘与读屏。 */
+.preset-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.preset-group__legend {
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.preset-options {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.preset-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.preset-option__radio {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--pk-accent);
+}
+
+.preset-option__radio:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.preset-option__body {
+  display: grid;
+  gap: 2px;
+}
+
+.preset-option__label {
+  font-weight: 600;
+}
+
+.preset-option__text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pk-muted);
+}
+
+/* 信任对话框：指纹要能被完整读出来比对，所以等宽并允许任意处折行。 */
+.package-dialog {
+  display: grid;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.package-dialog p {
+  margin: 0;
+}
+
+.package-dialog__facts {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.package-dialog__facts div {
+  display: flex;
+  gap: 10px;
+}
+
+.package-dialog__facts dt {
+  flex: 0 0 56px;
+  color: var(--pk-muted);
+}
+
+.package-dialog__facts dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.package-dialog__digest {
+  font-family: var(--pk-font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.package-dialog__permissions {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.audit-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+/* ---- Demo 控制台：阶段一行、录音区、输入区与准备向导 ---- */
+
+.demo-phase {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 13px;
+}
+
+/* 中间文本一块一块地回来，给它一个安静、可读的容器。 */
+.demo-transcript {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius);
+  background: var(--pk-surface);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.demo-recorder,
+.demo-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.demo-recorder__actions,
+.demo-compose__actions,
+.demo-check__actions,
+.demo-key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-compose__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.demo-key-state {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+/* 向导里一行就是一次明确决定：勾、名称、完整指纹、声明的权限要能连着读。 */
+.demo-prep__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.demo-prep__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.demo-prep__preset,
+.demo-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  cursor: pointer;
+}

@@ -36,6 +36,27 @@ await bundle({
   target: 'node24',
   sourcemap: true,
 });
+const workspace = path.resolve(root, '../..');
+for (const plugin of ['asr-local', 'chat', 'voice-chat', 'llm-provider', 'avatar-default']) {
+  await bundle({
+    entryPoints: [path.join(workspace, 'plugins', plugin, 'src/index.ts')],
+    outfile: path.join(workspace, 'plugins', plugin, 'dist/index.mjs'),
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node24',
+    external: ['sherpa-onnx-node'],
+  });
+}
+await bundle({
+  entryPoints: [path.join(workspace, 'plugins/asr-local/src/asr-worker.cjs')],
+  outfile: path.join(workspace, 'plugins/asr-local/dist/asr-worker.cjs'),
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node24',
+  external: ['sherpa-onnx-node'],
+});
 for (const renderer of ['pet', 'console']) {
   await buildRenderer({
     configFile: false,

@@ -193,7 +193,7 @@ try {
     await save().click(); await revision(1);
     const first = (await inspect()).value.snapshot;
     assert.deepEqual(first.data, { name: '首次配置', engine: 'sensevoice', options: { enabled: false, threads: 2 }, tags: ['桌宠'], credential: 'asr-key', note: '', ratio: 0, empty: null, version: 'm2' });
-    await expect(page.getByRole('status')).toContainText('重启');
+    await expect(page.locator('.config-banner[role="status"]')).toContainText('重启');
     report.checks.push('client-errors-focus-and-description-without-write', 'unicode-input-and-number-array-validation', 'ui-first-save-creates-revision-one-with-valid-empty-values');
 
     await name().fill('立即改动');
@@ -201,13 +201,13 @@ try {
     await expect(page.getByLabel('备注', { exact: true })).toHaveCount(0);
     await save().click(); await revision(2);
     assert.equal(Object.hasOwn((await inspect()).value.snapshot.data, 'note'), false);
-    await expect(page.getByRole('status')).toContainText('立即');
+    await expect(page.locator('.config-banner[role="status"]')).toContainText('立即');
     await page.getByLabel('识别模型', { exact: true }).selectOption({ label: 'paraformer' });
     await save().click(); await revision(3);
-    await expect(page.getByRole('status')).toContainText('重载');
+    await expect(page.locator('.config-banner[role="status"]')).toContainText('重载');
     await page.getByLabel('词条 1', { exact: true }).fill('新词条');
     await save().click(); await revision(4);
-    await expect(page.getByRole('status')).toContainText('重启');
+    await expect(page.locator('.config-banner[role="status"]')).toContainText('重启');
     assert.equal((await app.evaluate(() => globalThis.m2ConfigQA.diagnostics())).plugins[0].state, 'disabled');
     report.checks.push('optional-unset-is-distinct-from-empty', 'returned-immediate-reload-restart-modes-without-activation');
 

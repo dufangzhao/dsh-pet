@@ -1,8 +1,8 @@
 import type {
   ConsolePlugin,
   ConsolePluginAction,
-  ConsolePluginChange,
   ConsoleSnapshot,
+  KernelError,
   KernelErrorCode,
 } from '@pet/contracts';
 import { useCallback, useRef, useState } from 'react';
@@ -116,7 +116,7 @@ export function usePluginActions({
           return UNCONFIRMED;
         }
         applySnapshot(result.value.snapshot);
-        return pluginActionOutcome(result.value);
+        return operationOutcome(result.value);
       } catch {
         markUncertain();
         return UNCONFIRMED;
@@ -141,9 +141,11 @@ export function usePluginActions({
 /**
  * operationError 非空就是没达成，哪怕快照里的状态已经变了。
  * 这是宿主明确报告的结果，所以不算"未确认"。
- * 单独导出是为了能直接验证这条规则，不必搭 DOM。
+ * 插件动作与安全动作共用这条规则，所以只认 operationError 一个字段。
  */
-export function pluginActionOutcome(change: ConsolePluginChange): PluginActionOutcome {
+export function operationOutcome(change: {
+  readonly operationError: KernelError | null;
+}): PluginActionOutcome {
   return change.operationError === null
     ? { ok: true, error: null, unknown: false }
     : { ok: false, error: describeError(change.operationError), unknown: false };

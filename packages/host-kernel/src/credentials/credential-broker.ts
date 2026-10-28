@@ -185,6 +185,22 @@ export class CredentialBroker {
     this.redactor = dependencies.redactor ?? new SecretRedactor();
   }
 
+  /** Host metadata only: presence is not a successful decryption or service test. */
+  async hasSecret(owner: CredentialNamespace, keyId: string): Promise<boolean> {
+    if (this.#disposed) throw new CredentialError('unavailable');
+    const ns = namespace(owner);
+    if (!localId(keyId)) throw new CredentialError('invalid-input');
+    const read = this.#writes.then(async () => {
+      if (this.#disposed) throw new CredentialError('unavailable');
+      const stored = await this.dependencies.store.read(locator(ns, keyId));
+      return stored !== null;
+    });
+    this.#writes = read.then(
+      () => {},
+      () => {},
+    );
+    return read;
+  }
   async setSecret(owner: CredentialNamespace, keyId: string, secret: string): Promise<void> {
     if (this.#disposed) throw new CredentialError('unavailable');
     const ns = namespace(owner);

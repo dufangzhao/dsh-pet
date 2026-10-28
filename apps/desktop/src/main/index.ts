@@ -15,6 +15,13 @@ import { consoleSnapshot } from './console-snapshot.js';
 import { handleConsoleRequest } from './console-request.js';
 import { handleConsoleConfigRequest } from './console-config-request.js';
 import { ConsolePluginRequests } from './console-plugin-request.js';
+import { ConsoleSecurityRequests } from './console-security-request.js';
+import { DemoController } from './demo-controller.js';
+import { createDemoTray } from './demo-tray.js';
+import { handleDemoRequest, type DemoAction } from './demo-request.js';
+import { demoReadiness } from './demo-readiness.js';
+import { installDemoMediaPermission } from './demo-media-permission.js';
+import { DEMO_IPC, DEMO_PLUGIN_IDS } from '@pet/contracts';
 import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { HostStatusRequests } from './host-request.js';
@@ -26,7 +33,10 @@ const rendererPath = path.resolve(here, '../renderer/pet/index.html');
 const expectedUrl = pathToFileURL(rendererPath).href;
 const consolePath = path.resolve(here, '../renderer/console/index.html');
 const consoleUrl = pathToFileURL(consolePath).href;
-const settings = new ConsoleWindow(consolePath, path.resolve(here, '../preload/index.cjs'));
+const settings = new ConsoleWindow(consolePath, path.resolve(here, '../preload/index.cjs'), () => {
+  host?.approvals.clear();
+  demo?.onConsoleClosed();
+});
 const channels = [
   PET_IPC.snapshot,
   PET_IPC.interaction,
@@ -54,6 +64,8 @@ let window: BrowserWindow | undefined;
 let budgetStart = performance.now();
 let requests = 0;
 let host: DesktopHost | undefined;
+let demo: DemoController | undefined;
+let tray: ReturnType<typeof createDemoTray> | undefined;
 let hostStarting: Promise<DesktopHost> | undefined;
 let quitting = false;
 function quitWithCode(code: number): void {
@@ -67,6 +79,20 @@ function quitWithCode(code: number): void {
   ipcMain.removeHandler(CONSOLE_IPC.inspectConfig);
   ipcMain.removeHandler(CONSOLE_IPC.saveConfig);
   ipcMain.removeHandler(CONSOLE_IPC.pluginAction);
+  for (const channel of Object.values(DEMO_IPC))
+    if (channel !== DEMO_IPC.changed) ipcMain.removeHandler(channel);
+  for (const channel of [
+    CONSOLE_IPC.security,
+    CONSOLE_IPC.trust,
+    CONSOLE_IPC.preset,
+    CONSOLE_IPC.approval,
+    CONSOLE_IPC.audit,
+    CONSOLE_IPC.restoreBuiltin,
+  ])
+    ipcMain.removeHandler(channel);
+  tray?.destroy();
+  tray = undefined;
+  demo?.close();
   settings.close();
   controller?.dispose();
   void (async () => {
@@ -76,16 +102,24 @@ function quitWithCode(code: number): void {
   })().catch(() => app.exit(1));
 }
 if (!app.isPackaged) {
+  const acceptanceFlag = process.argv.find((arg) => arg.startsWith('--demo-acceptance='));
+  if (acceptanceFlag && !/^--demo-acceptance=[A-Za-z0-9-]{1,64}$/.test(acceptanceFlag))
+    throw new Error('Invalid acceptance profile');
+  const acceptanceProfile = acceptanceFlag
+    ? 'pet-demo-acceptance-' + acceptanceFlag.slice('--demo-acceptance='.length)
+    : 'pet-demo-acceptance-profile';
   const profile = path.resolve(
     here,
     '../../../../.cache/',
-    process.argv.includes('--m1-host-smoke')
-      ? 'pet-host-smoke-profile'
-      : process.argv.includes('--m0-key-lab')
-        ? 'pet-key-lab-profile'
-        : process.argv.includes('--m0-mouse-lab')
-          ? 'pet-mouse-lab-profile'
-          : 'pet-prototype-profile',
+    process.argv.includes('--demo-acceptance') || acceptanceFlag !== undefined
+      ? acceptanceProfile
+      : process.argv.includes('--m1-host-smoke')
+        ? 'pet-host-smoke-profile'
+        : process.argv.includes('--m0-key-lab')
+          ? 'pet-key-lab-profile'
+          : process.argv.includes('--m0-mouse-lab')
+            ? 'pet-mouse-lab-profile'
+            : 'pet-prototype-profile',
   );
   mkdirSync(profile, { recursive: true });
   app.setPath('userData', profile);
@@ -104,7 +138,34 @@ const startup = app
     } catch {
       // No approved encryption backend: leave credentials unavailable, never use plaintext.
     }
+    const modelRoot = path.resolve(here, '../../../../.cache/asr-models');
+    const syncAvatar = () => {
+      if (!window || window.isDestroyed()) return;
+      const avatar = host?.manager.get({ pluginId: DEMO_PLUGIN_IDS.avatar, instanceId: 'default' });
+      const enabled =
+        !!avatar && avatar.origin === 'builtin' && host!.manager.isActive(avatar.owner);
+      if (enabled && !window.isVisible()) window.showInactive();
+      if (!enabled && window.isVisible()) window.hide();
+    };
+    const notifyDemo = () => {
+      syncAvatar();
+      for (const target of [window, settings.current])
+        if (target && !target.isDestroyed()) target.webContents.send(DEMO_IPC.changed);
+    };
     hostStarting = DesktopHost.create({
+      adapters: demoReadiness(modelRoot),
+      media: {
+        input: (reference, writer) => {
+          if (demo) demo.input(reference, writer);
+          else writer.cancel();
+        },
+        output: (reference, reader) => {
+          if (demo) demo.output(reference, reader);
+          else reader.cancel();
+        },
+        capabilityTask: (parent, child, capability, method) =>
+          demo?.capabilityTask(parent, child, capability, method),
+      },
       ...(cipher ? { cipher } : {}),
       executable: process.execPath,
       workerEntry: path.resolve(here, '../runtime/worker.cjs'),
@@ -118,6 +179,36 @@ const startup = app
       await host.shutdown();
       return;
     }
+    demo = await DemoController.create(host!, modelRoot, notifyDemo);
+    installDemoMediaPermission(session.defaultSession, settings, consoleUrl, demo);
+    const acceptanceTrace: Array<Record<string, unknown>> | undefined = process.argv.some(
+      (arg) => arg === '--demo-acceptance' || arg.startsWith('--demo-acceptance='),
+    )
+      ? []
+      : undefined;
+    if (acceptanceTrace)
+      Object.assign(globalThis, { petDemoAcceptance: { events: acceptanceTrace } });
+    for (const [action, channel] of Object.entries(DEMO_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, async (event, ...args: unknown[]) => {
+          const consoleSource = windowSource(event, settings.current, consoleUrl);
+          const source = isTrustedPetSource(consoleSource)
+            ? { ...consoleSource, role: 'console' as const }
+            : { ...windowSource(event, window, expectedUrl), role: 'pet' as const };
+          const result = await handleDemoRequest(source, action as DemoAction, args, demo!);
+          if (acceptanceTrace && action !== 'snapshot' && (action !== 'pcm' || !result.ok)) {
+            const body = args[0] as Record<string, unknown> | undefined;
+            acceptanceTrace.push({
+              at: Date.now(),
+              action,
+              role: source.role,
+              code: result.ok ? null : result.error.code,
+              ...(action === 'captureError' ? { reason: body?.['reason'] } : {}),
+            });
+            if (acceptanceTrace.length > 64) acceptanceTrace.shift();
+          }
+          return result;
+        });
     const hostRequests = new HostStatusRequests(() => host!.status());
     ipcMain.handle(HOST_IPC.status, (event, ...args: unknown[]) => {
       try {
@@ -160,27 +251,61 @@ const startup = app
     ipcMain.handle(CONSOLE_IPC.snapshot, (event, ...args: unknown[]) =>
       handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, snapshot),
     );
+    const notifySecurity = () => {
+      const target = settings.current;
+      if (target && !target.isDestroyed()) target.webContents.send(CONSOLE_IPC.securityChanged);
+      notifyDemo();
+    };
+    const securityRequests = new ConsoleSecurityRequests(host!, snapshot, notifySecurity);
+    for (const [channel, action] of [
+      [CONSOLE_IPC.security, 'get'],
+      [CONSOLE_IPC.trust, 'trust'],
+      [CONSOLE_IPC.preset, 'preset'],
+      [CONSOLE_IPC.approval, 'approval'],
+      [CONSOLE_IPC.audit, 'audit'],
+      [CONSOLE_IPC.restoreBuiltin, 'restore'],
+    ] as const)
+      ipcMain.handle(channel, (event, ...args: unknown[]) =>
+        securityRequests.handle(windowSource(event, settings.current, consoleUrl), action, args),
+      );
+    host!.approvals.subscribe(() => {
+      if (host!.approvals.snapshot().length)
+        void settings
+          .open()
+          .then(notifySecurity)
+          .catch(() => host!.approvals.clear());
+      else notifySecurity();
+    });
     const pluginRequests = new ConsolePluginRequests(host!, snapshot);
-    ipcMain.handle(CONSOLE_IPC.pluginAction, (event, ...args: unknown[]) =>
-      pluginRequests.handle(windowSource(event, settings.current, consoleUrl), args),
-    );
+    ipcMain.handle(CONSOLE_IPC.pluginAction, async (event, ...args: unknown[]) => {
+      const result = await pluginRequests.handle(
+        windowSource(event, settings.current, consoleUrl),
+        args,
+      );
+      if (result.ok) notifySecurity();
+      return result;
+    });
     ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
-      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () =>
-        host!.stopAll(),
-      ),
+      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () => {
+        const status = host!.stopAll();
+        demo?.onAllStopped();
+        return status;
+      }),
     );
     for (const [channel, action] of [
       [CONSOLE_IPC.inspectConfig, 'inspect'],
       [CONSOLE_IPC.saveConfig, 'save'],
     ] as const)
-      ipcMain.handle(channel, (event, ...args: unknown[]) =>
-        handleConsoleConfigRequest(
+      ipcMain.handle(channel, async (event, ...args: unknown[]) => {
+        const result = await handleConsoleConfigRequest(
           windowSource(event, settings.current, consoleUrl),
           action,
           args,
           host!,
-        ),
-      );
+        );
+        if (action === 'save' && result.ok) notifyDemo();
+        return result;
+      });
     for (const channel of channels)
       ipcMain.handle(channel, (event, ...args: unknown[]) => {
         try {
@@ -226,6 +351,20 @@ const startup = app
     });
     if (!(controller.window instanceof BrowserWindow)) throw new Error('Invalid window controller');
     window = controller.window;
+    syncAvatar();
+    tray = createDemoTray({
+      showPet: () => {
+        syncAvatar();
+        if (!window?.isVisible()) showSettingsForLaunch();
+      },
+      showSettings: showSettingsForLaunch,
+      stop: () => {
+        host?.stopAll();
+        demo?.onAllStopped();
+        notifySecurity();
+      },
+      quit: () => app.quit(),
+    });
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event) => event.preventDefault());
     window.webContents.on('will-redirect', (event) => event.preventDefault());

@@ -4,6 +4,7 @@ export class ConsoleWindow {
   constructor(
     private readonly entry: string,
     private readonly preload: string,
+    private readonly onClosed: () => void = () => {},
   ) {}
   get current(): BrowserWindow | undefined {
     return this.#window;
@@ -39,6 +40,7 @@ export class ConsoleWindow {
     window.webContents.on('will-attach-webview', (event) => event.preventDefault());
     window.once('closed', () => {
       this.#window = undefined;
+      this.onClosed();
     });
     window.once('ready-to-show', () => {
       window.show();

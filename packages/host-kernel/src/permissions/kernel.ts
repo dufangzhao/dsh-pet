@@ -88,6 +88,9 @@ export interface PermissionControl {
   setPreset(identity: InstanceIdentity, preset: PermissionPreset): boolean;
   revoke(identity: InstanceIdentity): boolean;
   resume(identity: InstanceIdentity): boolean;
+  inspect(
+    identity: InstanceIdentity,
+  ): { preset: PermissionPreset; blocked: boolean; epoch: number } | null;
   snapshotAudit(offset?: number, limit?: number): ReturnType<PermissionAudit['snapshot']>;
 }
 interface Policy {
@@ -199,6 +202,10 @@ class PermissionEngine {
         this.invalidate(id);
         this.policy(id).blocked = false;
         return true;
+      },
+      inspect: (identity: InstanceIdentity) => {
+        const id = configIdentity(identity);
+        return !this.#closed && id ? Object.freeze({ ...this.policy(id) }) : null;
       },
       snapshotAudit: (offset?: number, limit?: number) => this.#audit.snapshot(offset, limit),
     });

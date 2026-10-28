@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.asr-local",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "本地语音识别"
+  },
+  "description": {
+    "zh-CN": "使用已缓存的SenseVoice或Paraformer，在本机处理录音"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs",
+    "workers": {
+      "recognizer": "dist/asr-worker.cjs"
+    }
+  },
+  "provides": [
+    {
+      "id": "local",
+      "capability": "speech.asr@1",
+      "features": {
+        "methodPermissions": {
+          "prepare": [
+            {
+              "kind": "files",
+              "scope": "resources",
+              "access": "read"
+            },
+            {
+              "kind": "process",
+              "workers": ["recognizer"]
+            }
+          ],
+          "transcribe": [
+            {
+              "kind": "capability-use",
+              "capability": "speech.asr@1"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "files",
+      "scope": "resources",
+      "access": "read"
+    },
+    {
+      "kind": "process",
+      "workers": ["recognizer"]
+    },
+    {
+      "kind": "capability-use",
+      "capability": "speech.asr@1"
+    }
+  ],
+  "resources": [
+    {
+      "id": "sensevoice-model",
+      "url": "https://modelscope.cn/models/pengzhendong/sherpa-onnx-sense-voice-zh-en-ja-ko-yue/resolve/73eca47697f980daa3d16112404174b6b950b514/model.int8.onnx",
+      "bytes": 239233841,
+      "sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51",
+      "license": "SenseVoice / FunASR MODEL_LICENSE",
+      "shared": true
+    },
+    {
+      "id": "paraformer-encoder",
+      "url": "https://modelscope.cn/models/pengzhendong/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/c9d662eca7ca87765078148501659faa24e842ed/encoder.int8.onnx",
+      "bytes": 165462184,
+      "sha256": "81a70226a8934e6ed92aa1d4fc486b428b5398e2f2619ed4897b7294cab90e9a",
+      "license": "upstream model terms",
+      "shared": true
+    },
+    {
+      "id": "paraformer-decoder",
+      "url": "https://modelscope.cn/models/pengzhendong/sherpa-onnx-streaming-paraformer-bilingual-zh-en/resolve/c9d662eca7ca87765078148501659faa24e842ed/decoder.int8.onnx",
+      "bytes": 71664561,
+      "sha256": "f3cca9f77bb9d93c8fcbfb63ae617b6b1ee96818df3aa3b151c40658fe38594f",
+      "license": "upstream model terms",
+      "shared": true
+    }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "title": "本地模型",
+          "enum": ["sensevoice-small-int8", "streaming-paraformer-zh-en-int8"]
+        }
+      }
+    },
+    "apply": {
+      "model": "immediate"
+    }
+  }
+}

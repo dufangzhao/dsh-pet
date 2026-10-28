@@ -1,8 +1,10 @@
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { createHostPermissions } from './host-permissions.js';
-import { checkHostReadiness } from './host-readiness.js';
+import { checkHostReadiness, type HostAdapterAvailability } from './host-readiness.js';
 import { removeUserPlugin } from './plugin-removal.js';
+import { ApprovalInbox } from './approval-inbox.js';
+import { BuiltinRegistry } from './builtin-registry.js';
 import type { PermissionService, PermissionControl } from '@pet/host-kernel';
 import {
   RemoteRuntimeDriver,
@@ -15,13 +17,19 @@ import {
   PluginDataDirectories,
   createRuntimeHostPort,
   type RuntimeHostPort,
+  type HostServicesOptions,
   CredentialBroker,
   FileCiphertextStore,
   SecretRedactor,
   credentialPermissionAuthorizer,
   type SecretCipher,
 } from '@pet/host-kernel';
-import { makeError, type HostStatus } from '@pet/contracts';
+import {
+  makeError,
+  type HostStatus,
+  type ConsoleBuiltinPackage,
+  type Result,
+} from '@pet/contracts';
 export class DesktopHost {
   readonly manager: PluginManager;
   readonly tasks: TaskSupervisor;
@@ -30,6 +38,11 @@ export class DesktopHost {
   readonly dataDirectories: PluginDataDirectories;
   readonly permissions: PermissionService;
   readonly permissionControl: PermissionControl;
+  readonly approvals: ApprovalInbox;
+  readonly builtins: BuiltinRegistry;
+  readonly registerSource: ReturnType<typeof createHostPermissions>['register'];
+  readonly describeTrust: ReturnType<typeof createHostPermissions>['describeTrust'];
+  readonly verifyTrust: ReturnType<typeof createHostPermissions>['verifyTrust'];
   readonly credentials: CredentialBroker | undefined;
   #closing: Promise<{ exitConfirmed: boolean; forced: boolean }> | undefined;
   private constructor(
@@ -40,6 +53,9 @@ export class DesktopHost {
     permissions: PermissionService,
     permissionControl: PermissionControl,
     tasks: TaskSupervisor,
+    approval: ApprovalInbox,
+    builtins: BuiltinRegistry,
+    source: ReturnType<typeof createHostPermissions>,
     credentials?: CredentialBroker,
   ) {
     this.driver = driver;
@@ -49,6 +65,11 @@ export class DesktopHost {
     this.tasks = tasks;
     this.permissions = permissions;
     this.permissionControl = permissionControl;
+    this.approvals = approval;
+    this.builtins = builtins;
+    this.registerSource = source.register;
+    this.describeTrust = source.describeTrust;
+    this.verifyTrust = source.verifyTrust;
     this.credentials = credentials;
   }
   static async create(options: {
@@ -58,6 +79,9 @@ export class DesktopHost {
     userDirectory: string;
     cipher?: SecretCipher;
     protectedPackages?: Readonly<Record<string, string>>;
+    approvalTimeoutMs?: number;
+    adapters?: HostAdapterAvailability;
+    media?: Pick<HostServicesOptions, 'input' | 'output' | 'capabilityTask'>;
   }): Promise<DesktopHost> {
     await mkdir(options.userDirectory, { recursive: true });
     const roots: DiscoveryRoot[] = [
@@ -75,7 +99,9 @@ export class DesktopHost {
       tasks?: TaskSupervisor;
       hostPort?: RuntimeHostPort;
     } = {};
-    const permission = createHostPermissions(reference);
+    const builtins = await BuiltinRegistry.create(path.dirname(options.userDirectory));
+    const approval = new ApprovalInbox(options.approvalTimeoutMs ?? 30000);
+    const permission = createHostPermissions(reference, approval, options.approvalTimeoutMs);
     const credentials = options.cipher
       ? new CredentialBroker({
           cipher: options.cipher,
@@ -95,6 +121,22 @@ export class DesktopHost {
         useCredential: (...args) =>
           reference.hostPort?.useCredential?.(...args) ??
           Promise.resolve({ ok: false, error: makeError('not-ready', false) }),
+        ...(options.media?.input
+          ? {
+              input: (ref, writer) => {
+                if (reference.hostPort?.input) reference.hostPort.input(ref, writer);
+                else writer.cancel();
+              },
+            }
+          : {}),
+        ...(options.media?.output
+          ? {
+              output: (ref, reader) => {
+                if (reference.hostPort?.output) reference.hostPort.output(ref, reader);
+                else reader.cancel();
+              },
+            }
+          : {}),
         signalFor: (owner, taskId) => reference.hostPort?.signalFor(owner, taskId) ?? null,
         request: (owner, action, payload, context) =>
           reference.hostPort?.request(owner, action, payload, context) ??
@@ -116,7 +158,11 @@ export class DesktopHost {
       hostApiVersion: '1.0.0',
       platform: 'win32-x64',
       removeInstallation: async (snapshot, installation) => {
-        if (!(await removeUserPlugin(options.userDirectory, snapshot, installation))) return false;
+        const removed =
+          installation.origin === 'builtin'
+            ? await builtins.mark(snapshot.owner.pluginId, true)
+            : await removeUserPlugin(options.userDirectory, snapshot, installation);
+        if (!removed) return false;
         permission.forget({
           pluginId: snapshot.owner.pluginId,
           instanceId: snapshot.owner.instanceId,
@@ -130,6 +176,7 @@ export class DesktopHost {
           candidate,
           configs,
           credentials !== undefined,
+          options.adapters,
         ),
     });
     reference.manager = manager;
@@ -140,6 +187,7 @@ export class DesktopHost {
       tasks,
       configs,
       permissions: permission.service,
+      ...options.media,
       ...(credentials ? { credentials } : {}),
     });
     const host = new DesktopHost(
@@ -150,11 +198,19 @@ export class DesktopHost {
       permission.service,
       permission.control,
       tasks,
+      approval,
+      builtins,
+      permission,
       credentials,
     );
     try {
       const discovered = await discoverPlugins(roots);
       for (const candidate of discovered.plugins) {
+        const protectedPackage =
+          candidate.origin === 'builtin' &&
+          options.protectedPackages?.[candidate.manifest.id] !== undefined;
+        builtins.register(candidate, protectedPackage);
+        if (candidate.origin === 'builtin' && builtins.removed(candidate.manifest.id)) continue;
         const installed = manager.install(candidate.manifest, {
           directory: candidate.directory,
           origin: candidate.origin,
@@ -171,6 +227,30 @@ export class DesktopHost {
       await host.shutdown();
       throw new Error('Host initialization failed');
     }
+  }
+  availableBuiltins(): readonly ConsoleBuiltinPackage[] {
+    return this.builtins
+      .available()
+      .filter((pkg) => !this.manager.get({ pluginId: pkg.pluginId, instanceId: 'default' }));
+  }
+  async restoreBuiltin(pluginId: string, expectedDigest: string): Promise<Result<null>> {
+    const identity = { pluginId, instanceId: 'default' };
+    if (this.manager.get(identity)) return { ok: false, error: makeError('conflict', false) };
+    const candidate = await this.builtins.verified(pluginId, expectedDigest);
+    if (!candidate) return { ok: false, error: makeError('package-changed', false) };
+    if (!(await this.builtins.mark(pluginId, false)))
+      return { ok: false, error: makeError('unavailable', false) };
+    const installed = this.manager.install(candidate.manifest, {
+      directory: candidate.directory,
+      origin: 'builtin',
+    });
+    if (!installed.ok) return installed;
+    if (installed.value.state !== 'rejected') {
+      this.configs.register(identity, candidate.manifest);
+      this.registerSource(candidate);
+      await this.configs.initialize(identity);
+    }
+    return { ok: true, value: null };
   }
   status(): HostStatus {
     const plugins = this.manager.list();
@@ -197,6 +277,7 @@ export class DesktopHost {
     this.tasks.shutdown();
     this.configs.close();
     this.permissions.close();
+    this.approvals.close();
     this.credentials?.dispose();
     await this.manager.shutdown();
     const stopped = await this.driver.dispose();

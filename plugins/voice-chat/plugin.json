@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.voice-chat",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "语音与对话"
+  },
+  "description": {
+    "zh-CN": "编排本机录音识别、文本与所选回复服务"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "voice",
+      "capability": "chat.session@1"
+    }
+  ],
+  "consumes": [
+    {
+      "capability": "chat.session@1",
+      "optional": true
+    },
+    {
+      "capability": "speech.asr@1",
+      "optional": true
+    },
+    {
+      "capability": "llm.chat@1",
+      "optional": true
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "capability-use",
+      "capability": "chat.session@1"
+    },
+    {
+      "kind": "capability-use",
+      "capability": "speech.asr@1"
+    },
+    {
+      "kind": "capability-use",
+      "capability": "llm.chat@1"
+    },
+    {
+      "kind": "microphone"
+    },
+    {
+      "kind": "files",
+      "scope": "plugin-data",
+      "access": "read-write"
+    }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "title": "回复方式",
+          "enum": ["demo", "deepseek"],
+          "default": "demo"
+        },
+        "autoSend": {
+          "type": "boolean",
+          "title": "识别完成后发送",
+          "default": true
+        }
+      }
+    },
+    "apply": {
+      "mode": "immediate",
+      "autoSend": "immediate"
+    }
+  }
+}

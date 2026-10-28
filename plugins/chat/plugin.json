@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.chat",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "离线演示回复"
+  },
+  "description": {
+    "zh-CN": "只运行明确标注的本地脚本，不调用AI或网络"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "demo",
+      "capability": "llm.chat@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [
+            {
+              "kind": "capability-use",
+              "capability": "llm.chat@1"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "capability-use",
+      "capability": "llm.chat@1"
+    }
+  ]
+}
