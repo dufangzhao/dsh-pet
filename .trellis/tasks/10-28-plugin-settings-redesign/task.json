@@ -1,0 +1,32 @@
+{
+  "id": "plugin-settings-redesign",
+  "name": "plugin-settings-redesign",
+  "title": "Pet-first settings and Cortico integration",
+  "description": "Unify daily pet interactions and application guidance, move full prompts to Persona, and reuse pinned MIT Cortico Core/public page contracts with owned Electron services.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "console",
+  "package": null,
+  "priority": "P2",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-10-28",
+  "completedAt": null,
+  "branch": "feat/plugin-settings-cortico",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Approved by the user: proceed with the revised pet-first Cortico plan, retaining the DSH-style unified plugin host so the pet can evolve through plugins. Cortico is a replaceable agent implementation; main owns backend, DeepSeek max owns frontend.",
+  "meta": {
+    "reviewGate": {
+      "state": "approved",
+      "userInstruction": "同意，整个架构还是采用dsh的这种插件形式，方便桌宠自我迭代",
+      "architecture": "DSH-style unified plugin host; Cortico supplied as the replaceable agent-runtime plugin"
+    }
+  }
+}

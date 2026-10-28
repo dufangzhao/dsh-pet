@@ -1,0 +1,150 @@
+{
+  "checkedAt": "2026-10-28T10:08:20.799Z",
+  "registry": "https://registry.npmjs.org/cortico/0.2.7",
+  "package": "cortico",
+  "version": "0.2.7",
+  "license": "MIT",
+  "gitHead": "cb9ddbd685bcccba1f29905098648f46a79b3862",
+  "exports": {
+    "./*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "tarball": "https://registry.npmjs.org/cortico/-/cortico-0.2.7.tgz",
+  "integrity": "sha512-/kTJ4S0/rXtDf7I/y08FkrA1V4yoMIuoqtbVFoJzPQyAJUHC64kYfsHWjj2+VZd+t8FCb1O4umtKNTPXBHtepQ==",
+  "unpackedSize": 6176556,
+  "fileCount": 622,
+  "metadataSource": "https://unpkg.com/cortico@0.2.7/?meta",
+  "verifiedEntryFiles": [
+    {
+      "path": "/LICENSE",
+      "size": 1066,
+      "type": "text/plain",
+      "integrity": "sha256-uLLSqjskfNCGKxnfIDBUWFkiOTSlytcyH+bsl+rqcl0="
+    },
+    {
+      "path": "/package.json",
+      "size": 1099,
+      "type": "application/json",
+      "integrity": "sha256-6Du23MgDLzCOrgisgkNek6lt3X36EnEvamKcolDscAk="
+    },
+    {
+      "path": "/src/web/shared/client-panel.ts",
+      "size": 24442,
+      "type": "text/typescript",
+      "integrity": "sha256-tbKfe9OGYADI+mGsrFc4hLyhhEhXHEnF3FmW2yGpTLY="
+    },
+    {
+      "path": "/src/core/core.ts",
+      "size": 30448,
+      "type": "text/typescript",
+      "integrity": "sha256-hIXoeTXTWD9etXKPhVrYDeeBSUTggYtaLdk8D7UM118="
+    },
+    {
+      "path": "/src/core/event-store.ts",
+      "size": 13454,
+      "type": "text/typescript",
+      "integrity": "sha256-t6EuF0BIIC8lW9NGZA4SrRWNBl1GxqbCZeJLRuAEG9w="
+    },
+    {
+      "path": "/src/core/generation.ts",
+      "size": 8777,
+      "type": "text/typescript",
+      "integrity": "sha256-rCGZ83/7t8FyrzW7AKyzNOkDvekI3cGH6eAacvsvEK4="
+    },
+    {
+      "path": "/src/core/loop.ts",
+      "size": 94510,
+      "type": "text/typescript",
+      "integrity": "sha256-II6yTRg2xDvDpdvtQchf80BZFZqULXgt0Dbc1t7gbwI="
+    },
+    {
+      "path": "/src/providers/registry.ts",
+      "size": 6522,
+      "type": "text/typescript",
+      "integrity": "sha256-2TOaFRSL0gB14ACwaXHzlrXmEPss4WskArn/hoy+bGg="
+    },
+    {
+      "path": "/src/core/transcript.ts",
+      "size": 2505,
+      "type": "text/typescript",
+      "integrity": "sha256-wfn2VuLA5tPWcnTvgz4/873o75zcW4vvvKXoS0fi8Ds="
+    },
+    {
+      "path": "/src/core/types.ts",
+      "size": 50314,
+      "type": "text/typescript",
+      "integrity": "sha256-z4A5R9f92fZi97izHpbT4O0Zd6OSDp9spxa2K6FoEGE="
+    },
+    {
+      "path": "/src/web/shared/webui-protocol.ts",
+      "size": 23529,
+      "type": "text/typescript",
+      "integrity": "sha256-EhTBLypdIWOEC67DNttOHUuNTk711PBTrTnTAiB3VAU="
+    }
+  ],
+  "coverage": {
+    "registryMetadata": true,
+    "packageFileListing": true,
+    "tarballDownloaded": false,
+    "tarballIntegrityComputed": false,
+    "installed": false,
+    "runtimeTested": false,
+    "criticalSourceHashesMatch": true
+  },
+  "criticalSourceComparison": [
+    {
+      "path": "/LICENSE",
+      "status": "matched",
+      "bytes": 1066,
+      "expectedBytes": 1066,
+      "integrity": "sha256-uLLSqjskfNCGKxnfIDBUWFkiOTSlytcyH+bsl+rqcl0=",
+      "expectedIntegrity": "sha256-uLLSqjskfNCGKxnfIDBUWFkiOTSlytcyH+bsl+rqcl0=",
+      "source": "https://raw.githubusercontent.com/Pal-AI-Lab/Cortico/cb9ddbd685bcccba1f29905098648f46a79b3862/LICENSE"
+    },
+    {
+      "path": "/src/core/core.ts",
+      "status": "matched",
+      "bytes": 30448,
+      "expectedBytes": 30448,
+      "integrity": "sha256-hIXoeTXTWD9etXKPhVrYDeeBSUTggYtaLdk8D7UM118=",
+      "expectedIntegrity": "sha256-hIXoeTXTWD9etXKPhVrYDeeBSUTggYtaLdk8D7UM118=",
+      "source": "https://raw.githubusercontent.com/Pal-AI-Lab/Cortico/cb9ddbd685bcccba1f29905098648f46a79b3862/src/core/core.ts"
+    },
+    {
+      "path": "/src/core/event-store.ts",
+      "status": "matched",
+      "bytes": 13454,
+      "expectedBytes": 13454,
+      "integrity": "sha256-t6EuF0BIIC8lW9NGZA4SrRWNBl1GxqbCZeJLRuAEG9w=",
+      "expectedIntegrity": "sha256-t6EuF0BIIC8lW9NGZA4SrRWNBl1GxqbCZeJLRuAEG9w=",
+      "source": "https://raw.githubusercontent.com/Pal-AI-Lab/Cortico/cb9ddbd685bcccba1f29905098648f46a79b3862/src/core/event-store.ts"
+    },
+    {
+      "path": "/src/core/generation.ts",
+      "status": "matched",
+      "bytes": 8777,
+      "expectedBytes": 8777,
+      "integrity": "sha256-rCGZ83/7t8FyrzW7AKyzNOkDvekI3cGH6eAacvsvEK4=",
+      "expectedIntegrity": "sha256-rCGZ83/7t8FyrzW7AKyzNOkDvekI3cGH6eAacvsvEK4=",
+      "source": "https://raw.githubusercontent.com/Pal-AI-Lab/Cortico/cb9ddbd685bcccba1f29905098648f46a79b3862/src/core/generation.ts"
+    },
+    {
+      "path": "/src/providers/registry.ts",
+      "status": "matched",
+      "bytes": 6522,
+      "expectedBytes": 6522,
+      "integrity": "sha256-2TOaFRSL0gB14ACwaXHzlrXmEPss4WskArn/hoy+bGg=",
+      "expectedIntegrity": "sha256-2TOaFRSL0gB14ACwaXHzlrXmEPss4WskArn/hoy+bGg=",
+      "source": "https://raw.githubusercontent.com/Pal-AI-Lab/Cortico/cb9ddbd685bcccba1f29905098648f46a79b3862/src/providers/registry.ts"
+    },
+    {
+      "path": "/src/web/shared/webui-protocol.ts",
+      "status": "matched",
+      "bytes": 23529,
+      "expectedBytes": 23529,
+      "integrity": "sha256-EhTBLypdIWOEC67DNttOHUuNTk711PBTrTnTAiB3VAU=",
+      "expectedIntegrity": "sha256-EhTBLypdIWOEC67DNttOHUuNTk711PBTrTnTAiB3VAU=",
+      "source": "https://raw.githubusercontent.com/Pal-AI-Lab/Cortico/cb9ddbd685bcccba1f29905098648f46a79b3862/src/web/shared/webui-protocol.ts"
+    }
+  ]
+}

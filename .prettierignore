@@ -20,3 +20,9 @@ release/
 coverage/
 pnpm-lock.yaml
 *.tsbuildinfo
+
+# Trellis/agent managed workflow files keep their upstream formatting
+.agents/
+.codex/
+.trellis/
+AGENTS.md
