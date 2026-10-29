@@ -1,0 +1,100 @@
+/**
+ * 原创控件层的令牌：pb- = pet bench（饲养台）。
+ *
+ * 分工只有一条：颜色值由界面配色（theme.ts 的 36 格词表）落地，这里定的是语义映射与结构。
+ * 每个语义色写成 var(--配色格, light-dark(浅色, 黑夜))：配色一涂上 <html> 就跟着走；
+ * 还没涂（首帧、测试进程、没选方案）时落在品牌默认值上，两种情况都不碰复刻那套 --pk-*。
+ *
+ * 结构令牌（字体、密度、切角、按压行程、时长）是这套控件自己形状的唯一来源：
+ * 五个版式、外壳、预览台、配色工作室共用这一套，不各自再量一遍。
+ */
+
+:root {
+  /* ------------------------------------------------------------------ 字体
+   * 全部取本机已有字型，不下载也不内嵌。标题与导航用窄体拉丁 + 微软雅黑 UI，
+   * 正文同一族换字重：这是这套产品的声音，不是 system-ui 的默认样子。 */
+  --pb-font-display:
+    'Bahnschrift SemiCondensed', 'Segoe UI Variable Display', 'Microsoft YaHei UI', 'PingFang SC',
+    system-ui, sans-serif;
+  --pb-font-body:
+    'Microsoft YaHei UI', 'PingFang SC', 'Segoe UI Variable Text', system-ui, sans-serif;
+  --pb-font-mono: 'Cascadia Mono', Consolas, 'Microsoft YaHei UI', monospace;
+
+  --pb-size-micro: 12px; /* 只用于状态词与注记，不承担正文 */
+  --pb-size-note: 13px;
+  --pb-size-control: 14px;
+  --pb-size-body: 15px;
+  --pb-size-title: 17px;
+  --pb-size-page: 22px;
+  --pb-tracking-display: 0.01em;
+
+  /* ------------------------------------------------------------------ 密度 */
+  --pb-s-1: 4px;
+  --pb-s-2: 8px;
+  --pb-s-3: 12px;
+  --pb-s-4: 16px;
+  --pb-s-5: 24px;
+  --pb-s-6: 32px;
+  --pb-row-min: 44px; /* 任何可点的东西最短这一格 */
+  --pb-ctl-height: 34px;
+  --pb-ctl-height-sm: 28px;
+
+  /* ------------------------------------------------------------------ 形状
+   * 两处半径 + 一个切角。切角是这套唯一反复出现的记号（状态牌、主操作、抽屉标签），
+   * 别处不再加第二种花样。 */
+  --pb-radius-ctl: 5px;
+  --pb-radius-sheet: 12px;
+  --pb-notch: 10px;
+  --pb-ledge: 2px; /* 板底那道搁置厚度：按下去塌的就是它 */
+  --pb-hairline: 1px;
+
+  /* ------------------------------------------------------------------ 动效 */
+  --pb-t-press: 90ms;
+  --pb-t-move: 160ms;
+  --pb-t-fold: 200ms;
+  --pb-ease: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* ------------------------------------------------------------------ 焦点 */
+  --pb-focus-gap: 2px;
+  --pb-focus-width: 2px;
+
+  /* -------------------------------------------------------------- 语义颜色 */
+  --pb-paper: var(--paper, light-dark(#eef0f3, #14161b));
+  --pb-paper-2: var(--paper-2, light-dark(#e4e8ed, #1a1d24));
+  --pb-sheet: var(--sheet, light-dark(#f9fafb, #1f232b));
+  --pb-sheet-2: var(--sheet-2, light-dark(#f1f4f8, #262b34));
+  --pb-sheet-3: var(--sheet-3, light-dark(#e5e9ef, #2d333d));
+  --pb-ink: var(--ink, light-dark(#141a22, #e9edf3));
+  --pb-ink-soft: var(--ink-soft, light-dark(#4b5663, #aeb7c3));
+  --pb-ink-dim: var(--ink-dim, light-dark(#616c78, #8b95a1));
+  --pb-line: var(--line, light-dark(#d4dae1, #2e343e));
+  --pb-line-2: var(--line-2, light-dark(#bfc8d2, #3c4451));
+  --pb-line-strong: var(--line-strong, light-dark(#8d99a6, #5c6675));
+  --pb-accent: var(--accent, light-dark(#a23a63, #e07ba0));
+  --pb-accent-2: var(--accent-2, light-dark(#7c2748, #f0a8c2));
+  --pb-on-accent: var(--on-accent, light-dark(#fff2f7, #2a0d18));
+  --pb-ok: var(--ok, light-dark(#17734f, #6fd0a0));
+  --pb-warn: var(--warn, light-dark(#8a5a12, #e0b070));
+  --pb-danger: var(--danger, light-dark(#b03a2f, #ff9b90));
+
+  /* 派生三格：不让每个配色方案都补一遍 */
+  --pb-focus: var(--pb-accent-2);
+  --pb-ledge-color: color-mix(in oklab, var(--pb-line-strong) 62%, var(--pb-ink) 38%);
+  --pb-well: var(--pb-sheet-3);
+  --pb-clip-notch: polygon(
+    0 0,
+    calc(100% - var(--pb-notch)) 0,
+    100% var(--pb-notch),
+    100% 100%,
+    0 100%
+  );
+}
+
+/* 减少动态：状态照变，去掉过渡与位移。 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pb-t-press: 0ms;
+    --pb-t-move: 0ms;
+    --pb-t-fold: 0ms;
+  }
+}

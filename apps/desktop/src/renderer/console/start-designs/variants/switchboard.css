@@ -1,183 +1,76 @@
-/*
- * switchboard 的栅格：848 轨道 = 184 目录 + 24 + 640 详情，上面一条整宽状态、下面整宽配色。
- * 目录在 880 变整宽可折叠的一条；详情里的预览排在表单后面，只保底 260。
- *
- * 颜色、圆角、字号全取 --pk-* 令牌；这一版也没有自建过渡，减少动画无需覆盖。
- * 对共享插槽只做容器级覆盖：竖排、满宽、允许换行——控件本体与回执样式仍是共享那一份。
+/**
+ * switchboard「模型接线台」：目录常驻左列，详情只伺候正在挑的这家。
+ * 排布在这里，目录/表单/预览的形状仍在 kit 与 start.css。
  */
 
 .sd-board {
   display: grid;
+  gap: var(--pb-s-4);
   min-width: 0;
 }
 
-.sd-board__track {
-  display: grid;
-  gap: 20px;
-  max-width: 848px;
-  margin-inline: auto;
-  min-width: 0;
-}
-
-/* 状态条：整宽、最小 56，长回执在里面换行，不把「测试连接」顶出这一栏。 */
 .sd-board__strip {
-  display: grid;
-  align-content: center;
-  gap: 6px;
-  min-height: 56px;
-  min-width: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--pk-border);
-  border-radius: var(--pk-radius-lg);
-  background: var(--pk-surface);
+  padding: var(--pb-s-2) var(--pb-s-3);
+  border-left: 3px solid var(--pb-line-strong);
+  background-color: var(--pb-sheet-2);
 }
 
 .sd-board__body {
   display: grid;
-  grid-template-columns: minmax(0, 184px) minmax(0, 640px);
-  gap: 24px;
+  grid-template-columns: minmax(240px, 30%) minmax(0, 1fr);
+  gap: var(--pb-s-5);
   align-items: start;
   min-width: 0;
 }
 
 .sd-board__rail {
-  display: grid;
-  gap: 8px;
+  position: sticky;
+  top: var(--pb-s-4);
   min-width: 0;
-}
-
-.sd-board__rail-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 32px;
-  padding: 4px 2px;
-  border: 0;
-  border-bottom: 1px solid var(--pk-border);
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.sd-board__rail-title {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.sd-board__rail-count {
-  margin-left: auto;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--pk-muted);
-}
-
-/* 折叠指示是一个 CSS 三角，不是第二套图标语言；方向变化就是这一条的全部信息。 */
-.sd-board__rail-caret {
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--pk-muted);
-}
-
-.sd-board__rail-toggle[aria-expanded='false'] .sd-board__rail-caret {
-  transform: rotate(-90deg);
-}
-
-.sd-board__rail-body {
-  min-width: 0;
-}
-
-.sd-board__rail-body[hidden] {
-  display: none;
-}
-
-/* 同一批芯片竖过来当目录：只改排布方向与占宽，芯片本身不动。 */
-.sd-board__rail-body .start-chipline {
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  gap: 4px;
-}
-
-.sd-board__rail-body .start-chip {
-  width: 100%;
-  justify-content: flex-start;
-  min-width: 0;
-}
-
-.sd-board__rail-body .start-chip__off {
-  margin-left: auto;
 }
 
 .sd-board__detail {
   display: grid;
-  gap: 12px;
+  gap: var(--pb-s-3);
   min-width: 0;
 }
 
 .sd-board__title,
 .sd-board__subtitle {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pb-s-2);
   margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.sd-board__title {
-  font-size: 15px;
-  font-weight: 600;
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-title);
+  letter-spacing: var(--pb-tracking-display);
 }
 
 .sd-board__subtitle {
-  margin-top: 4px;
-  padding-top: 14px;
-  border-top: 1px solid var(--pk-border);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--pb-size-body);
+  padding-top: var(--pb-s-3);
+  border-top: var(--pb-hairline) solid var(--pb-line);
 }
 
-.sd-board__mark {
-  display: inline-flex;
-  align-self: center;
-  color: var(--pk-muted);
+.sd-board__who {
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-micro);
+  font-weight: 400;
+  color: var(--pb-ink-dim);
 }
 
-.sd-board__pet {
-  min-width: 0;
-}
-
+.sd-board__pet,
 .sd-board__colors {
   min-width: 0;
 }
 
-/* 880：目录变整宽一条（默认仍展开），详情回到它下面，芯片回到横排。 */
-@media (max-width: 900px) {
+@media (max-width: 880px) {
   .sd-board__body {
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
   }
 
-  .sd-board__rail-body .start-chipline {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .sd-board__rail-body .start-chip {
-    width: auto;
-  }
-
-  .sd-board__rail-body .start-chip__off {
-    margin-left: 0;
-  }
-
-  .sd-board__strip {
-    padding: 8px 12px;
+  .sd-board__rail {
+    position: static;
   }
 }

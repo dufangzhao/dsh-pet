@@ -11,11 +11,13 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
 const executablePath = path.join(path.dirname(require.resolve('electron/package.json')), 'dist/electron.exe');
-const designLab = process.argv.includes('--design-lab');
-const profileId = (designLab ? 'start-lab-' : 'coop-start-') + Date.now() + '-' + randomUUID().slice(0, 8);
+const collapsedCheck = process.argv.includes('--collapsed-check');
+const originalControls = process.argv.includes('--original-controls') || collapsedCheck;
+const designLab = process.argv.includes('--design-lab') || originalControls;
+const profileId = (collapsedCheck ? 'collapsed-' : designLab ? 'start-lab-' : 'coop-start-') + Date.now() + '-' + randomUUID().slice(0, 8);
 const profilePath = path.join(root, '.cache', 'pet-demo-acceptance-' + profileId);
-const output = path.join(root, designLab ? 'qa/screenshots/start-design-lab' : 'qa/screenshots/coopanion-start', profileId);
-const TOTAL_MS = 240000;
+const output = path.join(root, originalControls ? 'qa/screenshots/original-controls' : designLab ? 'qa/screenshots/start-design-lab' : 'qa/screenshots/coopanion-start', profileId);
+const TOTAL_MS = collapsedCheck ? 90000 : 240000;
 const fixtureKey = 'QA_UI_MODEL_KEY_' + randomUUID();
 const fixturePrompt = 'UI acceptance offline message ' + randomUUID();
 const customName = 'QA Start palette';
@@ -30,6 +32,7 @@ const redact = value => {
     .replace(/\u001b\[[0-9;]*m/g, '').slice(-1600);
 };
 const sourceFiles = {
+  probe: 'qa/probes/coopanion-start-ui-e2e.mjs',
   start: 'apps/desktop/src/renderer/console/pages/start.tsx',
   sections: 'apps/desktop/src/renderer/console/start-designs/sections.tsx',
   registry: 'apps/desktop/src/renderer/console/start-designs/registry.tsx',
@@ -56,6 +59,7 @@ const sourceFiles = {
 };
 async function inspectSource() {
   const contents = {}, fingerprints = {};
+  if (originalControls) Object.assign(sourceFiles, { providerBehavior:'apps/desktop/src/renderer/console/start-designs/behavior.ts', ownKit:'apps/desktop/src/renderer/console/original-ui/kit.tsx',ownKitCss:'apps/desktop/src/renderer/console/original-ui/kit.css',ownTokens:'apps/desktop/src/renderer/console/original-ui/design-tokens.css',ownBoard:'apps/desktop/src/renderer/console/original-ui/control-board.tsx',ownPreview:'apps/desktop/src/renderer/console/original-ui/pet-preview.tsx',ownPreviewCss:'apps/desktop/src/renderer/console/original-ui/pet-preview.css',previewBehavior:'apps/desktop/src/renderer/console/preview-behavior.ts',ownStudio:'apps/desktop/src/renderer/console/original-ui/theme-studio.tsx',ownStudioCss:'apps/desktop/src/renderer/console/original-ui/theme-studio.css',themeController:'apps/desktop/src/renderer/console/original-ui/theme-controller.ts',themeOwner:'apps/desktop/src/renderer/console/theme.ts',modelBehavior:'apps/desktop/src/renderer/console/start-designs/use-start-model.ts' });
   if (designLab) for (const id of ['bench','switchboard','spine','stage','workspaces']) {
     sourceFiles[id] = 'apps/desktop/src/renderer/console/start-designs/variants/' + id + '.tsx';
     sourceFiles[id+'Css'] = 'apps/desktop/src/renderer/console/start-designs/variants/' + id + '.css';
@@ -66,7 +70,12 @@ async function inspectSource() {
     fingerprints[name] = { path: relative, sha256: createHash('sha256').update(bytes).digest('hex') };
   }
   const version = JSON.parse(await fs.readFile(path.join(root, 'Coopanion/package.json'), 'utf8')).version;
-  const selectors = [
+  const selectors = (originalControls ? [
+    ['shell','settings-shell'], ['shell','settings-content'], ['sections','model-provider-search'],
+    ['sections','model-save'], ['sections','model-test'], ['sections','model-receipt'],
+    ['ownPreview','pet-chat-toggle'], ['ownPreview','pet-mic-toggle'], ['ownPreview','pet-composer-input'],
+    ['ownStudio','theme-token-'], ['ownStudio','theme-scheme-name'], ['ownStudio','theme-undo-preview'],
+  ] : [
     ['shell', '设置页导航'], ['shell', '收起侧栏'], ['shell', '展开侧栏'],
     ['start', 'start-guide'], ['start', 'pet-hide'], ['start', 'pet-show'], ['start', 'pet-dress'],
     ['start', 'model-pick-'], ['start', 'model-save'], ['start', 'model-test'], ['start', 'model-signin'],
@@ -74,16 +83,16 @@ async function inspectSource() {
     ['composer', 'pet-composer-send'], ['petDialog', 'pet-dialog-choice-'], ['petMenu', 'pet-settings'],
     ['theme', '调色盘'], ['theme', '明暗挡位'], ['theme', '方案名'], ['theme', 'theme-color__hex'],
     ['theme', '复制为新方案'], ['theme', '保存当前方案'], ['theme', '再次点击确认删除'],
-  ].map(([owner, selector]) => ({ owner, selector, present: (owner === 'start' ? contents.sections : contents[owner]).includes(selector) }));
-  return { referenceVersion: version, fingerprints, selectors,
+  ]).map(([owner, selector]) => ({ owner, selector, present: (owner === 'start' ? contents.sections : contents[owner]).includes(selector) }));
+  return { referenceVersion: version, sourceDigest: createHash('sha256').update(JSON.stringify(fingerprints)).digest('hex'), fingerprints, selectors,
     dependencies: {
-      startThemeMounted: /<ThemeEditor\b/.test(contents.sections + contents.console),
-      previewComposerMounted: /<PetComposer\b/.test(contents.preview),
-      startContainsRequiredHeadings: ['连接模型', '我的桌宠'].every(label => contents.start.includes(label)),
+      startThemeMounted: originalControls ? /<OriginalThemeStudio\b/.test(contents.sections) : /<ThemeEditor\b/.test(contents.sections + contents.console),
+      previewComposerMounted: originalControls ? contents.ownPreview.includes('composer.onSend') : /<PetComposer\b/.test(contents.preview),
+      startContainsRequiredHeadings: ['连接模型', '我的桌宠'].every(label => (originalControls ? contents.registry : contents.start).includes(label)),
     } };
 }
 
-const names = designLab ? ['source-and-real-profile','five-layouts-and-draft-preservation','each-layout-actions-and-shared-history','native-pause-and-visibility','theme-disclosure-and-undo','minimum-layout-zoom-and-reduced-motion','lab-restart-persistence'] : ['source-and-real-profile', 'shell-order-geometry-and-rail', 'vendor-regions-and-browser-pick',
+const names = collapsedCheck ? ['collapsed-footer-visibility-and-keyboard'] : designLab ? [...(originalControls ? ['original-normal-and-components', 'original-model-save-with-network-denial', 'original-theme-crud-and-variants'] : []), 'source-and-real-profile','five-layouts-and-draft-preservation','each-layout-actions-and-shared-history','native-pause-and-visibility','theme-disclosure-and-undo','minimum-layout-zoom-and-reduced-motion','lab-restart-persistence'] : ['source-and-real-profile', 'shell-order-geometry-and-rail', 'vendor-regions-and-browser-pick',
   'theme-presets-and-review-screenshots', 'palette-invalid-copy-save-and-variants',
   'palette-four-second-delete-and-leave-undo', 'minimum-layout-and-native-zoom',
   'model-key-save-with-real-network-denial', 'native-show-hide-and-dress',
@@ -92,7 +101,7 @@ const report = { status: 'running', at: new Date().toISOString(), profileId,
   checks: names.map(name => ({ name, status: 'not-run' })), screenshots: [], shutdown: [],
   errors: [], rendererRemoteOrigins: [], approvals: [], geometry: [],
   assumptions: [
-    'Parent built the current Main, worker, builtin admission and renderer before this serial run.',
+    'The QA integrator rebuilt current Main, worker, builtin admission and renderer after product freeze before this serial run.',
     'This launches the unpackaged application with a unique real userData under .cache.',
     '--no-sandbox is the existing native QA exception; this is not OS-sandbox evidence.',
     'No fake media device, fake UI, scripted provider, fake bridge, localStorage write, or external sign-in is used.',
@@ -102,7 +111,7 @@ const report = { status: 'running', at: new Date().toISOString(), profileId,
   limitations: [
     'Playwright pointer input does not prove physical desktop hit testing or native microphone capture.',
     'Renderer request observation is not a packet capture of worker traffic; the model guard is the actual network approval denial.',
-    'Screenshots use the same recorded content viewport at zoom 1; visual parity still requires reference review.',
+    'Screenshots use the same content viewport at zoom 1. Original-control screenshots mask only controls or bubbles containing private QA prefixes, with neutral masks; normal idle and nonsensitive Core replies remain visible. Negative DOM checks alone do not establish originality.',
   ] };
 let app, pet, page, activeCheck, closing, timedOut = false;
 let nativeDeadline = Infinity;
@@ -118,11 +127,15 @@ const demo = async () => unwrap(await pet.evaluate(() => window.petDemo.getSnaps
 const modelState = async () => unwrap(await page.evaluate(() => window.petModels.getSnapshot()), 'Model metadata');
 const security = async () => unwrap(await page.evaluate(() => window.petConsole.getSecurity()), 'Actual pending approval snapshot');
 const section = title => page.locator('section').filter({ has: page.getByRole('heading', { level: 2, name: title, exact: false }) }).first();
-const theme = () => page.locator('.theme-editor');
+const theme = () => originalControls ? page.getByTestId('theme-studio') : page.locator('.theme-editor');
 const preview = () => page.getByRole('region', { name: '桌宠预览', exact: true });
 const paper = () => page.locator('html').evaluate(node => getComputedStyle(node).getPropertyValue('--paper').trim().toLowerCase());
-const paletteHex = () => theme().getByRole('textbox', { name: '页面背景十六进制颜色', exact: true });
-const selectedScheme = () => theme().getByRole('group', { name: '配色方案', exact: true }).locator('button[aria-pressed="true"] .theme-scheme__name').innerText();
+const paletteHex = () => originalControls ? page.getByTestId('theme-token-paper-hex') : theme().getByRole('textbox', { name: '页面背景十六进制颜色', exact: true });
+const selectedScheme = () => theme().getByRole('group', { name: '配色方案', exact: true }).locator('button[aria-pressed="true"] ' + (originalControls ? '.pb-tile__name' : '.theme-scheme__name')).innerText();
+async function switchControl(control) {
+  if (originalControls) { await expect(control).toHaveAttribute('role', 'switch'); await control.focus(); await control.press('Space'); }
+  else await control.click();
+}
 async function step(name, run) {
   ensureActive();
   activeCheck = report.checks.find(check => check.name === name);
@@ -175,25 +188,35 @@ async function settingsFromPet() {
   await page.bringToFront();
 }
 async function paletteOpen() {
+  if (originalControls) {
+    if (await paletteHex().isVisible()) return;
+    await theme().locator('details.theme-studio__palette > summary').click();
+    await expect(paletteHex()).toBeVisible(); return;
+  }
   const details = theme().locator('details.theme-fold');
   if (!(await details.evaluate(node => node.open))) await details.locator('summary').click();
   await expect(paletteHex()).toBeVisible();
 }
 async function chooseMode(mode) {
+  if (originalControls) {
+    await page.getByTestId('theme-mode-'+mode).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme',mode); return;
+  }
   const label = { light: '浅色', dark: '黑夜', system: '跟随系统' }[mode];
   await theme().getByRole('radiogroup', { name: '明暗挡位', exact: true }).getByRole('radio', { name: label, exact: true }).check();
   await expect(page.locator('html')).toHaveAttribute('data-theme', mode);
 }
 async function chooseScheme(label) {
-  await theme().getByRole('group', { name: '配色方案', exact: true }).getByRole('button').filter({ has: page.locator('.theme-scheme__name', { hasText: label }) }).click();
+  await theme().getByRole('group', { name: '配色方案', exact: true }).getByRole('button').filter({ has: originalControls ? page.getByText(label, { exact: true }) : page.locator('.theme-scheme__name', { hasText: label }) }).click();
   await expect.poll(selectedScheme).toBe(label);
 }
 async function noOverflow(label) {
+  const labEnabled=designLab && await page.evaluate(()=>window.petDesignLab?.enabled===true);
   const dimensions = await page.evaluate(selectors => selectors.map(selector => {
     const node = document.querySelector(selector);
     if (!node) throw new Error('Missing real layout node: ' + selector);
     return { selector, client: node.clientWidth, scroll: node.scrollWidth };
-  }), ['html', 'body', '.pk-settings', '.pk-settings__main', '.pk-settings__pane', ...(designLab ? ['.lab__canvas'] : [])]);
+  }), ['html', 'body', ...(originalControls ? ['[data-testid="settings-shell"]','[data-testid="settings-main"]','[data-testid="settings-content"]'] : ['.pk-settings', '.pk-settings__main', '.pk-settings__pane']), ...(labEnabled ? [originalControls ? '[data-testid="start-design-lab"]' : '.lab__canvas'] : [])]);
   report.geometry.push({label,dimensions});
   if(!dimensions.every(item=>item.scroll<=item.client+1))report.overflowOffenders=await page.evaluate(()=>[...document.querySelectorAll('*')].filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1).slice(0,20).map(node=>({tag:node.tagName,class:typeof node.className==='string'?node.className:'',client:node.clientWidth,scroll:node.scrollWidth,right:node.getBoundingClientRect().right,minWidth:getComputedStyle(node).minWidth,overflowX:getComputedStyle(node).overflowX})));
   assert.ok(dimensions.every(item => item.scroll <= item.client + 1), 'Horizontal overflow: ' + label);
@@ -201,7 +224,7 @@ async function noOverflow(label) {
 async function capture(name) {
   ensureActive();
   if(name.startsWith('light-')||name.startsWith('dark-')||name.startsWith('rail-collapsed-')){
-    await page.evaluate(()=>{window.scrollTo(0,0);document.querySelector('.pk-settings__main')?.scrollTo(0,0);});
+    await page.evaluate(()=>{window.scrollTo(0,0);(document.querySelector('[data-testid="settings-main"]')??document.querySelector('.pk-settings__main'))?.scrollTo(0,0);});
     await expect.poll(()=>page.evaluate(()=>Math.round(window.scrollY+(document.querySelector('.pk-settings__main')?.scrollTop??0)))).toBe(0);
   }
   assert.ok(report.screenshots.length < (designLab ? 32 : 16), 'Screenshot budget exceeded');
@@ -209,10 +232,26 @@ async function capture(name) {
   const size = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scale: devicePixelRatio }));
   const file = path.join(output, name + '.png');
   // No tracing/HAR/full-page dumps: model inputs and conversation text are never recorded as metadata.
-  await page.screenshot({ path: file, fullPage: false, animations: 'disabled' });
+  const masks = [];
+  if (originalControls) {
+    const prefixes=['QA_UI_MODEL_KEY_','UI acceptance offline message '];
+    for (const id of ['key-input', 'pet-composer-input']) {
+      const input = page.getByTestId(id);
+      if (await input.count()) {
+        const value=await input.inputValue();
+        if(prefixes.some(prefix=>value.includes(prefix)))masks.push(input);
+      }
+    }
+    const bubbles=page.locator('.pet-bench__say');
+    for(let i=0;i<await bubbles.count();i++){
+      const bubble=bubbles.nth(i),text=await bubble.textContent();
+      if(prefixes.some(prefix=>text?.includes(prefix)))masks.push(bubble);
+    }
+  }
+  await page.screenshot({ path: file, fullPage: false, animations: 'disabled', mask: masks, maskColor: '#b9c1cc' });
   report.screenshots.push({ name, file: path.relative(root, file).split(path.sep).join('/'), ...size, zoom: 1 });
 }
-async function launch() {
+async function launch(withLab = designLab) {
   ensureActive();
   const env = {};
   for (const key of ['SystemRoot', 'WINDIR', 'TEMP', 'TMP', 'PATH', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA'])
@@ -221,7 +260,7 @@ async function launch() {
   const remaining = nativeDeadline - Date.now();
   assert.ok(remaining > 35000, 'Insufficient time for another launch and bounded shutdown');
   app = await _electron.launch({ executablePath,
-    args: ['--no-sandbox', path.join(root, 'apps/desktop'), '--demo-acceptance=' + profileId, '--show-settings', ...(designLab ? ['--start-design-lab'] : [])],
+    args: ['--no-sandbox', path.join(root, 'apps/desktop'), '--demo-acceptance=' + profileId, '--show-settings', ...(withLab ? ['--start-design-lab'] : [])],
     env, timeout: 30000 });
   closing = undefined;
   const child = app.process();
@@ -323,7 +362,10 @@ async function pickDesign(id) {
 async function revealDesign(id, part) {
   const target=part==='connect'?page.getByTestId('start-connect-form'):part==='pet'?preview():theme();
   if(await target.isVisible())return;
-  if(id==='spine')await page.getByTestId('spine-toggle-'+part).click();
+  if (originalControls && id==='spine') await page.getByTestId('spine-steps').locator('[data-step="'+part+'"] > details > summary').click();
+  else if (originalControls && id==='workspaces') await page.getByTestId('workspaces-tab-'+part).locator('xpath=ancestor::label[1]').click();
+  else if (originalControls && id==='stage'&&part!=='pet') await page.getByTestId('stage-layout').locator('.sd-stage__tray > summary').filter({hasText:part==='theme'?'界面配色':'连接模型'}).click();
+  else if(id==='spine')await page.getByTestId('spine-toggle-'+part).click();
   else if(id==='workspaces')await page.getByTestId('workspaces-tab-'+part).click();
   else if(id==='stage'&&part!=='pet')await page.getByTestId('stage-tray-'+part).click();
   else {
@@ -333,29 +375,223 @@ async function revealDesign(id, part) {
   await expect(target).toBeVisible();
 }
 async function designFrame(name) {
-  await page.evaluate(()=>{window.scrollTo(0,0);document.querySelector('.pk-settings__main')?.scrollTo(0,0);});
+  await page.evaluate(()=>{window.scrollTo(0,0);(document.querySelector('[data-testid="settings-main"]')??document.querySelector('.pk-settings__main'))?.scrollTo(0,0);});
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await capture(name);
 }
+async function originalLanguageSample(label) {
+  await expect(page.getByTestId('settings-shell')).toBeVisible();
+  const legacy=page.getByTestId('settings-content').locator('.pk-button,.pk-field,.pk-input,.pk-pill,.console-segmented,.theme-editor,.pet-preview');
+  await expect(legacy).toHaveCount(0);
+  const count=await page.getByTestId('settings-content').locator('.pb-btn,.pb-field,.pb-tile,.pb-notice').count();
+  assert.ok(count>0,'Original controls are absent: '+label);
+  return {label,legacyWidgets:0,originalControlCount:count};
+}
+async function originalPreviewGeometry(label, requireLongBubble = false) {
+  const avatar=preview().getByTestId('pet-avatar');
+  await avatar.evaluate(node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+  await expect(avatar).toBeInViewport({ratio:1});
+  const measured=await preview().evaluate(node=>{
+    const svg=node.querySelector('[data-testid="pet-avatar"]'),well=node.querySelector('.pet-bench__well'),say=node.querySelector('.pet-bench__say');
+    if(!svg||!well)throw new Error('Missing original scene or avatar');
+    const rect=element=>{const r=element.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
+    let bubble=null;
+    if(say){const style=getComputedStyle(say),range=document.createRange();range.selectNodeContents(say);const rows=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);
+      bubble={...rect(say),length:say.textContent.length,lines:rows.length,contentWidth:say.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight),scroll:say.scrollWidth,client:say.clientWidth};}
+    const tools=[...node.querySelectorAll('.pet-bench__rail .pb-toggle__text')].map(text=>{
+      const hint=text.querySelector('.pb-toggle__hint');let hintLength=0,hintLines=0,hintWidth=0;
+      if(hint){const range=document.createRange();range.selectNodeContents(hint);hintLength=hint.textContent.length;hintLines=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0).length;hintWidth=hint.getBoundingClientRect().width;}
+      return {textWidth:text.getBoundingClientRect().width,hintLength,hintLines,hintWidth};
+    });
+    return {avatar:rect(svg),well:rect(well),bubble,tools};
+  });
+  const {avatar:a,well:w,bubble:b}=measured;
+  assert.ok(a.width>=64&&a.height>=64,'Avatar must have usable nonzero dimensions: '+label);
+  assert.ok(a.x>=w.x-1&&a.y>=w.y-1&&a.right<=w.right+1&&a.bottom<=w.bottom+1,'Avatar is clipped by its scene: '+label);
+  assert.ok(w.width>=Math.max(160,a.width+24),'Preview tools leave too little room for the scene: '+label);
+  if(requireLongBubble)assert.ok(b&&b.length>=16,'A real long Core bubble was not exercised: '+label);
+  if(b&&b.length>=16){
+    assert.ok(b.contentWidth>=100&&b.lines>0&&b.length/b.lines>=6,'Bubble collapses toward one character per line: '+label);
+    assert.ok(b.scroll<=b.client+1&&b.x>=w.x-1&&b.right<=w.right+1,'Bubble overflows its real scene: '+label);
+    assert.ok(b.bottom<=a.y+2||b.x>=a.right||b.right<=a.x,'Long bubble covers the avatar: '+label);
+  }
+  for(const tool of measured.tools){
+    if(tool.hintLength>=12)assert.ok(tool.textWidth>=100&&tool.hintWidth>=100&&tool.hintLines>0&&tool.hintLength/tool.hintLines>=6,'Preview tool instructions collapse into narrow columns: '+label);
+  }
+  report.previewGeometry??=[];report.previewGeometry.push({label,...measured});
+}
+async function originalNormalEntry() {
+  await step('original-normal-and-components',async()=>{
+    await launch(false);
+    let state=await application();
+    if(state.dialog){await pet.getByTestId('pet-dialog-choice-later').click();await expect.poll(async()=>(await application()).dialog).toBeNull();}
+    await navigate('start');await nativeZoomKey('0');await resizeContent(1200,800);
+    assert.equal(await page.evaluate(()=>window.petDesignLab),undefined);
+    await chooseMode('light');
+    const metadata=await modelState(); let absentKeys=0;
+    const providerRows=page.locator('[data-testid^="model-pick-"]');
+    for(let i=0;i<await providerRows.count();i++){
+      const row=providerRows.nth(i),id=(await row.getAttribute('data-testid')).slice('model-pick-'.length);
+      if(metadata.endpoints.find(e=>e.id===id)?.keyConfigured!==true){
+        absentKeys++; await expect(row).not.toContainText('本机存过 Key');
+      }
+    }
+    assert.ok(absentKeys>0,'Fresh native profile must exercise endpoints without saved credentials');
+    report.freshProviderTruth={endpointsWithoutKey:absentKeys,noFalseSavedKeyLabels:true};
+    report.originalNormal=await originalLanguageSample('normalStart');
+    await designFrame('original-normal-light-1200x800'); await originalPreviewGeometry('normal1200');
+    await chooseMode('dark'); await noOverflow('normal dark1200');
+    await designFrame('original-normal-dark-1200x800');
+    await resizeContent(880,600); await noOverflow('normal minimum');
+    await designFrame('original-normal-minimum-880x600'); await originalPreviewGeometry('normal880');
+    await resizeContent(1200,800); await chooseMode('light');
+    const sidebar=page.getByTestId('settings-sidebar'),expanded=await sidebar.boundingBox();
+    await page.getByRole('button',{name:'收起侧栏',exact:true}).click();
+    await expect(page.getByTestId('settings-shell')).toHaveAttribute('data-rail','collapsed');
+    const collapsed=await sidebar.boundingBox(); assert.ok(expanded&&collapsed&&collapsed.width<expanded.width);
+    await noOverflow('normal collapsed rail'); await designFrame('original-normal-collapsed-1200x800');
+    await page.getByRole('button',{name:'展开侧栏',exact:true}).click();
+    await page.getByTestId('settings-skip').focus(); await page.keyboard.press('Enter');
+    await expect(page.getByTestId('settings-main')).toBeFocused();
+    report.shell={collapseExpandsContent:true,skipToMainKeyboard:true};
+    await close();
+  });
+}
+async function originalBoard() {
+  await page.getByTestId('lab-tab-controls').locator('xpath=ancestor::label[1]').click();
+  await expect(page.getByTestId('original-control-board')).toBeVisible();
+  await noOverflow('original component board1200');
+  await designFrame('original-control-board-light-1200x800');
+  const board=page.getByTestId('original-control-board');
+  assert.ok(await board.getByRole('button',{disabled:true}).count()>0,'Disabled design states not shown');
+  assert.ok(await board.locator('[aria-busy="true"]').count()>0,'Pending design states not shown');
+  const switches=board.getByRole('switch');assert.ok(await switches.count()>0);
+  const toggle=switches.first(), before=await toggle.isChecked();await toggle.focus();await toggle.press('Space');assert.equal(await toggle.isChecked(),!before);
+  const input=board.getByRole('textbox').first();await input.fill('x');await input.focus();await expect(input).toBeFocused();
+  await input.scrollIntoViewIfNeeded(); await capture('original-control-board-focused-1200x800');
+  await board.getByText('插销开关',{exact:true}).scrollIntoViewIfNeeded();
+  await capture('original-control-board-choice-states-light-1200x800');
+  const details=board.locator('details'),summary=details.locator('summary');
+  await summary.scrollIntoViewIfNeeded(); await summary.focus(); await summary.press('Enter');
+  await expect(details).not.toHaveAttribute('open'); await summary.press('Enter'); await expect(details).toHaveAttribute('open','');
+  await capture('original-control-board-receipt-states-light-1200x800');
+  report.originalBoard={renderedOwnControls:true,disabledAndPending:true,nativeSwitch:true,actualFocus:true,samplesNotBackend:true};
+  await page.getByTestId('lab-tab-layouts').locator('xpath=ancestor::label[1]').click();
+}
+
+async function originalModelSave() {
+  await step('original-model-save-with-network-denial',async()=>{
+    await pickDesign('bench'); await revealDesign('bench','connect');
+    const search=page.getByTestId('model-provider-search');
+    await search.fill('DeepSeek'); await expect(page.getByTestId('model-pick-deepseek')).toBeVisible();
+    assert.ok(await page.locator('[data-testid^="model-pick-"]').count()<15,'Provider search must narrow the directory');
+    await search.fill('qa-no-such-provider'); await expect(page.getByTestId('model-provider-empty')).toBeVisible();
+    await search.fill(''); await expect(page.locator('[data-testid^="model-pick-"]')).toHaveCount(15);
+    await page.getByTestId('model-provider-toggle').click();
+    await expect(page.getByTestId('start-provider').locator('ul')).toBeVisible();
+    await page.getByTestId('model-pick-deepseek').click();
+    const before=await modelState();
+    assert.equal(before.credentialStorageAvailable,true,'Native credential store is required');
+    assert.equal(before.active,null);
+    await expect(page.getByTestId('key-input')).toHaveAccessibleName('DeepSeek 的 API Key');
+    await page.getByTestId('model-input').fill('qa-ui-denied-model');
+    await page.getByTestId('key-input').fill(fixtureKey);
+    await page.getByTestId('model-save').click(); await denyRealModelNetwork();
+    await expect(page.getByTestId('model-save')).toHaveText('保存并开始');
+    await expect.poll(async()=>(await modelState()).endpoints.find(e=>e.id==='deepseek')?.keyConfigured).toBe(true);
+    const saved=await modelState();
+    assert.equal(saved.active,null,'Denied probe must not activate a saved credential');
+    assert.ok(saved.revision>before.revision);
+    assert.equal(saved.endpoints.find(e=>e.id==='deepseek').model,'qa-ui-denied-model');
+    assert.equal((await demo()).settings.replyMode,'demo');
+    assert.ok(!JSON.stringify(saved).includes(fixtureKey));
+    await expect(page.getByTestId('key-input')).toHaveValue('');
+    const receipt=page.getByTestId('model-receipt');
+    await expect(receipt.locator('div').filter({has:page.getByText('写进本机',{exact:true})})).toContainText('已保存');
+    await expect(receipt.locator('div').filter({has:page.getByText('这一次探测',{exact:true})})).toContainText('没通过');
+    await expect(receipt.locator('div').filter({has:page.getByText('现在在用',{exact:true})})).toContainText('当前没有在用连接');
+    await expect(page.getByTestId('start-status')).toContainText('本机存过配置，还没在用');
+    await expect(page.getByTestId('start-connect-form')).toHaveAttribute('data-mark','saved');
+    await expect(page.getByTestId('model-test')).toBeDisabled();
+    report.model={savedKeyPresent:true,active:false,offlineModePreserved:true,receiptDistinguishesSavedAndTested:true,searchAndList:true,revision:saved.revision,deniedNetworkApprovals:report.approvals.filter(p=>p.kind==='network'&&!p.approved).length};
+    await capture('original-saved-test-denied-1200x800');
+  });
+}
+async function originalThemeCrud() {
+  await step('original-theme-crud-and-variants',async()=>{
+    await pickDesign('bench'); await revealDesign('bench','theme'); await chooseMode('light');
+    const seen=new Set();
+    for(const name of ['青港','翠晓','陶烬']) { await chooseScheme(name); seen.add(await paper()); }
+    assert.equal(seen.size,3,'Own builtin schemes must paint distinct palettes');
+    await chooseScheme('青港'); await paletteOpen();
+    await expect(theme().locator('[data-testid$="-hex"]')).toHaveCount(36);
+    await expect(theme().locator('input[type="color"]')).toHaveCount(36);
+    await expect(theme().locator('.theme-studio__fields h3')).toHaveCount(5);
+    const original=await paletteHex().inputValue(),originalPaper=await paper();
+    await paletteHex().fill('#GGGGGG'); await expect(paletteHex()).toHaveAttribute('aria-invalid','true');
+    assert.equal(await paper(),originalPaper,'Invalid input must not enter live palette');
+    await expect(page.getByTestId('theme-token-paper-picker')).toHaveValue(original.toLowerCase());
+    await page.getByTestId('theme-scheme-name').fill(customName); await page.getByTestId('theme-copy').click();
+    await expect.poll(selectedScheme).toBe(customLabel);
+    await expect(paletteHex()).toHaveValue(original.toUpperCase());
+    await expect(paletteHex()).toHaveAttribute('aria-invalid','false');
+    await paletteHex().fill('#234567'); await expect.poll(paper).toBe('#234567');
+    await page.getByTestId('theme-save').click(); await chooseMode('dark');
+    await paletteHex().fill('#1A2B3C'); await page.getByTestId('theme-save').click();
+    await chooseMode('light'); await expect(paletteHex()).toHaveValue('#234567');
+    await chooseMode('dark'); await expect(paletteHex()).toHaveValue('#1A2B3C');
+    await paletteHex().fill('#445566'); await page.getByTestId('theme-undo-preview').click();
+    await expect.poll(paper).toBe('#1a2b3c'); await expect(paletteHex()).toHaveValue('#1A2B3C');
+    await page.getByTestId('theme-copy').click(); await expect.poll(selectedScheme).toBe(disposableLabel);
+    const armedAt=Date.now(); await page.getByTestId('theme-delete').click();
+    await expect(page.getByTestId('theme-delete')).toHaveText('再次点击确认删除');
+    await expect(page.getByTestId('theme-delete')).toHaveText('删除方案',{timeout:6500});
+    const elapsed=Date.now()-armedAt; assert.ok(elapsed>=3800&&elapsed<6500);
+    assert.equal(await selectedScheme(),disposableLabel);
+    await page.getByTestId('theme-delete').click(); await page.getByTestId('theme-delete').click();
+    await expect(theme().getByText(disposableLabel,{exact:true})).toHaveCount(0);
+    await chooseScheme(customLabel); await paletteHex().fill('#445566');
+    await navigate('persona'); await expect.poll(paper).toBe('#1a2b3c');
+    await navigate('start'); await pickDesign('bench'); await revealDesign('bench','theme');
+    await expect.poll(selectedScheme).toBe(customLabel); await paletteOpen();
+    await expect(paletteHex()).toHaveValue('#1A2B3C');
+    report.palette={tokens:36,groups:5,ownBuiltins:3,invalidHexExcluded:true,variantsSavedIndependently:true,explicitUndo:true,leaveRevertedUnsavedPreview:true,deleteConfirmationMs:elapsed};
+    await chooseScheme('青港'); await chooseMode('light');
+    await theme().getByRole('heading',{level:2}).scrollIntoViewIfNeeded();
+    await capture('original-theme-studio-light-1200x800');
+  });
+}
+
 async function runDesignLab() {
   assert.equal(process.platform,'win32');
   await fs.mkdir(output,{recursive:true});
+  if (originalControls) await originalNormalEntry();
   await step('source-and-real-profile',async()=>{
     report.source=await inspectSource();
+    report.buildArtifacts=[];
+    for (const relative of ['apps/desktop/dist/main/index.mjs','apps/desktop/dist/runtime/worker.cjs','apps/desktop/dist/preload/index.cjs','apps/desktop/dist/renderer/console/index.html']) {
+      const bytes=await fs.readFile(path.join(root,relative));
+      report.buildArtifacts.push({path:relative,sha256:createHash('sha256').update(bytes).digest('hex')});
+    }
     await launch();
     const state=await application();
     if(state.dialog){await pet.getByTestId('pet-dialog-choice-later').click();await expect.poll(async()=>(await application()).dialog).toBeNull();}
     await navigate('start');await nativeZoomKey('0');await resizeContent(1200,800);
     assert.equal(await page.evaluate(()=>window.petDesignLab?.enabled),true);
+    assert.ok(report.source.selectors.every(item=>item.present),'Actual original source selector absent');
+    assert.ok(Object.values(report.source.dependencies).every(Boolean),'Original controller or surface wiring absent');
     assert.equal(new URL(page.url()).search,'');assert.equal(new URL(page.url()).hash,'');
     await expect(page.getByTestId('start-design-lab')).toBeVisible();
     for(const id of designIds)await expect(page.getByTestId('lab-pick-'+id)).toBeEnabled();
     assert.equal((await demo()).settings.replyMode,'demo');
     report.lab={isolatedProfile:true,fixedConsoleUrl:true,availableVariants:designIds};
+    if (originalControls) await originalBoard();
   });
   await step('five-layouts-and-draft-preservation',async()=>{
     for(const id of designIds){
-      await pickDesign(id);await noOverflow(id+' light1200');await designFrame(id+'-light-1200x800');
+      await pickDesign(id);await noOverflow(id+' light1200');
+      if (originalControls) {report.originalViews??=[];report.originalViews.push(await originalLanguageSample(id));}
+      await designFrame(id+'-light-1200x800');
     }
     for (const id of designIds) {
       await pickDesign(id);
@@ -388,63 +624,193 @@ async function runDesignLab() {
       await expect(page.getByTestId('key-input')).toHaveCount(0);
       await page.getByTestId('model-pick-deepseek').click();
       await revealDesign(id,'pet');await expect(preview().getByTestId('pet-avatar')).toHaveCount(1);
+      if(originalControls)await originalPreviewGeometry(id+'1200 before chat');
       const before=(await application()).history;const cursor=before.at(-1)?.cursor??0;
       await preview().getByTestId('pet-poke').click();
       await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>cursor&&e.reaction==='poke').length).toBe(1);
-      if (!(await preview().getByTestId('pet-composer-input').isVisible())) await preview().getByTestId('pet-chat-toggle').click();
+      if (!(await preview().getByTestId('pet-composer-input').isVisible())) await switchControl(preview().getByTestId('pet-chat-toggle'));
       const text=fixturePrompt+'-'+id;
       await preview().getByTestId('pet-composer-input').fill(text);await preview().getByTestId('pet-composer-send').click();
       await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>cursor&&e.kind==='user').length).toBe(1);
       await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>cursor&&e.kind==='pet').length).toBe(1);
       const state=await demo();assert.equal(state.recordingStartedAt,null);assert.equal(state.settings.replyMode,'demo');
+      const history=(await application()).history.filter(e=>e.cursor>cursor), user=history.find(e=>e.kind==='user'),reply=history.find(e=>e.kind==='pet');
+      assert.equal(user.text,text); assert.equal(reply.mode,'demo');
+      assert.ok(state.messages.some(m=>m.text===user.text)&&state.messages.some(m=>m.text===reply.text),'Native pet and preview must project the same Core records');
+      await expect(preview().getByTestId('pet-composer-input')).toHaveValue('');
+      if(originalControls)await originalPreviewGeometry(id+'1200 long Core bubble',true);
       report.variantActions.push({id,vendorGroups:15,regionAndBrowserReachable:true,poke:1,user:1,reply:1,realCoreHistory:true});
     }
   });
+  if (originalControls) await originalModelSave();
   await step('native-pause-and-visibility',async()=>{
-    const toggle=page.getByTestId('model-pause');await toggle.click();
+    await revealDesign('workspaces','pet');
+    const toggle=page.getByTestId(originalControls ? 'pet-pause' : 'model-pause');await switchControl(toggle);
     await expect.poll(async()=>(await modelState()).paused).toBe(true);assert.equal((await demo()).canSend,false);
-    await toggle.click();await expect.poll(async()=>(await modelState()).paused).toBe(false);
+    await switchControl(toggle);await expect.poll(async()=>(await modelState()).paused).toBe(false);
     await pickDesign('bench');await revealDesign('bench','pet');await page.getByTestId('pet-hide').click();
     await expect.poll(async()=>(await windowState('pet')).visible).toBe(false);
     await pickDesign('stage');await expect(page.getByTestId('pet-show')).toBeVisible();await page.getByTestId('pet-show').click();
     await expect.poll(async()=>(await windowState('pet')).visible).toBe(true);
+    if (originalControls) {
+      const globalMode=await page.locator('html').getAttribute('data-theme'),light=await preview().getAttribute('data-light');
+      await switchControl(preview().getByTestId('pet-light-toggle'));
+      assert.notEqual(await preview().getAttribute('data-light'),light);
+      assert.equal(await page.locator('html').getAttribute('data-theme'),globalMode);
+      const poke=preview().getByTestId('pet-poke');
+      const dragCursor=(await application()).cursor; await poke.scrollIntoViewIfNeeded(); const box=await poke.boundingBox(); assert.ok(box);
+      await page.mouse.move(box.x+box.width/2,box.y+box.height/2); await page.mouse.down();
+      await page.mouse.move(box.x+box.width/2+32,box.y+box.height/2+18,{steps:5}); await page.mouse.up();
+      await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>dragCursor&&e.reaction==='drag').length).toBe(1);
+      assert.equal((await application()).history.filter(e=>e.cursor>dragCursor&&e.reaction==='poke').length,0,'One drag must not synthesize a poke');
+      const keyCursor=(await application()).cursor; await poke.focus(); await poke.press('Enter');
+      await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>keyCursor&&e.reaction==='poke').length).toBe(1);
+      await poke.press('Shift+F10');
+      await expect(preview().getByRole('menu')).toBeVisible(); await page.keyboard.press('Escape');
+      await expect(preview().getByRole('menu')).toHaveCount(0);
+      const mic=preview().getByTestId('pet-mic-toggle'),state=await demo();
+      assert.equal(await mic.isChecked(),false); assert.equal(state.recordingStartedAt,null);
+      assert.equal(await mic.isEnabled(),state.canRecord);
+      report.previewTools={dragExactlyOnce:true,keyboardPokeExactlyOnce:true,keyboardContextMenu:true,escapeDismissal:true,localLightOnly:true,microphoneAvailable:state.canRecord,recordingStarted:false};
+      await preview().scrollIntoViewIfNeeded(); await capture('original-preview-light-1200x800');
+      await page.getByTestId('pet-dress').click();
+      await expect(page.getByRole('heading',{level:1})).toHaveText((await application()).pages.find(p=>p.owner.pluginId==='pet.page-appearance').title);
+      await navigate('start'); await pickDesign('stage'); await revealDesign('stage','pet');
+      await page.getByTestId('pet-hide').click(); await expect.poll(async()=>(await windowState('pet')).visible).toBe(false);
+      const revision=(await application()).profile.revision; await page.getByTestId('start-guide').click();
+      await expect.poll(async()=>(await application()).profile.data.visible).toBe(true);
+      await expect.poll(async()=>(await windowState('pet')).visible).toBe(true);
+      await expect.poll(async()=>(await windowState('console')).visible).toBe(false);
+      await expect.poll(async()=>(await application()).dialog?.step).toBe('welcome');
+      assert.ok((await application()).profile.revision>revision);
+      await pet.getByTestId('pet-dialog-choice-later').click(); await expect.poll(async()=>(await application()).dialog).toBeNull();
+      await settingsFromPet(); await navigate('start');
+      report.guide={savedVisible:true,nativePetShown:true,settingsHidden:true,actualDialog:true};
+    }
     report.nativeReceipts={pausedBlocksInput:true,visibilityCrossLayout:true};
   });
+  if (originalControls) await originalThemeCrud();
   await step('theme-disclosure-and-undo',async()=>{
     await pickDesign('workspaces');await revealDesign('workspaces','theme');
     await chooseMode('dark');await paletteOpen();const before=await paper();
     await paletteHex().fill('#e8eaf0');await expect.poll(paper).toBe('#e8eaf0');
-    await page.getByTestId('workspaces-tab-connect').click();await expect.poll(paper).toBe(before);
+    await (originalControls ? page.getByTestId('workspaces-tab-connect').locator('xpath=ancestor::label[1]') : page.getByTestId('workspaces-tab-connect')).click();await expect.poll(paper).toBe(before);
     for (const id of ['spine','stage']) {
       await pickDesign(id); await revealDesign(id,'theme'); await paletteOpen(); const savedPaper=await paper();
       await paletteHex().fill('#e2e9f2'); await expect.poll(paper).toBe('#e2e9f2');
-      await page.getByTestId(id==='spine'?'spine-toggle-theme':'stage-tray-theme').click(); await expect.poll(paper).toBe(savedPaper);
+      if (originalControls) await (id==='spine' ? page.getByTestId('spine-steps').locator('[data-step="theme"] > details > summary') : page.getByTestId('stage-layout').locator('.sd-stage__tray > summary').filter({hasText:'界面配色'})).click();
+      else await page.getByTestId(id==='spine'?'spine-toggle-theme':'stage-tray-theme').click(); await expect.poll(paper).toBe(savedPaper);
     }
     for(const id of designIds){await pickDesign(id);await noOverflow(id+' dark1200');await designFrame(id+'-dark-1200x800');}
+    if (originalControls) {
+      await page.getByTestId('lab-tab-controls').locator('xpath=ancestor::label[1]').click();
+      await noOverflow('original component board dark1200'); await designFrame('original-control-board-dark-1200x800');
+      await page.getByTestId('lab-tab-layouts').locator('xpath=ancestor::label[1]').click();
+    }
     report.themeLab={globalModeShared:true,unsavedPreviewWithdrawnOnPanelLeave:true};
   });
   await step('minimum-layout-zoom-and-reduced-motion',async()=>{
+    if (originalControls) {
+      await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().includes('/console/index.html')).setSize(500,400));
+      const native=await windowState('console'); assert.deepEqual(native.minimum,[880,600]);
+      assert.equal(native.bounds.width,880); assert.equal(native.bounds.height,600); report.geometry.push({kind:'native-minimum',...native});
+    }
     await resizeContent(880,600);await page.emulateMedia({reducedMotion:'reduce'});
+    assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true);
     for(const id of designIds){
       await pickDesign(id);await noOverflow(id+' minimum');await designFrame(id+'-minimum-880x600');
-      for(const part of ['connect','pet','theme']){await revealDesign(id,part);await noOverflow(id+' '+part+' minimum');}
+      for(const part of ['connect','pet','theme']){await revealDesign(id,part);await noOverflow(id+' '+part+' minimum');if(originalControls&&part==='pet')await originalPreviewGeometry(id+'880 long Core bubble',true);}
     }
     await pickDesign('workspaces');await nativeZoomKey('+');await expect.poll(async()=>(await windowState('console')).zoom).toBeGreaterThan(1);
     await noOverflow('workspaces nativezoom');await nativeZoomKey('0');await page.emulateMedia({reducedMotion:'no-preference'});
     await page.getByTestId('lab-pick-bench').focus();await page.keyboard.press('Enter');await expect(page.getByTestId('lab-canvas')).toHaveAttribute('data-design','bench');
+    await expect(page.getByTestId('lab-pick-bench')).toBeFocused();
     report.minimum={allFive:true,nativeZoom:true,keyboardSelect:true,reducedMotion:true};
   });
   await step('lab-restart-persistence',async()=>{
-    const cursors=(await application()).history.map(e=>e.cursor);await close();await launch();await navigate('start');
+    const beforeHistory=(await application()).history.map(({id,cursor,kind,mode})=>({id,cursor,kind,mode}));
+    const cursors=beforeHistory.map(e=>e.cursor),modelRevision=(await modelState()).revision;
+    await close();await launch();await navigate('start');
     await expect(page.getByTestId('start-design-lab')).toBeVisible();await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-    const retained=new Set((await application()).history.map(e=>e.cursor));assert.ok(cursors.every(c=>retained.has(c)));
+    const afterHistory=(await application()).history; const retained=new Set(afterHistory.map(e=>e.cursor));assert.ok(cursors.every(c=>retained.has(c)));
+    assert.ok(beforeHistory.every(e=>afterHistory.some(n=>n.id===e.id&&n.cursor===e.cursor&&n.kind===e.kind&&n.mode===e.mode)),'Core record identities or kinds changed across restart');
     assert.equal((await demo()).settings.replyMode,'demo');
-    report.labPersistence={retainedHistoryEntries:cursors.length,themeMode:'dark',isolatedProfile:true};
+    if (originalControls) {
+      const saved=await modelState(); assert.equal(saved.revision,modelRevision); assert.equal(saved.active,null);
+      assert.equal(saved.endpoints.find(e=>e.id==='deepseek').keyConfigured,true);
+      await pickDesign('bench'); await revealDesign('bench','theme'); await chooseScheme(customLabel); await paletteOpen();
+      await expect(paletteHex()).toHaveValue('#1A2B3C'); await chooseMode('light'); await expect(paletteHex()).toHaveValue('#234567');
+      await chooseMode('dark'); await chooseScheme('青港');
+    }
+    report.labPersistence={retainedHistoryEntries:cursors.length,themeMode:'dark',isolatedProfile:true,customVariants:originalControls,keyPresentWithoutActivation:originalControls};
   });
   assert.equal(report.errors.length,0);assert.equal(report.rendererRemoteOrigins.length,0);report.status='passed';
 }
 
+async function runCollapsedCheck() {
+  await fs.mkdir(output,{recursive:true});
+  await step('collapsed-footer-visibility-and-keyboard',async()=>{
+    report.mode='collapsed-css-delta'; report.source=await inspectSource();
+    const basePath='qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/acceptance-report.json';
+    const base=JSON.parse(await fs.readFile(path.join(root,basePath),'utf8'));
+    assert.equal(base.status,'passed');
+    const changed=Object.keys(report.source.fingerprints).filter(key=>base.source.fingerprints[key]?.sha256!==report.source.fingerprints[key].sha256);
+    assert.ok(changed.every(key=>['probe','shellCss'].includes(key)),'Product changes outside collapsed footer CSS require broader acceptance');
+    report.baseNative={report:basePath,sourceDigest:base.source.sourceDigest,checksPassed:base.checks.length,changedFiles:changed.map(key=>report.source.fingerprints[key].path)};
+    report.assumptions=report.assumptions.filter(line=>!line.includes('synthetic model Key')&&!line.includes('Model success'));
+    report.assumptions.push('This bounded CSS delta checks only native collapsed footer visibility and theme keyboard/pointer activation; the separate base report owns Core/model/theme business acceptance.');
+    report.buildArtifacts=[];
+    for(const relative of ['apps/desktop/dist/main/index.mjs','apps/desktop/dist/runtime/worker.cjs','apps/desktop/dist/preload/index.cjs','apps/desktop/dist/renderer/console/index.html']){
+      const bytes=await fs.readFile(path.join(root,relative));report.buildArtifacts.push({path:relative,sha256:createHash('sha256').update(bytes).digest('hex')});
+    }
+    await launch(false);const state=await application();
+    if(state.dialog){await pet.getByTestId('pet-dialog-choice-later').click();await expect.poll(async()=>(await application()).dialog).toBeNull();}
+    await navigate('start');await nativeZoomKey('0');await resizeContent(1200,800);
+    assert.equal(await page.evaluate(()=>window.petDesignLab),undefined);
+    await page.getByRole('button',{name:'收起侧栏',exact:true}).click();
+    await expect(page.getByTestId('settings-shell')).toHaveAttribute('data-rail','collapsed');
+    const group=page.getByTestId('settings-sidebar').getByTestId('theme-select'),modes=['light','dark','system'];
+    await expect(group.getByRole('radio')).toHaveCount(3);report.collapsedModes=[];report.collapsedPointer=[];
+    for(const [width,height] of [[1200,800],[880,600]]){
+      await resizeContent(width,height);
+      await expect.poll(async()=>(await page.getByTestId('settings-sidebar').boundingBox()).width).toBe(72);
+      await noOverflow('collapsed '+width+'x'+height);
+      const measured=await group.evaluate(node=>{
+        const rail=node.closest('[data-testid="settings-sidebar"]');if(!rail)throw new Error('Missing real collapsed sidebar');
+        const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+        return {rail:rect(rail),viewport:{width:innerWidth,height:innerHeight},choices:[...node.querySelectorAll('label')].map(label=>({label:rect(label),text:rect(label.querySelector('.pb-choice__text')),mode:label.querySelector('input').value,textClient:label.querySelector('.pb-choice__text').clientWidth,textScroll:label.querySelector('.pb-choice__text').scrollWidth}))};
+      });
+      for(const choice of measured.choices){const {label,text}=choice,rail=measured.rail;
+        assert.ok(label.width>=28&&label.height>=28,'Collapsed theme target is too small');
+        assert.ok(label.x>=rail.x-1&&label.right<=rail.right+1&&label.y>=rail.y-1&&label.bottom<=rail.bottom+1&&label.bottom<=height+1,'Collapsed theme choice is clipped: '+choice.mode);
+        assert.ok(text.x>=label.x-1&&text.right<=label.right+1&&choice.textScroll<=choice.textClient+1,'Collapsed theme label is clipped: '+choice.mode);
+      }
+      report.geometry.push({kind:'collapsed-footer',...measured});
+      for(const mode of modes){
+        const radio=group.locator('input[value="'+mode+'"]');await radio.locator('xpath=ancestor::label[1]').click();
+        await expect(radio).toBeChecked();await expect(page.locator('html')).toHaveAttribute('data-theme',mode);
+        report.collapsedPointer.push({width,height,mode,actualPointer:true});
+      }
+      const light=group.locator('input[value="light"]');await light.focus();await light.press('Space');
+      for(let index=0;index<modes.length;index++){
+        if(index>0)await page.keyboard.press('ArrowDown');
+        const mode=modes[index],radio=group.locator('input[value="'+mode+'"]');
+        await expect(radio).toBeFocused();await expect(radio).toBeChecked();await expect(page.locator('html')).toHaveAttribute('data-theme',mode);
+        const focus=await radio.locator('xpath=ancestor::label[1]').locator('.pb-choice__text').evaluate(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return {style:s.outlineStyle,width:parseFloat(s.outlineWidth),offset:parseFloat(s.outlineOffset),x:r.x,y:r.y,right:r.right,bottom:r.bottom};});
+        assert.ok(focus.style!=='none'&&focus.width>=1,'Collapsed theme keyboard focus is invisible: '+mode);
+        const extent=focus.width+Math.max(0,focus.offset);
+        assert.ok(focus.x-extent>=measured.rail.x-1&&focus.right+extent<=measured.rail.right+1&&focus.y-extent>=measured.rail.y-1&&focus.bottom+extent<=height+1,'Collapsed focus outline is clipped: '+mode);
+        report.collapsedModes.push({width,height,mode,keyboard:true,fullyVisible:true,focus});
+        await capture('collapsed-'+mode+'-'+width+'x'+height);
+      }
+    }
+    assert.equal(report.errors.length,0);assert.equal(report.rendererRemoteOrigins.length,0);
+  });
+  report.status='passed';
+}
+
 async function run() {
+  if (collapsedCheck) return runCollapsedCheck();
   if (designLab) return runDesignLab();
   assert.equal(process.platform, 'win32', 'This UI acceptance targets Windows x64');
   assert.equal(process.arch, 'x64');
@@ -785,6 +1151,10 @@ if (process.argv.includes('--source-check')) {
   } catch (error) {
     report.status = 'failed'; report.failure = redact(error);
     if (activeCheck?.status === 'running') { activeCheck.status = 'failed'; activeCheck.error = report.failure; }
+    if (originalControls && page && !page.isClosed() && !timedOut) {
+      try { await capture('failure-' + (activeCheck?.name ?? 'native-start')); }
+      catch (captureError) { report.failureCaptureError = redact(captureError); }
+    }
     if (pet && !pet.isClosed()) {
       let diagnosticTimer;
       try {

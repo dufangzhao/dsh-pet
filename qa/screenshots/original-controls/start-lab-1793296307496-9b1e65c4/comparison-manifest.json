@@ -1,0 +1,40 @@
+{
+  "kind": "derived-screenshot-comparison",
+  "report": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/acceptance-report.json",
+  "sourceDigest": "1c00dc6a50142d52c312ec00fd6733e61d2076d6d8495781c3490e29f12f62e8",
+  "sources": [
+    {
+      "label": "旧稿 · 用户退回的复刻控件",
+      "file": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/light-1200x800.png",
+      "sha256": "15d0f23eae1c2f0f9950f6029b8bf7eb1ad6a2395b6d06632200bb0a08171ff2",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "label": "当前 · 日常三节",
+      "file": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-normal-light-1200x800.png",
+      "sha256": "ffaadc2542aba698298deb1518ad8751befafbe3590ae7eca40c22931fa6482c",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "label": "当前 · 控件与状态（浅色）",
+      "file": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-light-1200x800.png",
+      "sha256": "5c5c8be5a9d4c3799fbe857991b095e65dd036521746e1759d2ffe0a95588253",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "label": "当前 · 控件与状态（深色）",
+      "file": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-dark-1200x800.png",
+      "sha256": "bb590ad2af6a568a911cf36e7cf4b4b9b0c9f8f9bfb4616d2549b5de377d6113",
+      "width": 1200,
+      "height": 800
+    }
+  ],
+  "output": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-controls-before-after.png",
+  "sha256": "2500f2294df47823db1fa92d1d8aedac6308905df2ab6b5ae87baa2f84c98e4a",
+  "width": 1264,
+  "height": 1000,
+  "transform": "Uniform resize and labelled montage only; no reconstructed UI or changed source images"
+}

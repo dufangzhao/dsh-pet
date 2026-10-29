@@ -1,0 +1,162 @@
+{
+  "status": "failed",
+  "at": "2026-10-29T17:24:56.127Z",
+  "profileId": "start-lab-1793294696127-967f429f",
+  "checks": [
+    {
+      "name": "original-normal-and-components",
+      "status": "failed",
+      "error": "page.evaluate: Error: Missing real layout node: [data-testid=\"start-design-lab\"]\n    at eval (eval at evaluate (:370:30), <anonymous>:3:22)\n    at Array.map (<anonymous>)\n    at eval (eval at evaluate (:370:30), <anonymous>:1:24)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    {
+      "name": "original-model-save-with-network-denial",
+      "status": "not-run"
+    },
+    {
+      "name": "original-theme-crud-and-variants",
+      "status": "not-run"
+    },
+    {
+      "name": "source-and-real-profile",
+      "status": "not-run"
+    },
+    {
+      "name": "five-layouts-and-draft-preservation",
+      "status": "not-run"
+    },
+    {
+      "name": "each-layout-actions-and-shared-history",
+      "status": "not-run"
+    },
+    {
+      "name": "native-pause-and-visibility",
+      "status": "not-run"
+    },
+    {
+      "name": "theme-disclosure-and-undo",
+      "status": "not-run"
+    },
+    {
+      "name": "minimum-layout-zoom-and-reduced-motion",
+      "status": "not-run"
+    },
+    {
+      "name": "lab-restart-persistence",
+      "status": "not-run"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "original-normal-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793294696127-967f429f/original-normal-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "failure-original-normal-and-components",
+      "file": "qa/screenshots/original-controls/start-lab-1793294696127-967f429f/failure-original-normal-and-components.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    }
+  ],
+  "shutdown": [
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    }
+  ],
+  "errors": [],
+  "rendererRemoteOrigins": [],
+  "approvals": [],
+  "geometry": [],
+  "assumptions": [
+    "The QA integrator rebuilt current Main, worker, builtin admission and renderer after product freeze before this serial run.",
+    "This launches the unpackaged application with a unique real userData under .cache.",
+    "--no-sandbox is the existing native QA exception; this is not OS-sandbox evidence.",
+    "No fake media device, fake UI, scripted provider, fake bridge, localStorage write, or external sign-in is used.",
+    "The synthetic model Key is saved only to the isolated native credential store; its network permission is denied through the real pet dialog.",
+    "Model success and OAuth callback behavior are covered by separate offline probes; this runner does not fabricate them."
+  ],
+  "limitations": [
+    "Playwright pointer input does not prove physical desktop hit testing or native microphone capture.",
+    "Renderer request observation is not a packet capture of worker traffic; the model guard is the actual network approval denial.",
+    "Screenshots use the same content viewport at zoom 1. Original-control screenshots mask populated private inputs and the reply bubble; negative DOM checks alone do not establish originality."
+  ],
+  "originalNormal": {
+    "label": "normalStart",
+    "legacyWidgets": 0,
+    "originalControlCount": 77
+  },
+  "previewGeometry": [
+    {
+      "label": "normal1200",
+      "avatar": {
+        "x": 519,
+        "y": 323.984375,
+        "width": 152,
+        "height": 152,
+        "right": 671,
+        "bottom": 475.984375
+      },
+      "well": {
+        "x": 297,
+        "y": 264.234375,
+        "width": 596,
+        "height": 244,
+        "right": 893,
+        "bottom": 508.234375
+      },
+      "bubble": {
+        "x": 531,
+        "y": 280.234375,
+        "width": 128,
+        "height": 35.5,
+        "right": 659,
+        "bottom": 315.734375,
+        "length": 8,
+        "lines": 1,
+        "contentWidth": 104,
+        "scroll": 128,
+        "client": 128
+      }
+    }
+  ],
+  "failure": "page.evaluate: Error: Missing real layout node: [data-testid=\"start-design-lab\"]\n    at eval (eval at evaluate (:370:30), <anonymous>:3:22)\n    at Array.map (<anonymous>)\n    at eval (eval at evaluate (:370:30), <anonymous>:1:24)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "failureState": {
+    "agent": "ready",
+    "code": null,
+    "dialogStep": null,
+    "desktop": {
+      "available": true,
+      "shown": true
+    },
+    "profileRevision": 1,
+    "delivery": {
+      "phase": "idle",
+      "error": null,
+      "mode": "demo",
+      "paused": false,
+      "canSend": true,
+      "messages": [],
+      "history": [
+        {
+          "kind": "application",
+          "cursor": 1
+        }
+      ]
+    },
+    "model": {
+      "active": null,
+      "paused": false
+    },
+    "pending": []
+  },
+  "mainLogBytes": 145
+}

@@ -19,9 +19,9 @@ export const START_DESIGN_ORDER: readonly StartDesignId[] = [
 export const START_DESIGN_METAS: Readonly<Record<StartDesignId, StartDesignMeta>> = {
   baseline: {
     id: 'baseline',
-    name: '基线复刻',
-    intent: '已验证的三节顺序：连接模型、我的桌宠、界面配色。',
-    tradeoff: '结构最保守，不引入新的信息层级。',
+    name: '日常三节',
+    intent: '普通入口的那一屏：连接模型、我的桌宠、界面配色，自上而下读。',
+    tradeoff: '信息层级最保守，一屏里三件事都要滚一下。',
   },
   bench: {
     id: 'bench',

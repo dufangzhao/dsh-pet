@@ -169,7 +169,7 @@ export function PersonaPage({ app, notify }: PersonaPageProps): JSX.Element {
                 {nameEdited ? '名字还没保存' : '名字与本机存的一致'}
               </span>
               {app.conflict ? (
-                <span className="pk-row__error" role="alert">
+                <span className="pb-row__error" role="alert">
                   {PROFILE_CONFLICT}
                 </span>
               ) : null}

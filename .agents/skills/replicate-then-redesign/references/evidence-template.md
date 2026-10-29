@@ -20,6 +20,13 @@ Distinguish stored data from successful connection, accepted work from completed
 
 Use the requested count. If removing the palette makes two options identical, explain or strengthen their structural difference.
 
+## Component originality
+
+| Family | Reference / rejected characteristic | Our actual structure and interaction | Source or original design | State / screenshot evidence |
+| --- | --- | --- | --- | --- |
+
+Inspect the implemented button, field, picker, feedback, preview tools and shared shell independently of the grid. A new class name, palette, layout or test marker does not by itself establish an original component.
+
 ## Adopted assets
 
 | Asset / role | Exact URL / version | Author | License evidence | Adaptation / scope |

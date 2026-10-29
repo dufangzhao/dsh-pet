@@ -1,191 +1,45 @@
-/*
- * 桌宠在场这一版的排版：一块舞台、一条常驻状态、一个两格 dock、抽屉走文档流。
- *
- * 颜色与圆角全部取 @pet/ui-kit 的语义令牌，这里不写死任何配色——「界面配色」那一节会改这
- * 36 个 token，写死的值到了深色或自定义方案里就是脏的。反馈时长跟设置台已有的分段控件
- * 一致（0.16s，指示件走位这条微交互的来处见 .trellis/tasks/10-29-start-design-variants/
- * research/materials，Uiverse 以 MIT 发布，这里只借手法、按本项目令牌重写）。
- *
- * 一处结构约定：抽屉与状态条都在舞台之后，靠文档流把下面的内容推走，不用绝对定位，
- * 所以气泡和桌宠的脸永远不会被 dock 或托盘压住。
+/**
+ * stage「桌宠在场」：先看见它，接线与配色放在下面两段抽屉。
+ * 段与状态条都在这套控件自己的形状上，这里只排高度与顺序。
  */
 
 .sd-stage {
   display: grid;
-  gap: 12px;
+  gap: var(--pb-s-4);
   min-width: 0;
 }
 
 .sd-stage__head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 12px;
+  align-items: center;
+  gap: var(--pb-s-3);
 }
 
 .sd-stage__title {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--pk-text);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-page);
+  letter-spacing: var(--pb-tracking-display);
 }
-
-/* 桌面在不在：话是宿主给的，形状是五个版式共用的那对眼；颜色只是辅助，不是唯一信息。 */
-.sd-stage__presence {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  font-size: 12.5px;
-  color: var(--pk-muted);
-}
-
-.sd-stage__presence[data-tone='on'] {
-  color: var(--pk-ok);
-}
-
-/* ---- 舞台：真实预览，400 起步，随内容长大 ---- */
 
 .sd-stage__pet {
   min-width: 0;
 }
 
-/* 只在这一版里把场景抬高；预览内部的角色、气泡、麦克风入口一概不动。 */
-.sd-stage__pet .pet-preview__scene {
-  min-height: 400px;
-}
-
-/* 矮窗口（880×600 这类）里让回预览本身的下限，不把状态条挤出屏幕。 */
-@media (max-height: 760px) {
-  .sd-stage__pet .pet-preview__scene {
-    min-height: 260px;
-  }
-}
-
-.sd-stage__pet .start-petline {
-  margin-top: 10px;
-}
-
-/* ---- 常驻状态 ---- */
-
-/* 这一行有时是空的（还没读到模型配置时插槽自己就不画东西），所以这里不给分隔线：
-   分隔由下面 dock 自己的边框承担，空状态不会剩一条没有内容的细线。 */
 .sd-stage__status {
-  min-width: 0;
+  padding: var(--pb-s-2) var(--pb-s-3);
+  border-left: 3px solid var(--pb-line-strong);
+  background-color: var(--pb-sheet-2);
 }
-
-/* ---- 两格 dock：合起来是一对披露按钮，展开状态由 aria-expanded 说 ---- */
 
 .sd-stage__dock {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--pk-border-strong);
-  border-radius: var(--pk-radius);
-  background: var(--pk-sunken);
-}
-
-.sd-stage__dock-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 34px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: calc(var(--pk-radius) - 2px);
-  background: transparent;
-  color: var(--pk-muted);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    color 0.16s ease;
-}
-
-.sd-stage__dock-item:hover {
-  color: var(--pk-text);
-}
-
-/* 窄列里标签自己截断，不折成两行，也不把小三角挤出去。 */
-.sd-stage__dock-label {
+  gap: var(--pb-s-2);
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-.sd-stage__dock-item:focus-visible {
-  outline: 2px solid var(--pk-ring);
-  outline-offset: -1px;
-}
-
-/* 开着的那一格得到与设置台分段件同样的实心块：两块皮肤是同一套词汇。 */
-.sd-stage__dock-item.is-open {
-  background: var(--pk-bg);
-  box-shadow: var(--pk-shadow-1);
-  color: var(--pk-text);
-  font-weight: 600;
-}
-
-/* 小三角是 CSS 画的，不是第二套图标语言；开合时它转个方向，含义仍由文字与 aria 承担。 */
-.sd-stage__dock-caret {
-  width: 6px;
-  height: 6px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg) translateY(-1px);
-  transition: transform 0.16s ease;
-}
-
-.sd-stage__dock-item.is-open .sd-stage__dock-caret {
-  transform: rotate(-135deg) translateY(-1px);
-}
-
-/* ---- 抽屉：在流里展开，把下方内容推开 ---- */
-
-.sd-stage__tray {
+.sd-stage__tray .pb-fold__body {
   display: grid;
-  gap: 4px;
-  min-width: 0;
-  padding: 12px 2px 2px;
-  border-top: 1px solid var(--pk-border);
-  animation: sd-stage-open 0.16s ease-out;
-}
-
-@keyframes sd-stage-open {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* 减少动态：走位与淡入都去掉；展开本身还看得见，因为抽屉就在原来那块地方出现。 */
-@media (prefers-reduced-motion: reduce) {
-  .sd-stage__tray {
-    animation: none;
-  }
-
-  .sd-stage__dock-item,
-  .sd-stage__dock-caret {
-    transition: none;
-  }
-}
-
-/* 正文列被压窄（折叠侧栏 + 880 窗口）时，两格各自占一整行，字不挤成两行。 */
-@media (max-width: 620px) {
-  .sd-stage__dock {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sd-stage__dock-item {
-    justify-content: flex-start;
-  }
+  gap: var(--pb-s-4);
 }

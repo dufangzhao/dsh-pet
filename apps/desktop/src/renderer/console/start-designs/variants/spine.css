@@ -1,120 +1,33 @@
-/*
- * spine 的竖脊：一条主线，三段各自展开。
- * 只写这一版自己的结构，颜色与圆角仍取 --pk-* 令牌；共享的评审外壳样式在 lab.css。
+/**
+ * spine「从连接到见面」：三段抽屉按顺序读下去。
+ * 抽屉本体是 kit 的 Disclosure（原生 details），这里只管编号列与间距。
  */
 
 .sd-spine {
   display: grid;
-  gap: 0;
+  gap: var(--pb-s-2);
   margin: 0;
   padding: 0;
   list-style: none;
-  border-left: 1px solid var(--pk-border);
-}
-
-.sd-step {
-  position: relative;
-  display: grid;
-  gap: 0;
-  padding: 0 0 0 18px;
-}
-
-.sd-step + .sd-step {
-  margin-top: 4px;
-}
-
-/* 脊上的结：展开的那一段亮着，不代表下一段该轮到谁。 */
-.sd-step::before {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: 16px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--pk-border-strong);
-}
-
-.sd-step.is-open::before {
-  background: var(--pk-accent);
-}
-
-.sd-step__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-}
-
-.sd-step__index {
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--pk-muted);
-}
-
-.sd-step__marker {
-  display: inline-flex;
-  color: var(--pk-muted);
-}
-
-.sd-step.is-open .sd-step__marker {
-  color: var(--pk-accent-text);
-}
-
-.sd-step__toggle {
-  display: flex;
-  flex: 1;
-  align-items: baseline;
-  gap: 8px;
+  counter-reset: step;
   min-width: 0;
-  padding: 6px 4px;
-  border: 0;
-  border-radius: var(--pk-radius);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 }
 
-.sd-step__toggle:hover {
-  background: var(--pk-surface);
+.sd-spine__step {
+  border-left: 3px solid var(--pb-line);
+  padding-left: var(--pb-s-3);
 }
 
-.sd-step__title {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.sd-spine__step[data-step='connect'] {
+  border-left-color: var(--pb-accent);
 }
 
-.sd-step__hint {
-  overflow: hidden;
-  font-size: 12.5px;
-  color: var(--pk-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.sd-spine__step[open],
+.sd-spine__step .pb-fold[open] {
+  border-left-color: var(--pb-ok);
 }
 
-.sd-step__body {
+.sd-spine__step .pb-fold__body {
   display: grid;
-  gap: 12px;
-  padding: 2px 4px 20px;
-}
-
-.sd-step__body[hidden] {
-  display: none;
-}
-
-/* 窄窗口（880 以下）先保住正文：提示词收起来，标题与状态仍在。 */
-@media (max-width: 900px) {
-  .sd-step__hint {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sd-step::before,
-  .sd-step__toggle {
-    transition: none;
-  }
+  gap: var(--pb-s-4);
 }

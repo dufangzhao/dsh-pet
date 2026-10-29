@@ -4,15 +4,15 @@
 
 ## 插件式基础版本已执行（e6b291d）
 
-| 检查 | 结果与证据 |
-| --- | --- |
-| pnpm check | 全工作区类型、测试、QA、lint、格式、构建通过；最终提交前按最后源变化再确认 |
-| Core 实际运行 | [runtime report](cortico-runtime-results.json)：事件/完整Generation/工具/媒体、取消、重启5项 |
-| 普通智能体插件 | [plugin report](cortico-plugin-results.json)：发现与来源、配置CAS/权限、统一游标与停止/重启5项；退出已确认 |
-| 共享应用后端 | [app report](application-backend-results.json)：9项，含气泡直接引导、5017字提示词、实际语音开关、清空、较早记录/增量游标、停用恢复、外部页面配置与动作/故障撤下 |
-| 模型配置审批 | [model report](application-model-results.json)：4项；4个完整请求，允许只增加一次版本，拒绝不变，旧确认/版本冲突被拒，私有canary没有进入模型或媒体 |
-| 实际GUI | [GUI report](screenshots/application/acceptance-report.json)：9组全部通过，主进程与页面无异常，两个启动进程均正常退出 |
-| 实际鼠标 | [native pointer](pet-pointer-results.json)：Win32 SetCursorPos/SendInput，仅自有窗口；透明角落点击进入单独进程，角色拖动位移并释放，真实设置按钮打开窗口；最后鼠标已还原 |
+| 检查           | 结果与证据                                                                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| pnpm check     | 全工作区类型、测试、QA、lint、格式、构建通过；最终提交前按最后源变化再确认                                                                                               |
+| Core 实际运行  | [runtime report](cortico-runtime-results.json)：事件/完整Generation/工具/媒体、取消、重启5项                                                                             |
+| 普通智能体插件 | [plugin report](cortico-plugin-results.json)：发现与来源、配置CAS/权限、统一游标与停止/重启5项；退出已确认                                                               |
+| 共享应用后端   | [app report](application-backend-results.json)：9项，含气泡直接引导、5017字提示词、实际语音开关、清空、较早记录/增量游标、停用恢复、外部页面配置与动作/故障撤下          |
+| 模型配置审批   | [model report](application-model-results.json)：4项；4个完整请求，允许只增加一次版本，拒绝不变，旧确认/版本冲突被拒，私有canary没有进入模型或媒体                        |
+| 实际GUI        | [GUI report](screenshots/application/acceptance-report.json)：9组全部通过，主进程与页面无异常，两个启动进程均正常退出                                                    |
+| 实际鼠标       | [native pointer](pet-pointer-results.json)：Win32 SetCursorPos/SendInput，仅自有窗口；透明角落点击进入单独进程，角色拖动位移并释放，真实设置按钮打开窗口；最后鼠标已还原 |
 
 GUI使用真实页面按钮与输入完成初始名字/配色/语音/回应选择、键入聊天、提示词保存、两个形态/四种配色/三种大小、原生置顶/隐藏与隐藏预览；真实戳后红晕显示，再记录一条脸红回执，之后恢复。深浅主题、760×560窗口与键盘放大/缩小/复位无横向溢出。键盘加速经Electron原生sendInputEvent路径验证，CDP键事件绕过before-input-event，不能把它当作OS加速器证据。
 
@@ -41,3 +41,11 @@ GUI使用真实页面按钮与输入完成初始名字/配色/语音/回应选�
 - [replicate-then-redesign](../.agents/skills/replicate-then-redesign/SKILL.md)已入项目并可被skilltool发现；格式校验与[独立气泡前向计划测试](replica-redesign-skill-results.md)完成。新气泡功能没有在此任务实现，规划产物不冒称native通过。
 
 模型协议/真人账号/费用验证范围沿用前述已接受证据；本轮没有真人授权或付费模型请求。正常资料目录未用于评审；flag单独运行使用.cache/pet-start-design-lab-profile，自动验收使用唯一隔离profile。最终评审打开元数据见[start-design-review-open.json](start-design-review-open.json)。
+
+## 后续纠正：原创控件体系
+
+用户退回上一轮的控件语言；旧截图保留为退回稿。原创 kit、外壳、状态/动作层、预览与配色已实现。[基础原生报告](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/acceptance-report.json) 10/10 通过、27 图、三个应用进程均正常退出，覆盖保存后网络拒绝、Core 历史、36 色事务与五版最小窗口/缩放/重启。独立视觉复审实际 PASS，原头像/窄场景阻塞关闭。
+
+随后完整 `pnpm check` 退出 0：[原始输出](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/workspace-check.log)含 523 项桌面测试（52 文件）、其余 workspace 测试、QA 120 通过/1 跳过/0 失败、类型、lint、格式与构建。本次全检查先于后续折叠栏 CSS 修正；该修正另有 43 项定点测试/格式通过及[最终稳态原生增量](screenshots/original-controls/collapsed-1793300116862-5ff40377/acceptance-report.json)通过：两种窗口均为 72px，三档主题指针/键盘与完整焦点可见，6 图、单次进程正常退出。仅 probe 与侧栏 CSS 变动；[合并指纹](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/integration-evidence.json)已核对当前 47 个文件。
+
+本轮的组件替换、五版取舍、技能验证与实际截图统一见[原创控件评审](original-controls-review.md)；原生执行细节由[QA 执行记录](original-controls-results.md)维护。

@@ -113,7 +113,7 @@ function History({ app }: { app: ApplicationState }): JSX.Element {
             </Button>
           ) : null}
           {app.historyError === null ? null : (
-            <p className="pk-row__error" role="alert" data-testid="history-earlier-error">
+            <p className="pb-row__error" role="alert" data-testid="history-earlier-error">
               更早的记录没有读出来：{app.historyError}
             </p>
           )}

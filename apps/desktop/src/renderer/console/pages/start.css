@@ -1,242 +1,339 @@
-/*
- * 开始页的三块：模型选择行、Key 与模型那一排、桌宠按钮行。
+/**
+ * Start 自己的排版层：段落外壳、目录、接线表单与回执板。
  *
- * 颜色与圆角仍取 --pk-* 令牌；这里只写这一页特有的形状——服务是一排可选的胶囊，
- * 在用的那颗点亮，另一块平台的收在「更多」后面。
+ * 控件的形状一律来自 original-ui/design-tokens.css 与 kit.css（--pb-*），这一份只补三件事：
+ * 段落的节奏、目录的排布、回执板那三行。旧的 .start-chip / pk-input / pk-pill 都不在这里，
+ * Start 的呈现也不再借设置台的分组。
  */
 
-.start-note {
-  margin: 0;
-  max-width: 72ch;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--pk-muted);
-}
+/* ------------------------------------------------------------------ 段落外壳 */
 
-.start-picker {
+.sc-section {
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: 10px 12px;
-  align-items: start;
-  margin-top: 4px;
+  gap: var(--pb-s-3);
+  min-width: 0;
+  padding: var(--pb-s-4) 0;
+  border-top: var(--pb-hairline) solid var(--pb-line);
 }
 
-.start-grouplabel {
+.sc-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.sc-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--pb-s-2) var(--pb-s-4);
+}
+
+.sc-section__names {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 22ch;
+}
+
+.sc-section__title {
   margin: 0;
-  padding-top: 7px;
-  font-size: 13px;
-  color: var(--pk-muted);
-  white-space: nowrap;
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-title);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+  color: var(--pb-ink);
 }
 
-.start-chip__mark {
-  /* 22px 白底方形标记：黑色品牌形在深色芯片上也看得见，alt 为空——名字就在旁边。 */
-  width: 22px;
-  height: 22px;
-  flex: none;
-  padding: 2px;
-  border-radius: 6px;
+.sc-section__note {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--pb-size-note);
+  line-height: 1.55;
+  color: var(--pb-ink-dim);
+}
+
+.sc-section__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pb-s-2);
+  margin-left: auto;
+}
+
+.sc-section__body {
+  display: grid;
+  gap: var(--pb-s-4);
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ 状态一行 */
+
+.sc-statusline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pb-s-2);
+  min-width: 0;
+}
+
+.sc-statusline__notice {
+  font-size: var(--pb-size-micro);
+  color: var(--pb-warn);
+}
+
+.sc-loading {
+  margin: 0;
+  font-size: var(--pb-size-note);
+  color: var(--pb-ink-dim);
+}
+
+.sc-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pb-s-2);
+  padding: 2px var(--pb-s-2);
+  border-left: 3px solid var(--pb-line-strong);
+  font-size: var(--pb-size-micro);
+  color: var(--pb-ink-soft);
+}
+
+.sc-presence[data-tone='on'] {
+  border-left-color: var(--pb-ok);
+}
+
+/* ---------------------------------------------------------------- 服务目录 */
+
+.sc-provider {
+  display: grid;
+  gap: var(--pb-s-3);
+  min-width: 0;
+}
+
+.sc-provider__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--pb-s-2) var(--pb-s-3);
+}
+
+.sc-provider__search {
+  flex: 1 1 24ch;
+  min-width: 0;
+}
+
+.sc-provider__count {
+  font-size: var(--pb-size-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--pb-ink-dim);
+}
+
+.sc-provider__grid {
+  display: grid;
+  /* 一格至少 214px：服务名整行读完，注记另起一行；1200 的正文列里三列，不放四列挤名字。 */
+  grid-template-columns: repeat(auto-fill, minmax(214px, 1fr));
+  gap: var(--pb-s-2);
+}
+
+/* 名称与注记分两行，名称不省略：kit 默认单行截断，目录这一处需要完整名字。 */
+.sc-provider .pb-tile {
+  align-items: flex-start;
+}
+
+.sc-provider .pb-tile__name {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+  min-height: calc(2 * 1.35em);
+}
+
+.sc-provider .pb-tile__note {
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.sc-provider__list {
+  display: grid;
+  gap: var(--pb-s-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sc-provider__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pb-s-2) var(--pb-s-3);
+  padding-bottom: var(--pb-s-1);
+  border-bottom: var(--pb-hairline) solid var(--pb-line);
+}
+
+.sc-provider__item .pb-tile {
+  flex: 1 1 24ch;
+  min-width: 0;
+}
+
+.sc-provider__meta {
+  font-size: var(--pb-size-micro);
+  color: var(--pb-ink-dim);
+}
+
+.sc-provider__mark {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  border-radius: 3px;
   background: #fff;
   object-fit: contain;
 }
 
-.start-chipline {
+.sc-empty {
+  margin: 0;
+  font-size: var(--pb-size-note);
+  color: var(--pb-ink-dim);
+}
+
+/* ---------------------------------------------------------------- 接线表单 */
+
+.sc-form {
+  display: grid;
+  gap: var(--pb-s-3);
+  min-width: 0;
+  padding: var(--pb-s-4);
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-radius: var(--pb-radius-sheet);
+  background-color: var(--pb-sheet);
+}
+
+.sc-form__who {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-/* 在用的那一行不折行：长模型名截断，「测试连接」不能被挤掉。 */
-.start-chipline--current {
-  flex-wrap: nowrap;
-}
-
-.start-chipline--current .start-chip {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-/* 结果那句吃掉剩余宽度并允许断行：长原因不能把「测试连接」顶出这一栏。 */
-.start-chipline--current > .pk-button {
-  flex: none;
-}
-
-.start-chipline--current .start-result {
-  flex: 1 1 auto;
-  min-width: 0;
+  gap: var(--pb-s-2) var(--pb-s-3);
   margin: 0;
+  font-size: var(--pb-size-body);
+  font-weight: 600;
 }
 
-.start-chipline--current .start-chip > span,
-.start-chipline--current .start-chip {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.sc-form__name {
+  font-family: var(--pb-font-display);
+  letter-spacing: var(--pb-tracking-display);
 }
 
-.start-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--pk-border);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--pk-muted);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    color 0.15s ease;
+.sc-form__region {
+  font-size: var(--pb-size-micro);
+  font-weight: 400;
+  color: var(--pb-ink-dim);
 }
 
-.start-chip:hover:not(:disabled) {
-  border-color: var(--pk-border-strong);
-  color: var(--pk-text);
-}
-
-.start-chip.is-on {
-  border-color: var(--pk-accent);
-  background: color-mix(in srgb, var(--pk-accent) 10%, transparent);
-  color: var(--pk-text);
-}
-
-.start-chip:disabled {
-  cursor: default;
-  color: var(--pk-muted);
-  border-style: dashed;
-}
-
-.start-chip__off {
-  font-size: 11px;
-  color: var(--pk-muted);
-}
-
-.start-none {
-  font-size: 13px;
-  color: var(--pk-muted);
-}
-
-/*
- * 模型、Key 与「保存并开始」同一排：模型固定 240 的基准宽，Key 吃剩下的宽度，
- * 三个控件底边对齐、同高（40px）。放不下时才整排折行。
- */
-.start-fields {
+.sc-fields {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 10px 12px;
-  margin-top: 16px;
+  gap: var(--pb-s-3);
 }
 
-.start-field {
-  display: grid;
-  gap: 4px;
-  flex: 1 1 200px;
+.sc-fields__model {
+  flex: 0 1 20ch;
   min-width: 0;
 }
 
-.start-field--model {
-  flex: 0 0 240px;
+.sc-fields__key {
+  flex: 1 1 26ch;
+  min-width: 0;
 }
 
-.start-field .pk-input {
-  min-height: 40px;
-}
-
-.start-field__label {
-  font-size: 13px;
-  color: var(--pk-muted);
-}
-
-.start-field .pk-input {
-  width: 100%;
-}
-
-.start-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.start-signin {
+.sc-form__signin {
   display: grid;
-  gap: 10px;
-  margin-top: 16px;
+  gap: var(--pb-s-2);
 }
 
-.start-links {
+.sc-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 16px;
+  gap: var(--pb-s-2);
 }
 
-/* 右边那句「管理模型扩展」靠这根弹簧推过去；窄屏折行时它自己不占位。 */
-.start-links__spacer {
+.sc-actions__fill {
   flex: 1;
   min-width: 0;
 }
 
-/* 链接形状的文字按钮：真实 handler 在宿主那边（打开系统浏览器到那家服务的控制台）。 */
-.start-link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--pk-accent-text);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.start-link:hover {
-  text-decoration: underline;
-}
-
-.start-result {
+.sc-wait,
+.sc-hold {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--pb-size-micro);
   line-height: 1.5;
-  color: var(--pk-ok);
+  color: var(--pb-ink-soft);
+}
+
+.sc-hold {
+  border-left: 3px solid var(--pb-line-strong);
+  padding-left: var(--pb-s-2);
+}
+
+/* 回执板：三行各自一盏灯，一眼看得出"保存了但没测通"与"在用的是别家"。 */
+.sc-receipt {
+  display: grid;
+  gap: var(--pb-s-1);
+  margin: 0;
+  padding: var(--pb-s-3);
+  border: var(--pb-hairline) dashed var(--pb-line-2);
+  border-radius: var(--pb-radius-ctl);
+}
+
+.sc-receipt__row {
+  display: flex;
+  align-items: center;
+  gap: var(--pb-s-3);
+}
+
+.sc-receipt__row dt {
+  min-width: 9ch;
+  font-size: var(--pb-size-micro);
+  color: var(--pb-ink-dim);
+}
+
+.sc-receipt__row dd {
+  margin: 0;
+}
+
+.sc-receipt__line {
+  margin: var(--pb-s-1) 0 0;
+  font-size: var(--pb-size-note);
+  line-height: 1.5;
+  color: var(--pb-ink);
   overflow-wrap: anywhere;
 }
 
-.start-result.is-bad {
-  color: var(--pk-danger);
+/* ---------------------------------------------------------------- 桌宠一块 */
+
+.sc-pet {
+  display: grid;
+  gap: var(--pb-s-3);
+  min-width: 0;
 }
 
-.start-petline {
+.sc-pet__rail {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  align-items: flex-end;
+  gap: var(--pb-s-3);
+}
+
+.sc-theme {
+  min-width: 0;
 }
 
 @media (max-width: 700px) {
-  .start-picker {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
+  .sc-section__aside {
+    margin-left: 0;
   }
 
-  .start-grouplabel {
-    padding-top: 0;
-  }
-
-  .start-chipline--current {
-    flex-wrap: wrap;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .start-chip {
-    transition: none;
+  .sc-fields__model,
+  .sc-fields__key {
+    flex: 1 1 100%;
   }
 }

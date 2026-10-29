@@ -1,0 +1,908 @@
+/**
+ * 原创控件的形状：pb- = pet bench（饲养台）。三件事反复出现，别的一样都不加——
+ *
+ * 1. 板底搁置：每块可点／可填的板子底下都有一道 2px 实边。按下去板面落到这道边上，
+ *    位移与阴影同时消失，所以「点到了」是手感而不是换色。
+ * 2. 切角铭牌：标签牌与状态牌右上角切掉一格，像抽屉上那块金属铭牌。只用在牌类上，
+ *    大面板不用，免得几何在窄屏里散架。
+ * 3. 方销：开关的销、瓦片右下角的销都是方的，没有一处用胶囊。
+ *
+ * 颜色一律取 design-tokens.css 里的语义令牌，本文件不出现一个具体色值（白色井格除外：
+ * 那是厂商图形的承托底，与配色方案无关）。
+ */
+
+/* ------------------------------------------------------------------ 焦点 */
+
+.pb-btn:focus-visible,
+.pb-tile:focus-visible,
+.pb-choice__option input:focus-visible ~ .pb-choice__text,
+.pb-toggle__plate:has(.pb-toggle__input:focus-visible),
+.pb-field__slot :focus-visible,
+.pb-input:focus-visible,
+.pb-select:focus-visible {
+  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline-offset: var(--pb-focus-gap);
+}
+
+/* ------------------------------------------------------------------ 板扣 */
+
+.pb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pb-s-2);
+  box-sizing: border-box;
+  min-height: var(--pb-ctl-height);
+  padding: 0 var(--pb-s-3);
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-radius: var(--pb-radius-ctl);
+  background-color: var(--pb-sheet-2);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  color: var(--pb-ink);
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-control);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform var(--pb-t-press) var(--pb-ease),
+    box-shadow var(--pb-t-press) var(--pb-ease),
+    background-color var(--pb-t-move) var(--pb-ease),
+    border-color var(--pb-t-move) var(--pb-ease);
+}
+
+/* 板上的文字允许收缩截断，瓦片与按钮共用的这一条写在标签层。 */
+.pb-btn__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pb-btn:hover:not(:disabled) {
+  background-color: var(--pb-sheet);
+  border-color: var(--pb-line-strong);
+}
+
+/* 落板：板面沉到搁置上，阴影收掉。这是本套唯一的按下反馈。 */
+.pb-btn:active:not(:disabled) {
+  transform: translateY(var(--pb-ledge));
+  box-shadow: 0 0 0 var(--pb-ledge-color);
+}
+
+.pb-btn:disabled {
+  border-color: var(--pb-line);
+  background-color: var(--pb-sheet-3);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-line);
+  color: var(--pb-ink-dim);
+  cursor: default;
+}
+
+.pb-btn--sm {
+  min-height: var(--pb-ctl-height-sm);
+  padding: 0 var(--pb-s-2);
+  font-size: var(--pb-size-note);
+}
+
+/* 本套只有一颗实心强调板：一屏至多一次，用来落「保存并开始」这类写入。 */
+.pb-btn--primary {
+  border-color: transparent;
+  background-color: var(--pb-accent);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  color: var(--pb-on-accent);
+}
+
+.pb-btn--primary:hover:not(:disabled) {
+  background-color: var(--pb-accent-2);
+  border-color: transparent;
+}
+
+.pb-btn--danger {
+  border-color: var(--pb-danger);
+  background-color: transparent;
+  box-shadow: 0 var(--pb-ledge) 0 color-mix(in oklab, var(--pb-danger) 55%, transparent);
+  color: var(--pb-danger);
+}
+
+.pb-btn--danger:hover:not(:disabled) {
+  background-color: color-mix(in oklab, var(--pb-danger) 14%, var(--pb-sheet));
+}
+
+/* 安静档：没有板底搁置，也不抢边框；只在一行动作文字里出现。 */
+.pb-btn--quiet {
+  min-height: var(--pb-ctl-height-sm);
+  padding: 0 var(--pb-s-2);
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--pb-ink-soft);
+  font-weight: 500;
+}
+
+.pb-btn--quiet:hover:not(:disabled) {
+  border-color: transparent;
+  background-color: var(--pb-sheet-3);
+  color: var(--pb-accent-2);
+}
+
+.pb-btn--quiet:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* 等待记号：一枚肉垫形状的方块呼吸一下，而不是通用转圈。
+ * 减少动态时不呼吸，只留一块实心方块——状态仍然看得见。 */
+.pb-busy {
+  flex: none;
+  inline-size: 9px;
+  block-size: 9px;
+  border-radius: 3px 3px 4px 4px;
+  background-color: currentColor;
+  animation: pb-pad 900ms var(--pb-ease) infinite;
+}
+
+@keyframes pb-pad {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.78);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-busy {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+.pb-lead {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ 铭牌字段 */
+
+.pb-field {
+  display: block;
+  min-width: 0;
+}
+
+/* 整块板子：铭牌在上、控件在下。节点模式下它就是 label，隐式关联归浏览器。 */
+.pb-field__plate {
+  display: block;
+}
+
+/* 铭牌压在板子上沿：自己的边只画左、右、上，下沿由板子的上边接手；右上角切掉一格。 */
+.pb-field__tag {
+  display: block;
+  box-sizing: border-box;
+  padding: 3px var(--pb-s-2);
+  background-color: var(--pb-sheet-3);
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-bottom: 0;
+  border-radius: var(--pb-radius-ctl) 0 0 0;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+
+.pb-field__name {
+  display: block;
+  color: var(--pb-ink);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-note);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+}
+
+.pb-field__slot {
+  display: flex;
+  min-width: 0;
+}
+
+/* 补充写在板底搁置下面：它在 label 之外，所以不会混进控件的可访问名称。 */
+.pb-field__hint {
+  margin: var(--pb-s-1) 0 0;
+  padding-inline-start: 12px;
+  color: var(--pb-ink-dim);
+  font-size: var(--pb-size-micro);
+  line-height: 1.5;
+}
+
+/* 控件本体：上角由铭牌接手，所以只画下面两个圆角；板底同样有一道搁置。 */
+.pb-field__slot input,
+.pb-field__slot select,
+.pb-field__slot textarea,
+.pb-input,
+.pb-select {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-height: var(--pb-ctl-height);
+  padding: var(--pb-s-2);
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-radius: 0 0 var(--pb-radius-ctl) var(--pb-radius-ctl);
+  background-color: var(--pb-sheet);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  color: var(--pb-ink);
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-control);
+  transition:
+    border-color var(--pb-t-move) var(--pb-ease),
+    background-color var(--pb-t-move) var(--pb-ease);
+}
+
+.pb-field__slot input,
+.pb-input,
+.pb-select {
+  border-top: 0;
+}
+
+.pb-field__slot input::placeholder {
+  color: var(--pb-ink-dim);
+  opacity: 1;
+}
+
+.pb-field__slot input:hover,
+.pb-input:hover,
+.pb-select:hover {
+  border-color: var(--pb-line-strong);
+}
+
+.pb-field:focus-within .pb-field__slot input,
+.pb-field:focus-within .pb-field__slot select,
+.pb-input:focus,
+.pb-select:focus {
+  border-color: var(--pb-accent);
+  background-color: var(--pb-sheet);
+}
+
+.pb-field__slot input:disabled,
+.pb-field__slot select:disabled,
+.pb-input:disabled,
+.pb-select:disabled {
+  border-color: var(--pb-line);
+  background-color: var(--pb-sheet-3);
+  color: var(--pb-ink-dim);
+  cursor: default;
+}
+
+/* Key、模型名这类值用等宽：数一位少一位都看得见。 */
+.pb-field__slot input[type='password'],
+.pb-input--value {
+  font-family: var(--pb-font-mono);
+  font-size: var(--pb-size-note);
+  letter-spacing: 0.02em;
+}
+
+.pb-select {
+  appearance: none;
+  padding-inline-end: var(--pb-s-5);
+  background-image:
+    linear-gradient(45deg, transparent 49%, var(--pb-ink-soft) 49%),
+    linear-gradient(-45deg, transparent 49%, var(--pb-ink-soft) 49%);
+  background-position:
+    calc(100% - 14px) 55%,
+    calc(100% - 8px) 55%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* 失败：铭牌名字、板面边框、下面那句话同时收成警示色，并立即播报。 */
+.pb-field--bad .pb-field__tag,
+.pb-field--bad .pb-field__name {
+  color: var(--pb-danger);
+}
+
+.pb-field--bad .pb-field__tag {
+  background-color: color-mix(in oklab, var(--pb-danger) 14%, var(--pb-sheet-3));
+  border-color: var(--pb-danger);
+}
+
+.pb-field--bad .pb-field__slot input,
+.pb-field--bad .pb-field__slot select,
+.pb-input--bad {
+  border-color: var(--pb-danger);
+  box-shadow: 0 var(--pb-ledge) 0 color-mix(in oklab, var(--pb-danger) 60%, transparent);
+}
+
+.pb-field__error {
+  margin: var(--pb-s-1) 0 0;
+  padding-inline-start: 12px;
+  color: var(--pb-danger);
+  font-size: var(--pb-size-note);
+  line-height: 1.5;
+  background-image: linear-gradient(to bottom, var(--pb-danger) 0 100%);
+  background-position: 2px 4px;
+  background-size: 2px 12px;
+  background-repeat: no-repeat;
+}
+
+/* ------------------------------------------------------------------ 插销开关 */
+
+.pb-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pb-s-3);
+  min-block-size: var(--pb-row-min);
+  cursor: pointer;
+}
+
+.pb-toggle__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pb-toggle__name {
+  color: var(--pb-ink);
+  font-size: var(--pb-size-control);
+  cursor: pointer;
+}
+
+.pb-toggle__hint {
+  color: var(--pb-ink-dim);
+  font-size: var(--pb-size-micro);
+}
+
+/* 点名称也能拨：那是 label 的浏览器行为，不是这里自己写的点击。 */
+.pb-toggle {
+  cursor: default;
+}
+
+/* 原生 checkbox 铺在这块板下面：点击区、键盘、状态都还是浏览器自己的东西。
+   它在装饰层之上，所以真实点击、label 点击与自动化点控件三边落点一致。 */
+.pb-toggle__input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pb-toggle__plate {
+  position: relative;
+  flex: none;
+  inline-size: 46px;
+  block-size: 24px;
+  border-radius: 3px;
+  background-color: var(--pb-well);
+  box-shadow:
+    inset 0 0 0 var(--pb-hairline) var(--pb-line-2),
+    0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  transition:
+    background-color var(--pb-t-move) var(--pb-ease),
+    box-shadow var(--pb-t-move) var(--pb-ease);
+}
+
+/* 板上那两个字是给眼睛的辅助（aria-hidden），状态本身在原生控件上。 */
+.pb-toggle__word {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 5px;
+  color: var(--pb-ink-dim);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-micro);
+  line-height: 16px;
+}
+
+.pb-toggle__knob {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-start: 4px;
+  inline-size: 12px;
+  border-radius: 2px;
+  background-color: var(--pb-line-strong);
+  transition:
+    transform var(--pb-t-move) var(--pb-ease),
+    background-color var(--pb-t-move) var(--pb-ease);
+}
+
+.pb-toggle[data-pressed='true'] .pb-toggle__plate {
+  background-color: color-mix(in oklab, var(--pb-accent) 26%, var(--pb-sheet));
+  box-shadow:
+    inset 0 0 0 var(--pb-hairline) var(--pb-accent),
+    0 var(--pb-ledge) 0 var(--pb-ledge-color);
+}
+
+.pb-toggle[data-pressed='true'] .pb-toggle__knob {
+  transform: translateX(26px);
+  background-color: var(--pb-accent);
+}
+
+.pb-toggle[data-pressed='true'] .pb-toggle__word {
+  inset-inline-end: auto;
+  inset-inline-start: 6px;
+  color: var(--pb-accent-2);
+}
+
+/* 禁用状态直接问原生控件，不做第二套 class 映射。 */
+.pb-toggle:has(.pb-toggle__input:disabled) {
+  cursor: default;
+}
+
+.pb-toggle:has(.pb-toggle__input:disabled) .pb-toggle__text {
+  cursor: default;
+}
+
+.pb-toggle:has(.pb-toggle__input:disabled) .pb-toggle__plate {
+  background-color: var(--pb-sheet-3);
+  box-shadow: inset 0 0 0 var(--pb-hairline) var(--pb-line);
+}
+
+.pb-toggle:has(.pb-toggle__input:disabled) .pb-toggle__knob {
+  background-color: var(--pb-line);
+}
+
+.pb-toggle:has(.pb-toggle__input:disabled) .pb-toggle__name,
+.pb-toggle:has(.pb-toggle__input:disabled) .pb-toggle__word {
+  color: var(--pb-ink-dim);
+}
+
+/* ------------------------------------------------------------------ 状态牌 */
+
+.pb-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 2px 8px 2px 7px;
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-radius: var(--pb-radius-ctl) 0 var(--pb-radius-ctl) var(--pb-radius-ctl);
+  background-color: var(--pb-sheet-2);
+  clip-path: var(--pb-clip-notch);
+  color: var(--pb-ink-soft);
+  font-size: var(--pb-size-micro);
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.pb-status__lamp {
+  flex: none;
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background-color: var(--pb-line-strong);
+}
+
+.pb-status[data-tone='on'],
+.pb-status[data-tone='ok'] {
+  border-color: color-mix(in oklab, var(--pb-ok) 55%, var(--pb-line-2));
+  color: var(--pb-ink);
+}
+
+.pb-status[data-tone='on'] .pb-status__lamp,
+.pb-status[data-tone='ok'] .pb-status__lamp {
+  background-color: var(--pb-ok);
+}
+
+.pb-status[data-tone='off'] {
+  color: var(--pb-ink-dim);
+}
+
+.pb-status[data-tone='warn'] {
+  border-color: color-mix(in oklab, var(--pb-warn) 55%, var(--pb-line-2));
+  color: var(--pb-ink);
+}
+
+.pb-status[data-tone='warn'] .pb-status__lamp {
+  background-color: var(--pb-warn);
+}
+
+.pb-status[data-tone='danger'] {
+  border-color: color-mix(in oklab, var(--pb-danger) 55%, var(--pb-line-2));
+  color: var(--pb-ink);
+}
+
+.pb-status[data-tone='danger'] .pb-status__lamp {
+  background-color: var(--pb-danger);
+}
+
+/* ------------------------------------------------------------------ 回执条 */
+
+.pb-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pb-s-2);
+  box-sizing: border-box;
+  padding: var(--pb-s-2) var(--pb-s-3);
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-inline-start: 3px solid var(--pb-line-strong);
+  border-radius: 0 var(--pb-radius-ctl) var(--pb-radius-ctl) 0;
+  background-color: var(--pb-sheet-2);
+  color: var(--pb-ink);
+  font-size: var(--pb-size-note);
+  line-height: 1.55;
+}
+
+.pb-notice__mark {
+  flex: none;
+  inline-size: 14px;
+  block-size: 14px;
+  margin-block-start: 3px;
+  color: var(--pb-line-strong);
+}
+
+.pb-notice__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.pb-notice__action {
+  flex: none;
+}
+
+.pb-notice[data-tone='ok'] {
+  border-inline-start-color: var(--pb-ok);
+  background-color: color-mix(in oklab, var(--pb-ok) 12%, var(--pb-sheet));
+}
+
+.pb-notice[data-tone='ok'] .pb-notice__mark {
+  color: var(--pb-ok);
+}
+
+.pb-notice[data-tone='warn'] {
+  border-inline-start-color: var(--pb-warn);
+  background-color: color-mix(in oklab, var(--pb-warn) 14%, var(--pb-sheet));
+}
+
+.pb-notice[data-tone='warn'] .pb-notice__mark {
+  color: var(--pb-warn);
+}
+
+.pb-notice[data-tone='danger'] {
+  border-inline-start-color: var(--pb-danger);
+  background-color: color-mix(in oklab, var(--pb-danger) 12%, var(--pb-sheet));
+}
+
+.pb-notice[data-tone='danger'] .pb-notice__mark {
+  color: var(--pb-danger);
+}
+
+/* ------------------------------------------------------------------ 选择瓦片 */
+
+.pb-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--pb-s-2);
+  box-sizing: border-box;
+  min-block-size: var(--pb-row-min);
+  min-inline-size: 0;
+  padding: var(--pb-s-2) 20px var(--pb-s-2) var(--pb-s-2);
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-radius: var(--pb-radius-ctl);
+  background-color: var(--pb-sheet);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  color: var(--pb-ink);
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-control);
+  text-align: start;
+  cursor: pointer;
+  transition:
+    transform var(--pb-t-press) var(--pb-ease),
+    box-shadow var(--pb-t-press) var(--pb-ease),
+    background-color var(--pb-t-move) var(--pb-ease),
+    border-color var(--pb-t-move) var(--pb-ease);
+}
+
+.pb-tile:hover:not(:disabled) {
+  border-color: var(--pb-line-strong);
+  background-color: var(--pb-sheet-2);
+}
+
+.pb-tile:active:not(:disabled) {
+  transform: translateY(var(--pb-ledge));
+  box-shadow: 0 0 0 var(--pb-ledge-color);
+}
+
+/* 井格承托厂商图形：深色标记在两种底色上都要看得见，所以这里就是白底方格。 */
+.pb-tile__well {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 26px;
+  block-size: 26px;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: inset 0 0 0 var(--pb-hairline) var(--pb-line);
+  overflow: hidden;
+}
+
+/* 主名称优先：窄格里让名称换行，不把它压成「Deep…」。 */
+.pb-tile__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+/* 注记不是选择信息，可缩可换行，不跟名称抢宽。 */
+.pb-tile__note {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: var(--pb-ink-dim);
+  font-size: var(--pb-size-micro);
+  overflow-wrap: anywhere;
+}
+
+/* 右下角那一枚方销：选中才落下。名称与文字才是主要信息，销只是复认。 */
+.pb-tile__pin {
+  position: absolute;
+  inset-block-end: 7px;
+  inset-inline-end: 7px;
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 1px;
+  transform: rotate(45deg) scale(0.6);
+  background-color: transparent;
+  box-shadow: inset 0 0 0 var(--pb-hairline) var(--pb-line-2);
+  transition:
+    transform var(--pb-t-move) var(--pb-ease),
+    background-color var(--pb-t-move) var(--pb-ease);
+}
+
+.pb-tile[data-selected='true'] {
+  border-color: var(--pb-accent);
+  background-color: color-mix(in oklab, var(--pb-accent) 12%, var(--pb-sheet));
+  box-shadow:
+    0 var(--pb-ledge) 0 color-mix(in oklab, var(--pb-accent) 70%, var(--pb-ledge-color)),
+    inset 0 0 0 var(--pb-hairline) var(--pb-accent);
+}
+
+.pb-tile[data-selected='true'] .pb-tile__pin {
+  transform: rotate(45deg) scale(1);
+  background-color: var(--pb-accent);
+  box-shadow: none;
+}
+
+.pb-tile:disabled {
+  border-color: var(--pb-line);
+  background-color: var(--pb-sheet-3);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-line);
+  color: var(--pb-ink-dim);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ 单选板 */
+
+/* 主题三态这类互斥选择：每档是一块自己的板，选中那块落成强调板。
+ * 旧的滑动分段轨道（console-segmented）不在本套里，也不该出现在 Start 呈现里。 */
+.pb-choice {
+  display: inline-flex;
+  gap: var(--pb-s-1);
+}
+
+.pb-choice__option {
+  position: relative;
+  display: inline-flex;
+}
+
+.pb-choice__option input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.pb-choice__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-block-size: var(--pb-ctl-height-sm);
+  padding: 0 var(--pb-s-3);
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-radius: var(--pb-radius-ctl);
+  background-color: var(--pb-sheet);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  color: var(--pb-ink-soft);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-note);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--pb-t-press) var(--pb-ease),
+    box-shadow var(--pb-t-press) var(--pb-ease),
+    background-color var(--pb-t-move) var(--pb-ease),
+    color var(--pb-t-move) var(--pb-ease);
+}
+
+.pb-choice__option:hover .pb-choice__text {
+  border-color: var(--pb-line-strong);
+  color: var(--pb-ink);
+}
+
+.pb-choice__option:active .pb-choice__text {
+  transform: translateY(var(--pb-ledge));
+  box-shadow: 0 0 0 var(--pb-ledge-color);
+}
+
+.pb-choice__option input:checked ~ .pb-choice__text {
+  border-color: var(--pb-accent);
+  background-color: var(--pb-accent);
+  color: var(--pb-on-accent);
+}
+
+/* ------------------------------------------------------------------ 抽屉段 */
+
+/* 装饰层一律不接指针：能收点击的永远是那块原生控件本身。
+   这样用户点文字/点图标、键盘 Enter/Space、自动化点原生控件，三者落的是同一个目标。 */
+.pb-toggle__word,
+.pb-toggle__knob,
+.pb-tile__pin,
+.pb-tile__well,
+.pb-status__lamp,
+.pb-fold__chevron,
+.pb-choice__text,
+.pb-btn__label,
+.pb-lead,
+.pb-busy {
+  pointer-events: none;
+}
+
+.pb-fold {
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-radius: var(--pb-radius-ctl);
+  background-color: var(--pb-sheet-2);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+}
+
+.pb-fold__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--pb-s-2);
+  box-sizing: border-box;
+  min-block-size: var(--pb-row-min);
+  padding: var(--pb-s-2) var(--pb-s-3);
+  cursor: pointer;
+  list-style: none;
+}
+
+.pb-fold__summary::-webkit-details-marker {
+  display: none;
+}
+
+.pb-fold__summary:focus-visible {
+  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline-offset: calc(var(--pb-focus-gap) * -1);
+}
+
+.pb-fold__label {
+  color: var(--pb-ink);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-control);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+}
+
+.pb-fold__hint {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pb-ink-dim);
+  font-size: var(--pb-size-micro);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pb-fold__chevron {
+  flex: none;
+  margin-inline-start: auto;
+  inline-size: 8px;
+  block-size: 8px;
+  border-inline-end: var(--pb-focus-width) solid var(--pb-ink-soft);
+  border-block-end: var(--pb-focus-width) solid var(--pb-ink-soft);
+  transform: rotate(45deg);
+  transition: transform var(--pb-t-fold) var(--pb-ease);
+}
+
+.pb-fold[open] .pb-fold__chevron {
+  transform: rotate(-135deg);
+}
+
+.pb-fold__body {
+  padding: 0 var(--pb-s-3) var(--pb-s-3);
+  border-top: var(--pb-hairline) solid var(--pb-line);
+  animation: pb-reveal var(--pb-t-fold) var(--pb-ease);
+}
+
+@keyframes pb-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-fold__body {
+    animation: none;
+  }
+}
+/* -------------------------------------------------------- 样板台（设计证据） */
+
+/* 一块样板就是一格：顶部那道轨与设置台的分节同一件事，状态摆在这里给人对照。 */
+.pb-board {
+  display: grid;
+  gap: var(--pb-s-4);
+  inline-size: 100%;
+}
+
+.pb-board__sample {
+  box-sizing: border-box;
+  padding: var(--pb-s-4);
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-block-start: 3px solid var(--pb-line-2);
+  border-radius: 0 0 var(--pb-radius-sheet) var(--pb-radius-sheet);
+  background-color: var(--pb-sheet);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+}
+
+.pb-board__head {
+  display: grid;
+  gap: 2px;
+  margin-block-end: var(--pb-s-3);
+}
+
+.pb-board__title {
+  margin: 0;
+  color: var(--pb-ink);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-title);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+}
+
+.pb-board__note {
+  margin: 0;
+  max-inline-size: 72ch;
+  color: var(--pb-ink-dim);
+  font-size: var(--pb-size-micro);
+  line-height: 1.55;
+}
+
+.pb-board__parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pb-s-3);
+  align-items: center;
+}
+
+.pb-board__parts > .pb-field {
+  flex: 1 1 240px;
+  max-inline-size: 320px;
+}
+
+.pb-board__glyphs {
+  display: inline-flex;
+  gap: var(--pb-s-3);
+  align-items: center;
+  color: var(--pb-ink-soft);
+}
+
+.pb-board__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--pb-s-2);
+  inline-size: 100%;
+}
+
+.pb-board__body {
+  margin: 0;
+  color: var(--pb-ink-soft);
+  font-size: var(--pb-size-note);
+  line-height: 1.6;
+}

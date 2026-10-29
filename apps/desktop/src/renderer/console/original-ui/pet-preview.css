@@ -1,0 +1,296 @@
+/**
+ * 原创桌宠预览：一块饲养台。台上井格里站着角色，工具排在旁边（窄起来落到台面下面一行），
+ * 草稿与菜单各是一个抽屉。形状与密度取自 original-ui/design-tokens.css（pb-）。
+ *
+ * 角色本体仍是 pet/PetAvatar.tsx：它的尺寸与皮肤（眼睛、眉毛、嘴、光轮、思考点、错误记号）
+ * 在这里按 .pet-bench 自己声明一份，取值与桌宠窗口 pet.css 一致——预览就是桌面上那一只。
+ * 旧的 .pet-preview 皮肤不进来，本文件也不借它的类名。
+ */
+
+.pet-bench {
+  /* 自有角色的那三格颜色：pet.css 不在设置台里加载，变量得在这一格里给出来。 */
+  --pet-ink: #1c2430;
+  --pet-accent: #3766dc;
+  --pet-error: #b23c09;
+  --pet-blush: #ffb8b0;
+
+  /* 角色大小跟着「大小」这一项，外接矩形不变，切档时场景不跳。 */
+  --pb-avatar: 152px;
+  --pb-well-height: calc(var(--pb-avatar) + 92px);
+
+  container-type: inline-size;
+
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--pb-s-3);
+  padding: var(--pb-s-4);
+  background: var(--pb-sheet);
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-radius: var(--pb-radius-sheet);
+  color: var(--pb-ink);
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-body);
+}
+
+.pet-bench[data-size='small'] {
+  --pb-avatar: 104px;
+}
+
+.pet-bench[data-size='normal'] {
+  --pb-avatar: 152px;
+}
+
+.pet-bench[data-size='large'] {
+  --pb-avatar: 176px;
+}
+
+/* 默认竖着排：井格吃满这一块自己的宽度。够宽了才把工具挪到右边一列。 */
+.pet-bench__top {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--pb-s-3);
+}
+
+@container (min-width: 640px) {
+  .pet-bench__top {
+    grid-template-columns: minmax(0, 1fr) 232px;
+    gap: var(--pb-s-4);
+  }
+}
+
+.pet-bench__well {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-items: center;
+  align-content: center;
+  gap: var(--pb-s-2);
+  min-height: var(--pb-well-height);
+  padding: var(--pb-s-4) var(--pb-s-3) var(--pb-s-5);
+  background: var(--pb-well);
+  clip-path: var(--pb-clip-notch);
+}
+
+/* 这块场景的灯：只压这一格的亮度，不写主题挡位。 */
+.pet-bench[data-light='night'] .pet-bench__well {
+  background: color-mix(in oklab, var(--pb-well) 58%, #000 42%);
+}
+
+/* 台沿：角色站的那一道，画在台口内沿，不盖在角色身上。 */
+.pet-bench__ledge {
+  align-self: end;
+  justify-self: stretch;
+  height: var(--pb-ledge);
+  margin-top: calc(-1 * var(--pb-s-3));
+  background: var(--pb-ledge-color);
+}
+
+.pet-bench__holder,
+.pet-bench__poke {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.pet-bench__poke {
+  cursor: grab;
+  touch-action: none;
+  transition: transform var(--pb-t-move) var(--pb-ease);
+}
+
+.pet-bench__poke:active {
+  cursor: grabbing;
+}
+
+.pet-bench__poke:focus-visible {
+  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline-offset: var(--pb-focus-gap);
+}
+
+/* ---- 角色本体：与 pet.css 同一组声明，只约束在 .pet-bench 里面 ---- */
+
+.pet-bench .pet-avatar {
+  display: block;
+  width: var(--pb-avatar);
+  height: var(--pb-avatar);
+  overflow: visible;
+  filter: drop-shadow(0 6px 14px rgb(28 36 48 / 0.18));
+}
+
+.pet-bench .pet-avatar__eye {
+  fill: var(--pet-ink);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform var(--pb-t-move) var(--pb-ease),
+    opacity var(--pb-t-move) var(--pb-ease);
+}
+
+.pet-bench .pet-avatar__brow,
+.pet-bench .pet-avatar__mouth {
+  stroke: var(--pet-ink);
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+  /* SVG 默认以 (0,0) 为变换原点，不写这两行会在动画时飞出脸部。 */
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--pb-t-move) var(--pb-ease);
+}
+
+.pet-bench .pet-avatar__blush {
+  fill: var(--pet-blush);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.pet-bench .pet-avatar[data-expression='blush'] .pet-avatar__blush {
+  opacity: 0.7;
+}
+
+.pet-bench .pet-avatar__halo,
+.pet-bench .pet-avatar__dots,
+.pet-bench .pet-avatar__error-mark {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.pet-bench .pet-avatar__dots circle {
+  fill: var(--pet-accent);
+}
+
+.pet-bench .pet-avatar__error-mark circle {
+  fill: var(--pet-error);
+}
+
+.pet-bench .pet-avatar__error-mark path {
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* 状态：光轮、思考点、错误记号与眼的形状——和桌面那一只读同一套类名。 */
+.pet-bench .pet-avatar--listening .pet-avatar__halo {
+  opacity: 0.85;
+}
+
+.pet-bench .pet-avatar--listening .pet-avatar__eye {
+  transform: scaleY(1.15);
+}
+
+.pet-bench .pet-avatar--thinking .pet-avatar__dots {
+  opacity: 1;
+}
+
+.pet-bench .pet-avatar--thinking .pet-avatar__eye {
+  transform: scaleY(0.45);
+}
+
+.pet-bench .pet-avatar--thinking .pet-avatar__brow {
+  transform: translateY(-2px);
+}
+
+.pet-bench .pet-avatar--error .pet-avatar__error-mark {
+  opacity: 1;
+}
+
+/* 宿主真的要说的那句话：跟着配色走，宽度按这一块自己算，不是一列一个字。 */
+.pet-bench__say {
+  max-width: min(34ch, 100%);
+  margin: 0;
+  padding: var(--pb-s-2) var(--pb-s-3);
+  background: var(--bubble-bg, var(--pb-sheet-2));
+  color: var(--bubble-ink, var(--pb-ink));
+  font-size: var(--pb-size-note);
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+  clip-path: var(--pb-clip-notch);
+}
+
+/* 工具排：一行一项。窄的时候它在台面下面占满这一块，宽的时候在右边 232 那一列——
+   两处都是单列，因为名称与那句补充需要正常行宽才能读（三列并排会把说明压成一两个字）。 */
+.pet-bench__rail {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--pb-s-2);
+  padding: var(--pb-s-3);
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-radius: var(--pb-radius-ctl);
+}
+
+.pet-bench__rail > * {
+  min-width: 0;
+}
+
+.pet-bench__rail .pb-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--pb-s-2);
+}
+
+/* 草稿抽屉：铭牌字段 + 一颗主操作；不够宽就把主操作换到下一行。 */
+.pet-bench__draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--pb-s-3);
+  padding-top: var(--pb-s-3);
+  border-top: var(--pb-hairline) solid var(--pb-line);
+}
+
+.pet-bench__draft .pb-field {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+/* 菜单抽屉：贴着台口右上角的一列动作，收在这一格里面不外扩。 */
+.pet-bench__drawer {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  z-index: 3;
+  display: grid;
+  gap: var(--pb-s-2);
+  width: min(260px, 92%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--pb-s-4);
+  background: var(--pb-sheet-2);
+  border: var(--pb-hairline) solid var(--pb-line-strong);
+  clip-path: var(--pb-clip-notch);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.16);
+}
+
+.pet-bench__drawer-title {
+  margin: 0 0 var(--pb-s-1);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-note);
+  font-weight: 600;
+  color: var(--pb-ink-dim);
+}
+
+.pet-bench__drawer .pb-btn {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-bench__poke,
+  .pet-bench .pet-avatar__eye,
+  .pet-bench .pet-avatar__brow,
+  .pet-bench .pet-avatar__mouth,
+  .pet-bench .pet-avatar__blush,
+  .pet-bench .pet-avatar__halo,
+  .pet-bench .pet-avatar__dots,
+  .pet-bench .pet-avatar__error-mark {
+    transition: none;
+  }
+}

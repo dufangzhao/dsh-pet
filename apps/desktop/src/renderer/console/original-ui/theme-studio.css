@@ -1,0 +1,208 @@
+/**
+ * 界面配色工作室的摆放：板面、抽屉与调色格。
+ *
+ * 颜色与形状一律取自 original-ui/design-tokens.css（pb-），这里只补这一页自己的布局：
+ * 左调色、右试色、下面那条保存搁置。没有第二种圆角，也没有从旧 theme-editor.css 搬来的尺寸。
+ */
+
+.theme-studio {
+  display: grid;
+  gap: var(--pb-s-4);
+  padding: var(--pb-s-5);
+  background: var(--pb-sheet);
+  border: var(--pb-hairline) solid var(--pb-line);
+  border-radius: var(--pb-radius-sheet);
+  color: var(--pb-ink);
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-body);
+}
+
+.theme-studio__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pb-s-3);
+}
+
+.theme-studio__title {
+  margin: 0;
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-title);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+}
+
+.theme-studio__description {
+  margin: calc(-1 * var(--pb-s-3)) 0 0;
+  color: var(--pb-ink-soft);
+  font-size: var(--pb-size-note);
+}
+
+/* 挡位与方案都是同一款抽屉瓦片，只是分组不同。 */
+.theme-studio__modes,
+.theme-studio__schemes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--pb-s-2);
+}
+
+.theme-studio__schemes {
+  grid-auto-flow: row dense;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* 挡位是 radio：选中态写在 aria-checked 上，样式与抽屉瓦片的选中态同一套。 */
+.theme-studio__mode[aria-checked='true'] {
+  border-color: var(--pb-accent);
+  background-color: color-mix(in oklab, var(--pb-accent) 12%, var(--pb-sheet));
+  box-shadow:
+    0 var(--pb-ledge) 0 color-mix(in oklab, var(--pb-accent) 70%, var(--pb-ledge-color)),
+    inset 0 0 0 var(--pb-hairline) var(--pb-accent);
+}
+
+.theme-studio__mode[aria-checked='true'] .pb-tile__pin {
+  transform: rotate(45deg) scale(1);
+  background-color: var(--pb-accent);
+  box-shadow: none;
+}
+
+.theme-studio__band {
+  display: flex;
+  gap: 2px;
+}
+
+.theme-studio__band span {
+  width: 12px;
+  height: 18px;
+  border: var(--pb-hairline) solid var(--pb-line-2);
+}
+
+/* 调色与试色并排：窄下来就换行，不做横向滚动。 */
+.theme-studio__bench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
+  gap: var(--pb-s-5);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .theme-studio__bench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.theme-studio__group + .theme-studio__group {
+  margin-top: var(--pb-s-4);
+}
+
+.theme-studio__group-title {
+  margin: 0 0 var(--pb-s-2);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-note);
+  font-weight: 600;
+  color: var(--pb-ink-dim);
+  letter-spacing: var(--pb-tracking-display);
+}
+
+.theme-studio__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--pb-s-3);
+}
+
+.theme-studio__token-row {
+  display: flex;
+  align-items: center;
+  gap: var(--pb-s-2);
+  width: 100%;
+}
+
+/* 选色方块：原生控件，只做尺寸与切角，颜色本身由浏览器画。 */
+.theme-studio__token-row input[type='color'] {
+  flex: none;
+  width: var(--pb-ctl-height);
+  height: var(--pb-ctl-height);
+  padding: 0;
+  background: none;
+  border: var(--pb-hairline) solid var(--pb-line-strong);
+  border-radius: var(--pb-radius-ctl);
+  cursor: pointer;
+}
+
+.theme-studio__hex {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--pb-font-mono);
+  font-size: var(--pb-size-note);
+}
+
+.theme-studio__sample-body {
+  display: grid;
+  gap: var(--pb-s-3);
+  padding: var(--pb-s-4);
+  background: var(--pb-paper);
+  border: var(--pb-hairline) solid var(--pb-line);
+}
+
+.theme-studio__bubble {
+  margin: 0;
+  padding: var(--pb-s-2) var(--pb-s-3);
+  background: var(--bubble-bg, var(--pb-sheet-2));
+  color: var(--bubble-ink, var(--pb-ink));
+  border-radius: var(--pb-radius-ctl);
+}
+
+.theme-studio__tool {
+  margin: 0;
+  color: var(--tool-result, var(--pb-accent));
+  font-family: var(--pb-font-mono);
+  font-size: var(--pb-size-note);
+}
+
+.theme-studio__world {
+  margin: 0;
+  padding: var(--pb-s-2);
+  background: var(--world-bg, var(--pb-sheet-2));
+  color: var(--world-ink, var(--pb-ink-soft));
+  font-size: var(--pb-size-note);
+}
+
+.theme-studio__row {
+  display: flex;
+  gap: var(--pb-s-2);
+  margin: 0;
+}
+
+.theme-studio__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--pb-s-2);
+  height: 72px;
+}
+
+.theme-studio__chart span {
+  flex: 1;
+}
+
+/* 保存搁置：回执在左，动作在右，一屏只有一颗实心主操作。 */
+.theme-studio__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pb-s-3);
+  margin-top: var(--pb-s-4);
+  padding-top: var(--pb-s-3);
+  border-top: var(--pb-hairline) solid var(--pb-line);
+}
+
+.theme-studio__status {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-studio__band span,
+  .theme-studio__token-row input[type='color'] {
+    transition: none;
+  }
+}

@@ -9,7 +9,6 @@
  * 也不改控制台的主题挡位——这里的「夜」只是这块场景的灯。
  */
 import {
-  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -22,8 +21,19 @@ import type { ApplicationPreferences, ApplicationSnapshot, PetState } from '@pet
 
 import { PetAvatar } from '../pet/PetAvatar.js';
 import { PetComposer } from '../pet/PetComposer.js';
-import { ExpressionTimeline, type PetExpression } from '../pet/expression.js';
 import { ActivityIcon, MessageIcon } from './icons.js';
+import {
+  clampDragOffset,
+  focusStillInside,
+  micButtonHint,
+  micButtonLabel,
+  sceneHoldsFocus,
+  useOutsideDismiss,
+  usePokeableAvatar,
+  type InteractionWriter,
+  type PetPreviewComposer,
+  type PetPreviewMic,
+} from './preview-behavior.js';
 import './pet-preview.css';
 
 /**
@@ -50,30 +60,11 @@ const AGENT_TO_PET: Readonly<Record<ApplicationSnapshot['agent']['state'], PetSt
   error: 'error',
 };
 
-/** 这一栏会用到的互动种类，取值与桥一致，不在这里另起一名。 */
-export type PreviewInteraction = 'poke' | 'blush' | 'drag';
-
-/** 说话入口：能不能发、有没有在途、发出去那句话，都由调用方交给既有的那一条会话。 */
-export interface PetPreviewComposer {
-  canSend: boolean;
-  sending: boolean;
-  onSend(text: string): Promise<boolean>;
-}
-
-/** 录音入口：状态与动作都由调用方给，用的是全场那一个录音所有者，这里不新开。 */
-export interface PetPreviewMic {
-  canRecord: boolean;
-  recording: boolean;
-  /** 宿主报出的剩余秒数；没报就不编一个数。 */
-  secondsLeft: number | null;
-  /** 还没准备好时的一句话：按钮上不装能按。 */
-  unavailable: string | null;
-  /** 这一次能说多长；由调用方给报出来的上限，没报就不写秒数。 */
-  secondsLimit: number | null;
-  start(): void;
-  end(): void;
-  cancel(): void;
-}
+/**
+ * 互动种类、说话与录音入口的形状住在 preview-behavior.ts——旧预览与 original-ui 的原创预览
+ * 共用那一份行为，这里只接着导出名字，不给同一件事起第二个名。
+ */
+export type { PreviewInteraction, PetPreviewComposer, PetPreviewMic } from './preview-behavior.js';
 
 export interface PetPreviewProps {
   /** 界面上正在显示的偏好值（含还没保存的草稿）：编辑什么就预览什么。 */
@@ -85,7 +76,7 @@ export interface PetPreviewProps {
   /** 宿主此刻真的要说的那句话；没有就不画气泡。 */
   bubble?: string | null;
   /** 宿主那条互动记录的写入者；给定了角色才可以被戳，挪完才可以记一次拖动。 */
-  interact?: ((kind: PreviewInteraction) => Promise<{ ok: boolean }>) | undefined;
+  interact?: InteractionWriter | undefined;
   composer?: PetPreviewComposer | undefined;
   mic?: PetPreviewMic | undefined;
   /** 「语音输入」那一页的入口：菜单里那条设置项要的跳转。 */
@@ -126,93 +117,21 @@ export function PetPreview({
   const draggable = values?.draggable ?? true;
   const colors = PET_PALETTES[palette];
   const petState: PetState = state ?? AGENT_TO_PET[agent?.state ?? 'stopped'];
-  const [expression, setExpression] = useState<PetExpression>('neutral');
+  const { expression, sceneRef, poke } = usePokeableAvatar(interact);
   const [chatting, setChatting] = useState(false);
   /** 这块场景的灯：只改预览的明暗，不写挡位，也不影响控制台与桌面。 */
   const [night, setNight] = useState(false);
   const [menu, setMenu] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const sceneRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: number; startX: number; startY: number; moved: number } | null>(
     null,
   );
-  const timeline = useRef<ExpressionTimeline | null>(null);
-  const inView = useRef(true);
-  /** 表情回报走的是当前这一次的写入者；卸载后不会再发。 */
-  const interactRef = useRef(interact);
-  interactRef.current = interact;
 
-  useEffect(() => {
-    timeline.current = new ExpressionTimeline({
-      onApply: setExpression,
-      onVisible: () => {
-        void interactRef.current?.('blush');
-      },
-      // 窗口被藏起来或这一块滑出视口：画面没人看见，就不替宿主记这条表情。
-      isVisible: () =>
-        typeof document !== 'undefined' && document.visibilityState === 'visible' && inView.current,
-    });
-    const node = sceneRef.current;
-    const observer =
-      typeof IntersectionObserver === 'undefined' || node === null
-        ? null
-        : new IntersectionObserver(
-            (entries) => {
-              inView.current = entries.some((entry) => entry.isIntersecting);
-            },
-            { threshold: 0.25 },
-          );
-    if (node !== null) {
-      observer?.observe(node);
-    }
-    return () => {
-      timeline.current?.dispose();
-      timeline.current = null;
-      observer?.disconnect();
-    };
-  }, []);
-
-  /*
-   * 菜单是就地浮层：Escape 或这一点之外 anywhere 的点击都该关掉它，
-   * 不然右键一次就要按「关闭」才能继续用这一格。
-   */
-  useEffect(() => {
-    if (!menu) {
-      return;
-    }
-    const close = (event: KeyboardEvent | MouseEvent): void => {
-      if (event instanceof KeyboardEvent) {
-        if (event.key === 'Escape') {
-          setMenu(false);
-        }
-        return;
-      }
-      const scene = sceneRef.current;
-      if (scene !== null && event.target instanceof Node && !scene.contains(event.target)) {
-        setMenu(false);
-      }
-    };
-    document.addEventListener('keydown', close);
-    document.addEventListener('mousedown', close);
-    return () => {
-      document.removeEventListener('keydown', close);
-      document.removeEventListener('mousedown', close);
-    };
-  }, [menu]);
+  // 菜单是就地浮层：Escape 或这一点之外的按下都该关掉它。
+  useOutsideDismiss(menu, sceneRef, () => setMenu(false));
 
   /** 这一次按下是否已由指针路径处理过：处理过就不让 click 再补一发。 */
   const pointerHandled = useRef(false);
-
-  const poke = async (): Promise<void> => {
-    const write = interact;
-    if (write === undefined) {
-      return;
-    }
-    const accepted = await write('poke');
-    if (accepted.ok) {
-      timeline.current?.blush();
-    }
-  };
 
   /*
    * 收不收输入框只看一件事：焦点还在不在这一块里。
@@ -221,11 +140,6 @@ export function PetPreview({
    * 那样输入框在「点发送」的路上就被拆掉，宿主根本收不到这句话（首轮 native 实测就是这个）。
    * 所以 blur 只信事件带过来的 relatedTarget；pointerleave 时焦点已经落定，才用真的 contains。
    */
-  const focusStillInside = (node: HTMLElement, target: EventTarget | null): boolean =>
-    target instanceof Node && node.contains(target);
-
-  const holdsFocus = (): boolean =>
-    sceneRef.current !== null && sceneRef.current.contains(document.activeElement);
 
   const blurScene = (event: FocusEvent<HTMLDivElement>): void => {
     const node = sceneRef.current;
@@ -241,7 +155,7 @@ export function PetPreview({
     if (composer === undefined) {
       return;
     }
-    if (shouldCloseChat(holdsFocus(), composer.sending)) {
+    if (shouldCloseChat(sceneHoldsFocus(sceneRef), composer.sending)) {
       setChatting(false);
     }
   };
@@ -277,11 +191,8 @@ export function PetPreview({
     if (!pointerWasDrag(drag.moved)) {
       return;
     }
-    const limit = Math.max(0, scene.getBoundingClientRect().width / 2 - 90);
-    setOffset({
-      x: Math.max(-limit, Math.min(limit, dx)),
-      y: Math.max(-48, Math.min(0, dy)),
-    });
+    // 挪过位置只在这块格子里：预览不是桌面窗口，位移夹在场景内。
+    setOffset(clampDragOffset(dx, dy, scene.getBoundingClientRect().width));
   };
 
   const dragEnd = (event: ReactPointerEvent<HTMLButtonElement>): void => {
@@ -311,22 +222,8 @@ export function PetPreview({
     void poke();
   };
 
-  const micLabel = mic?.recording
-    ? mic?.secondsLeft === null
-      ? '正在录音'
-      : '剩 ' + mic?.secondsLeft + ' 秒'
-    : '录音';
-
-  const micHint =
-    mic === undefined
-      ? ''
-      : mic.unavailable !== null
-        ? mic.unavailable
-        : mic.recording
-          ? '正在录音，点此结束并识别'
-          : mic.secondsLimit === null
-            ? '用语音对它说一句'
-            : '用语音对它说一句，最长 ' + mic.secondsLimit + ' 秒';
+  const micLabel = mic === undefined ? '' : micButtonLabel(mic);
+  const micHint = mic === undefined ? '' : micButtonHint(mic);
 
   const avatar = (
     <PetAvatar

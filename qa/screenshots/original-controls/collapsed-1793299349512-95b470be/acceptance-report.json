@@ -1,0 +1,642 @@
+{
+  "status": "passed",
+  "at": "2026-10-29T18:42:29.513Z",
+  "profileId": "collapsed-1793299349512-95b470be",
+  "checks": [
+    {
+      "name": "collapsed-footer-visibility-and-keyboard",
+      "status": "passed",
+      "elapsedMs": 4508
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "collapsed-light-1200x800",
+      "file": "qa/screenshots/original-controls/collapsed-1793299349512-95b470be/collapsed-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "collapsed-dark-1200x800",
+      "file": "qa/screenshots/original-controls/collapsed-1793299349512-95b470be/collapsed-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "collapsed-system-1200x800",
+      "file": "qa/screenshots/original-controls/collapsed-1793299349512-95b470be/collapsed-system-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "collapsed-light-880x600",
+      "file": "qa/screenshots/original-controls/collapsed-1793299349512-95b470be/collapsed-light-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "collapsed-dark-880x600",
+      "file": "qa/screenshots/original-controls/collapsed-1793299349512-95b470be/collapsed-dark-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "collapsed-system-880x600",
+      "file": "qa/screenshots/original-controls/collapsed-1793299349512-95b470be/collapsed-system-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    }
+  ],
+  "shutdown": [
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    }
+  ],
+  "errors": [],
+  "rendererRemoteOrigins": [],
+  "approvals": [],
+  "geometry": [
+    {
+      "label": "collapsed 1200x800",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 1062,
+          "scroll": 1062
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 900,
+          "scroll": 900
+        }
+      ]
+    },
+    {
+      "kind": "collapsed-footer",
+      "rail": {
+        "x": 0,
+        "y": 0,
+        "right": 85.265625,
+        "bottom": 800,
+        "width": 85.265625,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1200,
+        "height": 800
+      },
+      "choices": [
+        {
+          "label": {
+            "x": 8,
+            "y": 696,
+            "right": 76.265625,
+            "bottom": 724,
+            "width": 68.265625,
+            "height": 28
+          },
+          "text": {
+            "x": 8,
+            "y": 696,
+            "right": 76.265625,
+            "bottom": 724,
+            "width": 68.265625,
+            "height": 28
+          },
+          "mode": "light",
+          "textClient": 66,
+          "textScroll": 66
+        },
+        {
+          "label": {
+            "x": 8,
+            "y": 728,
+            "right": 76.265625,
+            "bottom": 756,
+            "width": 68.265625,
+            "height": 28
+          },
+          "text": {
+            "x": 8,
+            "y": 728,
+            "right": 76.265625,
+            "bottom": 756,
+            "width": 68.265625,
+            "height": 28
+          },
+          "mode": "dark",
+          "textClient": 66,
+          "textScroll": 66
+        },
+        {
+          "label": {
+            "x": 8,
+            "y": 760,
+            "right": 76.265625,
+            "bottom": 788,
+            "width": 68.265625,
+            "height": 28
+          },
+          "text": {
+            "x": 8,
+            "y": 760,
+            "right": 76.265625,
+            "bottom": 788,
+            "width": 68.265625,
+            "height": 28
+          },
+          "mode": "system",
+          "textClient": 66,
+          "textScroll": 66
+        }
+      ]
+    },
+    {
+      "label": "collapsed 880x600",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 798,
+          "scroll": 798
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 766,
+          "scroll": 766
+        }
+      ]
+    },
+    {
+      "kind": "collapsed-footer",
+      "rail": {
+        "x": 0,
+        "y": 0,
+        "right": 72,
+        "bottom": 600,
+        "width": 72,
+        "height": 600
+      },
+      "viewport": {
+        "width": 880,
+        "height": 600
+      },
+      "choices": [
+        {
+          "label": {
+            "x": 8,
+            "y": 496,
+            "right": 63,
+            "bottom": 524,
+            "width": 55,
+            "height": 28
+          },
+          "text": {
+            "x": 8,
+            "y": 496,
+            "right": 63,
+            "bottom": 524,
+            "width": 55,
+            "height": 28
+          },
+          "mode": "light",
+          "textClient": 53,
+          "textScroll": 53
+        },
+        {
+          "label": {
+            "x": 8,
+            "y": 528,
+            "right": 63,
+            "bottom": 556,
+            "width": 55,
+            "height": 28
+          },
+          "text": {
+            "x": 8,
+            "y": 528,
+            "right": 63,
+            "bottom": 556,
+            "width": 55,
+            "height": 28
+          },
+          "mode": "dark",
+          "textClient": 53,
+          "textScroll": 53
+        },
+        {
+          "label": {
+            "x": 8,
+            "y": 560,
+            "right": 63,
+            "bottom": 588,
+            "width": 55,
+            "height": 28
+          },
+          "text": {
+            "x": 8,
+            "y": 560,
+            "right": 63,
+            "bottom": 588,
+            "width": 55,
+            "height": 28
+          },
+          "mode": "system",
+          "textClient": 53,
+          "textScroll": 53
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "The QA integrator rebuilt current Main, worker, builtin admission and renderer after product freeze before this serial run.",
+    "This launches the unpackaged application with a unique real userData under .cache.",
+    "--no-sandbox is the existing native QA exception; this is not OS-sandbox evidence.",
+    "No fake media device, fake UI, scripted provider, fake bridge, localStorage write, or external sign-in is used.",
+    "This bounded CSS delta checks only native collapsed footer visibility and theme keyboard/pointer activation; the separate base report owns Core/model/theme business acceptance."
+  ],
+  "limitations": [
+    "Playwright pointer input does not prove physical desktop hit testing or native microphone capture.",
+    "Renderer request observation is not a packet capture of worker traffic; the model guard is the actual network approval denial.",
+    "Screenshots use the same content viewport at zoom 1. Original-control screenshots mask only controls or bubbles containing private QA prefixes, with neutral masks; normal idle and nonsensitive Core replies remain visible. Negative DOM checks alone do not establish originality."
+  ],
+  "mode": "collapsed-css-delta",
+  "source": {
+    "referenceVersion": "0.2.10",
+    "sourceDigest": "9316cbeff3f1729c9da03f78e99035b32f25128f51f8ed06607924bdbe0c90b9",
+    "fingerprints": {
+      "probe": {
+        "path": "qa/probes/coopanion-start-ui-e2e.mjs",
+        "sha256": "0e420a60cdcee2a7565c26dbe7a45a940408df7e588c94c3c5b79dc682108962"
+      },
+      "start": {
+        "path": "apps/desktop/src/renderer/console/pages/start.tsx",
+        "sha256": "f4410cdb058c7f247f837d8a1283ecbd999ee64d72b75ca0d642973c1a4757bb"
+      },
+      "sections": {
+        "path": "apps/desktop/src/renderer/console/start-designs/sections.tsx",
+        "sha256": "d504aa3af9e9051bafe17be5e151299b90db0f5fe3f51bcf79e8c9393efa5e63"
+      },
+      "registry": {
+        "path": "apps/desktop/src/renderer/console/start-designs/registry.tsx",
+        "sha256": "e2b9ec3131b775e8c030e682c8bfadc786e18ba616ad2ae6f2b63a019bf4518b"
+      },
+      "lab": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.tsx",
+        "sha256": "8665fa618d7ba5afaecc852f1989b2ca98db26b985fab1219801aa5e226bc8ca"
+      },
+      "catalog": {
+        "path": "apps/desktop/src/renderer/console/start-designs/catalog.ts",
+        "sha256": "a54760ae6a2a8da46ca6af2954d35905f2618d464cfda58c5c704a7b346746c9"
+      },
+      "labIcons": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab-icons.tsx",
+        "sha256": "e06702ebd9398bb3a6d51bf489f024cb08a734d44b1bd165ad66ed1ae8e690d6"
+      },
+      "labCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.css",
+        "sha256": "c7b46d95dd6f606ace06052d813eded14ebc074e9c705b53160d06482e676638"
+      },
+      "startCss": {
+        "path": "apps/desktop/src/renderer/console/pages/start.css",
+        "sha256": "298031d185506df47edff45b1c80fe608682ef1952b81f4373a4780d39b872fe"
+      },
+      "main": {
+        "path": "apps/desktop/src/main/index.ts",
+        "sha256": "f0db3da5654046b6b5d4405d7a3c0b67902eeca7cb1a25a76025c3b42c821301"
+      },
+      "preload": {
+        "path": "apps/desktop/src/preload/index.ts",
+        "sha256": "f0f0295e42932fe680dbe3c5a9aed8b906bf65a34c6a2c5a90bb25cfb2ae897b"
+      },
+      "presentation": {
+        "path": "packages/contracts/src/design-lab.ts",
+        "sha256": "90e58eb18c9fdba82462ff8a31d71b358af07978409ce779c40a11933bc078a9"
+      },
+      "shell": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.tsx",
+        "sha256": "9581431cd67771b5c172065c5f6ece120031b203e4ed36253c1b6f59f3b81571"
+      },
+      "shellCss": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.css",
+        "sha256": "48ee8ec73bf3d7ba82d87c90ff941d46ab34ee72c26d8f657eeabcbdcd7e9010"
+      },
+      "preview": {
+        "path": "apps/desktop/src/renderer/console/pet-preview.tsx",
+        "sha256": "a4a472b019835da4dfe461a1d28bf579180474058be7f05295ecbeec27c95817"
+      },
+      "composer": {
+        "path": "apps/desktop/src/renderer/pet/PetComposer.tsx",
+        "sha256": "49b83d169b91a8d1fa2e8574ab0d8606fc5814f54d5c046b057e7b0b6e033e1b"
+      },
+      "avatar": {
+        "path": "apps/desktop/src/renderer/pet/PetAvatar.tsx",
+        "sha256": "0e361e6ddcc61fc03c90c846820626977c4980d93daddf1f2d38c4ccb80bed75"
+      },
+      "petDialog": {
+        "path": "apps/desktop/src/renderer/pet/PetDialog.tsx",
+        "sha256": "c05676265d0030c8209874166fa6a91e94439a109d738ff9a7ed0c4d54c7fb29"
+      },
+      "petMenu": {
+        "path": "apps/desktop/src/renderer/pet/PetMenu.tsx",
+        "sha256": "346f09753feca1acc25d39797cc69a6683ceb45215853b3e851cead4c329a692"
+      },
+      "theme": {
+        "path": "apps/desktop/src/renderer/console/theme-editor.tsx",
+        "sha256": "32c040604088dabe3d1224442e0d80b17b8fa16e04aef85f8807d07b601ed874"
+      },
+      "console": {
+        "path": "apps/desktop/src/renderer/console/console-app.tsx",
+        "sha256": "5b90b766b5c2501170ea74799bf9b707c00dd9629a1bae429c0128750b47c706"
+      },
+      "reference": {
+        "path": "Coopanion/console/features/home/index.ts",
+        "sha256": "7918d7f95497bd8f51eaadae1e9bd854eb05e7da1550c00f9dec60299634e812"
+      },
+      "referenceCss": {
+        "path": "Coopanion/console/features/home/home.css",
+        "sha256": "1a50bf461df410d09ff209afd6601742765a99e3007976ceb2413067df29ce92"
+      },
+      "referenceStrings": {
+        "path": "Coopanion/console/features/home/strings.ts",
+        "sha256": "1ca92d5fe09729777fe2efc6b836d6153b8c5f95ef36946c6dae8ac2ba6a9781"
+      },
+      "providerBehavior": {
+        "path": "apps/desktop/src/renderer/console/start-designs/behavior.ts",
+        "sha256": "31de96f54ef7b9b0866dd0869a3f9aa6da8a2ac1a058e7e2d06d803caf8710b6"
+      },
+      "ownKit": {
+        "path": "apps/desktop/src/renderer/console/original-ui/kit.tsx",
+        "sha256": "74241cd44da4e72e8d7a9d3b10e652bf3bb667993f2f188a53e8de76366b0bf5"
+      },
+      "ownKitCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/kit.css",
+        "sha256": "dd5ef3ec0b9beb9e0afb87968af863fa549150bed9069221eb58bb0839b4ccd5"
+      },
+      "ownTokens": {
+        "path": "apps/desktop/src/renderer/console/original-ui/design-tokens.css",
+        "sha256": "2082bf4f5756a6cec0560b541dbe63dd3bafcb7decac5dcbb00f9793afa3ed1e"
+      },
+      "ownBoard": {
+        "path": "apps/desktop/src/renderer/console/original-ui/control-board.tsx",
+        "sha256": "61cc566e222f5bc0fe97945c26eef615a37a18dca7fefcebca5a0cf306825910"
+      },
+      "ownPreview": {
+        "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.tsx",
+        "sha256": "d153b2eed1db9ca96338f4eb4ec263ced5e33dd82f39b7293ea0df7a847e69c5"
+      },
+      "ownPreviewCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.css",
+        "sha256": "e228e0dacac7d791f23e815ea5c6f25684ef5dac9534065bcc16d53bf66f7975"
+      },
+      "previewBehavior": {
+        "path": "apps/desktop/src/renderer/console/preview-behavior.ts",
+        "sha256": "676f3c6d9bf2103473a53e6ee5280ae709e4a35bfbd472e8a8936710c2ad83f8"
+      },
+      "ownStudio": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-studio.tsx",
+        "sha256": "5346c87b290fce7cb7d944e10f3e0f4bbf92dbbb47664552ae1512873051315a"
+      },
+      "ownStudioCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-studio.css",
+        "sha256": "216d596a07c05197680bfb296823081e2fa21a6eae2fc6852bcc51830f7d9ace"
+      },
+      "themeController": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-controller.ts",
+        "sha256": "5a3a4c87d1ebf2ad447cde2d55a3bf09560b9d0597285b882cf53a52852d3f8a"
+      },
+      "themeOwner": {
+        "path": "apps/desktop/src/renderer/console/theme.ts",
+        "sha256": "f2fa647b0b74dd41d628db9d15b6c17679ab77212670f70f6aa41b7833b48f71"
+      },
+      "modelBehavior": {
+        "path": "apps/desktop/src/renderer/console/start-designs/use-start-model.ts",
+        "sha256": "00de763da48648854a7d7cdc87428b2d4d620a97528f525bfb8c8d79bfa7b1b8"
+      },
+      "bench": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/bench.tsx",
+        "sha256": "3a8583b68031cbf2f22f91d00feea7510716c203464578f4b91ec05094d69a47"
+      },
+      "benchCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/bench.css",
+        "sha256": "0c569d8065ca683f47fbd4e6da37e12c0db81edee33db4a3af87e1a0387adaaa"
+      },
+      "switchboard": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/switchboard.tsx",
+        "sha256": "03c45a9bbaca36d4f2f159993789ccf853de6d4f41bdf8bc8438602addeb554c"
+      },
+      "switchboardCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/switchboard.css",
+        "sha256": "f0481da8669221ceb88816bcb9300b6a241918fa3574780040655e06e7ba7cfc"
+      },
+      "spine": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/spine.tsx",
+        "sha256": "a02f48e19d2c1e42d61260b0709f02ed5f39bf949d2bfe385eb0a9d29fecbfb6"
+      },
+      "spineCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/spine.css",
+        "sha256": "3623a6f8bac961a2c546f5da7031335257c5334e354547e836e59458a8bbc920"
+      },
+      "stage": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/stage.tsx",
+        "sha256": "7b517caf80d90165fe74fa30ac44eb72bc1ba80a183334958ac0ec66024cc563"
+      },
+      "stageCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/stage.css",
+        "sha256": "417981c723672beae234de774f645aab412a3e79eea88284564caa9577905a6a"
+      },
+      "workspaces": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/workspaces.tsx",
+        "sha256": "303dc6e6243ee045a8505b1c6a5cabfa97b9a535ed12c6a41e8b175e98a53e72"
+      },
+      "workspacesCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/workspaces.css",
+        "sha256": "b2321319925571771e520c15c757d53b80f380a7e1bb6fd4df77964991c2c513"
+      }
+    },
+    "selectors": [
+      {
+        "owner": "shell",
+        "selector": "settings-shell",
+        "present": true
+      },
+      {
+        "owner": "shell",
+        "selector": "settings-content",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-provider-search",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-save",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-test",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-receipt",
+        "present": true
+      },
+      {
+        "owner": "ownPreview",
+        "selector": "pet-chat-toggle",
+        "present": true
+      },
+      {
+        "owner": "ownPreview",
+        "selector": "pet-mic-toggle",
+        "present": true
+      },
+      {
+        "owner": "ownPreview",
+        "selector": "pet-composer-input",
+        "present": true
+      },
+      {
+        "owner": "ownStudio",
+        "selector": "theme-token-",
+        "present": true
+      },
+      {
+        "owner": "ownStudio",
+        "selector": "theme-scheme-name",
+        "present": true
+      },
+      {
+        "owner": "ownStudio",
+        "selector": "theme-undo-preview",
+        "present": true
+      }
+    ],
+    "dependencies": {
+      "startThemeMounted": true,
+      "previewComposerMounted": true,
+      "startContainsRequiredHeadings": true
+    }
+  },
+  "baseNative": {
+    "report": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/acceptance-report.json",
+    "sourceDigest": "1c00dc6a50142d52c312ec00fd6733e61d2076d6d8495781c3490e29f12f62e8",
+    "checksPassed": 10,
+    "changedFiles": [
+      "qa/probes/coopanion-start-ui-e2e.mjs",
+      "apps/desktop/src/renderer/console/settings-shell.css"
+    ]
+  },
+  "buildArtifacts": [
+    {
+      "path": "apps/desktop/dist/main/index.mjs",
+      "sha256": "719c13ede0a59f58a1a93393973e12e981796c22c0c4832f3e86e43fe9a0bac0"
+    },
+    {
+      "path": "apps/desktop/dist/runtime/worker.cjs",
+      "sha256": "f3459863fa5ddb63e135a3fc500b7921e8da6104b25f213277b795438ea61ca1"
+    },
+    {
+      "path": "apps/desktop/dist/preload/index.cjs",
+      "sha256": "640ec32450d6cedb3aeab2cc4d279b9ca5492692c9f9f525a9c9390f195d3d99"
+    },
+    {
+      "path": "apps/desktop/dist/renderer/console/index.html",
+      "sha256": "68e8f538c1064d4cbb58785135ea34c01e7a0bbc38625ba7272c0c4e4313f88f"
+    }
+  ],
+  "collapsedModes": [
+    {
+      "width": 1200,
+      "height": 800,
+      "mode": "light",
+      "keyboard": true,
+      "fullyVisible": true
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "mode": "dark",
+      "keyboard": true,
+      "fullyVisible": true
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "mode": "system",
+      "keyboard": true,
+      "fullyVisible": true
+    },
+    {
+      "width": 880,
+      "height": 600,
+      "mode": "light",
+      "keyboard": true,
+      "fullyVisible": true
+    },
+    {
+      "width": 880,
+      "height": 600,
+      "mode": "dark",
+      "keyboard": true,
+      "fullyVisible": true
+    },
+    {
+      "width": 880,
+      "height": 600,
+      "mode": "system",
+      "keyboard": true,
+      "fullyVisible": true
+    }
+  ],
+  "mainLogBytes": 145
+}

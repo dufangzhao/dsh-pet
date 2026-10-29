@@ -1,0 +1,2993 @@
+{
+  "status": "failed",
+  "at": "2026-10-29T17:49:08.020Z",
+  "profileId": "start-lab-1793296148019-037ca5fa",
+  "checks": [
+    {
+      "name": "original-normal-and-components",
+      "status": "passed",
+      "elapsedMs": 7243
+    },
+    {
+      "name": "original-model-save-with-network-denial",
+      "status": "passed",
+      "elapsedMs": 1273
+    },
+    {
+      "name": "original-theme-crud-and-variants",
+      "status": "passed",
+      "elapsedMs": 7126
+    },
+    {
+      "name": "source-and-real-profile",
+      "status": "passed",
+      "elapsedMs": 3214
+    },
+    {
+      "name": "five-layouts-and-draft-preservation",
+      "status": "passed",
+      "elapsedMs": 1611
+    },
+    {
+      "name": "each-layout-actions-and-shared-history",
+      "status": "passed",
+      "elapsedMs": 5844
+    },
+    {
+      "name": "native-pause-and-visibility",
+      "status": "passed",
+      "elapsedMs": 2606
+    },
+    {
+      "name": "theme-disclosure-and-undo",
+      "status": "passed",
+      "elapsedMs": 1583
+    },
+    {
+      "name": "minimum-layout-zoom-and-reduced-motion",
+      "status": "failed",
+      "error": "expect(locator).toBeInViewport() failed\n\nLocator:  getByRole('region', { name: '桌宠预览', exact: true }).getByTestId('pet-avatar')\nExpected: in viewport\nReceived: viewport ratio 0.9988692402839661\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeInViewport\" getByRole('region', { name: '桌宠预览', exact: true }).getByTestId('pet-avatar') with timeout 5000ms\n  - waiting for getByRole('region', { name: '桌宠预览', exact: true }).getByTestId('pet-avatar')\n    14 × locator resolved to <svg role=\"img\" data-state=\"idle\" aria-label=\"桌宠 小蓝\" viewBox=\"0 0 160 160\" data-figure=\"minimal\" data-testid=\"pet-avatar\" data-expression=\"neutral\" data-label-id=\"pet-eye-idle\" xmlns=\"http://www.w3.org/2000/svg\" class=\"pet-avatar pet-avatar--idle pet-avatar--minimal\">…</svg>\n       - unexpected value \"viewport ratio 0.9988692402839661\"\n"
+    },
+    {
+      "name": "lab-restart-persistence",
+      "status": "not-run"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "original-normal-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-normal-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-normal-minimum-880x600",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-normal-collapsed-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-collapsed-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-control-board-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-control-board-focused-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-focused-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-control-board-choice-states-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-choice-states-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-control-board-receipt-states-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-receipt-states-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "bench-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/bench-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "switchboard-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/switchboard-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "spine-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/spine-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "stage-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/stage-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "workspaces-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/workspaces-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-saved-test-denied-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-saved-test-denied-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-preview-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-preview-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-theme-studio-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-theme-studio-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "bench-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/bench-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "switchboard-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/switchboard-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "spine-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/spine-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "stage-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/stage-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "workspaces-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/workspaces-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "original-control-board-dark-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "bench-minimum-880x600",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/bench-minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "switchboard-minimum-880x600",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/switchboard-minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "spine-minimum-880x600",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/spine-minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "stage-minimum-880x600",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/stage-minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "workspaces-minimum-880x600",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/workspaces-minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "failure-minimum-layout-zoom-and-reduced-motion",
+      "file": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/failure-minimum-layout-zoom-and-reduced-motion.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    }
+  ],
+  "shutdown": [
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    },
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    }
+  ],
+  "errors": [],
+  "rendererRemoteOrigins": [],
+  "approvals": [
+    {
+      "kind": "capability-use",
+      "approved": true
+    },
+    {
+      "kind": "network",
+      "approved": false
+    }
+  ],
+  "geometry": [
+    {
+      "label": "normal dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "normal minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "normal collapsed rail",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 1062,
+          "scroll": 1062
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 900,
+          "scroll": 900
+        }
+      ]
+    },
+    {
+      "label": "original component board1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "bench light1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "switchboard light1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "spine light1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "stage light1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "workspaces light1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "bench dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "switchboard dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "spine dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "stage dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "workspaces dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "label": "original component board dark1200",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 942,
+          "scroll": 942
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 878,
+          "scroll": 878
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 878,
+          "scroll": 878
+        }
+      ]
+    },
+    {
+      "kind": "native-minimum",
+      "visible": true,
+      "bounds": {
+        "x": 360,
+        "y": 116,
+        "width": 880,
+        "height": 600
+      },
+      "contentBounds": {
+        "x": 368,
+        "y": 147,
+        "width": 864,
+        "height": 561
+      },
+      "minimum": [
+        880,
+        600
+      ],
+      "zoom": 1
+    },
+    {
+      "label": "bench minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "bench connect minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "bench pet minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "bench theme minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "switchboard minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "switchboard connect minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "switchboard pet minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "switchboard theme minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "spine minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "spine connect minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "spine pet minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "spine theme minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "stage minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "stage connect minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "stage pet minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "stage theme minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "workspaces minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "workspaces connect minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    },
+    {
+      "label": "workspaces pet minimum",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-shell\"]",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "[data-testid=\"settings-main\"]",
+          "client": 622,
+          "scroll": 622
+        },
+        {
+          "selector": "[data-testid=\"settings-content\"]",
+          "client": 590,
+          "scroll": 590
+        },
+        {
+          "selector": "[data-testid=\"start-design-lab\"]",
+          "client": 590,
+          "scroll": 590
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "The QA integrator rebuilt current Main, worker, builtin admission and renderer after product freeze before this serial run.",
+    "This launches the unpackaged application with a unique real userData under .cache.",
+    "--no-sandbox is the existing native QA exception; this is not OS-sandbox evidence.",
+    "No fake media device, fake UI, scripted provider, fake bridge, localStorage write, or external sign-in is used.",
+    "The synthetic model Key is saved only to the isolated native credential store; its network permission is denied through the real pet dialog.",
+    "Model success and OAuth callback behavior are covered by separate offline probes; this runner does not fabricate them."
+  ],
+  "limitations": [
+    "Playwright pointer input does not prove physical desktop hit testing or native microphone capture.",
+    "Renderer request observation is not a packet capture of worker traffic; the model guard is the actual network approval denial.",
+    "Screenshots use the same content viewport at zoom 1. Original-control screenshots mask only controls or bubbles containing private QA prefixes, with neutral masks; normal idle and nonsensitive Core replies remain visible. Negative DOM checks alone do not establish originality."
+  ],
+  "freshProviderTruth": {
+    "endpointsWithoutKey": 15,
+    "noFalseSavedKeyLabels": true
+  },
+  "originalNormal": {
+    "label": "normalStart",
+    "legacyWidgets": 0,
+    "originalControlCount": 77
+  },
+  "previewGeometry": [
+    {
+      "label": "normal1200",
+      "avatar": {
+        "x": 519,
+        "y": 323.984375,
+        "width": 152,
+        "height": 152,
+        "right": 671,
+        "bottom": 475.984375
+      },
+      "well": {
+        "x": 297,
+        "y": 264.234375,
+        "width": 596,
+        "height": 244,
+        "right": 893,
+        "bottom": 508.234375
+      },
+      "bubble": {
+        "x": 531,
+        "y": 280.234375,
+        "width": 128,
+        "height": 35.5,
+        "right": 659,
+        "bottom": 315.734375,
+        "length": 8,
+        "lines": 1,
+        "contentWidth": 104,
+        "scroll": 128,
+        "client": 128
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "normal880",
+      "avatar": {
+        "x": 483,
+        "y": 224.375,
+        "width": 152,
+        "height": 152,
+        "right": 635,
+        "bottom": 376.375
+      },
+      "well": {
+        "x": 281,
+        "y": 164.625,
+        "width": 556,
+        "height": 244,
+        "right": 837,
+        "bottom": 408.625
+      },
+      "bubble": {
+        "x": 495,
+        "y": 180.625,
+        "width": 128,
+        "height": 35.5,
+        "right": 623,
+        "bottom": 216.125,
+        "length": 8,
+        "lines": 1,
+        "contentWidth": 104,
+        "scroll": 128,
+        "client": 128
+      },
+      "tools": [
+        {
+          "textWidth": 476,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 476
+        }
+      ]
+    },
+    {
+      "label": "bench1200 before chat",
+      "avatar": {
+        "x": 897.625,
+        "y": 346.734375,
+        "width": 152,
+        "height": 152,
+        "right": 1049.625,
+        "bottom": 498.734375
+      },
+      "well": {
+        "x": 806.25,
+        "y": 286.984375,
+        "width": 334.75,
+        "height": 244,
+        "right": 1141,
+        "bottom": 530.984375
+      },
+      "bubble": {
+        "x": 909.625,
+        "y": 302.984375,
+        "width": 128,
+        "height": 35.5,
+        "right": 1037.625,
+        "bottom": 338.484375,
+        "length": 8,
+        "lines": 1,
+        "contentWidth": 104,
+        "scroll": 128,
+        "client": 128
+      },
+      "tools": [
+        {
+          "textWidth": 254.75,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 254.75
+        },
+        {
+          "textWidth": 254.75,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 254.75
+        },
+        {
+          "textWidth": 254.75,
+          "hintLength": 30,
+          "hintLines": 2,
+          "hintWidth": 254.75
+        }
+      ]
+    },
+    {
+      "label": "bench1200 long Core bubble",
+      "avatar": {
+        "x": 897.625,
+        "y": 319.984375,
+        "width": 152,
+        "height": 152,
+        "right": 1049.625,
+        "bottom": 471.984375
+      },
+      "well": {
+        "x": 806.25,
+        "y": 240.984375,
+        "width": 334.75,
+        "height": 263,
+        "right": 1141,
+        "bottom": 503.984375
+      },
+      "bubble": {
+        "x": 844.03125,
+        "y": 256.984375,
+        "width": 259.1875,
+        "height": 55,
+        "right": 1103.21875,
+        "bottom": 311.984375,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 254.75,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 254.75
+        },
+        {
+          "textWidth": 254.75,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 254.75
+        },
+        {
+          "textWidth": 254.75,
+          "hintLength": 30,
+          "hintLines": 2,
+          "hintWidth": 254.75
+        }
+      ]
+    },
+    {
+      "label": "switchboard1200 before chat",
+      "avatar": {
+        "x": 786.6875,
+        "y": 622.78125,
+        "width": 152,
+        "height": 152,
+        "right": 938.6875,
+        "bottom": 774.78125
+      },
+      "well": {
+        "x": 584.390625,
+        "y": 543.78125,
+        "width": 556.609375,
+        "height": 263,
+        "right": 1141,
+        "bottom": 806.78125
+      },
+      "bubble": {
+        "x": 733.09375,
+        "y": 559.78125,
+        "width": 259.1875,
+        "height": 55,
+        "right": 992.28125,
+        "bottom": 614.78125,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 476.609375,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 476.609375
+        },
+        {
+          "textWidth": 476.609375,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 476.609375
+        },
+        {
+          "textWidth": 476.609375,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 476.609375
+        }
+      ]
+    },
+    {
+      "label": "switchboard1200 long Core bubble",
+      "avatar": {
+        "x": 786.6875,
+        "y": 168.78125,
+        "width": 152,
+        "height": 152,
+        "right": 938.6875,
+        "bottom": 320.78125
+      },
+      "well": {
+        "x": 584.390625,
+        "y": 89.78125,
+        "width": 556.609375,
+        "height": 263,
+        "right": 1141,
+        "bottom": 352.78125
+      },
+      "bubble": {
+        "x": 733.09375,
+        "y": 105.78125,
+        "width": 259.1875,
+        "height": 55,
+        "right": 992.28125,
+        "bottom": 160.78125,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 476.609375,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 476.609375
+        },
+        {
+          "textWidth": 476.609375,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 476.609375
+        },
+        {
+          "textWidth": 476.609375,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 476.609375
+        }
+      ]
+    },
+    {
+      "label": "spine1200 before chat",
+      "avatar": {
+        "x": 526.5,
+        "y": 428.390625,
+        "width": 152,
+        "height": 152,
+        "right": 678.5,
+        "bottom": 580.390625
+      },
+      "well": {
+        "x": 325,
+        "y": 349.390625,
+        "width": 555,
+        "height": 263,
+        "right": 880,
+        "bottom": 612.390625
+      },
+      "bubble": {
+        "x": 472.90625,
+        "y": 365.390625,
+        "width": 259.1875,
+        "height": 55,
+        "right": 732.09375,
+        "bottom": 420.390625,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "spine1200 long Core bubble",
+      "avatar": {
+        "x": 526.5,
+        "y": 428.390625,
+        "width": 152,
+        "height": 152,
+        "right": 678.5,
+        "bottom": 580.390625
+      },
+      "well": {
+        "x": 325,
+        "y": 349.390625,
+        "width": 555,
+        "height": 263,
+        "right": 880,
+        "bottom": 612.390625
+      },
+      "bubble": {
+        "x": 472.90625,
+        "y": 365.390625,
+        "width": 259.1875,
+        "height": 55,
+        "right": 732.09375,
+        "bottom": 420.390625,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "stage1200 before chat",
+      "avatar": {
+        "x": 519,
+        "y": 323.984375,
+        "width": 152,
+        "height": 152,
+        "right": 671,
+        "bottom": 475.984375
+      },
+      "well": {
+        "x": 297,
+        "y": 244.984375,
+        "width": 596,
+        "height": 263,
+        "right": 893,
+        "bottom": 507.984375
+      },
+      "bubble": {
+        "x": 465.40625,
+        "y": 260.984375,
+        "width": 259.1875,
+        "height": 55,
+        "right": 724.59375,
+        "bottom": 315.984375,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "stage1200 long Core bubble",
+      "avatar": {
+        "x": 519,
+        "y": 323.984375,
+        "width": 152,
+        "height": 152,
+        "right": 671,
+        "bottom": 475.984375
+      },
+      "well": {
+        "x": 297,
+        "y": 244.984375,
+        "width": 596,
+        "height": 263,
+        "right": 893,
+        "bottom": 507.984375
+      },
+      "bubble": {
+        "x": 465.40625,
+        "y": 260.984375,
+        "width": 259.1875,
+        "height": 55,
+        "right": 724.59375,
+        "bottom": 315.984375,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "workspaces1200 before chat",
+      "avatar": {
+        "x": 524,
+        "y": 412.796875,
+        "width": 152,
+        "height": 152,
+        "right": 676,
+        "bottom": 564.796875
+      },
+      "well": {
+        "x": 297,
+        "y": 333.796875,
+        "width": 606,
+        "height": 263,
+        "right": 903,
+        "bottom": 596.796875
+      },
+      "bubble": {
+        "x": 470.40625,
+        "y": 349.796875,
+        "width": 259.1875,
+        "height": 55,
+        "right": 729.59375,
+        "bottom": 404.796875,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "workspaces1200 long Core bubble",
+      "avatar": {
+        "x": 519,
+        "y": 412.796875,
+        "width": 152,
+        "height": 152,
+        "right": 671,
+        "bottom": 564.796875
+      },
+      "well": {
+        "x": 297,
+        "y": 333.796875,
+        "width": 596,
+        "height": 263,
+        "right": 893,
+        "bottom": 596.796875
+      },
+      "bubble": {
+        "x": 465.40625,
+        "y": 349.796875,
+        "width": 259.1875,
+        "height": 55,
+        "right": 724.59375,
+        "bottom": 404.796875,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 152,
+          "hintLength": 18,
+          "hintLines": 2,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 152
+        },
+        {
+          "textWidth": 152,
+          "hintLength": 30,
+          "hintLines": 3,
+          "hintWidth": 152
+        }
+      ]
+    },
+    {
+      "label": "bench880 long Core bubble",
+      "avatar": {
+        "x": 483,
+        "y": 223.65625,
+        "width": 152,
+        "height": 152,
+        "right": 635,
+        "bottom": 375.65625
+      },
+      "well": {
+        "x": 281,
+        "y": 144.65625,
+        "width": 556,
+        "height": 263,
+        "right": 837,
+        "bottom": 407.65625
+      },
+      "bubble": {
+        "x": 429.40625,
+        "y": 160.65625,
+        "width": 259.1875,
+        "height": 55,
+        "right": 688.59375,
+        "bottom": 215.65625,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 476,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 476
+        }
+      ]
+    },
+    {
+      "label": "switchboard880 long Core bubble",
+      "avatar": {
+        "x": 483,
+        "y": 223.953125,
+        "width": 152,
+        "height": 152,
+        "right": 635,
+        "bottom": 375.953125
+      },
+      "well": {
+        "x": 281,
+        "y": 144.953125,
+        "width": 556,
+        "height": 263,
+        "right": 837,
+        "bottom": 407.953125
+      },
+      "bubble": {
+        "x": 429.40625,
+        "y": 160.953125,
+        "width": 259.1875,
+        "height": 55,
+        "right": 688.59375,
+        "bottom": 215.953125,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 476,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 476
+        }
+      ]
+    },
+    {
+      "label": "spine880 long Core bubble",
+      "avatar": {
+        "x": 490.5,
+        "y": 223.765625,
+        "width": 152,
+        "height": 152,
+        "right": 642.5,
+        "bottom": 375.765625
+      },
+      "well": {
+        "x": 309,
+        "y": 144.765625,
+        "width": 515,
+        "height": 263,
+        "right": 824,
+        "bottom": 407.765625
+      },
+      "bubble": {
+        "x": 436.90625,
+        "y": 160.765625,
+        "width": 259.1875,
+        "height": 55,
+        "right": 696.09375,
+        "bottom": 215.765625,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 435,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 435
+        },
+        {
+          "textWidth": 435,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 435
+        },
+        {
+          "textWidth": 435,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 435
+        }
+      ]
+    },
+    {
+      "label": "stage880 long Core bubble",
+      "avatar": {
+        "x": 483,
+        "y": 412.359375,
+        "width": 152,
+        "height": 152,
+        "right": 635,
+        "bottom": 564.359375
+      },
+      "well": {
+        "x": 281,
+        "y": 333.359375,
+        "width": 556,
+        "height": 263,
+        "right": 837,
+        "bottom": 596.359375
+      },
+      "bubble": {
+        "x": 429.40625,
+        "y": 349.359375,
+        "width": 259.1875,
+        "height": 55,
+        "right": 688.59375,
+        "bottom": 404.359375,
+        "length": 22,
+        "lines": 2,
+        "contentWidth": 235,
+        "scroll": 259,
+        "client": 259
+      },
+      "tools": [
+        {
+          "textWidth": 476,
+          "hintLength": 18,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 12,
+          "hintLines": 1,
+          "hintWidth": 476
+        },
+        {
+          "textWidth": 476,
+          "hintLength": 30,
+          "hintLines": 1,
+          "hintWidth": 476
+        }
+      ]
+    }
+  ],
+  "shell": {
+    "collapseExpandsContent": true,
+    "skipToMainKeyboard": true
+  },
+  "source": {
+    "referenceVersion": "0.2.10",
+    "sourceDigest": "2c9568f59eb1b7a25424a31abbe3ea72058975e69137d3e95fde02104d7044c3",
+    "fingerprints": {
+      "probe": {
+        "path": "qa/probes/coopanion-start-ui-e2e.mjs",
+        "sha256": "c2445ba8f7d47fbf4304db4fdd8ff6000f20cc6d8c9e785cff839d5a4c8aa013"
+      },
+      "start": {
+        "path": "apps/desktop/src/renderer/console/pages/start.tsx",
+        "sha256": "f4410cdb058c7f247f837d8a1283ecbd999ee64d72b75ca0d642973c1a4757bb"
+      },
+      "sections": {
+        "path": "apps/desktop/src/renderer/console/start-designs/sections.tsx",
+        "sha256": "d504aa3af9e9051bafe17be5e151299b90db0f5fe3f51bcf79e8c9393efa5e63"
+      },
+      "registry": {
+        "path": "apps/desktop/src/renderer/console/start-designs/registry.tsx",
+        "sha256": "e2b9ec3131b775e8c030e682c8bfadc786e18ba616ad2ae6f2b63a019bf4518b"
+      },
+      "lab": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.tsx",
+        "sha256": "8665fa618d7ba5afaecc852f1989b2ca98db26b985fab1219801aa5e226bc8ca"
+      },
+      "catalog": {
+        "path": "apps/desktop/src/renderer/console/start-designs/catalog.ts",
+        "sha256": "a54760ae6a2a8da46ca6af2954d35905f2618d464cfda58c5c704a7b346746c9"
+      },
+      "labIcons": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab-icons.tsx",
+        "sha256": "e06702ebd9398bb3a6d51bf489f024cb08a734d44b1bd165ad66ed1ae8e690d6"
+      },
+      "labCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.css",
+        "sha256": "c7b46d95dd6f606ace06052d813eded14ebc074e9c705b53160d06482e676638"
+      },
+      "startCss": {
+        "path": "apps/desktop/src/renderer/console/pages/start.css",
+        "sha256": "298031d185506df47edff45b1c80fe608682ef1952b81f4373a4780d39b872fe"
+      },
+      "main": {
+        "path": "apps/desktop/src/main/index.ts",
+        "sha256": "f0db3da5654046b6b5d4405d7a3c0b67902eeca7cb1a25a76025c3b42c821301"
+      },
+      "preload": {
+        "path": "apps/desktop/src/preload/index.ts",
+        "sha256": "f0f0295e42932fe680dbe3c5a9aed8b906bf65a34c6a2c5a90bb25cfb2ae897b"
+      },
+      "presentation": {
+        "path": "packages/contracts/src/design-lab.ts",
+        "sha256": "90e58eb18c9fdba82462ff8a31d71b358af07978409ce779c40a11933bc078a9"
+      },
+      "shell": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.tsx",
+        "sha256": "9581431cd67771b5c172065c5f6ece120031b203e4ed36253c1b6f59f3b81571"
+      },
+      "shellCss": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.css",
+        "sha256": "822017977208881abac5fdcf8574fda5e693040eeddc0c62be056eab3dabbfa0"
+      },
+      "preview": {
+        "path": "apps/desktop/src/renderer/console/pet-preview.tsx",
+        "sha256": "a4a472b019835da4dfe461a1d28bf579180474058be7f05295ecbeec27c95817"
+      },
+      "composer": {
+        "path": "apps/desktop/src/renderer/pet/PetComposer.tsx",
+        "sha256": "49b83d169b91a8d1fa2e8574ab0d8606fc5814f54d5c046b057e7b0b6e033e1b"
+      },
+      "avatar": {
+        "path": "apps/desktop/src/renderer/pet/PetAvatar.tsx",
+        "sha256": "0e361e6ddcc61fc03c90c846820626977c4980d93daddf1f2d38c4ccb80bed75"
+      },
+      "petDialog": {
+        "path": "apps/desktop/src/renderer/pet/PetDialog.tsx",
+        "sha256": "c05676265d0030c8209874166fa6a91e94439a109d738ff9a7ed0c4d54c7fb29"
+      },
+      "petMenu": {
+        "path": "apps/desktop/src/renderer/pet/PetMenu.tsx",
+        "sha256": "346f09753feca1acc25d39797cc69a6683ceb45215853b3e851cead4c329a692"
+      },
+      "theme": {
+        "path": "apps/desktop/src/renderer/console/theme-editor.tsx",
+        "sha256": "32c040604088dabe3d1224442e0d80b17b8fa16e04aef85f8807d07b601ed874"
+      },
+      "console": {
+        "path": "apps/desktop/src/renderer/console/console-app.tsx",
+        "sha256": "5b90b766b5c2501170ea74799bf9b707c00dd9629a1bae429c0128750b47c706"
+      },
+      "reference": {
+        "path": "Coopanion/console/features/home/index.ts",
+        "sha256": "7918d7f95497bd8f51eaadae1e9bd854eb05e7da1550c00f9dec60299634e812"
+      },
+      "referenceCss": {
+        "path": "Coopanion/console/features/home/home.css",
+        "sha256": "1a50bf461df410d09ff209afd6601742765a99e3007976ceb2413067df29ce92"
+      },
+      "referenceStrings": {
+        "path": "Coopanion/console/features/home/strings.ts",
+        "sha256": "1ca92d5fe09729777fe2efc6b836d6153b8c5f95ef36946c6dae8ac2ba6a9781"
+      },
+      "providerBehavior": {
+        "path": "apps/desktop/src/renderer/console/start-designs/behavior.ts",
+        "sha256": "31de96f54ef7b9b0866dd0869a3f9aa6da8a2ac1a058e7e2d06d803caf8710b6"
+      },
+      "ownKit": {
+        "path": "apps/desktop/src/renderer/console/original-ui/kit.tsx",
+        "sha256": "74241cd44da4e72e8d7a9d3b10e652bf3bb667993f2f188a53e8de76366b0bf5"
+      },
+      "ownKitCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/kit.css",
+        "sha256": "dd5ef3ec0b9beb9e0afb87968af863fa549150bed9069221eb58bb0839b4ccd5"
+      },
+      "ownTokens": {
+        "path": "apps/desktop/src/renderer/console/original-ui/design-tokens.css",
+        "sha256": "2082bf4f5756a6cec0560b541dbe63dd3bafcb7decac5dcbb00f9793afa3ed1e"
+      },
+      "ownBoard": {
+        "path": "apps/desktop/src/renderer/console/original-ui/control-board.tsx",
+        "sha256": "61cc566e222f5bc0fe97945c26eef615a37a18dca7fefcebca5a0cf306825910"
+      },
+      "ownPreview": {
+        "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.tsx",
+        "sha256": "d153b2eed1db9ca96338f4eb4ec263ced5e33dd82f39b7293ea0df7a847e69c5"
+      },
+      "ownPreviewCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.css",
+        "sha256": "e228e0dacac7d791f23e815ea5c6f25684ef5dac9534065bcc16d53bf66f7975"
+      },
+      "previewBehavior": {
+        "path": "apps/desktop/src/renderer/console/preview-behavior.ts",
+        "sha256": "676f3c6d9bf2103473a53e6ee5280ae709e4a35bfbd472e8a8936710c2ad83f8"
+      },
+      "ownStudio": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-studio.tsx",
+        "sha256": "5346c87b290fce7cb7d944e10f3e0f4bbf92dbbb47664552ae1512873051315a"
+      },
+      "ownStudioCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-studio.css",
+        "sha256": "216d596a07c05197680bfb296823081e2fa21a6eae2fc6852bcc51830f7d9ace"
+      },
+      "themeController": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-controller.ts",
+        "sha256": "5a3a4c87d1ebf2ad447cde2d55a3bf09560b9d0597285b882cf53a52852d3f8a"
+      },
+      "themeOwner": {
+        "path": "apps/desktop/src/renderer/console/theme.ts",
+        "sha256": "f2fa647b0b74dd41d628db9d15b6c17679ab77212670f70f6aa41b7833b48f71"
+      },
+      "modelBehavior": {
+        "path": "apps/desktop/src/renderer/console/start-designs/use-start-model.ts",
+        "sha256": "00de763da48648854a7d7cdc87428b2d4d620a97528f525bfb8c8d79bfa7b1b8"
+      },
+      "bench": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/bench.tsx",
+        "sha256": "3a8583b68031cbf2f22f91d00feea7510716c203464578f4b91ec05094d69a47"
+      },
+      "benchCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/bench.css",
+        "sha256": "0c569d8065ca683f47fbd4e6da37e12c0db81edee33db4a3af87e1a0387adaaa"
+      },
+      "switchboard": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/switchboard.tsx",
+        "sha256": "03c45a9bbaca36d4f2f159993789ccf853de6d4f41bdf8bc8438602addeb554c"
+      },
+      "switchboardCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/switchboard.css",
+        "sha256": "f0481da8669221ceb88816bcb9300b6a241918fa3574780040655e06e7ba7cfc"
+      },
+      "spine": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/spine.tsx",
+        "sha256": "a02f48e19d2c1e42d61260b0709f02ed5f39bf949d2bfe385eb0a9d29fecbfb6"
+      },
+      "spineCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/spine.css",
+        "sha256": "3623a6f8bac961a2c546f5da7031335257c5334e354547e836e59458a8bbc920"
+      },
+      "stage": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/stage.tsx",
+        "sha256": "7b517caf80d90165fe74fa30ac44eb72bc1ba80a183334958ac0ec66024cc563"
+      },
+      "stageCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/stage.css",
+        "sha256": "417981c723672beae234de774f645aab412a3e79eea88284564caa9577905a6a"
+      },
+      "workspaces": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/workspaces.tsx",
+        "sha256": "303dc6e6243ee045a8505b1c6a5cabfa97b9a535ed12c6a41e8b175e98a53e72"
+      },
+      "workspacesCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/workspaces.css",
+        "sha256": "b2321319925571771e520c15c757d53b80f380a7e1bb6fd4df77964991c2c513"
+      }
+    },
+    "selectors": [
+      {
+        "owner": "shell",
+        "selector": "settings-shell",
+        "present": true
+      },
+      {
+        "owner": "shell",
+        "selector": "settings-content",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-provider-search",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-save",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-test",
+        "present": true
+      },
+      {
+        "owner": "sections",
+        "selector": "model-receipt",
+        "present": true
+      },
+      {
+        "owner": "ownPreview",
+        "selector": "pet-chat-toggle",
+        "present": true
+      },
+      {
+        "owner": "ownPreview",
+        "selector": "pet-mic-toggle",
+        "present": true
+      },
+      {
+        "owner": "ownPreview",
+        "selector": "pet-composer-input",
+        "present": true
+      },
+      {
+        "owner": "ownStudio",
+        "selector": "theme-token-",
+        "present": true
+      },
+      {
+        "owner": "ownStudio",
+        "selector": "theme-scheme-name",
+        "present": true
+      },
+      {
+        "owner": "ownStudio",
+        "selector": "theme-undo-preview",
+        "present": true
+      }
+    ],
+    "dependencies": {
+      "startThemeMounted": true,
+      "previewComposerMounted": true,
+      "startContainsRequiredHeadings": true
+    }
+  },
+  "buildArtifacts": [
+    {
+      "path": "apps/desktop/dist/main/index.mjs",
+      "sha256": "719c13ede0a59f58a1a93393973e12e981796c22c0c4832f3e86e43fe9a0bac0"
+    },
+    {
+      "path": "apps/desktop/dist/runtime/worker.cjs",
+      "sha256": "f3459863fa5ddb63e135a3fc500b7921e8da6104b25f213277b795438ea61ca1"
+    },
+    {
+      "path": "apps/desktop/dist/preload/index.cjs",
+      "sha256": "640ec32450d6cedb3aeab2cc4d279b9ca5492692c9f9f525a9c9390f195d3d99"
+    },
+    {
+      "path": "apps/desktop/dist/renderer/console/index.html",
+      "sha256": "034e58181716dd182ffd7c2e5e32419ea095695b10ebe64b03a0da2c23f7ad3e"
+    }
+  ],
+  "lab": {
+    "isolatedProfile": true,
+    "fixedConsoleUrl": true,
+    "availableVariants": [
+      "bench",
+      "switchboard",
+      "spine",
+      "stage",
+      "workspaces"
+    ]
+  },
+  "originalBoard": {
+    "renderedOwnControls": true,
+    "disabledAndPending": true,
+    "nativeSwitch": true,
+    "actualFocus": true,
+    "samplesNotBackend": true
+  },
+  "originalViews": [
+    {
+      "label": "bench",
+      "legacyWidgets": 0,
+      "originalControlCount": 77
+    },
+    {
+      "label": "switchboard",
+      "legacyWidgets": 0,
+      "originalControlCount": 77
+    },
+    {
+      "label": "spine",
+      "legacyWidgets": 0,
+      "originalControlCount": 26
+    },
+    {
+      "label": "stage",
+      "legacyWidgets": 0,
+      "originalControlCount": 26
+    },
+    {
+      "label": "workspaces",
+      "legacyWidgets": 0,
+      "originalControlCount": 23
+    }
+  ],
+  "drafts": {
+    "allFivePreserved": true,
+    "privateKeyMemoryOnly": true,
+    "uniqueControlInstances": true
+  },
+  "variantActions": [
+    {
+      "id": "bench",
+      "vendorGroups": 15,
+      "regionAndBrowserReachable": true,
+      "poke": 1,
+      "user": 1,
+      "reply": 1,
+      "realCoreHistory": true
+    },
+    {
+      "id": "switchboard",
+      "vendorGroups": 15,
+      "regionAndBrowserReachable": true,
+      "poke": 1,
+      "user": 1,
+      "reply": 1,
+      "realCoreHistory": true
+    },
+    {
+      "id": "spine",
+      "vendorGroups": 15,
+      "regionAndBrowserReachable": true,
+      "poke": 1,
+      "user": 1,
+      "reply": 1,
+      "realCoreHistory": true
+    },
+    {
+      "id": "stage",
+      "vendorGroups": 15,
+      "regionAndBrowserReachable": true,
+      "poke": 1,
+      "user": 1,
+      "reply": 1,
+      "realCoreHistory": true
+    },
+    {
+      "id": "workspaces",
+      "vendorGroups": 15,
+      "regionAndBrowserReachable": true,
+      "poke": 1,
+      "user": 1,
+      "reply": 1,
+      "realCoreHistory": true
+    }
+  ],
+  "model": {
+    "savedKeyPresent": true,
+    "active": false,
+    "offlineModePreserved": true,
+    "receiptDistinguishesSavedAndTested": true,
+    "searchAndList": true,
+    "revision": 2,
+    "deniedNetworkApprovals": 1
+  },
+  "previewTools": {
+    "dragExactlyOnce": true,
+    "keyboardPokeExactlyOnce": true,
+    "keyboardContextMenu": true,
+    "escapeDismissal": true,
+    "localLightOnly": true,
+    "microphoneAvailable": false,
+    "recordingStarted": false
+  },
+  "guide": {
+    "savedVisible": true,
+    "nativePetShown": true,
+    "settingsHidden": true,
+    "actualDialog": true
+  },
+  "nativeReceipts": {
+    "pausedBlocksInput": true,
+    "visibilityCrossLayout": true
+  },
+  "palette": {
+    "tokens": 36,
+    "groups": 5,
+    "ownBuiltins": 3,
+    "invalidHexExcluded": true,
+    "variantsSavedIndependently": true,
+    "explicitUndo": true,
+    "leaveRevertedUnsavedPreview": true,
+    "deleteConfirmationMs": 4452
+  },
+  "themeLab": {
+    "globalModeShared": true,
+    "unsavedPreviewWithdrawnOnPanelLeave": true
+  },
+  "failure": "expect(locator).toBeInViewport() failed\n\nLocator:  getByRole('region', { name: '桌宠预览', exact: true }).getByTestId('pet-avatar')\nExpected: in viewport\nReceived: viewport ratio 0.9988692402839661\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeInViewport\" getByRole('region', { name: '桌宠预览', exact: true }).getByTestId('pet-avatar') with timeout 5000ms\n  - waiting for getByRole('region', { name: '桌宠预览', exact: true }).getByTestId('pet-avatar')\n    14 × locator resolved to <svg role=\"img\" data-state=\"idle\" aria-label=\"桌宠 小蓝\" viewBox=\"0 0 160 160\" data-figure=\"minimal\" data-testid=\"pet-avatar\" data-expression=\"neutral\" data-label-id=\"pet-eye-idle\" xmlns=\"http://www.w3.org/2000/svg\" class=\"pet-avatar pet-avatar--idle pet-avatar--minimal\">…</svg>\n       - unexpected value \"viewport ratio 0.9988692402839661\"\n",
+  "failureState": {
+    "agent": "ready",
+    "code": null,
+    "dialogStep": null,
+    "desktop": {
+      "available": true,
+      "shown": true
+    },
+    "profileRevision": 5,
+    "delivery": {
+      "phase": "idle",
+      "error": null,
+      "mode": "demo",
+      "paused": false,
+      "canSend": true,
+      "messages": [
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        },
+        {
+          "mode": "demo"
+        }
+      ],
+      "history": [
+        {
+          "kind": "application",
+          "cursor": 1
+        },
+        {
+          "kind": "interaction",
+          "reaction": "poke",
+          "cursor": 2
+        },
+        {
+          "kind": "interaction",
+          "reaction": "blush",
+          "cursor": 3
+        },
+        {
+          "kind": "user",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 4
+        },
+        {
+          "kind": "pet",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 5
+        },
+        {
+          "kind": "interaction",
+          "reaction": "poke",
+          "cursor": 6
+        },
+        {
+          "kind": "interaction",
+          "reaction": "blush",
+          "cursor": 7
+        },
+        {
+          "kind": "user",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 8
+        },
+        {
+          "kind": "pet",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 9
+        },
+        {
+          "kind": "interaction",
+          "reaction": "poke",
+          "cursor": 10
+        },
+        {
+          "kind": "interaction",
+          "reaction": "blush",
+          "cursor": 11
+        },
+        {
+          "kind": "user",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 12
+        },
+        {
+          "kind": "pet",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 13
+        },
+        {
+          "kind": "interaction",
+          "reaction": "poke",
+          "cursor": 14
+        },
+        {
+          "kind": "interaction",
+          "reaction": "blush",
+          "cursor": 15
+        },
+        {
+          "kind": "user",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 16
+        },
+        {
+          "kind": "pet",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 17
+        },
+        {
+          "kind": "interaction",
+          "reaction": "poke",
+          "cursor": 18
+        },
+        {
+          "kind": "interaction",
+          "reaction": "blush",
+          "cursor": 19
+        },
+        {
+          "kind": "user",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 20
+        },
+        {
+          "kind": "pet",
+          "mode": "demo",
+          "via": "console",
+          "cursor": 21
+        },
+        {
+          "kind": "application",
+          "cursor": 22
+        },
+        {
+          "kind": "application",
+          "cursor": 23
+        },
+        {
+          "kind": "interaction",
+          "reaction": "drag",
+          "cursor": 24
+        },
+        {
+          "kind": "interaction",
+          "reaction": "poke",
+          "cursor": 25
+        },
+        {
+          "kind": "interaction",
+          "reaction": "blush",
+          "cursor": 26
+        },
+        {
+          "kind": "application",
+          "cursor": 27
+        },
+        {
+          "kind": "application",
+          "cursor": 28
+        },
+        {
+          "kind": "application",
+          "cursor": 29
+        }
+      ]
+    },
+    "model": {
+      "active": null,
+      "paused": false
+    },
+    "pending": []
+  },
+  "mainLogBytes": 290
+}

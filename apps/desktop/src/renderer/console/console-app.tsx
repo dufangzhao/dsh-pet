@@ -1,7 +1,9 @@
 import type { ConsolePlugin, ConsolePluginAction, ConsoleSecurityChange } from '@pet/contracts';
-import { useCallback, useRef, useState, type CSSProperties, type JSX } from 'react';
+import { useCallback, useRef, useState, type JSX } from 'react';
 
-import { Button, Dialog, Toast, useToastStore } from '@pet/ui-kit';
+import { Dialog, Toast, useToastStore } from '@pet/ui-kit';
+
+import { Button } from './original-ui/kit.js';
 
 import type { AppView } from './app-views.js';
 import {
@@ -264,7 +266,7 @@ export function ConsoleApp(): JSX.Element {
   /** 录音会话是全场的：停在别的页也看得见，也能结束或取消。 */
   const recordingStrip =
     demoState.recording === null || view === 'voice' || view === 'conversation' ? null : (
-      <div className="pk-settings__recording">
+      <div className="pb-strip">
         <DemoRecorder demo={demoState} />
       </div>
     );
@@ -530,16 +532,16 @@ function RunToggle({
 }): JSX.Element {
   const state = runState(ready, paused);
   return (
-    <div className="console-run">
+    <div className="pb-run">
       <span
-        className="console-run__state"
+        className="pb-run__state"
         data-state={ready ? (paused ? 'paused' : 'running') : 'offline'}
       >
         {state.status}
       </span>
       <button
         type="button"
-        className="console-run__toggle"
+        className="pb-run__button"
         aria-pressed={ready ? paused : undefined}
         aria-label={state.hint}
         title={state.hint}
@@ -548,22 +550,23 @@ function RunToggle({
         onClick={() => onToggle(!paused)}
       >
         {/* 折叠到 72px 时只剩这枚图标：它在按下去之前就说清了下一步是暂停还是继续。 */}
-        <svg className="console-run__icon" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="pb-run__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
           {ready && paused ? (
             <path d="M8 5.5 18 12 8 18.5Z" fill="currentColor" stroke="none" />
           ) : (
             <path d="M9.5 5.5v13M14.5 5.5v13" strokeLinecap="round" />
           )}
         </svg>
-        <span className="console-run__text">{state.action}</span>
+        <span className="pb-run__label">{state.action}</span>
       </button>
     </div>
   );
 }
 
 /**
- * 主题三态用原生 radio 组分段控件：三个选项互斥且都可见，
- * 比下拉少一次点击就能看清全部状态。原生 radio 保留 Tab 进入、方向键切换与可见焦点。
+ * 主题三态用原生 radio 组成的单选板（pb-choice）：三个选项互斥且都可见，
+ * 比下拉少一次点击就能看清全部状态；选中那一档自己落成强调板。
+ * 原生 radio 保留 Tab 进入、方向键切换与可见焦点，没有滑块轨道，也不需要第二份状态。
  */
 function ThemePicker({
   theme,
@@ -572,24 +575,19 @@ function ThemePicker({
   theme: Theme;
   onChange: (next: Theme) => void;
 }): JSX.Element {
-  const activeIndex = THEMES.indexOf(theme);
-
   return (
-    <div className="console-theme">
-      <span className="console-theme__label" id="console-theme-label">
+    <div className="pb-modes">
+      <span className="pb-modes__label" id="console-theme-label">
         {COPY.themeLabel}
       </span>
-      <div
-        className="console-segmented"
+      <span
+        className="pb-choice"
         role="radiogroup"
         aria-labelledby="console-theme-label"
         data-testid="theme-select"
-        style={{ '--segment-index': activeIndex } as CSSProperties}
       >
-        {/* 滑块只是视觉指示，选中状态由原生 radio 自己表达。 */}
-        <span className="console-segmented__thumb" aria-hidden="true" />
         {THEMES.map((candidate) => (
-          <label key={candidate} className="console-segmented__option">
+          <label key={candidate} className="pb-choice__option">
             <input
               type="radio"
               name="console-theme"
@@ -598,12 +596,13 @@ function ThemePicker({
               checked={candidate === theme}
               onChange={() => onChange(candidate)}
             />
-            <span className="console-segmented__text" aria-hidden="true">
+            {/* 可见的两字标签留给窄侧栏，完整含义在 radio 的 aria-label 上。 */}
+            <span className="pb-choice__text" aria-hidden="true">
               {themeLabel(candidate)}
             </span>
           </label>
         ))}
-      </div>
+      </span>
     </div>
   );
 }

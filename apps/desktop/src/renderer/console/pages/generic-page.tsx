@@ -84,7 +84,7 @@ function PageActions({ page, app, actions }: PageActionsProps): JSX.Element {
               {current?.busy ? '正在执行…' : action.label}
             </Button>
             {current?.error === null || current?.error === undefined ? null : (
-              <p className="pk-row__error" role="alert">
+              <p className="pb-row__error" role="alert">
                 这次没完成：{current.error}
               </p>
             )}

@@ -12,7 +12,7 @@ Evidence: [console-app.tsx](../../../apps/desktop/src/renderer/console/console-a
 
 ## Accessible controls
 
-Reuse Button, Field and Dialog rather than emulate their behavior with clickable divs. Button defaults to type=button; form submission must be explicit. Field owns the label/control ID and description/error association. Connect its inputId, describedBy and invalid result to the actual input. Keep hints outside the accessible name. Dialog uses native showModal, explicit tab wrapping, Escape handling and focus restoration; data-autofocus identifies a deliberate initial target.
+Reuse the owning product primitives by default rather than emulate controls with clickable divs. When the user explicitly requests an original component language, implement native semantic controls in the new product kit and reuse behavior/state separately; the earlier replica Button/Field/Section markup is not a required visual dependency. Preserve the accessibility contracts below. Avoid keeping two competing active control systems for the same redesigned surface. Button defaults to type=button; form submission must be explicit. Field owns the label/control ID and description/error association. Connect its inputId, describedBy and invalid result to the actual input. Keep hints outside the accessible name. Dialog uses native showModal, explicit tab wrapping, Escape handling and focus restoration; data-autofocus identifies a deliberate initial target.
 
 Evidence: [button.tsx](../../../packages/ui-kit/src/button.tsx), [field.tsx](../../../packages/ui-kit/src/field.tsx), [dialog.tsx](../../../packages/ui-kit/src/dialog.tsx). Changes to pet choice dialogs must preserve the same keyboard/focus principles while also honoring native pet hit/drag geometry.
 

@@ -389,15 +389,21 @@ describe('开始页', () => {
     expect(html).not.toContain('model-test');
   });
 
-  it('没有在用端点：说暂未连接，测试连接点不动', () => {
+  it('没有在用端点：状态牌说还没有在用连接，测试连接点不动', () => {
     const html = render(<StartPage {...startProps(appState())} />);
-    expect(html).toContain('暂未连接');
+    expect(html).toContain('还没有在用连接');
     expect(tag(html, 'model-test')).toContain('disabled');
-    // 目录按厂商归组：同一家的两块平台只出现一枚芯片。
+    // 目录按厂商归组：同一家的两块平台只占一格，切换在详情里给。
     expect(html).toContain('model-pick-deepseek');
     expect(html).toContain('model-pick-qwen');
     expect(html).not.toContain('model-pick-qwen-intl');
-    expect(html).toContain('这一家还没有存过 Key');
+    expect(html).toContain('2 / 2 家');
+    // 「挑了，还没保存」只属于当前那一家；没挑中的说它自己怎么接进来。
+    expect(html).toContain('挑了，还没保存');
+    expect(html).toContain('可选，填 API Key');
+    // 按不下去的原因写在明面上，不靠 tooltip。
+    expect(html).toContain('model-save-reason');
+    expect(html).toContain('还没有可用的 Key');
   });
 
   it('在用的那一家带着模型名，测试可以点，Key 留空沿用', () => {
@@ -415,17 +421,23 @@ describe('开始页', () => {
     );
     expect(html).toContain('通义千问 · qwen3.8-flash');
     expect(tag(html, 'model-test')).not.toContain('disabled');
-    expect(html).toContain('留空沿用已保存的 Key');
+    expect(html).toContain('留空就沿用这台机器上已经存着的那一份');
     expect(html).toContain('改用国际平台');
   });
 
-  it('这一页只有三节：运行状态归扩展页管', () => {
+  it('这一页只有三节：运行状态归扩展页管，配色是新工作室不是旧编辑器', () => {
     const html = render(<StartPage {...startProps(appState())} />);
     expect(html).toContain('连接模型');
     expect(html).toContain('我的桌宠');
-    expect(html).toContain('theme-editor');
+    expect(html).toContain('界面配色');
+    expect(html).toContain('theme-studio');
+    expect(html).not.toContain('theme-editor');
     expect(html).not.toContain('运行状态');
     expect(html).not.toContain('console-stop-all');
+    // 呈现里不留被否掉的复制品词汇/类名。
+    for (const old of ['start-chip', 'pk-pill', 'console-segmented', '暂未连接']) {
+      expect(html).not.toContain(old);
+    }
   });
 
   it('显示状态没读出来就说未就绪，不猜它在不在桌上', () => {
@@ -450,14 +462,15 @@ describe('开始页', () => {
     expect(tag(onDesktop, 'pet-show')).toContain('disabled');
   });
 
-  it('预览是桌宠那个角色组件本身，能真的戳；说话入口挂在场景里而不是下面另起一行', () => {
+  it('预览是桌宠那个角色组件本身，能真的戳；说话与录音都挂在台面上而不是下面另起一行', () => {
     const html = render(<StartPage {...startProps(appState())} />);
     expect(html).toContain('data-testid="pet-avatar"');
     expect(html).toContain('data-testid="pet-poke"');
-    // 场景里有墙面点阵与地面，不再念名字/形态/配色那一串事实。
-    expect(html).toContain('pet-preview__floor');
-    expect(html).not.toContain('pet-preview__facts');
-    // 说话与录音是这一格里两个真入口；输入框要点了开关才出现，不常驻占地方。
+    // 台面是这套控件自己的形状（井格 + 台沿 + 右侧插销板），旧的那面点阵墙与地面已经不在。
+    expect(html).toContain('pet-bench');
+    expect(html).toContain('pet-bench__rail');
+    expect(html).not.toContain('pet-preview__floor');
+    // 说话与录音是两个真入口；草稿抽屉要点开才出现，不常驻占地方。
     expect(html).toContain('pet-chat-toggle');
     expect(html).not.toContain('pet-composer-input');
     const focused = render(
@@ -468,6 +481,9 @@ describe('开始页', () => {
     expect(focused).toContain('pet-mic-toggle');
     expect(focused).toContain('pet-light-toggle');
     expect(focused).toContain('管理模型扩展');
+    // 桌面可见性与回应开关接到真实动作上，不是画出来的样子。
+    expect(focused).toContain('pet-pause');
+    expect(tag(focused, 'pet-hide')).toContain('disabled');
   });
 });
 

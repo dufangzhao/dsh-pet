@@ -1,0 +1,443 @@
+{
+  "status": "failed",
+  "at": "2026-10-29T16:36:56.129Z",
+  "profileId": "start-lab-1793291816129-d69605b3",
+  "checks": [
+    {
+      "name": "original-normal-and-components",
+      "status": "passed",
+      "elapsedMs": 6136
+    },
+    {
+      "name": "source-and-real-profile",
+      "status": "failed",
+      "error": "locator.check: Timeout 10000ms exceeded.\nCall log:\n  - waiting for getByTestId('lab-tab-controls')\n    - locator resolved to <input type=\"radio\" name=\"lab-tab\" value=\"controls\" data-testid=\"lab-tab-controls\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - performing click action\n      - <span class=\"pb-choice__text\">控件与状态</span> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - performing click action\n      - <span class=\"pb-choice__text\">控件与状态</span> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    18 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - performing click action\n       - <span class=\"pb-choice__text\">控件与状态</span> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "name": "five-layouts-and-draft-preservation",
+      "status": "not-run"
+    },
+    {
+      "name": "each-layout-actions-and-shared-history",
+      "status": "not-run"
+    },
+    {
+      "name": "native-pause-and-visibility",
+      "status": "not-run"
+    },
+    {
+      "name": "theme-disclosure-and-undo",
+      "status": "not-run"
+    },
+    {
+      "name": "minimum-layout-zoom-and-reduced-motion",
+      "status": "not-run"
+    },
+    {
+      "name": "lab-restart-persistence",
+      "status": "not-run"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "original-normal-light-1200x800",
+      "file": "qa/screenshots/original-controls/start-lab-1793291816129-d69605b3/original-normal-light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    }
+  ],
+  "shutdown": [
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    },
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    }
+  ],
+  "errors": [],
+  "rendererRemoteOrigins": [],
+  "approvals": [],
+  "geometry": [],
+  "assumptions": [
+    "Parent built the current Main, worker, builtin admission and renderer before this serial run.",
+    "This launches the unpackaged application with a unique real userData under .cache.",
+    "--no-sandbox is the existing native QA exception; this is not OS-sandbox evidence.",
+    "No fake media device, fake UI, scripted provider, fake bridge, localStorage write, or external sign-in is used.",
+    "The synthetic model Key is saved only to the isolated native credential store; its network permission is denied through the real pet dialog.",
+    "Model success and OAuth callback behavior are covered by separate offline probes; this runner does not fabricate them."
+  ],
+  "limitations": [
+    "Playwright pointer input does not prove physical desktop hit testing or native microphone capture.",
+    "Renderer request observation is not a packet capture of worker traffic; the model guard is the actual network approval denial.",
+    "Screenshots use the same recorded content viewport at zoom 1; visual parity still requires reference review."
+  ],
+  "originalNormal": {
+    "label": "normalStart",
+    "legacyWidgets": 0,
+    "originalControlCount": 77
+  },
+  "source": {
+    "referenceVersion": "0.2.10",
+    "fingerprints": {
+      "start": {
+        "path": "apps/desktop/src/renderer/console/pages/start.tsx",
+        "sha256": "f4410cdb058c7f247f837d8a1283ecbd999ee64d72b75ca0d642973c1a4757bb"
+      },
+      "sections": {
+        "path": "apps/desktop/src/renderer/console/start-designs/sections.tsx",
+        "sha256": "f47ad0602f0fdf12e7c6403a3b9a1ad5547827a6f9bebe30f131c230deb1d913"
+      },
+      "registry": {
+        "path": "apps/desktop/src/renderer/console/start-designs/registry.tsx",
+        "sha256": "e2b9ec3131b775e8c030e682c8bfadc786e18ba616ad2ae6f2b63a019bf4518b"
+      },
+      "lab": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.tsx",
+        "sha256": "8665fa618d7ba5afaecc852f1989b2ca98db26b985fab1219801aa5e226bc8ca"
+      },
+      "catalog": {
+        "path": "apps/desktop/src/renderer/console/start-designs/catalog.ts",
+        "sha256": "a54760ae6a2a8da46ca6af2954d35905f2618d464cfda58c5c704a7b346746c9"
+      },
+      "labIcons": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab-icons.tsx",
+        "sha256": "e06702ebd9398bb3a6d51bf489f024cb08a734d44b1bd165ad66ed1ae8e690d6"
+      },
+      "labCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.css",
+        "sha256": "c7b46d95dd6f606ace06052d813eded14ebc074e9c705b53160d06482e676638"
+      },
+      "startCss": {
+        "path": "apps/desktop/src/renderer/console/pages/start.css",
+        "sha256": "a18c22fb31c53667fcf75a87c4973e5c92354213e955a5269a2ca1a200ef0045"
+      },
+      "main": {
+        "path": "apps/desktop/src/main/index.ts",
+        "sha256": "f0db3da5654046b6b5d4405d7a3c0b67902eeca7cb1a25a76025c3b42c821301"
+      },
+      "preload": {
+        "path": "apps/desktop/src/preload/index.ts",
+        "sha256": "f0f0295e42932fe680dbe3c5a9aed8b906bf65a34c6a2c5a90bb25cfb2ae897b"
+      },
+      "presentation": {
+        "path": "packages/contracts/src/design-lab.ts",
+        "sha256": "90e58eb18c9fdba82462ff8a31d71b358af07978409ce779c40a11933bc078a9"
+      },
+      "shell": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.tsx",
+        "sha256": "9581431cd67771b5c172065c5f6ece120031b203e4ed36253c1b6f59f3b81571"
+      },
+      "shellCss": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.css",
+        "sha256": "822017977208881abac5fdcf8574fda5e693040eeddc0c62be056eab3dabbfa0"
+      },
+      "preview": {
+        "path": "apps/desktop/src/renderer/console/pet-preview.tsx",
+        "sha256": "a4a472b019835da4dfe461a1d28bf579180474058be7f05295ecbeec27c95817"
+      },
+      "composer": {
+        "path": "apps/desktop/src/renderer/pet/PetComposer.tsx",
+        "sha256": "49b83d169b91a8d1fa2e8574ab0d8606fc5814f54d5c046b057e7b0b6e033e1b"
+      },
+      "avatar": {
+        "path": "apps/desktop/src/renderer/pet/PetAvatar.tsx",
+        "sha256": "0e361e6ddcc61fc03c90c846820626977c4980d93daddf1f2d38c4ccb80bed75"
+      },
+      "petDialog": {
+        "path": "apps/desktop/src/renderer/pet/PetDialog.tsx",
+        "sha256": "c05676265d0030c8209874166fa6a91e94439a109d738ff9a7ed0c4d54c7fb29"
+      },
+      "petMenu": {
+        "path": "apps/desktop/src/renderer/pet/PetMenu.tsx",
+        "sha256": "346f09753feca1acc25d39797cc69a6683ceb45215853b3e851cead4c329a692"
+      },
+      "theme": {
+        "path": "apps/desktop/src/renderer/console/theme-editor.tsx",
+        "sha256": "32c040604088dabe3d1224442e0d80b17b8fa16e04aef85f8807d07b601ed874"
+      },
+      "console": {
+        "path": "apps/desktop/src/renderer/console/console-app.tsx",
+        "sha256": "5b90b766b5c2501170ea74799bf9b707c00dd9629a1bae429c0128750b47c706"
+      },
+      "reference": {
+        "path": "Coopanion/console/features/home/index.ts",
+        "sha256": "7918d7f95497bd8f51eaadae1e9bd854eb05e7da1550c00f9dec60299634e812"
+      },
+      "referenceCss": {
+        "path": "Coopanion/console/features/home/home.css",
+        "sha256": "1a50bf461df410d09ff209afd6601742765a99e3007976ceb2413067df29ce92"
+      },
+      "referenceStrings": {
+        "path": "Coopanion/console/features/home/strings.ts",
+        "sha256": "1ca92d5fe09729777fe2efc6b836d6153b8c5f95ef36946c6dae8ac2ba6a9781"
+      },
+      "ownKit": {
+        "path": "apps/desktop/src/renderer/console/original-ui/kit.tsx",
+        "sha256": "74241cd44da4e72e8d7a9d3b10e652bf3bb667993f2f188a53e8de76366b0bf5"
+      },
+      "ownKitCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/kit.css",
+        "sha256": "dda2999d19a76c14a6228b94e16c42677c3da99618269cfc1ec24aafe801f297"
+      },
+      "ownTokens": {
+        "path": "apps/desktop/src/renderer/console/original-ui/design-tokens.css",
+        "sha256": "2082bf4f5756a6cec0560b541dbe63dd3bafcb7decac5dcbb00f9793afa3ed1e"
+      },
+      "ownBoard": {
+        "path": "apps/desktop/src/renderer/console/original-ui/control-board.tsx",
+        "sha256": "61cc566e222f5bc0fe97945c26eef615a37a18dca7fefcebca5a0cf306825910"
+      },
+      "ownPreview": {
+        "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.tsx",
+        "sha256": "cc246d61a9677c716e00ea4c40a866609e1bacde9ef1f7278e1c7b3633bc66b3"
+      },
+      "ownPreviewCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.css",
+        "sha256": "b746995957ef01b6e631eb39ce6efa73ec28bdd9ccfd77a93304191d9debe95d"
+      },
+      "previewBehavior": {
+        "path": "apps/desktop/src/renderer/console/preview-behavior.ts",
+        "sha256": "676f3c6d9bf2103473a53e6ee5280ae709e4a35bfbd472e8a8936710c2ad83f8"
+      },
+      "ownStudio": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-studio.tsx",
+        "sha256": "5346c87b290fce7cb7d944e10f3e0f4bbf92dbbb47664552ae1512873051315a"
+      },
+      "ownStudioCss": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-studio.css",
+        "sha256": "216d596a07c05197680bfb296823081e2fa21a6eae2fc6852bcc51830f7d9ace"
+      },
+      "themeController": {
+        "path": "apps/desktop/src/renderer/console/original-ui/theme-controller.ts",
+        "sha256": "5a3a4c87d1ebf2ad447cde2d55a3bf09560b9d0597285b882cf53a52852d3f8a"
+      },
+      "themeOwner": {
+        "path": "apps/desktop/src/renderer/console/theme.ts",
+        "sha256": "7752600dd68502ea290e4cfb8686b0116cf33e7753ef3870f1e18d4c5eb8940a"
+      },
+      "modelBehavior": {
+        "path": "apps/desktop/src/renderer/console/start-designs/use-start-model.ts",
+        "sha256": "187a5460dfb30d416f4bd279a17d12a07ab9ed4aceab9fb4238f9e2818e2501e"
+      },
+      "bench": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/bench.tsx",
+        "sha256": "3a8583b68031cbf2f22f91d00feea7510716c203464578f4b91ec05094d69a47"
+      },
+      "benchCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/bench.css",
+        "sha256": "0c569d8065ca683f47fbd4e6da37e12c0db81edee33db4a3af87e1a0387adaaa"
+      },
+      "switchboard": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/switchboard.tsx",
+        "sha256": "03c45a9bbaca36d4f2f159993789ccf853de6d4f41bdf8bc8438602addeb554c"
+      },
+      "switchboardCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/switchboard.css",
+        "sha256": "f0481da8669221ceb88816bcb9300b6a241918fa3574780040655e06e7ba7cfc"
+      },
+      "spine": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/spine.tsx",
+        "sha256": "3f90116e88c9065e0be80c022bafdb13a90aa9a42aa20d1b95053a553eb85757"
+      },
+      "spineCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/spine.css",
+        "sha256": "3623a6f8bac961a2c546f5da7031335257c5334e354547e836e59458a8bbc920"
+      },
+      "stage": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/stage.tsx",
+        "sha256": "a9536c24de60d084b6c5f6385339815dbc65d08a3fc8124550059b73eab7baa7"
+      },
+      "stageCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/stage.css",
+        "sha256": "417981c723672beae234de774f645aab412a3e79eea88284564caa9577905a6a"
+      },
+      "workspaces": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/workspaces.tsx",
+        "sha256": "303dc6e6243ee045a8505b1c6a5cabfa97b9a535ed12c6a41e8b175e98a53e72"
+      },
+      "workspacesCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/variants/workspaces.css",
+        "sha256": "b2321319925571771e520c15c757d53b80f380a7e1bb6fd4df77964991c2c513"
+      }
+    },
+    "selectors": [
+      {
+        "owner": "shell",
+        "selector": "设置页导航",
+        "present": true
+      },
+      {
+        "owner": "shell",
+        "selector": "收起侧栏",
+        "present": true
+      },
+      {
+        "owner": "shell",
+        "selector": "展开侧栏",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "start-guide",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "pet-hide",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "pet-show",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "pet-dress",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-pick-",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-save",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-test",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-signin",
+        "present": true
+      },
+      {
+        "owner": "preview",
+        "selector": "桌宠预览",
+        "present": true
+      },
+      {
+        "owner": "avatar",
+        "selector": "pet-avatar",
+        "present": true
+      },
+      {
+        "owner": "composer",
+        "selector": "pet-composer-input",
+        "present": true
+      },
+      {
+        "owner": "composer",
+        "selector": "pet-composer-send",
+        "present": true
+      },
+      {
+        "owner": "petDialog",
+        "selector": "pet-dialog-choice-",
+        "present": true
+      },
+      {
+        "owner": "petMenu",
+        "selector": "pet-settings",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "调色盘",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "明暗挡位",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "方案名",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "theme-color__hex",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "复制为新方案",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "保存当前方案",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "再次点击确认删除",
+        "present": true
+      }
+    ],
+    "dependencies": {
+      "startThemeMounted": false,
+      "previewComposerMounted": true,
+      "startContainsRequiredHeadings": false
+    }
+  },
+  "lab": {
+    "isolatedProfile": true,
+    "fixedConsoleUrl": true,
+    "availableVariants": [
+      "bench",
+      "switchboard",
+      "spine",
+      "stage",
+      "workspaces"
+    ]
+  },
+  "failure": "locator.check: Timeout 10000ms exceeded.\nCall log:\n  - waiting for getByTestId('lab-tab-controls')\n    - locator resolved to <input type=\"radio\" name=\"lab-tab\" value=\"controls\" data-testid=\"lab-tab-controls\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - performing click action\n      - <span class=\"pb-choice__text\">控件与状态</span> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - performing click action\n      - <span class=\"pb-choice__text\">控件与状态</span> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    18 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - performing click action\n       - <span class=\"pb-choice__text\">控件与状态</span> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+  "failureState": {
+    "agent": "ready",
+    "code": null,
+    "dialogStep": null,
+    "desktop": {
+      "available": true,
+      "shown": true
+    },
+    "profileRevision": 1,
+    "delivery": {
+      "phase": "idle",
+      "error": null,
+      "mode": "demo",
+      "paused": false,
+      "canSend": true,
+      "messages": [],
+      "history": [
+        {
+          "kind": "application",
+          "cursor": 1
+        }
+      ]
+    },
+    "model": {
+      "active": null,
+      "paused": false
+    },
+    "pending": []
+  },
+  "mainLogBytes": 290
+}

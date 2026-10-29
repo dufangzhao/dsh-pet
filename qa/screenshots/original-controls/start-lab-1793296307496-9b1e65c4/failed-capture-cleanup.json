@@ -1,0 +1,661 @@
+{
+  "schema": "failed-native-capture-cleanup-v1",
+  "status": "completed",
+  "scope": "57 PNG captures from six failed original-controls runs only",
+  "method": "Published ops_remove with observed expectedRevision SHA-256; no shell deletion",
+  "expectedCaptures": 57,
+  "removed": [
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793291816129-d69605b3/original-normal-light-1200x800.png",
+      "sha256": "adde4890bea132191622bcf006d32dedff5a1d496dbff8044b8593e63c8f3fbc",
+      "bytes": 89513,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292283975-c07a774d/original-normal-light-1200x800.png",
+      "sha256": "adde4890bea132191622bcf006d32dedff5a1d496dbff8044b8593e63c8f3fbc",
+      "bytes": 89513,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/original-normal-light-1200x800.png",
+      "sha256": "adde4890bea132191622bcf006d32dedff5a1d496dbff8044b8593e63c8f3fbc",
+      "bytes": 89513,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/original-control-board-light-1200x800.png",
+      "sha256": "98b77cc9f8ef4c6ab761aebae0a5121d7f847a2e0ed808fc552d850141e34cf0",
+      "bytes": 85478,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/original-control-board-focused-1200x800.png",
+      "sha256": "e32916cdb38614c1dbeac887f06936601804dccda68e5974de9d9b8c3302c794",
+      "bytes": 85399,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/bench-light-1200x800.png",
+      "sha256": "715e653e537f25a7db0cdd56744f40c6eb48ec644d6f223a6bc206c0959de905",
+      "bytes": 113510,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/switchboard-light-1200x800.png",
+      "sha256": "f81a9f7274b57f9cc48683f7db4847d8b86b38d3075b2ed5a0db918bcdadff57",
+      "bytes": 100116,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/spine-light-1200x800.png",
+      "sha256": "9444230fa95196ff68d9e5670b280fa53ad42b14556fcf5cccd685f2a5ed2acc",
+      "bytes": 62413,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/stage-light-1200x800.png",
+      "sha256": "6b88e0ef03187c59f73df7a18c6c435a84b91aadebfd3bb818bd0f899befc975",
+      "bytes": 68030,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/workspaces-light-1200x800.png",
+      "sha256": "a1a7d7121a346032470c546dd183afadef9be31b5e5dd5cd3ca6b96c29dbe003",
+      "bytes": 91081,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294696127-967f429f/original-normal-light-1200x800.png",
+      "sha256": "83b15f083d072abbd45556310b7cbdd0750b6b645896868bd33898f62d7c7c73",
+      "bytes": 102613,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294696127-967f429f/failure-original-normal-and-components.png",
+      "sha256": "44b41aed70aace745cc0d9c8378443bd98c4fa6655aa0bb2ce2b527fc3595883",
+      "bytes": 83226,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-normal-light-1200x800.png",
+      "sha256": "83b15f083d072abbd45556310b7cbdd0750b6b645896868bd33898f62d7c7c73",
+      "bytes": 102613,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-normal-dark-1200x800.png",
+      "sha256": "72b99ab922a9d0a0a4154c158a1abebc60adce628514e174731c101e88cb736d",
+      "bytes": 101530,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-normal-minimum-880x600.png",
+      "sha256": "f6599f77a41a4abb9c9136c7d7740bd8215a155a530b03c98ea38f45ec67701e",
+      "bytes": 76533,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-normal-collapsed-1200x800.png",
+      "sha256": "5112e95205b8279906a77ab40d5fd82993cfbeb98ea1f19d2c5ee2f9cfd209d2",
+      "bytes": 96113,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-control-board-light-1200x800.png",
+      "sha256": "5c5c8be5a9d4c3799fbe857991b095e65dd036521746e1759d2ffe0a95588253",
+      "bytes": 85489,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-control-board-focused-1200x800.png",
+      "sha256": "717f66071c5818daa1f432a99c01147153531d965deec327d411c562170f359a",
+      "bytes": 82120,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-control-board-choice-states-light-1200x800.png",
+      "sha256": "5b673ccbb097843bb1d4fac26937ee68ce6b39dc92cb9b06c60c113aa4ce868a",
+      "bytes": 82120,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-control-board-receipt-states-light-1200x800.png",
+      "sha256": "51c847959d8530cb7d74eed7aff6591e77c3a985be2b5f76e4e784ca94b686b2",
+      "bytes": 79783,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/bench-light-1200x800.png",
+      "sha256": "411c438b020ba9ad9b78338b5fdc109192d8b17836ce2ba4fd3e5a69c0c0bc7f",
+      "bytes": 128846,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/switchboard-light-1200x800.png",
+      "sha256": "3b9f391c5a3e5947d673b045ac2c463f136758ec170fe5a377c3c275e0db20e1",
+      "bytes": 104925,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/spine-light-1200x800.png",
+      "sha256": "73b23b597954a6a65ab33f17f6b8ecdf4481d531988b982e4321e9db5463e7c7",
+      "bytes": 97971,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/stage-light-1200x800.png",
+      "sha256": "43927483f629d2328955134c3de4003249846b7872cf9d205d2035d907b6fc5c",
+      "bytes": 81024,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/workspaces-light-1200x800.png",
+      "sha256": "0b7d314a29b314c966fb34ea1d9b28fda82ae25c8d2454c5e8a1422ad871463d",
+      "bytes": 100594,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-saved-test-denied-1200x800.png",
+      "sha256": "f6092e359486207f348222a5bc14cf670ace1c865bdf38d0587eba165d289e71",
+      "bytes": 111539,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-preview-light-1200x800.png",
+      "sha256": "5f9c1e06eadd33c774cf3110f5fd8bd6c8bef7cb3362f9fe5b92a3afa71e0bad",
+      "bytes": 79209,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/original-theme-studio-light-1200x800.png",
+      "sha256": "8066aa90134a7d043604987b7f4ab9060e446f61ee40824de2d2e8125d3c2601",
+      "bytes": 87794,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/failure-theme-disclosure-and-undo.png",
+      "sha256": "f5ce9a9c8e6aa135ef9ce63bc8339733de751cb3f20225dae9bf57aa8ff2b829",
+      "bytes": 76762,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-light-1200x800.png",
+      "sha256": "ffaadc2542aba698298deb1518ad8751befafbe3590ae7eca40c22931fa6482c",
+      "bytes": 91019,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-dark-1200x800.png",
+      "sha256": "ae351f74c631847abc27212309d6c873a968f01dd99d0d8afba515d3b47693d5",
+      "bytes": 89817,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-minimum-880x600.png",
+      "sha256": "9cae4585c93a8847fdd80950941fc84e5e632bd14f5a755ae9d918f4136b7734",
+      "bytes": 65329,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-normal-collapsed-1200x800.png",
+      "sha256": "01029164aeddd95113a25ddc0b3d1e0afea88ad933b419096fc3704a06db3001",
+      "bytes": 83383,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-light-1200x800.png",
+      "sha256": "5c5c8be5a9d4c3799fbe857991b095e65dd036521746e1759d2ffe0a95588253",
+      "bytes": 85489,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-focused-1200x800.png",
+      "sha256": "717f66071c5818daa1f432a99c01147153531d965deec327d411c562170f359a",
+      "bytes": 82120,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-choice-states-light-1200x800.png",
+      "sha256": "5b673ccbb097843bb1d4fac26937ee68ce6b39dc92cb9b06c60c113aa4ce868a",
+      "bytes": 82120,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-receipt-states-light-1200x800.png",
+      "sha256": "0bb7d527bf45ce6f45357996aa935a591aa702eef28ec347523bbb47664950af",
+      "bytes": 79792,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/bench-light-1200x800.png",
+      "sha256": "8e1d7d2750ee31afa3480c0b3eac5acbf77c7af866b7e2b21482b95d3951678a",
+      "bytes": 118378,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/switchboard-light-1200x800.png",
+      "sha256": "8415e4b5ff99374e0bfab604336a02b3d509f92c82ec8e1636e2fa24ec1c88c0",
+      "bytes": 100475,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/spine-light-1200x800.png",
+      "sha256": "4dadbdf25eb21ecdebf4a4ff5b7081b7cea1d39d2f4e5ed1531b1a5309fa63cf",
+      "bytes": 86601,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/stage-light-1200x800.png",
+      "sha256": "abc924cb5c820ee25c0916044f308a8c7a7b731150bf8b32d7f3f2420f9665d2",
+      "bytes": 82319,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/workspaces-light-1200x800.png",
+      "sha256": "ef0b42d9e2fb8f24b02f1a1fd1f6577d8a8075c369b798c1eebdba275033cce3",
+      "bytes": 88992,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-saved-test-denied-1200x800.png",
+      "sha256": "e1fe477646354ad2f2d047e972d9f0596941aafb25cd0590ad7ed4c454c77977",
+      "bytes": 113184,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-preview-light-1200x800.png",
+      "sha256": "5767ee83e5a3b80e49bbcb1bf6fe198d9a98156c09cc84f6a178dfc19e70f9ef",
+      "bytes": 81963,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-theme-studio-light-1200x800.png",
+      "sha256": "04a73cad1ae60d8431e2d551d5fd6221b09d28eb4fd496317d63130555adf5c1",
+      "bytes": 91125,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/bench-dark-1200x800.png",
+      "sha256": "82c6d4c53366b76b4cbe9f92ff3ec5e76043f4350fb4787cf6e31f012493bf02",
+      "bytes": 118543,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/switchboard-dark-1200x800.png",
+      "sha256": "5dafa8591dc7b289b5f27b8b6ab371db73c50fdbdbaf0c12687a9a8a2c99d3ee",
+      "bytes": 101803,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/spine-dark-1200x800.png",
+      "sha256": "07718eb3b013245dada69ffd1569f77c82b595143d711be119795850f389ab1e",
+      "bytes": 87947,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/stage-dark-1200x800.png",
+      "sha256": "5fc4f686c9b3064fe95070e6482bf885b1c98aac3542ec2fa56c5010deac8900",
+      "bytes": 80893,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/workspaces-dark-1200x800.png",
+      "sha256": "f42d4b1f97fce84cd036d23111c2eac24955ca30e0cb83259a78ef4509d83697",
+      "bytes": 90300,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/original-control-board-dark-1200x800.png",
+      "sha256": "bb590ad2af6a568a911cf36e7cf4b4b9b0c9f8f9bfb4616d2549b5de377d6113",
+      "bytes": 84940,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/bench-minimum-880x600.png",
+      "sha256": "5850e8d7a3030bd9e237c6d6ded7641e2b59dc5bc151d2fa62f3afb60f19c21a",
+      "bytes": 64413,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/switchboard-minimum-880x600.png",
+      "sha256": "955cceb967e04cb139e5c78da9144806614e2f2de581be811cd2cb74d5661342",
+      "bytes": 58840,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/spine-minimum-880x600.png",
+      "sha256": "7d286a02ec760cf815bd7aed33da0af3094e857fc6991629c12e6bcd40f05b12",
+      "bytes": 59110,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/stage-minimum-880x600.png",
+      "sha256": "c17b496d7e9dc8add86190635c8f6919eae0d23a301f172f40e439ce5aacea97",
+      "bytes": 52406,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/workspaces-minimum-880x600.png",
+      "sha256": "41728bfc8c8a798493682c74b0b8c5d97052c98699d37f97398e3c8136b74e04",
+      "bytes": 60515,
+      "removed": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/failure-minimum-layout-zoom-and-reduced-motion.png",
+      "sha256": "7ce4af27a5e5c8de65e38099128259b225bf2e6499d5e85dc18696ed9b0008cf",
+      "bytes": 54254,
+      "removed": true
+    }
+  ],
+  "failedReportsRetained": [
+    "qa/screenshots/original-controls/start-lab-1793291816129-d69605b3/acceptance-report.json",
+    "qa/screenshots/original-controls/start-lab-1793292283975-c07a774d/acceptance-report.json",
+    "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/acceptance-report.json",
+    "qa/screenshots/original-controls/start-lab-1793294696127-967f429f/acceptance-report.json",
+    "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/acceptance-report.json",
+    "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/acceptance-report.json"
+  ],
+  "preservedArtifacts": [
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-normal-light-1200x800.png",
+      "sha256": "ffaadc2542aba698298deb1518ad8751befafbe3590ae7eca40c22931fa6482c",
+      "bytes": 91019,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-normal-dark-1200x800.png",
+      "sha256": "ae351f74c631847abc27212309d6c873a968f01dd99d0d8afba515d3b47693d5",
+      "bytes": 89817,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-normal-minimum-880x600.png",
+      "sha256": "9cae4585c93a8847fdd80950941fc84e5e632bd14f5a755ae9d918f4136b7734",
+      "bytes": 65329,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-normal-collapsed-1200x800.png",
+      "sha256": "01029164aeddd95113a25ddc0b3d1e0afea88ad933b419096fc3704a06db3001",
+      "bytes": 83383,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-light-1200x800.png",
+      "sha256": "5c5c8be5a9d4c3799fbe857991b095e65dd036521746e1759d2ffe0a95588253",
+      "bytes": 85489,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-focused-1200x800.png",
+      "sha256": "d6fcabda22ff5701aae386da290d3a8693ee4a5d5ab2aadce30b010be9a2bea1",
+      "bytes": 82104,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-choice-states-light-1200x800.png",
+      "sha256": "b4e929c32ab68ef77a569d0fbe40909c69098cf8327590006edba1fcc3c19b48",
+      "bytes": 82104,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-receipt-states-light-1200x800.png",
+      "sha256": "b5343c8f81848beadd1802660eb1ca802b38936abfd23c1999b6166f36e6de48",
+      "bytes": 79769,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/bench-light-1200x800.png",
+      "sha256": "8e1d7d2750ee31afa3480c0b3eac5acbf77c7af866b7e2b21482b95d3951678a",
+      "bytes": 118378,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/switchboard-light-1200x800.png",
+      "sha256": "8415e4b5ff99374e0bfab604336a02b3d509f92c82ec8e1636e2fa24ec1c88c0",
+      "bytes": 100475,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/spine-light-1200x800.png",
+      "sha256": "4dadbdf25eb21ecdebf4a4ff5b7081b7cea1d39d2f4e5ed1531b1a5309fa63cf",
+      "bytes": 86601,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/stage-light-1200x800.png",
+      "sha256": "abc924cb5c820ee25c0916044f308a8c7a7b731150bf8b32d7f3f2420f9665d2",
+      "bytes": 82319,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/workspaces-light-1200x800.png",
+      "sha256": "ef0b42d9e2fb8f24b02f1a1fd1f6577d8a8075c369b798c1eebdba275033cce3",
+      "bytes": 88992,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-saved-test-denied-1200x800.png",
+      "sha256": "e1fe477646354ad2f2d047e972d9f0596941aafb25cd0590ad7ed4c454c77977",
+      "bytes": 113184,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-preview-light-1200x800.png",
+      "sha256": "5767ee83e5a3b80e49bbcb1bf6fe198d9a98156c09cc84f6a178dfc19e70f9ef",
+      "bytes": 81963,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-theme-studio-light-1200x800.png",
+      "sha256": "04a73cad1ae60d8431e2d551d5fd6221b09d28eb4fd496317d63130555adf5c1",
+      "bytes": 91125,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/bench-dark-1200x800.png",
+      "sha256": "82c6d4c53366b76b4cbe9f92ff3ec5e76043f4350fb4787cf6e31f012493bf02",
+      "bytes": 118543,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/switchboard-dark-1200x800.png",
+      "sha256": "5dafa8591dc7b289b5f27b8b6ab371db73c50fdbdbaf0c12687a9a8a2c99d3ee",
+      "bytes": 101803,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/spine-dark-1200x800.png",
+      "sha256": "07718eb3b013245dada69ffd1569f77c82b595143d711be119795850f389ab1e",
+      "bytes": 87947,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/stage-dark-1200x800.png",
+      "sha256": "5fc4f686c9b3064fe95070e6482bf885b1c98aac3542ec2fa56c5010deac8900",
+      "bytes": 80893,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/workspaces-dark-1200x800.png",
+      "sha256": "f42d4b1f97fce84cd036d23111c2eac24955ca30e0cb83259a78ef4509d83697",
+      "bytes": 90300,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-control-board-dark-1200x800.png",
+      "sha256": "bb590ad2af6a568a911cf36e7cf4b4b9b0c9f8f9bfb4616d2549b5de377d6113",
+      "bytes": 84940,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/bench-minimum-880x600.png",
+      "sha256": "5850e8d7a3030bd9e237c6d6ded7641e2b59dc5bc151d2fa62f3afb60f19c21a",
+      "bytes": 64413,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/switchboard-minimum-880x600.png",
+      "sha256": "955cceb967e04cb139e5c78da9144806614e2f2de581be811cd2cb74d5661342",
+      "bytes": 58840,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/spine-minimum-880x600.png",
+      "sha256": "7d286a02ec760cf815bd7aed33da0af3094e857fc6991629c12e6bcd40f05b12",
+      "bytes": 59110,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/stage-minimum-880x600.png",
+      "sha256": "c17b496d7e9dc8add86190635c8f6919eae0d23a301f172f40e439ce5aacea97",
+      "bytes": 52406,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/workspaces-minimum-880x600.png",
+      "sha256": "41728bfc8c8a798493682c74b0b8c5d97052c98699d37f97398e3c8136b74e04",
+      "bytes": 60515,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793300116862-5ff40377/collapsed-light-1200x800.png",
+      "sha256": "c45dacb7890d67a5f9960cce2290b6eafa14f38f1ae121bc60196438f7b5b58e",
+      "bytes": 85365,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793300116862-5ff40377/collapsed-dark-1200x800.png",
+      "sha256": "fe730813c8544fd171e3a37d9fc13f96db6cdf0b3692a9f49a687755d1cc2e56",
+      "bytes": 85112,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793300116862-5ff40377/collapsed-system-1200x800.png",
+      "sha256": "f33076566ac84e481bebd047d6661cfb130e6af5189f4e041cbe2531976a436a",
+      "bytes": 85193,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793300116862-5ff40377/collapsed-light-880x600.png",
+      "sha256": "3a3c2e6da71373b208fd25446e1c54afb77bb945c2897d81f0d9d426f0a027f8",
+      "bytes": 63976,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793300116862-5ff40377/collapsed-dark-880x600.png",
+      "sha256": "26f0c958ec079604199ddb37064ca90356d564071fd5cab8442e75ac2b89adbc",
+      "bytes": 63959,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793300116862-5ff40377/collapsed-system-880x600.png",
+      "sha256": "8f31c514178ec025a3d710a0cea9b1915ef0f6058566e9296617b3daa1dc66de",
+      "bytes": 63953,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793299968366-d8c2e35e/collapsed-light-1200x800.png",
+      "sha256": "c45dacb7890d67a5f9960cce2290b6eafa14f38f1ae121bc60196438f7b5b58e",
+      "bytes": 85365,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793299968366-d8c2e35e/collapsed-dark-1200x800.png",
+      "sha256": "fe730813c8544fd171e3a37d9fc13f96db6cdf0b3692a9f49a687755d1cc2e56",
+      "bytes": 85112,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793299968366-d8c2e35e/collapsed-system-1200x800.png",
+      "sha256": "f33076566ac84e481bebd047d6661cfb130e6af5189f4e041cbe2531976a436a",
+      "bytes": 85193,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793299968366-d8c2e35e/collapsed-light-880x600.png",
+      "sha256": "3a3c2e6da71373b208fd25446e1c54afb77bb945c2897d81f0d9d426f0a027f8",
+      "bytes": 63976,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793299968366-d8c2e35e/collapsed-dark-880x600.png",
+      "sha256": "26f0c958ec079604199ddb37064ca90356d564071fd5cab8442e75ac2b89adbc",
+      "bytes": 63959,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/collapsed-1793299968366-d8c2e35e/collapsed-system-880x600.png",
+      "sha256": "8f31c514178ec025a3d710a0cea9b1915ef0f6058566e9296617b3daa1dc66de",
+      "bytes": 63953,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/overview-light.png",
+      "sha256": "cee619aa4ca35f8f1f3a77e116fd59dbd450216bda203e7d97fc82b278640973",
+      "bytes": 466452,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/overview-dark.png",
+      "sha256": "fc919b83199d289dac3c240d32d6607e077f318c4629949540dbf89260c8a242",
+      "bytes": 477430,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296307496-9b1e65c4/original-controls-before-after.png",
+      "sha256": "2500f2294df47823db1fa92d1d8aedac6308905df2ab6b5ae87baa2f84c98e4a",
+      "bytes": 362629,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/light-1200x800.png",
+      "sha256": "15d0f23eae1c2f0f9950f6029b8bf7eb1ad6a2395b6d06632200bb0a08171ff2",
+      "bytes": 76384,
+      "unchangedAfter": true
+    },
+    {
+      "path": "qa/screenshots/start-design-lab/start-lab-1793272859631-b3d0f795/overview-light.png",
+      "sha256": "2bbfcd53b065843892a613c17a68125e02ac1b38cee7e6c2238b73a28cafae94",
+      "bytes": 380898,
+      "unchangedAfter": true
+    }
+  ],
+  "retainedReports": [
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793291816129-d69605b3/acceptance-report.json",
+      "sha256": "6aa07e8864042770fd56509459a971a2f6af96d242d4886b44372d691eb23fb0",
+      "status": "failed"
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292283975-c07a774d/acceptance-report.json",
+      "sha256": "c8fdaa93f6ca0e586c7e7d26d3fd787a318fc43287d4c16c1d3e5f205fc5ff5c",
+      "status": "failed"
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793292498994-c4aaf70b/acceptance-report.json",
+      "sha256": "ecbeb7f4b984a4d7593b08891d354c073047456c192555367f44c750d3dcb1e0",
+      "status": "failed"
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294696127-967f429f/acceptance-report.json",
+      "sha256": "b1453e12e5bf9be8e252aa9fbbecd751de7cb7180f5b4f743184e08a08903906",
+      "status": "failed"
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793294797829-4d9039de/acceptance-report.json",
+      "sha256": "bc78ceae3f074daa7d95e95ffc1d3eb1cfc00d80c7c647b846d11fc61cf11575",
+      "status": "failed"
+    },
+    {
+      "path": "qa/screenshots/original-controls/start-lab-1793296148019-037ca5fa/acceptance-report.json",
+      "sha256": "3a64d80c50999c3aef2d7b422e82de0eb6b7e2140fce6cb661ea24e7e7df5a0f",
+      "status": "failed"
+    }
+  ],
+  "removedCount": 57,
+  "removedBytes": 4971440,
+  "remainingFailedCaptures": 0,
+  "preservedImageCount": 44
+}

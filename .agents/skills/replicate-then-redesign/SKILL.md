@@ -41,6 +41,18 @@ Generate the number of options requested. Make each option differ in information
 
 Use available design guidance selectively. The user's product and reference constrain the exploration; a generic design-system search must not replace them.
 
+## Establish an independent component language
+
+When the user wants a product of their own, redesign includes the controls and interaction vocabulary, not only page grids. Inventory the reference's identifying primitives: buttons, fields, provider/item pickers, segmented tracks, badges, notices, menus, preview tools and theme chrome. State which must be replaced.
+
+Define one coherent original kit with typography/spacing/surface/radius/color/motion rules and real normal, focus, disabled, pending, error and selected states. Build a small component/state board so that the vocabulary can be inspected before it is spread across options. Use a fitting licensed set or design the set; a collection of unrelated gallery snippets is not a design system.
+
+Separate functional reuse from presentation reuse. Reuse controllers as state and action callbacks. Do not feed old fully rendered JSX controls into different layout slots and call the result original. A shared rendered slot is suitable only after its actual controls have been redesigned. Renaming CSS classes or applying a new palette to the old widget is not evidence of replacement.
+
+Apply the new kit consistently to all relevant options and their shared shell. Keep the original character or assets when they belong to this product; do not preserve a reference's builtin theme names, copied palette identity or characteristic control forms merely because they were present in the replica. Migrate saved builtin selections when needed without losing user-created schemes or other data.
+
+Review close views of controls as well as whole windows against the rejected reference. If fields, pickers, feedback and preview tools still read as the reference after the layout is removed, the originality work is unfinished. Structural difference and functional parity remain separate requirements.
+
 ## Research components and icons
 
 Visit the user's specified sources. For each material actually adopted, record its exact permalink or repository/version, author, license evidence and adaptation. A gallery calling itself open source is not sufficient evidence for every asset. If a license is unclear, keep that item as inspiration or choose a verified alternative.
@@ -51,7 +63,7 @@ Adapt styles to scoped classes and existing tokens. Keep external examples, anal
 
 ## Implement reviewable options
 
-Reuse the current action/controller layer and extract only the presentation seams needed by the options. Keep long-lived capture, subscriptions, drafts and credentials in their authoritative owners. Changing an option must not start another microphone or duplicate service requests. Trace what actually remounts when a layout, dialog or permission prompt appears; define which drafts survive those seams instead of assuming a shared runtime preserves component-local input.
+Reuse the current action/controller layer and extract only the presentation seams needed by the options. For original-control work, that seam must expose behavior independently of the reference widget markup; new controls render that behavior through the new kit. Keep long-lived capture, subscriptions, drafts and credentials in their authoritative owners. Changing an option must not start another microphone or duplicate service requests. Trace what actually remounts when a layout, dialog or permission prompt appears; define which drafts survive those seams instead of assuming a shared runtime preserves component-local input.
 
 When the user is choosing among options, provide an isolated review entry or equivalent concrete prototypes. Keep the normal application/profile available. Do not silently pick a production winner; if the user already authorized a chosen design, implement that choice directly without adding another approval gate.
 

@@ -4,47 +4,31 @@
  * 读写都走 theme.ts 那一份本机记录。调色盘里改的每一格只是试色：不落记录，
  * 离开这一页就撤掉；保存才写进去，内置方案只能另存为自定义。
  */
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type JSX } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type JSX,
+} from 'react';
 
 import { Button, Field } from '@pet/ui-kit';
 
 import {
   THEMES,
-  THEME_APPEARANCE_LABELS,
   THEME_MODE_GLYPHS,
   THEME_MODE_NAMES,
   allSchemes,
-  clonePalette,
-  committedPalette,
-  currentScheme,
   groupedThemeTokens,
-  normalizeHex,
-  previewPalette,
-  readThemeState,
-  removeScheme,
-  resetPreview,
-  resolveAppearance,
-  saveCurrentScheme,
-  saveSchemeAs,
   schemeSwatches,
   schemeText,
-  selectScheme,
-  selectedIsCustom,
-  subscribeTheme,
-  writeThemeState,
-  type StoredTheme,
   type ThemeMode,
-  type ThemePalette,
 } from './theme.js';
+import { SCHEME_NAME_MAX, createThemeStudioController } from './original-ui/theme-controller.js';
 
 import './settings-shell.css';
 import './theme-editor.css';
-
-/** 再点一次确认删除的解除武装时限。 */
-const DELETE_ARM_MS = 4000;
-
-/** 方案名上限：与记录里的规范化同一个数。 */
-const NAME_MAX = 40;
 
 const TEXT = {
   title: '界面配色',
@@ -58,27 +42,13 @@ const TEXT = {
   schemeName: '方案名',
   colorAria: (label: string) => label + '颜色',
   hexAria: (label: string) => label + '十六进制颜色',
-  switchedMode: (label: string) => '已切换到「' + label + '」',
-  switchedScheme: (name: string) => '✓ 已切换到「' + name + '」',
-  previewing: '● 正在预览，尚未保存',
   resetPreview: '撤销预览',
-  previewReset: '已撤销未保存的调色预览',
   deleteScheme: '删除方案',
   confirmDelete: '再次点击确认删除',
-  aboutToDelete: (name: string) => '即将删除「' + name + '」；再次点击确认。',
-  deleteCancelled: '已取消删除',
-  deleted: (name: string) => '已删除自定义方案，并切回「' + name + '」',
+  deleteSchemeAria: '删除这个自定义方案',
   copyAsNew: '复制为新方案',
-  copySuffix: ' 副本',
-  customSuffix: ' 自定义',
-  copied: '✓ 已复制为新的自定义方案',
   saveCurrent: '保存当前方案',
   saveAsCustom: '另存为自定义',
-  savedVariant: (appearance: string) => '✓ 当前' + appearance + '变体已保存',
-  savedAsCustom: '✓ 内置方案已另存为自定义',
-  notSaved: (reason: string) => '配色没能存进本机：' + reason,
-  builtinHint: '内置方案不可覆盖；调色后可另存为自定义。',
-  customHint: '自定义方案可直接保存；浅色与黑夜变体互相独立。',
   specimenTitle: '组件试色',
   specimenBubble: '发送气泡预览',
   specimenThink: '思考',
@@ -106,171 +76,36 @@ export interface ThemeEditorProps {
   readonly description?: string | undefined;
 }
 
-interface Status {
-  readonly text: string;
-  readonly bad: boolean;
-}
-
 /**
  * 配色那一节的完整控件：挡位、方案卡、调色盘与保存条。
- * 放进 Start 只需要一行 —— 它自己订阅记录，不要求父级传状态。
+ * 放进 Start 只需要一行 —— 草稿与写记录的行为都在 original-ui/theme-controller.ts 里，
+ * 与新的 OriginalThemeStudio 共用同一个控制器。
  */
 export function ThemeEditor({
   title = TEXT.title,
   description = TEXT.description,
 }: ThemeEditorProps): JSX.Element {
-  const [state, setState] = useState<StoredTheme>(readThemeState);
-  const scheme = currentScheme(state);
-  const appearance = resolveAppearance(state.mode);
-  const shown = schemeText(scheme);
-  const canWrite = selectedIsCustom(state);
-  const groups = useMemo(() => groupedThemeTokens(), []);
-
-  /** 用户正在调、尚未保存的那份调色板，以及每一格正在打字的十六进制文本。 */
-  const [draft, setDraft] = useState<ThemePalette>(() => clonePalette(scheme.palettes[appearance]));
-  const [name, setName] = useState(shown.name);
-  const [hexText, setHexText] = useState<Readonly<Record<string, string>>>({});
-  const [invalidKeys, setInvalidKeys] = useState<ReadonlySet<string>>(() => new Set<string>());
-  const [armed, setArmed] = useState(false);
-  const [status, setStatus] = useState<Status>(() => ({
-    text: scheme.builtin === true ? TEXT.builtinHint : TEXT.customHint,
-    bad: false,
-  }));
-  const armTimer = useRef<number | null>(null);
-
-  // 记录是唯一的状态源：换页、换方案、侧栏改挡位，都从订阅里拿回来。
-  useEffect(() => subscribeTheme(setState), []);
-
-  useEffect(() => {
-    const committed = currentScheme(state);
-    const resolved = resolveAppearance(state.mode);
-    setDraft(clonePalette(committed.palettes[resolved]));
-    setName(schemeText(committed).name);
-    setHexText({});
-    setInvalidKeys(new Set<string>());
-    // 换方案、换挡位都撤掉“再点一次确认删除”的武装：那一次点击认的是原来那张卡。
-    if (armTimer.current !== null) {
-      window.clearTimeout(armTimer.current);
-      armTimer.current = null;
-    }
-    setArmed(false);
-  }, [state]);
-
-  // 离开这一页：撤掉试色，别让一份没保存的草稿留在整个设置台上。
-  useEffect(
-    () => () => {
-      if (armTimer.current !== null) window.clearTimeout(armTimer.current);
-      resetPreview();
-    },
-    [],
+  const [controller] = useState(createThemeStudioController);
+  useEffect(() => () => controller.dispose(), [controller]);
+  // 第三个参数是服务端快照：这条记录本来就是同步读出来的，两种渲染拿同一份。
+  const snapshot = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot,
   );
 
-  /** 写记录；写不进本机存储时说写不进，不报成功。 */
-  const persist = (next: StoredTheme, success: Status): void => {
-    const result = writeThemeState(next);
-    setStatus(result.ok ? success : { text: TEXT.notSaved(result.error ?? '未知原因'), bad: true });
-  };
-
-  const chooseMode = (mode: ThemeMode): void => {
-    persist({ ...state, mode }, { text: TEXT.switchedMode(THEME_MODE_NAMES[mode]), bad: false });
-  };
-
-  const chooseScheme = (id: string, label: string): void => {
-    const next = selectScheme(state, id);
-    if (next === null) return;
-    persist(next, { text: TEXT.switchedScheme(label), bad: false });
-  };
-
-  /**
-   * 改一格颜色。认不出来的十六进制只标红那一格，**不进草稿**：草稿永远是完整合法的一份，
-   * 否则保存时会把用户还没打完的那半截写进记录。
-   */
-  const editToken = (key: string, raw: string, from: 'picker' | 'hex'): void => {
-    const normalized = normalizeHex(raw);
-    const markInvalid = normalized === null;
-    setInvalidKeys((prev) => {
-      if (prev.has(key) === markInvalid) return prev;
-      const next = new Set(prev);
-      if (markInvalid) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-    if (from === 'hex') setHexText((prev) => ({ ...prev, [key]: raw }));
-    if (normalized === null) return;
-    const next = { ...draft, [key]: normalized };
-    setDraft(next);
-    // 只回填**另一个**控件：回填正在打字的那个会把光标弹到末尾。
-    if (from !== 'hex') setHexText((prev) => ({ ...prev, [key]: normalized.toUpperCase() }));
-    previewPalette(next);
-    setStatus({ text: TEXT.previewing, bad: false });
-  };
-
-  const undoPreview = (): void => {
-    resetPreview();
-    setDraft(committedPalette());
-    setHexText({});
-    setInvalidKeys(new Set<string>());
-    setStatus({ text: TEXT.previewReset, bad: false });
-  };
-
-  const trimName = (): string => name.trim();
-
-  const copyAsNew = (): void => {
-    const base = trimName() === '' ? shown.name : trimName();
-    const suffix = canWrite ? TEXT.copySuffix : TEXT.customSuffix;
-    const saved = saveSchemeAs(state, { name: base + suffix, palette: draft, appearance });
-    persist(saved.state, { text: TEXT.copied, bad: false });
-  };
-
-  const save = (): void => {
-    if (canWrite) {
-      const next = saveCurrentScheme(state, {
-        name: trimName(),
-        palette: draft,
-        appearance,
-        schemeId: state.selectedId,
-      });
-      if (next === null) return;
-      persist(next, {
-        text: TEXT.savedVariant(THEME_APPEARANCE_LABELS[appearance]),
-        bad: false,
-      });
-      return;
-    }
-    const raw = trimName();
-    const saved = saveSchemeAs(state, {
-      name: raw === shown.name ? shown.name + TEXT.customSuffix : raw,
-      palette: draft,
-      appearance,
-    });
-    persist(saved.state, { text: TEXT.savedAsCustom, bad: false });
-  };
-
-  const disarmDelete = (): void => {
-    if (armTimer.current !== null) {
-      window.clearTimeout(armTimer.current);
-      armTimer.current = null;
-    }
-    setArmed(false);
-  };
-
-  const remove = (): void => {
-    if (!canWrite) return;
-    if (!armed) {
-      setArmed(true);
-      setStatus({ text: TEXT.aboutToDelete(shown.name), bad: true });
-      armTimer.current = window.setTimeout(() => {
-        armTimer.current = null;
-        setArmed(false);
-        setStatus({ text: TEXT.deleteCancelled, bad: false });
-      }, DELETE_ARM_MS);
-      return;
-    }
-    disarmDelete();
-    const next = removeScheme(state, state.selectedId);
-    if (next === null) return;
-    persist(next, { text: TEXT.deleted(schemeText(currentScheme(next)).name), bad: false });
-  };
+  const groups = useMemo(() => groupedThemeTokens(), []);
+  const { record, appearance, draft, hexText, invalidKeys, canWrite, deleteArmed, name } = snapshot;
+  const state = record;
+  const chooseMode = (mode: ThemeMode): void => controller.chooseMode(mode);
+  const chooseScheme = (id: string): void => controller.chooseScheme(id);
+  const editToken = (key: string, raw: string, from: 'picker' | 'hex'): void =>
+    controller.editToken(key, raw, from);
+  const setName = (value: string): void => controller.setName(value);
+  const undoPreview = (): void => controller.undoPreview();
+  const copyAsNew = (): void => controller.copyAsNew();
+  const save = (): void => controller.save();
+  const remove = (): void => controller.requestDelete();
 
   const activeIndex = THEMES.indexOf(state.mode);
 
@@ -316,7 +151,7 @@ export function ThemeEditor({
                 type="button"
                 className={'theme-scheme' + (active ? ' theme-scheme--active' : '')}
                 aria-pressed={active}
-                onClick={() => chooseScheme(item.id, label.name)}
+                onClick={() => chooseScheme(item.id)}
               >
                 <span className="theme-scheme__head">
                   <span className="theme-scheme__name">{label.name}</span>
@@ -350,7 +185,7 @@ export function ThemeEditor({
                     className="pk-input"
                     type="text"
                     value={name}
-                    maxLength={NAME_MAX}
+                    maxLength={SCHEME_NAME_MAX}
                     aria-describedby={describedBy}
                     aria-invalid={invalid}
                     onChange={(event) => setName(event.target.value)}
@@ -442,18 +277,21 @@ export function ThemeEditor({
 
           <div className="pk-draft-actions theme-editor__actions">
             <span
-              className={'theme-editor__status' + (status.bad ? ' theme-editor__status--bad' : '')}
+              className={
+                'theme-editor__status' +
+                (snapshot.status.tone === 'danger' ? ' theme-editor__status--bad' : '')
+              }
               role="status"
               aria-live="polite"
             >
-              {status.text}
+              {snapshot.status.text}
             </span>
             <Button variant="quiet" size="small" onClick={undoPreview}>
               {TEXT.resetPreview}
             </Button>
             {canWrite ? (
               <Button variant="danger" size="small" onClick={remove}>
-                {armed ? TEXT.confirmDelete : TEXT.deleteScheme}
+                {deleteArmed ? TEXT.confirmDelete : TEXT.deleteScheme}
               </Button>
             ) : null}
             <Button size="small" onClick={copyAsNew}>
