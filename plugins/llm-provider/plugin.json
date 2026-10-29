@@ -1,57 +1,269 @@
 {
   "schemaVersion": 1,
   "id": "pet.llm-provider",
-  "version": "0.1.0",
-  "displayName": {
-    "zh-CN": "DeepSeek 回复服务"
-  },
-  "description": {
-    "zh-CN": "使用独立安全保存的Key，仅向DeepSeek发送文本"
-  },
+  "version": "0.2.0",
+  "displayName": { "zh-CN": "模型服务" },
+  "description": { "zh-CN": "按端点独立保管Key，使用标准模型协议" },
   "license": "MIT",
   "host": "^1.0.0",
   "platforms": ["win32-x64"],
-  "entries": {
-    "runtime": "dist/index.mjs"
-  },
+  "entries": { "runtime": "dist/index.mjs" },
   "provides": [
-    {
-      "id": "deepseek",
-      "capability": "llm.chat@1",
-      "features": {
-        "methodPermissions": {
-          "respond": [
-            {
-              "kind": "network",
-              "origins": ["https://api.deepseek.com"]
-            }
-          ]
-        }
-      }
-    },
     {
       "id": "responses",
       "capability": "llm.responses@1",
       "features": {
         "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.deepseek.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.deepseek.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-qwen",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://dashscope.aliyuncs.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://dashscope.aliyuncs.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-qwen-intl",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://dashscope-intl.aliyuncs.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://dashscope-intl.aliyuncs.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-kimi",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.moonshot.cn"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.moonshot.cn"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-kimi-intl",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.moonshot.ai"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.moonshot.ai"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-glm",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://open.bigmodel.cn"] }],
+          "test": [{ "kind": "network", "origins": ["https://open.bigmodel.cn"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-glm-intl",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.z.ai"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.z.ai"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-doubao",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://ark.cn-beijing.volces.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://ark.cn-beijing.volces.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-minimax",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.minimax.cn"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.minimax.cn"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-minimax-intl",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.minimax.io"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.minimax.io"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-stepfun",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.stepfun.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.stepfun.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-stepfun-plan",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.stepfun.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.stepfun.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-qianfan",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://qianfan.baidubce.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://qianfan.baidubce.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-openrouter",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://openrouter.ai"] }],
+          "test": [{ "kind": "network", "origins": ["https://openrouter.ai"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-openai",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.openai.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.openai.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-chatgpt",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
           "respond": [
-            {
-              "kind": "network",
-              "origins": ["https://api.deepseek.com"]
-            }
+            { "kind": "network", "origins": ["https://api.openai.com", "https://auth.openai.com"] }
+          ],
+          "test": [
+            { "kind": "network", "origins": ["https://api.openai.com", "https://auth.openai.com"] }
           ]
+        }
+      }
+    },
+    {
+      "id": "responses-anthropic",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.anthropic.com"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.anthropic.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-gemini",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [
+            { "kind": "network", "origins": ["https://generativelanguage.googleapis.com"] }
+          ],
+          "test": [{ "kind": "network", "origins": ["https://generativelanguage.googleapis.com"] }]
+        }
+      }
+    },
+    {
+      "id": "responses-xai",
+      "capability": "llm.responses@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.x.ai"] }],
+          "test": [{ "kind": "network", "origins": ["https://api.x.ai"] }]
+        }
+      }
+    },
+    {
+      "id": "deepseek",
+      "capability": "llm.chat@1",
+      "features": {
+        "methodPermissions": {
+          "respond": [{ "kind": "network", "origins": ["https://api.deepseek.com"] }]
         }
       }
     }
   ],
+  "consumes": [{ "capability": "llm.responses@1", "optional": true }],
   "permissions": [
+    { "kind": "capability-use", "capability": "llm.responses@1" },
     {
       "kind": "credentials",
-      "keys": ["api-key"]
+      "keys": [
+        "api-key",
+        "qwen-api-key",
+        "qwen-intl-api-key",
+        "kimi-api-key",
+        "kimi-intl-api-key",
+        "glm-api-key",
+        "glm-intl-api-key",
+        "doubao-api-key",
+        "minimax-api-key",
+        "minimax-intl-api-key",
+        "stepfun-api-key",
+        "stepfun-plan-api-key",
+        "qianfan-api-key",
+        "openrouter-api-key",
+        "openai-api-key",
+        "chatgpt-api-key"
+      ]
+    },
+    { "kind": "credentials", "keys": ["anthropic-api-key", "gemini-api-key", "xai-api-key"] },
+    {
+      "kind": "network",
+      "origins": [
+        "https://api.deepseek.com",
+        "https://dashscope.aliyuncs.com",
+        "https://dashscope-intl.aliyuncs.com",
+        "https://api.moonshot.cn",
+        "https://api.moonshot.ai",
+        "https://open.bigmodel.cn",
+        "https://api.z.ai",
+        "https://ark.cn-beijing.volces.com",
+        "https://api.minimax.cn",
+        "https://api.minimax.io",
+        "https://api.stepfun.com",
+        "https://qianfan.baidubce.com",
+        "https://openrouter.ai",
+        "https://api.openai.com",
+        "https://auth.openai.com",
+        "https://api.anthropic.com"
+      ]
     },
     {
       "kind": "network",
-      "origins": ["https://api.deepseek.com"]
+      "origins": ["https://generativelanguage.googleapis.com", "https://api.x.ai"]
     }
   ],
   "config": {
@@ -62,12 +274,149 @@
       "properties": {
         "model": {
           "type": "string",
-          "title": "模型名称",
+          "title": "原有DeepSeek模型",
           "default": "deepseek-chat",
           "minLength": 1,
           "maxLength": 128
+        },
+        "active": {
+          "type": "string",
+          "enum": [
+            "",
+            "deepseek",
+            "qwen",
+            "qwen-intl",
+            "kimi",
+            "kimi-intl",
+            "glm",
+            "glm-intl",
+            "doubao",
+            "minimax",
+            "minimax-intl",
+            "stepfun",
+            "stepfun-plan",
+            "qianfan",
+            "openrouter",
+            "openai",
+            "chatgpt",
+            "anthropic",
+            "gemini",
+            "xai"
+          ],
+          "default": ""
+        },
+        "models": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "deepseek": {
+              "type": "string",
+              "default": "deepseek-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "qwen": {
+              "type": "string",
+              "default": "qwen3.8-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "qwen-intl": {
+              "type": "string",
+              "default": "qwen3.8-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "kimi": { "type": "string", "default": "kimi-k3", "minLength": 1, "maxLength": 128 },
+            "kimi-intl": {
+              "type": "string",
+              "default": "kimi-k3",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "glm": {
+              "type": "string",
+              "default": "glm-5.3-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "glm-intl": {
+              "type": "string",
+              "default": "glm-5.3-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "doubao": {
+              "type": "string",
+              "default": "doubao-seed-2-1-lite-260915",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "minimax": {
+              "type": "string",
+              "default": "MiniMax-M3",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "minimax-intl": {
+              "type": "string",
+              "default": "MiniMax-M3",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "stepfun": {
+              "type": "string",
+              "default": "step-3.7-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "stepfun-plan": {
+              "type": "string",
+              "default": "step-5-preview",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "qianfan": {
+              "type": "string",
+              "default": "glm-5.3-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "openrouter": {
+              "type": "string",
+              "default": "deepseek/deepseek-v4.1-flash",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "openai": {
+              "type": "string",
+              "default": "gpt-6-luna",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "chatgpt": {
+              "type": "string",
+              "default": "gpt-6-luna",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "anthropic": {
+              "type": "string",
+              "default": "claude-haiku-5-5",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "gemini": {
+              "type": "string",
+              "default": "gemini-3.5-flash-lite",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "xai": { "type": "string", "default": "grok-4.3", "minLength": 1, "maxLength": 128 }
+          }
         }
       }
-    }
+    },
+    "apply": { "active": "immediate", "models": "immediate", "model": "immediate" }
   }
 }

@@ -1,23 +1,35 @@
 /*
  * 设置台外壳与行式设置的排版。
  *
- * 颜色、字号基准、圆角、过渡与焦点环全部取自 @pet/ui-kit 的语义令牌，
- * 这里不写死任何配色：浅色、深色与跟随系统由页面写在 <html data-theme> 上决定。
- * 结构只有两件事：236px 安静侧栏，居中不超过 1120px 的内容；
- * 值与控件右端对齐到同一条 260px 轨，行之间用细线，不做卡片墙。
+ * 颜色一律取 @pet/ui-kit 的语义令牌，这里不写死配色：浅色、深色与跟随系统由页面写在
+ * <html data-theme> 上决定，可调的那组 token 由「界面配色」那一节接管。
+ * 结构只有三件事：侧栏展开 248px、折叠 72px；内容单栏，居中不超过 1120px；
+ * 正文 15px，页面标题 22px，分组 15px，一节一条细分隔线，不做卡片墙。
+ * 值与控件右端对齐到同一条 260px 轨，行之间用细线。
  */
 
 .pk-settings {
   /* 右轨宽度集中在一处，需要更宽的轨（例如带预览的分组）在分组上覆盖它。 */
   --pk-track: 260px;
+  --pk-rail: 248px;
+  --pk-rail-fold: 72px;
+  --pk-rail-motion: 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  --pk-gutter: clamp(20px, 3.1vw, 44px);
 
   position: relative;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-columns: var(--pk-rail) minmax(0, 1fr);
   height: 100%;
   color: var(--pk-text);
+  font-size: 15px;
+  line-height: 1.62;
   letter-spacing: 0;
+  transition: grid-template-columns var(--pk-rail-motion);
+}
+
+.pk-settings[data-rail='collapsed'] {
+  grid-template-columns: var(--pk-rail-fold) minmax(0, 1fr);
 }
 
 .pk-settings *,
@@ -39,6 +51,7 @@
  * 不写 .pk-settings p 这种宽选择器——那会盖掉 ui-kit 组件内部的字号与颜色。
  */
 .pk-settings__summary,
+.pk-sheet__description,
 .pk-row__description,
 .pk-row__error,
 .pk-prompt__prefix-title,
@@ -79,104 +92,311 @@
 .pk-settings__sidebar {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   min-width: 0;
-  padding: 16px 12px;
+  padding: 0 0 16px;
   border-right: 1px solid var(--pk-border);
   background: var(--pk-surface);
-  overflow-y: auto;
+  /* 横向一律裁掉：品牌名与折叠后的文字都不该把这一栏顶宽。 */
+  overflow: hidden auto;
+  scrollbar-width: none;
+}
+
+/* 侧栏滚动用滚轮，但不显示滚动条：一列导航出现两根轨道没有意义。 */
+.pk-settings__sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.pk-settings__brand-row {
+  display: grid;
+  gap: 6px;
+  padding: 16px 12px 0;
 }
 
 .pk-settings__brand {
-  margin: 0 0 0 8px;
+  margin: 0;
+  padding-left: 6px;
+  overflow: hidden;
+  color: var(--pk-muted);
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition:
+    opacity 140ms ease,
+    visibility 0s linear 0s;
+}
+
+/* 折叠时项目名只是看不见：留着它占的那一行，下面的按钮才不会跟着上下跳。 */
+.pk-settings[data-rail='collapsed'] .pk-settings__brand {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 140ms ease,
+    visibility 0s linear 140ms;
+}
+
+.pk-settings__rail-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--pk-radius-lg);
+  background: transparent;
   color: var(--pk-muted);
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.pk-settings__rail-toggle:hover {
+  background: var(--pk-bg);
+  color: var(--pk-text);
+}
+
+.pk-settings__rail-chevron {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  stroke-width: 1.6;
+  transform-origin: 15px 12px;
+  transition: transform var(--pk-rail-motion);
+}
+
+.pk-settings[data-rail='collapsed'] .pk-settings__rail-chevron {
+  transform: rotate(180deg);
+}
+
+.pk-settings__rail-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    opacity 160ms ease 120ms,
+    visibility 0s linear 0s;
+}
+
+.pk-settings[data-rail='collapsed'] .pk-settings__rail-text {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 100ms ease,
+    visibility 0s linear 100ms;
+}
+
+/* 折叠后箭头居中在 72px 的中线上，与下面导航那枚图标同一条竖线。 */
+.pk-settings[data-rail='collapsed'] .pk-settings__rail-toggle {
+  justify-content: center;
+  padding: 0;
 }
 
 .pk-settings__nav {
   display: grid;
-  gap: 8px;
+  gap: 14px;
+  padding: 8px 12px 0;
+  overflow-x: hidden;
 }
 
 .pk-settings__list {
   display: grid;
-  gap: 2px;
+  gap: 1px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 恢复类入口挂在日常入口下面，一条细线分开：可达，但不参与日常视觉重心。 */
+/* 恢复类入口挂在日常入口下面，一条淡线分开：可达，但不参与日常视觉重心。 */
 .pk-settings__list--quiet {
-  padding-top: 8px;
-  border-top: 1px solid var(--pk-border);
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--pk-border) 78%, transparent);
 }
 
 .pk-settings__nav-button {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  min-height: 32px;
-  padding: 0 10px 0 14px;
-  border: 1px solid transparent;
-  border-radius: var(--pk-radius);
+  min-height: 40px;
+  padding: 9px 13px 9px 14px;
+  border: 0;
+  border-radius: var(--pk-radius-lg);
   background: transparent;
-  color: var(--pk-text);
+  color: var(--pk-muted);
   font: inherit;
   font-size: 14px;
+  line-height: 1.35;
+  overflow: hidden;
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color 0.16s ease,
-    color 0.16s ease,
-    border-color 0.16s ease;
+    background-color 140ms ease,
+    color 140ms ease;
 }
 
 .pk-settings__nav-button:hover {
   background: var(--pk-bg);
-  border-color: var(--pk-border);
+  color: var(--pk-text);
 }
 
-/* 当前页用一条从中心展开的竖线确认；状态本身已经由 aria-current 表达。 */
-.pk-settings__nav-button::before {
-  content: '';
-  position: absolute;
-  left: 2px;
-  top: 50%;
-  width: 2px;
-  height: 0;
-  border-radius: 2px;
-  background: var(--pk-accent);
-  opacity: 0;
-  transform: translateY(-50%);
-  transition:
-    height 0.16s ease,
-    opacity 0.16s ease;
-}
-
+/* 当前页：一层薄薄的强调色底加一条左边竖线，状态本身由 aria-current 表达。 */
 .pk-settings__nav-button[aria-current='page'] {
-  background: var(--pk-bg);
-  color: var(--pk-accent-text);
+  background: color-mix(in srgb, var(--pk-accent) 11%, transparent);
+  color: var(--pk-text);
   font-weight: 600;
 }
 
-.pk-settings__nav-button[aria-current='page']::before {
-  height: 16px;
-  opacity: 1;
+.pk-settings__nav-button[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 13px;
+  bottom: 13px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--pk-accent);
+}
+
+/*
+ * 折叠后的导航只剩图标：文字收进不可见但仍留在按钮里，可访问名称与 title 都是完整名称，
+ * 图标本身是 aria-hidden 的装饰。
+ */
+.pk-settings[data-rail='collapsed'] .pk-settings__nav-button {
+  padding: 9px 0;
+  justify-content: center;
+}
+
+.pk-settings[data-rail='collapsed'] .pk-settings__nav-text {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 100ms ease,
+    visibility 0s linear 100ms;
+}
+
+/* 图标是装饰：20px 一格，含义由旁边那句名称与 aria-current 承担。 */
+.pk-settings__nav-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.pk-settings__nav-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    opacity 160ms ease 120ms,
+    visibility 0s linear 0s;
 }
 
 .pk-settings__footer {
+  display: grid;
+  gap: 10px;
   margin-top: auto;
-  padding-top: 12px;
+  padding: 12px;
   border-top: 1px solid var(--pk-border);
+}
+
+/* ---- 侧栏底部：回应开关常驻，只有三段挡位放不下才收起 ---- */
+
+/*
+ * 回应开关不跟着折叠收起来：桌宠在不在跑、能不能暂停，是这一栏常年要说的状态。
+ * 折叠时只留那枚 24px 图标，动作与原因仍然挂在 aria-label 与 title 上。
+ */
+.console-run {
+  display: grid;
+  gap: 6px;
+}
+
+.console-run__state {
+  padding-left: 8px;
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+.console-run__state[data-state='running'] {
+  color: var(--pk-accent-text);
+}
+
+.console-run__state[data-state='paused'] {
+  color: var(--pk-warn);
+}
+
+.console-run__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--pk-radius-lg);
+  background: transparent;
+  color: var(--pk-muted);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.console-run__toggle:hover:not(:disabled) {
+  background: var(--pk-bg);
+  color: var(--pk-text);
+}
+
+/* 桌宠没启动时按不了：字面已经写着「桌宠未启动」，这里只把可点性收掉。 */
+.console-run__toggle:disabled {
+  color: var(--pk-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.console-run__icon {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  fill: none;
+}
+
+.pk-settings[data-rail='collapsed'] .console-run {
+  gap: 0;
+}
+
+.pk-settings[data-rail='collapsed'] .console-run__state {
+  display: none;
+}
+
+.pk-settings[data-rail='collapsed'] .console-run__text {
+  display: none;
+}
+
+.pk-settings[data-rail='collapsed'] .console-run__toggle {
+  justify-content: center;
+  padding: 0;
+}
+
+/* 三段挡位放不下 72px 这一栏：折叠时收起，同一件事在「界面配色」那一节里还在。 */
+.pk-settings[data-rail='collapsed'] .console-theme {
+  display: none;
 }
 
 /* ---- 内容区 ---- */
 
 .pk-settings__main {
   min-width: 0;
-  padding: 28px clamp(20px, 4vw, 40px) 40px;
+  padding: 0 var(--pk-gutter) 48px;
   overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
 }
 
 /* 跳转目标本身不描边（内容区整块亮起没有意义），但键盘仍然能回到这里；
@@ -187,39 +407,150 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  margin-bottom: 16px;
+  background: var(--pk-bg);
 }
 
 .pk-settings__pane {
   display: grid;
-  gap: 28px;
   max-width: 1120px;
   margin: 0 auto;
 }
 
-/* 页面头部只靠字号和留白建立层级：不画线、不放按钮，操作贴着它作用的数据。 */
+/*
+ * 页面标题钉在内容区顶部，正文从它下面滚过——和参考一致：换了入口也知道自己在哪一页。
+ *
+ * 这条带子的宽度就是内容宽度，不用负 margin 去外扩栏距：--pk-gutter 里有 vw 分量，
+ * 外扩出来的宽度恰好等于滚动容器的内边距盒，四舍五入了 1px 就是一条横向滚动条
+ * （折叠到 72px 时主栏更宽，正好落在会进位的那一侧）。左右栏距里本来就没有文字，
+ * 底色又与页面同色，收在内容宽度里不会漏字。
+ */
 .pk-settings__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: grid;
   gap: 6px;
+  max-width: 100%;
+  padding: 30px 0 16px;
+  border-bottom: 1px solid var(--pk-border);
+  background: var(--pk-bg);
+}
+
+/* 标题一行：页面名在左，整页级操作贴右端；窄窗口时操作整块折到下一行。 */
+.pk-settings__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
 }
 
 .pk-settings__title {
   margin: 0;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+.pk-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-left: auto;
 }
 
 .pk-settings__summary {
-  max-width: 60ch;
-  font-size: 14px;
+  max-width: 68ch;
+  font-size: 13px;
   color: var(--pk-muted);
 }
 
+/* ---- 分组 ---- */
+
+/* 正文每节一节：上边一条细分隔线，节与节之间靠各自的上下留白，不叠额外的 gap。 */
 .pk-settings__body {
   display: grid;
-  gap: 28px;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.pk-settings__body > :is(.pk-section, .pk-sheet) {
+  padding-block: 20px;
+  border-top: 1px solid var(--pk-border);
+}
+
+/* 紧跟标题的第一节不再画线：上面那条已经是它和标题的分界。 */
+.pk-settings__body > :is(.pk-section, .pk-sheet):first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.pk-sheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.pk-sheet__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.pk-sheet__description {
+  margin-top: 3px;
+  margin-bottom: 16px;
+  max-width: 68ch;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+.pk-sheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.pk-sheet__body {
+  display: grid;
+  gap: 12px;
+}
+
+/* ui-kit 的 Section 用同一套标题量度，两类分组混排时层级不会跳。 */
+.pk-settings .pk-section__title {
+  font-size: 15px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+/* 标题右边那一枚状态：颜色只是辅助，字本身说清楚是哪一态。 */
+.pk-pill {
+  margin-left: 10px;
+  padding: 2px 9px;
+  border: 1px solid var(--pk-border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--pk-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  vertical-align: 2px;
+  white-space: nowrap;
+}
+
+.pk-pill--on {
+  color: var(--pk-ok);
+  border-color: color-mix(in srgb, var(--pk-ok) 42%, transparent);
+}
+
+.pk-pill--off {
+  color: var(--pk-muted);
+  border-color: color-mix(in srgb, var(--pk-muted) 42%, transparent);
 }
 
 /* ---- 行 ---- */
@@ -393,6 +724,20 @@
 }
 
 /*
+ * 按钮的圆角与高度跟着这一栏的量度走，配色仍由 ui-kit 的变体决定：
+ * 这里只改几何，不碰 background 与 border-color，否则 hover、primary、danger 会被吃掉。
+ */
+.pk-settings .pk-button {
+  border-radius: var(--pk-radius-lg);
+}
+
+.pk-settings .pk-button:not(.pk-button--small) {
+  min-height: 34px;
+  padding: 6px 11px;
+  font-size: 13px;
+}
+
+/*
  * 焦点环统一取 --pk-ring：按钮与文字操作画在元素外侧，输入类控件贴一点，
  * 与 ui-kit 的 .pk-button、.pk-input 取值一致，
  * 这样父级放进右轨的任何控件（自定义选择器、链接、可编程聚焦区域）都有可见焦点。
@@ -410,21 +755,6 @@
 .pk-settings__main:focus,
 .pk-settings__main:focus-visible {
   outline: none;
-}
-
-@media (max-width: 860px) {
-  .pk-settings__title {
-    font-size: 24px;
-  }
-}
-
-/* 减少动态：去掉位移与过渡，保留颜色变化；焦点环不受影响。 */
-@media (prefers-reduced-motion: reduce) {
-  .pk-settings__skip,
-  .pk-settings__nav-button,
-  .pk-settings__nav-button::before {
-    transition: none;
-  }
 }
 
 /* ---- 右轨里的选择 ---- */
@@ -505,15 +835,9 @@
   color: var(--pk-muted);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pk-choice {
-    transition: none;
-  }
-}
-
 /* ---- 并排的一栏（预览台）---- */
 
-/* 宽窗口时行与预览并排；1180px 以下预览退成页顶一段，不挤压值轨。 */
+/* 宽窗口时行与预览并排；窄到 1180px 以下预览退成页顶一段，不挤压值轨。 */
 .pk-split {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
@@ -553,4 +877,29 @@
   padding-top: 10px;
   border-top: 1px solid var(--pk-border);
   background: var(--pk-bg);
+}
+
+/* 最小窗口 880×600：栏距收到 20px，标题不缩——22px 是这一栏正文层级的一部分。 */
+@media (max-width: 960px) {
+  .pk-settings {
+    --pk-gutter: 20px;
+  }
+}
+
+/* 减少动态：侧栏不animate宽度，箭头与文字直接切换；焦点环不受影响。 */
+@media (prefers-reduced-motion: reduce) {
+  .pk-settings,
+  .pk-settings[data-rail='collapsed'] {
+    --pk-rail-motion: 0s linear;
+  }
+
+  .pk-settings__skip,
+  .pk-settings__nav-button,
+  .pk-settings__rail-toggle,
+  .pk-settings__rail-chevron,
+  .pk-settings__rail-text,
+  .pk-settings__brand,
+  .pk-choice {
+    transition: none;
+  }
 }

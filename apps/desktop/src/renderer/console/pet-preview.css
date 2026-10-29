@@ -1,31 +1,80 @@
 /*
- * 预览台：比纸低半格的浅面 + 一条地平线，彩色只由角色自己承担。
- * 界面底色与文字取 --pk-* 令牌；角色配色是这个产品唯一的第二色族，
- * 四个 --pv-* 值就是「配色」这一项设置本身，深浅主题下都用同一组浅色身体。
+ * 预览台：墙上点阵 + 底下一条地面，角色站在地面上；说话入口在这一块里被 pointerenter / 焦点带出来。
+ *
+ * 角色本体画在 pet/PetAvatar.tsx，颜色由它读的那四个 --pet-* 变量给出（值来自 PET_PALETTES，
+ * 与桌宠窗口 pet.css 同一组）。下面的皮肤规则与 pet.css 一致，只约束在 .pet-preview 里面：
+ * 不把整张 pet.css 拖进设置台——它带 html/body 透明与窗口尺寸规则。
  */
 
 .pet-preview {
+  --pet-ink: #1c2430;
+  --pv-floor: 48px;
+  --pet-accent: #3766dc;
+  --pet-error: #b23c09;
+
   box-sizing: border-box;
   display: grid;
-  gap: 8px;
-  justify-items: center;
 }
 
-.pet-preview__stage {
+.pet-preview__scene {
+  position: relative; /* 只给菜单定位用；菜单一律收在这块格子内，不外扩。 */
   display: grid;
-  place-items: end center;
-  width: 100%;
+  grid-template-rows: minmax(0, 1fr) var(--pv-floor);
+  min-height: 260px;
   padding: 16px 16px 0;
+  overflow: hidden;
   border: 1px solid var(--pk-border);
   border-radius: var(--pk-radius-lg);
   background: var(--pk-sunken);
 }
 
-.pet-preview__figure {
+/* 墙面点阵：只当背景纹理，不接指针。 */
+.pet-preview__wall {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  align-content: end;
+  justify-self: stretch;
+  min-height: 0;
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--pk-border-strong) 35%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+}
+
+/* 地面：48px 一条，颜色跟着明暗走。 */
+/* 这块场景的灯：只改预览自己的底色与点阵，不写主题挡位，也不影响桌面那一只。 */
+.pet-preview[data-light='night'] .pet-preview__scene {
+  background: color-mix(in srgb, var(--pk-sunken) 60%, var(--pk-text));
+}
+
+.pet-preview[data-light='night'] .pet-preview__floor {
+  background: color-mix(in srgb, var(--pk-surface) 55%, var(--pk-text));
+}
+
+.pet-preview[data-light='night'] .pet-preview__wall {
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--pk-bg) 30%, transparent) 1px,
+    transparent 1px
+  );
+}
+
+/* 地面是一行，不是一条盖在角色上的绝对层：角色站在它的上边缘，脸不会被截成平底。 */
+.pet-preview__floor {
+  height: var(--pv-floor);
+  border-top: 1px solid var(--pk-border);
+  background: color-mix(in srgb, var(--pk-bg) 82%, var(--pk-surface));
+}
+
+/* 角色大小跟着「大小」这一项，外接矩形不变，切档时场景不跳。 */
+.pet-preview .pet-avatar {
   display: block;
-  /* 大小这一项设置真的改变预览尺寸；外接矩形保持稳定，不跟着抖动。 */
+  width: var(--pv-size, 152px);
   height: var(--pv-size, 152px);
-  width: auto;
+  overflow: visible;
 }
 
 .pet-preview[data-size='small'] {
@@ -37,82 +86,264 @@
 }
 
 .pet-preview[data-size='large'] {
-  --pv-size: 188px;
+  --pv-size: 176px;
 }
 
-/* 地平线：角色的立足点，也是预览台唯一的一条线。 */
-.pet-preview__stage::after {
-  content: '';
-  grid-row: 2;
-  width: 62%;
-  height: 1px;
-  margin-bottom: 14px;
-  background: var(--pk-border-strong);
-  opacity: 0.5;
+/* 可戳的外壳必须是"没有外壳"：系统按钮的边框与底色会在角色外面套出一个黑框。 */
+.pet-preview__poke {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 
-.pet-preview__ears path {
-  fill: var(--pv-bottom);
+/* hover 或焦点进入这块场景时才出现的一排入口；键盘 Tab 进来也看得见（focus-within）。 */
+.pet-preview__tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 160ms ease;
 }
 
-.pet-preview__face {
-  fill: var(--pv-face);
+.pet-preview__scene:hover .pet-preview__tools,
+.pet-preview__scene:focus-within .pet-preview__tools {
+  opacity: 1;
 }
 
-.pet-preview__eyes ellipse {
-  fill: #1c2430;
-  transition: ry var(--pk-transition);
+.pet-preview__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--pk-border);
+  border-radius: 999px;
+  background: var(--pk-bg);
+  color: var(--pk-muted);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
-.pet-preview__mouth {
+.pet-preview__tool:hover:not(:disabled) {
+  border-color: var(--pk-border-strong);
+  color: var(--pk-text);
+}
+
+.pet-preview__tool.is-on {
+  border-color: var(--pk-accent);
+  color: var(--pk-accent-text);
+}
+
+.pet-preview__tool:disabled {
+  color: var(--pk-muted);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.pet-preview__tool-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.pet-preview__tool-glyph {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pet-preview__holder {
+  display: block;
+}
+
+/* 右键/键盘菜单：只列这一格真做得动的事，一条不落空。 */
+.pet-preview__menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  gap: 2px;
+  width: 168px;
+  padding: 6px;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  background: var(--pk-bg);
+  box-shadow: var(--pk-shadow-2);
+}
+
+.pet-preview__menu > button {
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--pk-radius);
+  background: transparent;
+  color: var(--pk-text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pet-preview__menu > button:hover:not(:disabled) {
+  background: var(--pk-surface);
+}
+
+.pet-preview__menu > button:disabled {
+  color: var(--pk-muted);
+  cursor: not-allowed;
+}
+
+.pet-preview__menu-close {
+  margin-top: 2px;
+  border-top: 1px solid var(--pk-border) !important;
+  border-radius: 0 0 var(--pk-radius) var(--pk-radius) !important;
+  color: var(--pk-muted) !important;
+}
+
+/* ---- 角色皮肤：与 pet.css 同一组声明 ---- */
+
+.pet-preview .pet-avatar__eye {
+  fill: var(--pet-ink);
+}
+
+.pet-preview .pet-avatar__brow,
+.pet-preview .pet-avatar__mouth {
+  stroke: var(--pet-ink);
+  stroke-width: 2.4;
   fill: none;
-  stroke: #1c2430;
-  stroke-width: 2.5;
   stroke-linecap: round;
 }
 
-.pet-preview__blush {
-  fill: var(--pv-halo);
-  opacity: 0.45;
+.pet-preview .pet-avatar__blush {
+  fill: #ffb8b0;
+  opacity: 0.7;
 }
 
-.pet-preview__caption {
+.pet-preview .pet-avatar__halo,
+.pet-preview .pet-avatar__dots,
+.pet-preview .pet-avatar__error-mark {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.pet-preview .pet-avatar__dots circle {
+  fill: var(--pet-accent);
+}
+
+.pet-preview .pet-avatar__error-mark circle {
+  fill: var(--pet-error);
+}
+
+.pet-preview .pet-avatar__error-mark path {
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.pet-preview .pet-avatar--listening .pet-avatar__halo {
+  opacity: 0.85;
+}
+
+.pet-preview .pet-avatar--listening .pet-avatar__eye {
+  transform: scaleY(1.15);
+}
+
+.pet-preview .pet-avatar--thinking .pet-avatar__dots {
+  opacity: 1;
+}
+
+.pet-preview .pet-avatar--thinking .pet-avatar__eye {
+  transform: scaleY(0.45);
+}
+
+.pet-preview .pet-avatar--error .pet-avatar__error-mark {
+  opacity: 1;
+}
+
+/* 气泡：只画宿主真的说过的那句。 */
+.pet-preview__bubble {
+  max-width: min(38ch, 100%);
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--pk-border);
+  border-radius: 10px 10px 10px 3px;
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* ---- 说话入口：与桌宠窗口同一个 PetComposer，样式约束在这块场景里 ---- */
+
+.pet-preview .pet-bubble__compose {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
-  margin: 0;
-  font-size: 14px;
+  align-items: flex-end;
+  gap: 8px;
+  width: min(420px, 100%);
+  margin-top: 2px;
 }
 
-.pet-preview__name {
-  font-weight: 600;
+.pet-preview .pet-composer__field {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 180px;
+  min-width: 0;
 }
 
-.pet-preview__facts,
-.pet-preview__note,
-.pet-preview__label {
+.pet-preview .pet-composer__label {
   font-size: 12px;
   color: var(--pk-muted);
 }
 
-.pet-preview__note {
-  margin: 0;
-  max-width: 34ch;
-  line-height: 1.6;
-  text-align: center;
+.pet-preview .pet-composer__input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font: inherit;
+  font-size: 13px;
 }
 
-.pet-preview__state {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
-  margin: 0;
+.pet-preview .pet-composer__send {
+  flex: none;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--pk-accent);
+  border-radius: var(--pk-radius);
+  background: var(--pk-accent);
+  color: var(--pk-accent-on);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pet-preview .pet-composer__send:disabled {
+  border-color: var(--pk-border);
+  background: var(--pk-surface);
+  color: var(--pk-muted);
+  cursor: not-allowed;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pet-preview__eyes ellipse {
+  .pet-preview__tools,
+  .pet-preview .pet-avatar__halo,
+  .pet-preview .pet-avatar__dots,
+  .pet-preview .pet-avatar__error-mark {
     transition: none;
   }
 }

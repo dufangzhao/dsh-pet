@@ -1,5 +1,10 @@
 import admission from './builtin-admission.json' with { type: 'json' };
-import { APPLICATION_PLUGIN_IDS as ID, DEMO_PLUGIN_IDS } from '@pet/contracts';
+import {
+  APPLICATION_PLUGIN_IDS as ID,
+  DEMO_PLUGIN_IDS,
+  modelProviderId,
+  modelService,
+} from '@pet/contracts';
 import type { DesktopHost } from './desktop-host.js';
 import type { DiscoveredPlugin } from '@pet/host-kernel';
 const records: Readonly<Record<string, { files: readonly unknown[] }>> = admission.plugins;
@@ -30,6 +35,24 @@ export async function startApplicationPlugins(
     'llm.responses@1',
     { pluginId: DEMO_PLUGIN_IDS.cloud, instanceId: 'default', providerId: 'responses' },
   );
+  const selectedModel = await host.configs.get({
+    pluginId: DEMO_PLUGIN_IDS.cloud,
+    instanceId: 'default',
+  });
+  const active =
+    selectedModel.ok && typeof selectedModel.value.data['active'] === 'string'
+      ? selectedModel.value.data['active']
+      : '';
+  if (modelService(active)?.available)
+    host.manager.capabilities.select(
+      { pluginId: ID.agent, instanceId: 'default' },
+      'llm.responses@1',
+      {
+        pluginId: DEMO_PLUGIN_IDS.cloud,
+        instanceId: 'default',
+        providerId: modelProviderId(active),
+      },
+    );
   for (const id of [...Object.values(ID), DEMO_PLUGIN_IDS.avatar]) {
     if (!enabled(id)) continue;
     const entry = host.manager.get({ pluginId: id, instanceId: 'default' });

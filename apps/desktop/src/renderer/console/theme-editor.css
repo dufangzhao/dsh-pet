@@ -1,0 +1,428 @@
+/*
+ * 「界面配色」那一节的排版。
+ *
+ * 颜色一律取主题词表本身（--paper / --sheet-2 / --ink-soft / --accent …），这些变量由
+ * theme.ts 写在 <html> 上；这里不写死任何一个十六进制值，试色才会跟着草稿实时变。
+ * 布局沿用来源那一节的骨架：方案卡自动铺满、调色盘按组分段一条细线、右侧组件试色粘住不动；
+ * 圆角、过渡与字号回到 @pet/ui-kit 的量度，不引入第二种形状语言。
+ */
+
+.theme-editor__modes {
+  max-width: 360px;
+}
+
+/* ---- 方案卡 ---- */
+
+.theme-schemes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.theme-scheme {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--pk-radius);
+  background: var(--sheet-2);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--pk-transition),
+    background-color var(--pk-transition),
+    box-shadow var(--pk-transition);
+}
+
+.theme-scheme:hover {
+  border-color: var(--line-strong);
+  background: var(--sheet);
+}
+
+/* 选中的方案：一条强调色竖线 + 一层主卡底色，状态本身由 aria-pressed 表达。 */
+.theme-scheme--active {
+  border-color: var(--accent);
+  background: var(--sheet);
+  box-shadow: inset 3px 0 0 var(--accent-2);
+}
+
+.theme-scheme:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+.theme-scheme__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.theme-scheme__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.theme-scheme__kind {
+  margin-left: auto;
+  flex: none;
+  color: var(--ink-dim);
+  font-family: var(--pk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.theme-scheme__note {
+  min-height: 32px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.theme-swatches {
+  display: flex;
+  height: 15px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.theme-swatches span {
+  flex: 1;
+}
+
+/* ---- 折叠的调色盘 ---- */
+
+.theme-fold {
+  padding: 0;
+  border-top: 1px solid var(--pk-border);
+}
+
+.theme-fold__summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 0;
+  list-style: none;
+  cursor: pointer;
+}
+
+.theme-fold__summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 折叠标记只是一个字符：展开与收起另外由 details 的 open 属性表达。 */
+.theme-fold__summary::after {
+  content: '＋';
+  flex: none;
+  margin-left: auto;
+  color: var(--ink-dim);
+  font-family: var(--pk-font-mono);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.theme-fold[open] > .theme-fold__summary::after {
+  content: '−';
+}
+
+.theme-fold__summary:hover .theme-fold__title {
+  color: var(--accent);
+}
+
+.theme-fold__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pk-text);
+}
+
+.theme-fold__desc {
+  font-size: 12px;
+  color: var(--pk-muted);
+}
+
+.theme-bench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 12px;
+}
+
+.theme-bench__colors {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* 窄窗口时试色退到下面，粘住的那一栏会盖住调色盘。 */
+@media (max-width: 860px) {
+  .theme-bench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .theme-bench__sample {
+    position: static;
+  }
+}
+
+.theme-color-group {
+  display: grid;
+  gap: 7px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+}
+
+.theme-color-group:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.theme-color-group__title {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.theme-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+  gap: 7px;
+}
+
+@media (max-width: 1080px) {
+  .theme-color-grid {
+    grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+  }
+}
+
+/* 一格颜色：左边取色器，右边名称在上、十六进制在下。 */
+.theme-color {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--pk-radius);
+  background: var(--sheet-2);
+}
+
+.theme-color input[type='color'] {
+  grid-row: 1 / 3;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* 原生取色器在 Windows 上会把外框画成系统样式：只留内容，边框交给上面那一层。 */
+.theme-color input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.theme-color input[type='color']::-webkit-color-swatch {
+  border: 0;
+  border-radius: 3px;
+}
+
+.theme-color__label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 10.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 十六进制那一格看起来就是词表里的一行文字，输入时才有等宽对齐；无效只标边框，不报错文案。 */
+.theme-color__hex {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--pk-font-mono);
+  font-size: 11px;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.theme-color__hex:focus-visible {
+  outline: 1px solid var(--pk-ring);
+  outline-offset: 1px;
+}
+
+.theme-color--invalid {
+  border-color: var(--danger);
+}
+
+/* ---- 组件试色 ---- */
+
+.theme-bench__sample {
+  position: sticky;
+  top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.theme-specimen {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.theme-specimen__bubble {
+  padding: 8px 10px;
+  border-radius: var(--pk-radius);
+  background: var(--bubble-bg);
+  color: var(--bubble-ink);
+  font-size: 12px;
+}
+
+.theme-specimen__agent {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--pk-radius);
+  background: var(--agent-surface);
+  font-size: 12px;
+}
+
+.theme-specimen__marker {
+  justify-self: start;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: var(--on-accent);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.theme-specimen__marker--think {
+  background: var(--violet);
+}
+
+.theme-specimen__marker--agent {
+  background: var(--ink-blue);
+}
+
+.theme-specimen__think {
+  color: var(--ink-soft);
+}
+
+.theme-specimen__body {
+  color: var(--ink);
+}
+
+.theme-specimen__tool {
+  color: var(--tool-result);
+  font-family: var(--pk-font-mono);
+  font-size: 11px;
+}
+
+.theme-specimen__world {
+  padding: 8px 10px;
+  border-radius: var(--pk-radius);
+  background: var(--world-bg);
+  color: var(--world-ink);
+  font-family: var(--pk-font-mono);
+  font-size: 11px;
+}
+
+.theme-specimen__states,
+.theme-specimen__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.theme-specimen__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+/* 状态色不靠文字颜色单说：前面一颗同色圆点，读屏拿到的仍是那两个词。 */
+.theme-specimen__state::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.theme-specimen__state--ok {
+  color: var(--ok);
+}
+
+.theme-specimen__state--warn {
+  color: var(--warn);
+}
+
+.theme-specimen__state--danger {
+  color: var(--danger);
+}
+
+.theme-chart-preview {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 116px;
+  padding: 14px 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--pk-radius);
+  background: var(--sheet-2);
+}
+
+.theme-chart-preview span {
+  flex: 1;
+  min-width: 12px;
+  border-radius: 3px 3px 1px 1px;
+  transition:
+    height 0.2s ease,
+    background-color 0.2s ease;
+}
+
+/* ---- 保存条 ---- */
+
+.theme-editor__actions {
+  padding-top: 10px;
+  border-top: 1px solid var(--pk-border);
+}
+
+.theme-editor__status {
+  flex: 1 1 200px;
+  min-width: 0;
+  color: var(--pk-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.theme-editor__status--bad {
+  color: var(--pk-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-scheme,
+  .theme-chart-preview span {
+    transition: none;
+  }
+}

@@ -18,10 +18,10 @@ export class ConsoleWindow {
       return;
     }
     const window = new BrowserWindow({
-      width: 1040,
-      height: 740,
-      minWidth: 760,
-      minHeight: 560,
+      width: 1200,
+      height: 800,
+      minWidth: 880,
+      minHeight: 600,
       title: 'AI 桌宠 · 设置',
       show: false,
       autoHideMenuBar: true,

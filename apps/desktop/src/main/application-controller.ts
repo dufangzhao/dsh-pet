@@ -45,6 +45,10 @@ interface Flow {
   revision: number;
 }
 export class ApplicationController {
+  desktopStatus = (): { available: boolean; shown: boolean } => ({
+    available: false,
+    shown: false,
+  });
   #flow: Flow | null = null;
   #closed = false;
   #attachedGeneration: number | null = null;
@@ -160,10 +164,14 @@ export class ApplicationController {
     if (migrate) await this.persist({ legacyMigrated: true });
     this.#attachedGeneration = row.owner.generation;
   }
+  pluginWasDisabled(id: string): boolean {
+    return (this.record.data['disabled'] as string[]).includes(id);
+  }
   async recordPluginStates(): Promise<void> {
+    if (this.#closed) return;
     await this.attachIfActive();
     const disabled = new Set(this.record.data['disabled'] as string[]);
-    for (const id of Object.values(ID)) {
+    for (const id of [...Object.values(ID), DEMO_PLUGIN_IDS.cloud]) {
       const row = this.host.manager.get({ pluginId: id, instanceId: 'default' });
       if (row?.state === 'disabled') disabled.add(id);
       else if (row?.state === 'active') disabled.delete(id);
@@ -200,7 +208,10 @@ export class ApplicationController {
     );
     if (!task.ok) return task;
     try {
-      return await task.value.result;
+      const result = await task.value.result;
+      if (result.ok && method === 'run' && object(result.value)?.['paused'] === true)
+        this.demo.onConsoleClosed();
+      return result;
     } finally {
       task.value.release();
     }
@@ -330,6 +341,7 @@ export class ApplicationController {
       !!row && this.host.manager.isActive(row.owner) && stateResult.ok && historyResult.ok;
     return {
       version: 1,
+      desktop: this.desktopStatus(),
       historyBefore: typeof history?.['before'] === 'number' ? history['before'] : null,
       historyHasEarlier: history?.['more'] === true,
       profile,
@@ -433,7 +445,14 @@ export class ApplicationController {
     return { ok: true, value: null };
   }
   async startGuide(): Promise<Result<ApplicationSnapshot>> {
-    const profile = await this.profile();
+    let profile = await this.profile();
+    if (!profile) return fail('not-ready');
+    if (!profile.data.visible) {
+      const shown = await this.saveProfile(profile.revision, { ...profile.data, visible: true });
+      if (!shown.ok) return shown;
+      profile = shown.value.profile;
+      if (!profile) return fail('not-ready');
+    }
     this.#flow = {
       id: randomUUID(),
       step: 'welcome',

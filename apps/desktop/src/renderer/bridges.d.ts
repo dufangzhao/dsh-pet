@@ -2,6 +2,7 @@ import type {
   ApplicationBridge,
   ConsoleBridge,
   DemoBridge,
+  ModelConnectionBridge,
   SettingsLauncher,
 } from '@pet/contracts';
 
@@ -15,5 +16,10 @@ declare global {
      * 页面据此显示真实不可用态，不画假数据。
      */
     readonly petApplication?: ApplicationBridge;
+    /**
+     * 模型连接桥：读快照、存 Key 并开始、测试在用端点、暂停与打开服务页。
+     * 缺失就是这台机器还没有这条通道——连接卡片据此报不可用，不猜配置。
+     */
+    readonly petModels?: ModelConnectionBridge;
   }
 }

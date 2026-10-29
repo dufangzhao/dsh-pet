@@ -82,6 +82,7 @@ export interface DemoSnapshot {
   readonly preparedModelId: string | null;
   readonly canRecord: boolean;
   readonly canSend: boolean;
+  readonly paused?: boolean;
   readonly transcript: string;
   readonly partialTranscript: string;
   readonly partialReply: string;

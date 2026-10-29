@@ -2,6 +2,7 @@ import { APPLICATION_PLUGIN_IDS as APP } from '@pet/contracts';
 import { randomUUID } from 'node:crypto';
 import {
   DEMO_PLUGIN_IDS as ID,
+  modelService,
   LOCAL_ASR_MODELS,
   LOCAL_ASR_MAX_SECONDS,
   LOCAL_ASR_SAMPLE_RATE,
@@ -151,7 +152,15 @@ export class DemoController {
       keyConfigured = false;
     if (this.host.credentials)
       try {
-        keyConfigured = await this.host.credentials.hasSecret(identity(ID.cloud), 'api-key');
+        const modelConfig = await this.host.configs.get(identity(ID.cloud));
+        const activeId =
+          modelConfig.ok && typeof modelConfig.value.data['active'] === 'string'
+            ? modelConfig.value.data['active']
+            : '';
+        keyConfigured = await this.host.credentials.hasSecret(
+          identity(ID.cloud),
+          modelService(activeId)?.secretKey ?? 'api-key',
+        );
       } catch {
         keyAvailable = false;
       }
@@ -179,16 +188,38 @@ export class DemoController {
         !!this.owner(id) && plugin?.trusted === true && !plugin.blocked && plugin.preset !== 'deny'
       );
     };
+    const agentOwner = this.owner(APP.agent);
+    let paused = false;
+    let agentStateError: KernelError | null = null;
+    if (agentOwner) {
+      try {
+        const state = object(await this.queryAgent('state', null));
+        if (typeof state?.['paused'] !== 'boolean') agentStateError = makeError('not-ready', false);
+        else paused = state['paused'];
+      } catch (error) {
+        agentStateError =
+          error instanceof KernelFault ? error.error : makeError('unavailable', false);
+      }
+    }
     const configured = settings.replyMode !== null && settings.readError === null;
     const canSend =
       configured &&
-      !!this.owner(APP.agent) &&
+      !!agentOwner &&
+      !agentStateError &&
+      !paused &&
       (settings.replyMode === 'demo' || ready(reply)) &&
       (settings.replyMode !== 'deepseek' || (keyAvailable && keyConfigured));
     const profile = await this.host.configs.get(identity(APP.profile));
     const voiceEnabled = profile.ok && profile.value.data['voiceEnabled'] === true;
     const canRecord =
-      voiceEnabled && configured && ready(ID.voice) && ready(ID.asr) && settings.modelId !== null;
+      !!agentOwner &&
+      !agentStateError &&
+      !paused &&
+      voiceEnabled &&
+      configured &&
+      ready(ID.voice) &&
+      ready(ID.asr) &&
+      settings.modelId !== null;
     return {
       version: 1,
       phase: this.#phase === 'setup' && (canSend || canRecord) ? 'idle' : this.#phase,
@@ -199,13 +230,14 @@ export class DemoController {
       preparedModelId: this.#preparedModel,
       canRecord,
       canSend,
+      ...(agentOwner && !agentStateError ? { paused } : {}),
       transcript: this.#transcript,
       partialTranscript: this.#partialTranscript,
       partialReply: this.#partialReply,
       messages: this.#messages,
       recordingStartedAt: this.#started,
       maxRecordingSeconds: LOCAL_ASR_MAX_SECONDS,
-      error: this.#error,
+      error: this.#error ?? agentStateError,
       keyAvailable,
       keyConfigured,
       avatarEnabled: !!this.owner(ID.avatar),

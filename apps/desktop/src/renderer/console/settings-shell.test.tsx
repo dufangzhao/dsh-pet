@@ -1,9 +1,10 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   SettingsRow,
   SettingsRows,
+  SettingsSection,
   SettingsShell,
   type SettingsNavItem,
   type SettingsShellProps,
@@ -11,7 +12,7 @@ import {
 
 /**
  * 外壳只该做两件事：把父级给的入口画出来并标出当前项，把插槽放回该放的位置。
- * 这里断言语义（aria-current、label→控件、describedBy），不断言像素。
+ * 这里断言语义（aria-current、label→控件、describedBy、折叠态的来源），不断言像素。
  */
 const items: readonly SettingsNavItem[] = [
   { id: 'persona', label: '人设' },
@@ -37,7 +38,8 @@ describe('设置台外壳', () => {
   it('当前入口只有一个 aria-current，选中的是父级给的那个 id', () => {
     const html = shell();
     expect(html.match(/aria-current="page"/g)).toHaveLength(1);
-    expect(html).toContain('aria-current="page">语音输入</button>');
+    expect(html).toContain('aria-current="page"');
+    expect(html).toContain('<span class="pk-settings__nav-text">语音输入</span>');
   });
 
   it('恢复入口排在日常入口之后，没有恢复入口时不出现第二条列表', () => {
@@ -60,11 +62,79 @@ describe('设置台外壳', () => {
     expect(filled).toContain('主题');
   });
 
+  it('整页操作与标题同一行；没给时空容器也不出现', () => {
+    expect(shell()).not.toContain('pk-settings__actions');
+    expect(shell({ actions: <button type="button">使用向导</button> })).toContain(
+      '<div class="pk-settings__actions"><button type="button">使用向导</button></div>',
+    );
+  });
+
   it('内容区可被程序化聚焦，跳转按钮是按钮而不是锚点', () => {
     const html = shell();
     expect(html).toMatch(/<main class="pk-settings__main" tabindex="-1">/);
     expect(html).toContain('<button type="button" class="pk-settings__skip">');
     expect(html).not.toContain('href=');
+  });
+});
+
+describe('侧栏折叠', () => {
+  it('本机记着折叠就折叠，没有记录时展开', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => (key === 'pet.console.rail' ? 'collapsed' : null),
+      setItem: () => undefined,
+    });
+    expect(shell()).toContain('data-rail="collapsed"');
+    vi.unstubAllGlobals();
+    expect(shell()).toContain('data-rail="open"');
+  });
+
+  it('存储读不到时按展开处理，折叠按钮仍然在', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('受限环境');
+      },
+      setItem: () => undefined,
+    });
+    const html = shell();
+    vi.unstubAllGlobals();
+    expect(html).toContain('data-rail="open"');
+    expect(html).toContain('aria-label="收起侧栏"');
+    expect(html).toContain('aria-expanded="true"');
+  });
+
+  it('折叠不改变可访问名称：文字仍在按钮里，图标只是装饰', () => {
+    const html = shell();
+    expect(html).toContain('title="语音输入"');
+    expect(html).toContain('<span class="pk-settings__nav-text">语音输入</span>');
+    expect(html).toContain('aria-current="page"');
+    expect(html.match(/class="pk-settings__nav-icon"/g)).toHaveLength(items.length);
+  });
+});
+
+describe('分组', () => {
+  it('标题右边挂的是给出来的真实状态，标题本身就是这一节的名称', () => {
+    const html = renderToStaticMarkup(
+      <SettingsSection title="我的桌宠" state={{ text: '在桌面上', tone: 'on' }}>
+        <p>预览</p>
+      </SettingsSection>,
+    );
+    expect(html).toContain('<span class="pk-pill pk-pill--on">在桌面上</span>');
+    const labelledBy = /<section class="pk-sheet" aria-labelledby="([^"]+)">/.exec(html)?.[1];
+    const titleId = /<h2 class="pk-sheet__title" id="([^"]+)">/.exec(html)?.[1];
+    expect(labelledBy).toBeTruthy();
+    expect(titleId).toBe(labelledBy);
+  });
+
+  it('没有状态、说明与操作时不画空容器', () => {
+    const html = renderToStaticMarkup(
+      <SettingsSection title="连接模型">
+        <p>卡片</p>
+      </SettingsSection>,
+    );
+    expect(html).not.toContain('pk-pill');
+    expect(html).not.toContain('pk-sheet__description');
+    expect(html).not.toContain('pk-sheet__actions');
+    expect(html).toContain('卡片');
   });
 });
 

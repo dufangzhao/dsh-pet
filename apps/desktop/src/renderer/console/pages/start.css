@@ -1,0 +1,242 @@
+/*
+ * 开始页的三块：模型选择行、Key 与模型那一排、桌宠按钮行。
+ *
+ * 颜色与圆角仍取 --pk-* 令牌；这里只写这一页特有的形状——服务是一排可选的胶囊，
+ * 在用的那颗点亮，另一块平台的收在「更多」后面。
+ */
+
+.start-note {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--pk-muted);
+}
+
+.start-picker {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 10px 12px;
+  align-items: start;
+  margin-top: 4px;
+}
+
+.start-grouplabel {
+  margin: 0;
+  padding-top: 7px;
+  font-size: 13px;
+  color: var(--pk-muted);
+  white-space: nowrap;
+}
+
+.start-chip__mark {
+  /* 22px 白底方形标记：黑色品牌形在深色芯片上也看得见，alt 为空——名字就在旁边。 */
+  width: 22px;
+  height: 22px;
+  flex: none;
+  padding: 2px;
+  border-radius: 6px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.start-chipline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 在用的那一行不折行：长模型名截断，「测试连接」不能被挤掉。 */
+.start-chipline--current {
+  flex-wrap: nowrap;
+}
+
+.start-chipline--current .start-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* 结果那句吃掉剩余宽度并允许断行：长原因不能把「测试连接」顶出这一栏。 */
+.start-chipline--current > .pk-button {
+  flex: none;
+}
+
+.start-chipline--current .start-result {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.start-chipline--current .start-chip > span,
+.start-chipline--current .start-chip {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.start-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--pk-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pk-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.start-chip:hover:not(:disabled) {
+  border-color: var(--pk-border-strong);
+  color: var(--pk-text);
+}
+
+.start-chip.is-on {
+  border-color: var(--pk-accent);
+  background: color-mix(in srgb, var(--pk-accent) 10%, transparent);
+  color: var(--pk-text);
+}
+
+.start-chip:disabled {
+  cursor: default;
+  color: var(--pk-muted);
+  border-style: dashed;
+}
+
+.start-chip__off {
+  font-size: 11px;
+  color: var(--pk-muted);
+}
+
+.start-none {
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+/*
+ * 模型、Key 与「保存并开始」同一排：模型固定 240 的基准宽，Key 吃剩下的宽度，
+ * 三个控件底边对齐、同高（40px）。放不下时才整排折行。
+ */
+.start-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+  margin-top: 16px;
+}
+
+.start-field {
+  display: grid;
+  gap: 4px;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.start-field--model {
+  flex: 0 0 240px;
+}
+
+.start-field .pk-input {
+  min-height: 40px;
+}
+
+.start-field__label {
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+.start-field .pk-input {
+  width: 100%;
+}
+
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.start-signin {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.start-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+}
+
+/* 右边那句「管理模型扩展」靠这根弹簧推过去；窄屏折行时它自己不占位。 */
+.start-links__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 链接形状的文字按钮：真实 handler 在宿主那边（打开系统浏览器到那家服务的控制台）。 */
+.start-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pk-accent-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.start-link:hover {
+  text-decoration: underline;
+}
+
+.start-result {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pk-ok);
+  overflow-wrap: anywhere;
+}
+
+.start-result.is-bad {
+  color: var(--pk-danger);
+}
+
+.start-petline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .start-picker {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .start-grouplabel {
+    padding-top: 0;
+  }
+
+  .start-chipline--current {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-chip {
+    transition: none;
+  }
+}

@@ -76,6 +76,12 @@ export interface ApplicationState {
   /** 请应用重新播放上手引导；结果来自宿主返回的快照。 */
   startGuide: () => Promise<ApplicationOutcome>;
   /**
+   * 让宿主记一次真实互动（戳、摸，以及表情画出来之后的脸红回执）。
+   *
+   * 走的是桌宠窗口同一条桥、同一条记录：设置台不本地演反应，也不新开一份历史。
+   */
+  interact: (kind: PetInteractionKind) => Promise<ApplicationOutcome>;
+  /**
    * 执行外部页面自己声明的一个操作。宿主返回的结果值不猜含义：
    * 这里只说"这次调用完成了没有"，之后的状态变化靠事件与重读带回来。
    */
@@ -95,6 +101,9 @@ export interface ApplicationState {
 
 /** 页面操作项由宿主在 pages[].actions 里给；这里不自定义新形状。 */
 export type PageAction = NonNullable<ApplicationPage['actions']>[number];
+
+/** 桥的 interact 认这几种；与契约里的取值一致，不在这里另起一名。 */
+export type PetInteractionKind = 'poke' | 'pat' | 'drag' | 'blush' | 'happy';
 
 const OK: ApplicationOutcome = { ok: true, error: null };
 const BUSY: ApplicationOutcome = { ok: false, error: '上一个保存还没结束。' };
@@ -297,6 +306,30 @@ export function useApplication(): ApplicationState {
     }
   }, []);
 
+  const interact = useCallback(
+    async (kind: PetInteractionKind): Promise<ApplicationOutcome> => {
+      const current = currentBridge();
+      if (current === undefined) {
+        return { ok: false, error: COPY.missingBridge };
+      }
+      try {
+        const result = await current.interact({ kind, via: 'console' });
+        if (!alive.current) {
+          return { ok: false, error: CALL_REJECTED };
+        }
+        if (!result.ok) {
+          return { ok: false, error: describeError(result.error) };
+        }
+        // 记录与状态都由宿主说话：它报变了我们再读一次，不在这里补一份。
+        void read(false);
+        return OK;
+      } catch {
+        return { ok: false, error: CALL_REJECTED };
+      }
+    },
+    [read],
+  );
+
   const runPageAction = useCallback(
     async (page: ApplicationPage, action: PageAction): Promise<ApplicationOutcome> => {
       const current = currentBridge();
@@ -402,6 +435,7 @@ export function useApplication(): ApplicationState {
     edit,
     save,
     startGuide,
+    interact,
     runPageAction,
     history,
     historyEarlier,

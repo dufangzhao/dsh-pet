@@ -2,7 +2,7 @@
 
 当前产品说明统一见[使用与扩展](../docs/34-plugin-pet-guide.md)。实现保留 DSH 式统一宿主，Cortico 为普通智能体插件，五个页面通过普通贡献加载。无付费服务调用、无用户 Key、无环境录音；本机权重与公开 WAV 不入库。
 
-## 已执行
+## 插件式基础版本已执行（e6b291d）
 
 | 检查 | 结果与证据 |
 | --- | --- |
@@ -19,6 +19,12 @@ GUI使用真实页面按钮与输入完成初始名字/配色/语音/回应选�
 公开SenseVoice WAV经真实本机识别，约19.8秒自动结束、9次实际权限决定、1次getUserMedia、1次成功结束；跨人设/对话页后仍是同一录音，音轨ended，识别48个字符并收到明确离线脚本回复。全部使用假音频设备但未使用媒体自动同意参数。
 
 截图为当前实际窗口，保留在[本机截图目录](screenshots/application/)。当前截图足以审阅布局与表情，不等于所有设备/多屏条件都已覆盖。此前M0/M1/M2记录只代表各自阶段，现有完整版GUI入口是 application-ui-acceptance.mjs。
+
+## 当前开始栏复刻验收
+
+本轮仍在集成前端，基础版本的GUI截图不作为新界面验收。当前 [模型报告](start-model-results.json) 已通过13组真实宿主检查，覆盖18个API Key端点、实际审批、失败与版本冲突，以及同一隔离profile的四次新Host/worker生命周期；全部退出确认，未强制结束。恢复不发模型请求、不解密Key、不覆盖deny，明确禁用后仍不恢复。报告的emulatedCipher=true仅用于headless数据流程，不证明DPAPI或完整OS进程重启。
+
+浏览器登录的7项本地回调测试覆盖PKCE/JWKS身份、nonce与套餐授权拒绝、取消、加密令牌轮换和永久拒绝刷新后的退出状态，未使用真人账号或登录服务。模型协议测试另含真实格式的Chat/Responses、Anthropic/Gemini、Gemini工具签名重放、ChatGPT流式回执和可用模型选择；没有实际付费调用。新 [界面验收脚本](probes/coopanion-start-ui-e2e.mjs) 已通过全部12组；[最终报告](screenshots/coopanion-start/coop-start-1793262754337-88ae2a0b/acceptance-report.json)记录两个真实应用进程正常退出、零脚本/远端请求异常。预览日夜、菜单、拖动、键盘与禁止拖动点按、真实表情/聊天、向导显隐和重启偏好均通过。截图与参考版本说明见[对照](screenshots/coopanion-start/comparison.md)。[原资料正常启动](start-normal-results.json)已确认五页、Core ready、桌宠与设置均显示；未加测试资料或兼容启动标志。
 
 ## 发行边界
 

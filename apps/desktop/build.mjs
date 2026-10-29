@@ -9,6 +9,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const workspace = path.resolve(root, '../..');
 const require = createRequire(import.meta.url);
 await import('../../plugins/profile/build.mjs');
+await import('../../plugins/llm-provider/build.mjs');
 for (const entry of await fs.readdir(path.join(workspace, 'plugins'), { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
   const directory = path.join(workspace, 'plugins', entry.name);

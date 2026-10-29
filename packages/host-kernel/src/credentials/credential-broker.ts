@@ -48,6 +48,15 @@ export interface CredentialClient {
     operation: (secret: string, signal: AbortSignal) => Promise<T>,
   ): Promise<T>;
 }
+export interface ManagedCredentialValue {
+  readonly value: string;
+  readonly stored?: string;
+  readonly sensitiveValues?: readonly string[];
+}
+export type ManagedCredentialResolver = (
+  stored: string,
+  signal: AbortSignal,
+) => Promise<ManagedCredentialValue | { readonly revoked: true }>;
 interface CredentialUse {
   done: boolean;
   pending: number;
@@ -166,6 +175,7 @@ function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
 /** Host-only authority. Never expose this object or its management methods in a plugin SDK. */
 export class CredentialBroker {
   readonly #sessions = new Map<string, Session>();
+  readonly #resolvers = new Map<string, ManagedCredentialResolver>();
   readonly #uses = new Set<CredentialUse>();
   readonly #generations = new Map<string, number>();
   readonly #keyEpochs = new Map<string, AbortController>();
@@ -185,6 +195,74 @@ export class CredentialBroker {
     this.redactor = dependencies.redactor ?? new SecretRedactor();
   }
 
+  /** Host OAuth adapters renew the encrypted record; plugins receive only its current access token. */
+  registerManagedSecret(
+    owner: CredentialNamespace,
+    keyId: string,
+    resolver: ManagedCredentialResolver,
+  ): () => void {
+    const ns = namespace(owner);
+    if (!localId(keyId) || typeof resolver !== 'function')
+      throw new CredentialError('invalid-input');
+    const key = locator(ns, keyId);
+    this.#resolvers.set(key, resolver);
+    return () => {
+      if (this.#resolvers.get(key) === resolver) this.#resolvers.delete(key);
+    };
+  }
+  private resolveManaged(
+    owner: CredentialNamespace,
+    keyId: string,
+    resolver: ManagedCredentialResolver,
+    signal: AbortSignal,
+    check: () => void,
+  ): Promise<string | null> {
+    const ns = namespace(owner);
+    const key = locator(ns, keyId);
+    const pending = this.#writes.then(async () => {
+      check();
+      const encrypted = await this.dependencies.store.read(key);
+      check();
+      if (!encrypted) throw new CredentialError('not-ready');
+      const decoded = await this.dependencies.cipher.decrypt(Uint8Array.from(encrypted));
+      check();
+      if (decoded.shouldReEncrypt) throw new CredentialError('not-ready');
+      const original = credentialPayload(decoded.plaintext, ns, keyId);
+      const next = await resolver(original, signal);
+      check();
+      if ('revoked' in next) {
+        await this.dependencies.store.remove(key);
+        check();
+        return null;
+      }
+      if (!secretText(next.value) || (next.stored !== undefined && !secretText(next.stored)))
+        throw new CredentialError('unavailable');
+      this.redactor.add(next.value);
+      for (const value of next.sensitiveValues ?? []) this.redactor.add(value);
+      if (next.stored !== undefined && next.stored !== original) {
+        this.redactor.add(next.stored);
+        const ciphertext = await this.dependencies.cipher.encrypt(
+          JSON.stringify({ version: 1, owner: ns, keyId, secret: next.stored }),
+        );
+        check();
+        if (
+          !(ciphertext instanceof Uint8Array) ||
+          !ciphertext.byteLength ||
+          ciphertext.byteLength > MAX_CIPHERTEXT_BYTES
+        )
+          throw new CredentialError('unavailable');
+        await this.dependencies.store.write(key, Uint8Array.from(ciphertext));
+        check();
+      }
+      return next.value;
+    });
+    this.#writes = pending.then(
+      () => {},
+      () => {},
+    );
+    return pending;
+  }
+
   /** Host metadata only: presence is not a successful decryption or service test. */
   async hasSecret(owner: CredentialNamespace, keyId: string): Promise<boolean> {
     if (this.#disposed) throw new CredentialError('unavailable');
@@ -201,8 +279,15 @@ export class CredentialBroker {
     );
     return read;
   }
-  async setSecret(owner: CredentialNamespace, keyId: string, secret: string): Promise<void> {
+  async setSecret(
+    owner: CredentialNamespace,
+    keyId: string,
+    secret: string,
+    signal?: AbortSignal,
+  ): Promise<void> {
     if (this.#disposed) throw new CredentialError('unavailable');
+    if (signal !== undefined && !repairSignal(signal)) throw new CredentialError('invalid-input');
+    if (signal?.aborted) throw new CredentialError('cancelled');
     const ns = namespace(owner);
     if (!localId(keyId) || !secretText(secret)) throw new CredentialError('invalid-input');
     try {
@@ -212,6 +297,7 @@ export class CredentialBroker {
     }
     return this.mutateKey(locator(ns, keyId), async () => {
       try {
+        if (signal?.aborted) throw new CredentialError('cancelled');
         const payload = JSON.stringify({ version: 1, owner: ns, keyId, secret });
         const encrypted = await this.dependencies.cipher.encrypt(payload);
         if (
@@ -221,8 +307,10 @@ export class CredentialBroker {
         )
           throw new CredentialError('unavailable');
         if (this.#disposed) throw new CredentialError('unavailable');
+        if (signal?.aborted) throw new CredentialError('cancelled');
         await this.dependencies.store.write(locator(ns, keyId), Uint8Array.from(encrypted));
-      } catch {
+      } catch (error) {
+        if (error instanceof CredentialError && error.code === 'cancelled') throw error;
         throw new CredentialError('unavailable');
       }
     });
@@ -342,6 +430,7 @@ export class CredentialBroker {
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#resolvers.clear();
     for (const session of this.#sessions.values()) session.abort.abort();
     for (const epoch of this.#keyEpochs.values()) epoch.abort();
     this.#sessions.clear();
@@ -552,7 +641,18 @@ export class CredentialBroker {
         !secretText(record['secret'])
       )
         throw new CredentialError('permission-denied');
-      const secret = record['secret'];
+      const managed = this.#resolvers.get(key);
+      const secret = managed
+        ? await abortable(
+            track(
+              this.resolveManaged(session.owner, keyId, managed, useSignal, () =>
+                this.check(session, task.signal, lease ?? undefined, keySignal),
+              ),
+            ),
+            useSignal,
+          )
+        : record['secret'];
+      if (secret === null) throw new CredentialError('not-ready');
       this.redactor.add(secret);
       this.check(session, task.signal, lease, keySignal);
       let result: T;

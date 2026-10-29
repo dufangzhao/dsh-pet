@@ -1,4 +1,10 @@
-import { DEMO_PLUGIN_IDS } from '@pet/contracts';
+import { DEMO_PLUGIN_IDS, MODEL_SERVICE_ENDPOINTS } from '@pet/contracts';
+const modelOrigins = new Set([
+  'https://auth.openai.com',
+  ...MODEL_SERVICE_ENDPOINTS.filter((item) => item.available).map(
+    (item) => new URL(item.baseUrl).origin,
+  ),
+]);
 import type { HostAdapterAvailability } from './host-readiness.js';
 import { modelPresent } from '../../../../plugins/asr-local/src/model-store.js';
 export function demoReadiness(modelRoot: string): HostAdapterAvailability {
@@ -29,7 +35,7 @@ export function demoReadiness(modelRoot: string): HostAdapterAvailability {
       return (
         manifest.id === DEMO_PLUGIN_IDS.cloud &&
         permission.kind === 'network' &&
-        permission.origins.every((origin) => origin === 'https://api.deepseek.com')
+        permission.origins.every((origin) => modelOrigins.has(origin))
       );
     },
   };

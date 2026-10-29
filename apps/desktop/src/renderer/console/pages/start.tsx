@@ -1,329 +1,533 @@
-import { useEffect, useRef, useState, type JSX } from 'react';
+/**
+ * 开始页：这台机器上要办的三件事，按要办的顺序从上到下。
+ *
+ * 连接模型（在用的端点与测试、目录里的厂商、模型与 Key、保存并开始）、
+ * 我的桌宠（桌面上有没有这一只、能戳能说的 live 预览、隐藏/显示/装扮）、界面配色。
+ * 运行状态在扩展页顶上，那里才是管它的地方；这一页不加第四块。
+ *
+ * 这里没有第二个录音会话，也没有第二份历史：预览的说话入口走宿主既有的那一条 sendText。
+ * 测试通过、写进去了、真的切成在用了是三件不同的事，界面分开说。
+ */
+import { useState, type JSX } from 'react';
 
-import type { ConsoleSnapshot } from '@pet/contracts';
+import type { DemoSnapshot, ModelService } from '@pet/contracts';
 
-import { Button, Field, Section, StatusBadge } from '@pet/ui-kit';
+import { Button } from '@pet/ui-kit';
 
+import { demoBubbleText, phaseToPetState } from '../../pet/demo-status.js';
 import type { AppView } from '../app-views.js';
-import { ConsoleStatus } from '../console-status.js';
 import { COPY } from '../copy.js';
-import { hostSummary, hostRuntime, taskSummary, demoReplyMode } from '../labels.js';
-import { PetPreview } from '../pet-preview.js';
-import { SettingsRow, SettingsRows } from '../settings-shell.js';
+import { type PetPreviewMic, PetPreview } from '../pet-preview.js';
+import { SettingsSection } from '../settings-shell.js';
+import { ThemeEditor } from '../theme-editor.js';
+import { describeTest, saveMessage, type ModelConnectionState } from '../use-model-connection.js';
 import type { ApplicationState } from '../use-application.js';
 import type { DemoState } from '../use-demo.js';
+import { vendorIcon } from '../vendor-icons.js';
+
+import './start.css';
+
+type Notify = (message: string, tone: 'ok' | 'danger') => void;
+
+/**
+ * 录不了音到底为什么：按报上来的状态排序说一句话，不写内部口吻。
+ * 读不到状态、被暂停、没配识别模型是三件不同的事，别说成同一件。
+ */
+function micUnavailable(snapshot: DemoSnapshot | null): string | null {
+  if (snapshot === null) {
+    return '正在读取录音状态';
+  }
+  if (snapshot.paused === true) {
+    return '桌宠已暂停，继续回应后可录音';
+  }
+  if (!snapshot.canRecord) {
+    return snapshot.settings.modelId === null ? '请先在语音输入中完成设置' : '现在还不能录音';
+  }
+  return null;
+}
+
+const FAILED = (why: string): string => `连接没有成功：${why}`;
+
+/**
+ * 标题右边的「使用向导」：让桌宠在桌面上把引导再走一遍，这个窗口自己让开位置。
+ *
+ * 引导只有一份实现，在桌宠那边；宿主成功时还会把桌宠显示出来并收起设置窗。
+ * 这里只报成功或宿主给的原因，不在设置台里演一遍本地引导，也不自己藏窗口。
+ */
+export function StartGuideAction({
+  app,
+  notify,
+}: {
+  app: ApplicationState;
+  notify: Notify;
+}): JSX.Element {
+  const [started, setStarted] = useState(false);
+
+  const replay = async (): Promise<void> => {
+    setStarted(true);
+    const outcome = await app.startGuide();
+    setStarted(false);
+    notify(
+      outcome.ok ? '引导已经在桌宠那边开始。' : FAILED(outcome.error ?? '未知原因'),
+      outcome.ok ? 'ok' : 'danger',
+    );
+  };
+
+  return (
+    <Button
+      size="small"
+      variant="quiet"
+      title="由桌宠在桌面上再走一遍"
+      disabled={!app.available || app.saving || started}
+      data-testid="start-guide"
+      onClick={() => void replay()}
+    >
+      使用向导
+    </Button>
+  );
+}
 
 export interface StartPageProps {
   app: ApplicationState;
   demo: DemoState;
-  /** 宿主运行状态那一路：读失败只收起这一块，不牵连上面两块。 */
-  snapshot: ConsoleSnapshot | null;
-  loading: boolean;
-  error: string | null;
-  available: boolean;
-  onRetry: () => void;
-  onRequestStopAll: () => void;
-  stopping: boolean;
-  notify: (message: string, tone: 'ok' | 'danger') => void;
+  models: ModelConnectionState;
+  notify: Notify;
   goToView: (view: AppView) => void;
+  /** 「管理模型扩展」：模型目录由扩展提供，这一句只跳到真实的扩展入口。 */
+  onOpenPlugins: () => void;
 }
 
-/**
- * 开始页：现在能不能回话、要不要接自己的 Key、桌面上是哪一只。
- *
- * 这里没有开发清单，也没有第二个聊天入口：能说的只有宿主真的报上来的状态。
- * 没有 Key 也能正常使用——回复来源默认是离线脚本演示，接 DeepSeek 是可选项。
- */
 export function StartPage({
   app,
   demo,
-  snapshot,
-  loading,
-  error,
-  available,
-  onRetry,
-  onRequestStopAll,
-  stopping,
+  models,
   notify,
   goToView,
+  onOpenPlugins,
 }: StartPageProps): JSX.Element {
-  const [value, setValue] = useState('');
-  const [savingKey, setSavingKey] = useState(false);
+  const desktop = app.snapshot?.desktop ?? null;
+  const ready = desktop !== null && desktop.available;
+  const shown = desktop !== null && desktop.available && desktop.shown;
+  const [sending, setSending] = useState(false);
 
-  const saveKey = async (): Promise<void> => {
-    const key = value.trim();
-    if (key === '') {
-      notify('没有保存：Key 是空的。', 'danger');
-      return;
+  /*
+   * 录音入口完全转给预览：状态、剩余秒数与三个动作都来自全场那一个录音所有者，
+   * 这一页不新开 useDemo、不自己申请麦克风；没准备好时给的是宿主报出来的那句话。
+   */
+  const mic: PetPreviewMic | undefined = demo.available
+    ? {
+        canRecord: demo.snapshot?.canRecord === true,
+        recording: demo.recording !== null,
+        secondsLeft: demo.left,
+        secondsLimit: demo.snapshot?.maxRecordingSeconds ?? null,
+        unavailable: micUnavailable(demo.snapshot),
+        start: () => {
+          void demo.startRecording();
+        },
+        end: () => {
+          void demo.endRecording();
+        },
+        cancel: () => {
+          void demo.cancelRecording();
+        },
+      }
+    : undefined;
+
+  const setVisible = async (next: boolean): Promise<void> => {
+    const outcome = await app.save({ visible: next });
+    if (!outcome.ok) {
+      notify(FAILED(outcome.error ?? '未知原因'), 'danger');
     }
-    setSavingKey(true);
-    const outcome = await demo.saveProviderKey(key);
-    setSavingKey(false);
-    if (outcome.ok) {
-      setValue('');
-      notify('Key 已存到本机；连接结果会在实际对话里显示。', 'ok');
-    } else {
-      notify(`Key 没有存进去：${outcome.error ?? '未知原因'}`, 'danger');
+  };
+
+  /** 发出去的那句话走宿主既有的 demo 会话；接受了才由 PetComposer 清草稿。 */
+  const onSend = async (text: string): Promise<boolean> => {
+    setSending(true);
+    const outcome = await demo.sendText(text);
+    setSending(false);
+    if (!outcome.ok) {
+      notify(FAILED(outcome.error ?? '未知原因'), 'danger');
     }
+    return outcome.ok;
   };
-
-  const removeKey = async (): Promise<void> => {
-    setSavingKey(true);
-    const outcome = await demo.removeProviderKey();
-    setSavingKey(false);
-    notify(
-      outcome.ok ? '已移除本机的 Key。' : `移除失败：${outcome.error ?? '未知原因'}`,
-      outcome.ok ? 'ok' : 'danger',
-    );
-  };
-
-  const replayGuide = async (): Promise<void> => {
-    const outcome = await app.startGuide();
-    notify(
-      outcome.ok ? '引导已经在桌宠那边开始。' : `引导没能开始：${outcome.error ?? '未知原因'}`,
-      outcome.ok ? 'ok' : 'danger',
-    );
-  };
-
-  const demoSnapshot = demo.snapshot;
-  const mode = demoSnapshot?.settings.replyMode ?? 'demo';
-  const model =
-    demoSnapshot === null
-      ? null
-      : (demoSnapshot.models.find((item) => item.id === demoSnapshot.settings.modelId) ?? null);
 
   return (
     <>
-      <Section
-        title="它现在怎么回话"
-        description="没有 Key 也能用：离线脚本演示不需要网络。接真实 DeepSeek 是可选项。"
+      <ModelSection models={models} onOpenPlugins={onOpenPlugins} />
+
+      <SettingsSection
+        title="我的桌宠"
+        /* 只说宿主报上来的那一句：读不到显示状态就是「未就绪」，不猜它在不在桌上。 */
+        state={
+          !ready
+            ? { text: '桌宠未就绪', tone: 'off' }
+            : shown
+              ? { text: '在桌面上', tone: 'on' }
+              : { text: '已隐藏', tone: 'off' }
+        }
       >
-        <SettingsRows>
-          <SettingsRow
-            label="回复来源"
-            description={demoSnapshot === null ? '还没读到设置。' : demoReplyMode(mode)}
+        <PetPreview
+          values={app.values}
+          agent={app.snapshot?.agent ?? null}
+          state={demo.snapshot === null ? null : phaseToPetState(demo.snapshot.phase)}
+          bubble={demo.snapshot === null ? null : demoBubbleText(demo.snapshot)}
+          interact={app.available ? app.interact : undefined}
+          mic={mic}
+          onOpenVoiceSettings={() => goToView('voice')}
+          onOpenDress={() => goToView('appearance')}
+          composer={
+            demo.available
+              ? { canSend: demo.snapshot?.canSend === true, sending, onSend }
+              : undefined
+          }
+        />
+        <div className="start-petline">
+          <Button
+            size="small"
+            disabled={!app.available || app.saving || !shown}
+            data-testid="pet-hide"
+            onClick={() => void setVisible(false)}
           >
-            <Button
-              size="small"
-              variant="quiet"
-              data-testid="start-go-voice"
-              onClick={() => goToView('voice')}
-            >
-              改
-            </Button>
-          </SettingsRow>
-
-          <SettingsRow
-            label="本机识别"
-            description={
-              demoSnapshot === null
-                ? '还没读到识别设置。'
-                : model === null
-                  ? '还没选识别模型：文字对话不需要它。'
-                  : model.cached
-                    ? `${model.name} · 已在本机`
-                    : `${model.name} · 还没有下载`
-            }
+            在桌面隐藏
+          </Button>
+          <Button
+            size="small"
+            disabled={!app.available || app.saving || shown}
+            data-testid="pet-show"
+            onClick={() => void setVisible(true)}
           >
-            <Button size="small" variant="quiet" onClick={() => goToView('voice')}>
-              {COPY.voiceEntry}
-            </Button>
-          </SettingsRow>
-
-          <SettingsRow
-            label="DeepSeek Key"
-            labelFor="group"
-            wide
-            description="Key 只保存在本机；能不能连通，要在实际对话后才知道。"
+            在桌面显示
+          </Button>
+          <Button
+            size="small"
+            variant="primary"
+            disabled={!app.available}
+            data-testid="pet-dress"
+            onClick={() => goToView('appearance')}
           >
-            {demoSnapshot === null ? null : (
-              <div className="demo-key">
-                <span className="config-toolbar__state" role="status">
-                  {demoSnapshot.keyConfigured
-                    ? '本机已存有 Key，能不能连通还没验证。'
-                    : demoSnapshot.keyAvailable
-                      ? '还没有 Key。'
-                      : '本机凭据存储不可用：现在存不进去。'}
-                </span>
-                <Field label="API Key" description="粘贴 DeepSeek 的 Key，保存后不再显示。">
-                  {({ inputId, describedBy }) => (
-                    <>
-                      <input
-                        id={inputId}
-                        className="pk-input"
-                        type="password"
-                        autoComplete="off"
-                        spellCheck={false}
-                        aria-describedby={describedBy}
-                        value={value}
-                        disabled={!demoSnapshot.keyAvailable || savingKey}
-                        data-testid="demo-key-input"
-                        onChange={(event) => setValue(event.target.value)}
-                      />
-                      {/* 两个按钮同一行；容器窄时各自折行，不把输入框挤窄。 */}
-                      <div className="demo-key__actions">
-                        <Button
-                          variant="primary"
-                          size="small"
-                          disabled={!demoSnapshot.keyAvailable || savingKey || value.trim() === ''}
-                          data-testid="demo-key-save"
-                          onClick={() => void saveKey()}
-                        >
-                          {savingKey ? '正在保存…' : '存到本机'}
-                        </Button>
-                        <Button
-                          size="small"
-                          disabled={!demoSnapshot.keyConfigured || savingKey}
-                          data-testid="demo-key-remove"
-                          onClick={() => void removeKey()}
-                        >
-                          移除本机 Key
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </Field>
-              </div>
-            )}
-          </SettingsRow>
-        </SettingsRows>
-      </Section>
-
-      <div className="pk-split">
-        <div className="pk-split__main">
-          <Section
-            title="桌面上就是这一只"
-            description="在装扮页改形态、配色和大小，保存后桌面就是这个样子。"
-          >
-            {app.available ? (
-              <SettingsRows>
-                <SettingsRow
-                  label="上手引导"
-                  description="引导在桌宠的气泡里一步一步走，这里只是重放一次。"
-                >
-                  <Button
-                    size="small"
-                    variant="quiet"
-                    disabled={app.saving}
-                    data-testid="start-guide"
-                    onClick={() => void replayGuide()}
-                  >
-                    重新播放
-                  </Button>
-                </SettingsRow>
-                <SettingsRow
-                  label="想换个样子"
-                  description="形态、配色、大小与是否显示都在装扮页。"
-                >
-                  <Button size="small" variant="quiet" onClick={() => goToView('appearance')}>
-                    去装扮
-                  </Button>
-                </SettingsRow>
-              </SettingsRows>
-            ) : (
-              <p className="console-muted">{COPY.appUnavailable}</p>
-            )}
-          </Section>
+            装扮
+          </Button>
         </div>
-        <div className="pk-split__aside">
-          <PetPreview values={app.values} agent={app.snapshot?.agent ?? null} />
-        </div>
-      </div>
+      </SettingsSection>
 
-      <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
-        {snapshot === null ? null : (
-          <HostSection
-            snapshot={snapshot}
-            loading={loading}
-            onRetry={onRetry}
-            onRequestStopAll={onRequestStopAll}
-            stopping={stopping}
-          />
-        )}
-      </ConsoleStatus>
+      <ThemeEditor />
     </>
   );
 }
 
-interface HostSectionProps {
-  snapshot: ConsoleSnapshot;
-  loading: boolean;
-  onRetry: () => void;
-  onRequestStopAll: () => void;
-  stopping: boolean;
+/* ---- 连接模型 ---- */
+
+/** 芯片上的品牌标记：assets 里的 manifest 没这一家时什么都不画，名字本来就在文字里。 */
+function ChipMark({ service }: { service: string }): JSX.Element | null {
+  const src = vendorIcon(service);
+  if (src === null) {
+    return null;
+  }
+  return <img className="start-chip__mark" src={src} alt="" width={22} height={22} />;
 }
 
-/** 运行状态只报确切的计数；有空闲、有任务、有未就绪插件是三件不同的事。 */
-function HostSection({
-  snapshot,
-  loading,
-  onRetry,
-  onRequestStopAll,
-  stopping,
-}: HostSectionProps): JSX.Element {
-  const { host } = snapshot;
-  const runtime = hostRuntime(host.runtime);
-  const busy = host.runningTasks > 0 || host.pendingWork > 0;
-  const taskRef = useRef<HTMLDivElement>(null);
-  const hadStopRef = useRef(busy);
+interface ModelSectionProps {
+  models: ModelConnectionState;
+  onOpenPlugins: () => void;
+}
+
+/** 一家服务在目录里的那一（几）块平台：main 是芯片上那一家，alt 是要切过去的另一块。 */
+interface VendorGroup {
+  name: string;
+  main: ModelService;
+  alt?: ModelService;
+}
+
+/**
+ * 一个视图看完这台机器的连接：在用的端点排第一行（带测试），目录里的厂商排第二行，
+ * 选中哪家就在下面填它的模型与 Key。「保存并开始」把 Key 存进那一家自己的端点、
+ * 测一次、把它设为在用，并让暂停中的会话继续接话。
+ */
+function ModelSection({ models, onOpenPlugins }: ModelSectionProps): JSX.Element {
+  const snapshot = models.snapshot;
+  const services = snapshot?.services ?? [];
+  const active = snapshot?.active ?? null;
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [draftOf, setDraftOf] = useState<string | null>(null);
+  const [modelDraft, setModelDraft] = useState('');
+  const [keyDraft, setKeyDraft] = useState('');
+  const [saveLine, setSaveLine] = useState<string | null>(null);
+  const [saveBad, setSaveBad] = useState(false);
+  const [testLine, setTestLine] = useState<string | null>(null);
+  const [testBad, setTestBad] = useState(false);
 
   /*
-   * 任务可能在确认框打开期间自然结束，停止入口随之卸载，焦点会掉到 body。
-   * 只在"入口刚消失且焦点确实无人接管"时，把它就近交给任务行。
+   * 平台按「一家服务」归成一组：同一家在两块平台上的端点不占两个位置，
+   * 另一块用下面那句切换。所以芯片的数量是厂商数，不是端点数。
    */
-  useEffect(() => {
-    const vanished = hadStopRef.current && !busy;
-    hadStopRef.current = busy;
-    if (vanished && document.activeElement === document.body) {
-      taskRef.current?.focus();
+  const vendors = services.reduce<VendorGroup[]>((acc, item) => {
+    const found = acc.find((group) => group.name === item.service);
+    if (found === undefined) {
+      acc.push({ name: item.service, main: item });
+      return acc;
     }
-  }, [busy]);
+    if (found.main.region === 'intl' && item.region !== 'intl') {
+      found.alt = found.main;
+      found.main = item;
+    } else {
+      found.alt = item;
+    }
+    return acc;
+  }, []);
+  const picked =
+    services.find((item) => item.id === pickedId) ??
+    (active === null ? undefined : services.find((item) => item.id === active.id)) ??
+    vendors.find((group) => group.main.available)?.main ??
+    vendors[0]?.main;
+  const firstLabel = vendors[0]?.main.label ?? 'DeepSeek';
+  /** 填的就是在用的那个端点：这时 Key 留空表示沿用已保存的那一份。 */
+  const inUse = picked !== undefined && active !== null && active.id === picked.id;
+  const saved = snapshot?.endpoints.find((item) => item.id === picked?.id);
+
+  /*
+   * 换目标时在渲染里定下草稿，不等 effect：两秒一次的后台重读不能抹掉正在输入的东西，
+   * 只有换了服务或端点才重置成那一家该显示的值。
+   */
+  if (picked !== undefined && draftOf !== picked.id) {
+    const current =
+      inUse && active !== null && active.model !== '' ? active.model : picked.defaultModel;
+    setDraftOf(picked.id);
+    setModelDraft(current);
+    setKeyDraft('');
+    setSaveLine(null);
+    setTestLine(null);
+  }
+
+  const sibling =
+    picked === undefined
+      ? undefined
+      : services.find((item) => item.service === picked.service && item.region !== picked.region);
+
+  const save = async (): Promise<void> => {
+    if (picked === undefined) {
+      return;
+    }
+    const key = keyDraft.trim();
+    if (key === '' && !inUse) {
+      return;
+    }
+    const outcome = await models.saveAndStart({
+      id: picked.id,
+      model: modelDraft.trim(),
+      ...(key === '' ? {} : { key }),
+    });
+    setKeyDraft('');
+    setSaveBad(!outcome.ok);
+    setSaveLine(saveMessage(outcome, picked.id));
+  };
+
+  const runTest = async (): Promise<void> => {
+    const result = await models.testActive();
+    setTestBad(!result.ok);
+    setTestLine(describeTest(result));
+  };
+
+  const signIn = async (): Promise<void> => {
+    if (picked === undefined) {
+      return;
+    }
+    const outcome = await models.signInAndStart(picked);
+    setSaveBad(!outcome.ok);
+    setSaveLine(saveMessage(outcome, picked.id));
+  };
+
+  const openKeyPage = async (): Promise<void> => {
+    if (picked === undefined) {
+      return;
+    }
+    const outcome = await models.openServicePage(picked.id);
+    if (!outcome.ok) {
+      setSaveBad(true);
+      setSaveLine(FAILED('打不开那家服务的页面：' + (outcome.error ?? '未知原因')));
+    }
+  };
 
   return (
-    <Section
-      title="运行状态"
-      actions={
-        <button
-          type="button"
-          className="console-action"
-          data-testid="console-refresh"
-          onClick={onRetry}
-          disabled={loading}
-        >
-          {loading ? COPY.refreshing : COPY.refresh}
-        </button>
-      }
-    >
-      <div className="console-status">
-        <p className="console-lead">
-          <StatusBadge tone={runtime.tone}>{runtime.text}</StatusBadge>
-          <span>{hostSummary(host.runtime, host.installedPlugins, host.activePlugins)}</span>
+    <SettingsSection title="连接模型">
+      {!models.available ? (
+        <p className="start-note">这台机器还没有模型连接的通道，所以这里没有可填的表单。</p>
+      ) : snapshot === null ? (
+        <p className="start-note">
+          {models.loading ? COPY.loading : (models.error ?? '还没读到这台机器的模型配置。')}
         </p>
-        <div className="console-task" ref={taskRef} tabIndex={-1}>
-          <p className="console-task__text">{taskSummary(host.runningTasks, host.pendingWork)}</p>
-          {busy ? (
+      ) : (
+        <>
+          {snapshot.notice === undefined ? null : (
+            <p className="start-result is-bad" role="status">
+              {snapshot.notice}
+            </p>
+          )}
+
+          {active === null ? (
+            <p className="start-note">{`选择一家模型服务并填写它的 API Key。不确定时先选 ${firstLabel}。`}</p>
+          ) : null}
+
+          <div className="start-picker">
+            <p className="start-grouplabel">已连接的模型：</p>
+            <div className="start-chipline start-chipline--current">
+              {active === null ? (
+                <span className="start-none">暂未连接</span>
+              ) : (
+                <span className="start-chip is-on">
+                  {active.label + (active.model === '' ? '' : ' · ' + active.model)}
+                </span>
+              )}
+              <Button
+                size="small"
+                disabled={active === null || models.testing}
+                data-testid="model-test"
+                onClick={() => void runTest()}
+              >
+                {models.testing ? '正在测试…' : '测试连接'}
+              </Button>
+              {testLine === null ? null : (
+                <span className={testBad ? 'start-result is-bad' : 'start-result'}>{testLine}</span>
+              )}
+            </div>
+
+            <p className="start-grouplabel">可选择的模型：</p>
+            <div className="start-chipline">
+              {vendors.map((group) => (
+                <button
+                  key={group.name}
+                  type="button"
+                  className={group.name === picked?.service ? 'start-chip is-on' : 'start-chip'}
+                  disabled={!group.main.available}
+                  title={group.main.unavailableReason ?? group.main.label}
+                  data-testid={'model-pick-' + group.main.id}
+                  onClick={() => setPickedId(group.main.id)}
+                >
+                  <ChipMark service={group.name} />
+                  {group.main.label}
+                  {group.main.available ? null : <span className="start-chip__off">未接入</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {picked === undefined ? null : picked.auth === 'browser' ? (
+            <div className="start-signin">
+              <p className="start-note">这一家用浏览器登录自己的账号，不填 API Key。</p>
+              <div className="start-actions">
+                <Button
+                  variant="primary"
+                  disabled={models.signingIn || !picked.available}
+                  data-testid="model-signin"
+                  onClick={() => void signIn()}
+                >
+                  {models.signingIn ? '正在等待登录…' : '登录并连接'}
+                </Button>
+                {models.signingIn ? (
+                  <Button size="small" onClick={() => void models.cancelSignIn()}>
+                    取消
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <div className="start-fields">
+              <label className="start-field start-field--model">
+                <span className="start-field__label">模型</span>
+                <input
+                  className="pk-input"
+                  value={modelDraft}
+                  list="start-model-list"
+                  autoComplete="off"
+                  spellCheck={false}
+                  data-testid="model-input"
+                  onChange={(event) => setModelDraft(event.target.value)}
+                />
+              </label>
+              <label className="start-field">
+                <span className="start-field__label">{`${picked.label} 的 API Key`}</span>
+                <input
+                  className="pk-input"
+                  type="password"
+                  value={keyDraft}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={inUse ? '留空沿用已保存的 Key' : picked.keyHint}
+                  disabled={!snapshot.credentialStorageAvailable || models.saving}
+                  data-testid="key-input"
+                  onChange={(event) => setKeyDraft(event.target.value)}
+                />
+              </label>
+              <datalist id="start-model-list">
+                {picked.models.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+              <Button
+                variant="primary"
+                disabled={
+                  models.saving ||
+                  !picked.available ||
+                  modelDraft.trim() === '' ||
+                  (keyDraft.trim() === '' && !inUse)
+                }
+                data-testid="model-save"
+                onClick={() => void save()}
+              >
+                {models.saving ? '正在保存…' : '保存并开始'}
+              </Button>
+            </div>
+          )}
+
+          {picked === undefined || picked.auth === 'browser' ? null : (
+            <p className="start-note">
+              {saved?.keyConfigured
+                ? '这一家在本机已存有 Key；留空就是继续用它。'
+                : snapshot.credentialStorageAvailable
+                  ? '这一家还没有存过 Key。'
+                  : '本机凭据存储不可用：现在存不进去。'}
+            </p>
+          )}
+
+          <div className="start-links">
+            {picked === undefined ? null : (
+              <button
+                type="button"
+                className="start-link"
+                data-testid="model-getkey"
+                onClick={() => void openKeyPage()}
+              >
+                {`前往 ${picked.label} 申请 Key`}
+              </button>
+            )}
+            {sibling === undefined || picked === undefined ? null : (
+              <button
+                type="button"
+                className="start-link"
+                data-testid="model-region"
+                onClick={() => setPickedId(sibling.id)}
+              >
+                {picked.region === 'cn' ? '改用国际平台' : '改用中国大陆平台'}
+              </button>
+            )}
+            <span className="start-links__spacer" aria-hidden="true" />
+            {/* 目录由扩展提供：这句只跳到真实的扩展入口，不编任何任意 URL。 */}
             <button
               type="button"
-              className="console-action"
-              data-testid="console-stop-all"
-              aria-disabled={stopping}
-              aria-busy={stopping}
-              onClick={() => {
-                if (!stopping) {
-                  onRequestStopAll();
-                }
-              }}
+              className="start-link"
+              data-testid="model-manage"
+              onClick={onOpenPlugins}
             >
-              {stopping ? '正在停止…' : '停止全部任务'}
+              管理模型扩展
             </button>
-          ) : null}
-        </div>
-        {host.unreadyPlugins > 0 || host.pendingRestartPlugins > 0 ? (
-          <p className="console-muted">
-            {host.unreadyPlugins} 个扩展未就绪，{host.pendingRestartPlugins} 个需要重启后生效。
-          </p>
-        ) : null}
-      </div>
-    </Section>
+          </div>
+
+          {saveLine === null ? null : (
+            <p className={saveBad ? 'start-result is-bad' : 'start-result'} role="status">
+              {saveLine}
+            </p>
+          )}
+        </>
+      )}
+    </SettingsSection>
   );
 }

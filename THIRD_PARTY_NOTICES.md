@@ -26,3 +26,7 @@
 
 - Cortico 0.2.7：MIT，Copyright (c) 2026 Phantivia，发布提交 cb9ddbd685bcccba1f29905098648f46a79b3862。保留随包 LICENSE；来源 https://github.com/Pal-AI-Lab/Cortico 。此依赖不包含 Coopanion 产品代码或角色资产。
 - tsx 4.23.15：MIT，作者 privatenumber，用于 Cortico TypeScript/ESM 加载。保留随包许可；来源 https://github.com/privatenumber/tsx 。
+
+## LobeHub provider icons
+
+The settings model selector uses13 selected SVGs from @lobehub/icons-static-svg1.101.0, MIT, Copyright(c)2023LobeHub. Source: https://github.com/lobehub/lobe-icons. Exact package integrity and service mapping are in [the icon manifest](apps/desktop/src/renderer/console/vendor-icons/manifest.json); the full [MIT notice](apps/desktop/src/renderer/console/vendor-icons/LICENSE.txt) accompanies them. Provider names and marks identify their respective services. No runtime icon dependency is installed.

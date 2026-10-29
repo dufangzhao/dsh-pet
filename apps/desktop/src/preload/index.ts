@@ -1,3 +1,4 @@
+import { createModelConnectionBridge } from './model-connection-bridge.js';
 import { createApplicationBridge } from './application-bridge.js';
 import { APPLICATION_IPC } from '@pet/contracts';
 import { contextBridge, ipcRenderer } from 'electron';
@@ -159,4 +160,8 @@ contextBridge.exposeInMainWorld(
       };
     },
   ),
+);
+contextBridge.exposeInMainWorld(
+  'petModels',
+  createModelConnectionBridge((channel, ...args) => ipcRenderer.invoke(channel, ...args)),
 );

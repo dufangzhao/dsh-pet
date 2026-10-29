@@ -317,3 +317,68 @@ describe('credential broker shutdown', () => {
     expect(write).not.toHaveBeenCalled();
   });
 });
+
+describe('managed credential renewal', () => {
+  it('renews the encrypted record once for concurrent borrowers and delivers only the access token', async () => {
+    const { broker, cipher } = fixture();
+    await broker.setSecret(
+      a,
+      'oauth',
+      JSON.stringify({ access: 'expired', refresh: 'old-refresh', expires: 0 }),
+    );
+    broker.registerManagedSecret(a, 'oauth', async (stored) => {
+      const current = JSON.parse(stored);
+      return current.expires
+        ? { value: current.access }
+        : {
+            value: 'new-access',
+            stored: JSON.stringify({
+              access: 'new-access',
+              refresh: 'rotated-refresh',
+              expires: 1,
+            }),
+            sensitiveValues: ['rotated-refresh'],
+          };
+    });
+    const client = broker.issueClient(a, ['oauth']);
+    const borrowed = await Promise.all([
+      client.withSecret('oauth', task(), async (value) => value),
+      client.withSecret('oauth', task(), async (value) => value),
+    ]);
+    expect(borrowed).toEqual(['new-access', 'new-access']);
+    expect(cipher.encrypt).toHaveBeenCalledTimes(2);
+    expect(broker.redactor.contains('rotated-refresh')).toBe(true);
+    await expect(
+      broker.issueClient(b, ['oauth']).withSecret('oauth', task(), async (value) => value),
+    ).rejects.toMatchObject({ code: 'not-ready' });
+  });
+  it('does not renew a denied credential and preserves a newer manual replacement during renewal', async () => {
+    const denied = fixture(async () => null);
+    await denied.broker.setSecret(a, 'oauth', 'stored');
+    const renew = vi.fn(async () => ({ value: 'not-delivered' }));
+    denied.broker.registerManagedSecret(a, 'oauth', renew);
+    await expect(
+      denied.broker.issueClient(a, ['oauth']).withSecret('oauth', task(), async (value) => value),
+    ).rejects.toMatchObject({ code: 'permission-denied' });
+    expect(renew).not.toHaveBeenCalled();
+    const { broker } = fixture();
+    await broker.setSecret(a, 'oauth', 'old');
+    const entered = deferred<void>(),
+      release = deferred<void>();
+    const remove = broker.registerManagedSecret(a, 'oauth', async () => {
+      entered.resolve();
+      await release.promise;
+      return { value: 'stale-access', stored: 'stale-record' };
+    });
+    const client = broker.issueClient(a, ['oauth']);
+    const old = client.withSecret('oauth', task(), async (value) => value);
+    const rejection = expect(old).rejects.toMatchObject({ code: 'cancelled' });
+    await entered.promise;
+    const replacement = broker.setSecret(a, 'oauth', 'fresh-manual');
+    release.resolve();
+    await rejection;
+    await replacement;
+    remove();
+    expect(await client.withSecret('oauth', task(), async (value) => value)).toBe('fresh-manual');
+  });
+});

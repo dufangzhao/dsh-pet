@@ -1,3 +1,7 @@
+import { ModelOAuth } from './model-oauth.js';
+import { ModelConnectionController } from './model-connection-controller.js';
+import { handleModelConnectionRequest } from './model-connection-request.js';
+import { MODEL_CONNECTION_IPC } from '@pet/contracts';
 import { ApplicationController } from './application-controller.js';
 import { handleApplicationRequest } from './application-request.js';
 import { APPLICATION_IPC, APPLICATION_DEFAULTS, type ApplicationPreferences } from '@pet/contracts';
@@ -7,6 +11,7 @@ import {
   ipcMain,
   session,
   safeStorage,
+  shell,
   type IpcMainInvokeEvent,
 } from 'electron';
 import { mkdirSync } from 'node:fs';
@@ -68,6 +73,7 @@ let requests = 0;
 let host: DesktopHost | undefined;
 let demo: DemoController | undefined;
 let application: ApplicationController | undefined;
+let models: ModelConnectionController | undefined;
 let preferences: Readonly<ApplicationPreferences> = APPLICATION_DEFAULTS;
 let tray: ReturnType<typeof createDemoTray> | undefined;
 let hostStarting: Promise<DesktopHost> | undefined;
@@ -83,6 +89,7 @@ function quitWithCode(code: number): void {
   ipcMain.removeHandler(CONSOLE_IPC.inspectConfig);
   ipcMain.removeHandler(CONSOLE_IPC.saveConfig);
   ipcMain.removeHandler(CONSOLE_IPC.pluginAction);
+  for (const channel of Object.values(MODEL_CONNECTION_IPC)) ipcMain.removeHandler(channel);
   for (const channel of Object.values(APPLICATION_IPC))
     if (channel !== APPLICATION_IPC.changed) ipcMain.removeHandler(channel);
   for (const channel of Object.values(DEMO_IPC))
@@ -98,6 +105,7 @@ function quitWithCode(code: number): void {
     ipcMain.removeHandler(channel);
   tray?.destroy();
   tray = undefined;
+  models?.close();
   application?.close();
   demo?.close();
   settings.close();
@@ -211,19 +219,54 @@ const startup = app
         syncAvatar();
       },
     );
+    application.desktopStatus = () => {
+      const avatar = host?.manager.get({ pluginId: DEMO_PLUGIN_IDS.avatar, instanceId: 'default' });
+      const available =
+        !!window &&
+        !window.isDestroyed() &&
+        !!avatar &&
+        avatar.origin === 'builtin' &&
+        host!.manager.isActive(avatar.owner);
+      return { available, shown: available && window!.isVisible() };
+    };
     for (const [action, channel] of Object.entries(APPLICATION_IPC))
       if (action !== 'changed') {
-        ipcMain.handle(channel, (event, ...args: unknown[]) => {
+        ipcMain.handle(channel, async (event, ...args: unknown[]) => {
           const source = windowSource(event, settings.current, consoleUrl);
-          return handleApplicationRequest(
+          const result = await handleApplicationRequest(
             isTrustedPetSource(source) ? source : windowSource(event, window, expectedUrl),
             action,
             args,
             application!,
           );
+          if (result.ok && action === 'guide') {
+            demo?.onConsoleClosed();
+            settings.current?.hide();
+          }
+          return result;
         });
       }
 
+    models = new ModelConnectionController(host, application, notifyDemo, (url) =>
+      shell.openExternal(url),
+    );
+    if (host.credentials)
+      models.auth = await ModelOAuth.create(
+        host.credentials,
+        app.getPath('userData'),
+        notifyDemo,
+        (url) => shell.openExternal(url),
+      );
+    await models.restore();
+    for (const [action, channel] of Object.entries(MODEL_CONNECTION_IPC))
+      ipcMain.handle(channel, (event, ...args: unknown[]) =>
+        handleModelConnectionRequest(
+          windowSource(event, settings.current, consoleUrl),
+          action,
+          args,
+          models!,
+        ),
+      );
     installDemoMediaPermission(session.defaultSession, settings, consoleUrl, demo);
     const acceptanceTrace: Array<Record<string, unknown>> | undefined = process.argv.some(
       (arg) => arg === '--demo-acceptance' || arg.startsWith('--demo-acceptance='),

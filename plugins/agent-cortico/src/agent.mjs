@@ -115,6 +115,7 @@ export async function activateAgent(ctx) {
     promptError,
     segments: segments(),
     busy: active !== null,
+    paused: core?.bus.isPaused() ?? false,
     cursor: core?.store.latestCursor() ?? 0,
   });
   const readProfile = async (task) => {
@@ -290,8 +291,25 @@ export async function activateAgent(ctx) {
             : 'Offline scripted demo: message received, ' + current.data.userName + '.';
         return generation('script-' + crypto.randomUUID(), 'pet_say', { text: response });
       }
+      const origins = (options.context ?? []).flatMap((entry) => {
+        const origin = entry.context?.origin;
+        return entry.item?.type === 'reasoning' && entry.item.id && origin
+          ? [
+              {
+                id: entry.item.id,
+                origin: {
+                  instance: origin.instance,
+                  module: origin.module,
+                  model: origin.model,
+                  compatibilityDomain: origin.compatibilityDomain,
+                },
+              },
+            ]
+          : [];
+      });
       const used = await ctx.host.capabilities.invoke(turn.task, 'llm.responses@1', 'respond', {
         request: json(request),
+        ...(origins.length ? { origins: json(origins) } : {}),
       });
       const value = used.ok ? object(used.value) : null;
       if (!value || value.errorCode || !object(value.response) || !Array.isArray(value.attempts))
@@ -377,6 +395,13 @@ export async function activateAgent(ctx) {
       return { cursor: 0, errorCode: null };
     },
 
+    run: async (_task, input) => {
+      const request = object(input);
+      if (!request || !['pause', 'resume'].includes(request.action))
+        return { errorCode: 'invalid-input' };
+      core.bus.setPaused(request.action === 'pause');
+      return state();
+    },
     reload: async (task) => {
       await applyProfile(await readProfile(task));
       return state();
@@ -475,6 +500,8 @@ export async function activateAgent(ctx) {
         if (typeof model !== 'string')
           return { errorCode: described.ok ? 'not-ready' : described.error.code };
         cfg.providers.desktop.spec.model = model;
+        const baseUrl = described.ok ? object(described.value)?.baseUrl : null;
+        if (typeof baseUrl === 'string') cfg.providers.desktop.baseUrl = baseUrl;
       }
       await applyProfile(await readProfile(task));
       if (promptState === 'error') return { errorCode: 'unavailable' };

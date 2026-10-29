@@ -168,6 +168,7 @@ export interface ApplicationHistoryPage {
   readonly more: boolean;
 }
 export interface ApplicationSnapshot {
+  readonly desktop?: { readonly available: boolean; readonly shown: boolean };
   readonly historyBefore?: number | null;
   readonly historyHasEarlier?: boolean;
   readonly version: 1;

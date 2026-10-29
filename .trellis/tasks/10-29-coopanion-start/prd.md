@@ -1,0 +1,11 @@
+# Coopanion Start column reproduction
+
+User direction: reproduce Coopanion settings interface and functionality step by step, one column at a time, preserving the existing DSH-style plugin substrate. No independent redesign. This task is the first column: shared shell styling needed for it and Start only; later columns retain working current implementation until their own passes.
+
+Reference authority: current local Coopanion package0.2.10 source (console/index.ts, features/home/index.ts/home.css/model.ts/strings.ts, companion.css, base UI/theme and rail). README start-zh.png is visual evidence with v0.1.19 content, not the current exact order; current source wins where different. Do not change the reference repository or operator installation/data, copy its product implementation/assets into our product, or start paid model calls during development.
+
+Current first-column order: heading 开始 + 使用向导; 连接模型 (current connection and test, service picker, model/Key/save, account/platform/help/manual links and actual status); 我的桌宠 (actual shown/hidden pill beside title, live preview above hide/show/dress controls); 界面配色. Sidebar width248, typography, section rhythm, muted palette, pills and rounded controls follow reference; dynamic page contributions and existing role/data/permission boundaries remain authoritative.
+
+Acceptance: real saved model configuration and test results are distinct, no credential exposure or fabricated connection; display/hide updates actual native window and preview remains visible; dress link navigates existing appearance plugin; guide uses current pet flow; themes persist via current theme mechanism. No dead button/new fake service. Necessary service/backend gaps are implemented in main/plugin adapters, not local UI state. Broader service sign-in/parity gaps must be stated precisely in the per-column feature map rather than claimed complete.
+
+Frontend DeepSeek max; parent backend/integration. No libraries/styles invented for a new aesthetic. Meaningful adapter/action tests, project checks and actual reference/product screenshots at equal viewports, then normal-profile fresh startup with preserved user data. Commit locally; no push. Stop this column for user review before starting the next column.

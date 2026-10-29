@@ -6,6 +6,7 @@ vi.mock('cortico/core/config.ts', () => ({ CORE_DEFAULTS: {} }));
 vi.mock('cortico/core/core.ts', () => ({
   Core: class {
     constructor(_loaded, deps) {
+      this.bus = { isPaused: () => false, setPaused: () => {} };
       this.persona = deps.persona;
       this.world = deps.worlds[0];
       this.store = { latestCursor: () => 0, range: () => [] };

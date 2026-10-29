@@ -23,13 +23,14 @@ import { PermissionsPage } from './pages/permissions.js';
 import { PersonaPage } from './pages/persona.js';
 import { PluginConfigPanel } from './pages/plugin-config.js';
 import { PluginsPage } from './pages/plugins.js';
-import { StartPage } from './pages/start.js';
+import { StartGuideAction, StartPage } from './pages/start.js';
 import { VoicePage } from './pages/voice.js';
 import { SettingsShell } from './settings-shell.js';
 import { THEMES, themeAriaLabel, themeLabel, type Theme } from './theme.js';
 import { useApplication } from './use-application.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { useDemo } from './use-demo.js';
+import { useModelConnection } from './use-model-connection.js';
 import { actionLabel, usePluginActions } from './use-plugin-actions.js';
 import { useSecurity } from './use-security.js';
 import { useStopAll } from './use-stop-all.js';
@@ -130,6 +131,7 @@ export function ConsoleApp(): JSX.Element {
   );
 
   const demoState = useDemo({ notify });
+  const models = useModelConnection();
 
   /*
    * 安全写操作返回两份真实快照：先都采用，再由调用方判断 operationError。
@@ -293,10 +295,27 @@ export function ConsoleApp(): JSX.Element {
         selected={current}
         onSelect={select}
         brand={COPY.appName}
+        actions={view === 'start' ? <StartGuideAction app={app} notify={notify} /> : undefined}
         title={configuring?.name ?? page?.title ?? RECOVERY_TITLES[current] ?? COPY.appName}
-        summary={page === null ? RECOVERY_SUMMARY[current] : VIEW_SUMMARY[view ?? 'generic']}
+        /* 空字符串＝这一页不写整页说明：开始页的句子在「连接模型」那一节里。 */
+        summary={
+          (page === null ? RECOVERY_SUMMARY[current] : (VIEW_SUMMARY[view ?? 'generic'] ?? '')) ||
+          undefined
+        }
         notice={notice}
-        footer={<ThemePicker theme={theme} onChange={setTheme} />}
+        footer={
+          <>
+            <RunToggle
+              ready={app.snapshot?.agent.state === 'ready'}
+              paused={models.snapshot?.paused ?? false}
+              busy={models.pausing}
+              onToggle={(next) => {
+                void models.setPaused(next);
+              }}
+            />
+            <ThemePicker theme={theme} onChange={setTheme} />
+          </>
+        }
       >
         {renderBody()}
       </SettingsShell>
@@ -383,20 +402,10 @@ export function ConsoleApp(): JSX.Element {
             <StartPage
               app={app}
               demo={demoState}
-              snapshot={shared.snapshot}
-              loading={shared.loading}
-              error={shared.error}
-              available={shared.available}
-              onRetry={shared.onRetry}
-              stopping={stopAll.busy}
-              onRequestStopAll={() => {
-                // 请求进行中重复点击不重复开框。
-                if (!stopAll.busy) {
-                  setConfirming(true);
-                }
-              }}
+              models={models}
               notify={notify}
               goToView={goToView}
+              onOpenPlugins={() => select('plugins')}
             />
           );
         case 'persona':
@@ -459,12 +468,97 @@ export function ConsoleApp(): JSX.Element {
             onOpenPermissions={() => select('permissions')}
             pending={pluginActions.pending}
             onAction={requestPluginAction}
+            stopping={stopAll.busy}
+            onRequestStopAll={() => {
+              // 请求进行中重复点击不重复开框。
+              if (!stopAll.busy) {
+                setConfirming(true);
+              }
+            }}
           />
         ) : (
           configPanel(configuring.owner, closeConfig)
         );
     }
   }
+}
+
+/**
+ * 这一栏要说的话：桌宠在不在跑决定能不能按，paused 决定按下去是暂停还是继续。
+ *
+ * 可用性取代理状态（Core 的离线演示脚本也在跑，也真的可暂停），
+ * 不以"接了哪家模型"为条件；桌宠没启动时按不了，也要把原因写在字面上。
+ */
+export function runState(ready: boolean, paused: boolean): RunState {
+  if (!ready) {
+    return {
+      status: '桌宠未启动',
+      action: '暂停回应',
+      hint: '桌宠未启动，现在没有可暂停的回应',
+      enabled: false,
+    };
+  }
+  return paused
+    ? { status: '已暂停', action: '继续回应', hint: '回应已暂停：点这里继续', enabled: true }
+    : { status: '运行中', action: '暂停回应', hint: '正在回应：点这里暂停', enabled: true };
+}
+
+export interface RunState {
+  /** 状态那一行的词。 */
+  status: string;
+  /** 按钮上的动作词。 */
+  action: string;
+  /** 悬停与读屏用的完整一句。 */
+  hint: string;
+  enabled: boolean;
+}
+
+/**
+ * 侧栏底部的回应开关，常驻。暂停与继续说的是宿主那条运行总线，
+ * paused 读模型连接快照，不在这份界面里另记一次。
+ */
+function RunToggle({
+  ready,
+  paused,
+  busy,
+  onToggle,
+}: {
+  ready: boolean;
+  paused: boolean;
+  busy: boolean;
+  onToggle: (next: boolean) => void;
+}): JSX.Element {
+  const state = runState(ready, paused);
+  return (
+    <div className="console-run">
+      <span
+        className="console-run__state"
+        data-state={ready ? (paused ? 'paused' : 'running') : 'offline'}
+      >
+        {state.status}
+      </span>
+      <button
+        type="button"
+        className="console-run__toggle"
+        aria-pressed={ready ? paused : undefined}
+        aria-label={state.hint}
+        title={state.hint}
+        disabled={!state.enabled || busy}
+        data-testid="model-pause"
+        onClick={() => onToggle(!paused)}
+      >
+        {/* 折叠到 72px 时只剩这枚图标：它在按下去之前就说清了下一步是暂停还是继续。 */}
+        <svg className="console-run__icon" viewBox="0 0 24 24" aria-hidden="true">
+          {ready && paused ? (
+            <path d="M8 5.5 18 12 8 18.5Z" fill="currentColor" stroke="none" />
+          ) : (
+            <path d="M9.5 5.5v13M14.5 5.5v13" strokeLinecap="round" />
+          )}
+        </svg>
+        <span className="console-run__text">{state.action}</span>
+      </button>
+    </div>
+  );
 }
 
 /**

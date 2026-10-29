@@ -1,27 +1,41 @@
 /**
- * 设置台外壳：导航、页面骨架与对齐行。
+ * 设置台外壳：可折叠侧栏、页面骨架、分组与对齐行。
  *
  * 外壳不固定任何页面清单，也不认识「人设」「语音输入」这些具体入口：
  * 入口数组、当前项、选择回调与插槽内容都由父级给。外部页面启用、停用或消失时
  * 只改父级给的数组，这里跟着走。
  *
- * 分组继续用 @pet/ui-kit 的 Section；行（SettingsRow）只补它在设置台里缺的那件事：
- * 标签在左轨，值与控件右端对齐到同一条 260px 轨，行间用细线而不是卡片。
+ * 侧栏展开 248px、折叠 72px。折叠后每项只剩一枚线性图标：完整名称仍然是按钮里的文字，
+ * 读屏与悬停提示都拿得到。折叠状态记在本机，下次打开还是这样。
+ *
+ * 分组沿用 @pet/ui-kit 的 Section 节奏；外壳自己画的那一段（SettingsSection）只多
+ * 它需要的一件事：标题右边挂着真实状态。行（SettingsRow）补的是设置台里缺的那件事：
+ * 标签在左轨，值与控件右端对齐到同一条轨，行间用细线而不是卡片。
  */
 import './settings-shell.css';
 
-import { useId, useRef, type JSX, type ReactNode } from 'react';
+import { useCallback, useId, useRef, useState, type JSX, type ReactNode } from 'react';
 
 import type { FieldControl } from '@pet/ui-kit';
+
+import { NavIcon, type SettingsNavIcon } from './icons.js';
 
 const SIDEBAR_LABEL = '设置';
 const NAV_LABEL = '设置页导航';
 const SKIP_LABEL = '跳到主要内容';
+const RAIL_COLLAPSE_LABEL = '收起侧栏';
+const RAIL_EXPAND_LABEL = '展开侧栏';
+const RAIL_STORAGE_KEY = 'pet.console.rail';
 
 export interface SettingsNavItem {
   /** 父级的入口标识；外壳只把它原样回传给 onSelect。 */
   id: string;
   label: string;
+  /**
+   * 折叠侧栏上画的那一枚图标。语义名由父级按页面给（内置视图、恢复入口各有其名），
+   * 外部插件页给不出来就用通用格子——外壳不认识具体页面，也不替它编一个含义。
+   */
+  icon?: SettingsNavIcon | undefined;
   /** 恢复类入口（扩展、关于）：仍然可达，但不与日常入口抢视觉重心。 */
   quiet?: boolean | undefined;
 }
@@ -36,7 +50,9 @@ export interface SettingsShellProps {
   title: string;
   /** 标题下的一句说明。 */
   summary?: string | undefined;
-  /** 标题区的补充：状态行、贴着整页的低强调操作等。 */
+  /** 标题右边整页级的低强调操作（例如「使用向导」），与标题同一行。 */
+  actions?: ReactNode;
+  /** 标题区的补充：状态行、贴着整页的说明等。 */
   header?: ReactNode;
   /** 跨页提示条，停在内容区顶部；没有内容时连容器一起不出现。 */
   notice?: ReactNode;
@@ -56,23 +72,56 @@ export function SettingsShell({
   brand,
   title,
   summary,
+  actions,
   header,
   notice,
   footer,
   children,
 }: SettingsShellProps): JSX.Element {
   const mainRef = useRef<HTMLElement>(null);
+  const [collapsed, setCollapsed] = useState<boolean>(readStoredRail);
   const everyday = items.filter((item) => item.quiet !== true);
   const recovery = items.filter((item) => item.quiet === true);
 
+  const toggleRail = useCallback((): void => {
+    const next = !collapsed;
+    // 先写存储再改状态：写失败只影响下次启动的默认值，当前这一次要立刻生效。
+    storeRailCollapsed(next);
+    setCollapsed(next);
+  }, [collapsed]);
+
   return (
-    <div className="pk-settings">
+    <div className="pk-settings" data-rail={collapsed ? 'collapsed' : 'open'}>
       <button type="button" className="pk-settings__skip" onClick={() => mainRef.current?.focus()}>
         {SKIP_LABEL}
       </button>
 
       <aside className="pk-settings__sidebar" aria-label={SIDEBAR_LABEL}>
-        <p className="pk-settings__brand">{brand}</p>
+        <div className="pk-settings__brand-row">
+          <p className="pk-settings__brand">{brand}</p>
+          <button
+            type="button"
+            className="pk-settings__rail-toggle"
+            aria-label={collapsed ? RAIL_EXPAND_LABEL : RAIL_COLLAPSE_LABEL}
+            aria-expanded={!collapsed}
+            onClick={toggleRail}
+          >
+            {/* 折叠后只剩这个箭头：箭头与文字在同一个按钮里，读屏拿到的是完整名称。 */}
+            <svg
+              className="pk-settings__rail-chevron"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M15 5 8 12l7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="pk-settings__rail-text">
+              {collapsed ? RAIL_EXPAND_LABEL : RAIL_COLLAPSE_LABEL}
+            </span>
+          </button>
+        </div>
+
         <nav className="pk-settings__nav" aria-label={NAV_LABEL}>
           <ul className="pk-settings__list">
             {everyday.map((item) => (
@@ -98,7 +147,10 @@ export function SettingsShell({
         {notice === undefined ? null : <div className="pk-settings__notice">{notice}</div>}
         <div className="pk-settings__pane">
           <div className="pk-settings__header">
-            <h1 className="pk-settings__title">{title}</h1>
+            <div className="pk-settings__title-row">
+              <h1 className="pk-settings__title">{title}</h1>
+              {actions === undefined ? null : <div className="pk-settings__actions">{actions}</div>}
+            </div>
             {summary === undefined ? null : <p className="pk-settings__summary">{summary}</p>}
             {header === undefined ? null : (
               <div className="pk-settings__header-extra">{header}</div>
@@ -124,12 +176,31 @@ function NavButton({
     <button
       type="button"
       className="pk-settings__nav-button"
-      aria-current={item.id === selected ? 'page' : undefined}
+      title={item.label}
       onClick={() => onSelect(item.id)}
+      aria-current={item.id === selected ? 'page' : undefined}
     >
-      {item.label}
+      <NavIcon icon={item.icon} className="pk-settings__nav-icon" />
+      <span className="pk-settings__nav-text">{item.label}</span>
     </button>
   );
+}
+
+/** 存储不可用时按展开处理：折叠只是省地方的偏好，不该让界面打不开。 */
+function readStoredRail(): boolean {
+  try {
+    return localStorage.getItem(RAIL_STORAGE_KEY) === 'collapsed';
+  } catch {
+    return false;
+  }
+}
+
+function storeRailCollapsed(collapsed: boolean): void {
+  try {
+    localStorage.setItem(RAIL_STORAGE_KEY, collapsed ? 'collapsed' : 'open');
+  } catch {
+    // 存不下就这一次不记住，当前窗口照样折叠。
+  }
 }
 
 export interface SettingsRowsProps {
@@ -242,5 +313,50 @@ export function SettingsRow({
       </div>
       <div className="pk-row__value">{control}</div>
     </div>
+  );
+}
+
+/** 分组标题右边那一枚状态的颜色。 */
+export type SettingsPillTone = 'neutral' | 'on' | 'off';
+
+export interface SettingsSectionProps {
+  title: string;
+  /** 标题右边的状态；没有真实状态时不传，外壳不猜。 */
+  state?: { text: string; tone: SettingsPillTone } | undefined;
+  description?: string | undefined;
+  /** 标题同一行右侧的操作。 */
+  actions?: ReactNode;
+  children: ReactNode;
+}
+
+/**
+ * 设置台里的分组：一条上分隔线、一个标题、一句说明，然后才是内容。
+ *
+ * ui-kit 的 Section 标题只能是字符串，而这里的标题右边常年挂着真实状态
+ * （在桌面上、已连接），所以外壳自己画这一段；节奏与 Section 用同一套量度。
+ */
+export function SettingsSection({
+  title,
+  state,
+  description,
+  actions,
+  children,
+}: SettingsSectionProps): JSX.Element {
+  const titleId = useId();
+
+  return (
+    <section className="pk-sheet" aria-labelledby={titleId}>
+      <div className="pk-sheet__head">
+        <h2 className="pk-sheet__title" id={titleId}>
+          {title}
+          {state === undefined ? null : (
+            <span className={`pk-pill pk-pill--${state.tone}`}>{state.text}</span>
+          )}
+        </h2>
+        {actions === undefined ? null : <div className="pk-sheet__actions">{actions}</div>}
+      </div>
+      {description === undefined ? null : <p className="pk-sheet__description">{description}</p>}
+      <div className="pk-sheet__body">{children}</div>
+    </section>
   );
 }

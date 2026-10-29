@@ -10,8 +10,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "b760c72ec401eecdc3f28aa3c53d5c5fe567e6f79d4237eb195bd9cffd7ab33f",
-          "bytes": 38789
+          "sha256": "523345635328d629cdc6adef29a4896631b80f68a9089c45cfa14bd65b34f41a",
+          "bytes": 45210
         }
       ]
     },
@@ -24,13 +24,13 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "206e853ca55b8ff780a38ef7ebeac5832e6cad6870411cf1196c9c3cf43f0c21",
-          "bytes": 31957
+          "sha256": "9b303b5c3eaa1709cf43f507f9d234d076a32d7cb80951d45e3aa197c95477c4",
+          "bytes": 37351
         },
         {
           "relativePath": "dist/asr-worker.cjs",
-          "sha256": "a63436a2ea82f944caa737da9342fa476c4bf0f743223ee435acd2b9b3e18aaa",
-          "bytes": 38560
+          "sha256": "27316860fe7fc452248e0dbe6d611e4bb21d2a2b18b2bdacf4a7def06d89697a",
+          "bytes": 45169
         }
       ]
     },
@@ -66,13 +66,13 @@
       "files": [
         {
           "relativePath": "plugin.json",
-          "sha256": "0b959fe6b0ed472a5821f16ddcecee1fe8ffd120725134adabb72808606fa649",
-          "bytes": 1471
+          "sha256": "80b1b98b9a0698c328dd85c688ce9727158ffd912f07dd8af231bc7530d7faba",
+          "bytes": 12743
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "30a813f8fd18481411039363452112ff8e5667f35abc07a53d7c797581b501ba",
-          "bytes": 9668
+          "sha256": "3cd7d288449910159c53e0381ce111a61059e265aa014c3d4bdcecb2b8d5871d",
+          "bytes": 52330
         }
       ]
     },

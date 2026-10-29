@@ -1,52 +1,165 @@
 import { respondCompatible } from './responses.mjs';
-import { definePlugin } from '@pet/plugin-sdk';
-import type { JsonValue } from '@pet/contracts';
+import { definePlugin, type PluginTask } from '@pet/plugin-sdk';
+import {
+  MODEL_SERVICE_ENDPOINTS,
+  modelProviderId,
+  type JsonValue,
+  type JsonObject,
+} from '@pet/contracts';
 const object = (value: JsonValue) =>
   value && typeof value === 'object' && !Array.isArray(value) ? value : null;
 export default definePlugin({
   activate(ctx) {
-    ctx.provide('responses', {
-      describe: async () => {
+    for (const endpoint of MODEL_SERVICE_ENDPOINTS.filter((item) => item.available)) {
+      const selected = async () => {
         const cfg = await ctx.host.config.get();
-        return cfg.ok ? { model: cfg.value.data['model'] ?? null } : { errorCode: cfg.error.code };
-      },
-      respond: async (task, input) => {
-        const body = object(input);
-        const request = object(body?.['request'] ?? null);
-        if (!request) return { errorCode: 'invalid-input' };
-        const config = await ctx.host.config.get();
-        if (!config.ok || typeof config.value.data['model'] !== 'string')
-          return { errorCode: config.ok ? 'not-ready' : config.error.code };
-        if (!ctx.host.credentials) return { errorCode: 'credential-unavailable' };
+        if (!cfg.ok) return null;
+        const models = object(cfg.value.data['models'] ?? null);
+        return {
+          model:
+            endpoint.id === 'deepseek' && typeof cfg.value.data['model'] === 'string'
+              ? cfg.value.data['model']
+              : typeof models?.[endpoint.id] === 'string'
+                ? (models[endpoint.id] as string)
+                : endpoint.defaultModel,
+        };
+      };
+      const request = async (
+        task: PluginTask,
+        input: JsonValue,
+        diagnostic: boolean,
+      ): Promise<JsonValue> => {
+        const value = object(input);
+        const origins = value?.['origins'];
+        if (
+          origins !== undefined &&
+          (!Array.isArray(origins) ||
+            !origins.every((entry) => {
+              const row = object(entry);
+              const origin = object(row?.['origin'] ?? null);
+              return (
+                typeof row?.['id'] === 'string' &&
+                !!origin &&
+                ['instance', 'module', 'model', 'compatibilityDomain'].every(
+                  (key) => typeof origin[key] === 'string',
+                )
+              );
+            }))
+        )
+          return { errorCode: 'invalid-input' };
+        const config = await selected();
+        const body = diagnostic
+          ? {
+              model: config?.model,
+              input: [
+                {
+                  type: 'message',
+                  role: 'user',
+                  content: [{ type: 'input_text', text: 'Reply with OK.' }],
+                },
+              ],
+              max_output_tokens: 256,
+            }
+          : object(value?.['request'] ?? null);
+        if (!body || !config || !ctx.host.credentials) return { errorCode: 'not-ready' };
         const used = await ctx.host.credentials.withSecret(
           task,
-          'api-key',
+          endpoint.secretKey,
           async (secret, signal) => {
+            const started = performance.now();
             try {
-              return await respondCompatible(
+              let selectedModel = config.model;
+              if (diagnostic && endpoint.auth === 'browser' && value?.['chooseModel'] === true) {
+                const listed = await fetch(endpoint.baseUrl + '/models', {
+                  headers: { authorization: 'Bearer ' + secret },
+                  redirect: 'error',
+                  signal,
+                });
+                if (!listed.ok)
+                  throw Object.assign(new Error('Model list failed'), { status: listed.status });
+                const rows = object((await listed.json()) as JsonValue)?.['models'];
+                const models = Array.isArray(rows)
+                  ? rows
+                      .slice(0, 2000)
+                      .map(object)
+                      .filter(
+                        (row) =>
+                          row?.['visibility'] === 'list' &&
+                          typeof row['slug'] === 'string' &&
+                          row['slug'].length > 0 &&
+                          row['slug'].length <= 128,
+                      )
+                      .map((row) => row!['slug'] as string)
+                  : [];
+                if (!models.length)
+                  return {
+                    ok: false,
+                    elapsedMs: Math.round(performance.now() - started),
+                    reason: 'ChatGPT暂时没有可用模型',
+                  };
+                selectedModel = models.includes(config.model) ? config.model : models[0]!;
+              }
+              const generation = await respondCompatible(
                 secret,
-                config.value.data['model'] as string,
-                request,
+                selectedModel,
+                { ...body, model: selectedModel } as JsonObject,
                 signal,
+                endpoint,
+                diagnostic,
+                value?.['origins'],
               );
+              if (!diagnostic) return generation;
+              const response = object(object(generation)?.['response'] ?? null);
+              return {
+                ok:
+                  response?.['status'] === 'completed' &&
+                  Array.isArray(response['output']) &&
+                  response['output'].length > 0,
+                elapsedMs: Math.round(performance.now() - started),
+                model: selectedModel,
+                ...(response?.['status'] !== 'completed' ||
+                !Array.isArray(response['output']) ||
+                response['output'].length === 0
+                  ? { reason: '模型没有完成连接测试' }
+                  : {}),
+              };
             } catch (error) {
               const status =
                 error !== null && typeof error === 'object' && 'status' in error
                   ? error.status
                   : undefined;
-              return {
-                errorCode: signal.aborted
-                  ? 'cancelled'
-                  : status === 401 || status === 403
-                    ? 'auth-failed'
-                    : 'network',
-              };
+              const errorCode = signal.aborted
+                ? 'cancelled'
+                : status === 401 || status === 403
+                  ? 'auth-failed'
+                  : status === 429
+                    ? 'rate-limited'
+                    : status === 408 || status === 504
+                      ? 'timeout'
+                      : 'network';
+              return diagnostic
+                ? {
+                    ok: false,
+                    elapsedMs: Math.round(performance.now() - started),
+                    reason: errorCode,
+                  }
+                : { errorCode };
             }
           },
         );
         return used.ok ? used.value : { errorCode: used.error.code };
-      },
-    });
+      };
+      ctx.provide(modelProviderId(endpoint.id), {
+        describe: async () => ({
+          ...(await selected()),
+          baseUrl: endpoint.baseUrl,
+          label: endpoint.label,
+          service: endpoint.id,
+        }),
+        respond: (task, input) => request(task, input, false),
+        test: (task, input) => request(task, input, true),
+      });
+    }
     ctx.provide('deepseek', {
       respond: async (task, input) => {
         const body = object(input);

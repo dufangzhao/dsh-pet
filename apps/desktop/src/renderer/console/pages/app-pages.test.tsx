@@ -1,8 +1,11 @@
+import type { JSX } from 'react';
+
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import type {
   ApplicationPreferences,
+  ConsoleSnapshot,
   ApplicationSnapshot,
   DemoPhase,
   DemoReplyMode,
@@ -12,12 +15,15 @@ import { APPLICATION_DEFAULTS } from '@pet/contracts';
 
 import type { ApplicationOutcome, ApplicationState } from '../use-application.js';
 import type { DemoOutcome, DemoState } from '../use-demo.js';
+import type { ModelConnectionSnapshot, ModelService, SavedModelEndpoint } from '@pet/contracts';
+import type { ModelConnectionState } from '../use-model-connection.js';
 import type { ApplicationPage } from '@pet/contracts';
 import { AppearancePage } from './appearance.js';
 import { GenericPage } from './generic-page.js';
 import { ConversationPage } from './conversation.js';
 import { PersonaPage } from './persona.js';
 import { StartPage } from './start.js';
+import { PluginsPage } from './plugins.js';
 
 /**
  * 只断言用户看得到的话与按钮状态。这一批用例守的是四句不许说谎：
@@ -115,6 +121,7 @@ function appState(over: Partial<ApplicationState> = {}): ApplicationState {
     edit: noop,
     save: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
     startGuide: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
+    interact: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
     runPageAction: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
     // 时间线默认就是快照那一段；这里补的是「更早几页」的临时投影。
     history: current?.history ?? [],
@@ -126,21 +133,92 @@ function appState(over: Partial<ApplicationState> = {}): ApplicationState {
   };
 }
 
-const consoleSnapshot = null;
+const render = (node: JSX.Element): string => renderToStaticMarkup(node);
 
-function sharedStart(app: ApplicationState) {
+function startProps(app: ApplicationState, models: ModelConnectionState = modelState()) {
   return {
     app,
     demo: demoState(demoSnapshot()),
-    snapshot: consoleSnapshot,
-    loading: false,
-    error: null,
-    available: false,
-    onRetry: noop,
-    stopping: false,
-    onRequestStopAll: noop,
+    models,
     notify: noop,
     goToView: noop,
+    onOpenPlugins: noop,
+  };
+}
+
+/**
+ * React 把 disabled="" 写在开标签的最前面，所以断言看整个开标签，
+ * 不看某个属性后面是否还跟着它。
+ */
+function tag(html: string, testId: string): string {
+  const at = html.indexOf('data-testid="' + testId + '"');
+  if (at < 0) {
+    throw new Error('缺少 testid：' + testId);
+  }
+  const open = html.lastIndexOf('<', at);
+  const close = html.indexOf('>', at);
+  return html.slice(open, close + 1);
+}
+
+/* ---- 模型连接：目录里两家，一家有两块平台，另一家全局 ---- */
+
+const deepseek: ModelService = {
+  id: 'deepseek',
+  label: 'DeepSeek',
+  region: 'global',
+  service: 'deepseek',
+  defaultModel: 'deepseek-flash',
+  models: ['deepseek-flash', 'deepseek-chat'],
+  keyHint: '粘贴 API Key',
+  keyUrl: 'https://example.invalid/keys',
+  auth: 'api-key',
+  available: true,
+};
+
+const qwen: ModelService = {
+  ...deepseek,
+  id: 'qwen',
+  label: '通义千问',
+  region: 'cn',
+  service: 'qwen',
+};
+const qwenIntl: ModelService = { ...qwen, id: 'qwen-intl', region: 'intl' };
+
+function modelSnapshot(over: Partial<ModelConnectionSnapshot> = {}): ModelConnectionSnapshot {
+  const endpoints: SavedModelEndpoint[] = [];
+  return {
+    revision: 4,
+    services: [deepseek, qwen, qwenIntl],
+    endpoints,
+    active: null,
+    paused: false,
+    credentialStorageAvailable: true,
+    ...over,
+  };
+}
+
+function modelState(over: Partial<ModelConnectionState> = {}): ModelConnectionState {
+  const never = async (): Promise<never> => {
+    throw new Error('这条用例不触发写入');
+  };
+  return {
+    available: true,
+    snapshot: modelSnapshot(),
+    loading: false,
+    error: null,
+    saving: false,
+    testing: false,
+    pausing: false,
+    signIn: null,
+    signingIn: false,
+    refresh: noop,
+    saveAndStart: never,
+    testActive: never,
+    setPaused: never,
+    openServicePage: never,
+    signInAndStart: never,
+    cancelSignIn: never,
+    ...over,
   };
 }
 
@@ -302,42 +380,144 @@ describe('外部扩展的一页', () => {
 });
 
 describe('开始页', () => {
-  it('没有 Key 也不是缺项：默认走离线脚本演示', () => {
-    const html = renderToStaticMarkup(
+  it('模型桥不在：只说没有这条通道，不给一份能填的假表单', () => {
+    const html = render(
+      <StartPage {...startProps(appState(), modelState({ available: false, snapshot: null }))} />,
+    );
+    expect(html).toContain('还没有模型连接的通道');
+    expect(html).not.toContain('model-save');
+    expect(html).not.toContain('model-test');
+  });
+
+  it('没有在用端点：说暂未连接，测试连接点不动', () => {
+    const html = render(<StartPage {...startProps(appState())} />);
+    expect(html).toContain('暂未连接');
+    expect(tag(html, 'model-test')).toContain('disabled');
+    // 目录按厂商归组：同一家的两块平台只出现一枚芯片。
+    expect(html).toContain('model-pick-deepseek');
+    expect(html).toContain('model-pick-qwen');
+    expect(html).not.toContain('model-pick-qwen-intl');
+    expect(html).toContain('这一家还没有存过 Key');
+  });
+
+  it('在用的那一家带着模型名，测试可以点，Key 留空沿用', () => {
+    const html = render(
       <StartPage
-        {...sharedStart(appState())}
-        demo={demoState(
-          demoSnapshot({
-            settings: {
-              asrOwner: null,
-              asrRevision: 0,
-              modelId: null,
-              voiceOwner: { pluginId: 'pet.voice-chat', instanceId: 'i', generation: 1 },
-              voiceRevision: 1,
-              replyMode: 'demo',
-              autoSend: false,
-              readError: null,
+        {...startProps(
+          appState(),
+          modelState({
+            snapshot: modelSnapshot({
+              active: { id: 'qwen', model: 'qwen3.8-flash', label: '通义千问' },
+            }),
+          }),
+        )}
+      />,
+    );
+    expect(html).toContain('通义千问 · qwen3.8-flash');
+    expect(tag(html, 'model-test')).not.toContain('disabled');
+    expect(html).toContain('留空沿用已保存的 Key');
+    expect(html).toContain('改用国际平台');
+  });
+
+  it('这一页只有三节：运行状态归扩展页管', () => {
+    const html = render(<StartPage {...startProps(appState())} />);
+    expect(html).toContain('连接模型');
+    expect(html).toContain('我的桌宠');
+    expect(html).toContain('theme-editor');
+    expect(html).not.toContain('运行状态');
+    expect(html).not.toContain('console-stop-all');
+  });
+
+  it('显示状态没读出来就说未就绪，不猜它在不在桌上', () => {
+    const unknown = render(<StartPage {...startProps(appState())} />);
+    expect(unknown).toContain('桌宠未就绪');
+    expect(unknown).not.toContain('在桌面上');
+
+    const onDesktop = render(
+      <StartPage
+        {...startProps(
+          appState({
+            snapshot: {
+              ...(appState().snapshot as ApplicationSnapshot),
+              desktop: { available: true, shown: true },
             },
           }),
         )}
       />,
     );
-    expect(html).toContain('离线脚本演示（不是 AI）');
-    expect(html).toContain('没有 Key 也能用');
-    expect(html).not.toContain('待接入');
+    expect(onDesktop).toContain('在桌面上');
+    expect(tag(onDesktop, 'pet-hide')).not.toContain('disabled');
+    expect(tag(onDesktop, 'pet-show')).toContain('disabled');
   });
 
-  it('Key 只报存在本机，连接结果留给实际对话', () => {
-    const html = renderToStaticMarkup(
-      <StartPage
-        {...sharedStart(appState())}
-        demo={demoState(demoSnapshot({ keyConfigured: true }))}
+  it('预览是桌宠那个角色组件本身，能真的戳；说话入口挂在场景里而不是下面另起一行', () => {
+    const html = render(<StartPage {...startProps(appState())} />);
+    expect(html).toContain('data-testid="pet-avatar"');
+    expect(html).toContain('data-testid="pet-poke"');
+    // 场景里有墙面点阵与地面，不再念名字/形态/配色那一串事实。
+    expect(html).toContain('pet-preview__floor');
+    expect(html).not.toContain('pet-preview__facts');
+    // 说话与录音是这一格里两个真入口；输入框要点了开关才出现，不常驻占地方。
+    expect(html).toContain('pet-chat-toggle');
+    expect(html).not.toContain('pet-composer-input');
+    const focused = render(
+      <StartPage {...startProps(appState())} demo={demoState(demoSnapshot({ canSend: true }))} />,
+    );
+    expect(focused).toContain('pet-chat-toggle');
+    // 录音入口带的是全场那一个所有者：能录时可点，菜单里也不列做不到的事。
+    expect(focused).toContain('pet-mic-toggle');
+    expect(focused).toContain('pet-light-toggle');
+    expect(focused).toContain('管理模型扩展');
+  });
+});
+
+describe('扩展页的运行状态', () => {
+  const host = (over: Partial<ConsoleSnapshot['host']> = {}): ConsoleSnapshot => ({
+    version: 1,
+    host: {
+      version: 1,
+      runtime: 'ready',
+      installedPlugins: 1,
+      activePlugins: 1,
+      unreadyPlugins: 0,
+      pendingRestartPlugins: 0,
+      runningTasks: 0,
+      pendingWork: 0,
+      ...over,
+    },
+    plugins: [],
+    contributions: [],
+    app: { name: 'AI 桌宠', version: '0.0.0', electron: '45', node: '24', platform: 'win32-x64' },
+  });
+
+  function pluginsPage(snapshot: ConsoleSnapshot): string {
+    return render(
+      <PluginsPage
+        snapshot={snapshot}
+        loading={false}
+        error={null}
+        available
+        onRetry={noop}
+        onOpenConfig={undefined}
+        onOpenPermissions={noop}
+        pending={new Map()}
+        onAction={noop}
+        stopping={false}
+        onRequestStopAll={noop}
       />,
     );
-    expect(html).toContain('本机已存有 Key，能不能连通还没验证');
-    expect(html).toContain('Key 只保存在本机');
-    // 不说实现（凭据存储、日志、连接测试），也不宣称已经验证通过。
-    expect(html).not.toContain('验证通过');
-    expect(html).not.toMatch(/凭据存储|写进日志|连接测试/);
+  }
+
+  it('运行状态排在插件列表上面，空闲时不给停止入口', () => {
+    const html = pluginsPage(host());
+    expect(html.indexOf('运行状态')).toBeLessThan(html.indexOf('已安装'));
+    expect(html).not.toContain('console-stop-all');
+    expect(html).toContain('没有正在运行的任务');
+  });
+
+  it('有任务时给停止入口，计数照宿主的话说', () => {
+    const html = pluginsPage(host({ runningTasks: 2, pendingWork: 3 }));
+    expect(html).toContain('console-stop-all');
+    expect(html).toContain('2 个任务在运行，共 3 项工作尚未结束');
   });
 });

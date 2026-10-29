@@ -45,6 +45,15 @@ describe('应用页面识别', () => {
     ).toBe('generic');
   });
 
+  it('图标按视图给语义，认不出的外部页只给通用格子', () => {
+    const items = navItemsOf([
+      page({ id: 'p', order: 10, manifest: { panels: [{ builtin: 'pet.persona' }] } }),
+      page({ id: 'community', order: 20, owner: owner('community.translator') }),
+    ]);
+    expect(items.map((item) => item.icon)).toEqual(['bot', 'panel']);
+    expect(RECOVERY_ITEMS.map((item) => item.icon)).toEqual(['puzzle', 'shield', 'info']);
+  });
+
   it('导航顺序跟着宿主的 order，不是本机数组顺序', () => {
     const items = navItemsOf([page({ id: 'voice', order: 30 }), page({ id: 'start', order: 10 })]);
     expect(items.map((item) => item.id)).toEqual(['start', 'voice']);

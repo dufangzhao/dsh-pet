@@ -32,3 +32,5 @@ export * from './security.js';
 export * from './local-asr.js';
 export * from './demo.js';
 export * from './application.js';
+export * from './model-connection.js';
+export * from './model-services.js';

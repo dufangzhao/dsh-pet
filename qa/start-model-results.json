@@ -1,0 +1,2835 @@
+{
+  "status": "passed",
+  "directory": ".cache\\start-model-jHouCw",
+  "checks": [
+    "fixed-preload-arity-and-real-request-trust-shape-revision-and-fixed-link-boundaries",
+    "isolated-source-needs-exact-fingerprint-review-with-current-manifest-unchanged",
+    "network-denial-credential-denial-and-task-cancellation-never-activate-or-resume",
+    "success-binds-real-registry-sets-mode-resumes-Core-and-stale-CAS-does-not-replace-key",
+    "failed-draft-retains-saved-key-config-and-active-binding-mode-and-test-targets-saved-active",
+    "every-current-available-service-fails-and-succeeds-via-own-provider-model-and-independent-key",
+    "actual-Core-turn-uses-new-binding-withSecret-and-emits-reply-through-real-media",
+    "new-config-revision-during-real-credential-approval-rejects-post-probe-activation",
+    "save-enable-preserves-explicit-deny-without-prompt-key-use-binding-mode-or-bus-switch",
+    "fresh-host-reviews-exact-fixture-restores-selected-binding-without-probe-and-preserves-deny-mode-pause",
+    "fresh-Core-turn-consumes-persisted-key-and-closed-state-recording-keeps-enabled-user-choice",
+    "explicit-user-disable-persists-and-prevents-restore-even-after-fresh-host-exact-source-review",
+    "snapshot-only-exposes-endpoint-metadata-and-profile-disk-and-audit-contain-no-raw-keys"
+  ],
+  "decisions": [
+    {
+      "operation": "save-qwen-qa-pass-qwen-deny-network",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-deny-network",
+      "kind": "network",
+      "choice": "deny",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-deny-credentials",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-deny-credentials",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-deny-credentials",
+      "kind": "credentials",
+      "choice": "deny",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-cancel-credentials",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-cancel-credentials",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen-cancel-credentials",
+      "kind": "credentials",
+      "choice": "cancel-task",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "save-deepseek-qa-pass-deepseek",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-deepseek-qa-pass-deepseek",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.deepseek.com"
+      ]
+    },
+    {
+      "operation": "save-deepseek-qa-pass-deepseek",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen-draft",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen-draft",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen-draft",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "test-saved-active",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "test-saved-active",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.deepseek.com"
+      ]
+    },
+    {
+      "operation": "test-saved-active",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "api-key"
+      ]
+    },
+    {
+      "operation": "save-deepseek-qa-fail-deepseek",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-deepseek-qa-fail-deepseek",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.deepseek.com"
+      ]
+    },
+    {
+      "operation": "save-deepseek-qa-fail-deepseek",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "api-key"
+      ]
+    },
+    {
+      "operation": "save-deepseek-qa-pass-deepseek",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-deepseek-qa-pass-deepseek",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.deepseek.com"
+      ]
+    },
+    {
+      "operation": "save-deepseek-qa-pass-deepseek",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-fail-qwen",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-qa-pass-qwen",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-intl-qa-fail-qwen-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-intl-qa-fail-qwen-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope-intl.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-intl-qa-fail-qwen-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-qwen-intl-qa-pass-qwen-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qwen-intl-qa-pass-qwen-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope-intl.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "save-qwen-intl-qa-pass-qwen-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-kimi-qa-fail-kimi",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-kimi-qa-fail-kimi",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.moonshot.cn"
+      ]
+    },
+    {
+      "operation": "save-kimi-qa-fail-kimi",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "kimi-api-key"
+      ]
+    },
+    {
+      "operation": "save-kimi-qa-pass-kimi",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-kimi-qa-pass-kimi",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.moonshot.cn"
+      ]
+    },
+    {
+      "operation": "save-kimi-qa-pass-kimi",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "kimi-api-key"
+      ]
+    },
+    {
+      "operation": "save-kimi-intl-qa-fail-kimi-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-kimi-intl-qa-fail-kimi-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.moonshot.ai"
+      ]
+    },
+    {
+      "operation": "save-kimi-intl-qa-fail-kimi-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "kimi-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-kimi-intl-qa-pass-kimi-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-kimi-intl-qa-pass-kimi-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.moonshot.ai"
+      ]
+    },
+    {
+      "operation": "save-kimi-intl-qa-pass-kimi-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "kimi-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-glm-qa-fail-glm",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-glm-qa-fail-glm",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://open.bigmodel.cn"
+      ]
+    },
+    {
+      "operation": "save-glm-qa-fail-glm",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "glm-api-key"
+      ]
+    },
+    {
+      "operation": "save-glm-qa-pass-glm",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-glm-qa-pass-glm",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://open.bigmodel.cn"
+      ]
+    },
+    {
+      "operation": "save-glm-qa-pass-glm",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "glm-api-key"
+      ]
+    },
+    {
+      "operation": "save-glm-intl-qa-fail-glm-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-glm-intl-qa-fail-glm-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.z.ai"
+      ]
+    },
+    {
+      "operation": "save-glm-intl-qa-fail-glm-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "glm-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-glm-intl-qa-pass-glm-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-glm-intl-qa-pass-glm-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.z.ai"
+      ]
+    },
+    {
+      "operation": "save-glm-intl-qa-pass-glm-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "glm-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-doubao-qa-fail-doubao",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-doubao-qa-fail-doubao",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://ark.cn-beijing.volces.com"
+      ]
+    },
+    {
+      "operation": "save-doubao-qa-fail-doubao",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "doubao-api-key"
+      ]
+    },
+    {
+      "operation": "save-doubao-qa-pass-doubao",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-doubao-qa-pass-doubao",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://ark.cn-beijing.volces.com"
+      ]
+    },
+    {
+      "operation": "save-doubao-qa-pass-doubao",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "doubao-api-key"
+      ]
+    },
+    {
+      "operation": "save-minimax-qa-fail-minimax",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-minimax-qa-fail-minimax",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.minimax.cn"
+      ]
+    },
+    {
+      "operation": "save-minimax-qa-fail-minimax",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "minimax-api-key"
+      ]
+    },
+    {
+      "operation": "save-minimax-qa-pass-minimax",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-minimax-qa-pass-minimax",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.minimax.cn"
+      ]
+    },
+    {
+      "operation": "save-minimax-qa-pass-minimax",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "minimax-api-key"
+      ]
+    },
+    {
+      "operation": "save-minimax-intl-qa-fail-minimax-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-minimax-intl-qa-fail-minimax-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.minimax.io"
+      ]
+    },
+    {
+      "operation": "save-minimax-intl-qa-fail-minimax-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "minimax-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-minimax-intl-qa-pass-minimax-intl",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-minimax-intl-qa-pass-minimax-intl",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.minimax.io"
+      ]
+    },
+    {
+      "operation": "save-minimax-intl-qa-pass-minimax-intl",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "minimax-intl-api-key"
+      ]
+    },
+    {
+      "operation": "save-stepfun-qa-fail-stepfun",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-stepfun-qa-fail-stepfun",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.stepfun.com"
+      ]
+    },
+    {
+      "operation": "save-stepfun-qa-fail-stepfun",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "stepfun-api-key"
+      ]
+    },
+    {
+      "operation": "save-stepfun-qa-pass-stepfun",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-stepfun-qa-pass-stepfun",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.stepfun.com"
+      ]
+    },
+    {
+      "operation": "save-stepfun-qa-pass-stepfun",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "stepfun-api-key"
+      ]
+    },
+    {
+      "operation": "save-stepfun-plan-qa-fail-stepfun-plan",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-stepfun-plan-qa-fail-stepfun-plan",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.stepfun.com"
+      ]
+    },
+    {
+      "operation": "save-stepfun-plan-qa-fail-stepfun-plan",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "stepfun-plan-api-key"
+      ]
+    },
+    {
+      "operation": "save-stepfun-plan-qa-pass-stepfun-plan",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-stepfun-plan-qa-pass-stepfun-plan",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.stepfun.com"
+      ]
+    },
+    {
+      "operation": "save-stepfun-plan-qa-pass-stepfun-plan",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "stepfun-plan-api-key"
+      ]
+    },
+    {
+      "operation": "save-qianfan-qa-fail-qianfan",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qianfan-qa-fail-qianfan",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://qianfan.baidubce.com"
+      ]
+    },
+    {
+      "operation": "save-qianfan-qa-fail-qianfan",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qianfan-api-key"
+      ]
+    },
+    {
+      "operation": "save-qianfan-qa-pass-qianfan",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-qianfan-qa-pass-qianfan",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://qianfan.baidubce.com"
+      ]
+    },
+    {
+      "operation": "save-qianfan-qa-pass-qianfan",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qianfan-api-key"
+      ]
+    },
+    {
+      "operation": "save-openrouter-qa-fail-openrouter",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-openrouter-qa-fail-openrouter",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://openrouter.ai"
+      ]
+    },
+    {
+      "operation": "save-openrouter-qa-fail-openrouter",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "openrouter-api-key"
+      ]
+    },
+    {
+      "operation": "save-openrouter-qa-pass-openrouter",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-openrouter-qa-pass-openrouter",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://openrouter.ai"
+      ]
+    },
+    {
+      "operation": "save-openrouter-qa-pass-openrouter",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "openrouter-api-key"
+      ]
+    },
+    {
+      "operation": "save-openai-qa-fail-openai",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-openai-qa-fail-openai",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.openai.com"
+      ]
+    },
+    {
+      "operation": "save-openai-qa-fail-openai",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "openai-api-key"
+      ]
+    },
+    {
+      "operation": "save-openai-qa-pass-openai",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-openai-qa-pass-openai",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.openai.com"
+      ]
+    },
+    {
+      "operation": "save-openai-qa-pass-openai",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "openai-api-key"
+      ]
+    },
+    {
+      "operation": "save-anthropic-qa-fail-anthropic",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-anthropic-qa-fail-anthropic",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.anthropic.com"
+      ]
+    },
+    {
+      "operation": "save-anthropic-qa-fail-anthropic",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "anthropic-api-key"
+      ]
+    },
+    {
+      "operation": "save-anthropic-qa-pass-anthropic",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-anthropic-qa-pass-anthropic",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.anthropic.com"
+      ]
+    },
+    {
+      "operation": "save-anthropic-qa-pass-anthropic",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "anthropic-api-key"
+      ]
+    },
+    {
+      "operation": "save-gemini-qa-fail-gemini",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-gemini-qa-fail-gemini",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://generativelanguage.googleapis.com"
+      ]
+    },
+    {
+      "operation": "save-gemini-qa-fail-gemini",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "gemini-api-key"
+      ]
+    },
+    {
+      "operation": "save-gemini-qa-pass-gemini",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-gemini-qa-pass-gemini",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://generativelanguage.googleapis.com"
+      ]
+    },
+    {
+      "operation": "save-gemini-qa-pass-gemini",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "gemini-api-key"
+      ]
+    },
+    {
+      "operation": "save-xai-qa-fail-xai",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-xai-qa-fail-xai",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.x.ai"
+      ]
+    },
+    {
+      "operation": "save-xai-qa-fail-xai",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "xai-api-key"
+      ]
+    },
+    {
+      "operation": "save-xai-qa-pass-xai",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "save-xai-qa-pass-xai",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.x.ai"
+      ]
+    },
+    {
+      "operation": "save-xai-qa-pass-xai",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "xai-api-key"
+      ]
+    },
+    {
+      "operation": "Core-turn-selected-provider",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.x.ai"
+      ]
+    },
+    {
+      "operation": "Core-turn-selected-provider",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "xai-api-key"
+      ]
+    },
+    {
+      "operation": "fixture-audit",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "post-probe-revision-conflict",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "post-probe-revision-conflict",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://dashscope.aliyuncs.com"
+      ]
+    },
+    {
+      "operation": "post-probe-revision-conflict",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "qwen-api-key"
+      ]
+    },
+    {
+      "operation": "restore-no-probe-audit",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    },
+    {
+      "operation": "restored-Core-turn",
+      "kind": "network",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "origins": [
+        "https://api.x.ai"
+      ]
+    },
+    {
+      "operation": "restored-Core-turn",
+      "kind": "credentials",
+      "choice": "allow",
+      "owner": "pet.llm-provider",
+      "keys": [
+        "xai-api-key"
+      ]
+    },
+    {
+      "operation": "restored-Core-audit",
+      "kind": "capability-use",
+      "choice": "allow",
+      "owner": "pet.llm-provider"
+    }
+  ],
+  "hostShutdowns": [
+    {
+      "phase": "initial",
+      "exitConfirmed": true,
+      "forced": false
+    },
+    {
+      "phase": "restored",
+      "exitConfirmed": true,
+      "forced": false
+    },
+    {
+      "phase": "user-disabled",
+      "exitConfirmed": true,
+      "forced": false
+    },
+    {
+      "phase": "disabled-reopen",
+      "exitConfirmed": true,
+      "forced": false
+    }
+  ],
+  "runtime": {
+    "electron": "45.0.0",
+    "node": "24.22.0"
+  },
+  "assumptions": [
+    "Parent builds the current worker, plugins, and builtin admission serially before this runner.",
+    "Only the isolated pet.llm-provider runtime is scripted; its current manifest/config/provides/consumes/permissions are unchanged.",
+    "No provider traffic is sent. Scripted model values determine test results after real credential authorization.",
+    "Headless safeStorage absence permits an ephemeral QA cipher; emulatedCipher is explicit and is not OS-encryption evidence.",
+    "This exercises the real fixed request/preload functions in process, not a BrowserWindow IPC sender.",
+    "Cancellation uses TaskSupervisor.cancelAll while its credential approval is pending; no Start cancel UI/API is claimed.",
+    "Recovery creates fresh DesktopHost workers serially with the same isolated profile, builtin files, and cipher; it is not an OS process restart or OAuth test.",
+    "Each fresh host explicitly reviews the scripted fixture digest again; the fixture never inherits production builtin admission."
+  ],
+  "stage": "snapshot-and-disk-secret-exclusion",
+  "knownPlaceholderIssues": [
+    {
+      "directory": "plugins\\asr-cloud",
+      "code": "invalid-input",
+      "manifestAbsent": true
+    },
+    {
+      "directory": "plugins\\audio-capture",
+      "code": "invalid-input",
+      "manifestAbsent": true
+    },
+    {
+      "directory": "plugins\\talk-key",
+      "code": "invalid-input",
+      "manifestAbsent": true
+    }
+  ],
+  "requiredBuiltinIds": [
+    "pet.agent-cortico",
+    "pet.asr-local",
+    "pet.avatar-default",
+    "pet.chat",
+    "pet.llm-provider",
+    "pet.page-appearance",
+    "pet.page-conversation",
+    "pet.page-persona",
+    "pet.page-start",
+    "pet.page-voice",
+    "pet.profile",
+    "pet.voice-chat"
+  ],
+  "emulatedCipher": true,
+  "cipherBackend": "qa-aes-256-gcm-ephemeral-headless-only",
+  "cipherLimitation": "Headless platform encryption unavailable; this run does not validate DPAPI.",
+  "fixtureTrust": {
+    "digest": "f4987f2f86092f82f18a8dd30ec4d887d5585f3d2cb0908d1cf569b85795c75a",
+    "explicitReview": true,
+    "fixtureSourceSha256": "2b3d261fba6884c6aaeaaee812873ea41675d967a35aa8e0b1004d4c776259ef",
+    "files": [
+      {
+        "relativePath": "plugin.json",
+        "sha256": "80b1b98b9a0698c328dd85c688ce9727158ffd912f07dd8af231bc7530d7faba",
+        "bytes": 12743
+      },
+      {
+        "relativePath": "dist/index.mjs",
+        "sha256": "6da7085b95a7db48dbd5e36667f357a4a247de57cc250ee6aeb97db5053ff260",
+        "bytes": 30271
+      }
+    ],
+    "manifestMatchesOriginal": true
+  },
+  "freshFixtureReviews": [
+    {
+      "phase": "restored",
+      "digest": "f4987f2f86092f82f18a8dd30ec4d887d5585f3d2cb0908d1cf569b85795c75a"
+    },
+    {
+      "phase": "user-disabled",
+      "digest": "f4987f2f86092f82f18a8dd30ec4d887d5585f3d2cb0908d1cf569b85795c75a"
+    },
+    {
+      "phase": "disabled-reopen",
+      "digest": "f4987f2f86092f82f18a8dd30ec4d887d5585f3d2cb0908d1cf569b85795c75a"
+    }
+  ],
+  "restoreTasks": [
+    {
+      "phase": "Unreviewed fixture restore",
+      "providerTasks": 0
+    },
+    {
+      "phase": "Reviewed restore under explicit deny",
+      "providerTasks": 0
+    },
+    {
+      "phase": "Restore before explicit user disable",
+      "providerTasks": 0
+    },
+    {
+      "phase": "Respect current user disable",
+      "providerTasks": 0
+    },
+    {
+      "phase": "Respect persisted user disable after fresh host review",
+      "providerTasks": 0
+    }
+  ],
+  "hostShutdown": {
+    "exitConfirmed": true,
+    "forced": false
+  },
+  "restoredFixtureCalls": [
+    {
+      "service": "xai",
+      "model": "qa-pass-xai",
+      "method": "respond",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    }
+  ],
+  "restoredSnapshot": {
+    "revision": 65,
+    "services": [
+      {
+        "id": "deepseek",
+        "label": "DeepSeek",
+        "service": "deepseek",
+        "keyUrl": "https://platform.deepseek.com/api_keys",
+        "defaultModel": "deepseek-flash",
+        "models": [
+          "deepseek-flash",
+          "deepseek-v4-pro",
+          "deepseek-chat",
+          "deepseek-reasoner"
+        ],
+        "keyHint": "sk-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qwen",
+        "label": "通义千问",
+        "service": "qwen",
+        "keyUrl": "https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key",
+        "defaultModel": "qwen3.8-flash",
+        "models": [
+          "qwen3.8-flash",
+          "qwen3.7-flash",
+          "qwen3.8-max"
+        ],
+        "keyHint": "sk-…",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qwen-intl",
+        "label": "通义千问",
+        "service": "qwen",
+        "keyUrl": "https://modelstudio.console.alibabacloud.com/ap-southeast-1/model/settings/api-key",
+        "defaultModel": "qwen3.8-flash",
+        "models": [
+          "qwen3.8-flash",
+          "qwen3.7-flash",
+          "qwen3.8-max"
+        ],
+        "keyHint": "sk-…",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "kimi",
+        "label": "Kimi",
+        "service": "kimi",
+        "keyUrl": "https://platform.kimi.com/console/api-keys",
+        "defaultModel": "kimi-k3",
+        "models": [
+          "kimi-k3"
+        ],
+        "keyHint": "sk-…",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "kimi-intl",
+        "label": "Kimi",
+        "service": "kimi",
+        "keyUrl": "https://platform.kimi.ai/console/api-keys",
+        "defaultModel": "kimi-k3",
+        "models": [
+          "kimi-k3"
+        ],
+        "keyHint": "sk-…",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "glm",
+        "label": "智谱 GLM",
+        "service": "glm",
+        "keyUrl": "https://bigmodel.cn/usercenter/proj-mgmt/apikeys",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "glm-5.3",
+          "glm-4.6v-flashx",
+          "glm-4.6v-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "glm-intl",
+        "label": "智谱 GLM",
+        "service": "glm",
+        "keyUrl": "https://z.ai/manage-apikey/apikey-list",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "glm-5.3",
+          "glm-4.6v-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "doubao",
+        "label": "豆包",
+        "service": "doubao",
+        "keyUrl": "https://ark.volcengine.com/region:cn-beijing/apikey",
+        "defaultModel": "doubao-seed-2-1-lite-260915",
+        "models": [
+          "doubao-seed-2-1-lite-260915",
+          "doubao-seed-2-0-mini-260428"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "minimax",
+        "label": "MiniMax",
+        "service": "minimax",
+        "keyUrl": "https://platform.minimax.cn/user-center/basic-information/interface-key",
+        "defaultModel": "MiniMax-M3",
+        "models": [
+          "MiniMax-M3",
+          "MiniMax-M2.7"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "minimax-intl",
+        "label": "MiniMax",
+        "service": "minimax",
+        "keyUrl": "https://platform.minimax.io/user-center/basic-information/interface-key",
+        "defaultModel": "MiniMax-M3",
+        "models": [
+          "MiniMax-M3",
+          "MiniMax-M2.7"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "stepfun",
+        "label": "阶跃星辰",
+        "service": "stepfun",
+        "keyUrl": "https://platform.stepfun.com/interface-key",
+        "defaultModel": "step-3.7-flash",
+        "models": [
+          "step-3.7-flash",
+          "step-5-preview"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "stepfun-plan",
+        "label": "阶跃 Step Plan",
+        "service": "stepfun-plan",
+        "keyUrl": "https://platform.stepfun.com/interface-key",
+        "defaultModel": "step-5-preview",
+        "models": [
+          "step-5-preview",
+          "step-3.7-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qianfan",
+        "label": "百度千帆",
+        "service": "qianfan",
+        "keyUrl": "https://console.bce.baidu.com/iam/#/iam/apikey/list",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "deepseek-v4.1-flash",
+          "ernie-4.5-turbo-vl",
+          "glm-5.1"
+        ],
+        "keyHint": "bce-v3/…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "openrouter",
+        "label": "OpenRouter",
+        "service": "openrouter",
+        "keyUrl": "https://openrouter.ai/settings/keys",
+        "defaultModel": "deepseek/deepseek-v4.1-flash",
+        "models": [
+          "deepseek/deepseek-v4.1-flash",
+          "qwen/qwen3.8-flash",
+          "qwen/qwen3.7-flash",
+          "google/gemini-3.1-flash-lite",
+          "z-ai/glm-5.3-flash"
+        ],
+        "keyHint": "sk-or-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "service": "openai",
+        "keyUrl": "https://platform.openai.com/settings/organization/api-keys",
+        "defaultModel": "gpt-6-luna",
+        "models": [
+          "gpt-6-luna",
+          "gpt-6.1-sol",
+          "gpt-6-astra"
+        ],
+        "keyHint": "sk-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "chatgpt",
+        "label": "ChatGPT",
+        "service": "chatgpt",
+        "keyUrl": "https://chatgpt.com/",
+        "defaultModel": "gpt-6-luna",
+        "models": [
+          "gpt-6-luna"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "browser",
+        "available": false
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "service": "anthropic",
+        "keyUrl": "https://platform.claude.com/settings/keys",
+        "defaultModel": "claude-haiku-5-5",
+        "models": [
+          "claude-haiku-5-5",
+          "claude-sonnet-5-5",
+          "claude-opus-5-5"
+        ],
+        "keyHint": "sk-ant-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "gemini",
+        "label": "Gemini",
+        "service": "gemini",
+        "keyUrl": "https://aistudio.google.com/apikey",
+        "defaultModel": "gemini-3.5-flash-lite",
+        "models": [
+          "gemini-3.5-flash-lite",
+          "gemini-3.8-flash",
+          "gemini-3.1-pro-preview"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "xai",
+        "label": "xAI",
+        "service": "xai",
+        "keyUrl": "https://console.x.ai/team/default/api-keys",
+        "defaultModel": "grok-4.3",
+        "models": [
+          "grok-4.3",
+          "grok-4.7"
+        ],
+        "keyHint": "xai-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "deepseek",
+        "model": "qa-pass-deepseek",
+        "keyConfigured": true
+      },
+      {
+        "id": "qwen",
+        "model": "qa-pass-qwen-preset-denied",
+        "keyConfigured": true
+      },
+      {
+        "id": "qwen-intl",
+        "model": "qa-pass-interleaved-revision",
+        "keyConfigured": true
+      },
+      {
+        "id": "kimi",
+        "model": "qa-pass-kimi",
+        "keyConfigured": true
+      },
+      {
+        "id": "kimi-intl",
+        "model": "qa-pass-kimi-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "glm",
+        "model": "qa-pass-glm",
+        "keyConfigured": true
+      },
+      {
+        "id": "glm-intl",
+        "model": "qa-pass-glm-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "doubao",
+        "model": "qa-pass-doubao",
+        "keyConfigured": true
+      },
+      {
+        "id": "minimax",
+        "model": "qa-pass-minimax",
+        "keyConfigured": true
+      },
+      {
+        "id": "minimax-intl",
+        "model": "qa-pass-minimax-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "stepfun",
+        "model": "qa-pass-stepfun",
+        "keyConfigured": true
+      },
+      {
+        "id": "stepfun-plan",
+        "model": "qa-pass-stepfun-plan",
+        "keyConfigured": true
+      },
+      {
+        "id": "qianfan",
+        "model": "qa-pass-qianfan",
+        "keyConfigured": true
+      },
+      {
+        "id": "openrouter",
+        "model": "qa-pass-openrouter",
+        "keyConfigured": true
+      },
+      {
+        "id": "openai",
+        "model": "qa-pass-openai",
+        "keyConfigured": true
+      },
+      {
+        "id": "chatgpt",
+        "model": "gpt-6-luna",
+        "keyConfigured": false
+      },
+      {
+        "id": "anthropic",
+        "model": "qa-pass-anthropic",
+        "keyConfigured": true
+      },
+      {
+        "id": "gemini",
+        "model": "qa-pass-gemini",
+        "keyConfigured": true
+      },
+      {
+        "id": "xai",
+        "model": "qa-pass-xai",
+        "keyConfigured": true
+      }
+    ],
+    "active": {
+      "id": "xai",
+      "model": "qa-pass-xai",
+      "label": "xAI"
+    },
+    "paused": true,
+    "credentialStorageAvailable": true
+  },
+  "disabledRestoreSnapshot": {
+    "revision": 65,
+    "services": [
+      {
+        "id": "deepseek",
+        "label": "DeepSeek",
+        "service": "deepseek",
+        "keyUrl": "https://platform.deepseek.com/api_keys",
+        "defaultModel": "deepseek-flash",
+        "models": [
+          "deepseek-flash",
+          "deepseek-v4-pro",
+          "deepseek-chat",
+          "deepseek-reasoner"
+        ],
+        "keyHint": "sk-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qwen",
+        "label": "通义千问",
+        "service": "qwen",
+        "keyUrl": "https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key",
+        "defaultModel": "qwen3.8-flash",
+        "models": [
+          "qwen3.8-flash",
+          "qwen3.7-flash",
+          "qwen3.8-max"
+        ],
+        "keyHint": "sk-…",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qwen-intl",
+        "label": "通义千问",
+        "service": "qwen",
+        "keyUrl": "https://modelstudio.console.alibabacloud.com/ap-southeast-1/model/settings/api-key",
+        "defaultModel": "qwen3.8-flash",
+        "models": [
+          "qwen3.8-flash",
+          "qwen3.7-flash",
+          "qwen3.8-max"
+        ],
+        "keyHint": "sk-…",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "kimi",
+        "label": "Kimi",
+        "service": "kimi",
+        "keyUrl": "https://platform.kimi.com/console/api-keys",
+        "defaultModel": "kimi-k3",
+        "models": [
+          "kimi-k3"
+        ],
+        "keyHint": "sk-…",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "kimi-intl",
+        "label": "Kimi",
+        "service": "kimi",
+        "keyUrl": "https://platform.kimi.ai/console/api-keys",
+        "defaultModel": "kimi-k3",
+        "models": [
+          "kimi-k3"
+        ],
+        "keyHint": "sk-…",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "glm",
+        "label": "智谱 GLM",
+        "service": "glm",
+        "keyUrl": "https://bigmodel.cn/usercenter/proj-mgmt/apikeys",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "glm-5.3",
+          "glm-4.6v-flashx",
+          "glm-4.6v-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "glm-intl",
+        "label": "智谱 GLM",
+        "service": "glm",
+        "keyUrl": "https://z.ai/manage-apikey/apikey-list",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "glm-5.3",
+          "glm-4.6v-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "doubao",
+        "label": "豆包",
+        "service": "doubao",
+        "keyUrl": "https://ark.volcengine.com/region:cn-beijing/apikey",
+        "defaultModel": "doubao-seed-2-1-lite-260915",
+        "models": [
+          "doubao-seed-2-1-lite-260915",
+          "doubao-seed-2-0-mini-260428"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "minimax",
+        "label": "MiniMax",
+        "service": "minimax",
+        "keyUrl": "https://platform.minimax.cn/user-center/basic-information/interface-key",
+        "defaultModel": "MiniMax-M3",
+        "models": [
+          "MiniMax-M3",
+          "MiniMax-M2.7"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "minimax-intl",
+        "label": "MiniMax",
+        "service": "minimax",
+        "keyUrl": "https://platform.minimax.io/user-center/basic-information/interface-key",
+        "defaultModel": "MiniMax-M3",
+        "models": [
+          "MiniMax-M3",
+          "MiniMax-M2.7"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "stepfun",
+        "label": "阶跃星辰",
+        "service": "stepfun",
+        "keyUrl": "https://platform.stepfun.com/interface-key",
+        "defaultModel": "step-3.7-flash",
+        "models": [
+          "step-3.7-flash",
+          "step-5-preview"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "stepfun-plan",
+        "label": "阶跃 Step Plan",
+        "service": "stepfun-plan",
+        "keyUrl": "https://platform.stepfun.com/interface-key",
+        "defaultModel": "step-5-preview",
+        "models": [
+          "step-5-preview",
+          "step-3.7-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qianfan",
+        "label": "百度千帆",
+        "service": "qianfan",
+        "keyUrl": "https://console.bce.baidu.com/iam/#/iam/apikey/list",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "deepseek-v4.1-flash",
+          "ernie-4.5-turbo-vl",
+          "glm-5.1"
+        ],
+        "keyHint": "bce-v3/…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "openrouter",
+        "label": "OpenRouter",
+        "service": "openrouter",
+        "keyUrl": "https://openrouter.ai/settings/keys",
+        "defaultModel": "deepseek/deepseek-v4.1-flash",
+        "models": [
+          "deepseek/deepseek-v4.1-flash",
+          "qwen/qwen3.8-flash",
+          "qwen/qwen3.7-flash",
+          "google/gemini-3.1-flash-lite",
+          "z-ai/glm-5.3-flash"
+        ],
+        "keyHint": "sk-or-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "service": "openai",
+        "keyUrl": "https://platform.openai.com/settings/organization/api-keys",
+        "defaultModel": "gpt-6-luna",
+        "models": [
+          "gpt-6-luna",
+          "gpt-6.1-sol",
+          "gpt-6-astra"
+        ],
+        "keyHint": "sk-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "chatgpt",
+        "label": "ChatGPT",
+        "service": "chatgpt",
+        "keyUrl": "https://chatgpt.com/",
+        "defaultModel": "gpt-6-luna",
+        "models": [
+          "gpt-6-luna"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "browser",
+        "available": false
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "service": "anthropic",
+        "keyUrl": "https://platform.claude.com/settings/keys",
+        "defaultModel": "claude-haiku-5-5",
+        "models": [
+          "claude-haiku-5-5",
+          "claude-sonnet-5-5",
+          "claude-opus-5-5"
+        ],
+        "keyHint": "sk-ant-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "gemini",
+        "label": "Gemini",
+        "service": "gemini",
+        "keyUrl": "https://aistudio.google.com/apikey",
+        "defaultModel": "gemini-3.5-flash-lite",
+        "models": [
+          "gemini-3.5-flash-lite",
+          "gemini-3.8-flash",
+          "gemini-3.1-pro-preview"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "xai",
+        "label": "xAI",
+        "service": "xai",
+        "keyUrl": "https://console.x.ai/team/default/api-keys",
+        "defaultModel": "grok-4.3",
+        "models": [
+          "grok-4.3",
+          "grok-4.7"
+        ],
+        "keyHint": "xai-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "deepseek",
+        "model": "qa-pass-deepseek",
+        "keyConfigured": true
+      },
+      {
+        "id": "qwen",
+        "model": "qa-pass-qwen-preset-denied",
+        "keyConfigured": true
+      },
+      {
+        "id": "qwen-intl",
+        "model": "qa-pass-interleaved-revision",
+        "keyConfigured": true
+      },
+      {
+        "id": "kimi",
+        "model": "qa-pass-kimi",
+        "keyConfigured": true
+      },
+      {
+        "id": "kimi-intl",
+        "model": "qa-pass-kimi-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "glm",
+        "model": "qa-pass-glm",
+        "keyConfigured": true
+      },
+      {
+        "id": "glm-intl",
+        "model": "qa-pass-glm-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "doubao",
+        "model": "qa-pass-doubao",
+        "keyConfigured": true
+      },
+      {
+        "id": "minimax",
+        "model": "qa-pass-minimax",
+        "keyConfigured": true
+      },
+      {
+        "id": "minimax-intl",
+        "model": "qa-pass-minimax-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "stepfun",
+        "model": "qa-pass-stepfun",
+        "keyConfigured": true
+      },
+      {
+        "id": "stepfun-plan",
+        "model": "qa-pass-stepfun-plan",
+        "keyConfigured": true
+      },
+      {
+        "id": "qianfan",
+        "model": "qa-pass-qianfan",
+        "keyConfigured": true
+      },
+      {
+        "id": "openrouter",
+        "model": "qa-pass-openrouter",
+        "keyConfigured": true
+      },
+      {
+        "id": "openai",
+        "model": "qa-pass-openai",
+        "keyConfigured": true
+      },
+      {
+        "id": "chatgpt",
+        "model": "gpt-6-luna",
+        "keyConfigured": false
+      },
+      {
+        "id": "anthropic",
+        "model": "qa-pass-anthropic",
+        "keyConfigured": true
+      },
+      {
+        "id": "gemini",
+        "model": "qa-pass-gemini",
+        "keyConfigured": true
+      },
+      {
+        "id": "xai",
+        "model": "qa-pass-xai",
+        "keyConfigured": true
+      }
+    ],
+    "active": null,
+    "paused": false,
+    "credentialStorageAvailable": true
+  },
+  "servicesTested": [
+    "deepseek",
+    "qwen",
+    "qwen-intl",
+    "kimi",
+    "kimi-intl",
+    "glm",
+    "glm-intl",
+    "doubao",
+    "minimax",
+    "minimax-intl",
+    "stepfun",
+    "stepfun-plan",
+    "qianfan",
+    "openrouter",
+    "openai",
+    "anthropic",
+    "gemini",
+    "xai"
+  ],
+  "fixtureCalls": [
+    {
+      "service": "qwen",
+      "model": "qa-fail-qwen",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "deepseek",
+      "model": "qa-pass-deepseek",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qwen",
+      "model": "qa-fail-qwen-draft",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "deepseek",
+      "model": "qa-pass-deepseek",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "deepseek",
+      "model": "qa-fail-deepseek",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "deepseek",
+      "model": "qa-pass-deepseek",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qwen",
+      "model": "qa-fail-qwen",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qwen",
+      "model": "qa-pass-qwen",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qwen-intl",
+      "model": "qa-fail-qwen-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qwen-intl",
+      "model": "qa-pass-qwen-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "kimi",
+      "model": "qa-fail-kimi",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "kimi",
+      "model": "qa-pass-kimi",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "kimi-intl",
+      "model": "qa-fail-kimi-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "kimi-intl",
+      "model": "qa-pass-kimi-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "glm",
+      "model": "qa-fail-glm",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "glm",
+      "model": "qa-pass-glm",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "glm-intl",
+      "model": "qa-fail-glm-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "glm-intl",
+      "model": "qa-pass-glm-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "doubao",
+      "model": "qa-fail-doubao",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "doubao",
+      "model": "qa-pass-doubao",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "minimax",
+      "model": "qa-fail-minimax",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "minimax",
+      "model": "qa-pass-minimax",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "minimax-intl",
+      "model": "qa-fail-minimax-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "minimax-intl",
+      "model": "qa-pass-minimax-intl",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "stepfun",
+      "model": "qa-fail-stepfun",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "stepfun",
+      "model": "qa-pass-stepfun",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "stepfun-plan",
+      "model": "qa-fail-stepfun-plan",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "stepfun-plan",
+      "model": "qa-pass-stepfun-plan",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qianfan",
+      "model": "qa-fail-qianfan",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "qianfan",
+      "model": "qa-pass-qianfan",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "openrouter",
+      "model": "qa-fail-openrouter",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "openrouter",
+      "model": "qa-pass-openrouter",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "openai",
+      "model": "qa-fail-openai",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "openai",
+      "model": "qa-pass-openai",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "anthropic",
+      "model": "qa-fail-anthropic",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "anthropic",
+      "model": "qa-pass-anthropic",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "gemini",
+      "model": "qa-fail-gemini",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "gemini",
+      "model": "qa-pass-gemini",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "xai",
+      "model": "qa-fail-xai",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "xai",
+      "model": "qa-pass-xai",
+      "method": "test",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    },
+    {
+      "service": "xai",
+      "model": "qa-pass-xai",
+      "method": "respond",
+      "credentialUsed": true,
+      "keyMatchesEndpoint": true,
+      "aborted": false
+    }
+  ],
+  "snapshot": {
+    "revision": 65,
+    "services": [
+      {
+        "id": "deepseek",
+        "label": "DeepSeek",
+        "service": "deepseek",
+        "keyUrl": "https://platform.deepseek.com/api_keys",
+        "defaultModel": "deepseek-flash",
+        "models": [
+          "deepseek-flash",
+          "deepseek-v4-pro",
+          "deepseek-chat",
+          "deepseek-reasoner"
+        ],
+        "keyHint": "sk-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qwen",
+        "label": "通义千问",
+        "service": "qwen",
+        "keyUrl": "https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key",
+        "defaultModel": "qwen3.8-flash",
+        "models": [
+          "qwen3.8-flash",
+          "qwen3.7-flash",
+          "qwen3.8-max"
+        ],
+        "keyHint": "sk-…",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qwen-intl",
+        "label": "通义千问",
+        "service": "qwen",
+        "keyUrl": "https://modelstudio.console.alibabacloud.com/ap-southeast-1/model/settings/api-key",
+        "defaultModel": "qwen3.8-flash",
+        "models": [
+          "qwen3.8-flash",
+          "qwen3.7-flash",
+          "qwen3.8-max"
+        ],
+        "keyHint": "sk-…",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "kimi",
+        "label": "Kimi",
+        "service": "kimi",
+        "keyUrl": "https://platform.kimi.com/console/api-keys",
+        "defaultModel": "kimi-k3",
+        "models": [
+          "kimi-k3"
+        ],
+        "keyHint": "sk-…",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "kimi-intl",
+        "label": "Kimi",
+        "service": "kimi",
+        "keyUrl": "https://platform.kimi.ai/console/api-keys",
+        "defaultModel": "kimi-k3",
+        "models": [
+          "kimi-k3"
+        ],
+        "keyHint": "sk-…",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "glm",
+        "label": "智谱 GLM",
+        "service": "glm",
+        "keyUrl": "https://bigmodel.cn/usercenter/proj-mgmt/apikeys",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "glm-5.3",
+          "glm-4.6v-flashx",
+          "glm-4.6v-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "glm-intl",
+        "label": "智谱 GLM",
+        "service": "glm",
+        "keyUrl": "https://z.ai/manage-apikey/apikey-list",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "glm-5.3",
+          "glm-4.6v-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "doubao",
+        "label": "豆包",
+        "service": "doubao",
+        "keyUrl": "https://ark.volcengine.com/region:cn-beijing/apikey",
+        "defaultModel": "doubao-seed-2-1-lite-260915",
+        "models": [
+          "doubao-seed-2-1-lite-260915",
+          "doubao-seed-2-0-mini-260428"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "minimax",
+        "label": "MiniMax",
+        "service": "minimax",
+        "keyUrl": "https://platform.minimax.cn/user-center/basic-information/interface-key",
+        "defaultModel": "MiniMax-M3",
+        "models": [
+          "MiniMax-M3",
+          "MiniMax-M2.7"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "cn",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "minimax-intl",
+        "label": "MiniMax",
+        "service": "minimax",
+        "keyUrl": "https://platform.minimax.io/user-center/basic-information/interface-key",
+        "defaultModel": "MiniMax-M3",
+        "models": [
+          "MiniMax-M3",
+          "MiniMax-M2.7"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "intl",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "stepfun",
+        "label": "阶跃星辰",
+        "service": "stepfun",
+        "keyUrl": "https://platform.stepfun.com/interface-key",
+        "defaultModel": "step-3.7-flash",
+        "models": [
+          "step-3.7-flash",
+          "step-5-preview"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "stepfun-plan",
+        "label": "阶跃 Step Plan",
+        "service": "stepfun-plan",
+        "keyUrl": "https://platform.stepfun.com/interface-key",
+        "defaultModel": "step-5-preview",
+        "models": [
+          "step-5-preview",
+          "step-3.7-flash"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "qianfan",
+        "label": "百度千帆",
+        "service": "qianfan",
+        "keyUrl": "https://console.bce.baidu.com/iam/#/iam/apikey/list",
+        "defaultModel": "glm-5.3-flash",
+        "models": [
+          "glm-5.3-flash",
+          "deepseek-v4.1-flash",
+          "ernie-4.5-turbo-vl",
+          "glm-5.1"
+        ],
+        "keyHint": "bce-v3/…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "openrouter",
+        "label": "OpenRouter",
+        "service": "openrouter",
+        "keyUrl": "https://openrouter.ai/settings/keys",
+        "defaultModel": "deepseek/deepseek-v4.1-flash",
+        "models": [
+          "deepseek/deepseek-v4.1-flash",
+          "qwen/qwen3.8-flash",
+          "qwen/qwen3.7-flash",
+          "google/gemini-3.1-flash-lite",
+          "z-ai/glm-5.3-flash"
+        ],
+        "keyHint": "sk-or-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "service": "openai",
+        "keyUrl": "https://platform.openai.com/settings/organization/api-keys",
+        "defaultModel": "gpt-6-luna",
+        "models": [
+          "gpt-6-luna",
+          "gpt-6.1-sol",
+          "gpt-6-astra"
+        ],
+        "keyHint": "sk-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "chatgpt",
+        "label": "ChatGPT",
+        "service": "chatgpt",
+        "keyUrl": "https://chatgpt.com/",
+        "defaultModel": "gpt-6-luna",
+        "models": [
+          "gpt-6-luna"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "browser",
+        "available": false
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "service": "anthropic",
+        "keyUrl": "https://platform.claude.com/settings/keys",
+        "defaultModel": "claude-haiku-5-5",
+        "models": [
+          "claude-haiku-5-5",
+          "claude-sonnet-5-5",
+          "claude-opus-5-5"
+        ],
+        "keyHint": "sk-ant-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "gemini",
+        "label": "Gemini",
+        "service": "gemini",
+        "keyUrl": "https://aistudio.google.com/apikey",
+        "defaultModel": "gemini-3.5-flash-lite",
+        "models": [
+          "gemini-3.5-flash-lite",
+          "gemini-3.8-flash",
+          "gemini-3.1-pro-preview"
+        ],
+        "keyHint": "粘贴 API Key",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      },
+      {
+        "id": "xai",
+        "label": "xAI",
+        "service": "xai",
+        "keyUrl": "https://console.x.ai/team/default/api-keys",
+        "defaultModel": "grok-4.3",
+        "models": [
+          "grok-4.3",
+          "grok-4.7"
+        ],
+        "keyHint": "xai-…",
+        "region": "global",
+        "auth": "api-key",
+        "available": true
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "deepseek",
+        "model": "qa-pass-deepseek",
+        "keyConfigured": true
+      },
+      {
+        "id": "qwen",
+        "model": "qa-pass-qwen-preset-denied",
+        "keyConfigured": true
+      },
+      {
+        "id": "qwen-intl",
+        "model": "qa-pass-interleaved-revision",
+        "keyConfigured": true
+      },
+      {
+        "id": "kimi",
+        "model": "qa-pass-kimi",
+        "keyConfigured": true
+      },
+      {
+        "id": "kimi-intl",
+        "model": "qa-pass-kimi-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "glm",
+        "model": "qa-pass-glm",
+        "keyConfigured": true
+      },
+      {
+        "id": "glm-intl",
+        "model": "qa-pass-glm-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "doubao",
+        "model": "qa-pass-doubao",
+        "keyConfigured": true
+      },
+      {
+        "id": "minimax",
+        "model": "qa-pass-minimax",
+        "keyConfigured": true
+      },
+      {
+        "id": "minimax-intl",
+        "model": "qa-pass-minimax-intl",
+        "keyConfigured": true
+      },
+      {
+        "id": "stepfun",
+        "model": "qa-pass-stepfun",
+        "keyConfigured": true
+      },
+      {
+        "id": "stepfun-plan",
+        "model": "qa-pass-stepfun-plan",
+        "keyConfigured": true
+      },
+      {
+        "id": "qianfan",
+        "model": "qa-pass-qianfan",
+        "keyConfigured": true
+      },
+      {
+        "id": "openrouter",
+        "model": "qa-pass-openrouter",
+        "keyConfigured": true
+      },
+      {
+        "id": "openai",
+        "model": "qa-pass-openai",
+        "keyConfigured": true
+      },
+      {
+        "id": "chatgpt",
+        "model": "gpt-6-luna",
+        "keyConfigured": false
+      },
+      {
+        "id": "anthropic",
+        "model": "qa-pass-anthropic",
+        "keyConfigured": true
+      },
+      {
+        "id": "gemini",
+        "model": "qa-pass-gemini",
+        "keyConfigured": true
+      },
+      {
+        "id": "xai",
+        "model": "qa-pass-xai",
+        "keyConfigured": true
+      }
+    ],
+    "active": null,
+    "paused": false,
+    "credentialStorageAvailable": true
+  },
+  "credentialChecks": {
+    "isolatedProfileFiles": 51,
+    "ciphertextCount": 18,
+    "metadataDoesNotDecrypt": true,
+    "staleCiphertextUnchanged": true,
+    "plaintextOnlyCheckedLocally": true
+  },
+  "exitCode": 0,
+  "processExit": {
+    "confirmed": true,
+    "forced": false,
+    "signal": null
+  },
+  "stderr": ""
+}

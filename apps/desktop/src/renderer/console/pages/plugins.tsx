@@ -1,6 +1,6 @@
 import type { ConsolePlugin, ConsolePluginAction, ConsoleSnapshot } from '@pet/contracts';
 import { errorMessage } from '@pet/contracts';
-import type { JSX } from 'react';
+import { useEffect, useRef, type JSX } from 'react';
 
 import { Button, List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
 
@@ -9,10 +9,14 @@ import { COPY } from '../copy.js';
 import {
   contributionKind,
   describePermission,
+  hostRuntime,
+  hostSummary,
   ownerKey,
   pluginOrigin,
   pluginState,
+  taskSummary,
 } from '../labels.js';
+import { SettingsSection } from '../settings-shell.js';
 import { actionLabel } from '../use-plugin-actions.js';
 
 export interface PluginsPageProps {
@@ -29,6 +33,9 @@ export interface PluginsPageProps {
   pending: ReadonlyMap<string, ConsolePluginAction>;
   /** 发起启用/停用/卸载；确认由外壳统一处理。 */
   onAction: (plugin: ConsolePlugin, action: ConsolePluginAction) => void;
+  /** 运行状态这一块要发起「停止全部任务」；确认框仍然在外壳里。 */
+  onRequestStopAll: () => void;
+  stopping: boolean;
 }
 
 /** 插件页：真实插件列表、声明权限、状态与修复入口。 */
@@ -42,6 +49,8 @@ export function PluginsPage({
   onOpenPermissions,
   pending,
   onAction,
+  onRequestStopAll,
+  stopping,
 }: PluginsPageProps): JSX.Element {
   return (
     <>
@@ -55,6 +64,8 @@ export function PluginsPage({
             onOpenPermissions={onOpenPermissions}
             pending={pending}
             onAction={onAction}
+            onRequestStopAll={onRequestStopAll}
+            stopping={stopping}
           />
         )}
       </ConsoleStatus>
@@ -70,6 +81,8 @@ interface PluginContentProps {
   onOpenPermissions: () => void;
   pending: ReadonlyMap<string, ConsolePluginAction>;
   onAction: (plugin: ConsolePlugin, action: ConsolePluginAction) => void;
+  onRequestStopAll: () => void;
+  stopping: boolean;
 }
 
 function PluginContent({
@@ -80,12 +93,16 @@ function PluginContent({
   onOpenPermissions,
   pending,
   onAction,
+  onRequestStopAll,
+  stopping,
 }: PluginContentProps): JSX.Element {
   // 贡献条目只带 owner，按 owner 找显示名；找不到时退回技术 id。
   const names = new Map(snapshot.plugins.map((plugin) => [ownerKey(plugin.owner), plugin.name]));
 
   return (
     <>
+      <RunSection host={snapshot.host} stopping={stopping} onRequestStopAll={onRequestStopAll} />
+
       <Section
         title="已安装"
         description="插件代码按本机程序对待。启用只是让它开始运行，不会替你批准任何权限。"
@@ -355,5 +372,72 @@ function PluginPermissions({ plugin }: { plugin: ConsolePlugin }): JSX.Element {
         ))}
       </ul>
     </details>
+  );
+}
+
+/**
+ * 运行状态：这一页管的就是本机在跑的东西，所以它排在插件列表上面。
+ * 只报确切的计数——有空闲、有任务、有未就绪插件是三件不同的事；
+ * 刷新用下面「已安装」那一个，这里不放第二个。
+ */
+function RunSection({
+  host,
+  stopping,
+  onRequestStopAll,
+}: {
+  host: ConsoleSnapshot['host'];
+  stopping: boolean;
+  onRequestStopAll: () => void;
+}): JSX.Element {
+  const runtime = hostRuntime(host.runtime);
+  const busy = host.runningTasks > 0 || host.pendingWork > 0;
+  const taskRef = useRef<HTMLDivElement>(null);
+  const hadStopRef = useRef(busy);
+
+  /*
+   * 任务可能在确认框打开期间自然结束，停止入口随之卸载，焦点会掉到 body。
+   * 只在「入口刚消失且焦点确实无人接管」时，把它就近交给任务行。
+   */
+  useEffect(() => {
+    const vanished = hadStopRef.current && !busy;
+    hadStopRef.current = busy;
+    if (vanished && document.activeElement === document.body) {
+      taskRef.current?.focus();
+    }
+  }, [busy]);
+
+  return (
+    <SettingsSection title="运行状态">
+      <div className="console-status">
+        <p className="console-lead">
+          <StatusBadge tone={runtime.tone}>{runtime.text}</StatusBadge>
+          <span>{hostSummary(host.runtime, host.installedPlugins, host.activePlugins)}</span>
+        </p>
+        <div className="console-task" ref={taskRef} tabIndex={-1}>
+          <p className="console-task__text">{taskSummary(host.runningTasks, host.pendingWork)}</p>
+          {busy ? (
+            <button
+              type="button"
+              className="console-action"
+              data-testid="console-stop-all"
+              aria-disabled={stopping}
+              aria-busy={stopping}
+              onClick={() => {
+                if (!stopping) {
+                  onRequestStopAll();
+                }
+              }}
+            >
+              {stopping ? '正在停止…' : '停止全部任务'}
+            </button>
+          ) : null}
+        </div>
+        {host.unreadyPlugins > 0 || host.pendingRestartPlugins > 0 ? (
+          <p className="console-muted">
+            {host.unreadyPlugins} 个扩展未就绪，{host.pendingRestartPlugins} 个需要重启后生效。
+          </p>
+        ) : null}
+      </div>
+    </SettingsSection>
   );
 }

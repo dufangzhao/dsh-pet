@@ -1,6 +1,7 @@
 import type { ApplicationPage, ApplicationPreferences, JsonObject } from '@pet/contracts';
 import { APPLICATION_PLUGIN_IDS } from '@pet/contracts';
 
+import type { SettingsNavIcon } from './icons.js';
 import type { SettingsNavItem } from './settings-shell.js';
 import type { ApplicationState } from './use-application.js';
 
@@ -29,15 +30,30 @@ const PAGE_PLUGIN_VIEWS: Readonly<Record<string, AppView>> = {
   [APPLICATION_PLUGIN_IDS.voice]: 'voice',
 };
 
+/*
+ * 折叠侧栏上那一枚图标：按视图给语义，不按页面 id 猜。
+ * 通用配置页（外部插件自己加的那几页）统一用面板格子——这里不认识它是什么页面，
+ * 也就不能替它挑一个会说谎的形状。
+ */
+const VIEW_ICON: Readonly<Record<AppView, SettingsNavIcon>> = {
+  start: 'play',
+  persona: 'bot',
+  appearance: 'shirt',
+  conversation: 'message',
+  voice: 'activity',
+  generic: 'panel',
+};
+
 /** 恢复类入口：日常五页之外仍然可达，但不占主视线。 */
 export const RECOVERY_ITEMS: readonly SettingsNavItem[] = [
-  { id: 'plugins', label: '扩展', quiet: true },
-  { id: 'permissions', label: '权限与数据', quiet: true },
-  { id: 'about', label: '关于', quiet: true },
+  { id: 'plugins', label: '扩展', icon: 'puzzle', quiet: true },
+  { id: 'permissions', label: '权限与数据', icon: 'shield', quiet: true },
+  { id: 'about', label: '关于', icon: 'info', quiet: true },
 ];
 
 export const VIEW_SUMMARY: Readonly<Record<AppView, string>> = {
-  start: '先看它现在能不能回话，再接你自己的 Key。',
+  // 开始页没有整页说明：要用户判断的那句话在「连接模型」那一节里，只写一次。
+  start: '',
   persona: '它怎么称呼你、按什么说话，以及它真正读到的那段提示词。',
   appearance: '桌面上的样子：形态、配色、大小和是否显示。',
   conversation: '和它说过的话、真实的触碰与应用提示，都记在同一条时间线里。',
@@ -49,7 +65,7 @@ export const VIEW_SUMMARY: Readonly<Record<AppView, string>> = {
 export function navItemsOf(pages: readonly ApplicationPage[]): SettingsNavItem[] {
   return [...pages]
     .sort((a, b) => a.order - b.order)
-    .map((page) => ({ id: page.id, label: page.title }));
+    .map((page) => ({ id: page.id, label: page.title, icon: VIEW_ICON[appViewOf(page)] }));
 }
 
 /**

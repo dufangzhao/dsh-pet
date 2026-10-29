@@ -1,0 +1,24 @@
+{
+  "package": "@lobehub/icons-static-svg",
+  "version": "1.101.0",
+  "license": "MIT",
+  "source": "https://github.com/lobehub/lobe-icons",
+  "integrity": "sha512-Ob6WJOjXauLP/A1qZ9OlPlrncPNbwsIGH+ToFdxWt3APtaaMKtbIBGqJ0/LY2eBeUwTQuG7GpUw9LwPiv7OTdg==",
+  "services": {
+    "deepseek": "deepseek-color.svg",
+    "qwen": "qwen-color.svg",
+    "kimi": "kimi-color.svg",
+    "glm": "chatglm-color.svg",
+    "doubao": "doubao-color.svg",
+    "minimax": "minimax-color.svg",
+    "stepfun": "stepfun-color.svg",
+    "stepfun-plan": "stepfun-color.svg",
+    "qianfan": "baiducloud-color.svg",
+    "openrouter": "openrouter.svg",
+    "openai": "openai.svg",
+    "chatgpt": "openai.svg",
+    "anthropic": "anthropic.svg",
+    "gemini": "gemini-color.svg",
+    "xai": "xai.svg"
+  }
+}
