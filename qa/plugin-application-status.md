@@ -29,3 +29,15 @@ GUI使用真实页面按钮与输入完成初始名字/配色/语音/回应选�
 ## 发行边界
 
 当前无本项目安装包/更新发布源；更新状态与动作适配器仅以实际状态fixture验证，界面不显示虚构版本。Coopanion产品源码/角色资产未复用。Cortico0.2.7/tsx4.23.15固定版本及许可已记录，分发依赖与权重仍按[第三方说明](../THIRD_PARTY_NOTICES.md)分别处理。
+
+## Start设计评审与可复用流程（2026-10-29）
+
+在已接受的开始栏动作上完成5个DeepSeek QoderCN max展示方案，普通入口保留基准；独立[评审启动器](../Start-Design-Lab.cmd)与[截图/取舍](screenshots/start-design-lab/comparison.md)已交付。UI Designer实际回报1/3，UX/Frontend咨询因共享3席容量未返回，不冒称共识。
+
+- 最终pnpmcheck通过（jobfd371cc416024221）：类型、448项桌面测试及其他workspace/QA测试、lint、格式、构建；包含真实插槽按钮禁用状态5项回归。原生先抓到saveEnabled正值直接传disabled的问题，已由DeepSeek修正并补组件层断言。
+- [当前正常入口回归](screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/acceptance-report.json)：12组全过，2次真实应用进程正常退出。
+- [五版评审原生报告](screenshots/start-design-lab/start-lab-1793272859631-b3d0f795/acceptance-report.json)：7组全过，5版各一次真实poke+user+pet，同一Core记录；跨版Key/model内存草稿、真实pause/visibility、spine/stage/workspaces退出撤试色、880×600/zoom/keyboard/reducedMotion、进程重启保留；2次正常退出。15幅原生截图+1幅对照已核阅代表性浅/深/最小窗口。
+- Morphicons2.0.2为实装MIT引擎；glyph是本项目自绘。Uiverse3条MIT许可逐页核实，仅作可供性参考后独立改写；无Lucide第二套依赖，无Coopanion产品代码/角色移植。完整NOTICE在源码同目录。
+- [replicate-then-redesign](../.agents/skills/replicate-then-redesign/SKILL.md)已入项目并可被skilltool发现；格式校验与[独立气泡前向计划测试](replica-redesign-skill-results.md)完成。新气泡功能没有在此任务实现，规划产物不冒称native通过。
+
+模型协议/真人账号/费用验证范围沿用前述已接受证据；本轮没有真人授权或付费模型请求。正常资料目录未用于评审；flag单独运行使用.cache/pet-start-design-lab-profile，自动验收使用唯一隔离profile。最终评审打开元数据见[start-design-review-open.json](start-design-review-open.json)。

@@ -1,0 +1,565 @@
+{
+  "status": "passed",
+  "at": "2026-10-29T11:20:04.868Z",
+  "profileId": "coop-start-1793272804867-49bf2eb9",
+  "checks": [
+    {
+      "name": "source-and-real-profile",
+      "status": "passed",
+      "elapsedMs": 2783
+    },
+    {
+      "name": "shell-order-geometry-and-rail",
+      "status": "passed",
+      "elapsedMs": 1471
+    },
+    {
+      "name": "vendor-regions-and-browser-pick",
+      "status": "passed",
+      "elapsedMs": 509
+    },
+    {
+      "name": "theme-presets-and-review-screenshots",
+      "status": "passed",
+      "elapsedMs": 833
+    },
+    {
+      "name": "palette-invalid-copy-save-and-variants",
+      "status": "passed",
+      "elapsedMs": 881
+    },
+    {
+      "name": "palette-four-second-delete-and-leave-undo",
+      "status": "passed",
+      "elapsedMs": 4666
+    },
+    {
+      "name": "minimum-layout-and-native-zoom",
+      "status": "passed",
+      "elapsedMs": 341
+    },
+    {
+      "name": "model-key-save-with-real-network-denial",
+      "status": "passed",
+      "elapsedMs": 976
+    },
+    {
+      "name": "native-show-hide-and-dress",
+      "status": "passed",
+      "elapsedMs": 726
+    },
+    {
+      "name": "preview-poke-and-chat-share-Core-history",
+      "status": "passed",
+      "elapsedMs": 3039
+    },
+    {
+      "name": "guide-from-hidden-pet",
+      "status": "passed",
+      "elapsedMs": 1102
+    },
+    {
+      "name": "restart-keeps-user-preferences",
+      "status": "passed",
+      "elapsedMs": 3328
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "rail-collapsed-1200x800",
+      "file": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/rail-collapsed-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "light-1200x800",
+      "file": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/light-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "dark-1200x800",
+      "file": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/dark-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "palette-1200x800",
+      "file": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/palette-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "scale": 1,
+      "zoom": 1
+    },
+    {
+      "name": "minimum-880x600",
+      "file": "qa/screenshots/coopanion-start/coop-start-1793272804867-49bf2eb9/minimum-880x600.png",
+      "width": 880,
+      "height": 600,
+      "scale": 1,
+      "zoom": 1
+    }
+  ],
+  "shutdown": [
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    },
+    {
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "treeKillCode": null
+    }
+  ],
+  "errors": [],
+  "rendererRemoteOrigins": [],
+  "approvals": [
+    {
+      "kind": "capability-use",
+      "approved": true
+    },
+    {
+      "kind": "network",
+      "approved": false
+    }
+  ],
+  "geometry": [
+    {
+      "label": "collapsed 1200x800",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": "body",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": ".pk-settings",
+          "client": 1200,
+          "scroll": 1200
+        },
+        {
+          "selector": ".pk-settings__main",
+          "client": 1098,
+          "scroll": 1098
+        },
+        {
+          "selector": ".pk-settings__pane",
+          "client": 1024,
+          "scroll": 1024
+        }
+      ]
+    },
+    {
+      "viewport": [
+        1200,
+        800
+      ],
+      "openRail": 248,
+      "foldedRail": 72,
+      "guideOnRight": true,
+      "icons": 8
+    },
+    {
+      "kind": "native-minimum",
+      "visible": true,
+      "bounds": {
+        "x": 360,
+        "y": 116,
+        "width": 880,
+        "height": 600
+      },
+      "contentBounds": {
+        "x": 368,
+        "y": 147,
+        "width": 864,
+        "height": 561
+      },
+      "minimum": [
+        880,
+        600
+      ],
+      "zoom": 1
+    },
+    {
+      "label": "880x600 at 100%",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": "body",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": ".pk-settings",
+          "client": 880,
+          "scroll": 880
+        },
+        {
+          "selector": ".pk-settings__main",
+          "client": 602,
+          "scroll": 602
+        },
+        {
+          "selector": ".pk-settings__pane",
+          "client": 562,
+          "scroll": 562
+        }
+      ]
+    },
+    {
+      "label": "minimum native zoom in",
+      "dimensions": [
+        {
+          "selector": "html",
+          "client": 733,
+          "scroll": 733
+        },
+        {
+          "selector": "body",
+          "client": 733,
+          "scroll": 733
+        },
+        {
+          "selector": ".pk-settings",
+          "client": 733,
+          "scroll": 733
+        },
+        {
+          "selector": ".pk-settings__main",
+          "client": 460,
+          "scroll": 460
+        },
+        {
+          "selector": ".pk-settings__pane",
+          "client": 420,
+          "scroll": 420
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Parent built the current Main, worker, builtin admission and renderer before this serial run.",
+    "This launches the unpackaged application with a unique real userData under .cache.",
+    "--no-sandbox is the existing native QA exception; this is not OS-sandbox evidence.",
+    "No fake media device, fake UI, scripted provider, fake bridge, localStorage write, or external sign-in is used.",
+    "The synthetic model Key is saved only to the isolated native credential store; its network permission is denied through the real pet dialog.",
+    "Model success and OAuth callback behavior are covered by separate offline probes; this runner does not fabricate them."
+  ],
+  "limitations": [
+    "Playwright pointer input does not prove physical desktop hit testing or native microphone capture.",
+    "Renderer request observation is not a packet capture of worker traffic; the model guard is the actual network approval denial.",
+    "Screenshots use the same recorded content viewport at zoom 1; visual parity still requires reference review."
+  ],
+  "source": {
+    "referenceVersion": "0.2.10",
+    "fingerprints": {
+      "start": {
+        "path": "apps/desktop/src/renderer/console/pages/start.tsx",
+        "sha256": "97c2a667c68afd23733c04fce214f219966aa6b0b301672d4ad6b23015b9dc96"
+      },
+      "sections": {
+        "path": "apps/desktop/src/renderer/console/start-designs/sections.tsx",
+        "sha256": "aa396975849ab394dba4747caac6d60a9b553bb4fddd9f8ed07e37cf1c097a35"
+      },
+      "registry": {
+        "path": "apps/desktop/src/renderer/console/start-designs/registry.tsx",
+        "sha256": "9c2ed392200b93e49a0a5e0b33bbabeaa9b7e9ff82de7a7c756a1ecc9b47f7e7"
+      },
+      "lab": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.tsx",
+        "sha256": "e434bc258e1f60ca1c2f00f2ae7638a4ab022f5cfc56212ac3c518dd4d89528b"
+      },
+      "catalog": {
+        "path": "apps/desktop/src/renderer/console/start-designs/catalog.ts",
+        "sha256": "3842e38d35aecee1b41dfd4c227fdc9b630770196593fc0eb63b60dcacf48a13"
+      },
+      "labIcons": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab-icons.tsx",
+        "sha256": "e06702ebd9398bb3a6d51bf489f024cb08a734d44b1bd165ad66ed1ae8e690d6"
+      },
+      "labCss": {
+        "path": "apps/desktop/src/renderer/console/start-designs/lab.css",
+        "sha256": "51cba0e14397de02cbe07a43a6ad6ce4daef4733e79a243e0882d443d85409e1"
+      },
+      "startCss": {
+        "path": "apps/desktop/src/renderer/console/pages/start.css",
+        "sha256": "4fc41940918ba0d6902e41f27ce274cc85e8b2dee7a2fde3d029006d170796a4"
+      },
+      "main": {
+        "path": "apps/desktop/src/main/index.ts",
+        "sha256": "f0db3da5654046b6b5d4405d7a3c0b67902eeca7cb1a25a76025c3b42c821301"
+      },
+      "preload": {
+        "path": "apps/desktop/src/preload/index.ts",
+        "sha256": "f0f0295e42932fe680dbe3c5a9aed8b906bf65a34c6a2c5a90bb25cfb2ae897b"
+      },
+      "presentation": {
+        "path": "packages/contracts/src/design-lab.ts",
+        "sha256": "90e58eb18c9fdba82462ff8a31d71b358af07978409ce779c40a11933bc078a9"
+      },
+      "shell": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.tsx",
+        "sha256": "64e260804c0536683abf49023a32de405d96fb8c5a5cf4e5773cb7d3bceefa9d"
+      },
+      "shellCss": {
+        "path": "apps/desktop/src/renderer/console/settings-shell.css",
+        "sha256": "dae24473e32f3f517cfdccb165be7c3f4ddfe2bd45868b287d523ab5828d728d"
+      },
+      "preview": {
+        "path": "apps/desktop/src/renderer/console/pet-preview.tsx",
+        "sha256": "c4e068b3dc562fb51f5341410aa750fe87e37782ebb1c63496db30c393475aad"
+      },
+      "composer": {
+        "path": "apps/desktop/src/renderer/pet/PetComposer.tsx",
+        "sha256": "49b83d169b91a8d1fa2e8574ab0d8606fc5814f54d5c046b057e7b0b6e033e1b"
+      },
+      "avatar": {
+        "path": "apps/desktop/src/renderer/pet/PetAvatar.tsx",
+        "sha256": "0e361e6ddcc61fc03c90c846820626977c4980d93daddf1f2d38c4ccb80bed75"
+      },
+      "petDialog": {
+        "path": "apps/desktop/src/renderer/pet/PetDialog.tsx",
+        "sha256": "c05676265d0030c8209874166fa6a91e94439a109d738ff9a7ed0c4d54c7fb29"
+      },
+      "petMenu": {
+        "path": "apps/desktop/src/renderer/pet/PetMenu.tsx",
+        "sha256": "346f09753feca1acc25d39797cc69a6683ceb45215853b3e851cead4c329a692"
+      },
+      "theme": {
+        "path": "apps/desktop/src/renderer/console/theme-editor.tsx",
+        "sha256": "cb89837cd213172dae4867e47b83be13555865f8729074310ef6dded642a4d24"
+      },
+      "console": {
+        "path": "apps/desktop/src/renderer/console/console-app.tsx",
+        "sha256": "dacba14f959678ec0b214506e1fb6e3fae5fd8647dee050d9f205baed65afbc5"
+      },
+      "reference": {
+        "path": "Coopanion/console/features/home/index.ts",
+        "sha256": "7918d7f95497bd8f51eaadae1e9bd854eb05e7da1550c00f9dec60299634e812"
+      },
+      "referenceCss": {
+        "path": "Coopanion/console/features/home/home.css",
+        "sha256": "1a50bf461df410d09ff209afd6601742765a99e3007976ceb2413067df29ce92"
+      },
+      "referenceStrings": {
+        "path": "Coopanion/console/features/home/strings.ts",
+        "sha256": "1ca92d5fe09729777fe2efc6b836d6153b8c5f95ef36946c6dae8ac2ba6a9781"
+      }
+    },
+    "selectors": [
+      {
+        "owner": "shell",
+        "selector": "设置页导航",
+        "present": true
+      },
+      {
+        "owner": "shell",
+        "selector": "收起侧栏",
+        "present": true
+      },
+      {
+        "owner": "shell",
+        "selector": "展开侧栏",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "start-guide",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "pet-hide",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "pet-show",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "pet-dress",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-pick-",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-save",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-test",
+        "present": true
+      },
+      {
+        "owner": "start",
+        "selector": "model-signin",
+        "present": true
+      },
+      {
+        "owner": "preview",
+        "selector": "桌宠预览",
+        "present": true
+      },
+      {
+        "owner": "avatar",
+        "selector": "pet-avatar",
+        "present": true
+      },
+      {
+        "owner": "composer",
+        "selector": "pet-composer-input",
+        "present": true
+      },
+      {
+        "owner": "composer",
+        "selector": "pet-composer-send",
+        "present": true
+      },
+      {
+        "owner": "petDialog",
+        "selector": "pet-dialog-choice-",
+        "present": true
+      },
+      {
+        "owner": "petMenu",
+        "selector": "pet-settings",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "调色盘",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "明暗挡位",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "方案名",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "theme-color__hex",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "复制为新方案",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "保存当前方案",
+        "present": true
+      },
+      {
+        "owner": "theme",
+        "selector": "再次点击确认删除",
+        "present": true
+      }
+    ],
+    "dependencies": {
+      "startThemeMounted": true,
+      "previewComposerMounted": true,
+      "startContainsRequiredHeadings": true
+    }
+  },
+  "pausedInput": {
+    "pausedBlocksSend": true,
+    "pausedBlocksCapture": true,
+    "collapsedRunAccessible": true
+  },
+  "vendors": {
+    "groups": 15,
+    "regionalToggle": true,
+    "browserFieldsHidden": true,
+    "externalSignInStarted": false
+  },
+  "palette": {
+    "tokens": 36,
+    "groups": 5,
+    "invalidHexExcluded": true,
+    "variantsSavedIndependently": true,
+    "deleteConfirmationMs": 4085,
+    "leaveRevertedUnsavedPreview": true
+  },
+  "zoom": {
+    "nativeSendInputEvent": true,
+    "reset": 1
+  },
+  "model": {
+    "savedKeyPresent": true,
+    "active": false,
+    "offlineModePreserved": true,
+    "deniedNetworkApprovals": 1
+  },
+  "desktop": {
+    "nativeHide": true,
+    "nativeShow": true,
+    "previewRemainsVisible": true,
+    "dressUsesOwnedPage": true
+  },
+  "previewControls": {
+    "fullAvatar": true,
+    "independentDayNight": true,
+    "keyboardMenu": true,
+    "sharedVoiceConfiguration": true,
+    "unavailableMicDisabled": true,
+    "boundedDrag": true,
+    "keyboardPoke": true,
+    "pokeWithDragDisabled": true
+  },
+  "history": {
+    "pokeEntries": 4,
+    "explicitPokeActions": 3,
+    "userEntries": 1,
+    "replyEntries": 1,
+    "mode": "demo",
+    "secondRecorder": false
+  },
+  "guide": {
+    "savedVisible": true,
+    "nativePetShown": true,
+    "settingsHidden": true,
+    "actualDialog": true
+  },
+  "persistence": {
+    "retainedHistoryEntries": 19,
+    "profileRevision": 7,
+    "themeMode": "dark",
+    "customVariant": true,
+    "railCollapsed": true,
+    "keyPresentWithoutActivation": true
+  },
+  "mainLogBytes": 290
+}

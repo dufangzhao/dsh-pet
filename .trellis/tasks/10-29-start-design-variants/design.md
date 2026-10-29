@@ -1,0 +1,3 @@
+# Design
+
+Main validates an unpackaged start-design-lab flag, chooses isolated lab userData (unique existing acceptance profile in tests), and supplies a fixed readonly presentation marker through the existing sandboxed preload. The console URL stays unchanged. ConsoleApp remains the one useApplication/useDemo/useModelConnection/theme owner; frontend extracts the minimum reusable Start controller/fragments and adds five presentation modules plus a review selector. No production choice is inferred. Asset scopes and reduced-motion are shared; provider branding remains referential. Expert reports finalize layout direction before presentation coding.

@@ -34,3 +34,4 @@ export * from './demo.js';
 export * from './application.js';
 export * from './model-connection.js';
 export * from './model-services.js';
+export * from './design-lab.js';

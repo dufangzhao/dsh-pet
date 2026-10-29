@@ -1,6 +1,6 @@
 import { createModelConnectionBridge } from './model-connection-bridge.js';
 import { createApplicationBridge } from './application-bridge.js';
-import { APPLICATION_IPC } from '@pet/contracts';
+import { APPLICATION_IPC, START_DESIGN_LAB_ARG } from '@pet/contracts';
 import { contextBridge, ipcRenderer } from 'electron';
 import {
   CONSOLE_IPC,
@@ -18,6 +18,10 @@ import { createDemoBridge } from './demo-bridge.js';
 import { DEMO_IPC } from '@pet/contracts';
 import { createHostStatusBridge } from './host-bridge.js';
 import { PET_IPC, type PetPrototypeBridge, type PetReply, type PetSnapshot } from '@pet/contracts';
+
+if (process.argv.includes(START_DESIGN_LAB_ARG)) {
+  contextBridge.exposeInMainWorld('petDesignLab', Object.freeze({ enabled: true }));
+}
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<PetReply<T>> {
   try {

@@ -1,7 +1,7 @@
 import { ModelOAuth } from './model-oauth.js';
 import { ModelConnectionController } from './model-connection-controller.js';
 import { handleModelConnectionRequest } from './model-connection-request.js';
-import { MODEL_CONNECTION_IPC } from '@pet/contracts';
+import { MODEL_CONNECTION_IPC, START_DESIGN_LAB_FLAG } from '@pet/contracts';
 import { ApplicationController } from './application-controller.js';
 import { handleApplicationRequest } from './application-request.js';
 import { APPLICATION_IPC, APPLICATION_DEFAULTS, type ApplicationPreferences } from '@pet/contracts';
@@ -37,13 +37,19 @@ import { createPetWindow, type PetWindowController } from './windows/pet-window.
 import { handlePetRequest, isTrustedPetSource, type PetRequestSource } from './ipc-request.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const startDesignLab = !app.isPackaged && process.argv.includes(START_DESIGN_LAB_FLAG);
 const rendererPath = path.resolve(here, '../renderer/pet/index.html');
 const expectedUrl = pathToFileURL(rendererPath).href;
 const consolePath = path.resolve(here, '../renderer/console/index.html');
 const consoleUrl = pathToFileURL(consolePath).href;
-const settings = new ConsoleWindow(consolePath, path.resolve(here, '../preload/index.cjs'), () => {
-  demo?.onConsoleClosed();
-});
+const settings = new ConsoleWindow(
+  consolePath,
+  path.resolve(here, '../preload/index.cjs'),
+  () => {
+    demo?.onConsoleClosed();
+  },
+  startDesignLab,
+);
 const channels = [
   PET_IPC.snapshot,
   PET_IPC.interaction,
@@ -128,13 +134,15 @@ if (!app.isPackaged) {
     '../../../../.cache/',
     process.argv.includes('--demo-acceptance') || acceptanceFlag !== undefined
       ? acceptanceProfile
-      : process.argv.includes('--m1-host-smoke')
-        ? 'pet-host-smoke-profile'
-        : process.argv.includes('--m0-key-lab')
-          ? 'pet-key-lab-profile'
-          : process.argv.includes('--m0-mouse-lab')
-            ? 'pet-mouse-lab-profile'
-            : 'pet-prototype-profile',
+      : startDesignLab
+        ? 'pet-start-design-lab-profile'
+        : process.argv.includes('--m1-host-smoke')
+          ? 'pet-host-smoke-profile'
+          : process.argv.includes('--m0-key-lab')
+            ? 'pet-key-lab-profile'
+            : process.argv.includes('--m0-mouse-lab')
+              ? 'pet-mouse-lab-profile'
+              : 'pet-prototype-profile',
   );
   mkdirSync(profile, { recursive: true });
   app.setPath('userData', profile);

@@ -27,6 +27,10 @@
 - Cortico 0.2.7：MIT，Copyright (c) 2026 Phantivia，发布提交 cb9ddbd685bcccba1f29905098648f46a79b3862。保留随包 LICENSE；来源 https://github.com/Pal-AI-Lab/Cortico 。此依赖不包含 Coopanion 产品代码或角色资产。
 - tsx 4.23.15：MIT，作者 privatenumber，用于 Cortico TypeScript/ESM 加载。保留随包许可；来源 https://github.com/privatenumber/tsx 。
 
+## Start design lab assets
+
+The isolated review presentation uses morphicons2.0.2 (MIT, Copyright2026Guillermo) for SVG state transitions, with original24-unit glyph data. It adds one runtime package and no transitive runtime dependencies. Three restrained Uiverse affordances are adapted to semantic controls and project tokens: [alexruix switch](https://uiverse.io/alexruix/silent-otter-72), [Maximinodotpy input](https://uiverse.io/Maximinodotpy/thin-sheep-13), [cssbuttons-io button](https://uiverse.io/cssbuttons-io/wonderful-baboon-62). Their individual pages each supply an MIT notice naming the author. Full notices are retained in [the lab asset notices](apps/desktop/src/renderer/console/start-designs/asset-notices.txt). Morphicons supplies animation, not the glyph family; no Lucide runtime package or Coopanion product asset is included.
+
 ## LobeHub provider icons
 
 The settings model selector uses13 selected SVGs from @lobehub/icons-static-svg1.101.0, MIT, Copyright(c)2023LobeHub. Source: https://github.com/lobehub/lobe-icons. Exact package integrity and service mapping are in [the icon manifest](apps/desktop/src/renderer/console/vendor-icons/manifest.json); the full [MIT notice](apps/desktop/src/renderer/console/vendor-icons/LICENSE.txt) accompanies them. Provider names and marks identify their respective services. No runtime icon dependency is installed.

@@ -1,0 +1,115 @@
+/*
+ * bench 的栅格：848 的正文轨道 = 464 舞台 + 24 + 360 检查器，配色在轨道下方整宽。
+ *
+ * 只写这一版的摆放。颜色、圆角、字号一律取 --pk-* 令牌，不写死值，因此深色与浅色、
+ * 用户自己的配色都自动跟随；这里也没有自建的过渡动画，减少动画无需额外覆盖。
+ * 对共享插槽只做容器级覆盖（flex 方向、宽度、换行），不碰控件本身的样子。
+ */
+
+.sd-bench {
+  display: grid;
+  gap: var(--sd-gap, 20px);
+  min-width: 0;
+}
+
+.sd-bench__track {
+  display: grid;
+  grid-template-columns: minmax(0, 464px) minmax(0, 360px);
+  gap: 24px;
+  align-items: start;
+  max-width: 848px;
+  margin-inline: auto;
+  min-width: 0;
+}
+
+/* 视线在左（舞台），键盘在右起（检查器）：格位负责把 DOM 顺序翻成视觉顺序。 */
+.sd-bench__inspector {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.sd-bench__stage {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.sd-bench__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sd-bench__mark {
+  display: inline-flex;
+  align-self: center;
+  color: var(--pk-muted);
+}
+
+.sd-bench__inspector,
+.sd-bench__stage {
+  min-width: 0;
+}
+
+.sd-bench__inspector {
+  display: grid;
+  gap: 12px;
+}
+
+.sd-bench__colors {
+  min-width: 0;
+}
+
+/*
+ * 360 的检查器里：模型、Key 与「保存并开始」纵向排。
+ * 共享那条 .start-fields 是横向 flex（模型 240 + Key 吃剩下），栏宽不够时整排折行会让
+ * 按钮比输入框先掉下去，所以这一栏里改成一列一件、按钮满宽——窄窗口不适用。
+ */
+@media (min-width: 901px) {
+  .sd-bench__inspector .start-fields {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .sd-bench__inspector .start-field,
+  .sd-bench__inspector .start-field--model {
+    flex: none;
+    min-width: 0;
+  }
+
+  .sd-bench__inspector .start-fields .pk-button {
+    width: 100%;
+  }
+}
+
+/*
+ * 880 一列：格位取消，DOM 顺序就是视觉顺序（接线 → 舞台 → 配色）。
+ * 舞台与检查器之间补一条分隔线，靠位置而不是靠颜色说明"这是两块"。
+ */
+@media (max-width: 900px) {
+  .sd-bench__track {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    max-width: none;
+  }
+
+  .sd-bench__inspector,
+  .sd-bench__stage {
+    grid-column: 1;
+  }
+
+  .sd-bench__stage {
+    padding-top: 20px;
+    border-top: 1px solid var(--pk-border);
+  }
+
+  .sd-bench__title {
+    flex-wrap: wrap;
+  }
+}

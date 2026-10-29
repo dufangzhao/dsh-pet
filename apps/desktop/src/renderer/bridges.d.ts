@@ -4,10 +4,12 @@ import type {
   DemoBridge,
   ModelConnectionBridge,
   SettingsLauncher,
+  StartDesignLabPresentation,
 } from '@pet/contracts';
 
 declare global {
   interface Window {
+    readonly petDesignLab?: StartDesignLabPresentation;
     readonly petConsole?: ConsoleBridge;
     readonly petDemo?: DemoBridge;
     readonly petSettings?: SettingsLauncher;

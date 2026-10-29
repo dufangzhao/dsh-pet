@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "profile": ".cache\\pet-start-design-lab-profile",
+  "normalProfileUsed": false,
+  "availableVariants": [
+    "bench",
+    "switchboard",
+    "spine",
+    "stage",
+    "workspaces"
+  ],
+  "initialReview": "bench",
+  "fixedConsoleUrl": true,
+  "compatibilityFlags": false,
+  "paidModelRequest": false
+}

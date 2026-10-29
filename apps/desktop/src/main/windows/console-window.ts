@@ -1,10 +1,12 @@
 import { BrowserWindow } from 'electron';
+import { START_DESIGN_LAB_ARG } from '@pet/contracts';
 export class ConsoleWindow {
   #window: BrowserWindow | undefined;
   constructor(
     private readonly entry: string,
     private readonly preload: string,
     private readonly onClosed: () => void = () => {},
+    private readonly startDesignLab = false,
   ) {}
   get current(): BrowserWindow | undefined {
     return this.#window;
@@ -22,7 +24,7 @@ export class ConsoleWindow {
       height: 800,
       minWidth: 880,
       minHeight: 600,
-      title: 'AI 桌宠 · 设置',
+      title: this.startDesignLab ? 'AI 桌宠 · 开始方案评审' : 'AI 桌宠 · 设置',
       show: false,
       autoHideMenuBar: true,
       backgroundColor: '#f7f7f5',
@@ -31,6 +33,7 @@ export class ConsoleWindow {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
+        additionalArguments: this.startDesignLab ? [START_DESIGN_LAB_ARG] : [],
       },
     });
     this.#window = window;

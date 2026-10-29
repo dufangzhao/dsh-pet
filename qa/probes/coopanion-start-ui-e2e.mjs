@@ -11,9 +11,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
 const executablePath = path.join(path.dirname(require.resolve('electron/package.json')), 'dist/electron.exe');
-const profileId = 'coop-start-' + Date.now() + '-' + randomUUID().slice(0, 8);
+const designLab = process.argv.includes('--design-lab');
+const profileId = (designLab ? 'start-lab-' : 'coop-start-') + Date.now() + '-' + randomUUID().slice(0, 8);
 const profilePath = path.join(root, '.cache', 'pet-demo-acceptance-' + profileId);
-const output = path.join(root, 'qa/screenshots/coopanion-start', profileId);
+const output = path.join(root, designLab ? 'qa/screenshots/start-design-lab' : 'qa/screenshots/coopanion-start', profileId);
 const TOTAL_MS = 240000;
 const fixtureKey = 'QA_UI_MODEL_KEY_' + randomUUID();
 const fixturePrompt = 'UI acceptance offline message ' + randomUUID();
@@ -30,6 +31,16 @@ const redact = value => {
 };
 const sourceFiles = {
   start: 'apps/desktop/src/renderer/console/pages/start.tsx',
+  sections: 'apps/desktop/src/renderer/console/start-designs/sections.tsx',
+  registry: 'apps/desktop/src/renderer/console/start-designs/registry.tsx',
+  lab: 'apps/desktop/src/renderer/console/start-designs/lab.tsx',
+  catalog: 'apps/desktop/src/renderer/console/start-designs/catalog.ts',
+  labIcons: 'apps/desktop/src/renderer/console/start-designs/lab-icons.tsx',
+  labCss: 'apps/desktop/src/renderer/console/start-designs/lab.css',
+  startCss: 'apps/desktop/src/renderer/console/pages/start.css',
+  main: 'apps/desktop/src/main/index.ts',
+  preload: 'apps/desktop/src/preload/index.ts',
+  presentation: 'packages/contracts/src/design-lab.ts',
   shell: 'apps/desktop/src/renderer/console/settings-shell.tsx',
   shellCss: 'apps/desktop/src/renderer/console/settings-shell.css',
   preview: 'apps/desktop/src/renderer/console/pet-preview.tsx',
@@ -45,6 +56,10 @@ const sourceFiles = {
 };
 async function inspectSource() {
   const contents = {}, fingerprints = {};
+  if (designLab) for (const id of ['bench','switchboard','spine','stage','workspaces']) {
+    sourceFiles[id] = 'apps/desktop/src/renderer/console/start-designs/variants/' + id + '.tsx';
+    sourceFiles[id+'Css'] = 'apps/desktop/src/renderer/console/start-designs/variants/' + id + '.css';
+  }
   for (const [name, relative] of Object.entries(sourceFiles)) {
     const bytes = await fs.readFile(path.join(root, relative));
     contents[name] = bytes.toString('utf8');
@@ -59,16 +74,16 @@ async function inspectSource() {
     ['composer', 'pet-composer-send'], ['petDialog', 'pet-dialog-choice-'], ['petMenu', 'pet-settings'],
     ['theme', '调色盘'], ['theme', '明暗挡位'], ['theme', '方案名'], ['theme', 'theme-color__hex'],
     ['theme', '复制为新方案'], ['theme', '保存当前方案'], ['theme', '再次点击确认删除'],
-  ].map(([owner, selector]) => ({ owner, selector, present: contents[owner].includes(selector) }));
+  ].map(([owner, selector]) => ({ owner, selector, present: (owner === 'start' ? contents.sections : contents[owner]).includes(selector) }));
   return { referenceVersion: version, fingerprints, selectors,
     dependencies: {
-      startThemeMounted: /<ThemeEditor\b/.test(contents.start + contents.console),
+      startThemeMounted: /<ThemeEditor\b/.test(contents.sections + contents.console),
       previewComposerMounted: /<PetComposer\b/.test(contents.preview),
       startContainsRequiredHeadings: ['连接模型', '我的桌宠'].every(label => contents.start.includes(label)),
     } };
 }
 
-const names = ['source-and-real-profile', 'shell-order-geometry-and-rail', 'vendor-regions-and-browser-pick',
+const names = designLab ? ['source-and-real-profile','five-layouts-and-draft-preservation','each-layout-actions-and-shared-history','native-pause-and-visibility','theme-disclosure-and-undo','minimum-layout-zoom-and-reduced-motion','lab-restart-persistence'] : ['source-and-real-profile', 'shell-order-geometry-and-rail', 'vendor-regions-and-browser-pick',
   'theme-presets-and-review-screenshots', 'palette-invalid-copy-save-and-variants',
   'palette-four-second-delete-and-leave-undo', 'minimum-layout-and-native-zoom',
   'model-key-save-with-real-network-denial', 'native-show-hide-and-dress',
@@ -174,11 +189,11 @@ async function chooseScheme(label) {
   await expect.poll(selectedScheme).toBe(label);
 }
 async function noOverflow(label) {
-  const dimensions = await page.evaluate(() => ['html', 'body', '.pk-settings', '.pk-settings__main', '.pk-settings__pane'].map(selector => {
+  const dimensions = await page.evaluate(selectors => selectors.map(selector => {
     const node = document.querySelector(selector);
     if (!node) throw new Error('Missing real layout node: ' + selector);
     return { selector, client: node.clientWidth, scroll: node.scrollWidth };
-  }));
+  }), ['html', 'body', '.pk-settings', '.pk-settings__main', '.pk-settings__pane', ...(designLab ? ['.lab__canvas'] : [])]);
   report.geometry.push({label,dimensions});
   if(!dimensions.every(item=>item.scroll<=item.client+1))report.overflowOffenders=await page.evaluate(()=>[...document.querySelectorAll('*')].filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1).slice(0,20).map(node=>({tag:node.tagName,class:typeof node.className==='string'?node.className:'',client:node.clientWidth,scroll:node.scrollWidth,right:node.getBoundingClientRect().right,minWidth:getComputedStyle(node).minWidth,overflowX:getComputedStyle(node).overflowX})));
   assert.ok(dimensions.every(item => item.scroll <= item.client + 1), 'Horizontal overflow: ' + label);
@@ -189,7 +204,7 @@ async function capture(name) {
     await page.evaluate(()=>{window.scrollTo(0,0);document.querySelector('.pk-settings__main')?.scrollTo(0,0);});
     await expect.poll(()=>page.evaluate(()=>Math.round(window.scrollY+(document.querySelector('.pk-settings__main')?.scrollTop??0)))).toBe(0);
   }
-  assert.ok(report.screenshots.length < 16, 'Screenshot budget exceeded');
+  assert.ok(report.screenshots.length < (designLab ? 32 : 16), 'Screenshot budget exceeded');
   assert.equal((await windowState('console')).zoom, 1, 'Review screenshots require native zoom 1');
   const size = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scale: devicePixelRatio }));
   const file = path.join(output, name + '.png');
@@ -206,7 +221,7 @@ async function launch() {
   const remaining = nativeDeadline - Date.now();
   assert.ok(remaining > 35000, 'Insufficient time for another launch and bounded shutdown');
   app = await _electron.launch({ executablePath,
-    args: ['--no-sandbox', path.join(root, 'apps/desktop'), '--demo-acceptance=' + profileId, '--show-settings'],
+    args: ['--no-sandbox', path.join(root, 'apps/desktop'), '--demo-acceptance=' + profileId, '--show-settings', ...(designLab ? ['--start-design-lab'] : [])],
     env, timeout: 30000 });
   closing = undefined;
   const child = app.process();
@@ -300,7 +315,137 @@ async function denyRealModelNetwork() {
   }
   await expect.poll(async () => (await security()).pending.length).toBe(0);
 }
+const designIds = ['bench','switchboard','spine','stage','workspaces'];
+async function pickDesign(id) {
+  await page.getByTestId('lab-pick-'+id).click();
+  await expect(page.getByTestId('lab-canvas')).toHaveAttribute('data-design',id);
+}
+async function revealDesign(id, part) {
+  const target=part==='connect'?page.getByTestId('start-connect-form'):part==='pet'?preview():theme();
+  if(await target.isVisible())return;
+  if(id==='spine')await page.getByTestId('spine-toggle-'+part).click();
+  else if(id==='workspaces')await page.getByTestId('workspaces-tab-'+part).click();
+  else if(id==='stage'&&part!=='pet')await page.getByTestId('stage-tray-'+part).click();
+  else {
+    const ancestor=target.locator('xpath=ancestor::details[not(@open)]/summary').first();
+    if(await ancestor.count())await ancestor.click();
+  }
+  await expect(target).toBeVisible();
+}
+async function designFrame(name) {
+  await page.evaluate(()=>{window.scrollTo(0,0);document.querySelector('.pk-settings__main')?.scrollTo(0,0);});
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await capture(name);
+}
+async function runDesignLab() {
+  assert.equal(process.platform,'win32');
+  await fs.mkdir(output,{recursive:true});
+  await step('source-and-real-profile',async()=>{
+    report.source=await inspectSource();
+    await launch();
+    const state=await application();
+    if(state.dialog){await pet.getByTestId('pet-dialog-choice-later').click();await expect.poll(async()=>(await application()).dialog).toBeNull();}
+    await navigate('start');await nativeZoomKey('0');await resizeContent(1200,800);
+    assert.equal(await page.evaluate(()=>window.petDesignLab?.enabled),true);
+    assert.equal(new URL(page.url()).search,'');assert.equal(new URL(page.url()).hash,'');
+    await expect(page.getByTestId('start-design-lab')).toBeVisible();
+    for(const id of designIds)await expect(page.getByTestId('lab-pick-'+id)).toBeEnabled();
+    assert.equal((await demo()).settings.replyMode,'demo');
+    report.lab={isolatedProfile:true,fixedConsoleUrl:true,availableVariants:designIds};
+  });
+  await step('five-layouts-and-draft-preservation',async()=>{
+    for(const id of designIds){
+      await pickDesign(id);await noOverflow(id+' light1200');await designFrame(id+'-light-1200x800');
+    }
+    for (const id of designIds) {
+      await pickDesign(id);
+      await expect(page.getByTestId('start-guide')).toHaveCount(1);
+      await revealDesign(id,'connect');await expect(page.getByTestId('model-test')).toHaveCount(1);
+      await expect(page.getByTestId('key-input')).toHaveCount(1);
+      await expect(page.getByTestId('model-save')).toBeDisabled();
+    }
+    await pickDesign('bench');await revealDesign('bench','connect');
+    await page.getByTestId('model-pick-deepseek').click();
+    await page.getByTestId('model-input').fill('layout-draft-model');await page.getByTestId('key-input').fill(fixtureKey);
+    for(const id of [...designIds,'bench']){
+      await pickDesign(id);await revealDesign(id,'connect');
+      await expect(page.getByTestId('model-input')).toHaveValue('layout-draft-model');
+      await expect(page.getByTestId('key-input')).toHaveValue(fixtureKey);
+      await expect(page.getByTestId('model-save')).toBeEnabled();
+    }
+    await page.getByTestId('key-input').fill('');
+    await page.getByTestId('model-input').fill((await modelState()).services.find(s=>s.id==='deepseek').models[0]);
+    report.drafts={allFivePreserved:true,privateKeyMemoryOnly:true,uniqueControlInstances:true};
+  });
+  await step('each-layout-actions-and-shared-history',async()=>{
+    report.variantActions=[];
+    for(const id of designIds){
+      await pickDesign(id);await revealDesign(id,'connect');
+      await expect(page.locator('[data-testid^="model-pick-"]')).toHaveCount(15);
+      await page.getByTestId('model-pick-qwen').click();await expect(page.getByTestId('model-region')).toBeVisible();
+      await page.getByTestId('model-region').click();await expect(page.getByTestId('key-input')).toHaveValue('');
+      await page.getByTestId('model-pick-chatgpt').click();await expect(page.getByTestId('model-signin')).toBeVisible();
+      await expect(page.getByTestId('key-input')).toHaveCount(0);
+      await page.getByTestId('model-pick-deepseek').click();
+      await revealDesign(id,'pet');await expect(preview().getByTestId('pet-avatar')).toHaveCount(1);
+      const before=(await application()).history;const cursor=before.at(-1)?.cursor??0;
+      await preview().getByTestId('pet-poke').click();
+      await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>cursor&&e.reaction==='poke').length).toBe(1);
+      if (!(await preview().getByTestId('pet-composer-input').isVisible())) await preview().getByTestId('pet-chat-toggle').click();
+      const text=fixturePrompt+'-'+id;
+      await preview().getByTestId('pet-composer-input').fill(text);await preview().getByTestId('pet-composer-send').click();
+      await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>cursor&&e.kind==='user').length).toBe(1);
+      await expect.poll(async()=>(await application()).history.filter(e=>e.cursor>cursor&&e.kind==='pet').length).toBe(1);
+      const state=await demo();assert.equal(state.recordingStartedAt,null);assert.equal(state.settings.replyMode,'demo');
+      report.variantActions.push({id,vendorGroups:15,regionAndBrowserReachable:true,poke:1,user:1,reply:1,realCoreHistory:true});
+    }
+  });
+  await step('native-pause-and-visibility',async()=>{
+    const toggle=page.getByTestId('model-pause');await toggle.click();
+    await expect.poll(async()=>(await modelState()).paused).toBe(true);assert.equal((await demo()).canSend,false);
+    await toggle.click();await expect.poll(async()=>(await modelState()).paused).toBe(false);
+    await pickDesign('bench');await revealDesign('bench','pet');await page.getByTestId('pet-hide').click();
+    await expect.poll(async()=>(await windowState('pet')).visible).toBe(false);
+    await pickDesign('stage');await expect(page.getByTestId('pet-show')).toBeVisible();await page.getByTestId('pet-show').click();
+    await expect.poll(async()=>(await windowState('pet')).visible).toBe(true);
+    report.nativeReceipts={pausedBlocksInput:true,visibilityCrossLayout:true};
+  });
+  await step('theme-disclosure-and-undo',async()=>{
+    await pickDesign('workspaces');await revealDesign('workspaces','theme');
+    await chooseMode('dark');await paletteOpen();const before=await paper();
+    await paletteHex().fill('#e8eaf0');await expect.poll(paper).toBe('#e8eaf0');
+    await page.getByTestId('workspaces-tab-connect').click();await expect.poll(paper).toBe(before);
+    for (const id of ['spine','stage']) {
+      await pickDesign(id); await revealDesign(id,'theme'); await paletteOpen(); const savedPaper=await paper();
+      await paletteHex().fill('#e2e9f2'); await expect.poll(paper).toBe('#e2e9f2');
+      await page.getByTestId(id==='spine'?'spine-toggle-theme':'stage-tray-theme').click(); await expect.poll(paper).toBe(savedPaper);
+    }
+    for(const id of designIds){await pickDesign(id);await noOverflow(id+' dark1200');await designFrame(id+'-dark-1200x800');}
+    report.themeLab={globalModeShared:true,unsavedPreviewWithdrawnOnPanelLeave:true};
+  });
+  await step('minimum-layout-zoom-and-reduced-motion',async()=>{
+    await resizeContent(880,600);await page.emulateMedia({reducedMotion:'reduce'});
+    for(const id of designIds){
+      await pickDesign(id);await noOverflow(id+' minimum');await designFrame(id+'-minimum-880x600');
+      for(const part of ['connect','pet','theme']){await revealDesign(id,part);await noOverflow(id+' '+part+' minimum');}
+    }
+    await pickDesign('workspaces');await nativeZoomKey('+');await expect.poll(async()=>(await windowState('console')).zoom).toBeGreaterThan(1);
+    await noOverflow('workspaces nativezoom');await nativeZoomKey('0');await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.getByTestId('lab-pick-bench').focus();await page.keyboard.press('Enter');await expect(page.getByTestId('lab-canvas')).toHaveAttribute('data-design','bench');
+    report.minimum={allFive:true,nativeZoom:true,keyboardSelect:true,reducedMotion:true};
+  });
+  await step('lab-restart-persistence',async()=>{
+    const cursors=(await application()).history.map(e=>e.cursor);await close();await launch();await navigate('start');
+    await expect(page.getByTestId('start-design-lab')).toBeVisible();await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+    const retained=new Set((await application()).history.map(e=>e.cursor));assert.ok(cursors.every(c=>retained.has(c)));
+    assert.equal((await demo()).settings.replyMode,'demo');
+    report.labPersistence={retainedHistoryEntries:cursors.length,themeMode:'dark',isolatedProfile:true};
+  });
+  assert.equal(report.errors.length,0);assert.equal(report.rendererRemoteOrigins.length,0);report.status='passed';
+}
+
 async function run() {
+  if (designLab) return runDesignLab();
   assert.equal(process.platform, 'win32', 'This UI acceptance targets Windows x64');
   assert.equal(process.arch, 'x64');
   for (const relative of ['apps/desktop/dist/main/index.mjs', 'apps/desktop/dist/runtime/worker.cjs',

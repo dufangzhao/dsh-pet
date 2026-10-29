@@ -16,10 +16,14 @@ for (const key of [
 ]) {
   if (process.env[key]) env[key] = process.env[key];
 }
-const child = spawn(electron, [fileURLToPath(new URL('.', import.meta.url))], {
-  env,
-  stdio: 'inherit',
-});
+const child = spawn(
+  electron,
+  [fileURLToPath(new URL('.', import.meta.url)), ...process.argv.slice(2)],
+  {
+    env,
+    stdio: 'inherit',
+  },
+);
 child.once('error', () => {
   console.error('Could not start desktop prototype');
   process.exitCode = 1;

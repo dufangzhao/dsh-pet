@@ -1,0 +1,113 @@
+/*
+ * 评审入口自己的那一栏：选择器、计数与一句取舍。版式画布不加任何装饰，
+ * 五个方案看起来像不像同一件产品，靠的就是这块地方不替它们打扮。
+ */
+
+.lab {
+  display: grid;
+  gap: 10px;
+}
+
+.lab__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  background: var(--pk-surface);
+}
+
+.lab__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pk-muted);
+}
+
+.lab__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lab__choice {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--pk-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pk-muted);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.lab__choice:hover:not(:disabled) {
+  border-color: var(--pk-border-strong);
+  color: var(--pk-text);
+}
+
+.lab__choice.is-on {
+  border-color: var(--pk-accent);
+  background: var(--pk-accent-soft);
+  color: var(--pk-accent-text);
+  font-weight: 600;
+}
+
+.lab__choice:disabled {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.lab__count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--pk-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lab__note {
+  margin: 0;
+  max-width: 92ch;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--pk-muted);
+}
+
+.lab__canvas {
+  min-width: 0;
+}
+
+.lab-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pk-muted);
+}
+
+/*
+ * 五个版式共用的画布约束，只写一次：版式文件不再各自定宽、定距，
+ * 也就不出现五种"差一点点"的正文宽度。正常入口不导入这份文件，天然隔开。
+ */
+.lab__canvas {
+  --sd-gap: 20px;
+
+  display: grid;
+  gap: var(--sd-gap);
+  max-width: 1120px;
+  min-width: 0;
+  /* 版式排不下时在格子里自己处理，不把横向滚动条留给整个窗口。 */
+  overflow-x: hidden;
+}
+
+/* 版式里"一节"的共通节奏：标题层级由各版式自己定，这里只管间距与分隔。 */
+.lab__canvas :is(.sd-block) {
+  display: grid;
+  gap: 12px;
+}
+
+.lab__canvas .sd-block + .sd-block {
+  margin-top: var(--sd-gap);
+  padding-top: var(--sd-gap);
+  border-top: 1px solid var(--pk-border);
+}

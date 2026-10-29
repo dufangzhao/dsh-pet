@@ -1,0 +1,29 @@
+{
+  "id": "replica-redesign",
+  "name": "replica-redesign",
+  "title": "Replica to differentiated design workflow",
+  "description": "Deliver five distinct functional Electron Start interfaces and a reusable replica-to-redesign skill, based on the accepted Start implementation.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-10-29",
+  "completedAt": "2026-10-29",
+  "branch": "feat/start-design-lab",
+  "base_branch": "feat/coopanion-start",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-29-start-design-variants",
+    "10-29-replica-redesign-skill"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Complete:5real DeepSeek layouts and reusable skill; final full check and serial normal12/lab7 native acceptance passed. Live review uses isolated profile. Local commit/archive pending; no push, live-account or paid-model calls.",
+  "meta": {}
+}
