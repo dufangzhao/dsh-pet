@@ -41,7 +41,7 @@ Start 的展示片段由新控件生成后交给版式摆放；实际状态与�
 | 基础原生   | [完整报告](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/acceptance-report.json) 10/10 通过，27 幅 1200×800 / 880×600 截图，zoom 1；三个进程 code 0 / signal null / forced false；无 renderer 异常或 renderer 远端请求                                                                 |
 | 功能与状态 | 正常入口/样板、五版草稿/实际 Core 回应与历史、保存后网络拒绝、暂停/显隐/向导、预览拖动/键盘/菜单、36 色 CRUD/明暗变体、抽屉退出撤试色、五版最小窗口/缩放/焦点/减少动画、应用重启均通过                                                                                                                  |
 | 工作区检查 | [实际完整输出](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/workspace-check.log)：typecheck、523 项桌面测试（52 文件）、其余 workspace 测试、QA 120 通过/1 跳过/0 失败、lint、格式、build 全部通过；这次检查先于下述折叠栏 CSS 增量                                                   |
-| 独立视觉   | UI Finish-Gate Reviewer [实际复审 PASS](../.trellis/tasks/10-29-original-start-controls/research/visual-review.md)：原创语言符合，头像/窄场景关闭，无 P1/P2；厂商名称折行是可选优化                                                                                                                     |
+| 独立视觉   | UI Finish-Gate Reviewer [实际复审 PASS](../.trellis/tasks/archive/2026-10/10-29-original-start-controls/research/visual-review.md)：原创语言符合，头像/窄场景关闭，无 P1/P2；厂商名称折行是可选优化                                                                                                                     |
 | 折叠栏增量 | [最终稳态报告](screenshots/original-controls/collapsed-1793300116862-5ff40377/acceptance-report.json)通过；此前外壳所有者 43 项定点测试及格式检查通过。1200×800 与 880×600 均等到 72px 后测量，三档主题分别通过指针与键盘激活，标签/点击区完整可见，2px 焦点线与 2px 偏移无裁切；6 图、单次进程 clean 0 |
 
 基础与最终增量源码摘要、47 项当前文件指纹及仅有的两项变化（probe、侧栏 CSS）见[合并证据](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/integration-evidence.json)。已核阅正常浅色、浅深控件样板、深色工作台与最小窗口及两张五版对照：头像可见，窄预览工具提示未逐字挤压，实际 22 字 Core 回复保持两行。保存、探测、当前在用与默认端点的 Key 状态分别报告；Stage 兄弟抽屉事件不会撤掉刚打开的配色工作区。
@@ -50,4 +50,4 @@ Start 的展示片段由新控件生成后交给版式摆放；实际状态与�
 
 已通过发布的 CAS 文件操作移除本任务六次失败运行的 57 幅 PNG，保留失败报告、全部接受图和前任务退回稿；44 幅保留图的前后摘要一致，见[清理审计](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/failed-capture-cleanup.json)。
 
-设计规则与材料来源统一见[设计系统账](../.trellis/tasks/10-29-original-start-controls/research/design-system.md)；本轮没有新增外部控件代码、字体下载或图标包。真人登录、付费模型成功和麦克风采集不在本轮新原生证明范围。
+设计规则与材料来源统一见[设计系统账](../.trellis/tasks/archive/2026-10/10-29-original-start-controls/research/design-system.md)；本轮没有新增外部控件代码、字体下载或图标包。真人登录、付费模型成功和麦克风采集不在本轮新原生证明范围。
