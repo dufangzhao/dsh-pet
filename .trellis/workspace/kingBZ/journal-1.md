@@ -107,3 +107,36 @@ Delivered five ordinary plugin pages, shared Cortico interactions/profile/prompt
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: 原创控件与桌宠软件视觉语言
+
+**Date**: 2026-10-30
+**Task**: 原创控件与桌宠软件视觉语言
+**Branch**: `feat/original-start-controls`
+
+### Summary
+
+按用户纠正替换复刻表现控件而非只改布局：3个DeepSeek max作者完成七件原生控件、原创外壳、模型搜索/事实回执、新预览与主题工作室，正常开始和五排法统一。独立视觉复审PASS，完整工程检查通过(523桌面测试)，主体原生10/10与折叠栏CSS补充验证通过，共33张最终截图。保留自定义配色/模式与既有业务所有者；skill补独立组件语言检查。工作已本地提交并保留独立评审窗口，不推送、不付费调用。
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `52779d4` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
