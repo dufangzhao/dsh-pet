@@ -4,7 +4,7 @@
 
 - URL: https://uiverse.io/alexruix/silent-otter-72
 - License: MIT (per-element panel)
-- Notice: MIT License Copyright - 2026 alexruix (Alex Ruiz) Permission is hereby granted, free of charge, to any person obtaining a copy of 
+- Notice: MIT License Copyright - 2026 alexruix (Alex Ruiz) Permission is hereby granted, free of charge, to any person obtaining a copy of
 - Readable material: CSS true, HTML true under materials/.
 - Adoption: Adapt only meaningful affordance; scoped semantic controls and existing tokens.
 
@@ -12,7 +12,7 @@
 
 - URL: https://uiverse.io/Maximinodotpy/thin-sheep-13
 - License: MIT (per-element panel)
-- Notice: MIT License Copyright - 2026 Maximinodotpy (Maxim Maeder) Permission is hereby granted, free of charge, to any person obtaining a 
+- Notice: MIT License Copyright - 2026 Maximinodotpy (Maxim Maeder) Permission is hereby granted, free of charge, to any person obtaining a
 - Readable material: CSS true, HTML true under materials/.
 - Adoption: Adapt only meaningful affordance; scoped semantic controls and existing tokens.
 
