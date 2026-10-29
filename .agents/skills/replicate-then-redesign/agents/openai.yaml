@@ -1,0 +1,4 @@
+interface:
+  display_name: "先复刻，再重设计"
+  short_description: "Verify a replica, then redesign around its behavior."
+  default_prompt: "Use $replicate-then-redesign to verify an existing surface and create differentiated functional UI options while preserving its current architecture."
