@@ -61,3 +61,4 @@ Correct: systemSegments builds from pending, while current remains the last ackn
 Wrong: global snapshot-read sequence identifies a microphone session or stale async completion clears the next capture.
 
 Correct: the active AbortController/session token owns capture across navigation; any cleanup after await must recheck that identity. Temporary history-page requests have a separate projection sequence and cannot repopulate a cleared record.
+Normal startup regression: isolated --demo-acceptance checks do not cover an existing normal-profile process. Updating dist while the old main/preload/worker remains alive can mix new renderer files with the old API and registry. Before normal-launch acceptance, verify/close only the owned stale instance, preserve existing profile/vault/history, and confirm all primary page contributions plus native pet visibility using the normal profile. A repeat launch must reuse the current instance.
