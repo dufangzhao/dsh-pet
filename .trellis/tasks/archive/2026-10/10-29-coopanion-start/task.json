@@ -15,12 +15,12 @@
   "branch": "feat/coopanion-start",
   "base_branch": "feat/plugin-settings-cortico",
   "worktree_path": null,
-  "commit": null,
+  "commit": "029382c",
   "pr_url": null,
   "subtasks": [],
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Implemented and verified Start/shared shell. Full check, 13 protected model groups, 12 real native UI groups, and preserved normal-profile startup pass. All code/review findings closed. Local-only work commit/archive/journal follow existing authorization; no push/live-account or paid requests.",
+  "notes": "Completed and committed locally as 029382c. Full project check, 13 model groups, 12 native UI groups and preserved normal startup passed. No push or paid/live-account calls. Normal app remains open for review.",
   "meta": {}
 }

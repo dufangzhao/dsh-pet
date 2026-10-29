@@ -20,4 +20,4 @@
 
 用户指南docs/34-plugin-pet-guide.md、单一QA状态qa/plugin-application-status.md及契约已同步。前端实际由Qoder CN DeepSeek max完成；商汤未向当前会话开放，未声称试跑成功。三个UI/QA/复核助手均已结束，只有原资料应用任务有意保持运行。
 
-剩余收尾：工作提交→归档→journal→Goal完成。当前goal goal-f1e1d91c-b55a-468f-aed7-9b8a95a7559e revision4 active/armed，不推进下一栏目，不推送。
+工作提交029382c已完成，归档与journal按Trellis流程收尾。当前goal goal-f1e1d91c-b55a-468f-aed7-9b8a95a7559e的目标已达到；保留原资料应用打开供审阅，不推进下一栏目，不推送。
