@@ -12,10 +12,14 @@ Observed refinements applied: explicit plan/read-only branch and scoped trace li
 
 The evaluator's final transport notification reported a failed finish after its explicit artifact handoff; artifact presence and content were independently read. This is evidence of the skill's planning behavior, not a completed bubble implementation or runtime verification. No claim is made about that future work.
 
-## Current real usage
+## Historical real usage
 
 The earlier Start exercise reused the accepted capability contract, implemented an original kit and five layouts, and preserved exact asset/license and native evidence in the [original controls review](original-controls-review.md). Its accepted checks remain a historical behavior baseline. The user then rejected one kit arranged five ways.
 
 The current [five-style case](start-style-families-review.md) uses four new presentation families (Precision, Hearth, Folio and Prism) plus the labelled retained Workbench, each with an actual full-window frame and control/state board. Their provider controls are a native select/table, radio cards, a text index of pressed buttons, a command dialog/listbox and retained square-pin tiles. They share behavior and authoritative data owners. The updated skill now explicitly separates styles, layouts and selected-direction refinement; multiple styles require separate rendered kits and pairwise structural comparisons, with consolidation after selection.
 
 The updated skill and evidence template passed quick_validate.py on 2026-10-30. This is structural validation; the earlier independent forward-use evidence remains separate. Parent and independent QA read actual frames and controls; the expert tool returned no report (0/1), so no expert PASS is claimed. The final five-style native run passed22/22 with61 real captures and complete workspace checks passed (593desktop tests). Current source/build fingerprints and exact coverage are linked from the [canonical style review](start-style-families-review.md).
+
+## Current source-adoption usage
+
+The user explicitly chose existing website controls as the foundation. The workflow now distinguishes direct adoption, reference-led adaptation and original design before selecting a variation axis. The actual basis is five related andrew-demchenk0 Uiverse components from the pinned official Galaxy archive, with preserved raw files/notices and actual Tabler resources supported by Morphicons. The raw/adapted first milestone passed11 native checks and81 material comparisons; normal Start/shared-frame acceptance passed 14 functional cases and a final 6-case visual/source follow-up, with the complete workspace gate passing (634 desktop tests). Scope and current results are maintained only in the [website-sourced control review](site-sourced-controls-review.md). quick_validate.py passed for the updated skill and template; no new independent forward-use test is claimed.

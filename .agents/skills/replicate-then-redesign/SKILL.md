@@ -41,6 +41,14 @@ Generate the number of options requested. Make each option differ in information
 
 Use available design guidance selectively. The user's product and reference constrain the exploration; a generic design-system search must not replace them.
 
+## Choose the design foundation
+
+Honor whether the user wants direct source adoption, reference-led adaptation, or an original design. When the user requests a set from specific websites as the foundation, visit those sources and select actual existing components before designing a new kit. Original components merely described as inspired by those sites do not satisfy source adoption.
+
+Preserve exact upstream links, authors, versions or revisions, original source and license text. Map every adopted control to its raw source and integrated implementation. Show original and integrated examples side by side, retain the characteristic shape/material/interaction, and explain necessary semantic, responsive or token adaptations. Clearly mark controls added as extensions. Do not imply that several related snippets are an official complete design system.
+
+A source-led direction can be one coherent set even after a previous multi-style exploration. Do not keep generating original alternatives when the user has now asked to choose a website foundation. Generic design guidance must support that source choice rather than replace it with a new aesthetic plan.
+
 ## Choose the variation axis
 
 Distinguish multi-style exploration, alternative layouts within one product system, and refinement of a selected direction. If the user asks for four or five styles or different kinds of controls, one shared kit in four or five grids does not satisfy the request. Record the requested count on the correct axis before implementation.
@@ -49,11 +57,11 @@ For multi-style exploration, each candidate needs its own visual and interaction
 
 Compare candidates pairwise. Require observable differences in several visual dimensions and more than one meaningful control structure or interaction, rather than just color, radius or layout. Inspect real controls and complete frames side by side before claiming the count. Label any retained existing system accurately. Consolidate one kit across the product only after a direction is selected or the user explicitly requests harmonization.
 
-## Establish an independent component language
+## Establish a coherent component language
 
 When the user wants a product of their own, redesign includes the controls and interaction vocabulary, not only page grids. Inventory the reference's identifying primitives: buttons, fields, provider/item pickers, segmented tracks, badges, notices, menus, preview tools and theme chrome. State which must be replaced.
 
-Define one coherent original kit with typography/spacing/surface/radius/color/motion rules and real normal, focus, disabled, pending, error and selected states. Build a small component/state board so that the vocabulary can be inspected before it is spread across options. Use a fitting licensed set or design the set; a collection of unrelated gallery snippets is not a design system.
+For an authorized original-design route, define one coherent original kit. For direct adoption, derive the kit from the chosen existing source components. In either case document typography/spacing/surface/radius/color/motion rules and real normal, focus, disabled, pending, error and selected states. Build a small component/state board so that the vocabulary can be inspected before it is spread across options. Use a fitting licensed set or design the set; a collection of unrelated gallery snippets is not a design system.
 
 Separate functional reuse from presentation reuse. Reuse controllers as state and action callbacks. Do not feed old fully rendered JSX controls into different layout slots and call the result original. A shared rendered slot is suitable only after its actual controls have been redesigned. Renaming CSS classes or applying a new palette to the old widget is not evidence of replacement.
 

@@ -20,6 +20,15 @@ Distinguish stored data from successful connection, accepted work from completed
 
 Use the requested count. If removing the palette makes two options identical, explain or strengthen their structural difference.
 
+## Design foundation and direct adoption
+
+Record the requested foundation: direct existing-source adoption, reference-led adaptation, or original design. For source adoption, select the actual set before generating a new visual plan.
+
+| Control role | Exact source URL / author / revision | Raw source and license | Preserved visual / interaction features | Integrated implementation | Necessary adaptation or added extension |
+| --- | --- | --- | --- | --- | --- |
+
+Show raw and integrated versions in the same state. Compare characteristic geometry, material and behavior; do not count a rewritten original control as adopted merely because its page is cited. Distinguish an official set from related published snippets chosen as one foundation.
+
 ## Variation axis and style range
 
 Record the requested count and axis: styles, layouts, states, or refinement. Identify retained baseline candidates.

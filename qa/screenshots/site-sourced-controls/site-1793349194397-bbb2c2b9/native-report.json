@@ -1,0 +1,74 @@
+{
+  "status": "audit-passed",
+  "profileId": "site-1793349194397-bbb2c2b9",
+  "at": "2026-10-30T08:33:14.398Z",
+  "checks": [
+    {
+      "name": "five-byte-exact-sources-notices-and-seventeen-actual-glyphs",
+      "status": "passed",
+      "elapsedMs": 43
+    }
+  ],
+  "screenshots": [],
+  "fidelity": [],
+  "geometry": [],
+  "identity": [],
+  "approvals": [],
+  "themes": [],
+  "errors": [],
+  "remoteOrigins": [],
+  "shutdown": [],
+  "limitations": [
+    "Real unpackaged Electron and actual Core in an isolated profile. Product writes use visible controls; bridge reads provide evidence only.",
+    "No fake bridge/IPC, forced click, direct route bypass, media auto-consent, live account, installation or paid model call.",
+    "Raw sources are the frozen official Galaxy archive; the website returned Cloudflare 403 in an ordinary browser. No access-control bypass.",
+    "Upstream has no dark, disabled, busy or ARIA design. These are labelled adapters/extensions; exact source geometry is compared in default light mode.",
+    "Pointer input verifies renderer geometry and real drag receipts, not physical desktop hit testing. Microphone availability is checked without recording.",
+    "Renderer request observation is not packet capture. The actual model network approval is denied before provider contact."
+  ],
+  "sourceAudit": {
+    "revision": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+    "controls": [
+      {
+        "slug": "afraid-squid-51",
+        "sha256": "11cfdd7d14b5b7c3268f8baa33298dac310ad81916cc129ee50fe3d30691f7f0",
+        "vendorBytes": 593,
+        "byteExact": true,
+        "notice": true
+      },
+      {
+        "slug": "polite-stingray-67",
+        "sha256": "02e77dbd3c0a45d5beff3c249fcc066b1914fb10951dca95983643fc48e7401e",
+        "vendorBytes": 704,
+        "byteExact": true,
+        "notice": true
+      },
+      {
+        "slug": "empty-penguin-100",
+        "sha256": "4a3cb08d7e4684838d47c56aec476432f54f1715bc9ab09d9256dbdd4731c4c7",
+        "vendorBytes": 1527,
+        "byteExact": true,
+        "notice": true
+      },
+      {
+        "slug": "stupid-seahorse-9",
+        "sha256": "d0b435d6c672d2aec197fa54810d5cfd944881263fb6acd65f7e0c75a5262a05",
+        "vendorBytes": 1571,
+        "byteExact": true,
+        "notice": true
+      },
+      {
+        "slug": "afraid-cougar-9",
+        "sha256": "791fda9edbce04a8e5d6a70279db2851340708074ce3af69fe38ce766192a338",
+        "vendorBytes": 5321,
+        "byteExact": true,
+        "notice": true
+      }
+    ],
+    "completeMitPreserved": true,
+    "icons": 17,
+    "iconVersion": "2.0.2",
+    "noResearchRuntimeImports": true
+  },
+  "mainLogBytes": 0
+}

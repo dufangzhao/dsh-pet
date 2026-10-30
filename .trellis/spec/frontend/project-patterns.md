@@ -20,6 +20,14 @@ Reuse the owning product primitives by default rather than emulate controls with
 
 Evidence: [button.tsx](../../../packages/ui-kit/src/button.tsx), [field.tsx](../../../packages/ui-kit/src/field.tsx), [dialog.tsx](../../../packages/ui-kit/src/dialog.tsx). Changes to pet choice dialogs must preserve the same keyboard/focus principles while also honoring native pet hit/drag geometry.
 
+## Website-sourced foundations
+
+If the user chooses existing website controls as the foundation, retain the licensed raw files and exact authors/links/revisions, then build a small namespaced adapter. Preserve the control-specific shape, material and interaction; do not turn matching author credits into an original replacement kit. Distinguish adopted source, necessary adaptation and genuinely new extensions in one manifest. Vendor runtime assets with the UI rather than importing task directories that move on archival.
+
+For CSS-only original examples, use an isolated style boundary compatible with the existing CSP. Keep raw bytes untouched and stop native form submission at the preview host so a sample cannot navigate the trusted console. The current app uses an open ShadowRoot because frame-src is none. Source defaults belong in the existing builtin palette; source variables read the same effective theme and preview values as the editor. Do not add a separate visual override that hides selected builtin schemes.
+
+For responsive source controls, check the actual child bounds and hard shadow inside their host, not only document scrollWidth. A native fieldset can constrain its own box while a grid content track leaves the fixed-width radio child overflowing. The sourced footer uses ordinary block flow; native tests cover expanded/collapsed containment at both window widths.
+
 ## Preview geometry and menu interaction
 
 A menu and its trigger must participate in the outside-dismiss containment check, including when the chosen layout renders them beside the visual scene. Keep that interaction boundary separate from the scene ref used for visibility receipts and drag limits; widening the observed scene just to keep a menu open changes those geometry contracts. Verify actual menu callbacks, Escape/outside dismissal and a real drag in the native window.
