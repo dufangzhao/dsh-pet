@@ -31,9 +31,11 @@ export interface StartPageProps extends StartOwners {
   app: ApplicationState;
   demo: DemoState;
   models: ModelConnectionState;
+  /** 评审实例里回到「整窗风格家族」的那条路；正常入口没有这一条。 */
+  onOpenStyles?: (() => void) | undefined;
 }
 
-export function StartPage(props: StartPageProps): JSX.Element {
+export function StartPage({ onOpenStyles, ...props }: StartPageProps): JSX.Element {
   const owners: StartOwners = {
     app: props.app,
     demo: props.demo,
@@ -46,7 +48,7 @@ export function StartPage(props: StartPageProps): JSX.Element {
   const context = useMemo<StartContext>(() => ({ ...owners, model }), [owners, model]);
 
   return designLabEnabled() ? (
-    <StartDesignLab context={context} designs={START_DESIGNS} />
+    <StartDesignLab context={context} designs={START_DESIGNS} onOpenStyles={onOpenStyles} />
   ) : (
     <>{BASELINE_START_DESIGN.render(context, startSlotsOf(model))}</>
   );

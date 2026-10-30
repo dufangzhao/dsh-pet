@@ -1,0 +1,175 @@
+/**
+ * Workbench 那一整扇窗：标题板、状态栏、正文、页脚，形状全部取自 original-ui/design-tokens.css。
+ *
+ * 这一家允许吃 pb 令牌与那套板件（它就是这套板件的候选）。正文里的段落与控件仍由
+ * start-designs 那一份实现画，本文件只管窗与栏：不重画铭牌字段，也不改板扣的下压行程。
+ * 1200 是两栏，880 收成单列且栏位落到正文之后（DOM 顺序本身就是阅读顺序）。
+ */
+
+.wb {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 640px;
+  border: var(--pb-hairline) solid var(--pb-line-strong);
+  border-radius: var(--pb-radius-sheet);
+  background-color: var(--pb-paper);
+  color: var(--pb-ink);
+  font-family: var(--pb-font-body);
+  font-size: var(--pb-size-body);
+}
+
+/* 标题板：铭牌 + 此刻那一句 + 右边这一面是谁。 */
+.wb__bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--pb-s-2) var(--pb-s-3);
+  padding: var(--pb-s-3) var(--pb-s-4);
+  border-bottom: var(--pb-hairline) solid var(--pb-line-strong);
+  background-color: var(--pb-sheet-2);
+}
+
+.wb__nameplate {
+  padding: 3px var(--pb-s-3);
+  border: var(--pb-hairline) solid var(--pb-line-strong);
+  clip-path: var(--pb-clip-notch);
+  background-color: var(--pb-sheet);
+  font-family: var(--pb-font-display);
+  font-size: var(--pb-size-control);
+  font-weight: 600;
+  letter-spacing: var(--pb-tracking-display);
+}
+
+.wb__view {
+  font-family: var(--pb-font-mono);
+  font-size: var(--pb-size-micro);
+  color: var(--pb-ink-dim);
+}
+
+.wb__fill {
+  flex: 1 1 auto;
+}
+
+.wb__body {
+  display: grid;
+  grid-template-columns: 208px minmax(0, 1fr);
+  align-items: start;
+  min-width: 0;
+}
+
+/* 状态栏：这一家此刻在桌面、在不在回应、向导。 */
+.wb__rail {
+  display: grid;
+  gap: var(--pb-s-3);
+  align-content: start;
+  padding: var(--pb-s-4) var(--pb-s-3);
+  border-right: var(--pb-hairline) solid var(--pb-line);
+  background-color: var(--pb-paper-2);
+  min-width: 0;
+}
+
+.wb__rail-title {
+  margin: 0;
+  font-size: var(--pb-size-micro);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--pb-ink-dim);
+}
+
+.wb__rail-actions {
+  display: grid;
+  gap: var(--pb-s-2);
+}
+
+.wb__plate {
+  min-height: var(--pb-ctl-height-sm);
+  padding: 0 var(--pb-s-3);
+  border: var(--pb-hairline) solid var(--pb-line-strong);
+  border-radius: var(--pb-radius-ctl);
+  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
+  background-color: var(--pb-sheet);
+  color: var(--pb-ink);
+  font: inherit;
+  font-size: var(--pb-size-control);
+  cursor: pointer;
+  transition:
+    transform var(--pb-t-press) var(--pb-ease),
+    box-shadow var(--pb-t-press) var(--pb-ease),
+    background-color var(--pb-t-press) var(--pb-ease);
+}
+
+.wb__plate:hover:not(:disabled) {
+  background-color: var(--pb-sheet-2);
+}
+
+/* 按下去塌的就是板底那道搁置：位移等于它的厚度，影子收掉。 */
+.wb__plate:active:not(:disabled) {
+  transform: translateY(var(--pb-ledge));
+  box-shadow: none;
+}
+
+.wb__plate:disabled {
+  border-style: dashed;
+  box-shadow: none;
+  color: var(--pb-ink-dim);
+  cursor: not-allowed;
+}
+
+.wb__plate:focus-visible,
+.wb__rail :focus-visible,
+.wb__main :focus-visible,
+.wb__foot :focus-visible {
+  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline-offset: var(--pb-focus-gap);
+}
+
+.wb__rail-note {
+  margin: 0;
+  font-size: var(--pb-size-micro);
+  line-height: 1.6;
+  color: var(--pb-ink-dim);
+}
+
+.wb__main {
+  display: grid;
+  gap: var(--pb-s-5);
+  align-content: start;
+  padding: var(--pb-s-4);
+  min-width: 0;
+  max-width: 1120px;
+  overflow: auto;
+}
+
+.wb__inspector,
+.wb__stage,
+.wb__colors {
+  min-width: 0;
+}
+
+.wb__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--pb-s-3);
+  padding: var(--pb-s-2) var(--pb-s-4);
+  border-top: var(--pb-hairline) solid var(--pb-line-strong);
+  background-color: var(--pb-sheet);
+  font-size: var(--pb-size-micro);
+  color: var(--pb-ink-dim);
+}
+
+/* 880：栏位收成一格横排在正文前面，格位与粘性都取消。 */
+@media (max-width: 880px) {
+  .wb__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wb__rail {
+    border-right: none;
+    border-bottom: var(--pb-hairline) solid var(--pb-line);
+  }
+
+  .wb__rail-actions {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+}

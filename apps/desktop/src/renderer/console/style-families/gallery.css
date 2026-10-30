@@ -1,0 +1,184 @@
+/**
+ * 评审横栏与舞台：中立、低对比、不吃 pb 令牌，也不吃配色工作室那 36 格。
+ *
+ * 五家像不像五件产品，靠的就是这一条横栏不替它们打扮；一家的形状只准出现在它自己那一扇窗里。
+ * 字号与控件高度自己量一份，不复用饲养台的密度（那是候选之一的形状）。
+ */
+
+.sf-gallery {
+  --sf-ink: #23272e;
+  --sf-ink-dim: #6b7280;
+  --sf-line: #c8cdd5;
+  --sf-line-soft: #dfe3e9;
+  --sf-shell: #f2f3f6;
+  --sf-sheet: #fafbfc;
+  --sf-stage: #e6e8ed;
+
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  min-block-size: 100vh;
+  padding: 14px 18px 18px;
+  background-color: var(--sf-shell);
+  color: var(--sf-ink);
+  font:
+    400 14px/1.5 'Segoe UI Variable Text',
+    'Microsoft YaHei UI',
+    system-ui,
+    sans-serif;
+}
+
+.sf-gallery *,
+.sf-gallery *::before,
+.sf-gallery *::after {
+  box-sizing: border-box;
+}
+
+.sf-chrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--sf-line);
+  border-radius: 6px;
+  background-color: var(--sf-sheet);
+}
+
+.sf-chrome__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--sf-ink-dim);
+}
+
+.sf-chrome__families,
+.sf-chrome__views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sf-chrome__views {
+  margin-inline-start: 6px;
+  padding-inline-start: 10px;
+  border-inline-start: 1px solid var(--sf-line-soft);
+}
+
+.sf-chrome__pick,
+.sf-chrome__view,
+.sf-chrome__link {
+  min-block-size: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--sf-line);
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--sf-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sf-chrome__pick:hover:not(:disabled),
+.sf-chrome__view:hover,
+.sf-chrome__link:hover {
+  border-color: var(--sf-ink-dim);
+}
+
+.sf-chrome__pick.is-on,
+.sf-chrome__view.is-on {
+  border-color: #3d4653;
+  background-color: #3d4653;
+  color: #fff;
+  font-weight: 600;
+}
+
+.sf-chrome__pick:disabled {
+  border-style: dashed;
+  color: var(--sf-ink-dim);
+  cursor: not-allowed;
+}
+
+.sf-chrome__link {
+  margin-inline-start: auto;
+  border-style: dashed;
+  background: none;
+  color: var(--sf-ink-dim);
+  font-size: 12px;
+}
+
+.sf-chrome__count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--sf-ink-dim);
+}
+
+.sf-chrome__note {
+  margin: 0;
+  max-inline-size: 110ch;
+  font-size: 12px;
+  color: var(--sf-ink-dim);
+}
+
+/* 舞台只负责把那一扇窗托起来：不描边、不加圆角、不打光，任何一家都一样。 */
+.sf-stage {
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  min-block-size: 0;
+  padding: 18px;
+  border: 1px solid var(--sf-line-soft);
+  border-radius: 8px;
+  background-color: var(--sf-stage);
+  overflow: auto;
+}
+
+.sf-window {
+  inline-size: 100%;
+  max-inline-size: 1200px;
+  min-block-size: 640px;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgb(20 24 30 / 16%);
+}
+
+/* 评审外壳给的那一颗「使用向导」：只借当前这一家的字色与字号，自己不带形状。 */
+.sf-guide {
+  min-block-size: 24px;
+  padding: 2px 9px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sf-guide:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sf-pending {
+  margin: 0;
+  padding: 24px;
+  font-size: 13px;
+  color: var(--sf-ink-dim);
+}
+
+/* 880 那一挡：横栏收成两行，窗体吃满舞台宽度，家族自己负责内部怎么收。 */
+@media (max-width: 880px) {
+  .sf-gallery {
+    padding: 10px;
+  }
+
+  .sf-chrome__link {
+    margin-inline-start: 0;
+  }
+
+  .sf-window {
+    min-block-size: 560px;
+  }
+}

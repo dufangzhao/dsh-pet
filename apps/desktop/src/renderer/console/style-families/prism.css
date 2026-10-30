@@ -1,0 +1,1204 @@
+/**
+ * Prism（棱镜）的样式：这一家唯一的形状来源，全部收在 .sf-prism 与 pr- 前缀里。
+ *
+ * 材质是分层玻璃：半透面板 + backdrop-filter + 内部一道亮线，字段没有底色只有亮线，
+ * 动作条浮在面板底部，右侧一列信号灯。颜色先读界面配色那 36 格（根节点上的种子或本机记录），
+ * 没涂上才落在棱镜自己的暗色默认值。不碰 body、不写 :root，换家族不会把这套材质漏到别的屏。
+ */
+
+.sf-prism {
+  /* 字体：等宽承担机读标签与十六进制，正文用系统 UI 黑体；标题只用字重分层次。 */
+  --prf-display:
+    'Segoe UI Variable Display', 'Segoe UI Semibold', 'Microsoft YaHei UI', 'PingFang SC',
+    system-ui, sans-serif;
+  --prf-body:
+    'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', 'PingFang SC', system-ui, sans-serif;
+  --prf-mono: 'Cascadia Mono', Consolas, 'Microsoft YaHei UI', monospace;
+
+  --pr-r-pane: 18px;
+  --pr-r-key: 12px;
+  --pr-s-1: 4px;
+  --pr-s-2: 8px;
+  --pr-s-3: 12px;
+  --pr-s-4: 16px;
+  --pr-s-5: 24px;
+  --pr-hit: 40px;
+
+  --pr-paper: var(--paper, #0e1319);
+  --pr-paper-2: var(--paper-2, #121821);
+  --pr-sheet: var(--sheet, #171f29);
+  --pr-sheet-2: var(--sheet-2, #1d2632);
+  --pr-sheet-3: var(--sheet-3, #25303d);
+  --pr-ink: var(--ink, #e6edf5);
+  --pr-ink-soft: var(--ink-soft, #aab9c8);
+  --pr-ink-dim: var(--ink-dim, #7f8fa0);
+  --pr-line: var(--line, #28323f);
+  --pr-line-2: var(--line-2, #3a4757);
+  --pr-line-strong: var(--line-strong, #6b7d92);
+  --pr-accent: var(--accent, #7fc4e8);
+  --pr-accent-2: var(--accent-2, #b0dcf3);
+  --pr-on-accent: var(--on-accent, #07202c);
+  --pr-ok: var(--ok, #74d3ae);
+  --pr-warn: var(--warn, #e8bd72);
+  --pr-danger: var(--danger, #f49a92);
+
+  /* 玻璃：一层透、一道内亮线、一层落进雾里的影。 */
+  --pr-glass: color-mix(in oklab, var(--pr-sheet) 72%, transparent);
+  --pr-glass-2: color-mix(in oklab, var(--pr-sheet-2) 80%, transparent);
+  --pr-edge: color-mix(in oklab, var(--pr-ink) 14%, transparent);
+  --pr-shadow: 0 24px 48px -28px rgb(0 0 0 / 65%);
+  --pr-focus: 0 0 0 2px var(--pr-paper), 0 0 0 4px var(--pr-accent);
+
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: var(--pr-s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-3);
+  background:
+    radial-gradient(
+      90% 55% at 8% 0%,
+      color-mix(in oklab, var(--pr-accent) 12%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      70% 50% at 100% 100%,
+      color-mix(in oklab, var(--pr-ok) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(160deg, var(--pr-paper-2) 0%, var(--pr-paper) 55%, var(--pr-paper-2) 100%);
+  color: var(--pr-ink);
+  font-family: var(--prf-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.sf-prism *,
+.sf-prism *::before,
+.sf-prism *::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------ 顶栏 */
+
+.sf-prism .pr-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pr-s-3);
+  padding: var(--pr-s-2) var(--pr-s-4);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line);
+  background: var(--pr-glass);
+  backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow: inset 0 1px 0 var(--pr-edge);
+}
+
+.sf-prism .pr-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-s-2);
+}
+
+.sf-prism .pr-bar__mark {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.sf-prism .pr-bar__prism {
+  fill: none;
+  stroke: var(--pr-accent);
+  stroke-width: 1.6;
+}
+
+.sf-prism .pr-bar__beam {
+  stroke: var(--pr-ink-soft);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.sf-prism .pr-bar__name {
+  font-family: var(--prf-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.sf-prism .pr-bar__sub {
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-bar__quiet {
+  font-size: 12px;
+  color: var(--pr-warn);
+}
+
+.sf-prism .pr-bar__guide,
+.sf-prism .pr-bar__quiet {
+  margin-left: auto;
+}
+
+.sf-prism .pr-bar__guide {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------ 外壳三列 */
+
+.sf-prism .pr-shell {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr) 232px;
+  gap: var(--pr-s-3);
+  align-items: start;
+}
+
+@media (max-width: 1040px) {
+  .sf-prism .pr-shell {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+  .sf-prism .pr-side {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 880px) {
+  .sf-prism .pr-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sf-prism .pr-rail {
+    flex-direction: row;
+  }
+}
+
+.sf-prism .pr-stack,
+.sf-prism .pr-side,
+.sf-prism .pr-board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-3);
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ 竖轨 */
+
+.sf-prism .pr-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-1);
+  padding: var(--pr-s-2);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line);
+  background: var(--pr-glass);
+  backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: inset 1px 0 0 var(--pr-edge);
+  position: sticky;
+  top: var(--pr-s-3);
+}
+
+.sf-prism .pr-rail__here,
+.sf-prism .pr-rail__item {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-s-2);
+  min-height: var(--pr-hit);
+  padding: var(--pr-s-2);
+  border-radius: var(--pr-r-key);
+  border: 0;
+  background: none;
+  color: var(--pr-ink-soft);
+  font: inherit;
+  text-align: left;
+}
+
+.sf-prism .pr-rail__here {
+  color: var(--pr-ink);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--pr-accent);
+}
+
+.sf-prism .pr-rail__item {
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.sf-prism .pr-rail__item:hover {
+  background: color-mix(in oklab, var(--pr-ink) 8%, transparent);
+  color: var(--pr-ink);
+}
+
+.sf-prism .pr-rail__glyph {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.sf-prism .pr-rail__name {
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------------ 面板 */
+
+.sf-prism .pr-pane {
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line);
+  background: var(--pr-glass);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 var(--pr-edge),
+    var(--pr-shadow);
+  overflow: hidden;
+}
+
+.sf-prism .pr-pane[data-layer='2'] {
+  background: var(--pr-glass-2);
+  border-color: var(--pr-line-2);
+}
+
+.sf-prism .pr-pane__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--pr-s-3) var(--pr-s-4) var(--pr-s-2);
+}
+
+.sf-prism .pr-pane__title {
+  margin: 0;
+  font-family: var(--prf-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.sf-prism .pr-pane__meta {
+  margin: var(--pr-s-1) 0 0;
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+  max-width: 64ch;
+}
+
+.sf-prism .pr-pane__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-3);
+  padding: var(--pr-s-2) var(--pr-s-4) var(--pr-s-4);
+}
+
+.sf-prism .pr-note,
+.sf-prism .pr-wait,
+.sf-prism .pr-empty,
+.sf-prism .pr-hold {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pr-ink-soft);
+}
+
+.sf-prism .pr-empty {
+  padding: var(--pr-s-2) var(--pr-s-3);
+  border-left: 2px solid var(--pr-line-strong);
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-hold {
+  padding: var(--pr-s-2) var(--pr-s-3);
+  border-left: 2px solid var(--pr-warn);
+  background: color-mix(in oklab, var(--pr-warn) 10%, transparent);
+}
+
+.sf-prism .pr-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ 字段 */
+
+.sf-prism .pr-field {
+  display: grid;
+  grid-template-columns: minmax(96px, 128px) minmax(0, 1fr);
+  gap: var(--pr-s-1) var(--pr-s-3);
+  align-items: center;
+}
+
+.sf-prism .pr-field__key {
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+  letter-spacing: 0.02em;
+}
+
+.sf-prism .pr-field__slot {
+  min-width: 0;
+}
+
+.sf-prism .pr-inset {
+  width: 100%;
+  padding: var(--pr-s-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--pr-line-2);
+  background: none;
+  color: var(--pr-ink);
+  font-family: var(--prf-body);
+  font-size: 15px;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.sf-prism .pr-inset::placeholder {
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-inset:focus {
+  outline: none;
+  border-bottom-color: var(--pr-accent);
+  box-shadow: 0 2px 0 -1px var(--pr-accent);
+}
+
+.sf-prism .pr-inset:disabled {
+  color: var(--pr-ink-dim);
+  border-bottom-style: dotted;
+}
+
+.sf-prism .pr-field__note {
+  grid-column: 2;
+  margin: 0;
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+  max-width: 62ch;
+}
+
+.sf-prism .pr-field__bad {
+  grid-column: 2;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pr-danger);
+}
+
+.sf-prism .pr-field[data-bad='true'] .pr-inset {
+  border-bottom-color: var(--pr-danger);
+}
+
+.sf-prism .pr-keyline {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-s-2);
+}
+
+.sf-prism .pr-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+}
+
+/* 值键：等宽一串，没有图标，选中那一条加一道亮线。 */
+.sf-prism .pr-value {
+  min-height: 30px;
+  padding: 2px var(--pr-s-2);
+  border-radius: 8px;
+  border: 1px solid var(--pr-line-2);
+  background: color-mix(in oklab, var(--pr-ink) 5%, transparent);
+  color: var(--pr-ink-soft);
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.sf-prism .pr-value:hover {
+  color: var(--pr-ink);
+  border-color: var(--pr-line-strong);
+}
+
+.sf-prism .pr-value[data-selected='true'] {
+  color: var(--pr-accent-2);
+  border-color: var(--pr-accent);
+}
+
+/* ------------------------------------------------------------------ 键 */
+
+.sf-prism .pr-key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-s-2);
+  min-height: var(--pr-hit);
+  padding: var(--pr-s-2) var(--pr-s-3);
+  border-radius: var(--pr-r-key);
+  border: 1px solid var(--pr-line-2);
+  background: color-mix(in oklab, var(--pr-ink) 6%, transparent);
+  color: var(--pr-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.sf-prism .pr-key:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--pr-ink) 12%, transparent);
+  border-color: var(--pr-line-strong);
+}
+
+.sf-prism .pr-key[aria-pressed='true'] {
+  background: color-mix(in oklab, var(--pr-accent) 22%, transparent);
+  border-color: var(--pr-accent);
+  color: var(--pr-ink);
+}
+
+.sf-prism .pr-key[aria-pressed='true'] .pr-key__name {
+  font-weight: 600;
+}
+
+.sf-prism .pr-key[data-tone='primary'] {
+  background: color-mix(in oklab, var(--pr-accent) 30%, var(--pr-sheet));
+  border-color: var(--pr-accent);
+  color: var(--pr-on-accent);
+}
+
+.sf-prism .pr-key[data-tone='danger'] {
+  background: color-mix(in oklab, var(--pr-danger) 18%, transparent);
+  border-color: color-mix(in oklab, var(--pr-danger) 60%, var(--pr-line-2));
+  color: var(--pr-danger);
+}
+
+.sf-prism .pr-key:disabled {
+  cursor: not-allowed;
+  color: var(--pr-ink-dim);
+  border-color: var(--pr-line);
+  background: none;
+}
+
+.sf-prism .pr-key__glyph {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.sf-prism .pr-key--tight {
+  min-height: 30px;
+  padding: 2px var(--pr-s-2);
+  font-size: 12px;
+}
+
+/* 浮起的动作条：贴在面板底部，扫过焦点不会把它顶走。 */
+.sf-prism .pr-dock {
+  position: sticky;
+  bottom: var(--pr-s-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+  align-items: center;
+  padding: var(--pr-s-2);
+  border-radius: 16px;
+  border: 1px solid var(--pr-line-2);
+  background: color-mix(in oklab, var(--pr-sheet-3) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 var(--pr-edge),
+    0 -12px 24px -20px rgb(0 0 0 / 70%);
+  z-index: 2;
+}
+
+.sf-prism .pr-dock--inline {
+  position: static;
+}
+
+/* 主操作：一整道亮梁，左边那道亮边是唯一的重音。 */
+.sf-prism .pr-beam {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-s-3);
+  min-height: 46px;
+  padding: 0 var(--pr-s-4);
+  border-radius: 14px;
+  border: 1px solid var(--pr-accent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--pr-accent) 34%, var(--pr-sheet)) 0%,
+    color-mix(in oklab, var(--pr-accent) 12%, var(--pr-sheet)) 100%
+  );
+  color: var(--pr-ink);
+  font-family: var(--prf-display);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: inset 3px 0 0 var(--pr-accent-2);
+  transition:
+    filter 140ms ease,
+    transform 120ms ease;
+}
+
+.sf-prism .pr-beam:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.sf-prism .pr-beam:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.sf-prism .pr-beam:disabled {
+  cursor: not-allowed;
+  filter: none;
+  border-color: var(--pr-line-2);
+  background: color-mix(in oklab, var(--pr-ink) 5%, transparent);
+  color: var(--pr-ink-dim);
+  box-shadow: inset 3px 0 0 var(--pr-line-strong);
+}
+
+.sf-prism .pr-beam__glyph {
+  display: inline-flex;
+}
+
+/* ---------------------------------------------------------------- 信号 */
+
+.sf-prism .pr-signals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-2);
+  padding: var(--pr-s-3);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line);
+  background: var(--pr-glass);
+  backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: inset 0 1px 0 var(--pr-edge);
+}
+
+.sf-prism .pr-signal {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pr-s-2);
+  margin: 0;
+  font-size: 13px;
+  color: var(--pr-ink);
+}
+
+.sf-prism .pr-signal__lamp {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--pr-line-strong);
+  box-shadow: 0 0 8px currentColor;
+  color: var(--pr-line-strong);
+}
+
+.sf-prism .pr-signal__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sf-prism .pr-signal__word {
+  font-weight: 500;
+}
+
+.sf-prism .pr-signal__note {
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-signal[data-tone='ok'] .pr-signal__lamp,
+.sf-prism .pr-signal[data-tone='on'] .pr-signal__lamp {
+  background: var(--pr-ok);
+  color: var(--pr-ok);
+}
+
+.sf-prism .pr-signal[data-tone='warn'] .pr-signal__lamp {
+  background: var(--pr-warn);
+  color: var(--pr-warn);
+}
+
+.sf-prism .pr-signal[data-tone='danger'] .pr-signal__lamp {
+  background: var(--pr-danger);
+  color: var(--pr-danger);
+}
+
+.sf-prism .pr-ledger {
+  display: grid;
+  gap: var(--pr-s-1);
+  margin: 0;
+  padding: var(--pr-s-3);
+  border-radius: 14px;
+  border: 1px solid var(--pr-line);
+  background: color-mix(in oklab, var(--pr-ink) 4%, transparent);
+}
+
+.sf-prism .pr-ledger__row {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--pr-s-2);
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.sf-prism .pr-ledger dt {
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-ledger dd {
+  margin: 0;
+  color: var(--pr-ink);
+}
+
+.sf-prism .pr-ledger__row[data-tone='ok'] dd {
+  color: var(--pr-ok);
+}
+
+.sf-prism .pr-ledger__row[data-tone='warn'] dd {
+  color: var(--pr-warn);
+}
+
+.sf-prism .pr-ledger__row[data-tone='danger'] dd {
+  color: var(--pr-danger);
+}
+
+.sf-prism .pr-ledger__line {
+  margin: var(--pr-s-1) 0 0;
+  font-size: 12px;
+  color: var(--pr-ink-soft);
+}
+
+/* ------------------------------------------------------------------ 脚 */
+
+.sf-prism .pr-foot {
+  padding: var(--pr-s-2) var(--pr-s-4);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line);
+  background: color-mix(in oklab, var(--pr-sheet) 55%, transparent);
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+}
+
+/* ------------------------------------------------------------ 命令面板 */
+
+.sf-prism .pr-chooser {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-2);
+}
+
+.sf-prism .pr-chooser__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+  align-items: center;
+}
+
+.sf-prism .pr-chooser__count,
+.sf-prism .pr-chooser__kbd {
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-chooser__kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--pr-line-2);
+  border-radius: 6px;
+}
+
+.sf-prism .pr-chooser__now {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pr-ink-soft);
+}
+
+.sf-prism .pr-command {
+  width: min(560px, 92vw);
+  max-height: min(70vh, 620px);
+  padding: 0;
+  border: 1px solid var(--pr-line-2);
+  border-radius: var(--pr-r-pane);
+  background: color-mix(in oklab, var(--pr-sheet) 88%, transparent);
+  backdrop-filter: blur(20px) saturate(1.25);
+  color: var(--pr-ink);
+  box-shadow:
+    inset 0 1px 0 var(--pr-edge),
+    0 40px 80px -40px rgb(0 0 0 / 80%);
+}
+
+.sf-prism .pr-command::backdrop {
+  background: color-mix(in oklab, var(--pr-paper) 62%, rgb(0 0 0 / 45%));
+  backdrop-filter: blur(4px);
+}
+
+.sf-prism .pr-command__ring {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-3);
+  padding: var(--pr-s-4);
+}
+
+.sf-prism .pr-options {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 46vh;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--pr-line);
+  background: color-mix(in oklab, var(--pr-ink) 4%, transparent);
+}
+
+.sf-prism .pr-options:focus-visible {
+  outline: 2px solid var(--pr-accent);
+  outline-offset: 2px;
+}
+
+.sf-prism .pr-option {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: var(--pr-s-2);
+  align-items: center;
+  padding: var(--pr-s-2) var(--pr-s-3);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 120ms ease;
+}
+
+.sf-prism .pr-option:hover {
+  background: color-mix(in oklab, var(--pr-ink) 8%, transparent);
+}
+
+.sf-prism .pr-option[data-active='true'] {
+  background: color-mix(in oklab, var(--pr-accent) 18%, transparent);
+  box-shadow: inset 2px 0 0 var(--pr-accent-2);
+}
+
+.sf-prism .pr-option[aria-selected='true'] .pr-option__name {
+  color: var(--pr-accent-2);
+  font-weight: 600;
+}
+
+.sf-prism .pr-option[aria-disabled='true'] {
+  color: var(--pr-ink-dim);
+  cursor: not-allowed;
+}
+
+.sf-prism .pr-option__mark {
+  display: inline-flex;
+}
+
+.sf-prism .pr-option__note {
+  color: var(--pr-ink-dim);
+  font-size: 12px;
+}
+
+.sf-prism .pr-option__region {
+  font-family: var(--prf-mono);
+  font-size: 11px;
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-command__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sf-prism .pr-command__hint {
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-ink-dim);
+}
+
+/* ------------------------------------------------------------------ 接线 */
+
+.sf-prism .pr-connect {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-3);
+}
+
+.sf-prism .pr-connect__who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-3);
+  align-items: center;
+  padding-bottom: var(--pr-s-2);
+  border-bottom: 1px solid var(--pr-line);
+}
+
+.sf-prism .pr-connect__name {
+  font-family: var(--prf-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sf-prism .pr-connect__fields,
+.sf-prism .pr-connect__signin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-3);
+}
+
+/* ------------------------------------------------------------------ 舞台 */
+
+.sf-prism .pr-stage {
+  position: relative;
+  min-height: 236px;
+  padding: var(--pr-s-4);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--pr-ink) 6%, transparent) 0%,
+      color-mix(in oklab, var(--pr-paper) 30%, transparent) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 39px,
+      color-mix(in oklab, var(--pr-line) 60%, transparent) 39px 40px
+    );
+  display: grid;
+  place-items: end center;
+  transition: filter 200ms ease;
+}
+
+.sf-prism .pr-stage[data-light='night'] {
+  filter: brightness(0.66) saturate(0.8);
+}
+
+.sf-prism .pr-stage__say {
+  position: absolute;
+  top: var(--pr-s-3);
+  left: var(--pr-s-3);
+  right: var(--pr-s-3);
+  margin: 0;
+  padding: var(--pr-s-2) var(--pr-s-3);
+  border-radius: 12px;
+  border: 1px solid var(--pr-line-2);
+  background: var(--bubble-bg, #1e2c3a);
+  color: var(--bubble-ink, var(--pr-ink));
+  font-size: 13px;
+  max-width: 46ch;
+}
+
+.sf-prism .pr-stage__figure {
+  position: relative;
+  z-index: 1;
+  --pet-ink: var(--pr-ink);
+  --pet-accent: var(--pr-accent);
+  --pet-error: var(--pr-danger);
+  --pet-blush: color-mix(in oklab, var(--pr-accent) 45%, #fff);
+}
+
+.sf-prism .pr-stage__pet {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.sf-prism .pr-stage__pet:active {
+  cursor: grabbing;
+}
+
+.sf-prism .pr-composer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pr-s-2);
+  align-items: flex-end;
+}
+
+.sf-prism .pr-composer .pr-field {
+  flex: 1 1 240px;
+}
+
+/* ------------------------------------------------------------------ 仪表 */
+
+.sf-prism .pr-schemes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-s-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sf-prism .pr-scheme__pick {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--pr-s-3);
+  align-items: center;
+  width: 100%;
+  min-height: var(--pr-hit);
+  padding: var(--pr-s-2);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: color-mix(in oklab, var(--pr-ink) 4%, transparent);
+  color: var(--pr-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sf-prism .pr-scheme__pick:hover {
+  border-color: var(--pr-line-2);
+}
+
+.sf-prism .pr-scheme[data-on='true'] .pr-scheme__pick {
+  border-color: var(--pr-accent);
+  background: color-mix(in oklab, var(--pr-accent) 14%, transparent);
+}
+
+.sf-prism .pr-scheme__band {
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid var(--pr-line-2);
+}
+
+.sf-prism .pr-scheme__band span {
+  display: block;
+  width: 12px;
+  height: 20px;
+}
+
+.sf-prism .pr-scheme__note {
+  font-family: var(--prf-mono);
+  font-size: 11px;
+  color: var(--pr-ink-dim);
+}
+
+.sf-prism .pr-instruments {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: var(--pr-s-2);
+}
+
+.sf-prism .pr-instruments__group {
+  margin: 0 0 var(--pr-s-1);
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--pr-accent-2);
+  letter-spacing: 0.04em;
+}
+
+.sf-prism .pr-instrument {
+  display: grid;
+  grid-template-columns: 26px minmax(88px, 1fr) 26px minmax(84px, 96px);
+  gap: var(--pr-s-2);
+  align-items: center;
+  padding: 2px var(--pr-s-1);
+  border-radius: 8px;
+}
+
+.sf-prism .pr-instrument:hover {
+  background: color-mix(in oklab, var(--pr-ink) 5%, transparent);
+}
+
+.sf-prism .pr-instrument__strip {
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--pr-line);
+}
+
+.sf-prism .pr-instrument__label {
+  font-size: 13px;
+  color: var(--pr-ink-soft);
+}
+
+.sf-prism .pr-instrument__pick {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--pr-line-2);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.sf-prism .pr-instrument__pick::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.sf-prism .pr-instrument__pick::-webkit-color-swatch {
+  border: 0;
+  border-radius: 4px;
+}
+
+.sf-prism .pr-instrument__hex {
+  padding: 2px var(--pr-s-2);
+  border: 1px solid var(--pr-line);
+  border-radius: 6px;
+  background: none;
+  color: var(--pr-ink);
+  font-family: var(--prf-mono);
+  font-size: 12px;
+}
+
+.sf-prism .pr-instrument[data-bad='true'] .pr-instrument__hex {
+  border-color: var(--pr-danger);
+  color: var(--pr-danger);
+}
+
+/* ---------------------------------------------------------------- 样板台 */
+
+.sf-prism .pr-board__lead {
+  margin: 0;
+  padding: var(--pr-s-3) var(--pr-s-4);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line-2);
+  background: color-mix(in oklab, var(--pr-accent) 10%, transparent);
+  font-size: 13px;
+  color: var(--pr-ink-soft);
+  max-width: 92ch;
+}
+
+/* ---------------------------------------------------------------- 焦点与动效 */
+
+.sf-prism .pr-key:focus-visible,
+.sf-prism .pr-value:focus-visible,
+.sf-prism .pr-beam:focus-visible,
+.sf-prism .pr-rail__item:focus-visible,
+.sf-prism .pr-scheme__pick:focus-visible,
+.sf-prism .pr-instrument__hex:focus-visible,
+.sf-prism .pr-inset:focus-visible {
+  outline: none;
+  box-shadow: var(--pr-focus);
+}
+
+.sf-prism .pr-stage__pet:focus-visible .pet-avatar {
+  border-radius: 12px;
+  box-shadow: var(--pr-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-prism *,
+  .sf-prism *::before,
+  .sf-prism *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .sf-prism .pr-beam:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------ 舞台那一层工具面板（玻璃 + 等宽标签） */
+
+.sf-prism .pr-stage {
+  padding-bottom: 60px;
+}
+
+.sf-prism .pr-stage__menu-open {
+  position: absolute;
+  left: var(--pr-s-3);
+  bottom: var(--pr-s-3);
+  z-index: 3;
+}
+
+.sf-prism .pr-menu {
+  position: absolute;
+  left: var(--pr-s-3);
+  bottom: calc(var(--pr-s-3) + 52px);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(300px, 88%);
+  max-height: 70%;
+  overflow: auto;
+  padding: var(--pr-s-3);
+  border-radius: var(--pr-r-pane);
+  border: 1px solid var(--pr-line-2);
+  background: color-mix(in oklab, var(--pr-sheet-3) 88%, transparent);
+  backdrop-filter: blur(18px) saturate(1.25);
+  box-shadow:
+    inset 0 1px 0 var(--pr-edge),
+    0 28px 48px -28px rgb(0 0 0 / 75%);
+}
+
+.sf-prism .pr-menu__title {
+  margin: 0 0 var(--pr-s-2);
+  padding-bottom: var(--pr-s-2);
+  border-bottom: 1px solid var(--pr-line);
+  font-family: var(--prf-mono);
+  font-size: 12px;
+  color: var(--pr-accent-2);
+  letter-spacing: 0.04em;
+}
+
+.sf-prism .pr-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-s-2);
+  min-height: var(--pr-hit);
+  padding: var(--pr-s-2);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--pr-ink) 5%, transparent);
+  color: var(--pr-ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.sf-prism .pr-menu__item:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--pr-ink) 12%, transparent);
+  border-color: var(--pr-line-2);
+}
+
+.sf-prism .pr-menu__item:disabled {
+  cursor: not-allowed;
+  color: var(--pr-ink-dim);
+  background: none;
+}
+
+.sf-prism .pr-menu__item:focus-visible {
+  outline: none;
+  box-shadow: var(--pr-focus);
+}
+
+.sf-prism .pr-menu__bullet {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--pr-line-strong);
+  box-shadow: 0 0 8px currentColor;
+  color: var(--pr-line-strong);
+}
+
+.sf-prism .pr-menu__item:hover:not(:disabled) .pr-menu__bullet {
+  background: var(--pr-accent);
+  color: var(--pr-accent);
+}
+
+.sf-prism .pr-menu__label {
+  min-width: 0;
+}

@@ -10,11 +10,19 @@ ConsoleApp currently owns navigation, theme, actual snapshots, security actions,
 
 Evidence: [console-app.tsx](../../../apps/desktop/src/renderer/console/console-app.tsx), [pages.ts](../../../apps/desktop/src/renderer/console/pages.ts), [demo-console.tsx](../../../apps/desktop/src/renderer/console/pages/demo-console.tsx).
 
+## Multiple style candidates
+
+When the user requests several visual styles and different control types, count independent presentation families rather than layouts. Share state/actions and native semantics, while each candidate owns its actual widgets, typography, surfaces and complete frame. The existing original kit may be a labelled retained candidate; it is not the required rendered kit for all candidates. Consolidation into one product system follows direction selection.
+
 ## Accessible controls
 
 Reuse the owning product primitives by default rather than emulate controls with clickable divs. When the user explicitly requests an original component language, implement native semantic controls in the new product kit and reuse behavior/state separately; the earlier replica Button/Field/Section markup is not a required visual dependency. Preserve the accessibility contracts below. Avoid keeping two competing active control systems for the same redesigned surface. Button defaults to type=button; form submission must be explicit. Field owns the label/control ID and description/error association. Connect its inputId, describedBy and invalid result to the actual input. Keep hints outside the accessible name. Dialog uses native showModal, explicit tab wrapping, Escape handling and focus restoration; data-autofocus identifies a deliberate initial target.
 
 Evidence: [button.tsx](../../../packages/ui-kit/src/button.tsx), [field.tsx](../../../packages/ui-kit/src/field.tsx), [dialog.tsx](../../../packages/ui-kit/src/dialog.tsx). Changes to pet choice dialogs must preserve the same keyboard/focus principles while also honoring native pet hit/drag geometry.
+
+## Preview geometry and menu interaction
+
+A menu and its trigger must participate in the outside-dismiss containment check, including when the chosen layout renders them beside the visual scene. Keep that interaction boundary separate from the scene ref used for visibility receipts and drag limits; widening the observed scene just to keep a menu open changes those geometry contracts. Verify actual menu callbacks, Escape/outside dismissal and a real drag in the native window.
 
 ## Configuration drafts and real state
 

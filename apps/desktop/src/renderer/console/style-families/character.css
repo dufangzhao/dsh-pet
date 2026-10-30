@@ -1,0 +1,260 @@
+/**
+ * 共享角色资产样式：只管 pet/PetAvatar 这只角色本体（尺寸、五官、状态动画、减少动态）。
+ *
+ * 五个家族都引这一份，因为它们是同一只桌宠。这里不写台子、井格、栏位、气泡、抽屉——
+ * 那些是一家自己的板面，谁的风格谁自己画（对照 original-ui/pet-preview.css 的 .pet-bench，
+ * 那一套不进这里，也不许家族照抄）。--pet-body-* 四色由 useFamilyPreview 给（装扮页那一项
+ * 设置本身），家族把它贴在自己的 .sf-figure 容器上，再按「大小」这一项写 data-size。
+ */
+
+.sf-figure {
+  /* 角色本体的描线色：取值与桌宠窗口 pet.css 一致，预览就是桌面上那一只。 */
+  --pet-ink: #1c2430;
+  --pet-accent: #3766dc;
+  --pet-error: #b23c09;
+  --pet-blush: #ffb8b0;
+
+  /* 尺寸跟着「大小」这一项；外接矩形固定，切档时这一格不跳。 */
+  --sf-avatar: 152px;
+
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: calc(var(--sf-avatar) + 24px);
+  min-inline-size: 0;
+}
+
+.sf-figure[data-size='small'] {
+  --sf-avatar: 104px;
+}
+
+.sf-figure[data-size='normal'] {
+  --sf-avatar: 152px;
+}
+
+.sf-figure[data-size='large'] {
+  --sf-avatar: 176px;
+}
+
+.sf-figure .pet-avatar {
+  inline-size: var(--sf-avatar);
+  block-size: var(--sf-avatar);
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 6px 14px rgb(28 36 48 / 18%));
+  /* 抓手光标只给真的能拖的绘制面；pointer capture 需要禁掉触摸滚动与长按选中。 */
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.sf-figure .pet-avatar__eye {
+  fill: var(--pet-ink);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.sf-figure .pet-avatar__brow,
+.sf-figure .pet-avatar__mouth {
+  stroke: var(--pet-ink);
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+  /* SVG 默认以 (0,0) 为变换原点，会把嘴和眉毛在动画时甩出脸外。 */
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+/* 腮红只在真的戳过之后短暂出现：DOM 里平时没有这两个椭圆。 */
+.sf-figure .pet-avatar__blush {
+  fill: var(--pet-blush);
+  opacity: 0.7;
+}
+
+.sf-figure .pet-avatar__halo,
+.sf-figure .pet-avatar__dots,
+.sf-figure .pet-avatar__error-mark {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.sf-figure .pet-avatar__dots circle {
+  fill: var(--pet-accent);
+}
+
+.sf-figure .pet-avatar__error-mark circle {
+  fill: var(--pet-error);
+}
+
+.sf-figure .pet-avatar__error-mark path {
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* ------------------------------------------------------------ 五种状态动画 */
+
+.sf-figure .pet-avatar--idle .pet-avatar__body {
+  animation: sf-breathe 4.8s ease-in-out infinite;
+}
+
+.sf-figure .pet-avatar--listening .pet-avatar__halo {
+  opacity: 0.85;
+}
+
+.sf-figure .pet-avatar--listening .pet-avatar__halo circle {
+  opacity: 0.5;
+  stroke-dasharray: 10 7;
+  animation: sf-halo-dash 6s linear infinite;
+}
+
+.sf-figure .pet-avatar--listening .pet-avatar__ear {
+  animation: sf-perk 1.6s ease-in-out infinite;
+}
+
+.sf-figure .pet-avatar--listening .pet-avatar__eye {
+  transform: scaleY(1.15);
+}
+
+.sf-figure .pet-avatar--thinking .pet-avatar__dots {
+  opacity: 1;
+}
+
+.sf-figure .pet-avatar--thinking .pet-avatar__dots circle {
+  animation: sf-dot 1.4s ease-in-out infinite;
+}
+
+.sf-figure .pet-avatar--thinking .pet-avatar__dots circle:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.sf-figure .pet-avatar--thinking .pet-avatar__dots circle:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+.sf-figure .pet-avatar--thinking .pet-avatar__eye {
+  transform: scaleY(0.45);
+}
+
+.sf-figure .pet-avatar--thinking .pet-avatar__brow {
+  transform: translateY(-2px);
+}
+
+.sf-figure .pet-avatar--replying .pet-avatar__body {
+  animation: sf-float 2.4s ease-in-out infinite;
+}
+
+.sf-figure .pet-avatar--replying .pet-avatar__mouth {
+  animation: sf-talk 520ms ease-in-out infinite;
+}
+
+.sf-figure .pet-avatar--error .pet-avatar__error-mark {
+  opacity: 1;
+}
+
+.sf-figure .pet-avatar--error .pet-avatar__body {
+  animation: sf-shake 2.6s ease-in-out infinite;
+}
+
+.sf-figure .pet-avatar--error .pet-avatar__brow--left {
+  transform: rotate(-12deg);
+}
+
+.sf-figure .pet-avatar--error .pet-avatar__brow--right {
+  transform: rotate(12deg);
+}
+
+.sf-figure .pet-avatar--error .pet-avatar__mouth {
+  transform: translateY(2px) scaleY(-0.6);
+}
+
+@keyframes sf-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes sf-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes sf-perk {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes sf-halo-dash {
+  to {
+    stroke-dashoffset: -68;
+  }
+}
+
+@keyframes sf-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes sf-talk {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.6);
+  }
+}
+
+@keyframes sf-shake {
+  0%,
+  92%,
+  100% {
+    transform: translateX(0);
+  }
+  94% {
+    transform: translateX(-2px);
+  }
+  96% {
+    transform: translateX(2px);
+  }
+  98% {
+    transform: translateX(-1px);
+  }
+}
+
+/* 减少动态：状态照样变，动画与过渡收掉。 */
+@media (prefers-reduced-motion: reduce) {
+  .sf-figure .pet-avatar,
+  .sf-figure .pet-avatar *,
+  .sf-figure .pet-avatar__eye,
+  .sf-figure .pet-avatar__brow,
+  .sf-figure .pet-avatar__mouth {
+    animation: none !important;
+    transition: none !important;
+  }
+}

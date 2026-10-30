@@ -28,12 +28,15 @@ export interface StartDesignLabProps {
   designs: readonly StartDesign[];
   /** 评审默认先看哪一版：只是打开时落在新排法上，不是产品选择，普通入口永远走基线。 */
   initial?: StartDesignId;
+  /** 回到「整窗风格家族」：这一屏换的是摆放，不是风格，两条评审面要能互相走回去。 */
+  onOpenStyles?: (() => void) | undefined;
 }
 
 export function StartDesignLab({
   context,
   designs,
   initial = 'bench',
+  onOpenStyles,
 }: StartDesignLabProps): JSX.Element {
   const [tab, setTab] = useState<TabId>('layouts');
   const [selected, setSelected] = useState<StartDesignId>(initial);
@@ -48,7 +51,7 @@ export function StartDesignLab({
       <div className="lab__tabs pb-choice" role="radiogroup" aria-label="评审入口的两个页签">
         {(
           [
-            { id: 'layouts', label: 'Start 排法' },
+            { id: 'layouts', label: '排法对照' },
             { id: 'controls', label: '控件与状态' },
           ] as const
         ).map((item) => (
@@ -103,9 +106,19 @@ export function StartDesignLab({
             </div>
             <span className="lab__count" data-testid="lab-count">
               {missing === 0
-                ? '日常三节 + 5 个新排法，都可看'
-                : '日常三节 + 新排法：已交付 ' + delivered.length + ' / 5，还差 ' + missing + ' 版'}
+                ? '同一套控件的 5 种摆放——这是排法对照，不是风格候选'
+                : '排法对照：已交付 ' + delivered.length + ' / 5，还差 ' + missing + ' 版'}
             </span>
+            {onOpenStyles === undefined ? null : (
+              <button
+                type="button"
+                className="lab__choice"
+                data-testid="lab-open-styles"
+                onClick={onOpenStyles}
+              >
+                回到整窗风格家族
+              </button>
+            )}
           </div>
 
           <p className="lab__note">

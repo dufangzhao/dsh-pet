@@ -41,6 +41,14 @@ Generate the number of options requested. Make each option differ in information
 
 Use available design guidance selectively. The user's product and reference constrain the exploration; a generic design-system search must not replace them.
 
+## Choose the variation axis
+
+Distinguish multi-style exploration, alternative layouts within one product system, and refinement of a selected direction. If the user asks for four or five styles or different kinds of controls, one shared kit in four or five grids does not satisfy the request. Record the requested count on the correct axis before implementation.
+
+For multi-style exploration, each candidate needs its own visual and interaction vocabulary: typography, surface/material, control shape, density, buttons, fields, pickers, switches, feedback and navigation. A whole-window frame and a component/state board must demonstrate that vocabulary. Share headless business behavior, authority and data owners; do not share the selected product kit as the rendered presentation for every candidate. Native semantics and the product character may be reused.
+
+Compare candidates pairwise. Require observable differences in several visual dimensions and more than one meaningful control structure or interaction, rather than just color, radius or layout. Inspect real controls and complete frames side by side before claiming the count. Label any retained existing system accurately. Consolidate one kit across the product only after a direction is selected or the user explicitly requests harmonization.
+
 ## Establish an independent component language
 
 When the user wants a product of their own, redesign includes the controls and interaction vocabulary, not only page grids. Inventory the reference's identifying primitives: buttons, fields, provider/item pickers, segmented tracks, badges, notices, menus, preview tools and theme chrome. State which must be replaced.
@@ -49,7 +57,7 @@ Define one coherent original kit with typography/spacing/surface/radius/color/mo
 
 Separate functional reuse from presentation reuse. Reuse controllers as state and action callbacks. Do not feed old fully rendered JSX controls into different layout slots and call the result original. A shared rendered slot is suitable only after its actual controls have been redesigned. Renaming CSS classes or applying a new palette to the old widget is not evidence of replacement.
 
-Apply the new kit consistently to all relevant options and their shared shell. Keep the original character or assets when they belong to this product; do not preserve a reference's builtin theme names, copied palette identity or characteristic control forms merely because they were present in the replica. Migrate saved builtin selections when needed without losing user-created schemes or other data.
+For a selected direction, apply its kit consistently across its views and shell. During multi-style exploration, keep each candidate internally coherent while candidates use different presentation components and complete frames. Keep the original character or assets when they belong to this product; do not preserve a reference's builtin theme names, copied palette identity or characteristic control forms merely because they were present in the replica. Migrate saved builtin selections when needed without losing user-created schemes or other data.
 
 Review close views of controls as well as whole windows against the rejected reference. If fields, pickers, feedback and preview tools still read as the reference after the layout is removed, the originality work is unfinished. Structural difference and functional parity remain separate requirements.
 

@@ -106,7 +106,12 @@ export function sceneHoldsFocus(scene: SceneRef): boolean {
  * 浮层菜单：Escape 或这一点之外的任何按下都收起来，
  * 不然右键一次就要按「关闭」才能继续用这一格。
  */
-export function useOutsideDismiss(open: boolean, sceneRef: SceneRef, onClose: () => void): void {
+export function useOutsideDismiss(
+  open: boolean,
+  sceneRef: SceneRef,
+  onClose: () => void,
+  interactionRef?: SceneRef,
+): void {
   // 关掉它这件事存进 ref：菜单开着的每一次渲染都别重新挂一遍监听。
   const dismiss = useRef(onClose);
   dismiss.current = onClose;
@@ -119,7 +124,12 @@ export function useOutsideDismiss(open: boolean, sceneRef: SceneRef, onClose: ()
         return;
       }
       const scene = sceneRef.current;
-      if (scene !== null && event.target instanceof Node && !scene.contains(event.target)) {
+      if (
+        scene !== null &&
+        event.target instanceof Node &&
+        !scene.contains(event.target) &&
+        !interactionRef?.current?.contains(event.target)
+      ) {
         dismiss.current();
       }
     };
@@ -129,7 +139,7 @@ export function useOutsideDismiss(open: boolean, sceneRef: SceneRef, onClose: ()
       document.removeEventListener('keydown', close);
       document.removeEventListener('mousedown', close);
     };
-  }, [open, sceneRef]);
+  }, [open, sceneRef, interactionRef]);
 }
 
 /** 录音入口的样子：状态与动作都由调用方给，用的是全场那一个录音所有者。 */

@@ -20,6 +20,15 @@ Distinguish stored data from successful connection, accepted work from completed
 
 Use the requested count. If removing the palette makes two options identical, explain or strengthen their structural difference.
 
+## Variation axis and style range
+
+Record the requested count and axis: styles, layouts, states, or refinement. Identify retained baseline candidates.
+
+| Candidate | Type / material / shape | Button / field | Selector interaction | Toggle / feedback | Whole-window navigation | Actual frame and state-board evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+
+Compare pairs without counting a palette, radius or grid swap as a separate control family. State which behavior is shared and which actual components differ.
+
 ## Component originality
 
 | Family | Reference / rejected characteristic | Our actual structure and interaction | Source or original design | State / screenshot evidence |

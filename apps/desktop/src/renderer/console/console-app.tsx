@@ -26,6 +26,8 @@ import { PersonaPage } from './pages/persona.js';
 import { PluginConfigPanel } from './pages/plugin-config.js';
 import { PluginsPage } from './pages/plugins.js';
 import { StartGuideAction, StartPage } from './pages/start.js';
+import { designLabEnabled } from './start-designs/registry.js';
+import { StyleFamilyGallery } from './style-families/gallery.js';
 import { VoicePage } from './pages/voice.js';
 import { SettingsShell } from './settings-shell.js';
 import { THEMES, themeAriaLabel, themeLabel, type Theme } from './theme.js';
@@ -108,6 +110,11 @@ export function ConsoleApp(): JSX.Element {
   const [configuring, setConfiguring] = useState<ConsolePlugin | null>(null);
   /** 表单里还有没保存的改动时，切页或返回列表前先问一次。 */
   const [discarding, setDiscarding] = useState<(() => void) | null>(null);
+  /**
+   * 评审实例里 Start 那一眼要看哪个评审面：整窗风格家族（默认）或旧的排法对照。
+   * 只有主进程挂了 --start-design-lab 标记的未打包实例才有这条岔路。
+   */
+  const [reviewSurface, setReviewSurface] = useState<'styles' | 'layouts'>('styles');
   /** 等待确认的扩展动作；null 表示没有确认框。 */
   const [confirmAction, setConfirmAction] = useState<{
     plugin: ConsolePlugin;
@@ -290,6 +297,31 @@ export function ConsoleApp(): JSX.Element {
     />
   );
 
+  /**
+   * 评审实例的根分支：整窗风格家族。这条路不挂设置台外壳——侧栏、页头、页脚一个都不渲染，
+   * 所以读屏里不会有第二份导航，评审看到的确实是那一家自己那一整扇窗。
+   * 跳去「语音设置」「装扮」或别的页时回到真实页面；回到 Start 仍是家族那一扇窗。
+   * 正常入口没有 petDesignLab 标记，走不到这里，生产那一屏一个像素都不变。
+   */
+  if (designLabEnabled() && view === 'start' && reviewSurface === 'styles') {
+    return (
+      <>
+        <StyleFamilyGallery
+          owners={{
+            app,
+            demo: demoState,
+            models,
+            notify,
+            goToView,
+            onOpenPlugins: () => select('plugins'),
+          }}
+          onOpenLayouts={() => setReviewSurface('layouts')}
+        />
+        <Toast items={toasts.items} onDismiss={toasts.dismiss} />
+      </>
+    );
+  }
+
   return (
     <>
       <SettingsShell
@@ -408,6 +440,7 @@ export function ConsoleApp(): JSX.Element {
               notify={notify}
               goToView={goToView}
               onOpenPlugins={() => select('plugins')}
+              onOpenStyles={designLabEnabled() ? () => setReviewSurface('styles') : undefined}
             />
           );
         case 'persona':
