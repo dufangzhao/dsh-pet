@@ -1,0 +1,1376 @@
+{
+  "schemaVersion": 1,
+  "status": "completed",
+  "plan": "qa/screenshots/style-families/failed-capture-cleanup-plan.json",
+  "authorizedCount": 194,
+  "deleted": [
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-dark-board-1200x800.png",
+      "sha256": "82ab374266fc8f7c11bba0459bb4592f1a76e227a6b1bee743970fff6381722f",
+      "bytes": 126377
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-dark-board-880x600.png",
+      "sha256": "40c1e0b518d47700fa41013e011479cd33e894c50c818834d9190e2979d56a5b",
+      "bytes": 93176
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-dark-start-1200x800.png",
+      "sha256": "ff9af4677cc0427b8a4f120c1cccb727caa8e32d67952fd402a5fdcc0f9b0009",
+      "bytes": 170405
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-dark-start-880x600.png",
+      "sha256": "8715b3cc39e9a659663f16d204ef969e5f242b0f04531f6ffdac839a397e6829",
+      "bytes": 76601
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-light-board-1200x800.png",
+      "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+      "bytes": 127289
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-light-board-880x600.png",
+      "sha256": "7e8422ecaa7097a0ebb7215c196df5f44e01d3d311a79288a3fc0f0b67df2407",
+      "bytes": 95512
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-light-start-1200x800.png",
+      "sha256": "4691a45af032d5909b1cc7689a45261a3f0ba19a4703e38f7851d7a6254b2cd6",
+      "bytes": 181115
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/hearth-light-start-880x600.png",
+      "sha256": "b27f99851f3048c76a754ee0147a41923dd0454417a5ff2fc49a0842587eb9a9",
+      "bytes": 77295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-dark-board-1200x800.png",
+      "sha256": "de99d1c3cf413375a13b820c8023aeede144ddf310bc0a26a43fc891df01e404",
+      "bytes": 75484
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-dark-board-880x600.png",
+      "sha256": "3f03260b5b86550d0c2d4ca54d277edada55dc895405d40f5cea64ad093ea65b",
+      "bytes": 48867
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-dark-start-1200x800.png",
+      "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+      "bytes": 101182
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-dark-start-880x600.png",
+      "sha256": "992ff9a9d3986e3275d1453811eb59bb697f5ea021bfe8a236ae8458de41f3a3",
+      "bytes": 50426
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-light-board-1200x800.png",
+      "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+      "bytes": 73372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-light-board-880x600.png",
+      "sha256": "241b8f11091a0109b5d884a782c22f55ede4d2783a21c43d8bc924a74def8aaf",
+      "bytes": 48846
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-light-start-1200x800.png",
+      "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+      "bytes": 100946
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326656482-59c6ea9a/precision-light-start-880x600.png",
+      "sha256": "6b80bbba528efb7116b9cc71a3a7e53058133dabf17ef93927da45e4c9727384",
+      "bytes": 50402
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-dark-board-1200x800.png",
+      "sha256": "a2e4c7948a4ef52215ab721cd4d1501822f271ee7a4f7cc1a38c97c5be0de77d",
+      "bytes": 46468
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-dark-board-880x600.png",
+      "sha256": "5d103ed09429d7c8f294475fcd27b7c2f4e9c9a9c8b56322cae41f2388336c05",
+      "bytes": 38503
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-dark-start-1200x800.png",
+      "sha256": "cd5974dfd7199a0abba37b12795e13bd105fe92c265e05661e2efde33c1f9298",
+      "bytes": 47217
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-dark-start-880x600.png",
+      "sha256": "e782f259a7333ba9532671cb806f7974836b073f6fbc06d800ab6034401bc8fe",
+      "bytes": 37088
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-light-board-1200x800.png",
+      "sha256": "b5ea2f3b940991d6c61034a5a1c2c79834e52dc8686241b3fdfecbe3fb2ae5a8",
+      "bytes": 46145
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-light-board-880x600.png",
+      "sha256": "30444bbdd69dc77b0851d65b3c1bbdb8bd8f318b7c0bde42c4aafead61d8f0a3",
+      "bytes": 38425
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-light-start-880x600.png",
+      "sha256": "314dce7eaaa15bb1f9ffcc158bff68391ca798f83520b32089f8201dd55fb9ca",
+      "bytes": 36839
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-dark-board-1200x800.png",
+      "sha256": "82ab374266fc8f7c11bba0459bb4592f1a76e227a6b1bee743970fff6381722f",
+      "bytes": 126377
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-dark-board-880x600.png",
+      "sha256": "40c1e0b518d47700fa41013e011479cd33e894c50c818834d9190e2979d56a5b",
+      "bytes": 93176
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-dark-start-1200x800.png",
+      "sha256": "45481636a9a6160ece0f8a21a3c23a25ea5f8bbe24bd4d975e5e9e8b7c11d2fa",
+      "bytes": 170322
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-dark-start-880x600.png",
+      "sha256": "8715b3cc39e9a659663f16d204ef969e5f242b0f04531f6ffdac839a397e6829",
+      "bytes": 76601
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-light-board-1200x800.png",
+      "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+      "bytes": 127289
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-light-board-880x600.png",
+      "sha256": "7e8422ecaa7097a0ebb7215c196df5f44e01d3d311a79288a3fc0f0b67df2407",
+      "bytes": 95512
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-light-start-1200x800.png",
+      "sha256": "f94f85c3b8e97c59b5d0bd08281cf07d5bb661d5061e7438bb887e60603d95ae",
+      "bytes": 181287
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/hearth-light-start-880x600.png",
+      "sha256": "b27f99851f3048c76a754ee0147a41923dd0454417a5ff2fc49a0842587eb9a9",
+      "bytes": 77295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-dark-board-1200x800.png",
+      "sha256": "de99d1c3cf413375a13b820c8023aeede144ddf310bc0a26a43fc891df01e404",
+      "bytes": 75484
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-dark-board-880x600.png",
+      "sha256": "3f03260b5b86550d0c2d4ca54d277edada55dc895405d40f5cea64ad093ea65b",
+      "bytes": 48867
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-dark-start-1200x800.png",
+      "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+      "bytes": 101182
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-dark-start-880x600.png",
+      "sha256": "992ff9a9d3986e3275d1453811eb59bb697f5ea021bfe8a236ae8458de41f3a3",
+      "bytes": 50426
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-light-board-1200x800.png",
+      "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+      "bytes": 73372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-light-board-880x600.png",
+      "sha256": "241b8f11091a0109b5d884a782c22f55ede4d2783a21c43d8bc924a74def8aaf",
+      "bytes": 48846
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-light-start-1200x800.png",
+      "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+      "bytes": 100946
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-light-start-880x600.png",
+      "sha256": "6b80bbba528efb7116b9cc71a3a7e53058133dabf17ef93927da45e4c9727384",
+      "bytes": 50402
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-real-Core-preview-1200x800.png",
+      "sha256": "4705a21ed3aef6fe0041236ca336e8c1340a8f95a1e7eda5ed828d2d1f4211ae",
+      "bytes": 80450
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/precision-theme-actions-1200x800.png",
+      "sha256": "a96f4176ca7661f692beae95a5cf8270d05cf6ac92b4051211a0d48c73c0b375",
+      "bytes": 81532
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-dark-board-1200x800.png",
+      "sha256": "3f423efca2ecdf4740925ff17fa0b01bbeff2e3b5cb5e0544d44bc023df5ed73",
+      "bytes": 195295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-dark-board-880x600.png",
+      "sha256": "ceb6b6ba71fcd0b46e0fe85e8f0b73bb3faf1bc8ca836b8221e0587b5be1d462",
+      "bytes": 104204
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-dark-start-1200x800.png",
+      "sha256": "10723d03f02dbe950d1fde21b7f93728b971417480be95b394ed30d21233b5b7",
+      "bytes": 175795
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-dark-start-880x600.png",
+      "sha256": "ab288f0a539e251eca7d7a4771786b8bca82c1f9fd4437403d064640bbb325fd",
+      "bytes": 76184
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-light-board-1200x800.png",
+      "sha256": "bd7cbdea7b021cc4cbaf873494a09d3725889ef217c70325b16eb2212fbeaff9",
+      "bytes": 210971
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-light-board-880x600.png",
+      "sha256": "a380b8a3c2b0fefa64457713e0c9dee4ff5dfecda6bc56f2e36b2de0ed945f8b",
+      "bytes": 97372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-light-start-1200x800.png",
+      "sha256": "055f096fed913b7e17b4ee0b79e57c4b420e22114066bb8dbc68cbf83f64df09",
+      "bytes": 179475
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/prism-light-start-880x600.png",
+      "sha256": "50936a9d1c5f43eddee73d3e2f53cbe2595be9de1ce15ca0854bdec004a4f34e",
+      "bytes": 73238
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-dark-board-1200x800.png",
+      "sha256": "ea7241c2cc9672ae33f3ae87949743a008cde1778f60a8848ad6ebb795d7c312",
+      "bytes": 94310
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-dark-board-880x600.png",
+      "sha256": "8b2b7264f0297c9608c72c367c7b36b3cab20dd2e4ece155f834e55d435914aa",
+      "bytes": 49559
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-dark-start-1200x800.png",
+      "sha256": "39ddff0f14b412b798ada879cd15f4cec8b08ee8a4811f3d234916e33cc7dfa6",
+      "bytes": 104724
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-dark-start-880x600.png",
+      "sha256": "4d86b4c543ee8b78f381a75b4723db94e49837ff185f0bb21dd61930ced61230",
+      "bytes": 50149
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-light-board-1200x800.png",
+      "sha256": "0edb05570da90669a566e85dcfc06661a963340cb03ffb33b3276ac38ee8ca11",
+      "bytes": 94996
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-light-board-880x600.png",
+      "sha256": "a8e448aca778fc5bffe720a38dcc51f1bab3507ea98d2c1c91b644e9a714f41b",
+      "bytes": 49709
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-light-start-1200x800.png",
+      "sha256": "0395f6cbb8e7591ddea8de2b5d2dc791d07596af961dd2cdba57c7d568824d66",
+      "bytes": 106742
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793326740693-77bcffbd/workbench-light-start-880x600.png",
+      "sha256": "1e4f3aa4c296ef4391e4fee92de319047fcf8b81067f07e66596f5f9f6b80f9e",
+      "bytes": 50276
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-dark-board-1200x800.png",
+      "sha256": "a2e4c7948a4ef52215ab721cd4d1501822f271ee7a4f7cc1a38c97c5be0de77d",
+      "bytes": 46468
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-dark-board-880x600.png",
+      "sha256": "5d103ed09429d7c8f294475fcd27b7c2f4e9c9a9c8b56322cae41f2388336c05",
+      "bytes": 38503
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-dark-start-1200x800.png",
+      "sha256": "104b098f7a8ff96ca940df0bfb98a2ef03cc476a45415425dd7912208ac076e7",
+      "bytes": 52175
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-dark-start-880x600.png",
+      "sha256": "e782f259a7333ba9532671cb806f7974836b073f6fbc06d800ab6034401bc8fe",
+      "bytes": 37088
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-light-board-1200x800.png",
+      "sha256": "b5ea2f3b940991d6c61034a5a1c2c79834e52dc8686241b3fdfecbe3fb2ae5a8",
+      "bytes": 46145
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-light-board-880x600.png",
+      "sha256": "30444bbdd69dc77b0851d65b3c1bbdb8bd8f318b7c0bde42c4aafead61d8f0a3",
+      "bytes": 38425
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-light-start-1200x800.png",
+      "sha256": "0d57b6eedf1affaa0a881f19d5138b8080f504bc428cfe44c55d4f570fc9c30d",
+      "bytes": 51728
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/folio-light-start-880x600.png",
+      "sha256": "314dce7eaaa15bb1f9ffcc158bff68391ca798f83520b32089f8201dd55fb9ca",
+      "bytes": 36839
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-dark-board-1200x800.png",
+      "sha256": "82ab374266fc8f7c11bba0459bb4592f1a76e227a6b1bee743970fff6381722f",
+      "bytes": 126377
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-dark-board-880x600.png",
+      "sha256": "40c1e0b518d47700fa41013e011479cd33e894c50c818834d9190e2979d56a5b",
+      "bytes": 93176
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-dark-start-1200x800.png",
+      "sha256": "55feb1036943bbc8c520bb0609da15b0ce60183ba984dde51478ea5802fbd479",
+      "bytes": 171829
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-dark-start-880x600.png",
+      "sha256": "8715b3cc39e9a659663f16d204ef969e5f242b0f04531f6ffdac839a397e6829",
+      "bytes": 76601
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-light-board-1200x800.png",
+      "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+      "bytes": 127289
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-light-board-880x600.png",
+      "sha256": "7e8422ecaa7097a0ebb7215c196df5f44e01d3d311a79288a3fc0f0b67df2407",
+      "bytes": 95512
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-light-start-1200x800.png",
+      "sha256": "68d8ccd71711caaa6fd1bd356aaac6f206056511dd9ba24f996d00c5b91cbc51",
+      "bytes": 182673
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/hearth-light-start-880x600.png",
+      "sha256": "b27f99851f3048c76a754ee0147a41923dd0454417a5ff2fc49a0842587eb9a9",
+      "bytes": 77295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-dark-board-1200x800.png",
+      "sha256": "de99d1c3cf413375a13b820c8023aeede144ddf310bc0a26a43fc891df01e404",
+      "bytes": 75484
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-dark-board-880x600.png",
+      "sha256": "3f03260b5b86550d0c2d4ca54d277edada55dc895405d40f5cea64ad093ea65b",
+      "bytes": 48867
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-dark-start-1200x800.png",
+      "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+      "bytes": 101182
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-dark-start-880x600.png",
+      "sha256": "992ff9a9d3986e3275d1453811eb59bb697f5ea021bfe8a236ae8458de41f3a3",
+      "bytes": 50426
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-light-board-1200x800.png",
+      "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+      "bytes": 73372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-light-board-880x600.png",
+      "sha256": "241b8f11091a0109b5d884a782c22f55ede4d2783a21c43d8bc924a74def8aaf",
+      "bytes": 48846
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-light-start-1200x800.png",
+      "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+      "bytes": 100946
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-light-start-880x600.png",
+      "sha256": "6b80bbba528efb7116b9cc71a3a7e53058133dabf17ef93927da45e4c9727384",
+      "bytes": 50402
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-native-context-menu-1200x800.png",
+      "sha256": "de1e9c46836aa71bca9bcb4ae01fc36dea5c1c2725ab9b1810926c3c6ab8d4c8",
+      "bytes": 80677
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-real-Core-preview-1200x800.png",
+      "sha256": "c9c80b62474807c9c787f0cd35bc420e84269937c45db28d388b469f31ba0c13",
+      "bytes": 81108
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/precision-theme-actions-1200x800.png",
+      "sha256": "a96f4176ca7661f692beae95a5cf8270d05cf6ac92b4051211a0d48c73c0b375",
+      "bytes": 81532
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-dark-board-1200x800.png",
+      "sha256": "3f423efca2ecdf4740925ff17fa0b01bbeff2e3b5cb5e0544d44bc023df5ed73",
+      "bytes": 195295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-dark-board-880x600.png",
+      "sha256": "ceb6b6ba71fcd0b46e0fe85e8f0b73bb3faf1bc8ca836b8221e0587b5be1d462",
+      "bytes": 104204
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-dark-start-1200x800.png",
+      "sha256": "f19097e9c033afa6ad2de9c5ef843b9ceb9f9b3b1144af7e02d721eab68e0d1b",
+      "bytes": 175976
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-dark-start-880x600.png",
+      "sha256": "2a6cfaeb5bd4b2e4c508c164957eb8389e98fcfec8416374bf6b96a3d1505c14",
+      "bytes": 75854
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-light-board-1200x800.png",
+      "sha256": "bd7cbdea7b021cc4cbaf873494a09d3725889ef217c70325b16eb2212fbeaff9",
+      "bytes": 210971
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-light-board-880x600.png",
+      "sha256": "a380b8a3c2b0fefa64457713e0c9dee4ff5dfecda6bc56f2e36b2de0ed945f8b",
+      "bytes": 97372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-light-start-1200x800.png",
+      "sha256": "07112286eed264e8994a91539bc3e01f49f21a557af4affa1cc8604f6188c4ca",
+      "bytes": 179353
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/prism-light-start-880x600.png",
+      "sha256": "08ff304d3197ab65ce9d92c69bf666db4a576de982cb937d82bb02adb74cb86d",
+      "bytes": 73462
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-dark-board-1200x800.png",
+      "sha256": "278b19638ca63f7d979d4e3a42c95430f8b5789a1b744ea1b94745d762f06a64",
+      "bytes": 94299
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-dark-board-880x600.png",
+      "sha256": "8b2b7264f0297c9608c72c367c7b36b3cab20dd2e4ece155f834e55d435914aa",
+      "bytes": 49559
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-dark-start-1200x800.png",
+      "sha256": "90cd4f2fb5f4cba0492aed79f8f7ee4cfe51b1a8140d661460b49875b28a9541",
+      "bytes": 104721
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-dark-start-880x600.png",
+      "sha256": "4d86b4c543ee8b78f381a75b4723db94e49837ff185f0bb21dd61930ced61230",
+      "bytes": 50149
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-light-board-1200x800.png",
+      "sha256": "ad3e75510712f347fff5164ea368dd6a7eea1a328776db3fe6e2e8689a445e2c",
+      "bytes": 94965
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-light-board-880x600.png",
+      "sha256": "a8e448aca778fc5bffe720a38dcc51f1bab3507ea98d2c1c91b644e9a714f41b",
+      "bytes": 49709
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-light-start-1200x800.png",
+      "sha256": "c59293e3feea5b9aa7a393b6eeb57a558853301c5aaacab2f5e07c70d9e39c09",
+      "bytes": 105107
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328802300-cd7c9d46/workbench-light-start-880x600.png",
+      "sha256": "1e4f3aa4c296ef4391e4fee92de319047fcf8b81067f07e66596f5f9f6b80f9e",
+      "bytes": 50276
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-board-1200x800.png",
+      "sha256": "a2e4c7948a4ef52215ab721cd4d1501822f271ee7a4f7cc1a38c97c5be0de77d",
+      "bytes": 46468
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-board-880x600.png",
+      "sha256": "5d103ed09429d7c8f294475fcd27b7c2f4e9c9a9c8b56322cae41f2388336c05",
+      "bytes": 38503
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-start-1200x800.png",
+      "sha256": "104b098f7a8ff96ca940df0bfb98a2ef03cc476a45415425dd7912208ac076e7",
+      "bytes": 52175
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-start-880x600.png",
+      "sha256": "e782f259a7333ba9532671cb806f7974836b073f6fbc06d800ab6034401bc8fe",
+      "bytes": 37088
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-board-1200x800.png",
+      "sha256": "b5ea2f3b940991d6c61034a5a1c2c79834e52dc8686241b3fdfecbe3fb2ae5a8",
+      "bytes": 46145
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-board-880x600.png",
+      "sha256": "30444bbdd69dc77b0851d65b3c1bbdb8bd8f318b7c0bde42c4aafead61d8f0a3",
+      "bytes": 38425
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-start-1200x800.png",
+      "sha256": "0d57b6eedf1affaa0a881f19d5138b8080f504bc428cfe44c55d4f570fc9c30d",
+      "bytes": 51728
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-start-880x600.png",
+      "sha256": "314dce7eaaa15bb1f9ffcc158bff68391ca798f83520b32089f8201dd55fb9ca",
+      "bytes": 36839
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-native-context-menu-1200x800.png",
+      "sha256": "a75d63c2c0bafb614d9135adf84f261f8f9aa106a2cd32be8a54d8eccbfc803e",
+      "bytes": 32083
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-board-1200x800.png",
+      "sha256": "82ab374266fc8f7c11bba0459bb4592f1a76e227a6b1bee743970fff6381722f",
+      "bytes": 126377
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-board-880x600.png",
+      "sha256": "40c1e0b518d47700fa41013e011479cd33e894c50c818834d9190e2979d56a5b",
+      "bytes": 93176
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-start-1200x800.png",
+      "sha256": "742a56b26a0398cd70cc24232786205b618b965509136001e02b5fda43343b45",
+      "bytes": 172039
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-start-880x600.png",
+      "sha256": "8715b3cc39e9a659663f16d204ef969e5f242b0f04531f6ffdac839a397e6829",
+      "bytes": 76601
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-board-1200x800.png",
+      "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+      "bytes": 127289
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-board-880x600.png",
+      "sha256": "7e8422ecaa7097a0ebb7215c196df5f44e01d3d311a79288a3fc0f0b67df2407",
+      "bytes": 95512
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-start-1200x800.png",
+      "sha256": "144cebab6d41281ee3915fef47ca4265e22f6a3f2d57a7ea5563fbfad873e47b",
+      "bytes": 182747
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-start-880x600.png",
+      "sha256": "b27f99851f3048c76a754ee0147a41923dd0454417a5ff2fc49a0842587eb9a9",
+      "bytes": 77295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-native-context-menu-1200x800.png",
+      "sha256": "c28959bffd11bb507a16aa592cd7626261d706e9a32525d0944dbf91d08e7b00",
+      "bytes": 160729
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-real-Core-preview-1200x800.png",
+      "sha256": "2c1e7f427c3dfed1398c22443fe8d68e5300188fe5c29effdf4a18a05874a09e",
+      "bytes": 171216
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-theme-actions-1200x800.png",
+      "sha256": "8ea9282e6b2087ba23961379f6e01d9d86273651f1179ddb3c4a71979a4c4e04",
+      "bytes": 63337
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-board-1200x800.png",
+      "sha256": "de99d1c3cf413375a13b820c8023aeede144ddf310bc0a26a43fc891df01e404",
+      "bytes": 75484
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-board-880x600.png",
+      "sha256": "3f03260b5b86550d0c2d4ca54d277edada55dc895405d40f5cea64ad093ea65b",
+      "bytes": 48867
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-start-1200x800.png",
+      "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+      "bytes": 101182
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-start-880x600.png",
+      "sha256": "992ff9a9d3986e3275d1453811eb59bb697f5ea021bfe8a236ae8458de41f3a3",
+      "bytes": 50426
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-board-1200x800.png",
+      "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+      "bytes": 73372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-board-880x600.png",
+      "sha256": "241b8f11091a0109b5d884a782c22f55ede4d2783a21c43d8bc924a74def8aaf",
+      "bytes": 48846
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-start-1200x800.png",
+      "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+      "bytes": 100946
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-start-880x600.png",
+      "sha256": "6b80bbba528efb7116b9cc71a3a7e53058133dabf17ef93927da45e4c9727384",
+      "bytes": 50402
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-native-context-menu-1200x800.png",
+      "sha256": "cd654f817e5ee2871c6c48daf18c5bd68bd1d5103cb4af1e3aa095c97395fc2f",
+      "bytes": 80684
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-real-Core-preview-1200x800.png",
+      "sha256": "2b89b420f856997382ab7ecdba4b7c37456f31e25712a0f57af17516864351cb",
+      "bytes": 81109
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-theme-actions-1200x800.png",
+      "sha256": "a96f4176ca7661f692beae95a5cf8270d05cf6ac92b4051211a0d48c73c0b375",
+      "bytes": 81532
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-board-1200x800.png",
+      "sha256": "3f423efca2ecdf4740925ff17fa0b01bbeff2e3b5cb5e0544d44bc023df5ed73",
+      "bytes": 195295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-board-880x600.png",
+      "sha256": "ceb6b6ba71fcd0b46e0fe85e8f0b73bb3faf1bc8ca836b8221e0587b5be1d462",
+      "bytes": 104204
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-start-1200x800.png",
+      "sha256": "f19097e9c033afa6ad2de9c5ef843b9ceb9f9b3b1144af7e02d721eab68e0d1b",
+      "bytes": 175976
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-start-880x600.png",
+      "sha256": "2a6cfaeb5bd4b2e4c508c164957eb8389e98fcfec8416374bf6b96a3d1505c14",
+      "bytes": 75854
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-board-1200x800.png",
+      "sha256": "bd7cbdea7b021cc4cbaf873494a09d3725889ef217c70325b16eb2212fbeaff9",
+      "bytes": 210971
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-board-880x600.png",
+      "sha256": "a380b8a3c2b0fefa64457713e0c9dee4ff5dfecda6bc56f2e36b2de0ed945f8b",
+      "bytes": 97372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-start-1200x800.png",
+      "sha256": "07112286eed264e8994a91539bc3e01f49f21a557af4affa1cc8604f6188c4ca",
+      "bytes": 179353
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-start-880x600.png",
+      "sha256": "08ff304d3197ab65ce9d92c69bf666db4a576de982cb937d82bb02adb74cb86d",
+      "bytes": 73462
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-board-1200x800.png",
+      "sha256": "278b19638ca63f7d979d4e3a42c95430f8b5789a1b744ea1b94745d762f06a64",
+      "bytes": 94299
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-board-880x600.png",
+      "sha256": "8b2b7264f0297c9608c72c367c7b36b3cab20dd2e4ece155f834e55d435914aa",
+      "bytes": 49559
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-start-1200x800.png",
+      "sha256": "2a39b20804e6ba48f415463a14ef909c00e087be7237076521e41ce8c1e283fc",
+      "bytes": 104724
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-start-880x600.png",
+      "sha256": "7fb3a02ffb0e3b2403e062eb764c351b4df9c78aaf0637edb28bbc14e6602e13",
+      "bytes": 50149
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-board-1200x800.png",
+      "sha256": "7a843d2d1600128da94e72baefcf5ab19bc369b1ec7962bb2fe5ba623fefdc63",
+      "bytes": 94972
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-board-880x600.png",
+      "sha256": "a8e448aca778fc5bffe720a38dcc51f1bab3507ea98d2c1c91b644e9a714f41b",
+      "bytes": 49709
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-start-1200x800.png",
+      "sha256": "994e443bc73f9f619c0770f0a10a980f5afa66ad9b7fe5eca73f16e058fdb94b",
+      "bytes": 105111
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-start-880x600.png",
+      "sha256": "42c491aa6a8c1e6aa6fc40dd047439394a3654d048e8ac0d8653b713261a9e99",
+      "bytes": 50266
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-dark-board-1200x800.png",
+      "sha256": "a2e4c7948a4ef52215ab721cd4d1501822f271ee7a4f7cc1a38c97c5be0de77d",
+      "bytes": 46468
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-dark-board-880x600.png",
+      "sha256": "5d103ed09429d7c8f294475fcd27b7c2f4e9c9a9c8b56322cae41f2388336c05",
+      "bytes": 38503
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-dark-start-1200x800.png",
+      "sha256": "104b098f7a8ff96ca940df0bfb98a2ef03cc476a45415425dd7912208ac076e7",
+      "bytes": 52175
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-dark-start-880x600.png",
+      "sha256": "e782f259a7333ba9532671cb806f7974836b073f6fbc06d800ab6034401bc8fe",
+      "bytes": 37088
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-light-board-1200x800.png",
+      "sha256": "b5ea2f3b940991d6c61034a5a1c2c79834e52dc8686241b3fdfecbe3fb2ae5a8",
+      "bytes": 46145
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-light-board-880x600.png",
+      "sha256": "30444bbdd69dc77b0851d65b3c1bbdb8bd8f318b7c0bde42c4aafead61d8f0a3",
+      "bytes": 38425
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-light-start-1200x800.png",
+      "sha256": "0d57b6eedf1affaa0a881f19d5138b8080f504bc428cfe44c55d4f570fc9c30d",
+      "bytes": 51728
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-light-start-880x600.png",
+      "sha256": "314dce7eaaa15bb1f9ffcc158bff68391ca798f83520b32089f8201dd55fb9ca",
+      "bytes": 36839
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/folio-native-context-menu-1200x800.png",
+      "sha256": "d86dff329edb0b41ea29b50d3535d3f3d43838bfdb3fe151a4dafa27702e9e93",
+      "bytes": 32411
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-dark-board-1200x800.png",
+      "sha256": "82ab374266fc8f7c11bba0459bb4592f1a76e227a6b1bee743970fff6381722f",
+      "bytes": 126377
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-dark-board-880x600.png",
+      "sha256": "40c1e0b518d47700fa41013e011479cd33e894c50c818834d9190e2979d56a5b",
+      "bytes": 93176
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-dark-start-1200x800.png",
+      "sha256": "c95f51986934c32062f7c927c62f5d4581afd3cdc0201b16208993804b32e14b",
+      "bytes": 171728
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-dark-start-880x600.png",
+      "sha256": "8715b3cc39e9a659663f16d204ef969e5f242b0f04531f6ffdac839a397e6829",
+      "bytes": 76601
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-light-board-1200x800.png",
+      "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+      "bytes": 127289
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-light-board-880x600.png",
+      "sha256": "7e8422ecaa7097a0ebb7215c196df5f44e01d3d311a79288a3fc0f0b67df2407",
+      "bytes": 95512
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-light-start-1200x800.png",
+      "sha256": "999fc79388c249fa2e988e5ecfdde7ebc8a06afdfbf18d6a32fa5303b92a68d4",
+      "bytes": 182617
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-light-start-880x600.png",
+      "sha256": "b27f99851f3048c76a754ee0147a41923dd0454417a5ff2fc49a0842587eb9a9",
+      "bytes": 77295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-native-context-menu-1200x800.png",
+      "sha256": "a9c4002ec933864f2195a9ec46898bf7b0901063dd8ddc409e9135fc44265b03",
+      "bytes": 160711
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-real-Core-preview-1200x800.png",
+      "sha256": "3ff017ab6f29dc1f13ecdb80fdb66375be532454ff2c06c7049374d7ff0444bf",
+      "bytes": 171381
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/hearth-theme-actions-1200x800.png",
+      "sha256": "8ea9282e6b2087ba23961379f6e01d9d86273651f1179ddb3c4a71979a4c4e04",
+      "bytes": 63337
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-dark-board-1200x800.png",
+      "sha256": "de99d1c3cf413375a13b820c8023aeede144ddf310bc0a26a43fc891df01e404",
+      "bytes": 75484
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-dark-board-880x600.png",
+      "sha256": "3f03260b5b86550d0c2d4ca54d277edada55dc895405d40f5cea64ad093ea65b",
+      "bytes": 48867
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-dark-start-1200x800.png",
+      "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+      "bytes": 101182
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-dark-start-880x600.png",
+      "sha256": "992ff9a9d3986e3275d1453811eb59bb697f5ea021bfe8a236ae8458de41f3a3",
+      "bytes": 50426
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-light-board-1200x800.png",
+      "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+      "bytes": 73372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-light-board-880x600.png",
+      "sha256": "241b8f11091a0109b5d884a782c22f55ede4d2783a21c43d8bc924a74def8aaf",
+      "bytes": 48846
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-light-start-1200x800.png",
+      "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+      "bytes": 100946
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-light-start-880x600.png",
+      "sha256": "6b80bbba528efb7116b9cc71a3a7e53058133dabf17ef93927da45e4c9727384",
+      "bytes": 50402
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-native-context-menu-1200x800.png",
+      "sha256": "5d06f7ca2bb9b698654398406845a80f6a6e8d54691d610bf6b3387ed6d11ea6",
+      "bytes": 80693
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-real-Core-preview-1200x800.png",
+      "sha256": "da18396a80eeb022556accbc8b1666be1b5423155b4164e8bace75533c8203c1",
+      "bytes": 81498
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/precision-theme-actions-1200x800.png",
+      "sha256": "a96f4176ca7661f692beae95a5cf8270d05cf6ac92b4051211a0d48c73c0b375",
+      "bytes": 81532
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-dark-board-1200x800.png",
+      "sha256": "3f423efca2ecdf4740925ff17fa0b01bbeff2e3b5cb5e0544d44bc023df5ed73",
+      "bytes": 195295
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-dark-board-880x600.png",
+      "sha256": "ceb6b6ba71fcd0b46e0fe85e8f0b73bb3faf1bc8ca836b8221e0587b5be1d462",
+      "bytes": 104204
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-dark-start-1200x800.png",
+      "sha256": "f19097e9c033afa6ad2de9c5ef843b9ceb9f9b3b1144af7e02d721eab68e0d1b",
+      "bytes": 175976
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-dark-start-880x600.png",
+      "sha256": "2a6cfaeb5bd4b2e4c508c164957eb8389e98fcfec8416374bf6b96a3d1505c14",
+      "bytes": 75854
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-light-board-1200x800.png",
+      "sha256": "bd7cbdea7b021cc4cbaf873494a09d3725889ef217c70325b16eb2212fbeaff9",
+      "bytes": 210971
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-light-board-880x600.png",
+      "sha256": "a380b8a3c2b0fefa64457713e0c9dee4ff5dfecda6bc56f2e36b2de0ed945f8b",
+      "bytes": 97372
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-light-start-1200x800.png",
+      "sha256": "07112286eed264e8994a91539bc3e01f49f21a557af4affa1cc8604f6188c4ca",
+      "bytes": 179353
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/prism-light-start-880x600.png",
+      "sha256": "08ff304d3197ab65ce9d92c69bf666db4a576de982cb937d82bb02adb74cb86d",
+      "bytes": 73462
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-dark-board-1200x800.png",
+      "sha256": "bc994d29e9f78fb47e6d0d5ce669846f54c5dd6a1fcdbb96c877196a0c0a9440",
+      "bytes": 94312
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-dark-board-880x600.png",
+      "sha256": "8b2b7264f0297c9608c72c367c7b36b3cab20dd2e4ece155f834e55d435914aa",
+      "bytes": 49559
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-dark-start-1200x800.png",
+      "sha256": "39ddff0f14b412b798ada879cd15f4cec8b08ee8a4811f3d234916e33cc7dfa6",
+      "bytes": 104724
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-dark-start-880x600.png",
+      "sha256": "4d86b4c543ee8b78f381a75b4723db94e49837ff185f0bb21dd61930ced61230",
+      "bytes": 50149
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-light-board-1200x800.png",
+      "sha256": "e235fffe9988fb71c1b74678386193a0be17a90415bbba02e5d0a73942564a5b",
+      "bytes": 94995
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-light-board-880x600.png",
+      "sha256": "a8e448aca778fc5bffe720a38dcc51f1bab3507ea98d2c1c91b644e9a714f41b",
+      "bytes": 49709
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-light-start-1200x800.png",
+      "sha256": "994e443bc73f9f619c0770f0a10a980f5afa66ad9b7fe5eca73f16e058fdb94b",
+      "bytes": 105111
+    },
+    {
+      "path": "C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/qa/screenshots/style-families/native-1793329139695-1d16e692/workbench-light-start-880x600.png",
+      "sha256": "44e2264de1480afbf2a7c78367fab4a29b34f3e754b9bb9b92e8f7f19306d0dd",
+      "bytes": 50275
+    }
+  ],
+  "preservedBefore": [
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-light-start-1200x800.png",
+      "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+      "bytes": 100946
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-light-board-1200x800.png",
+      "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+      "bytes": 73372
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-dark-start-1200x800.png",
+      "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+      "bytes": 101182
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-dark-board-1200x800.png",
+      "sha256": "de99d1c3cf413375a13b820c8023aeede144ddf310bc0a26a43fc891df01e404",
+      "bytes": 75484
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-light-start-880x600.png",
+      "sha256": "6b80bbba528efb7116b9cc71a3a7e53058133dabf17ef93927da45e4c9727384",
+      "bytes": 50402
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-light-board-880x600.png",
+      "sha256": "241b8f11091a0109b5d884a782c22f55ede4d2783a21c43d8bc924a74def8aaf",
+      "bytes": 48846
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-dark-start-880x600.png",
+      "sha256": "992ff9a9d3986e3275d1453811eb59bb697f5ea021bfe8a236ae8458de41f3a3",
+      "bytes": 50426
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-dark-board-880x600.png",
+      "sha256": "3f03260b5b86550d0c2d4ca54d277edada55dc895405d40f5cea64ad093ea65b",
+      "bytes": 48867
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-light-start-1200x800.png",
+      "sha256": "fd8efb6a8ccc191d100a19608e35510bdf26b9fa63bc7ae8b7912a882816aa85",
+      "bytes": 182704
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-light-board-1200x800.png",
+      "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+      "bytes": 127289
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-dark-start-1200x800.png",
+      "sha256": "27c08b40d682de4f199531d900ec804da9a5eb95e486e73117cab498e20c600b",
+      "bytes": 171874
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-dark-board-1200x800.png",
+      "sha256": "82ab374266fc8f7c11bba0459bb4592f1a76e227a6b1bee743970fff6381722f",
+      "bytes": 126377
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-light-start-880x600.png",
+      "sha256": "b27f99851f3048c76a754ee0147a41923dd0454417a5ff2fc49a0842587eb9a9",
+      "bytes": 77295
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-light-board-880x600.png",
+      "sha256": "7e8422ecaa7097a0ebb7215c196df5f44e01d3d311a79288a3fc0f0b67df2407",
+      "bytes": 95512
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-dark-start-880x600.png",
+      "sha256": "8715b3cc39e9a659663f16d204ef969e5f242b0f04531f6ffdac839a397e6829",
+      "bytes": 76601
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-dark-board-880x600.png",
+      "sha256": "40c1e0b518d47700fa41013e011479cd33e894c50c818834d9190e2979d56a5b",
+      "bytes": 93176
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-light-start-1200x800.png",
+      "sha256": "0d57b6eedf1affaa0a881f19d5138b8080f504bc428cfe44c55d4f570fc9c30d",
+      "bytes": 51728
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-light-board-1200x800.png",
+      "sha256": "b5ea2f3b940991d6c61034a5a1c2c79834e52dc8686241b3fdfecbe3fb2ae5a8",
+      "bytes": 46145
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-dark-start-1200x800.png",
+      "sha256": "104b098f7a8ff96ca940df0bfb98a2ef03cc476a45415425dd7912208ac076e7",
+      "bytes": 52175
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-dark-board-1200x800.png",
+      "sha256": "a2e4c7948a4ef52215ab721cd4d1501822f271ee7a4f7cc1a38c97c5be0de77d",
+      "bytes": 46468
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-light-start-880x600.png",
+      "sha256": "314dce7eaaa15bb1f9ffcc158bff68391ca798f83520b32089f8201dd55fb9ca",
+      "bytes": 36839
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-light-board-880x600.png",
+      "sha256": "30444bbdd69dc77b0851d65b3c1bbdb8bd8f318b7c0bde42c4aafead61d8f0a3",
+      "bytes": 38425
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-dark-start-880x600.png",
+      "sha256": "e782f259a7333ba9532671cb806f7974836b073f6fbc06d800ab6034401bc8fe",
+      "bytes": 37088
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-dark-board-880x600.png",
+      "sha256": "5d103ed09429d7c8f294475fcd27b7c2f4e9c9a9c8b56322cae41f2388336c05",
+      "bytes": 38503
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-light-start-1200x800.png",
+      "sha256": "07112286eed264e8994a91539bc3e01f49f21a557af4affa1cc8604f6188c4ca",
+      "bytes": 179353
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-light-board-1200x800.png",
+      "sha256": "bd7cbdea7b021cc4cbaf873494a09d3725889ef217c70325b16eb2212fbeaff9",
+      "bytes": 210971
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-dark-start-1200x800.png",
+      "sha256": "f19097e9c033afa6ad2de9c5ef843b9ceb9f9b3b1144af7e02d721eab68e0d1b",
+      "bytes": 175976
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-dark-board-1200x800.png",
+      "sha256": "3f423efca2ecdf4740925ff17fa0b01bbeff2e3b5cb5e0544d44bc023df5ed73",
+      "bytes": 195295
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-light-start-880x600.png",
+      "sha256": "08ff304d3197ab65ce9d92c69bf666db4a576de982cb937d82bb02adb74cb86d",
+      "bytes": 73462
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-light-board-880x600.png",
+      "sha256": "a380b8a3c2b0fefa64457713e0c9dee4ff5dfecda6bc56f2e36b2de0ed945f8b",
+      "bytes": 97372
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-dark-start-880x600.png",
+      "sha256": "2a6cfaeb5bd4b2e4c508c164957eb8389e98fcfec8416374bf6b96a3d1505c14",
+      "bytes": 75854
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-dark-board-880x600.png",
+      "sha256": "ceb6b6ba71fcd0b46e0fe85e8f0b73bb3faf1bc8ca836b8221e0587b5be1d462",
+      "bytes": 104204
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-light-start-1200x800.png",
+      "sha256": "994e443bc73f9f619c0770f0a10a980f5afa66ad9b7fe5eca73f16e058fdb94b",
+      "bytes": 105111
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-light-board-1200x800.png",
+      "sha256": "e1c097035fd792d5f59f4c458bf4d12140259e3febfb0f41f5868f021954e7b3",
+      "bytes": 94983
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-dark-start-1200x800.png",
+      "sha256": "39ddff0f14b412b798ada879cd15f4cec8b08ee8a4811f3d234916e33cc7dfa6",
+      "bytes": 104724
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-dark-board-1200x800.png",
+      "sha256": "07befd3206c1863c79ac988bcaa0da1f5b3982af07a8fca276c130d442384790",
+      "bytes": 94288
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-light-start-880x600.png",
+      "sha256": "1e4f3aa4c296ef4391e4fee92de319047fcf8b81067f07e66596f5f9f6b80f9e",
+      "bytes": 50276
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-light-board-880x600.png",
+      "sha256": "a8e448aca778fc5bffe720a38dcc51f1bab3507ea98d2c1c91b644e9a714f41b",
+      "bytes": 49709
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-dark-start-880x600.png",
+      "sha256": "4d86b4c543ee8b78f381a75b4723db94e49837ff185f0bb21dd61930ced61230",
+      "bytes": 50149
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-dark-board-880x600.png",
+      "sha256": "8b2b7264f0297c9608c72c367c7b36b3cab20dd2e4ece155f834e55d435914aa",
+      "bytes": 49559
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-native-context-menu-1200x800.png",
+      "sha256": "0d4c45c88e05f1faf8883bb349e53cebe59a756e8da84d034c0710995c45bb7c",
+      "bytes": 80212
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-real-Core-preview-1200x800.png",
+      "sha256": "a11f34bb8926c0094f603ec63ef71f2beca38c81523cbbd2a94843c7681816ed",
+      "bytes": 81360
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-theme-actions-1200x800.png",
+      "sha256": "a96f4176ca7661f692beae95a5cf8270d05cf6ac92b4051211a0d48c73c0b375",
+      "bytes": 81532
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-native-context-menu-1200x800.png",
+      "sha256": "52e63bce57c91bc0576dc149f542ebb4f063b645b65babd9739afecb6d759dd6",
+      "bytes": 160656
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-real-Core-preview-1200x800.png",
+      "sha256": "f19e0bc94a5d07513d2b78be7f1a29647f6e9b1b396eab502991855d4aeb22ec",
+      "bytes": 171599
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-theme-actions-1200x800.png",
+      "sha256": "8ea9282e6b2087ba23961379f6e01d9d86273651f1179ddb3c4a71979a4c4e04",
+      "bytes": 63337
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-native-context-menu-1200x800.png",
+      "sha256": "9111a7bffd3bb5161ae95ecef7e5127642846f9aa21d2172e949f15294f71e7b",
+      "bytes": 32128
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-real-Core-preview-1200x800.png",
+      "sha256": "df0a738d4bdfe69e865605b27f8ee8f98e883987c8613555555f113caa9a319c",
+      "bytes": 31912
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-theme-actions-1200x800.png",
+      "sha256": "742a93e7ef74dd1c6444c2b3e7542fe4f2404dc9812b82af52c4f41cd68585f1",
+      "bytes": 33399
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-native-provider-command-search-1200x800.png",
+      "sha256": "536abbd78a2d0559d1fa99d5034d9987ac6b1d805fe677a371d28ece3492acb5",
+      "bytes": 109356
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-native-context-menu-1200x800.png",
+      "sha256": "20609fa600b1edcbaa7f443b272f7afb80bbac31163d307a181be24a73568c1b",
+      "bytes": 163422
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-real-Core-preview-1200x800.png",
+      "sha256": "ca1e58a2c92ff7b395078e969962bc0e3f0e475da279b3f06a8a5a8d0aa6491c",
+      "bytes": 153832
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-theme-actions-1200x800.png",
+      "sha256": "02d15e676788a6901f8d350f2f5d3df6750cb1b0255a23067dc2bb3d3caaf9d4",
+      "bytes": 125817
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-native-context-menu-1200x800.png",
+      "sha256": "bb784edc827bb7ead206da33ae86938b3ae42fa34f14a30b6465dbeb6cbf33ab",
+      "bytes": 57806
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-real-Core-preview-1200x800.png",
+      "sha256": "93ac50d6b6e166f1af7d75f18969731cc8b97b340db63c19b5ae55a62da444e6",
+      "bytes": 64612
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-theme-actions-1200x800.png",
+      "sha256": "b1e4f4e49f6b2150304594b56b11b198789f5cc66712a6b039c9eb26242f71f8",
+      "bytes": 72314
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\precision-minimum-native-focus-reduced-motion-880x600.png",
+      "sha256": "d9d6a446040206b105b048d550833a70465a0a05214e26a55e6b613a396b190d",
+      "bytes": 54599
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\hearth-minimum-native-focus-reduced-motion-880x600.png",
+      "sha256": "ddde81962740c868cb7e968b02286eba691510b14ec2738368f325ea4167e260",
+      "bytes": 104749
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\folio-minimum-native-focus-reduced-motion-880x600.png",
+      "sha256": "00214e6756e1a2bd278c492efa3040f2a7c3777591ed29f222d550326a7529d5",
+      "bytes": 31568
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\prism-minimum-native-focus-reduced-motion-880x600.png",
+      "sha256": "1fb38837cc2085e80216e7bb7625c83720909adafcba11eadb0da9e68f08f935",
+      "bytes": 81569
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\workbench-minimum-native-focus-reduced-motion-880x600.png",
+      "sha256": "d34fe5e9d2f3d67c7ddf8a59ab8f6690d41c9ce91cd48f37b7c5e0c75d7f8957",
+      "bytes": 51752
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\derived\\five-styles-representative.png",
+      "sha256": "ddee7e8ef1c642e85e1819cd5329bdde91dcedb2bb748ee03604b3a6b60ad886",
+      "bytes": 631699
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\derived\\five-styles-light.png",
+      "sha256": "66123d6a8c5688ccae570f0ce423d7bb5571c36891c73c41ab41c47dea797613",
+      "bytes": 621645
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\derived\\five-styles-dark.png",
+      "sha256": "e46dc75be84b22502ca479d842112470f4dd3050c6d3fcb63eb6f020d25cc88d",
+      "bytes": 614259
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82\\derived\\five-boards-representative.png",
+      "sha256": "8b7cc089eb42443f927d179a2836cef67f6a7bf1ed55170f6adcd25185de5d06",
+      "bytes": 557408
+    },
+    {
+      "path": "qa/screenshots/style-families\\native-1793326594361-060d68a6\\failure-all-five-whole-frames-boards-light-dark-1200-880.png",
+      "sha256": "fd87076e73f2fbbdaf448974c0604950c380733bb1d190b542789342484f7c73",
+      "bytes": 88250
+    },
+    {
+      "path": "qa/screenshots/style-families\\native-1793326656482-59c6ea9a\\failure-all-five-whole-frames-boards-light-dark-1200-880.png",
+      "sha256": "bfb621c3785b7f7033a390717c313aed7f26156d36a788af909a94b662c5620a",
+      "bytes": 33346
+    },
+    {
+      "path": "qa/screenshots/style-families\\native-1793326740693-77bcffbd\\failure-hearth-real-Core-preview-pause-visibility.png",
+      "sha256": "c6a0f486db4347acd38f9cb94a88f92e36722bffbfa828ac542cf3894b0cea6e",
+      "bytes": 165895
+    },
+    {
+      "path": "qa/screenshots/style-families\\native-1793328802300-cd7c9d46\\failure-hearth-real-Core-preview-pause-visibility.png",
+      "sha256": "b714d447135020314fa50011457f586a5ebf1a97367bbd4d2a441a7eff21bc48",
+      "bytes": 172032
+    },
+    {
+      "path": "qa/screenshots/style-families\\native-1793328998059-ea40d5d9\\failure-folio-real-Core-preview-pause-visibility.png",
+      "sha256": "0456d8c316142cd9d1939312f378b9f4f72c298168019508cf872c7163bf3931",
+      "bytes": 25962
+    },
+    {
+      "path": "qa/screenshots/style-families\\native-1793329139695-1d16e692\\failure-folio-real-Core-preview-pause-visibility.png",
+      "sha256": "ecceda57d1ec8684bf054b6e53d8aef2b67429539273285bd7ac40be89191918",
+      "bytes": 26449
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793326740693-77bcffbd/folio-light-start-1200x800.png",
+      "sha256": "2f46e25ac96982c85bd60870ee1f3674ac56cfb3dc9e55cec9a090108f6e04ad",
+      "bytes": 47072
+    }
+  ],
+  "reportVerification": [
+    {
+      "path": "C:\\Users\\ASUS\\Documents\\DeepSeek-WorkSpace\\Projects\\桌宠\\qa\\screenshots\\style-families\\native-1793326594361-060d68a6\\native-report.json",
+      "sha256": "6b7d95f817e2b7ce74234f7e070bffcf17195c97afe3c7b9345effcc690534ff",
+      "status": "failed"
+    },
+    {
+      "path": "C:\\Users\\ASUS\\Documents\\DeepSeek-WorkSpace\\Projects\\桌宠\\qa\\screenshots\\style-families\\native-1793326656482-59c6ea9a\\native-report.json",
+      "sha256": "4e0230e1de2c305acd76a112d54ab3177817fbf6a4a5ecf4343e6975af63c96a",
+      "status": "failed"
+    },
+    {
+      "path": "C:\\Users\\ASUS\\Documents\\DeepSeek-WorkSpace\\Projects\\桌宠\\qa\\screenshots\\style-families\\native-1793326740693-77bcffbd\\native-report.json",
+      "sha256": "a96c369688f05947b29c69060c0d637cc0e939a94d56492362d07b3536aa55b6",
+      "status": "failed"
+    },
+    {
+      "path": "C:\\Users\\ASUS\\Documents\\DeepSeek-WorkSpace\\Projects\\桌宠\\qa\\screenshots\\style-families\\native-1793328802300-cd7c9d46\\native-report.json",
+      "sha256": "a9f34378709e03298c00cb4daad0733d24119e96c0e275a7edb1b13a8b3a1e69",
+      "status": "failed"
+    },
+    {
+      "path": "C:\\Users\\ASUS\\Documents\\DeepSeek-WorkSpace\\Projects\\桌宠\\qa\\screenshots\\style-families\\native-1793328998059-ea40d5d9\\native-report.json",
+      "sha256": "29533d5417a4f340382820b47477c4c40d970df6b08bd7e9683b7f705ee3b84c",
+      "status": "failed"
+    },
+    {
+      "path": "C:\\Users\\ASUS\\Documents\\DeepSeek-WorkSpace\\Projects\\桌宠\\qa\\screenshots\\style-families\\native-1793329139695-1d16e692\\native-report.json",
+      "sha256": "6056c7f30af14d0045ceffdd4241140c19f09ebb61f83ed2a50693bc9a836a4e",
+      "status": "failed"
+    }
+  ],
+  "deletedCount": 194,
+  "deletedBytes": 17422855,
+  "preservedCount": 72,
+  "preservedUnchanged": true
+}

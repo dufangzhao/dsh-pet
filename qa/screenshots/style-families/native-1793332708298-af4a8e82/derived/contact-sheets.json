@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "nativeReport": "qa/screenshots/style-families/native-1793332708298-af4a8e82/native-report.json",
+  "nativeReportSha256": "8451aa7e95f40cfed0c4aee6d4428436cbfce5585019ffebbc015affb7d84f98",
+  "nativeStatus": "passed",
+  "sheets": [
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/derived/five-styles-representative.png",
+      "sha256": "ddee7e8ef1c642e85e1819cd5329bdde91dcedb2bb748ee03604b3a6b60ad886",
+      "bytes": 631699,
+      "size": [
+        1312,
+        1590
+      ],
+      "sources": [
+        {
+          "family": "precision",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-start-1200x800.png",
+          "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "hearth",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-start-1200x800.png",
+          "sha256": "fd8efb6a8ccc191d100a19608e35510bdf26b9fa63bc7ae8b7912a882816aa85",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "folio",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-start-1200x800.png",
+          "sha256": "0d57b6eedf1affaa0a881f19d5138b8080f504bc428cfe44c55d4f570fc9c30d",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "prism",
+          "mode": "dark",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-start-1200x800.png",
+          "sha256": "f19097e9c033afa6ad2de9c5ef843b9ceb9f9b3b1144af7e02d721eab68e0d1b",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "workbench",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-start-1200x800.png",
+          "sha256": "994e443bc73f9f619c0770f0a10a980f5afa66ad9b7fe5eca73f16e058fdb94b",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        }
+      ]
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/derived/five-styles-light.png",
+      "sha256": "66123d6a8c5688ccae570f0ce423d7bb5571c36891c73c41ab41c47dea797613",
+      "bytes": 621645,
+      "size": [
+        1312,
+        1590
+      ],
+      "sources": [
+        {
+          "family": "precision",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-start-1200x800.png",
+          "sha256": "eab382b258057a901eb24bb45b19c9449ce15226ecaa28004332a00997fd2e00",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "hearth",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-start-1200x800.png",
+          "sha256": "fd8efb6a8ccc191d100a19608e35510bdf26b9fa63bc7ae8b7912a882816aa85",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "folio",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-start-1200x800.png",
+          "sha256": "0d57b6eedf1affaa0a881f19d5138b8080f504bc428cfe44c55d4f570fc9c30d",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "prism",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-light-start-1200x800.png",
+          "sha256": "07112286eed264e8994a91539bc3e01f49f21a557af4affa1cc8604f6188c4ca",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "workbench",
+          "mode": "light",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-start-1200x800.png",
+          "sha256": "994e443bc73f9f619c0770f0a10a980f5afa66ad9b7fe5eca73f16e058fdb94b",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        }
+      ]
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/derived/five-styles-dark.png",
+      "sha256": "e46dc75be84b22502ca479d842112470f4dd3050c6d3fcb63eb6f020d25cc88d",
+      "bytes": 614259,
+      "size": [
+        1312,
+        1590
+      ],
+      "sources": [
+        {
+          "family": "precision",
+          "mode": "dark",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-dark-start-1200x800.png",
+          "sha256": "70aaa9728fbcb1f500d1046629dd6655af1feef2bd3b81e7fc08acc81b9f44f4",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "hearth",
+          "mode": "dark",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-dark-start-1200x800.png",
+          "sha256": "27c08b40d682de4f199531d900ec804da9a5eb95e486e73117cab498e20c600b",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "folio",
+          "mode": "dark",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-dark-start-1200x800.png",
+          "sha256": "104b098f7a8ff96ca940df0bfb98a2ef03cc476a45415425dd7912208ac076e7",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "prism",
+          "mode": "dark",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-start-1200x800.png",
+          "sha256": "f19097e9c033afa6ad2de9c5ef843b9ceb9f9b3b1144af7e02d721eab68e0d1b",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "workbench",
+          "mode": "dark",
+          "view": "start",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-dark-start-1200x800.png",
+          "sha256": "39ddff0f14b412b798ada879cd15f4cec8b08ee8a4811f3d234916e33cc7dfa6",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        }
+      ]
+    },
+    {
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/derived/five-boards-representative.png",
+      "sha256": "8b7cc089eb42443f927d179a2836cef67f6a7bf1ed55170f6adcd25185de5d06",
+      "bytes": 557408,
+      "size": [
+        1312,
+        1590
+      ],
+      "sources": [
+        {
+          "family": "precision",
+          "mode": "light",
+          "view": "board",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-board-1200x800.png",
+          "sha256": "d76f7a057166059af7ffc6df90d6f2ac99cffc0b52f49b15e5858051015c6717",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "hearth",
+          "mode": "light",
+          "view": "board",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-board-1200x800.png",
+          "sha256": "3e6c0c50684ff148a699ef271bcbe34f579f199c9b23432ddeb06f5fcdc2ba92",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "folio",
+          "mode": "light",
+          "view": "board",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-board-1200x800.png",
+          "sha256": "b5ea2f3b940991d6c61034a5a1c2c79834e52dc8686241b3fdfecbe3fb2ae5a8",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "prism",
+          "mode": "dark",
+          "view": "board",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-board-1200x800.png",
+          "sha256": "3f423efca2ecdf4740925ff17fa0b01bbeff2e3b5cb5e0544d44bc023df5ed73",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        },
+        {
+          "family": "workbench",
+          "mode": "light",
+          "view": "board",
+          "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-board-1200x800.png",
+          "sha256": "e1c097035fd792d5f59f4c458bf4d12140259e3febfb0f41f5868f021954e7b3",
+          "originalSize": [
+            1200,
+            800
+          ],
+          "transform": "whole-frame proportional resize; no crop"
+        }
+      ]
+    }
+  ],
+  "scope": "Derived comparison only; original 61 captures preserved. No new application run."
+}

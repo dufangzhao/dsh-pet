@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "presentation": "five-style-families",
+  "profile": ".cache/pet-start-design-lab-profile",
+  "normalProfileUsed": false,
+  "availableStyles": [
+    "precision",
+    "hearth",
+    "folio",
+    "prism",
+    "workbench"
+  ],
+  "retainedBaseline": "workbench",
+  "initialReview": "precision",
+  "fixedConsoleUrl": true,
+  "paidModelRequest": false
+}

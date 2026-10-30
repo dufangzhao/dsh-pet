@@ -1,0 +1,2925 @@
+{
+  "status": "failed",
+  "profileId": "native-1793328998059-ea40d5d9",
+  "at": "2026-10-30T02:56:38.060Z",
+  "checks": [
+    {
+      "name": "five-delivered-real-profile-and-pure-family-switch",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 2278
+    },
+    {
+      "name": "all-five-whole-frames-boards-light-dark-1200-880",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 24873
+    },
+    {
+      "name": "five-state-boards-real-local-interactions",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 3230
+    },
+    {
+      "name": "model-key-draft-cross-family",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 2196
+    },
+    {
+      "name": "precision-picker-and-denied-model-save",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 4238
+    },
+    {
+      "name": "precision-real-Core-preview-pause-visibility",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 7155
+    },
+    {
+      "name": "precision-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 6070
+    },
+    {
+      "name": "hearth-picker-and-denied-model-save",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 4490
+    },
+    {
+      "name": "hearth-real-Core-preview-pause-visibility",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 6778
+    },
+    {
+      "name": "hearth-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 4249
+    },
+    {
+      "name": "folio-picker-and-denied-model-save",
+      "status": "passed",
+      "agent": {
+        "state": "ready",
+        "error": null
+      },
+      "elapsedMs": 2133
+    },
+    {
+      "name": "folio-real-Core-preview-pause-visibility",
+      "status": "failed",
+      "error": "expect(locator).toBeFocused() failed\n\nLocator:  getByTestId('pet-visible')\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" getByTestId('pet-visible') with timeout 5000ms\n  - waiting for getByTestId('pet-visible')\n    - locator resolved to <input checked disabled id=\"_r_112_\" type=\"checkbox\" class=\"fl-check__input\" data-testid=\"pet-visible\"/>\n    13 × unexpected value \"inactive\"\n       - locator resolved to <input checked id=\"_r_112_\" type=\"checkbox\" class=\"fl-check__input\" data-testid=\"pet-visible\"/>\n    - unexpected value \"inactive\"\n"
+    }
+  ],
+  "screenshots": [
+    {
+      "family": "precision",
+      "label": "precision-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/prism-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/workbench-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/precision-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/hearth-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/folio-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "failure-folio-real-Core-preview-pause-visibility",
+      "path": "qa/screenshots/style-families/native-1793328998059-ea40d5d9/failure-folio-real-Core-preview-pause-visibility.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    }
+  ],
+  "geometry": [
+    {
+      "label": "precision light 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-precision",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision light 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-precision",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision dark 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-precision",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision dark 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-precision",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision light 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-precision",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision light 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-precision",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision dark 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-precision",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision dark 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-precision",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth light 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-hearth",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth light 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-hearth",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth dark 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-hearth",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth dark 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-hearth",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth light 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-hearth",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth light 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-hearth",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth dark 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-hearth",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "hearth dark 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-hearth",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio light 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-folio",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio light 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-folio",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio dark 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-folio",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio dark 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "sf-folio",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio light 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-folio",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio light 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-folio",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio dark 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-folio",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "folio dark 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "sf-folio",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism light 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-prism",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism light 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-prism",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism dark 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-prism",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism dark 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "family-prism",
+          "client": 1126,
+          "scroll": 1126,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism light 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-prism",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism light 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-prism",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism dark 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-prism",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "prism dark 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "family-prism",
+          "client": 822,
+          "scroll": 822,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench light 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "workbench-window",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench light 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "workbench-window",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench dark 1200 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "workbench-window",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench dark 1200 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "BODY",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 1200,
+          "scroll": 1200,
+          "left": 0,
+          "right": 1200
+        },
+        {
+          "node": "style-family-stage",
+          "client": 1162,
+          "scroll": 1162,
+          "left": 18,
+          "right": 1182
+        },
+        {
+          "node": "workbench-window",
+          "client": 1124,
+          "scroll": 1124,
+          "left": 37,
+          "right": 1163
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench light 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "workbench-window",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench light 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "workbench-window",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench dark 880 start",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "workbench-window",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "workbench dark 880 board",
+      "rows": [
+        {
+          "node": "HTML",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "BODY",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-gallery",
+          "client": 880,
+          "scroll": 880,
+          "left": 0,
+          "right": 880
+        },
+        {
+          "node": "style-family-stage",
+          "client": 858,
+          "scroll": 858,
+          "left": 10,
+          "right": 870
+        },
+        {
+          "node": "workbench-window",
+          "client": 820,
+          "scroll": 820,
+          "left": 29,
+          "right": 851
+        }
+      ],
+      "pass": true
+    },
+    {
+      "label": "precision readable provider search",
+      "width": 354,
+      "height": 28.84375,
+      "pass": true
+    },
+    {
+      "label": "hearth readable provider search",
+      "width": 454.3125,
+      "height": 38.390625,
+      "pass": true
+    },
+    {
+      "label": "folio readable provider search",
+      "width": 513,
+      "height": 31,
+      "pass": true
+    }
+  ],
+  "identity": [
+    {
+      "packaged": false,
+      "userData": ".cache/pet-demo-acceptance-native-1793328998059-ea40d5d9",
+      "versions": {
+        "node": "24.22.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "150",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.11",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2026e",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.6.75.19-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "platform": "win32"
+    }
+  ],
+  "approvals": [
+    {
+      "family": "precision",
+      "kind": "capability-use",
+      "approved": true
+    },
+    {
+      "family": "precision",
+      "kind": "network",
+      "approved": false
+    },
+    {
+      "family": "hearth",
+      "kind": "capability-use",
+      "approved": true
+    },
+    {
+      "family": "hearth",
+      "kind": "network",
+      "approved": false
+    },
+    {
+      "family": "folio",
+      "kind": "capability-use",
+      "approved": true
+    },
+    {
+      "family": "folio",
+      "kind": "network",
+      "approved": false
+    }
+  ],
+  "families": [
+    {
+      "id": "precision",
+      "providerStructure": "native select + table",
+      "modelRevision": 2,
+      "keyConfigured": true,
+      "active": false,
+      "testDisabledWithoutActive": true,
+      "networkDenied": true,
+      "history": {
+        "poke": 1,
+        "drag": 1,
+        "user": 1,
+        "pet": 1,
+        "sharedCore": true
+      },
+      "mic": {
+        "canRecord": false,
+        "disabled": true,
+        "captured": false
+      },
+      "pauseAndVisibility": true,
+      "localNightOnly": true,
+      "keyboardMenu": true,
+      "realRoutes": [
+        "appearance",
+        "voice"
+      ]
+    },
+    {
+      "id": "hearth",
+      "providerStructure": "native radio cards",
+      "modelRevision": 3,
+      "keyConfigured": true,
+      "active": false,
+      "testDisabledWithoutActive": true,
+      "networkDenied": true,
+      "history": {
+        "poke": 1,
+        "drag": 1,
+        "user": 1,
+        "pet": 1,
+        "sharedCore": true
+      },
+      "mic": {
+        "canRecord": false,
+        "disabled": true,
+        "captured": false
+      },
+      "pauseAndVisibility": true,
+      "localNightOnly": true,
+      "keyboardMenu": true,
+      "realRoutes": [
+        "appearance",
+        "voice"
+      ]
+    },
+    {
+      "id": "folio",
+      "providerStructure": "text index",
+      "modelRevision": 4,
+      "keyConfigured": true,
+      "active": false,
+      "testDisabledWithoutActive": true,
+      "networkDenied": true
+    }
+  ],
+  "themes": [
+    {
+      "family": "precision",
+      "customId": "custom-mvudtalt-npzf",
+      "name": "QA precision palette 自定义",
+      "tokens": 36,
+      "actualHexEditsReadBack": 36,
+      "nativePickerAction": true,
+      "invalidExcluded": true,
+      "previewOnly": true,
+      "undo": true,
+      "variants": {
+        "light": "#234567",
+        "dark": "#1A2B3C"
+      },
+      "leaveRolledBack": true,
+      "doubleDelete": true
+    },
+    {
+      "family": "hearth",
+      "customId": "custom-mvudtn82-etux",
+      "name": "QA hearth palette 副本",
+      "tokens": 36,
+      "actualHexEditsReadBack": 36,
+      "nativePickerAction": true,
+      "invalidExcluded": true,
+      "previewOnly": true,
+      "undo": true,
+      "variants": {
+        "light": "#234567",
+        "dark": "#1A2B3C"
+      },
+      "leaveRolledBack": true,
+      "doubleDelete": true
+    }
+  ],
+  "errors": [],
+  "remoteOrigins": [],
+  "shutdown": [
+    {
+      "pid": 18824,
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false
+    }
+  ],
+  "limitations": [
+    "Real unpackaged Electron and real Core, isolated native profile; all product writes use visible controls. Bridges are read only for evidence.",
+    "No fake bridge, injected IPC/state, media device, microphone permission bypass, provider fixture, paid request, account sign-in, installation, or server.",
+    "Model tests remain disabled without an active connection. Save-and-start exercises the real probe, whose real network approval is denied. No connected/active success is fabricated.",
+    "Pointer input does not establish physical desktop hit testing. Microphone availability is read and compared; native audio is not captured.",
+    "Renderer request observation is not worker packet capture; actual network permission denial guards model calls."
+  ],
+  "fingerprint": {
+    "source": {
+      "digest": "89eaf006d5c5ea00597aea70af348a97ca12bfcabdeef67d5c33916fc7b229fc",
+      "files": [
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/character.css",
+          "bytes": 5720,
+          "sha256": "5e4d79a67331068440ded658d1d3a3acdd37e745c84937924496219fdf45d81c"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/contracts.ts",
+          "bytes": 1613,
+          "sha256": "246f43af6a791d1546f4efb3d316af908439a96da42414343f81c88029b515fe"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/folio.css",
+          "bytes": 22839,
+          "sha256": "f34c1e4bd3eeabfa10faaafc55972c7bb4911e2f486eab27157058fd52b9cce2"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/folio.tsx",
+          "bytes": 47636,
+          "sha256": "51f6d59e026a9be0f3769e73f933892690d5b34187a12ca5d0f325105d99a665"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/gallery.css",
+          "bytes": 3812,
+          "sha256": "23dc74175a130fa3dfc2e819a310e7b3063cf4f2ebfa4335124045ee714dcda5"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/gallery.tsx",
+          "bytes": 7527,
+          "sha256": "0842df2c822e39e76e2e8bd45b9a10c2a2a8f03b819f5246f0a2afde743e24af"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/hearth.css",
+          "bytes": 29087,
+          "sha256": "9ef0c18b2cbd1bdf19d0f50645ce0cf26153a2845ae72299d49d55da0dae64d4"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/hearth.tsx",
+          "bytes": 51971,
+          "sha256": "7408c8823edd2e4164fa4889a75afd355323bc468c4627fdaa9a85acbdbe4c70"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/precision.css",
+          "bytes": 23341,
+          "sha256": "a8bfe5537297662745f1e3ce70e4e3cf3cb1be288a8508314625a5f8ee2f1bc4"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/precision.tsx",
+          "bytes": 48033,
+          "sha256": "d64cc13c6b8edb9b8d9e5f6f378e4167d010be3181f6c29a18719c530ba85ed1"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/prism.css",
+          "bytes": 27323,
+          "sha256": "f37096b710e4841fdae495650ce4b39f7faebae3612cc4fcb6e7fc3b3dc52fcc"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/prism.tsx",
+          "bytes": 64577,
+          "sha256": "80ac39bf666b9a27d81525182f7dc43a2eb52557a9c00f7d2ac400af827d4429"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/registry.ts",
+          "bytes": 3058,
+          "sha256": "147dc9b6bcb5541f61b4b857a65af559a13216899e7383ab254e8427d4ed1a4e"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/use-family-preview.ts",
+          "bytes": 13121,
+          "sha256": "466173fe205558249e1122e11428142a0c15ee181f958e39cae95727f1f6d868"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/use-family-theme.ts",
+          "bytes": 8700,
+          "sha256": "08c2f302a4da6cabc0470118734690e16aece639a2de0471430ddf313004b0d3"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/workbench.css",
+          "bytes": 4340,
+          "sha256": "d874e49a67758809db119ad8dfab03fda8f75385ef3f56c00b880c74ab7d04a6"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/style-families/workbench.tsx",
+          "bytes": 5008,
+          "sha256": "80bccd38b82bcbfb706d4f174a87d9822abffafac3189e67fed7787a064c3d78"
+        },
+        {
+          "path": "qa/probes/start-style-families-e2e.mjs",
+          "bytes": 50695,
+          "sha256": "5071962dfb9cc6646913a450d57710197dc8def433448385378d21bb450432f7"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/console-app.tsx",
+          "bytes": 22186,
+          "sha256": "d5d085dbe5f485bc4daa525cdf611b5f5a0c70f4c5d3541907e6fcc5c59d0bc3"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/pages/start.tsx",
+          "bytes": 2434,
+          "sha256": "a7f261b11733025ab0a0f994c5c07e822571791cba93aa269bf924aced1b7271"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/start-designs/use-start-model.ts",
+          "bytes": 15226,
+          "sha256": "00de763da48648854a7d7cdc87428b2d4d620a97528f525bfb8c8d79bfa7b1b8"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/start-designs/behavior.ts",
+          "bytes": 14011,
+          "sha256": "31de96f54ef7b9b0866dd0869a3f9aa6da8a2ac1a058e7e2d06d803caf8710b6"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/start-designs/sections.tsx",
+          "bytes": 21215,
+          "sha256": "d504aa3af9e9051bafe17be5e151299b90db0f5fe3f51bcf79e8c9393efa5e63"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/original-ui/theme-controller.ts",
+          "bytes": 11140,
+          "sha256": "5a3a4c87d1ebf2ad447cde2d55a3bf09560b9d0597285b882cf53a52852d3f8a"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/original-ui/pet-preview.tsx",
+          "bytes": 14451,
+          "sha256": "d153b2eed1db9ca96338f4eb4ec263ced5e33dd82f39b7293ea0df7a847e69c5"
+        },
+        {
+          "path": "apps/desktop/src/renderer/console/theme.ts",
+          "bytes": 32607,
+          "sha256": "f2fa647b0b74dd41d628db9d15b6c17679ab77212670f70f6aa41b7833b48f71"
+        },
+        {
+          "path": "apps/desktop/src/main/index.ts",
+          "bytes": 19304,
+          "sha256": "f0db3da5654046b6b5d4405d7a3c0b67902eeca7cb1a25a76025c3b42c821301"
+        },
+        {
+          "path": "apps/desktop/src/preload/index.ts",
+          "bytes": 5658,
+          "sha256": "f0f0295e42932fe680dbe3c5a9aed8b906bf65a34c6a2c5a90bb25cfb2ae897b"
+        }
+      ]
+    },
+    "build": {
+      "digest": "f024e557d55e8b44dfc61bfe306cd11554a75dd67afa92b80ab6b0aa0ce76d7f",
+      "files": [
+        {
+          "path": "apps/desktop/dist/main/index.mjs",
+          "bytes": 778653,
+          "sha256": "719c13ede0a59f58a1a93393973e12e981796c22c0c4832f3e86e43fe9a0bac0"
+        },
+        {
+          "path": "apps/desktop/dist/preload/index.cjs",
+          "bytes": 37854,
+          "sha256": "640ec32450d6cedb3aeab2cc4d279b9ca5492692c9f9f525a9c9390f195d3d99"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/console/assets/capture-worklet-46cQJGH7.js",
+          "bytes": 1064,
+          "sha256": "8d33d5d8e948a777f72dc129ee800544feda97d856dd589f12acf8c285cb5216"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/console/assets/index-Br0HapYW.js",
+          "bytes": 597553,
+          "sha256": "9c0aa26b300209976d3fbaf192dee636867d3f0c939610e470cebc71f96d7bfb"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/console/assets/index-DSYcUu3d.css",
+          "bytes": 157756,
+          "sha256": "6f612b61e29ec4f8938e00887dde200e1d0cc971aef3982e2c5da39cca923235"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/console/assets/region-BSWSZ3Bp.js",
+          "bytes": 12655,
+          "sha256": "4eb8e8fd4d6dea977f1b4793bf3d29b93b6aff8997040fbcd478f768a21b4a9b"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/console/index.html",
+          "bytes": 827,
+          "sha256": "ed11baa2d19fffcba48f22b71338f55186cceb36e545bd7e3f0500726c1b4937"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/pet/assets/index-9vutPO1i.js",
+          "bytes": 260073,
+          "sha256": "85700e1eb2aa741994b715ec79dbe186c8da0de4e5bf882bf8f561d22e538a6a"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/pet/assets/index-P2oW1mq2.css",
+          "bytes": 19091,
+          "sha256": "138663bc6d9df9efdd82c7d66998ddab25e6c0f7a5a2878c5e94fbb8fa592a1c"
+        },
+        {
+          "path": "apps/desktop/dist/renderer/pet/index.html",
+          "bytes": 807,
+          "sha256": "d625a2c432e7b18110d3e67868227aef18f4bc4af34fd75f2d7b0a013b34ef42"
+        },
+        {
+          "path": "apps/desktop/dist/runtime/worker.cjs",
+          "bytes": 583517,
+          "sha256": "f3459863fa5ddb63e135a3fc500b7921e8da6104b25f213277b795438ea61ca1"
+        },
+        {
+          "path": "apps/desktop/src/main/builtin-admission.json",
+          "bytes": 5973,
+          "sha256": "a06f85760a288020a723949019a881d0ac6eb25698ab57b176a1bcb265c2ab1b"
+        },
+        {
+          "path": "plugins/agent-cortico/dist/index.mjs",
+          "bytes": 45210,
+          "sha256": "523345635328d629cdc6adef29a4896631b80f68a9089c45cfa14bd65b34f41a"
+        },
+        {
+          "path": "plugins/agent-cortico/plugin.json",
+          "bytes": 1150,
+          "sha256": "9aef938e1cfe9e98aa7efb29d4a49d85cf66fc96ffaf3f7926f65e83b9660ec2"
+        },
+        {
+          "path": "plugins/asr-local/dist/asr-worker.cjs",
+          "bytes": 45346,
+          "sha256": "79b6bb0a157183f0daa980531f3f5bbca1218a31bc7df04819d4745ced1b3331"
+        },
+        {
+          "path": "plugins/asr-local/dist/index.mjs",
+          "bytes": 37351,
+          "sha256": "9b303b5c3eaa1709cf43f507f9d234d076a32d7cb80951d45e3aa197c95477c4"
+        },
+        {
+          "path": "plugins/asr-local/plugin.json",
+          "bytes": 2853,
+          "sha256": "a7a53a39c8b2c0fb6d108fb013ec473725a138e344e4427676777cab2d32baac"
+        },
+        {
+          "path": "plugins/avatar-default/dist/index.mjs",
+          "bytes": 1628,
+          "sha256": "f969f0b74647e02f5d6a8f3d055d1657870483599455d579e2ee27f23cdd2380"
+        },
+        {
+          "path": "plugins/avatar-default/plugin.json",
+          "bytes": 514,
+          "sha256": "2e68d5c7eb1014fba994c1da4a391f8264800ba765422ec9a6c851acde72f698"
+        },
+        {
+          "path": "plugins/chat/dist/index.mjs",
+          "bytes": 3129,
+          "sha256": "8648df2437869d5742209d10f78ff92d854bcd31d2a193cb3791d85aa72bdeb3"
+        },
+        {
+          "path": "plugins/chat/plugin.json",
+          "bytes": 747,
+          "sha256": "b73932b80620f3d5f642cc6e7eafda6b13412bcb64865366f7ce157184000b03"
+        },
+        {
+          "path": "plugins/llm-provider/dist/index.mjs",
+          "bytes": 52330,
+          "sha256": "3cd7d288449910159c53e0381ce111a61059e265aa014c3d4bdcecb2b8d5871d"
+        },
+        {
+          "path": "plugins/llm-provider/plugin.json",
+          "bytes": 12743,
+          "sha256": "80b1b98b9a0698c328dd85c688ce9727158ffd912f07dd8af231bc7530d7faba"
+        },
+        {
+          "path": "plugins/page-appearance/dist/index.mjs",
+          "bytes": 1474,
+          "sha256": "97b23a9f52d8da9a243d8324639ab931eba248939e3f20ea39f4540024fe7b92"
+        },
+        {
+          "path": "plugins/page-appearance/plugin.json",
+          "bytes": 489,
+          "sha256": "9bddcee01eebd17ca07cfda62030e3679da240f7861d63ce586531cfb74d2452"
+        },
+        {
+          "path": "plugins/page-conversation/dist/index.mjs",
+          "bytes": 1476,
+          "sha256": "b16233e97b2ea4719ab7a40fd44555ff11029bfaaa0223f2331cacc2e10ef57e"
+        },
+        {
+          "path": "plugins/page-conversation/plugin.json",
+          "bytes": 493,
+          "sha256": "afe8f9a00ec6079efcec42f9816b9b435be4d09bfd0ac3c759d1f710e57b8b78"
+        },
+        {
+          "path": "plugins/page-persona/dist/index.mjs",
+          "bytes": 1471,
+          "sha256": "6575f095d514f3ec473c476632dba46ca9bd2f2b383d844d75a9f6a9d0dbf1ef"
+        },
+        {
+          "path": "plugins/page-persona/plugin.json",
+          "bytes": 483,
+          "sha256": "3646be1855aa5b0daecb145c6536f1f746aff989ba8183f54b1e04b6b0ef398a"
+        },
+        {
+          "path": "plugins/page-start/dist/index.mjs",
+          "bytes": 1469,
+          "sha256": "d8c855253b4c166022ffe26eb8d1860b354d2b88ceb0d74cbe0b7a319e1ce8a4"
+        },
+        {
+          "path": "plugins/page-start/plugin.json",
+          "bytes": 479,
+          "sha256": "75bb8db31b31b13fc66e91f3b123a01c62c364af0bd1d2b5a6f746c6696bf498"
+        },
+        {
+          "path": "plugins/page-voice/dist/index.mjs",
+          "bytes": 1469,
+          "sha256": "cd1905750a54bdd1b60c3cebfac99ced0233676ad63608882bcaaf1773abb206"
+        },
+        {
+          "path": "plugins/page-voice/plugin.json",
+          "bytes": 497,
+          "sha256": "31980a59c1faa9a42e5897a06d1729ac018d36946d10f75acbfc383b56257192"
+        },
+        {
+          "path": "plugins/profile/dist/index.mjs",
+          "bytes": 2821,
+          "sha256": "9ee06e8ba0a9411481a788d633aef2ad8eb03d1c27442ea72c353457ecee466a"
+        },
+        {
+          "path": "plugins/profile/plugin.json",
+          "bytes": 3093,
+          "sha256": "763c0d3f7ec0874802b7dc47e797da12bcea3a05d8367b1936fa8cb90254c3eb"
+        },
+        {
+          "path": "plugins/voice-chat/dist/index.mjs",
+          "bytes": 4017,
+          "sha256": "2c7b854d834a45255f768585bf71f2b803ccf2d911fb592c0065c2801ee3c607"
+        },
+        {
+          "path": "plugins/voice-chat/plugin.json",
+          "bytes": 1609,
+          "sha256": "719d6efc3519531bb422d2d3aebc40df8cd70610190e1cdd9cf7b174630cdaca"
+        }
+      ]
+    },
+    "git": {
+      "branch": "feat/start-style-families",
+      "head": "08c667d59d15f79d6f331c2acb9a4207486e65df"
+    }
+  },
+  "visualIdentity": {
+    "precision": {
+      "light": {
+        "paper": "#f1f2f3",
+        "font": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei UI\", \"Noto Sans CJK SC\", sans-serif",
+        "background": "rgb(241, 242, 243)"
+      },
+      "dark": {
+        "paper": "#191c1f",
+        "font": "system-ui, -apple-system, \"Segoe UI\", \"Microsoft YaHei UI\", \"Noto Sans CJK SC\", sans-serif",
+        "background": "rgb(25, 28, 31)"
+      }
+    },
+    "hearth": {
+      "light": {
+        "paper": "#f6e9d2",
+        "font": "Corbel, \"Microsoft YaHei UI\", \"PingFang SC\", system-ui, sans-serif",
+        "background": "rgb(246, 233, 210)"
+      },
+      "dark": {
+        "paper": "#241a14",
+        "font": "Corbel, \"Microsoft YaHei UI\", \"PingFang SC\", system-ui, sans-serif",
+        "background": "rgb(36, 26, 20)"
+      }
+    },
+    "folio": {
+      "light": {
+        "paper": "#f4efe2",
+        "font": "\"Songti SC\", STSong, SimSun, \"Source Han Serif SC\", \"Noto Serif CJK SC\", Georgia, serif",
+        "background": "rgb(244, 239, 226)"
+      },
+      "dark": {
+        "paper": "#1e1b16",
+        "font": "\"Songti SC\", STSong, SimSun, \"Source Han Serif SC\", \"Noto Serif CJK SC\", Georgia, serif",
+        "background": "rgb(30, 27, 22)"
+      }
+    },
+    "prism": {
+      "light": {
+        "paper": "#e9eef3",
+        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"PingFang SC\", system-ui, sans-serif",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "dark": {
+        "paper": "#0e1319",
+        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"PingFang SC\", system-ui, sans-serif",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    },
+    "workbench": {
+      "light": {
+        "paper": "#eef0f3",
+        "font": "\"Microsoft YaHei UI\", \"PingFang SC\", \"Segoe UI Variable Text\", system-ui, sans-serif",
+        "background": "rgb(238, 240, 243)"
+      },
+      "dark": {
+        "paper": "#14161b",
+        "font": "\"Microsoft YaHei UI\", \"PingFang SC\", \"Segoe UI Variable Text\", system-ui, sans-serif",
+        "background": "rgb(20, 22, 27)"
+      }
+    }
+  },
+  "failure": "expect(locator).toBeFocused() failed\n\nLocator:  getByTestId('pet-visible')\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" getByTestId('pet-visible') with timeout 5000ms\n  - waiting for getByTestId('pet-visible')\n    - locator resolved to <input checked disabled id=\"_r_112_\" type=\"checkbox\" class=\"fl-check__input\" data-testid=\"pet-visible\"/>\n    13 × unexpected value \"inactive\"\n       - locator resolved to <input checked id=\"_r_112_\" type=\"checkbox\" class=\"fl-check__input\" data-testid=\"pet-visible\"/>\n    - unexpected value \"inactive\"\n",
+  "failureState": {
+    "family": "folio",
+    "agent": "ready",
+    "error": null,
+    "dialog": null,
+    "desktop": {
+      "available": true,
+      "shown": false
+    },
+    "history": [
+      {
+        "kind": "application",
+        "cursor": 1
+      },
+      {
+        "kind": "interaction",
+        "reaction": "poke",
+        "cursor": 2
+      },
+      {
+        "kind": "interaction",
+        "reaction": "blush",
+        "cursor": 3
+      },
+      {
+        "kind": "interaction",
+        "reaction": "drag",
+        "cursor": 4
+      },
+      {
+        "kind": "user",
+        "mode": "demo",
+        "cursor": 5
+      },
+      {
+        "kind": "pet",
+        "mode": "demo",
+        "cursor": 6
+      },
+      {
+        "kind": "application",
+        "cursor": 7
+      },
+      {
+        "kind": "application",
+        "cursor": 8
+      },
+      {
+        "kind": "interaction",
+        "reaction": "poke",
+        "cursor": 9
+      },
+      {
+        "kind": "interaction",
+        "reaction": "blush",
+        "cursor": 10
+      },
+      {
+        "kind": "interaction",
+        "reaction": "drag",
+        "cursor": 11
+      },
+      {
+        "kind": "user",
+        "mode": "demo",
+        "cursor": 12
+      },
+      {
+        "kind": "pet",
+        "mode": "demo",
+        "cursor": 13
+      },
+      {
+        "kind": "application",
+        "cursor": 14
+      },
+      {
+        "kind": "application",
+        "cursor": 15
+      },
+      {
+        "kind": "interaction",
+        "reaction": "poke",
+        "cursor": 16
+      },
+      {
+        "kind": "interaction",
+        "reaction": "blush",
+        "cursor": 17
+      },
+      {
+        "kind": "interaction",
+        "reaction": "drag",
+        "cursor": 18
+      },
+      {
+        "kind": "user",
+        "mode": "demo",
+        "cursor": 19
+      },
+      {
+        "kind": "pet",
+        "mode": "demo",
+        "cursor": 20
+      },
+      {
+        "kind": "application",
+        "cursor": 21
+      }
+    ],
+    "model": {
+      "active": null,
+      "paused": false,
+      "revision": 4
+    },
+    "delivery": {
+      "phase": "idle",
+      "canRecord": false,
+      "canSend": true,
+      "error": null
+    }
+  },
+  "mainLogBytes": 145
+}

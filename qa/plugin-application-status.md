@@ -20,9 +20,9 @@ GUI使用真实页面按钮与输入完成初始名字/配色/语音/回应选�
 
 截图为当前实际窗口，保留在[本机截图目录](screenshots/application/)。当前截图足以审阅布局与表情，不等于所有设备/多屏条件都已覆盖。此前M0/M1/M2记录只代表各自阶段，现有完整版GUI入口是 application-ui-acceptance.mjs。
 
-## 当前开始栏复刻验收
+## 已接受的开始栏复刻验收
 
-本轮仍在集成前端，基础版本的GUI截图不作为新界面验收。当前 [模型报告](start-model-results.json) 已通过13组真实宿主检查，覆盖18个API Key端点、实际审批、失败与版本冲突，以及同一隔离profile的四次新Host/worker生命周期；全部退出确认，未强制结束。恢复不发模型请求、不解密Key、不覆盖deny，明确禁用后仍不恢复。报告的emulatedCipher=true仅用于headless数据流程，不证明DPAPI或完整OS进程重启。
+该阶段的界面证据独立于基础版本，基础版本的 GUI 截图不作为新界面验收。当前 [模型报告](start-model-results.json) 已通过13组真实宿主检查，覆盖18个API Key端点、实际审批、失败与版本冲突，以及同一隔离profile的四次新Host/worker生命周期；全部退出确认，未强制结束。恢复不发模型请求、不解密Key、不覆盖deny，明确禁用后仍不恢复。报告的emulatedCipher=true仅用于headless数据流程，不证明DPAPI或完整OS进程重启。
 
 浏览器登录的7项本地回调测试覆盖PKCE/JWKS身份、nonce与套餐授权拒绝、取消、加密令牌轮换和永久拒绝刷新后的退出状态，未使用真人账号或登录服务。模型协议测试另含真实格式的Chat/Responses、Anthropic/Gemini、Gemini工具签名重放、ChatGPT流式回执和可用模型选择；没有实际付费调用。新 [界面验收脚本](probes/coopanion-start-ui-e2e.mjs) 已通过全部12组；[最终报告](screenshots/coopanion-start/coop-start-1793262754337-88ae2a0b/acceptance-report.json)记录两个真实应用进程正常退出、零脚本/远端请求异常。预览日夜、菜单、拖动、键盘与禁止拖动点按、真实表情/聊天、向导显隐和重启偏好均通过。截图与参考版本说明见[对照](screenshots/coopanion-start/comparison.md)。[原资料正常启动](start-normal-results.json)已确认五页、Core ready、桌宠与设置均显示；未加测试资料或兼容启动标志。
 
@@ -49,3 +49,9 @@ GUI使用真实页面按钮与输入完成初始名字/配色/语音/回应选�
 随后完整 `pnpm check` 退出 0：[原始输出](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/workspace-check.log)含 523 项桌面测试（52 文件）、其余 workspace 测试、QA 120 通过/1 跳过/0 失败、类型、lint、格式与构建。本次全检查先于后续折叠栏 CSS 修正；该修正另有 43 项定点测试/格式通过及[最终稳态原生增量](screenshots/original-controls/collapsed-1793300116862-5ff40377/acceptance-report.json)通过：两种窗口均为 72px，三档主题指针/键盘与完整焦点可见，6 图、单次进程正常退出。仅 probe 与侧栏 CSS 变动；[合并指纹](screenshots/original-controls/start-lab-1793296307496-9b1e65c4/integration-evidence.json)已核对当前 47 个文件。
 
 本轮的组件替换、五版取舍、技能验证与实际截图统一见[原创控件评审](original-controls-review.md)；原生执行细节由[QA 执行记录](original-controls-results.md)维护。
+
+## 五种风格与控件类型（2026-10-30，已验收）
+
+四套新方案 Precision、Hearth、Folio、Prism 与明确保留的 Workbench 已交付，各有整窗与实际控件样板。结构、两两差异、适用取舍和图证统一见[五种风格评审](start-style-families-review.md)。普通生产方向留待用户选择。
+
+[最终原生执行记录](style-families-results.md)为22/22通过、61张实际截图，包含每套控件的真实模型拒绝路径、Core、菜单跳转、36色编辑、显隐、焦点、减少动画及重启。完整 pnpm check 退出0，593项桌面测试与QA120通过/1跳过/0失败；当前29源码和37构建指纹匹配。早期菜单/稿纸列宽缺陷已实际关闭，失败报告保留为过程记录。UI Finish-Gate Reviewer工具未返回报告，不声称专家PASS；风格范围由父会话与独立QA实际读图及结构对照确认。

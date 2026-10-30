@@ -1,0 +1,7 @@
+# Implementation
+
+1.Publishfive-familydifference matrix andminimalheadlesscontract.
+2.Implement4newindependentfamilies+existingWorkbenchcandidateandwholewindowgallery.
+3.Buildandinspectactualfive-familyframes/stateboardsbeforebroadfunctionalchecks;returnfailuresdirectlytoowners.
+4.Serialnativefunctional/focus/motion/1200/880verificationandindependentdiversityreview.
+5.Updateworkflow,localcommit/archive/journal,openisolatedreview,nopush.

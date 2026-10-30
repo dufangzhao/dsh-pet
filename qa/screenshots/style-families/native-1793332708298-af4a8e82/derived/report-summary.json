@@ -1,0 +1,684 @@
+{
+  "keys": [
+    "status",
+    "profileId",
+    "at",
+    "checks",
+    "screenshots",
+    "geometry",
+    "identity",
+    "approvals",
+    "families",
+    "themes",
+    "errors",
+    "remoteOrigins",
+    "shutdown",
+    "limitations",
+    "fingerprint",
+    "visualIdentity",
+    "guide",
+    "motion",
+    "restart",
+    "finalFingerprint",
+    "mainLogBytes"
+  ],
+  "status": "passed",
+  "checks": [
+    {
+      "name": "five-delivered-real-profile-and-pure-family-switch",
+      "status": "passed"
+    },
+    {
+      "name": "all-five-whole-frames-boards-light-dark-1200-880",
+      "status": "passed"
+    },
+    {
+      "name": "five-state-boards-real-local-interactions",
+      "status": "passed"
+    },
+    {
+      "name": "model-key-draft-cross-family",
+      "status": "passed"
+    },
+    {
+      "name": "precision-picker-and-denied-model-save",
+      "status": "passed"
+    },
+    {
+      "name": "precision-real-Core-preview-pause-visibility",
+      "status": "passed"
+    },
+    {
+      "name": "precision-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed"
+    },
+    {
+      "name": "hearth-picker-and-denied-model-save",
+      "status": "passed"
+    },
+    {
+      "name": "hearth-real-Core-preview-pause-visibility",
+      "status": "passed"
+    },
+    {
+      "name": "hearth-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed"
+    },
+    {
+      "name": "folio-picker-and-denied-model-save",
+      "status": "passed"
+    },
+    {
+      "name": "folio-real-Core-preview-pause-visibility",
+      "status": "passed"
+    },
+    {
+      "name": "folio-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed"
+    },
+    {
+      "name": "prism-picker-and-denied-model-save",
+      "status": "passed"
+    },
+    {
+      "name": "prism-real-Core-preview-pause-visibility",
+      "status": "passed"
+    },
+    {
+      "name": "prism-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed"
+    },
+    {
+      "name": "workbench-picker-and-denied-model-save",
+      "status": "passed"
+    },
+    {
+      "name": "workbench-real-Core-preview-pause-visibility",
+      "status": "passed"
+    },
+    {
+      "name": "workbench-36-theme-fields-preview-undo-custom-variants",
+      "status": "passed"
+    },
+    {
+      "name": "native-guide-from-hidden-pet",
+      "status": "passed"
+    },
+    {
+      "name": "minimum-focus-reduced-motion",
+      "status": "passed"
+    },
+    {
+      "name": "restart-history-model-and-five-custom-palettes",
+      "status": "passed"
+    }
+  ],
+  "errors": [],
+  "shutdown": [
+    {
+      "pid": 22780,
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false
+    },
+    {
+      "pid": 6572,
+      "exitConfirmed": true,
+      "code": 0,
+      "signal": null,
+      "forced": false
+    }
+  ],
+  "screenshots": [
+    {
+      "family": "precision",
+      "label": "precision-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-start-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-dark-start-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-board-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-dark-board-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-light-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-light-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-start-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-dark-start-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-dark-board-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-dark-board-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-native-provider-command-search-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-native-provider-command-search-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-native-context-menu-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-native-context-menu-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-real-Core-preview-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-real-Core-preview-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-theme-actions-1200x800",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-theme-actions-1200x800.png",
+      "width": 1200,
+      "height": 800,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "precision",
+      "label": "precision-minimum-native-focus-reduced-motion-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/precision-minimum-native-focus-reduced-motion-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "hearth",
+      "label": "hearth-minimum-native-focus-reduced-motion-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/hearth-minimum-native-focus-reduced-motion-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "folio",
+      "label": "folio-minimum-native-focus-reduced-motion-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/folio-minimum-native-focus-reduced-motion-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "prism",
+      "label": "prism-minimum-native-focus-reduced-motion-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/prism-minimum-native-focus-reduced-motion-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    },
+    {
+      "family": "workbench",
+      "label": "workbench-minimum-native-focus-reduced-motion-880x600",
+      "path": "qa/screenshots/style-families/native-1793332708298-af4a8e82/workbench-minimum-native-focus-reduced-motion-880x600.png",
+      "width": 880,
+      "height": 600,
+      "zoom": 1,
+      "privateMasks": 0
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "status": "partial",
+  "profileId": "styles-review-1793324969708",
+  "mode": "real-window-style-review",
+  "available": [
+    "precision",
+    "hearth",
+    "workbench"
+  ],
+  "pending": [
+    "folio",
+    "prism"
+  ],
+  "screenshots": [
+    {
+      "family": "precision",
+      "view": "start",
+      "file": "qa/screenshots/style-families/styles-review-1793324969708/precision-start-1200x800.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "family": "precision",
+      "view": "board",
+      "file": "qa/screenshots/style-families/styles-review-1793324969708/precision-board-1200x800.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "family": "hearth",
+      "view": "start",
+      "file": "qa/screenshots/style-families/styles-review-1793324969708/hearth-start-1200x800.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "family": "hearth",
+      "view": "board",
+      "file": "qa/screenshots/style-families/styles-review-1793324969708/hearth-board-1200x800.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "family": "workbench",
+      "view": "start",
+      "file": "qa/screenshots/style-families/styles-review-1793324969708/workbench-start-1200x800.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "family": "workbench",
+      "view": "board",
+      "file": "qa/screenshots/style-families/styles-review-1793324969708/workbench-board-1200x800.png",
+      "width": 1200,
+      "height": 800
+    }
+  ],
+  "errors": [],
+  "shutdown": {
+    "code": 0,
+    "signal": null
+  }
+}
