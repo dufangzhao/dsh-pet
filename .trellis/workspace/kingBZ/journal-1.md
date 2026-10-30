@@ -174,3 +174,38 @@ Delivered five ordinary plugin pages, shared Cortico interactions/profile/prompt
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: Adopt website-sourced Start foundation
+
+**Date**: 2026-10-30
+**Task**: Adopt website-sourced Start foundation
+**Branch**: `feat/site-sourced-controls`
+
+### Summary
+
+Adopted five pinned Uiverse source roles and Morphicons-supported Tabler resources into normal Start and shared frame. Preserved raw bytes/MIT, effective theme owner and existing functional owners. Native functional14 and final visual6 accepted; complete workspace gate passed with634 desktop tests. Committed source/evidence/workflow updates locally, archived task, no push.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9d1ad67` | (see git log) |
+| `2ef0b9d` | (see git log) |
+| `eb8db0c` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

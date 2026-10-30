@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 5
+- **Total Sessions**: 6
 - **Last Active**: 2026-10-30
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~176 | Active |
+| `journal-1.md` | ~211 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 6 | 2026-10-30 | Adopt website-sourced Start foundation | `9d1ad67`, `2ef0b9d`, `eb8db0c` | `feat/site-sourced-controls` |
 | 5 | 2026-10-30 | 五种独立风格与控件体系 | `97e5fd4`, `ab670f3` | `feat/start-style-families` |
 | 4 | 2026-10-30 | 原创控件与桌宠软件视觉语言 | `52779d4` | `feat/original-start-controls` |
 | 3 | 2026-10-29 | 五版开始栏与复刻重设计技能 | `6c4dda2`, `90fe642`, `0d14e6c` | `feat/start-design-lab` |
