@@ -1,0 +1,217 @@
+/*
+ * 源码对照板的外壳：评审用的一层，不参与产品呈现，也不吃来源那一套材质（右边格子里才是源件自己）。
+ * 这里只摆位置与说明行；控件的样子全部来自 source-controls.css。
+ */
+
+.su-board {
+  display: grid;
+  gap: 24px;
+  padding: 20px 0 48px 0;
+  color: #26303b;
+}
+
+.su-board__head {
+  display: grid;
+  gap: 8px;
+}
+
+.su-board__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.su-board__note {
+  margin: 0;
+  max-width: 92ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #55606d;
+}
+
+.su-board__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+}
+
+.su-board__hint {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 退路那颗：外壳自己的按钮，不冒充源件（源件在右边格子里）。 */
+.su-board__close,
+.su-board-open {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #c6ccd4;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #26303b;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.su-board__close:hover,
+.su-board-open:hover {
+  border-color: #2d8cf0;
+}
+
+.su-board__close:focus-visible,
+.su-board-open:focus-visible {
+  outline: 2px solid #2d8cf0;
+  outline-offset: 2px;
+}
+
+.su-board__pairs {
+  display: grid;
+  gap: 30px;
+}
+
+.su-board__pair {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e3e7ec;
+}
+
+.su-board__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.su-board__cells {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.su-board__cell {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.su-board__cell-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+/* 右边那一格只是摆位置：源件的白底、描边与投影由 .su-source 那一层给。 */
+.su-board__states {
+  display: grid;
+  gap: 16px;
+  padding: 28px 24px;
+  min-height: 180px;
+  border: 1px dashed #c6ccd4;
+  border-radius: 6px;
+  background-color: #fbfcfd;
+}
+
+.su-board__state {
+  display: grid;
+  gap: 8px;
+}
+
+.su-board__state-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.su-board__line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.su-board__facts {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.su-board__facts > div {
+  display: grid;
+  grid-template-columns: 4em minmax(0, 1fr);
+  gap: 8px;
+}
+
+.su-board__facts dt {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.su-board__facts dd {
+  margin: 0;
+  color: #3b4552;
+}
+
+.su-board__link {
+  color: #2d8cf0;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+
+.su-board__hash {
+  display: block;
+  font-family: var(--pb-font-mono, ui-monospace, monospace);
+  color: #8b93a0;
+}
+
+.su-board__morph {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #c6ccd4;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #26303b;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.su-board__glyphs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 18px;
+  border: 1px dashed #c6ccd4;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.su-board__glyph {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  width: 96px;
+  color: #26303b;
+}
+
+.su-board__glyph-name {
+  font-family: var(--pb-font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  color: #6b7280;
+}
+
+@media (max-width: 900px) {
+  .su-board__cells {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

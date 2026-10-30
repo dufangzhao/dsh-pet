@@ -4,6 +4,9 @@ import { useCallback, useRef, useState, type JSX } from 'react';
 import { Dialog, Toast, useToastStore } from '@pet/ui-kit';
 
 import { Button } from './original-ui/kit.js';
+import { SiteMorphIcon } from './site-ui/site-icons.js';
+import { SourceButton } from './site-ui/source-button.js';
+import { SourceRadioGroup } from './site-ui/source-radio.js';
 
 import type { AppView } from './app-views.js';
 import {
@@ -572,26 +575,28 @@ function RunToggle({
       >
         {state.status}
       </span>
-      <button
-        type="button"
+      {/* 按钮是来源那一件；折叠到 72px 时只剩这枚 vendored 的 play↔pause 真形变。 */}
+      <SourceButton
+        size="small"
         className="pb-run__button"
         aria-pressed={ready ? paused : undefined}
         aria-label={state.hint}
         title={state.hint}
         disabled={!state.enabled || busy}
+        busy={busy}
         data-testid="model-pause"
+        leading={
+          <SiteMorphIcon
+            active={!(ready && paused)}
+            on="player-pause"
+            off="player-play"
+            size={16}
+          />
+        }
         onClick={() => onToggle(!paused)}
       >
-        {/* 折叠到 72px 时只剩这枚图标：它在按下去之前就说清了下一步是暂停还是继续。 */}
-        <svg className="pb-run__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          {ready && paused ? (
-            <path d="M8 5.5 18 12 8 18.5Z" fill="currentColor" stroke="none" />
-          ) : (
-            <path d="M9.5 5.5v13M14.5 5.5v13" strokeLinecap="round" />
-          )}
-        </svg>
         <span className="pb-run__label">{state.action}</span>
-      </button>
+      </SourceButton>
     </div>
   );
 }
@@ -610,32 +615,18 @@ function ThemePicker({
 }): JSX.Element {
   return (
     <div className="pb-modes">
-      <span className="pb-modes__label" id="console-theme-label">
-        {COPY.themeLabel}
-      </span>
-      <span
-        className="pb-choice"
-        role="radiogroup"
-        aria-labelledby="console-theme-label"
+      <SourceRadioGroup
+        label={COPY.themeLabel}
+        name="console-theme"
+        value={theme}
+        onChange={(next) => onChange(next as Theme)}
         data-testid="theme-select"
-      >
-        {THEMES.map((candidate) => (
-          <label key={candidate} className="pb-choice__option">
-            <input
-              type="radio"
-              name="console-theme"
-              value={candidate}
-              aria-label={themeAriaLabel(candidate)}
-              checked={candidate === theme}
-              onChange={() => onChange(candidate)}
-            />
-            {/* 可见的两字标签留给窄侧栏，完整含义在 radio 的 aria-label 上。 */}
-            <span className="pb-choice__text" aria-hidden="true">
-              {themeLabel(candidate)}
-            </span>
-          </label>
-        ))}
-      </span>
+        options={THEMES.map((candidate) => ({
+          value: candidate,
+          label: themeLabel(candidate),
+          ariaLabel: themeAriaLabel(candidate),
+        }))}
+      />
     </div>
   );
 }

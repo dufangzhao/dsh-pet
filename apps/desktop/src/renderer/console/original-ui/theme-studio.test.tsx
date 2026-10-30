@@ -29,8 +29,8 @@ describe('配色工作室', () => {
 
   it('三块内置方案各叫自己的名字，不给一句通用标签盖过去', () => {
     const html = seeded();
-    for (const name of ['青港', '陶烬', '翠晓'])
-      expect(html).toContain('<span class="pb-tile__name">' + name + '</span>');
+    for (const name of ['原件', '陶烬', '翠晓'])
+      expect(html).toContain('<span class="su-tile__name">' + name + '</span>');
     expect(html).not.toContain('方案色带');
     // 只有选中那一张说 pressed：挡位已经不叠这层，其余方案也不装选中。
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
@@ -53,7 +53,7 @@ describe('配色工作室', () => {
 
   it('调色段是原生 details：钩子在段落类名上，展开着并画满 36 格的两件控件', () => {
     const html = seeded();
-    expect(html).toContain('class="pb-fold theme-studio__palette" open=""');
+    expect(html).toContain('class="su-fold theme-studio__palette" open=""');
     expect(html.match(/type="color"/g)).toHaveLength(THEME_TOKENS.length);
     expect(html.match(/-hex"/g)).toHaveLength(THEME_TOKENS.length);
     expect(html).toContain('aria-label="主强调选色"');

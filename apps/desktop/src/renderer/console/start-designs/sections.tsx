@@ -1,17 +1,23 @@
 /**
  * Start 自己的控件：目录怎么挑、Key 怎么填、回执怎么说、桌宠怎么管，全在这里画。
  *
- * 这里只用 original-ui 的那套板件（Button / Field / Toggle / Status / Notice / Tile / Disclosure），
- * 不导入 @pet/ui-kit，也不留旧的胶囊芯片、滑轨分段、pk-input、pk-pill。
- * 判断与状态一律来自 use-start-model：这一层只负责摆与点，不再算一遍"能不能保存"。
+ * 板件一律来自 site-ui 那一套网站来源控件（SourceButton / SourceField+SourceInput /
+ * SourceSwitch / SourceTile / SourceStatus / SourceNotice / SourcePanel），
+ * 不再借 original-ui 的 PB 板件，也不导入 @pet/ui-kit。
+ * 判断与状态一律来自 use-start-model：这一层只负责摆与点，不再算一遍「能不能保存」。
  *
  * 每个片段在一次渲染里只出现一份（同一个输入框、同一份回执）。版式负责摆放它们。
  */
 import { useState, type JSX } from 'react';
 
-import { Button, Field, Notice, Status, Tile, Toggle } from '../original-ui/kit.js';
 import { OriginalPetPreview } from '../original-ui/pet-preview.js';
 import { OriginalThemeStudio } from '../original-ui/theme-studio.js';
+import { SourceButton } from '../site-ui/source-button.js';
+import { SourcePanel } from '../site-ui/source-panel.js';
+import { SourceField, SourceInput } from '../site-ui/source-input.js';
+import { SourceNotice, SourceStatus } from '../site-ui/source-status.js';
+import { SourceSwitch } from '../site-ui/source-switch.js';
+import { SourceTile } from '../site-ui/source-tile.js';
 import { vendorIcon } from '../vendor-icons.js';
 
 import { MARK_TEXT, activeNote, failureLine, providerNote } from './behavior.js';
@@ -21,8 +27,8 @@ import type { StartModel, StartOwners } from './use-start-model.js';
 /* ------------------------------------------------------------------ 段落外壳 */
 
 /**
- * 一节：左边一道规、上面名称与此刻的状态、下面是内容。
- * Start 用自己的这一段，不再借设置台的分组外壳——标题层级与状态牌是这套控件自己的。
+ * 一节：外壳是 afraid-cougar-9 的卡片材质（2px 描边 + 4px 4px 硬投影 + 20px 内边距），
+ * 上面名称与此刻的状态，下面是内容。Start 用自己的这一段，不再借设置台的分组外壳。
  */
 export function StartSection({
   className,
@@ -42,25 +48,16 @@ export function StartSection({
   testid?: string;
 }): JSX.Element {
   return (
-    <section
-      className={'sc-section' + (className === undefined ? '' : ' ' + className)}
-      data-testid={testid}
-      aria-labelledby={'sc-' + title}
+    <SourcePanel
+      title={title}
+      {...(className === undefined ? {} : { className })}
+      {...(note === undefined ? {} : { note })}
+      {...(status === undefined ? {} : { status })}
+      {...(actions === undefined ? {} : { actions })}
+      {...(testid === undefined ? {} : { 'data-testid': testid })}
     >
-      <header className="sc-section__head">
-        <div className="sc-section__names">
-          <h2 className="sc-section__title" id={'sc-' + title}>
-            {title}
-          </h2>
-          {note === undefined ? null : <p className="sc-section__note">{note}</p>}
-        </div>
-        <div className="sc-section__aside">
-          {status ?? null}
-          {actions ?? null}
-        </div>
-      </header>
-      <div className="sc-section__body">{children}</div>
-    </section>
+      {children}
+    </SourcePanel>
   );
 }
 
@@ -74,25 +71,25 @@ export function StartConnectionStatus({ model }: { model: StartModel }): JSX.Ele
   if (model.phase === 'no-bridge') {
     return (
       <div className="sc-statusline" data-testid="start-status">
-        <Notice tone="warn" live={false}>
+        <SourceNotice tone="warn" live={false}>
           这台机器还没有模型连接的通道，所以这里没有可填的表单。
-        </Notice>
+        </SourceNotice>
       </div>
     );
   }
   if (model.phase === 'read-failed') {
     return (
       <div className="sc-statusline" data-testid="start-status">
-        <Notice
+        <SourceNotice
           tone="danger"
           action={
-            <Button size="small" onClick={model.refresh}>
+            <SourceButton size="small" variant="quiet" onClick={model.refresh}>
               重新读取
-            </Button>
+            </SourceButton>
           }
         >
           {model.error ?? '这台机器的模型配置没读到。'}
-        </Notice>
+        </SourceNotice>
       </div>
     );
   }
@@ -114,7 +111,7 @@ export function StartConnectionStatus({ model }: { model: StartModel }): JSX.Ele
 
   return (
     <div className="sc-statusline" data-testid="start-status">
-      <Status tone={tone}>{words}</Status>
+      <SourceStatus tone={tone}>{words}</SourceStatus>
       {model.phase === 'in-use-paused' ? (
         <span className="sc-statusline__notice" data-testid="start-paused">
           回应已暂停
@@ -151,16 +148,15 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
   return (
     <div className="sc-provider" data-testid="start-provider">
       <div className="sc-provider__bar">
-        <Field
+        <SourceField
           className="sc-provider__search"
           label="找一家服务"
           hint="按名称、标识或可填的模型名筛，空白就是整份目录。"
         >
           {(control) => (
-            <input
+            <SourceInput
               id={control.inputId}
               aria-describedby={control.describedBy}
-              className="pb-input"
               type="search"
               value={model.query}
               placeholder="例如 Kimi、glm、deepseek-flash"
@@ -170,15 +166,15 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
               onChange={(event) => model.setQuery(event.target.value)}
             />
           )}
-        </Field>
-        <Button
+        </SourceField>
+        <SourceButton
           size="small"
           variant="quiet"
           data-testid="model-provider-toggle"
           onClick={() => setListMode((next) => !next)}
         >
           {listMode ? '改成井格目录' : '改成一行一家'}
-        </Button>
+        </SourceButton>
         <span className="sc-provider__count" data-testid="model-provider-count">
           {model.choices.length + ' / ' + model.rows.length + ' 家'}
         </span>
@@ -194,7 +190,7 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
         <ul className="sc-provider__list">
           {model.choices.map((choice) => (
             <li className="sc-provider__item" key={choice.service.id} data-mark={choice.mark}>
-              <Tile
+              <SourceTile
                 selected={choice.current}
                 leading={<ProviderMark service={choice.row.name} />}
                 note={providerNote(choice.mark, choice.service.auth, choice.dirty)}
@@ -204,7 +200,7 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
                 onClick={() => model.pick(choice.service.id)}
               >
                 {choice.service.label}
-              </Tile>
+              </SourceTile>
               <span className="sc-provider__meta">
                 {choice.service.region === 'cn' ? '中国大陆平台' : '国际平台'} ·{' '}
                 {choice.service.auth === 'browser' ? '用浏览器登录' : '填 API Key'}
@@ -215,7 +211,7 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
       ) : (
         <div className="sc-provider__grid" role="group" aria-label="模型服务目录">
           {model.choices.map((choice) => (
-            <Tile
+            <SourceTile
               key={choice.service.id}
               selected={choice.current}
               leading={<ProviderMark service={choice.row.name} />}
@@ -226,7 +222,7 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
               onClick={() => model.pick(choice.service.id)}
             >
               {choice.service.label}
-            </Tile>
+            </SourceTile>
           ))}
         </div>
       )}
@@ -237,7 +233,7 @@ export function StartProviderChooser({ model }: { model: StartModel }): JSX.Elem
 /* ---------------------------------------------------------------- 回执的三条 */
 
 /**
- * 写进本机、探测过没过、这台机器现在用不用它——三条事实分开摆，不合成一句"已连接"。
+ * 写进本机、探测过没过、这台机器现在用不用它——三条事实分开摆，不合成一句「已连接」。
  * 只有一次真实回执之后才出现；没测过就说没测过。
  */
 function SaveReceiptBoard({ model }: { model: StartModel }): JSX.Element | null {
@@ -245,7 +241,7 @@ function SaveReceiptBoard({ model }: { model: StartModel }): JSX.Element | null 
   if (receipt === null) {
     return null;
   }
-  // 「现在在用」按此刻的真实 active 说：没有在用就说没有在用，别推给"别的一家"。
+  // 「现在在用」按此刻的真实 active 说：没有在用就说没有在用，别推给「别的一家」。
   const who = activeNote({
     receiptActive: receipt.active || model.activeId === model.saveTargetId,
     activeId: model.activeId,
@@ -257,23 +253,23 @@ function SaveReceiptBoard({ model }: { model: StartModel }): JSX.Element | null 
       <div className="sc-receipt__row" data-state={receipt.saved ? 'ok' : 'danger'}>
         <dt>写进本机</dt>
         <dd>
-          <Status tone={receipt.saved ? 'ok' : 'danger'}>
+          <SourceStatus tone={receipt.saved ? 'ok' : 'danger'}>
             {receipt.saved ? '已保存' : '没保存'}
-          </Status>
+          </SourceStatus>
         </dd>
       </div>
       <div className="sc-receipt__row" data-state={receipt.tested ? 'ok' : 'warn'}>
         <dt>这一次探测</dt>
         <dd>
-          <Status tone={receipt.tested ? 'ok' : 'warn'}>
+          <SourceStatus tone={receipt.tested ? 'ok' : 'warn'}>
             {receipt.tested ? '通过' : '没通过'}
-          </Status>
+          </SourceStatus>
         </dd>
       </div>
       <div className="sc-receipt__row" data-state={who.tone}>
         <dt>现在在用</dt>
         <dd>
-          <Status tone={who.tone === 'warn' ? 'off' : who.tone}>{who.text}</Status>
+          <SourceStatus tone={who.tone === 'warn' ? 'off' : who.tone}>{who.text}</SourceStatus>
         </dd>
       </div>
       <p className="sc-receipt__line" role="status">
@@ -298,9 +294,9 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
   if (model.picked === undefined) {
     return (
       <div data-testid="start-connect-empty">
-        <Notice tone="neutral" live={false}>
+        <SourceNotice tone="neutral" live={false}>
           {model.loading ? '正在读这台机器的模型配置…' : '目录里还没有可接的服务。'}
-        </Notice>
+        </SourceNotice>
       </div>
     );
   }
@@ -323,11 +319,11 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
     >
       <h3 className="sc-form__who">
         <span className="sc-form__name">{model.picked.label}</span>
-        <Status
+        <SourceStatus
           tone={model.mark === 'in-use' ? 'ok' : model.mark === 'unavailable' ? 'off' : 'warn'}
         >
           {model.mark === null ? '—' : MARK_TEXT[model.mark]}
-        </Status>
+        </SourceStatus>
         <span className="sc-form__region">
           {model.picked.region === 'cn' ? '中国大陆平台' : '国际平台'}
         </span>
@@ -335,12 +331,12 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
 
       {browserSignIn ? (
         <div className="sc-form__signin">
-          <Notice tone="neutral" live={false}>
+          <SourceNotice tone="neutral" live={false}>
             这一家用浏览器登录自己的账号，不填 API
             Key。登录完成只是这台机器读到了登录，能不能接上还要看随后那一次写入。
-          </Notice>
+          </SourceNotice>
           <div className="sc-actions">
-            <Button
+            <SourceButton
               type="submit"
               variant="primary"
               busy={model.busy.signingIn}
@@ -348,11 +344,15 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
               data-testid="model-signin"
             >
               {model.busy.signingIn ? '正在等登录结果…' : '登录并连接'}
-            </Button>
+            </SourceButton>
             {model.busy.signingIn ? (
-              <Button size="small" data-testid="model-signin-cancel" onClick={model.cancelSignIn}>
+              <SourceButton
+                size="small"
+                data-testid="model-signin-cancel"
+                onClick={model.cancelSignIn}
+              >
                 取消这次登录
-              </Button>
+              </SourceButton>
             ) : null}
           </div>
           {model.signing === null ? null : (
@@ -363,7 +363,7 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
         </div>
       ) : (
         <div className="sc-fields">
-          <Field
+          <SourceField
             className="sc-fields__model"
             label="模型名"
             {...(model.picked.models.length > 0
@@ -372,11 +372,10 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
             {...(model.model.trim() === '' ? { error: '模型名不能空着。' } : {})}
           >
             {(control) => (
-              <input
+              <SourceInput
                 id={control.inputId}
                 aria-describedby={control.describedBy}
-                aria-invalid={control.invalid || undefined}
-                className="pb-input"
+                invalid={control.invalid}
                 value={model.model}
                 list="sc-model-list"
                 autoComplete="off"
@@ -385,14 +384,14 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
                 onChange={(event) => model.setModel(event.target.value)}
               />
             )}
-          </Field>
+          </SourceField>
           <datalist id="sc-model-list">
             {model.picked.models.map((name) => (
               <option key={name} value={name} />
             ))}
           </datalist>
 
-          <Field
+          <SourceField
             className="sc-fields__key"
             label={model.picked.label + ' 的 API Key'}
             hint={
@@ -405,11 +404,10 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
             {...(model.keyBlock === null ? {} : { error: model.keyBlock })}
           >
             {(control) => (
-              <input
+              <SourceInput
                 id={control.inputId}
                 aria-describedby={control.describedBy}
-                aria-invalid={model.keyBlock !== null || undefined}
-                className="pb-input"
+                invalid={model.keyBlock !== null}
                 type="password"
                 value={model.key}
                 autoComplete="off"
@@ -419,9 +417,9 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
                 onChange={(event) => model.setKey(event.target.value)}
               />
             )}
-          </Field>
+          </SourceField>
 
-          <Button
+          <SourceButton
             type="submit"
             variant="primary"
             busy={model.busy.saving}
@@ -429,12 +427,12 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
             data-testid="model-save"
           >
             {model.busy.saving ? '正在写入这台机器…' : '保存并开始'}
-          </Button>
+          </SourceButton>
         </div>
       )}
 
       <div className="sc-actions">
-        <Button
+        <SourceButton
           size="small"
           busy={model.busy.testing}
           disabled={!model.can.test}
@@ -442,27 +440,39 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
           onClick={model.test}
         >
           {model.busy.testing ? '正在探测…' : '测试连接'}
-        </Button>
+        </SourceButton>
         {model.tested === null ? null : (
-          <Status tone={model.tested.passed ? 'ok' : 'danger'}>{model.tested.text}</Status>
+          <SourceStatus tone={model.tested.passed ? 'ok' : 'danger'}>
+            {model.tested.text}
+          </SourceStatus>
         )}
         <span className="sc-actions__fill" aria-hidden="true" />
-        <Button size="small" variant="quiet" data-testid="model-getkey" onClick={model.openKeyPage}>
+        <SourceButton
+          size="small"
+          variant="quiet"
+          data-testid="model-getkey"
+          onClick={model.openKeyPage}
+        >
           {'去 ' + model.picked.label + ' 申请 Key'}
-        </Button>
+        </SourceButton>
         {model.sibling === undefined ? null : (
-          <Button
+          <SourceButton
             size="small"
             variant="quiet"
             data-testid="model-region"
             onClick={model.switchRegion}
           >
             {model.picked.region === 'cn' ? '改用国际平台' : '改用中国大陆平台'}
-          </Button>
+          </SourceButton>
         )}
-        <Button size="small" variant="quiet" data-testid="model-manage" onClick={model.openPlugins}>
+        <SourceButton
+          size="small"
+          variant="quiet"
+          data-testid="model-manage"
+          onClick={model.openPlugins}
+        >
           管理模型扩展
-        </Button>
+        </SourceButton>
       </div>
 
       {model.can.save || browserSignIn ? null : (
@@ -491,9 +501,9 @@ export function StartPetPanel({ model }: { model: StartModel }): JSX.Element {
   if (!model.appAvailable) {
     return (
       <div data-testid="start-pet">
-        <Notice tone="warn" live={false}>
+        <SourceNotice tone="warn" live={false}>
           这一页还没连上应用，所以看不见桌面上是哪一只。
-        </Notice>
+        </SourceNotice>
       </div>
     );
   }
@@ -503,7 +513,7 @@ export function StartPetPanel({ model }: { model: StartModel }): JSX.Element {
         <OriginalPetPreview {...model.pet} />
       </div>
       <div className="sc-pet__rail">
-        <Toggle
+        <SourceSwitch
           label="暂时不回应"
           hint="只是让它先不开口，录音与预览还在这里。"
           pressed={model.paused}
@@ -512,7 +522,7 @@ export function StartPetPanel({ model }: { model: StartModel }): JSX.Element {
           onChange={model.togglePaused}
         />
         <div className="sc-actions">
-          <Button
+          <SourceButton
             size="small"
             busy={model.busy.visibility}
             disabled={!model.desktopShown}
@@ -520,30 +530,30 @@ export function StartPetPanel({ model }: { model: StartModel }): JSX.Element {
             onClick={() => model.setDesktopVisible(false)}
           >
             在桌面隐藏
-          </Button>
-          <Button
+          </SourceButton>
+          <SourceButton
             size="small"
             disabled={model.desktopShown || model.busy.visibility}
             data-testid="pet-show"
             onClick={() => model.setDesktopVisible(true)}
           >
             在桌面显示
-          </Button>
-          <Button
+          </SourceButton>
+          <SourceButton
             size="small"
             variant="primary"
             data-testid="pet-dress"
             onClick={() => model.goToView('appearance')}
           >
             装扮
-          </Button>
+          </SourceButton>
         </div>
       </div>
     </div>
   );
 }
 
-/** 配色这一节：C 的工作室自己读写本机记录，卸载即撤掉没保存的试色。 */
+/** 配色这一节：工作室自己读写本机记录，卸载即撤掉没保存的试色。 */
 export function StartThemePanel(): JSX.Element {
   return (
     <div className="sc-theme" data-testid="start-theme">
@@ -565,7 +575,7 @@ export function StartGuideAction({
 }): JSX.Element {
   const [running, setRunning] = useState(false);
   return (
-    <Button
+    <SourceButton
       size="small"
       variant="quiet"
       title="由桌宠在桌面上再走一遍"
@@ -585,12 +595,12 @@ export function StartGuideAction({
       }}
     >
       使用向导
-    </Button>
+    </SourceButton>
   );
 }
 
 /**
- * 一次组装出这一屏的插槽：五块新控件，各自接同一份状态。
+ * 一次组装出这一屏的插槽：五块控件，各自接同一份状态。
  * 这里不建第二个持有者，也不把旧组件包一层——插槽里画的就是上面这几个。
  */
 export function startSlotsOf(model: StartModel): StartSlots {

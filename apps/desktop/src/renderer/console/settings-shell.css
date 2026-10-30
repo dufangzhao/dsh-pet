@@ -22,8 +22,8 @@
   grid-template-columns: var(--pb-rail) minmax(0, 1fr);
   block-size: 100%;
   overflow: hidden;
-  background-color: var(--pb-paper);
-  color: var(--pb-ink);
+  background-color: var(--bg-color);
+  color: var(--font-color);
   font-family: var(--pb-font-body);
   font-size: var(--pb-size-body);
   line-height: 1.6;
@@ -62,8 +62,7 @@
 .pb-shell[data-rail='collapsed'] .pb-nav__text,
 .pb-shell[data-rail='collapsed'] .pb-rail__brand-name,
 .pb-shell[data-rail='collapsed'] .pb-rail__toggle-text,
-.pb-shell[data-rail='collapsed'] .pb-run__label,
-.pb-shell[data-rail='collapsed'] .pb-modes__label {
+.pb-shell[data-rail='collapsed'] .pb-run__label {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
@@ -80,11 +79,11 @@
   inset-inline-start: var(--pb-s-2);
   z-index: 3;
   padding: var(--pb-s-2) var(--pb-s-3);
-  border: var(--pb-hairline) solid var(--pb-accent);
+  border: var(--pb-hairline) solid var(--input-focus);
   border-radius: var(--pb-radius-ctl);
-  background-color: var(--pb-sheet);
+  background-color: var(--bg-color);
   box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
-  color: var(--pb-accent-2);
+  color: var(--input-focus);
   font-size: var(--pb-size-note);
   cursor: pointer;
   translate: 0 -200%;
@@ -92,7 +91,7 @@
 }
 
 .pb-shell__skip:focus-visible {
-  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline: var(--pb-focus-width) solid var(--input-focus);
   outline-offset: var(--pb-focus-gap);
   translate: 0 0;
 }
@@ -106,9 +105,9 @@
   min-width: 0;
   padding: var(--pb-s-3) var(--pb-s-2);
   overflow: hidden;
-  border-inline-end: var(--pb-hairline) solid var(--pb-line);
-  border-block-start: 3px solid var(--pb-line-2);
-  background-color: var(--pb-paper-2);
+  border-inline-end: var(--pb-hairline) solid var(--input-out-of-focus);
+  border-block-start: 3px solid var(--input-out-of-focus);
+  background-color: var(--bg-color);
 }
 
 .pb-rail__brand-row {
@@ -125,7 +124,7 @@
   align-items: center;
   gap: var(--pb-s-2);
   min-width: 0;
-  color: var(--pb-ink);
+  color: var(--font-color);
 }
 
 .pb-rail__brand-name {
@@ -149,19 +148,19 @@
   border: var(--pb-hairline) solid transparent;
   border-radius: var(--pb-radius-ctl);
   background-color: transparent;
-  color: var(--pb-ink-dim);
+  color: var(--font-color-sub);
   font: inherit;
   cursor: pointer;
 }
 
 .pb-rail__toggle:hover {
-  border-color: var(--pb-line-2);
-  background-color: var(--pb-sheet);
-  color: var(--pb-ink);
+  border-color: var(--input-out-of-focus);
+  background-color: var(--bg-color);
+  color: var(--font-color);
 }
 
 .pb-rail__toggle:focus-visible {
-  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline: var(--pb-focus-width) solid var(--input-focus);
   outline-offset: var(--pb-focus-gap);
 }
 
@@ -212,7 +211,7 @@
   border-inline-start: 3px solid transparent;
   border-radius: 0 var(--pb-radius-ctl) var(--pb-radius-ctl) 0;
   background-color: transparent;
-  color: var(--pb-ink-soft);
+  color: var(--font-color);
   font-family: var(--pb-font-display);
   font-size: var(--pb-size-control);
   font-weight: 600;
@@ -226,20 +225,20 @@
 }
 
 .pb-nav:hover {
-  background-color: var(--pb-sheet-2);
-  color: var(--pb-ink);
+  background-color: var(--bg-color);
+  color: var(--font-color);
 }
 
 .pb-nav:focus-visible {
-  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline: var(--pb-focus-width) solid var(--input-focus);
   outline-offset: calc(var(--pb-focus-gap) * -1);
 }
 
 .pb-nav[aria-current='page'] {
-  border-inline-start-color: var(--pb-accent);
-  background-color: var(--pb-sheet);
+  border-inline-start-color: var(--input-focus);
+  background-color: var(--bg-color);
   box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
-  color: var(--pb-ink);
+  color: var(--font-color);
 }
 
 .pb-nav__icon {
@@ -257,7 +256,7 @@
 .pb-rail__list--quiet .pb-nav {
   font-family: var(--pb-font-body);
   font-size: var(--pb-size-note);
-  color: var(--pb-ink-dim);
+  color: var(--font-color-sub);
 }
 
 .pb-rail__footer {
@@ -265,7 +264,7 @@
   gap: var(--pb-s-3);
   margin-block-start: auto;
   padding-block-start: var(--pb-s-3);
-  border-block-start: var(--pb-hairline) solid var(--pb-line);
+  border-block-start: var(--pb-hairline) solid var(--input-out-of-focus);
 }
 
 /* ------------------------------------------------------------------ 主区 */
@@ -308,8 +307,8 @@
 .pb-main__title {
   margin: 0;
   padding-inline-start: var(--pb-s-3);
-  border-inline-start: 3px solid var(--pb-accent);
-  color: var(--pb-ink);
+  border-inline-start: 3px solid var(--input-focus);
+  color: var(--font-color);
   font-family: var(--pb-font-display);
   font-size: var(--pb-size-page);
   font-weight: 700;
@@ -325,7 +324,7 @@
   margin: var(--pb-s-2) 0 0;
   padding-inline-start: calc(var(--pb-s-3) + 3px);
   max-inline-size: 76ch;
-  color: var(--pb-ink-soft);
+  color: var(--font-color);
   font-size: var(--pb-size-note);
 }
 
@@ -344,10 +343,10 @@
 
 .pb-sheet {
   padding: var(--pb-s-4);
-  border: var(--pb-hairline) solid var(--pb-line);
-  border-block-start: 3px solid var(--pb-line-2);
+  border: var(--pb-hairline) solid var(--input-out-of-focus);
+  border-block-start: 3px solid var(--input-out-of-focus);
   border-radius: 0 0 var(--pb-radius-sheet) var(--pb-radius-sheet);
-  background-color: var(--pb-sheet);
+  background-color: var(--bg-color);
   box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
 }
 
@@ -364,7 +363,7 @@
   gap: var(--pb-s-2);
   margin: 0;
   min-width: 0;
-  color: var(--pb-ink);
+  color: var(--font-color);
   font-family: var(--pb-font-display);
   font-size: var(--pb-size-title);
   font-weight: 600;
@@ -379,7 +378,7 @@
 .pb-sheet__description {
   margin: var(--pb-s-1) 0 0;
   max-inline-size: 76ch;
-  color: var(--pb-ink-dim);
+  color: var(--font-color-sub);
   font-size: var(--pb-size-micro);
 }
 
@@ -403,7 +402,7 @@
   align-items: center;
   min-block-size: var(--pb-row-min);
   padding: var(--pb-s-2) 0;
-  border-block-start: var(--pb-hairline) solid var(--pb-line);
+  border-block-start: var(--pb-hairline) solid var(--input-out-of-focus);
 }
 
 .pb-rows > .pb-row:first-child {
@@ -430,7 +429,7 @@
 }
 
 .pb-row__name {
-  color: var(--pb-ink);
+  color: var(--font-color);
   font-size: var(--pb-size-control);
   font-weight: 600;
 }
@@ -438,7 +437,7 @@
 .pb-row__hint {
   min-width: 0;
   overflow: hidden;
-  color: var(--pb-ink-dim);
+  color: var(--font-color-sub);
   font-size: var(--pb-size-micro);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -447,7 +446,7 @@
 .pb-row__description {
   margin: 0;
   max-inline-size: 68ch;
-  color: var(--pb-ink-dim);
+  color: var(--font-color-sub);
   font-size: var(--pb-size-micro);
 }
 
@@ -455,9 +454,9 @@
 .pb-row__error {
   margin: 0;
   padding-inline-start: 12px;
-  color: var(--pb-danger);
+  color: var(--su-error);
   font-size: var(--pb-size-note);
-  background-image: linear-gradient(to bottom, var(--pb-danger) 0 100%);
+  background-image: linear-gradient(to bottom, var(--su-error) 0 100%);
   background-position: 2px 4px;
   background-size: 2px 12px;
   background-repeat: no-repeat;
@@ -483,7 +482,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--pb-ink-dim);
+  color: var(--font-color-sub);
   font-family: var(--pb-font-display);
   font-size: var(--pb-size-micro);
   letter-spacing: 0.03em;
@@ -495,75 +494,20 @@
   inline-size: 7px;
   block-size: 7px;
   border-radius: 50%;
-  background-color: var(--pb-line-strong);
+  background-color: var(--main-color);
 }
 
 .pb-run__state[data-state='running']::before {
-  background-color: var(--pb-ok);
+  background-color: var(--su-ok);
 }
 
 .pb-run__state[data-state='paused']::before {
-  background-color: var(--pb-warn);
+  background-color: var(--su-warn);
 }
 
 /* 回应开关：一块方形板，不是胶囊；按下沉一下，和 kit 的板扣是同一件事。 */
-.pb-run__button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--pb-s-2);
-  min-block-size: var(--pb-ctl-height);
-  padding: 0 var(--pb-s-2);
-  border: var(--pb-hairline) solid var(--pb-line-2);
-  border-radius: var(--pb-radius-ctl);
-  background-color: var(--pb-sheet-2);
-  box-shadow: 0 var(--pb-ledge) 0 var(--pb-ledge-color);
-  color: var(--pb-ink);
-  font-size: var(--pb-size-note);
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform var(--pb-t-press) var(--pb-ease),
-    box-shadow var(--pb-t-press) var(--pb-ease),
-    background-color var(--pb-t-move) var(--pb-ease);
-}
-
-.pb-run__button:hover:not(:disabled) {
-  border-color: var(--pb-line-strong);
-  background-color: var(--pb-sheet);
-}
-
-.pb-run__button:active:not(:disabled) {
-  transform: translateY(var(--pb-ledge));
-  box-shadow: 0 0 0 var(--pb-ledge-color);
-}
-
-.pb-run__button:focus-visible {
-  outline: var(--pb-focus-width) solid var(--pb-focus);
-  outline-offset: var(--pb-focus-gap);
-}
-
-.pb-run__button:disabled {
-  border-color: var(--pb-line);
-  background-color: var(--pb-sheet-3);
-  color: var(--pb-ink-dim);
-  cursor: default;
-}
 
 /* 暂停与继续是两件事：继续那一挡落成强调板，一眼看得出下一步。 */
-.pb-run__button[aria-pressed='true'] {
-  border-color: var(--pb-accent);
-  background-color: color-mix(in oklab, var(--pb-accent) 18%, var(--pb-sheet));
-  color: var(--pb-accent-2);
-}
-
-.pb-run__icon {
-  flex: none;
-  inline-size: 16px;
-  block-size: 16px;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  fill: none;
-}
 
 .pb-run__label {
   min-width: 0;
@@ -578,28 +522,33 @@
   min-width: 0;
 }
 
-.pb-modes__label {
-  color: var(--pb-ink-dim);
-  font-size: var(--pb-size-micro);
-}
-
 /* 折叠到 72px：主题三态改成纵向三块小板。三挡都得看得见、点得到、聚焦看得见——
    窄栏里裁掉后两挡不是“已知限制”，是少了一个可达的挡位。
    展开那一挡仍是一行三块（默认在 kit.css 的 .pb-choice），这里只改外壳窄栏里的排布。 */
-.pb-shell[data-rail='collapsed'] .pb-choice {
+/* 折叠到 72px：三挡改成纵向三块小板，每块仍是原件那一句「选中整格填 --main-color、字变 --bg-color」。
+   横向 34px 端圆的原件一条在 72px 里放不下；窄栏里裁掉后两挡不是「已知限制」，是少了一个可达的挡位。 */
+.su-choice-field {
+  inline-size: 100%;
+}
+
+.pb-shell[data-rail='collapsed'] .su-choice {
+  inline-size: 100%;
+  height: auto;
   flex-direction: column;
-  align-items: stretch;
+  border-radius: 5px;
   gap: var(--pb-s-1);
+  padding: var(--pb-s-1);
 }
 
-.pb-shell[data-rail='collapsed'] .pb-choice__option {
+.pb-shell[data-rail='collapsed'] .su-choice__option {
   inline-size: 100%;
+  block-size: 28px;
+  top: 0;
+  left: 0;
 }
 
-.pb-shell[data-rail='collapsed'] .pb-choice__text {
-  inline-size: 100%;
-  justify-content: center;
-  padding-inline: var(--pb-s-1);
+.pb-shell[data-rail='collapsed'] .su-choice__btn {
+  border-radius: 5px;
 }
 
 /* 窄到 880 一档时先收正文外边距，不牺牲行的两轨。 */

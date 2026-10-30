@@ -59,23 +59,23 @@
   --pb-focus-width: 2px;
 
   /* -------------------------------------------------------------- 语义颜色 */
-  --pb-paper: var(--paper, light-dark(#eef0f3, #14161b));
-  --pb-paper-2: var(--paper-2, light-dark(#e4e8ed, #1a1d24));
-  --pb-sheet: var(--sheet, light-dark(#f9fafb, #1f232b));
-  --pb-sheet-2: var(--sheet-2, light-dark(#f1f4f8, #262b34));
-  --pb-sheet-3: var(--sheet-3, light-dark(#e5e9ef, #2d333d));
-  --pb-ink: var(--ink, light-dark(#141a22, #e9edf3));
-  --pb-ink-soft: var(--ink-soft, light-dark(#4b5663, #aeb7c3));
-  --pb-ink-dim: var(--ink-dim, light-dark(#616c78, #8b95a1));
-  --pb-line: var(--line, light-dark(#d4dae1, #2e343e));
-  --pb-line-2: var(--line-2, light-dark(#bfc8d2, #3c4451));
-  --pb-line-strong: var(--line-strong, light-dark(#8d99a6, #5c6675));
-  --pb-accent: var(--accent, light-dark(#a23a63, #e07ba0));
-  --pb-accent-2: var(--accent-2, light-dark(#7c2748, #f0a8c2));
-  --pb-on-accent: var(--on-accent, light-dark(#fff2f7, #2a0d18));
+  --pb-paper: var(--paper, light-dark(#fff, #17181c));
+  --pb-paper-2: var(--paper-2, light-dark(#f7f7f7, #1f2024));
+  --pb-sheet: var(--sheet, light-dark(#fff, #1f2024));
+  --pb-sheet-2: var(--sheet-2, light-dark(#f7f7f7, #26272c));
+  --pb-sheet-3: var(--sheet-3, light-dark(#ececec, #303136));
+  --pb-ink: var(--ink, light-dark(#323232, #f2f3f5));
+  --pb-ink-soft: var(--ink-soft, light-dark(#4d4d4d, #d5d8dd));
+  --pb-ink-dim: var(--ink-dim, light-dark(#666, #a9adb5));
+  --pb-line: var(--line, light-dark(#ccc, #4a4f57));
+  --pb-line-2: var(--line-2, light-dark(#b3b3b3, #5a6068));
+  --pb-line-strong: var(--line-strong, light-dark(#323232, #f2f3f5));
+  --pb-accent: var(--accent, light-dark(#2d8cf0, #2d8cf0));
+  --pb-accent-2: var(--accent-2, light-dark(#1a6fd0, #6bb3ff));
+  --pb-on-accent: var(--on-accent, light-dark(#fff, #0e1622));
   --pb-ok: var(--ok, light-dark(#17734f, #6fd0a0));
   --pb-warn: var(--warn, light-dark(#8a5a12, #e0b070));
-  --pb-danger: var(--danger, light-dark(#b03a2f, #ff9b90));
+  --pb-danger: var(--danger, light-dark(#b42318, #ff8b80));
 
   /* 派生三格：不让每个配色方案都补一遍 */
   --pb-focus: var(--pb-accent-2);

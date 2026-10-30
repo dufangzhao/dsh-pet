@@ -1,0 +1,279 @@
+/*
+ * 同源语法的延伸件：来源包里还没有对应物的那几件（状态牌、回执、目录瓦片、抽屉段、侧栏项）。
+ *
+ * 规矩只有一条：这些件必须长得像那三件原件——2px var(--main-color) 描边、5px 圆角、
+ * 4px 4px 硬偏移投影、按下 translate(3px, 3px) 且投影归零、15px/600 的字、六个 token 说话；
+ * 选中态沿用 stupid-seahorse-9 自己那一句「整格填 --main-color、字变 --bg-color」。
+ * 每一处偏离都在行尾写明。这里不引入第二种形状，也不引入新的颜色来源
+ * （状态三格 --su-ok / --su-warn / --su-error 是同一份材质里唯一的加色，见 source-controls.css）。
+ */
+
+/* ------------------------------------------------------------------ 状态牌 */
+
+.su-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color); /* 与原件同一格投影；牌多时靠文字分色，不靠形状 */
+  color: var(--font-color);
+  font-size: 15px; /* 原件的次一档字（状态词短，17px 太重） */
+  font-weight: 600;
+}
+
+.su-status__lamp {
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--tone, var(--su-off));
+  border-radius: 2px; /* 与描边同一份材质里的方点，不用圆点做第二种语言 */
+  background: none;
+  flex: none;
+}
+
+.su-status[data-tone='ok'] {
+  --tone: var(--su-ok);
+}
+
+.su-status[data-tone='warn'] {
+  --tone: var(--su-warn);
+}
+
+.su-status[data-tone='danger'] {
+  --tone: var(--su-error);
+}
+
+.su-status[data-tone='on'] {
+  --tone: var(--input-focus);
+}
+
+.su-status[data-tone='off'] {
+  --tone: var(--su-off);
+}
+
+.su-status[data-tone='neutral'] {
+  --tone: var(--su-off);
+}
+
+/* -------------------------------------------------------------------- 回执 */
+
+.su-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--main-color);
+  border-left: 6px solid var(--tone, var(--su-off)); /* 左边那道色规：原件没有，材质同一份 */
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  color: var(--font-color);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.su-notice[data-tone='ok'] {
+  --tone: var(--su-ok);
+}
+
+.su-notice[data-tone='warn'] {
+  --tone: var(--su-warn);
+}
+
+.su-notice[data-tone='danger'] {
+  --tone: var(--su-error);
+}
+
+.su-notice[data-tone='neutral'] {
+  --tone: var(--su-off);
+}
+
+.su-notice__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.su-notice__action {
+  flex: none;
+}
+
+/* ------------------------------------------------------------------ 目录瓦片 */
+
+.su-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  color: var(--font-color);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.su-tile:active:not(:disabled) {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+/* 选中就是 stupid-seahorse-9 那一句：整格填 --main-color，字变 --bg-color。 */
+.su-tile[data-selected='true'] {
+  background-color: var(--main-color);
+  color: var(--bg-color);
+}
+
+.su-tile[data-selected='true'] .su-tile__note {
+  /* 选中那一格整块填 --main-color，副文也跟着换成前景那一支：
+     --bg-color-alt（#666）压在 #323232 上只有 1.7:1，读屏之外的人同样读不出来。 */
+  color: var(--bg-color);
+  opacity: 0.85;
+}
+
+.su-tile:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.su-tile:focus-visible {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 2px;
+}
+
+.su-tile__head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.su-tile__mark {
+  display: inline-flex;
+  flex: none;
+}
+
+.su-tile__name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.su-tile__note {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--font-color-sub);
+}
+
+/* ------------------------------------------------------------------ 抽屉段 */
+
+.su-fold {
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  color: var(--font-color);
+}
+
+.su-fold__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.su-fold__summary:focus-visible {
+  outline: 2px solid var(--input-focus);
+  outline-offset: -2px;
+}
+
+.su-fold__hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--font-color-sub);
+}
+
+.su-fold__chevron {
+  margin-left: auto;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--main-color);
+  border-bottom: 2px solid var(--main-color);
+  transform: rotate(45deg);
+  transition: transform 0.3s; /* 原件那一句 0.3s */
+}
+
+.su-fold[open] .su-fold__chevron {
+  transform: rotate(225deg);
+}
+
+.su-fold__body {
+  display: grid;
+  gap: 16px;
+  padding: 0 14px 14px 14px;
+}
+
+/* ------------------------------------------------------------------ 侧栏项 */
+
+.su-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 2px solid transparent; /* 静时不抢描边，选中那一格才按原件整格反色 */
+  border-radius: 5px;
+  background: none;
+  color: var(--font-color);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.su-nav:hover {
+  border-color: var(--main-color);
+}
+
+.su-nav:focus-visible {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 2px;
+}
+
+.su-nav[aria-current='page'] {
+  border-color: var(--main-color);
+  background-color: var(--main-color);
+  color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+}
+
+.su-nav__icon {
+  flex: none;
+  color: currentColor;
+}
+
+.su-nav__text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .su-fold__chevron {
+    transition: none;
+  }
+}

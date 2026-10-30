@@ -229,11 +229,9 @@
   min-width: 0;
 }
 
-.pet-bench__rail .pb-toggle {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--pb-s-2);
+/* 这一列里那一格开关：名称与补充各占一行，开关本体（91×36 那一件）不跟着挤。 */
+.pet-bench__rail .su-switch-row {
+  min-width: 0;
 }
 
 /* 草稿抽屉：铭牌字段 + 一颗主操作；不够宽就把主操作换到下一行。 */
@@ -246,7 +244,7 @@
   border-top: var(--pb-hairline) solid var(--pb-line);
 }
 
-.pet-bench__draft .pb-field {
+.pet-bench__draft .su-field {
   flex: 1 1 220px;
   min-width: 0;
 }
@@ -263,10 +261,12 @@
   max-height: 100%;
   overflow-y: auto;
   padding: var(--pb-s-4);
-  background: var(--pb-sheet-2);
-  border: var(--pb-hairline) solid var(--pb-line-strong);
-  clip-path: var(--pb-clip-notch);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 0.16);
+  /* 菜单是本站多出来的一层，但材质用来源那一句：2px 描边、5px 圆角、4px 4px 硬投影。 */
+  background: var(--bg-color, #fff);
+  border: 2px solid var(--main-color, #323232);
+  border-radius: 5px;
+  box-shadow: 4px 4px var(--main-color, #323232);
+  color: var(--font-color, #323232);
 }
 
 .pet-bench__drawer-title {

@@ -27,9 +27,19 @@
 - Cortico 0.2.7：MIT，Copyright (c) 2026 Phantivia，发布提交 cb9ddbd685bcccba1f29905098648f46a79b3862。保留随包 LICENSE；来源 https://github.com/Pal-AI-Lab/Cortico 。此依赖不包含 Coopanion 产品代码或角色资产。
 - tsx 4.23.15：MIT，作者 privatenumber，用于 Cortico TypeScript/ESM 加载。保留随包许可；来源 https://github.com/privatenumber/tsx 。
 
-## Start design lab assets
+## Historical Start design lab assets
 
 The isolated review presentation uses morphicons2.0.2 (MIT, Copyright2026Guillermo) for SVG state transitions, with original24-unit glyph data. It adds one runtime package and no transitive runtime dependencies. Three restrained Uiverse affordances are adapted to semantic controls and project tokens: [alexruix switch](https://uiverse.io/alexruix/silent-otter-72), [Maximinodotpy input](https://uiverse.io/Maximinodotpy/thin-sheep-13), [cssbuttons-io button](https://uiverse.io/cssbuttons-io/wonderful-baboon-62). Their individual pages each supply an MIT notice naming the author. Full notices are retained in [the lab asset notices](apps/desktop/src/renderer/console/start-designs/asset-notices.txt). Morphicons supplies animation, not the glyph family; no Lucide runtime package or Coopanion product asset is included.
+
+## 网站来源控件基础（2026-10-30）
+
+采用 Uiverse 作者 **andrew-demchenk0** 的已发表控件代码作为基础，固定来自官方 [uiverse-io/galaxy](https://github.com/uiverse-io/galaxy) 提交 `adbd2adde0a299a3956ea288fb444ec01891ca41`。它们是同作者、共同描边/投影语言的组件组合，不声称官方完整设计系统。
+
+- 核心：[按钮 afraid-squid-51](https://uiverse.io/andrew-demchenk0/afraid-squid-51)、[输入 polite-stingray-67](https://uiverse.io/andrew-demchenk0/polite-stingray-67)、[开关 empty-penguin-100](https://uiverse.io/andrew-demchenk0/empty-penguin-100)。
+- 补充采用的原件：[选项组 stupid-seahorse-9](https://uiverse.io/andrew-demchenk0/stupid-seahorse-9)、[表单面板 afraid-cougar-9](https://uiverse.io/andrew-demchenk0/afraid-cougar-9)。
+- 原 HTML/CSS 与作者注释保留在 [site-ui/upstream](apps/desktop/src/renderer/console/site-ui/upstream/)，完整 [MIT 许可](apps/desktop/src/renderer/console/site-ui/upstream/LICENSE.md) 为 Copyright (c) 2023 Uiverse.io。具体出处与适配范围见 [来源清单](apps/desktop/src/renderer/console/site-ui/source-manifest.json)。命名空间、中文标签、语义/键盘、流式尺寸、深色与状态反馈属于适配；菜单和软件外壳布局属于沿用这套基础的本地补充。
+
+图标采用 Morphicons 网站支持的 **Tabler outline** 资源：17 个实际 SVG 与 IconNode 数据固定在 Tabler 提交 `ed177a085b652fe04ec4f37ced867c94621e7840`，[原始图标](apps/desktop/src/renderer/console/site-ui/assets/icons/)附 [MIT 许可](apps/desktop/src/renderer/console/site-ui/assets/TABLER-LICENSE.txt)，Copyright (c) 2020-2026 Paweł Kuna。形变使用已安装的 morphicons 2.0.2，附其 [MIT 许可](apps/desktop/src/renderer/console/site-ui/assets/MORPHICONS-LICENSE.txt)，Copyright (c) 2026 Guillermo。这次采用的字形不是项目自绘数据。
 
 ## LobeHub provider icons
 

@@ -9,10 +9,8 @@
   display: grid;
   gap: var(--pb-s-4);
   padding: var(--pb-s-5);
-  background: var(--pb-sheet);
-  border: var(--pb-hairline) solid var(--pb-line);
-  border-radius: var(--pb-radius-sheet);
-  color: var(--pb-ink);
+  /* 工作室这一层坐在来源那件卡片（.su-panel）里面，不再自带第二种底与框。 */
+  color: var(--font-color, #323232);
   font-family: var(--pb-font-body);
   font-size: var(--pb-size-body);
 }
@@ -52,20 +50,8 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-/* 挡位是 radio：选中态写在 aria-checked 上，样式与抽屉瓦片的选中态同一套。 */
-.theme-studio__mode[aria-checked='true'] {
-  border-color: var(--pb-accent);
-  background-color: color-mix(in oklab, var(--pb-accent) 12%, var(--pb-sheet));
-  box-shadow:
-    0 var(--pb-ledge) 0 color-mix(in oklab, var(--pb-accent) 70%, var(--pb-ledge-color)),
-    inset 0 0 0 var(--pb-hairline) var(--pb-accent);
-}
-
-.theme-studio__mode[aria-checked='true'] .pb-tile__pin {
-  transform: rotate(45deg) scale(1);
-  background-color: var(--pb-accent);
-  box-shadow: none;
-}
+/* 挡位与方案都是同一件瓦片：选中那一句反色在 site-ui/source-extensions.css 的 .su-tile 里，
+   这里不再给挡位写第二种选中样式。 */
 
 .theme-studio__band {
   display: flex;
@@ -125,8 +111,9 @@
   height: var(--pb-ctl-height);
   padding: 0;
   background: none;
-  border: var(--pb-hairline) solid var(--pb-line-strong);
-  border-radius: var(--pb-radius-ctl);
+  border: 2px solid var(--main-color, #323232);
+  border-radius: 5px;
+  box-shadow: 4px 4px var(--main-color, #323232);
   cursor: pointer;
 }
 

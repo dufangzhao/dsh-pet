@@ -131,7 +131,7 @@ describe('保存、另存与两个明暗变体', () => {
     controller.editToken('accent', '#ff0000', 'picker');
     controller.save();
     const state = readThemeState();
-    expect(state.custom.map((s) => s.name)).toEqual(['旧的', '青港 自定义']);
+    expect(state.custom.map((s) => s.name)).toEqual(['旧的', '原件 自定义']);
     expect(state.selectedId).toBe(state.custom[1]!.id);
   });
 
@@ -146,8 +146,8 @@ describe('保存、另存与两个明暗变体', () => {
     expect(scheme.palettes['light']['accent']).toBe('#ff0000');
     expect(scheme.palettes['dark']['accent']).toBe('#00ff00');
     // 黑夜那两次保存不该在浅色里留下痕迹：纸底仍是品牌浅色那份。
-    expect(scheme.palettes['light']['paper']).toBe('#eef0f3');
-    expect(scheme.palettes['dark']['paper']).toBe('#14161b');
+    expect(scheme.palettes['light']['paper']).toBe('#fff');
+    expect(scheme.palettes['dark']['paper']).toBe('#17181c');
   });
 });
 

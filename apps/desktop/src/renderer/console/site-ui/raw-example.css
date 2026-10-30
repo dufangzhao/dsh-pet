@@ -1,0 +1,57 @@
+/* 对照板左边那一格的外壳：只给画布与居中的，不碰上游那一件自己的样式。 */
+
+.su-rawcell {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.su-rawcell__caption,
+.su-rawcell__foot {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.su-rawcell__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.su-rawcell__link {
+  color: #2d8cf0;
+  text-decoration: underline;
+}
+
+.su-rawcell__hash {
+  font-family: var(--pb-font-mono, ui-monospace, monospace);
+  color: #9aa1ab;
+}
+
+/* 上游有几枚自带位移（switch 右移一格、Forms 那张卡往上顶 200px 又自带 300×350 的体量），
+   所以宿主给足画布并居中：改的是这一格的高度与内边距，上游那一件的 CSS 一个字节都没动。 */
+.su-rawcell__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 40px 44px;
+  overflow: visible;
+  background-color: #fff;
+  border: 1px dashed #c6ccd4;
+  border-radius: 6px;
+}
+
+/* Forms 那件的 .switch 自己 translateY(-200px)：上面留出那 200px，卡片与来源链接都不被压住。 */
+.su-rawcell__stage[data-slug='afraid-cougar-9'] {
+  min-height: 600px;
+  padding: 260px 44px 60px 44px;
+  align-items: flex-start;
+}
+
+/* 开关那件自己右移一格，右边留出同样的余量。 */
+.su-rawcell__stage[data-slug='empty-penguin-100'] {
+  padding-right: 96px;
+}

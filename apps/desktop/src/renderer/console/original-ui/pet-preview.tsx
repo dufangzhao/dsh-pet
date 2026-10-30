@@ -1,9 +1,9 @@
 /**
  * 原创桌宠预览：饲养台板面上一只真的角色，说话、录音、日夜、菜单、拖动都还是那些真动作。
  *
- * 这里画的是本产品的控件（original-ui/kit），不是旧 PetPreview 换 class：
- * 井格里的角色、台沿、右边竖排的插销板、下面的草稿抽屉与右侧菜单抽屉，都是这套自己的形状；
- * 没有旧的那面点阵墙、那条地面、那一排胶囊工具与折角浮层。
+ * 板件一律来自 site-ui 的那套网站来源控件（按钮、输入栏、开关）：这里换的是「用哪件控件」，
+ * 形状由那一套定；角色本体（PetAvatar）、台沿与草稿抽屉的位置仍是这一格自己的布局，
+ * 没有旧的那面点阵墙、那条地面与那一排胶囊工具。
  *
  * 行为一律复用 preview-behavior.ts 与 pet-preview.tsx 导出的判定：同一次按下要么算戳、要么算拖动，
  * 表情只有真的画进一帧可见画面才回报，焦点离开时若在途就不收草稿。角色本体仍是 pet/PetAvatar，
@@ -39,7 +39,9 @@ import {
   useOutsideDismiss,
   usePokeableAvatar,
 } from '../preview-behavior.js';
-import { Button, Field, Toggle } from './kit.js';
+import { SourceButton as Button } from '../site-ui/source-button.js';
+import { SourceField as Field, SourceInput as Input } from '../site-ui/source-input.js';
+import { SourceSwitch as Toggle } from '../site-ui/source-switch.js';
 
 import './pet-preview.css';
 
@@ -286,9 +288,8 @@ export function OriginalPetPreview({
           <div className="pet-bench__draft">
             <Field label={PET_COPY.sendLabel} hint={PET_COPY.sendBlocked}>
               {({ inputId }) => (
-                <input
+                <Input
                   id={inputId}
-                  className="pb-input"
                   type="text"
                   value={text}
                   placeholder={PET_COPY.sendPlaceholder}

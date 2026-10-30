@@ -17,8 +17,9 @@ import './settings-shell.css';
 import { useCallback, useId, useRef, useState, type JSX, type ReactNode } from 'react';
 
 import type { FieldControl } from './original-ui/kit.js';
-import { Status } from './original-ui/kit.js';
 import { BrandMark, NavIcon, type SettingsNavIcon } from './icons.js';
+import { SourceStatus } from './site-ui/source-status.js';
+import { SOURCE_SURFACE_CLASS } from './site-ui/source-surface.js';
 
 const SIDEBAR_LABEL = '设置';
 const NAV_LABEL = '设置页导航';
@@ -92,7 +93,7 @@ export function SettingsShell({
 
   return (
     <div
-      className="pb-shell"
+      className={'pb-shell ' + SOURCE_SURFACE_CLASS}
       data-rail={collapsed ? 'collapsed' : 'expanded'}
       data-testid="settings-shell"
     >
@@ -196,7 +197,7 @@ function NavButton({
   return (
     <button
       type="button"
-      className="pb-nav"
+      className="pb-nav su-nav"
       title={item.label}
       onClick={() => onSelect(item.id)}
       aria-current={item.id === selected ? 'page' : undefined}
@@ -368,7 +369,7 @@ export function SettingsSection({
       <div className="pb-sheet__head">
         <h2 className="pb-sheet__title" id={titleId}>
           {title}
-          {state === undefined ? null : <Status tone={state.tone}>{state.text}</Status>}
+          {state === undefined ? null : <SourceStatus tone={state.tone}>{state.text}</SourceStatus>}
         </h2>
         {actions === undefined ? null : <div className="pb-sheet__actions">{actions}</div>}
       </div>

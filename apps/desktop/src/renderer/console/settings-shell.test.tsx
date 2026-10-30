@@ -125,7 +125,7 @@ describe('分节', () => {
         <p>预览</p>
       </SettingsSection>,
     );
-    expect(html).toContain('class="pb-status" data-tone="on"');
+    expect(html).toContain('class="su-status" data-tone="on"');
     expect(html).toContain('在桌面上');
     const labelledBy = /<section class="pb-sheet" aria-labelledby="([^"]+)">/.exec(html)?.[1];
     const titleId = /<h2 class="pb-sheet__title" id="([^"]+)">/.exec(html)?.[1];

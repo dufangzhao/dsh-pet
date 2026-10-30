@@ -215,12 +215,12 @@ describe('方案与调色板', () => {
   it('内置在前、自定义在后；色带是底纸 / 主卡纸 / 主强调 / 一个系列色', () => {
     const state = defaultStoredTheme();
     expect(allSchemes(state).map((s) => s.id)).toEqual(['slate-harbor', 'jade-dawn', 'clay-ember']);
-    // 默认那一套就是品牌板面：瓷灰中性配梅子强调，不是参考实现那三张色表。
+    // 默认那一套就是网站原件那一份：白底白卡、#2d8cf0 强调、同族低饱和蓝作系列色。
     expect(schemeSwatches(allSchemes(state)[0]!, 'light')).toEqual([
-      '#eef0f3',
-      '#f9fafb',
-      '#a23a63',
-      '#2f5d8a',
+      '#fff',
+      '#fff',
+      '#2d8cf0',
+      '#5a7fa8',
     ]);
   });
 
@@ -288,7 +288,7 @@ describe('方案与调色板', () => {
       palette: oneToken('paper', '#010203'),
       appearance: 'light',
     });
-    expect(empty.state.custom[0]!.name).toBe('青港 副本');
+    expect(empty.state.custom[0]!.name).toBe('原件 副本');
   });
 
   it('删掉正选中的方案回到默认方案；删别的不动当前选择', () => {

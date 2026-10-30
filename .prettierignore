@@ -26,3 +26,7 @@ pnpm-lock.yaml
 .codex/
 .trellis/
 AGENTS.md
+
+# vendored 的网站来源原件与字形数据：按字节存，改一个字符就对不上 SHA-256
+apps/desktop/src/renderer/console/site-ui/upstream/
+apps/desktop/src/renderer/console/site-ui/assets/

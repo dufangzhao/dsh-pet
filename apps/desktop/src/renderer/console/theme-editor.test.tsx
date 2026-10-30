@@ -49,7 +49,7 @@ describe('界面配色一节', () => {
     const html = renderToStaticMarkup(<ThemeEditor />);
     expect(html.match(/class="theme-scheme[" ]/g)).toHaveLength(3);
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
-    expect(html).toContain('青港');
+    expect(html).toContain('原件');
     expect(html).toContain('陶烬');
     expect(html).toContain('内置');
   });

@@ -1,9 +1,9 @@
 /**
- * 原创「界面配色」工作室：挡位、方案板、36 格调色与保存条，全部画在 pet bench 板面上。
+ * 「界面配色」工作室：挡位、方案板、36 格调色与保存条。
  *
- * 这不是旧 ThemeEditor 换层皮：这里没有滑轨、没有 pk-sheet、没有旧胶囊。画的是这套控件自己的
- * 板扣、抽屉标签字段与状态牌；读写仍走 theme.ts 那一份本机记录，草稿与写入行为在
- * original-ui/theme-controller.ts，和旧编辑器共用同一个控制器，不会有第二份「再点一次确认删除」。
+ * 板件一律来自 site-ui 的那套网站来源控件（按钮、输入栏、瓦片、抽屉段、状态牌、回执）；
+ * 这一层只改「用哪件控件」，不动读写：记录仍是 theme.ts 那一份，草稿与写入行为仍在
+ * original-ui/theme-controller.ts，共用同一个控制器，不会有第二份「再点一次确认删除」。
  *
  * 挂载 = 从记录起稿；卸载 = 撤掉试色（控制器 dispose）。换版式不写第二份存储。
  */
@@ -18,7 +18,11 @@ import {
   schemeSwatches,
   type ThemeMode,
 } from '../theme.js';
-import { Button, Disclosure, Field, Notice, Status, Tile } from './kit.js';
+import { SourceButton as Button } from '../site-ui/source-button.js';
+import { SourceDisclosure as Disclosure } from '../site-ui/source-panel.js';
+import { SourceField as Field, SourceInput as Input } from '../site-ui/source-input.js';
+import { SourceNotice as Notice, SourceStatus as Status } from '../site-ui/source-status.js';
+import { SourceTile as Tile } from '../site-ui/source-tile.js';
 import { SCHEME_NAME_MAX, createThemeStudioController } from './theme-controller.js';
 
 import './theme-studio.css';
@@ -150,9 +154,9 @@ export function OriginalThemeStudio({
           <div className="theme-studio__fields">
             <Field label={TEXT.schemeName} hint={TEXT.nameHint}>
               {({ inputId, describedBy, invalid }) => (
-                <input
+                <Input
                   id={inputId}
-                  className="pb-input"
+
                   type="text"
                   value={name}
                   maxLength={SCHEME_NAME_MAX}
@@ -180,8 +184,10 @@ export function OriginalThemeStudio({
                       >
                         {({ inputId, describedBy }) => (
                           <span className="theme-studio__token-row">
+                            {/* 原生取色井：来源包里没有这一件，保留系统的色井样子，只跟着这一栏的密度。 */}
                             <input
                               type="color"
+                              className="theme-studio__picker"
                               value={value}
                               aria-label={TEXT.pickerAria(token.label)}
                               data-testid={'theme-token-' + token.key + '-picker'}
@@ -189,9 +195,9 @@ export function OriginalThemeStudio({
                                 controller.editToken(token.key, event.target.value, 'picker')
                               }
                             />
-                            <input
+                            <Input
                               id={inputId}
-                              className="pb-input theme-studio__hex"
+                              className="theme-studio__hex"
                               type="text"
                               value={hexText[token.key] ?? value.toUpperCase()}
                               maxLength={7}

@@ -1,0 +1,480 @@
+/**
+ * 网站来源控件：Uiverse.io by andrew-demchenk0 的三件原件（MIT，见 upstream/LICENSE.md）。
+ *
+ *   button  https://uiverse.io/andrew-demchenk0/afraid-squid-51      sha256 11cfdd7d…
+ *   input   https://uiverse.io/andrew-demchenk0/polite-stingray-67   sha256 02e77dbd…
+ *   switch  https://uiverse.io/andrew-demchenk0/empty-penguin-100    sha256 4a3cb08d…
+ *
+ * 原件的记号一个都不动：2px var(--main-color) 描边 + 4px 4px 硬偏移投影 + 按下投影归零并
+ * translate(3px, 3px)；button/input 5px 圆角；switch 100px 圆轨 + 30px 圆钮 + 钮上的
+ * on/off 字样 + checked 时整轨 translateX(-32px)、钮 translateX(32px)、0.3s 过渡；
+ * 字号 17px/15px 与 600 字重、input 的 5px 10px 内边距、::placeholder 的 0.8 透明度。
+ * token 名沿用上游那六个（--main-color / --font-color / --font-color-sub / --bg-color /
+ * --bg-color-alt / --input-focus，外加 switch 的 --input-out-of-focus），只是收到
+ * .su-source 这一层声明一次，控件继续按名字取值。
+ *
+ * 只改四类，逐条在 adoption-map.md 里对账：
+ *   1) 选择器加 .su- 命名空间（原件的 .button/.input/.switch 是全局名，会和设置台撞）；
+ *   2) 固定宽度改上下限（窄窗与折叠侧栏不溢出）；
+ *   3) 语义与可访问性：原生 label、disabled、busy、error、键盘焦点环；
+ *   4) 配色归属：默认就是网站原件那一份；用户存过自定义方案时改用同一条主题记录的值。
+ *
+ * 黑夜那一档是**我们的适配**（上游这三件只有浅底一份），材质不变，只反着配色。
+ */
+
+/* ---------------------------------------------------------------- 配色归属 */
+
+/*
+ * 六个 token 的唯一来源：本机那条主题记录。
+ *
+ * 默认那条记录就是网站原件那一套（theme.ts 里第一个内置方案「原件」：白底、#323232 描边与文字、
+ * #666 补充、#2d8cf0 焦点、#ccc 未开轨），所以正常入口没自定义时看到的正是网站上那一份，
+ * 而配色工作室草稿起点读的是同一份值——界面与记录不会各说一套。
+ * 换了内置方案、选了自定义方案、正在试色或撤销试色，全都由 theme.ts 落地的同一批变量说话，
+ * 这一层不需要分支，也不需要第二份状态。var() 的兜底写成上游字面量，只防「一个字都没落地」
+ * 那两种情形（首帧、测试进程），不是第二套配色。
+ *
+ * 黑夜不是上游有的：这三件只发布过浅底一份。黑夜那一档由「原件」方案自己的 dark 变体给，
+ * 是本站对这一套的适配，界面上说「黑夜」，来源说明里也这么写。
+ */
+.su-source {
+  --bg-color: var(--sheet, #fff);
+  --bg-color-alt: var(--ink-dim, #666);
+  --font-color: var(--ink, #323232);
+  --font-color-sub: var(--ink-dim, #666);
+  --main-color: var(--line-strong, #323232);
+  --input-focus: var(--accent, #2d8cf0);
+  --input-out-of-focus: var(--line, #ccc);
+
+  /* 原件没有的三格状态色：同一份材质里只加这三格（描边与投影的形状都不变） */
+  --su-error: var(--danger, #b42318);
+  --su-ok: var(--ok, #17734f);
+  --su-warn: var(--warn, #8a5a12);
+  --su-off: var(--ink-dim, #6b7280);
+
+  /* 原件没写自己用什么字族：跟着设置台本机那一套，不新带字型 */
+  font-family: var(--pb-font-body, inherit);
+}
+
+/* -------------------------------------------------------------------- Button */
+
+/* afraid-squid-51 原件：.button */
+.su-button {
+  min-width: 120px; /* 原件是 width: 120px 的固定宽；改成下限，长一点的中文动作词不被截 */
+  max-width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--font-color);
+  cursor: pointer;
+  padding: 0 12px; /* 原件靠固定宽排字；改上下限后要一点内边距托住文字 */
+}
+
+.su-button:active:not(:disabled) {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+/** 设置台里多的是次要动作：同一件控件换密度，不加第二种形状。 */
+.su-button--small {
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 15px; /* 原件 input 那一档字号，不新引入第三种 */
+}
+
+/* 轻重三档：借 stupid-seahorse-9 选中那一格的说法（整块填 --main-color、字变 --bg-color）；
+   quiet 关掉描边与投影只留字；danger 用同一份材质里的状态色。几何与位移不改。 */
+.su-button--primary {
+  background-color: var(--main-color);
+  color: var(--bg-color);
+}
+
+.su-button--quiet {
+  min-width: 0;
+  padding: 0 4px;
+  border-color: transparent;
+  box-shadow: none;
+  font-size: 15px;
+}
+
+.su-button--quiet:active:not(:disabled) {
+  transform: none;
+  color: var(--input-focus);
+}
+
+.su-button--danger {
+  border-color: var(--su-error);
+  box-shadow: 4px 4px var(--su-error);
+  color: var(--su-error);
+}
+
+.su-button--danger:active:not(:disabled) {
+  box-shadow: 0px 0px var(--su-error);
+}
+
+/* 下面三档原件也没有（Uiverse 单件不含 disabled/busy/键盘焦点），只做同一材质的延伸。 */
+.su-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.su-button[data-busy='true'] {
+  /* 等待中就停在原件按下去那一格：不转圈、不加新记号，「正在…」由调用方写在文字里。 */
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+  cursor: default;
+}
+
+.su-button:focus-visible {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 2px;
+}
+
+/* 名称块：上游只给了中间那一栏，名称、补充与失败原因是本站按同一材质补的延伸。 */
+
+.su-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.su-field__label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+}
+
+.su-field__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--font-color-sub);
+}
+
+.su-field__error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--su-error);
+}
+
+/* 按钮里那枚图形的位置：原件这一件只有文字，加一枚 vendored 字形时不改动它的描边与投影。 */
+.su-button__lead {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+/* --------------------------------------------------------------------- Input */
+
+/* polite-stingray-67 原件：.input */
+.su-input {
+  width: 100%; /* 原件是固定 200px：改成跟着这一栏走，板面其余数值一个不动 */
+  max-width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+  padding: 5px 10px;
+  outline: none;
+}
+
+.su-input::placeholder {
+  color: var(--font-color-sub);
+  opacity: 0.8;
+}
+
+.su-input:focus {
+  border: 2px solid var(--input-focus);
+}
+
+.su-input:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+/* 原件没有错误态：沿用它唯一的说法——换描边色，不加新形状。 */
+.su-input[aria-invalid='true'] {
+  border: 2px solid var(--su-error);
+  box-shadow: 4px 4px var(--su-error);
+}
+
+/* -------------------------------------------------------------------- Switch */
+
+/* empty-penguin-100 原件：label.switch（70×36，自身右移一格，好让整轨 -32px 不越界） */
+.su-switch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  width: 70px;
+  height: 36px;
+  transform: translateX(calc(50% - 10px));
+}
+
+/**
+ * 集成时多出来的一层：原件那一格是独立摆的，这里要在旁边写一句名称。
+ * 位移余量仍由 .su-switch 自己的 translateX 承担，一处一物，不私改原件。
+ */
+.su-switch-row {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.su-switch__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--font-color);
+}
+
+.su-switch__hint {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--font-color-sub);
+}
+
+/* 原件：.toggle { opacity: 0 }。集成时它是全场唯一的 checkbox，名字来自同一块 label 里的文字。 */
+.su-toggle {
+  opacity: 0;
+}
+
+/* 原件：.slider */
+.su-slider {
+  box-sizing: border-box;
+  border-radius: 100px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--input-out-of-focus);
+  transition: 0.3s;
+}
+
+/* 原件：.slider:before —— 钮上是「off」这一句字，是这套记号的一部分，不换成图标。
+   content 走 var() 只为把字面量换成中文；默认值就是原件那两个词。 */
+.su-slider::before {
+  content: var(--su-switch-off-text, 'off');
+  box-sizing: border-box;
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  left: 2px;
+  bottom: 1px;
+  border: 2px solid var(--main-color);
+  border-radius: 100px;
+  background-color: var(--bg-color);
+  color: var(--main-color);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 25px;
+  transition: 0.3s;
+}
+
+.su-toggle:checked + .su-slider {
+  background-color: var(--input-focus);
+  transform: translateX(-32px);
+}
+
+.su-toggle:checked + .su-slider::before {
+  content: var(--su-switch-on-text, 'on');
+  transform: translateX(32px);
+}
+
+/* 原件把 checkbox 藏起来且没有任何键盘提示：这一条只让焦点看得见，形状与颜色都取自原件。 */
+.su-toggle:focus-visible + .su-slider {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 2px;
+}
+
+.su-toggle:disabled + .su-slider {
+  cursor: default;
+  opacity: 0.45;
+}
+
+/* -------------------------------------------------------------------- Radio */
+
+/* stupid-seahorse-9 原件：.wrapper / .option / .input / .btn / .span（三态选项组）
+ * https://uiverse.io/andrew-demchenk0/stupid-seahorse-9  sha256 d0b435d6…
+ * 原件的 250px 宽、36px 高、34px 端圆、里面 80.5×28 一格顶边左各 2px、50px 圆角、
+ * 选中时整格填 --main-color 且字变白，全部照抄；只有宽度与格宽改成按选项数分配。 */
+/* 集成时多出来的一层：上游那三格没有可访问的组名，这里用原生 fieldset/legend 说一句。 */
+.su-choice-field {
+  /* 普通块级：宽度由所在那一栏给。grid/inline-grid 都还是按内容（那 250px）算外部尺寸，
+     实测会把子条顶到栏宽之外（侧栏可用 230，子条仍 250，右端与 4px 投影一起被裁）。 */
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  /* 右与下各留 4px：原件那条 4px 硬投影落在自己盒子里，不越出侧栏边界 */
+  margin: 0;
+  padding: 0 4px 4px 0;
+  border: 0;
+}
+
+.su-choice-field__legend {
+  padding: 0;
+  /* 组名与那一横条之间的一句间隔（原来靠 grid 的 gap，现在块级就自己写） */
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+}
+
+.su-choice {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  width: 250px; /* 原件这一横条是 250px：栏够宽就照原件，栏窄就跟着栏走（侧栏可用约 230px） */
+  min-width: 0;
+  max-width: 100%;
+  height: 36px;
+  background-color: var(--bg-color);
+  border: 2px solid var(--main-color);
+  border-radius: 34px;
+  box-shadow: 4px 4px var(--main-color);
+}
+
+.su-choice__option {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  top: 2px;
+  left: 2px;
+  width: 80.5px; /* 原件三格一列的格宽；flex 之下只当下限参考 */
+  height: 28px;
+}
+
+.su-choice__input {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  appearance: none;
+  cursor: pointer;
+  margin: 0;
+}
+
+.su-choice__btn {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.su-choice__span {
+  color: var(--font-color);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.su-choice__input:checked + .su-choice__btn {
+  background-color: var(--main-color);
+}
+
+.su-choice__input:checked + .su-choice__btn .su-choice__span {
+  color: var(--bg-color);
+}
+
+.su-choice__input:focus-visible + .su-choice__btn {
+  outline: 2px solid var(--input-focus);
+  outline-offset: 2px;
+}
+
+.su-choice__input:disabled + .su-choice__btn {
+  opacity: 0.45;
+}
+
+.su-choice__input:disabled {
+  cursor: default;
+}
+
+/* -------------------------------------------------------------------- Panel */
+
+/* afraid-cougar-9 的卡片材质（只取材质，不移植它的登录/翻转业务）
+ * https://uiverse.io/andrew-demchenk0/afraid-cougar-9  sha256 791fda9e…
+ * 2px 描边 + 5px 圆角 + 4px 4px 硬投影 + 20px 内边距 + 20px 间隔，全按原件。 */
+.su-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding: 20px;
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+}
+
+/* 原件那张卡的题目是 25px/900 的一句宣传字；段落题目在设置台里说不上话，
+   所以用原件自己的 17px/600 那一档字，材质不变。 */
+.su-panel__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--font-color);
+}
+
+.su-panel__note {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--font-color-sub);
+}
+
+.su-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: baseline;
+}
+
+.su-panel__aside {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------------ 减弱动效 */
+
+@media (prefers-reduced-motion: reduce) {
+  .su-button:active:not(:disabled),
+  .su-button[data-busy='true'] {
+    transform: none;
+  }
+
+  .su-slider,
+  .su-slider::before,
+  .su-toggle:checked + .su-slider,
+  .su-toggle:checked + .su-slider::before {
+    transition: none;
+  }
+}

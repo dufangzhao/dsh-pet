@@ -1,0 +1,420 @@
+{
+  "purpose": "Byte-exact website-sourced pack used by console/site-ui. Never import from .trellis/tasks (task dirs get archived and move).",
+  "retrievedAt": "2026-10-30",
+  "controls": {
+    "author": "andrew-demchenk0",
+    "authorUrl": "https://uiverse.io/andrew-demchenk0",
+    "basis": "andrew-demchenk0 Uiverse control vocabulary (white surface, 2px #323232 outline, 4px 4px hard offset shadow, press-translate)",
+    "license": {
+      "spdx": "MIT",
+      "holder": "Uiverse.io",
+      "copyrightLine": "Copyright (c) 2023 Uiverse.io",
+      "licenseFile": "galaxy/LICENSE.md",
+      "vendoredFile": "upstream/LICENSE.md"
+    },
+    "upstream": {
+      "repository": "https://github.com/uiverse-io/galaxy",
+      "revision": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "revisionUrl": "https://github.com/uiverse-io/galaxy/commit/adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "tarballSha256": "1185545d18507404af8037fbac09eaf3b2f8071090d8a7eb8934a80627dab4da",
+      "retrievalMethod": "single authenticated-free tarball download of the pinned revision; files copied byte-for-byte from the extracted tree"
+    },
+    "sharedTokens": {
+      "note": "Not identical per file — each control declares only the properties it uses. Common to all five:",
+      "--bg-color": "#fff",
+      "--main-color": "#323232"
+    },
+    "sharedGeometry": {
+      "border": "2px solid var(--main-color)",
+      "radius": "5px (pills: 34px/50px/100px variants)",
+      "surface": "var(--bg-color) #fff",
+      "restShadow": "box-shadow: 4px 4px var(--main-color)",
+      "press": "box-shadow: 0px 0px + transform: translate(3px, 3px)",
+      "focus": "border-color: var(--input-focus) #2d8cf0",
+      "type": "15-17px / weight 600"
+    },
+    "items": [
+      {
+        "slug": "afraid-squid-51",
+        "category": "Buttons",
+        "role": "button",
+        "tier": "core adopted source component",
+        "permalink": "https://uiverse.io/andrew-demchenk0/afraid-squid-51",
+        "upstreamRepositoryFile": "uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41/Buttons/andrew-demchenk0_afraid-squid-51.html",
+        "vendoredFile": "upstream/Buttons/andrew-demchenk0_afraid-squid-51.html",
+        "bytes": 593,
+        "sha256": "11cfdd7d14b5b7c3268f8baa33298dac310ad81916cc129ee50fe3d30691f7f0",
+        "sha256MatchesManifest": true,
+        "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: animation, button, arrow, submit, confirm */",
+        "externalAssets": false,
+        "adapter": {
+          "reactFile": "source-button.tsx",
+          "cssSelectors": [".su-button", ".su-button--small"],
+          "status": "adopted"
+        }
+      },
+      {
+        "slug": "polite-stingray-67",
+        "category": "Inputs",
+        "role": "input",
+        "tier": "core adopted source component",
+        "permalink": "https://uiverse.io/andrew-demchenk0/polite-stingray-67",
+        "upstreamRepositoryFile": "uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41/Inputs/andrew-demchenk0_polite-stingray-67.html",
+        "vendoredFile": "upstream/Inputs/andrew-demchenk0_polite-stingray-67.html",
+        "bytes": 704,
+        "sha256": "02e77dbd3c0a45d5beff3c249fcc066b1914fb10951dca95983643fc48e7401e",
+        "sha256MatchesManifest": true,
+        "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: input, shadow, password */",
+        "externalAssets": false,
+        "adapter": {
+          "reactFile": "source-input.tsx",
+          "cssSelectors": [".su-input"],
+          "status": "adopted"
+        }
+      },
+      {
+        "slug": "empty-penguin-100",
+        "category": "Toggle-switches",
+        "role": "switch",
+        "tier": "core adopted source component",
+        "permalink": "https://uiverse.io/andrew-demchenk0/empty-penguin-100",
+        "upstreamRepositoryFile": "uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41/Toggle-switches/andrew-demchenk0_empty-penguin-100.html",
+        "vendoredFile": "upstream/Toggle-switches/andrew-demchenk0_empty-penguin-100.html",
+        "bytes": 1527,
+        "sha256": "4a3cb08d7e4684838d47c56aec476432f54f1715bc9ab09d9256dbdd4731c4c7",
+        "sha256MatchesManifest": true,
+        "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: blue, switch, on, off, toggle, text animation, switcher, color, text, toggle switch */",
+        "externalAssets": false,
+        "adapter": {
+          "reactFile": "source-switch.tsx",
+          "cssSelectors": [".su-switch-row", ".su-switch", ".su-toggle", ".su-slider"],
+          "status": "adopted"
+        }
+      },
+      {
+        "slug": "stupid-seahorse-9",
+        "category": "Radio-buttons",
+        "role": "choice (segmented radio group)",
+        "tier": "additionally adopted source component (upstream original, not our design)",
+        "permalink": "https://uiverse.io/andrew-demchenk0/stupid-seahorse-9",
+        "upstreamRepositoryFile": "uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41/Radio-buttons/andrew-demchenk0_stupid-seahorse-9.html",
+        "vendoredFile": "upstream/Radio-buttons/andrew-demchenk0_stupid-seahorse-9.html",
+        "bytes": 1571,
+        "sha256": "d0b435d6c672d2aec197fa54810d5cfd944881263fb6acd65f7e0c75a5262a05",
+        "sha256MatchesManifest": true,
+        "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: radio, select, radio-buttons, options  */",
+        "externalAssets": false,
+        "adapter": {
+          "reactFile": "source-radio.tsx",
+          "cssSelectors": [
+            ".su-choice-field",
+            ".su-choice",
+            ".su-choice__option",
+            ".su-choice__input",
+            ".su-choice__btn",
+            ".su-choice__span"
+          ],
+          "status": "adopted",
+          "note": "选项组（明暗三挡、目录两读法）。保留 250×36 一条、34px 端圆、2px 描边、4px 4px 硬投影、格内 2px 顶边左偏移、50px 圆角、选中整格填 --main-color 且字变 --bg-color；适配：格宽按选项数分、原生 fieldset/legend 给组名、radio 的可访问名称；延伸：键盘焦点环、disabled。"
+        }
+      },
+      {
+        "slug": "afraid-cougar-9",
+        "category": "Forms",
+        "role": "panel/card + square toggle + button + input (composite)",
+        "tier": "additionally adopted source component (upstream original, not our design)",
+        "permalink": "https://uiverse.io/andrew-demchenk0/afraid-cougar-9",
+        "upstreamRepositoryFile": "uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41/Forms/andrew-demchenk0_afraid-cougar-9.html",
+        "vendoredFile": "upstream/Forms/andrew-demchenk0_afraid-cougar-9.html",
+        "bytes": 5321,
+        "sha256": "791fda9edbce04a8e5d6a70279db2851340708074ce3af69fe38ce766192a338",
+        "sha256MatchesManifest": true,
+        "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: 3d, form, sign-up, toggle, animated, login form, toggle switch, log in, sign up form, click animation */",
+        "externalAssets": false,
+        "adapter": {
+          "reactFile": "source-panel.tsx",
+          "cssSelectors": [
+            ".su-panel",
+            ".su-panel__head",
+            ".su-panel__title",
+            ".su-panel__note",
+            ".su-panel__aside"
+          ],
+          "status": "adopted (material only)",
+          "note": "只取那张卡的材质当段落外壳：2px 描边、5px 圆角、4px 4px 硬投影、20px 内边距、20px 间隔。它的登录/注册两行、翻转卡与 flip 业务没有移植。"
+        }
+      }
+    ],
+    "localExtensions": {
+      "rule": "来源包没有的那几件按同一份语法补：2px var(--main-color) 描边、5px 圆角、4px 4px 硬偏移投影、按下 translate(3px,3px) 归零、15px/600 的字；选中态沿用 stupid-seahorse-9 那句「整格填 --main-color、字变 --bg-color」。不引入第二种形状，也不引入新的颜色来源。",
+      "items": [
+        {
+          "name": "按钮轻重三档",
+          "file": "source-button.tsx",
+          "css": [".su-button--primary", ".su-button--quiet", ".su-button--danger"],
+          "from": "primary 借 radio 选中那一格的反色；quiet 关掉描边与投影；danger 用同一材质里的状态色"
+        },
+        {
+          "name": "名称块",
+          "file": "source-input.tsx",
+          "css": [".su-field", ".su-field__label", ".su-field__hint", ".su-field__error"],
+          "from": "上游那一栏用 placeholder 当名称；这里给原生 label/hint/error 与 aria-describedby"
+        },
+        {
+          "name": "状态牌",
+          "file": "source-status.tsx",
+          "css": [".su-status", ".su-status__lamp"],
+          "from": "同一份 2px/5px/4px；色只取 --su-ok/--su-warn/--su-error/--input-focus/--su-off 五格"
+        },
+        {
+          "name": "回执",
+          "file": "source-status.tsx",
+          "css": [".su-notice", ".su-notice__body", ".su-notice__action"],
+          "from": "卡片材质 + 左边一道 6px 色规（这条是本站加的，上游没有）"
+        },
+        {
+          "name": "目录瓦片",
+          "file": "source-tile.tsx",
+          "css": [".su-tile", ".su-tile__head", ".su-tile__name", ".su-tile__note"],
+          "from": "卡片材质 + 原件的按下位移 + radio 的选中反色"
+        },
+        {
+          "name": "抽屉段",
+          "file": "source-panel.tsx",
+          "css": [".su-fold", ".su-fold__summary", ".su-fold__chevron"],
+          "from": "原生 details/summary；箭头那道折笔用同一份 2px 描边，开合沿用原件那句 0.3s"
+        },
+        {
+          "name": "侧栏项",
+          "file": "settings-shell.tsx + source-extensions.css",
+          "css": [".su-nav"],
+          "from": "静时不抢描边，选中那一格按原件反色；窄栏 72px 的折叠位置仍由 settings-shell.css 管"
+        },
+        {
+          "name": "黑夜那一档",
+          "file": "theme.ts（默认方案的 dark 变体）",
+          "css": [],
+          "from": "上游这三件只发布过浅底一份；黑夜是本站对这一套的适配，只反配色，材质与位移不变"
+        },
+        {
+          "name": "菜单浮层",
+          "file": "original-ui/pet-preview.css",
+          "css": [".pet-bench__drawer"],
+          "from": "本站多出来的一层，材质换成来源那一句 2px/5px/4px 硬投影（原来是切角 + 6px 模糊影）"
+        },
+        {
+          "name": "取色井",
+          "file": "original-ui/theme-studio.css",
+          "css": [".theme-studio__token-row input[type=color]"],
+          "from": "原生色井：框与角按同一份材质给（2px 描边、5px 圆角、4px 4px 硬投影）"
+        }
+      ]
+    }
+  },
+  "icons": {
+    "website": "https://www.morphicons.com/",
+    "library": "Tabler",
+    "variant": "outline",
+    "morphicons": {
+      "package": "morphicons",
+      "version": "2.0.2",
+      "license": "MIT",
+      "licenseFile": "assets/MORPHICONS-LICENSE.txt",
+      "importPath": "morphicons/react"
+    },
+    "glyphLicense": "MIT (Paweł Kuna)",
+    "glyphLicenseFile": "assets/TABLER-LICENSE.txt",
+    "revisionFile": "assets/tabler-revision.json",
+    "dataFile": "assets/tabler-icon-data.json",
+    "dataFileSha256": "34bde4256bf143ada73ea21b3733f38d2518e2ee40d7ec856e8543088565496c",
+    "revision": "ed177a085b652fe04ec4f37ced867c94621e7840",
+    "hashSemantics": "SHA-256 of saved raw UTF-8 bytes, including upstream trailing newline",
+    "strokeWidth": 2,
+    "motion": {
+      "integrationPreset": "smooth",
+      "integrationPresetSource": "morphicons SPRING_PRESETS.smooth (zeta = 1.00, critically damped)",
+      "presetShownInWebsiteCapture": "snappy",
+      "note": "Only preset names the library ships are used; no locally invented spring curve."
+    },
+    "websiteEvidence": {
+      "captureImage": "website-tabler-selected.png",
+      "selectedLibrary": "Tabler",
+      "variant": "outline",
+      "strokeWidth": 2,
+      "note": "image stays in the task research dir; app code never imports it"
+    },
+    "items": [
+      {
+        "name": "player-play",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/player-play.svg",
+        "vendoredSvgFile": "assets/icons/player-play.svg",
+        "bytes": 398,
+        "sha256": "e2bff69284f1dc77224c47c03798017206a29d4ef665549db724b0a4534d8e5c",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "player-pause",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/player-pause.svg",
+        "vendoredSvgFile": "assets/icons/player-pause.svg",
+        "bytes": 528,
+        "sha256": "d9be9ab25e52cdcae17def18d41edc0855fa44caa8492cde2b5b8cd085e8c5a6",
+        "sha256MatchesManifest": true,
+        "nodeCount": 2,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "player-stop",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/player-stop.svg",
+        "vendoredSvgFile": "assets/icons/player-stop.svg",
+        "bytes": 447,
+        "sha256": "9ed8cfd7b7cffbc925dae2c28ad5fb5115f3db451511acc47348e01cb862e291",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "microphone",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/microphone.svg",
+        "vendoredSvgFile": "assets/icons/microphone.svg",
+        "bytes": 536,
+        "sha256": "21aacc5c6cc7b28b03a179053a7aaf69eb6d23d333ab4b40504f2873fb07a5f8",
+        "sha256MatchesManifest": true,
+        "nodeCount": 4,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "microphone-off",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/microphone-off.svg",
+        "vendoredSvgFile": "assets/icons/microphone-off.svg",
+        "bytes": 598,
+        "sha256": "5a0c8ae019466ccb4e9c55420b172af2a46480da63b6d098f2c9f3a6056ebef6",
+        "sha256MatchesManifest": true,
+        "nodeCount": 5,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "eye",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/eye.svg",
+        "vendoredSvgFile": "assets/icons/eye.svg",
+        "bytes": 502,
+        "sha256": "45bdbd35bb18e9997a86dad8db6eb90931d1d53884484baf2c65e34d6f6e4f93",
+        "sha256MatchesManifest": true,
+        "nodeCount": 2,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "eye-off",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/eye-off.svg",
+        "vendoredSvgFile": "assets/icons/eye-off.svg",
+        "bytes": 669,
+        "sha256": "7fd56939026b76c23b64597bab2ad0b6aab824eef4e0edd772626126b8b20433",
+        "sha256MatchesManifest": true,
+        "nodeCount": 3,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "sun",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/sun.svg",
+        "vendoredSvgFile": "assets/icons/sun.svg",
+        "bytes": 501,
+        "sha256": "6677490605af8987d55d6e4185b1f6c241eced65b63ccfece68cadb7ce90fbb5",
+        "sha256MatchesManifest": true,
+        "nodeCount": 2,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "moon",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/moon.svg",
+        "vendoredSvgFile": "assets/icons/moon.svg",
+        "bytes": 443,
+        "sha256": "7cabaae40eea65310da478d3cad30b23cf1d7e99adad56378f82824338079668",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "robot",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/robot.svg",
+        "vendoredSvgFile": "assets/icons/robot.svg",
+        "bytes": 632,
+        "sha256": "c42ca8773a82b2bbcfc041fbfef2e207753c9f4e6ab2e5521c173c0497092458",
+        "sha256MatchesManifest": true,
+        "nodeCount": 9,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "shirt",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/shirt.svg",
+        "vendoredSvgFile": "assets/icons/shirt.svg",
+        "bytes": 444,
+        "sha256": "ef988788499b726d3a5b2744a8242aefd64c8801c32016239b138379c788771a",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "message-circle",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/message-circle.svg",
+        "vendoredSvgFile": "assets/icons/message-circle.svg",
+        "bytes": 597,
+        "sha256": "b91882d50b30e3884b289a51c2f1134464844fbd5bb5f61633d2d068db2d57a0",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "puzzle",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/puzzle.svg",
+        "vendoredSvgFile": "assets/icons/puzzle.svg",
+        "bytes": 642,
+        "sha256": "b51d3edacb69bde36e0914ba64998fe47875f25f0699a599a5407adf3ba6d14c",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "shield",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/shield.svg",
+        "vendoredSvgFile": "assets/icons/shield.svg",
+        "bytes": 453,
+        "sha256": "254faf50fe337be66083b5292d7a1d548bb24289a26a3496e367ea341c7869da",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "info-circle",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/info-circle.svg",
+        "vendoredSvgFile": "assets/icons/info-circle.svg",
+        "bytes": 442,
+        "sha256": "48b7dddf34a6b87e93843a42b14781ce01794cf69274c458249ed8bfc01b6e4d",
+        "sha256MatchesManifest": true,
+        "nodeCount": 3,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "layout-dashboard",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/layout-dashboard.svg",
+        "vendoredSvgFile": "assets/icons/layout-dashboard.svg",
+        "bytes": 699,
+        "sha256": "8210661405d0e6b7b5ea671a136c59e3e8fcc5e708a9fa332601bbf4a3d2b91a",
+        "sha256MatchesManifest": true,
+        "nodeCount": 4,
+        "morphiconsAdapter": "site-icons.tsx"
+      },
+      {
+        "name": "activity",
+        "upstreamUrl": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/activity.svg",
+        "vendoredSvgFile": "assets/icons/activity.svg",
+        "bytes": 401,
+        "sha256": "2279e7a64688d1e730e42a7b277792350fbfade1fd3b992ad3971737e88ccde8",
+        "sha256MatchesManifest": true,
+        "nodeCount": 1,
+        "morphiconsAdapter": "site-icons.tsx"
+      }
+    ]
+  },
+  "review": "逐件的来源表、限制与 QA 记录一处维护：qa/site-sourced-controls-review.md（父管）。这份 manifest 只登记来源与接法，不另写第二份说明。"
+}

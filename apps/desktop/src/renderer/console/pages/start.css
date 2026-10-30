@@ -337,3 +337,40 @@
     flex: 1 1 100%;
   }
 }
+/* ---------------------------------------------------------- 源码对照板入口 */
+
+/* 只在这条评审路上出现的一行入口：说明它是评审用的一屏，不是日常操作。 */
+.sc-sourcelink {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pb-s-2) var(--pb-s-3);
+  align-items: baseline;
+  margin: 0 0 var(--pb-s-3) 0;
+  padding: var(--pb-s-2) 0;
+  border-bottom: var(--pb-hairline) solid var(--pb-line);
+}
+
+.sc-sourcelink__button {
+  padding: 2px 8px;
+  border: var(--pb-hairline) solid var(--pb-line-2);
+  border-radius: var(--pb-radius-ctl);
+  background: none;
+  color: var(--pb-ink);
+  font: inherit;
+  font-size: var(--pb-size-micro);
+  cursor: pointer;
+}
+
+.sc-sourcelink__button:hover {
+  border-color: var(--pb-accent);
+}
+
+.sc-sourcelink__button:focus-visible {
+  outline: var(--pb-focus-width) solid var(--pb-focus);
+  outline-offset: var(--pb-focus-gap);
+}
+
+.sc-sourcelink__note {
+  font-size: var(--pb-size-micro);
+  color: var(--pb-ink-dim);
+}

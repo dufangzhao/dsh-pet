@@ -300,83 +300,88 @@ const jadeDawnDark: ThemePalette = {
   'chart-8': '#f2938a',
 };
 
-/** 青港：品牌默认那一套——梅子强调落在蓝灰中性上，纸底与边界跟着 A 的板面令牌走。 */
+/** 默认那一条：网站原件那一套（白天是上游六个 token 的字面量，黑夜是同一份材质的本站适配）。 */
 const slateHarborLight: ThemePalette = {
-  paper: '#eef0f3',
-  'paper-2': '#e4e8ed',
-  sheet: '#f9fafb',
-  'sheet-2': '#f1f4f8',
-  'sheet-3': '#e5e9ef',
-  ink: '#141a22',
-  'ink-soft': '#4b5663',
-  'ink-dim': '#616c78',
-  line: '#d4dae1',
-  'line-2': '#bfc8d2',
-  'line-strong': '#7d8894',
-  accent: '#a23a63',
-  'accent-2': '#7c2748',
-  'on-accent': '#fff2f7',
+  /* 网站原件那一份：Uiverse.io by andrew-demchenk0 的六个 token 落进 36 格。
+     白底、#323232 描边与文字、#666 补充、#2d8cf0 焦点、#ccc 未开轨。
+     分隔不靠底色差，靠原件那句 2px 描边加 4px 硬投影——所以 paper 与 sheet 同白。 */
+  paper: '#fff',
+  'paper-2': '#f7f7f7',
+  sheet: '#fff',
+  'sheet-2': '#f7f7f7',
+  'sheet-3': '#ececec',
+  ink: '#323232',
+  'ink-soft': '#4d4d4d',
+  'ink-dim': '#666',
+  line: '#ccc',
+  'line-2': '#b3b3b3',
+  'line-strong': '#323232',
+  accent: '#2d8cf0',
+  'accent-2': '#1a6fd0',
+  'on-accent': '#fff',
   ok: '#17734f',
   warn: '#8a5a12',
-  danger: '#b03a2f',
-  'ink-blue': '#2f5d8a',
-  violet: '#6a4f9c',
-  'agent-surface': '#f3f4f7',
-  'world-bg': '#eaeef2',
-  'world-ink': '#4b5663',
-  'bubble-bg': '#e2e8f0',
-  'bubble-ink': '#141a22',
-  'tool-result': '#2f5d8a',
+  danger: '#b42318',
+  'ink-blue': '#2d8cf0',
+  violet: '#5a7fa8',
+  'agent-surface': '#f7f7f7',
+  'world-bg': '#f2f2f2',
+  'world-ink': '#323232',
+  'bubble-bg': '#fff',
+  'bubble-ink': '#323232',
+  'tool-result': '#666',
   'chart-hit': '#17734f',
   'chart-miss': '#8a5a12',
-  'chart-output': '#a23a63',
-  'chart-1': '#a23a63',
-  'chart-2': '#2f5d8a',
-  'chart-3': '#17734f',
-  'chart-4': '#8a5a12',
-  'chart-5': '#6a4f9c',
-  'chart-6': '#3f7f86',
-  'chart-7': '#8d99a6',
-  'chart-8': '#b03a2f',
+  'chart-output': '#2d8cf0',
+  'chart-1': '#323232',
+  'chart-2': '#5a7fa8',
+  'chart-3': '#666',
+  'chart-4': '#17734f',
+  'chart-5': '#b42318',
+  'chart-6': '#8a5a12',
+  'chart-7': '#5a7fa8',
+  'chart-8': '#8a8a8a',
 };
 
 const slateHarborDark: ThemePalette = {
-  paper: '#14161b',
-  'paper-2': '#1a1d24',
-  sheet: '#1f232b',
-  'sheet-2': '#262b34',
-  'sheet-3': '#2d333d',
-  ink: '#e9edf3',
-  'ink-soft': '#aeb7c3',
-  'ink-dim': '#8b95a1',
-  line: '#2e343e',
-  'line-2': '#3c4451',
-  'line-strong': '#727c8b',
-  accent: '#e07ba0',
-  'accent-2': '#f0a8c2',
-  'on-accent': '#2a0d18',
+  /* 同一份材质的黑夜档：上游那三件只发布过浅底一份，这一档是本站的适配，
+     只反着配色，2px 描边与 4px 硬投影的说法不变。 */
+  paper: '#17181c',
+  'paper-2': '#1f2024',
+  sheet: '#1f2024',
+  'sheet-2': '#26272c',
+  'sheet-3': '#303136',
+  ink: '#f2f3f5',
+  'ink-soft': '#d5d8dd',
+  'ink-dim': '#a9adb5',
+  line: '#4a4f57',
+  'line-2': '#5a6068',
+  'line-strong': '#f2f3f5',
+  accent: '#2d8cf0',
+  'accent-2': '#6bb3ff',
+  'on-accent': '#0e1622',
   ok: '#6fd0a0',
   warn: '#e0b070',
-  danger: '#ff9b90',
-  'ink-blue': '#7fb4de',
-  violet: '#b6a3e8',
-  'agent-surface': '#20252e',
-  'world-bg': '#1b1f27',
-  'world-ink': '#aeb7c3',
-  'bubble-bg': '#2b3341',
-  'bubble-ink': '#e9edf3',
-  'tool-result': '#7fb4de',
+  danger: '#ff8b80',
+  'ink-blue': '#6bb3ff',
+  violet: '#9db8d6',
+  'agent-surface': '#26272c',
+  'world-bg': '#141518',
+  'world-ink': '#f2f3f5',
+  'bubble-bg': '#1f2024',
+  'bubble-ink': '#f2f3f5',
+  'tool-result': '#a9adb5',
   'chart-hit': '#6fd0a0',
   'chart-miss': '#e0b070',
-  'chart-output': '#e07ba0',
-  'chart-1': '#e07ba0',
-  'chart-2': '#7fb4de',
-  'chart-3': '#6fd0a0',
-  'chart-4': '#e0b070',
-  'chart-5': '#b6a3e8',
-  'chart-6': '#6fc0c9',
-  'chart-7': '#8b95a1',
-  'chart-8': '#ff9b90',
+  'chart-output': '#6bb3ff',
+  'chart-1': '#f2f3f5',
+  'chart-2': '#9db8d6',
+  'chart-3': '#a9adb5',
+  'chart-4': '#6fd0a0',
+  'chart-5': '#ff8b80',
+  'chart-6': '#e0b070',
+  'chart-7': '#9db8d6',
+  'chart-8': '#8a8f98',
 };
 
 /** 陶烬：陶土与玫瑰灰落在暖中性上，读起来像傍晚的灯。 */
@@ -459,8 +464,16 @@ const clayEmberDark: ThemePalette = {
 };
 
 /**
+ * 网站原件那一套：Uiverse.io by andrew-demchenk0 的六个 token 落进 36 格词表。
+ * 浅色那一份是上游字面量（白底、#323232 描边与文字、#666 补充、#2d8cf0 焦点、#ccc 未开轨）；
+ * 黑夜那一份是**本站对这一套的新增适配**——上游这三件只有浅底，这里按同一份材质反着配色。
+ * 它是第一个内置方案，所以没自定义过的机器打开看到的就是网站上那一份，
+ * 而配色工作室的草稿起点也是同一套值：界面与记录各说一套那种事不在这儿的写法里。
+ */
+
+/**
  * 内置方案。**这里的键序就是界面顺序，第一个就是框架默认方案**：
- * 默认取中性蓝灰的青港，不再让整套界面读起来是一片薄荷绿；翠晓留给装扮页那一只的绿色。
+ * 默认取网站原件那一套：界面看到的、配色工作室草稿起点、记录里那条默认值，三者是同一份。
  */
 export const BUILTIN_PALETTES: Readonly<Record<string, Record<ThemeAppearance, ThemePalette>>> = {
   'slate-harbor': { light: slateHarborLight, dark: slateHarborDark },
@@ -474,7 +487,10 @@ export const BUILTIN_SCHEME_IDS: readonly string[] = Object.keys(BUILTIN_PALETTE
 export const DEFAULT_SCHEME_ID: string = BUILTIN_SCHEME_IDS[0] ?? 'slate-harbor';
 
 const SCHEME_TEXT: Readonly<Record<string, { name: string; note: string }>> = {
-  'slate-harbor': { name: '青港', note: '瓷灰底、梅子信号色、铜扣边界（默认方案）' },
+  'slate-harbor': {
+    name: '原件',
+    note: '白底、#323232 描边、#2d8cf0 焦点（默认方案，网站来源那一套）',
+  },
   'jade-dawn': { name: '翠晓', note: '低饱和苔青与晨灰，不是旧薄荷' },
   'clay-ember': { name: '陶烬', note: '石墨底与炉口琥珀，暖色只落在动作上' },
 };
