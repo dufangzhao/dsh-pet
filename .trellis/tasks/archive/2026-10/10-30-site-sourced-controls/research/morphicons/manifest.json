@@ -1,0 +1,157 @@
+{
+  "website": "https://www.morphicons.com/",
+  "selectedLibrary": "Tabler",
+  "variant": "outline",
+  "morphiconsVersion": "2.0.2",
+  "morphiconsLicense": "MIT",
+  "glyphRevision": "ed177a085b652fe04ec4f37ced867c94621e7840",
+  "glyphLicense": "MIT (Paweł Kuna)",
+  "motionPreset": "smooth",
+  "strokeWidth": 2,
+  "icons": [
+    {
+      "name": "player-play",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/player-play.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/player-play.svg",
+      "nodeCount": 1,
+      "sha256": "e2bff69284f1dc77224c47c03798017206a29d4ef665549db724b0a4534d8e5c",
+      "bytes": 398
+    },
+    {
+      "name": "player-pause",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/player-pause.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/player-pause.svg",
+      "nodeCount": 2,
+      "sha256": "d9be9ab25e52cdcae17def18d41edc0855fa44caa8492cde2b5b8cd085e8c5a6",
+      "bytes": 528
+    },
+    {
+      "name": "player-stop",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/player-stop.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/player-stop.svg",
+      "nodeCount": 1,
+      "sha256": "9ed8cfd7b7cffbc925dae2c28ad5fb5115f3db451511acc47348e01cb862e291",
+      "bytes": 447
+    },
+    {
+      "name": "microphone",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/microphone.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/microphone.svg",
+      "nodeCount": 4,
+      "sha256": "21aacc5c6cc7b28b03a179053a7aaf69eb6d23d333ab4b40504f2873fb07a5f8",
+      "bytes": 536
+    },
+    {
+      "name": "microphone-off",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/microphone-off.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/microphone-off.svg",
+      "nodeCount": 5,
+      "sha256": "5a0c8ae019466ccb4e9c55420b172af2a46480da63b6d098f2c9f3a6056ebef6",
+      "bytes": 598
+    },
+    {
+      "name": "eye",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/eye.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/eye.svg",
+      "nodeCount": 2,
+      "sha256": "45bdbd35bb18e9997a86dad8db6eb90931d1d53884484baf2c65e34d6f6e4f93",
+      "bytes": 502
+    },
+    {
+      "name": "eye-off",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/eye-off.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/eye-off.svg",
+      "nodeCount": 3,
+      "sha256": "7fd56939026b76c23b64597bab2ad0b6aab824eef4e0edd772626126b8b20433",
+      "bytes": 669
+    },
+    {
+      "name": "sun",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/sun.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/sun.svg",
+      "nodeCount": 2,
+      "sha256": "6677490605af8987d55d6e4185b1f6c241eced65b63ccfece68cadb7ce90fbb5",
+      "bytes": 501
+    },
+    {
+      "name": "moon",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/moon.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/moon.svg",
+      "nodeCount": 1,
+      "sha256": "7cabaae40eea65310da478d3cad30b23cf1d7e99adad56378f82824338079668",
+      "bytes": 443
+    },
+    {
+      "name": "robot",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/robot.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/robot.svg",
+      "nodeCount": 9,
+      "sha256": "c42ca8773a82b2bbcfc041fbfef2e207753c9f4e6ab2e5521c173c0497092458",
+      "bytes": 632
+    },
+    {
+      "name": "shirt",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/shirt.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/shirt.svg",
+      "nodeCount": 1,
+      "sha256": "ef988788499b726d3a5b2744a8242aefd64c8801c32016239b138379c788771a",
+      "bytes": 444
+    },
+    {
+      "name": "message-circle",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/message-circle.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/message-circle.svg",
+      "nodeCount": 1,
+      "sha256": "b91882d50b30e3884b289a51c2f1134464844fbd5bb5f61633d2d068db2d57a0",
+      "bytes": 597
+    },
+    {
+      "name": "puzzle",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/puzzle.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/puzzle.svg",
+      "nodeCount": 1,
+      "sha256": "b51d3edacb69bde36e0914ba64998fe47875f25f0699a599a5407adf3ba6d14c",
+      "bytes": 642
+    },
+    {
+      "name": "shield",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/shield.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/shield.svg",
+      "nodeCount": 1,
+      "sha256": "254faf50fe337be66083b5292d7a1d548bb24289a26a3496e367ea341c7869da",
+      "bytes": 453
+    },
+    {
+      "name": "info-circle",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/info-circle.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/info-circle.svg",
+      "nodeCount": 3,
+      "sha256": "48b7dddf34a6b87e93843a42b14781ce01794cf69274c458249ed8bfc01b6e4d",
+      "bytes": 442
+    },
+    {
+      "name": "layout-dashboard",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/layout-dashboard.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/layout-dashboard.svg",
+      "nodeCount": 4,
+      "sha256": "8210661405d0e6b7b5ea671a136c59e3e8fcc5e708a9fa332601bbf4a3d2b91a",
+      "bytes": 699
+    },
+    {
+      "name": "activity",
+      "path": ".trellis/tasks/10-30-site-sourced-controls/research/morphicons/icons/activity.svg",
+      "url": "https://raw.githubusercontent.com/tabler/tabler-icons/ed177a085b652fe04ec4f37ced867c94621e7840/icons/outline/activity.svg",
+      "nodeCount": 1,
+      "sha256": "2279e7a64688d1e730e42a7b277792350fbfade1fd3b992ad3971737e88ccde8",
+      "bytes": 401
+    }
+  ],
+  "websiteEvidence": {
+    "image": "website-tabler-selected.png",
+    "selectedLibrary": "Tabler",
+    "variant": "outline",
+    "presetShownInCapture": "snappy",
+    "strokeWidth": 2
+  },
+  "hashSemantics": "SHA-256 of saved raw UTF-8 bytes, including upstream trailing newline"
+}

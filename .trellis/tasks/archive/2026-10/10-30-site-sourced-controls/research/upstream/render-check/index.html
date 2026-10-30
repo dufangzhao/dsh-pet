@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Raw upstream — andrew-demchenk0 Uiverse basis (verbatim, CSS-only, offline)</title>
+<style>
+ body{margin:0;padding:24px;background:#f4f4f5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#323232}
+ h1{font-size:15px;margin:0 0 4px} p{font-size:12px;margin:0 0 20px;color:#666;max-width:70ch}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px;align-items:start}
+ figure{margin:0;border:1px solid #d4d4d8;background:#fff}
+ figcaption{font-size:10.5px;padding:6px 10px;border-bottom:1px solid #e4e4e7;color:#666;line-height:1.5}
+ iframe{border:0;width:100%;display:block;background:#fff}
+</style></head>
+<body>
+<h1>Raw upstream, unmodified — the five adopted components, rendered from the retained byte-exact sources</h1>
+<p>Each frame's <code>srcdoc</code> is the published file inserted verbatim (only <code>&amp;</code> and <code>&quot;</code> escaped for the attribute; decoding reproduces the original SHA-256 shown in its caption). No adaptation, no product UI, no network assets, no external files — open this page offline and it renders. Source: <code>uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41</code>, MIT (Copyright (c) 2023 Uiverse.io), author andrew-demchenk0. The switch's fixed layout offset and the composite panel's own padding are upstream behaviour, left untouched.</p>
+<div class="grid">
+<figure><figcaption>button — <b>afraid-squid-51</b> · srcdoc decodes byte-exactly to SHA-256 <code>11cfdd7d14b5b7c3…</code></figcaption><iframe height="200" title="afraid-squid-51" srcdoc="<button class=&quot;button&quot;>
+  Let`s go →
+</button>
+<style>
+/* From Uiverse.io by andrew-demchenk0 - Tags: animation, button, arrow, submit, confirm */
+.button {
+  --font-color: #323232;
+  --bg-color: #fff;
+  --main-color: #323232;
+  width: 120px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--font-color);
+  cursor: pointer;
+}
+
+.button:active {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+</style>
+"></iframe></figure>
+<figure><figcaption>input — <b>polite-stingray-67</b> · srcdoc decodes byte-exactly to SHA-256 <code>02e77dbd3c0a45d5…</code></figcaption><iframe height="200" title="polite-stingray-67" srcdoc="<input type=&quot;password&quot; placeholder=&quot;Password&quot; name=&quot;text&quot; class=&quot;input&quot;>
+<style>
+/* From Uiverse.io by andrew-demchenk0 - Tags: input, shadow, password */
+.input {
+  --input-focus: #2d8cf0;
+  --font-color: #323232;
+  --font-color-sub: #666;
+  --bg-color: #fff;
+  --main-color: #323232;
+  width: 200px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+  padding: 5px 10px;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--font-color-sub);
+  opacity: 0.8;
+}
+
+.input:focus {
+  border: 2px solid var(--input-focus);
+}
+</style>
+"></iframe></figure>
+<figure><figcaption>switch — <b>empty-penguin-100</b> · srcdoc decodes byte-exactly to SHA-256 <code>4a3cb08d7e468483…</code></figcaption><iframe height="200" title="empty-penguin-100" srcdoc="<label class=&quot;switch&quot;>
+  <input checked=&quot;&quot; type=&quot;checkbox&quot; class=&quot;toggle&quot;>
+  <span class=&quot;slider&quot;></span>
+  <span class=&quot;card-side&quot;></span>
+</label>
+<style>
+/* From Uiverse.io by andrew-demchenk0 - Tags: blue, switch, on, off, toggle, text animation, switcher, color, text, toggle switch */
+.switch {
+  --input-focus: #2d8cf0;
+  --bg-color: #fff;
+  --bg-color-alt: #666;
+  --main-color: #323232;
+  --input-out-of-focus: #ccc;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  width: 70px;
+  height: 36px;
+  transform: translateX(calc(50% - 10px));
+}
+
+.toggle {
+  opacity: 0;
+}
+
+.slider {
+  box-sizing: border-box;
+  border-radius: 100px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--input-out-of-focus);
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: &quot;off&quot;;
+  box-sizing: border-box;
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  left: 2px;
+  bottom: 1px;
+  border: 2px solid var(--main-color);
+  border-radius: 100px;
+  background-color: var(--bg-color);
+  color: var(--main-color);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 25px;
+  transition: 0.3s;
+}
+
+.toggle:checked + .slider {
+  background-color: var(--input-focus);
+  transform: translateX(-32px);
+}
+
+.toggle:checked + .slider:before {
+  content: &quot;on&quot;;
+  transform: translateX(32px);
+}
+</style>
+"></iframe></figure>
+<figure><figcaption>choice (adopted source) — <b>stupid-seahorse-9</b> · srcdoc decodes byte-exactly to SHA-256 <code>d0b435d6c672d2ae…</code></figcaption><iframe height="200" title="stupid-seahorse-9" srcdoc="<div class=&quot;wrapper&quot;>
+  <div class=&quot;option&quot;>
+    <input class=&quot;input&quot; type=&quot;radio&quot; name=&quot;btn&quot; value=&quot;option1&quot; checked=&quot;&quot;>
+    <div class=&quot;btn&quot;>
+      <span class=&quot;span&quot;>Option</span>
+    </div>
+  </div>
+  <div class=&quot;option&quot;>
+    <input class=&quot;input&quot; type=&quot;radio&quot; name=&quot;btn&quot; value=&quot;option2&quot;>
+    <div class=&quot;btn&quot;>
+      <span class=&quot;span&quot;>Option</span>
+    </div>  </div>
+  <div class=&quot;option&quot;>
+    <input class=&quot;input&quot; type=&quot;radio&quot; name=&quot;btn&quot; value=&quot;option3&quot;>
+    <div class=&quot;btn&quot;>
+      <span class=&quot;span&quot;>Option</span>
+    </div>  
+  </div>
+</div>
+
+<style>
+/* From Uiverse.io by andrew-demchenk0 - Tags: radio, select, radio-buttons, options  */
+.wrapper {
+  --font-color-dark: #323232;
+  --font-color-light: #FFF;
+  --bg-color: #fff;
+  --main-color: #323232;
+  position: relative;
+  width: 250px;
+  height: 36px;
+  background-color: var(--bg-color);
+  border: 2px solid var(--main-color);
+  border-radius: 34px;
+  display: flex;
+  flex-direction: row;
+  box-shadow: 4px 4px var(--main-color);
+}
+
+.option {
+  width: 80.5px;
+  height: 28px;
+  position: relative;
+  top: 2px;
+  left: 2px;
+}
+
+.input {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  appearance: none;
+  cursor: pointer;
+}
+
+.btn {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.span {
+  color: var(--font-color-dark);
+}
+
+.input:checked + .btn {
+  background-color: var(--main-color);
+}
+
+.input:checked + .btn .span {
+  color: var(--font-color-light);
+}
+</style>
+"></iframe></figure>
+<figure><figcaption>panel composite (adopted source) — <b>afraid-cougar-9</b> · srcdoc decodes byte-exactly to SHA-256 <code>791fda9edbce04a8…</code></figcaption><iframe height="430" title="afraid-cougar-9" srcdoc="<div class=&quot;wrapper&quot;>
+        <div class=&quot;card-switch&quot;>
+            <label class=&quot;switch&quot;>
+               <input type=&quot;checkbox&quot; class=&quot;toggle&quot;>
+               <span class=&quot;slider&quot;></span>
+               <span class=&quot;card-side&quot;></span>
+               <div class=&quot;flip-card__inner&quot;>
+                  <div class=&quot;flip-card__front&quot;>
+                     <div class=&quot;title&quot;>Log in</div>
+                     <form class=&quot;flip-card__form&quot; action=&quot;&quot;>
+                        <input class=&quot;flip-card__input&quot; name=&quot;email&quot; placeholder=&quot;Email&quot; type=&quot;email&quot;>
+                        <input class=&quot;flip-card__input&quot; name=&quot;password&quot; placeholder=&quot;Password&quot; type=&quot;password&quot;>
+                        <button class=&quot;flip-card__btn&quot;>Let`s go!</button>
+                     </form>
+                  </div>
+                  <div class=&quot;flip-card__back&quot;>
+                     <div class=&quot;title&quot;>Sign up</div>
+                     <form class=&quot;flip-card__form&quot; action=&quot;&quot;>
+                        <input class=&quot;flip-card__input&quot; placeholder=&quot;Name&quot; type=&quot;name&quot;>
+                        <input class=&quot;flip-card__input&quot; name=&quot;email&quot; placeholder=&quot;Email&quot; type=&quot;email&quot;>
+                        <input class=&quot;flip-card__input&quot; name=&quot;password&quot; placeholder=&quot;Password&quot; type=&quot;password&quot;>
+                        <button class=&quot;flip-card__btn&quot;>Confirm!</button>
+                     </form>
+                  </div>
+               </div>
+            </label>
+        </div>   
+   </div>
+<style>
+/* From Uiverse.io by andrew-demchenk0 - Tags: 3d, form, sign-up, toggle, animated, login form, toggle switch, log in, sign up form, click animation */
+.wrapper {
+  --input-focus: #2d8cf0;
+  --font-color: #323232;
+  --font-color-sub: #666;
+  --bg-color: #fff;
+  --bg-color-alt: #666;
+  --main-color: #323232;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: center; */
+}
+/* switch card */
+.switch {
+  transform: translateY(-200px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  width: 50px;
+  height: 20px;
+}
+
+.card-side::before {
+  position: absolute;
+  content: 'Log in';
+  left: -70px;
+  top: 0;
+  width: 100px;
+  text-decoration: underline;
+  color: var(--font-color);
+  font-weight: 600;
+}
+
+.card-side::after {
+  position: absolute;
+  content: 'Sign up';
+  left: 70px;
+  top: 0;
+  width: 100px;
+  text-decoration: none;
+  color: var(--font-color);
+  font-weight: 600;
+}
+
+.toggle {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-colorcolor);
+  transition: 0.3s;
+}
+
+.slider:before {
+  box-sizing: border-box;
+  position: absolute;
+  content: &quot;&quot;;
+  height: 20px;
+  width: 20px;
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  left: -2px;
+  bottom: 2px;
+  background-color: var(--bg-color);
+  box-shadow: 0 3px 0 var(--main-color);
+  transition: 0.3s;
+}
+
+.toggle:checked + .slider {
+  background-color: var(--input-focus);
+}
+
+.toggle:checked + .slider:before {
+  transform: translateX(30px);
+}
+
+.toggle:checked ~ .card-side:before {
+  text-decoration: none;
+}
+
+.toggle:checked ~ .card-side:after {
+  text-decoration: underline;
+}
+
+/* card */ 
+
+.flip-card__inner {
+  width: 300px;
+  height: 350px;
+  position: relative;
+  background-color: transparent;
+  perspective: 1000px;
+    /* width: 100%;
+    height: 100%; */
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.toggle:checked ~ .flip-card__inner {
+  transform: rotateY(180deg);
+}
+
+.toggle:checked ~ .flip-card__front {
+  box-shadow: none;
+}
+
+.flip-card__front, .flip-card__back {
+  padding: 20px;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: lightgrey;
+  gap: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+}
+
+.flip-card__back {
+  width: 100%;
+  transform: rotateY(180deg);
+}
+
+.flip-card__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.title {
+  margin: 20px 0 20px 0;
+  font-size: 25px;
+  font-weight: 900;
+  text-align: center;
+  color: var(--main-color);
+}
+
+.flip-card__input {
+  width: 250px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+  padding: 5px 10px;
+  outline: none;
+}
+
+.flip-card__input::placeholder {
+  color: var(--font-color-sub);
+  opacity: 0.8;
+}
+
+.flip-card__input:focus {
+  border: 2px solid var(--input-focus);
+}
+
+.flip-card__btn:active, .button-confirm:active {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+.flip-card__btn {
+  margin: 20px 0 20px 0;
+  width: 120px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--font-color);
+  cursor: pointer;
+} 
+</style>
+"></iframe></figure>
+</div>
+</body></html>

@@ -1,0 +1,142 @@
+{
+  "basis": "andrew-demchenk0 Uiverse control vocabulary (white surface, 2px #323232 outline, 4px 4px hard offset shadow, press-translate)",
+  "author": "andrew-demchenk0",
+  "authorUrl": "https://uiverse.io/andrew-demchenk0",
+  "license": {
+    "spdx": "MIT",
+    "holder": "Uiverse.io",
+    "copyrightLine": "Copyright (c) 2023 Uiverse.io",
+    "licenseFile": "galaxy/LICENSE.md"
+  },
+  "upstream": {
+    "repository": "https://github.com/uiverse-io/galaxy",
+    "revision": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+    "revisionUrl": "https://github.com/uiverse-io/galaxy/commit/adbd2adde0a299a3956ea288fb444ec01891ca41",
+    "retrievedRevision": "main @ adbd2adde0a299a3956ea288fb444ec01891ca41 (repo pushed_at 2024-09-02T14:32:05Z)",
+    "tarballUrl": "https://codeload.github.com/uiverse-io/galaxy/tar.gz/adbd2adde0a299a3956ea288fb444ec01891ca41",
+    "tarballSha256": "1185545d18507404af8037fbac09eaf3b2f8071090d8a7eb8934a80627dab4da",
+    "retrievalMethod": "single authenticated-free tarball download of the pinned revision; files copied byte-for-byte from the extracted tree",
+    "retrievalDate": "2026-10-30"
+  },
+  "sharedTokens": {
+    "note": "Not identical per file — each control declares only the properties it uses. Common to all five:",
+    "--bg-color": "#fff",
+    "--main-color": "#323232"
+  },
+  "sharedGeometry": {
+    "border": "2px solid var(--main-color)",
+    "radius": "5px (pills: 34px/50px/100px variants)",
+    "surface": "var(--bg-color) #fff",
+    "restShadow": "box-shadow: 4px 4px var(--main-color)",
+    "press": "box-shadow: 0px 0px + transform: translate(3px, 3px)",
+    "focus": "border-color: var(--input-focus) #2d8cf0",
+    "type": "15-17px / weight 600"
+  },
+  "components": [
+    {
+      "cat": "Buttons",
+      "slug": "afraid-squid-51",
+      "role": "button",
+      "tier": "core adopted source component",
+      "file": "raw/Buttons/andrew-demchenk0_afraid-squid-51.html",
+      "bytes": 593,
+      "sha256": "11cfdd7d14b5b7c3268f8baa33298dac310ad81916cc129ee50fe3d30691f7f0",
+      "permalink": "https://uiverse.io/andrew-demchenk0/afraid-squid-51",
+      "repoPath": "Buttons/andrew-demchenk0_afraid-squid-51.html",
+      "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: animation, button, arrow, submit, confirm */",
+      "tags": "animation, button, arrow, submit, confirm",
+      "externalAssets": false,
+      "inlineSvg": false
+    },
+    {
+      "cat": "Inputs",
+      "slug": "polite-stingray-67",
+      "role": "input",
+      "tier": "core adopted source component",
+      "file": "raw/Inputs/andrew-demchenk0_polite-stingray-67.html",
+      "bytes": 704,
+      "sha256": "02e77dbd3c0a45d5beff3c249fcc066b1914fb10951dca95983643fc48e7401e",
+      "permalink": "https://uiverse.io/andrew-demchenk0/polite-stingray-67",
+      "repoPath": "Inputs/andrew-demchenk0_polite-stingray-67.html",
+      "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: input, shadow, password */",
+      "tags": "input, shadow, password",
+      "externalAssets": false,
+      "inlineSvg": false
+    },
+    {
+      "cat": "Toggle-switches",
+      "slug": "empty-penguin-100",
+      "role": "switch",
+      "tier": "core adopted source component",
+      "file": "raw/Toggle-switches/andrew-demchenk0_empty-penguin-100.html",
+      "bytes": 1527,
+      "sha256": "4a3cb08d7e4684838d47c56aec476432f54f1715bc9ab09d9256dbdd4731c4c7",
+      "permalink": "https://uiverse.io/andrew-demchenk0/empty-penguin-100",
+      "repoPath": "Toggle-switches/andrew-demchenk0_empty-penguin-100.html",
+      "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: blue, switch, on, off, toggle, text animation, switcher, color, text, toggle switch */",
+      "tags": "blue, switch, on, off, toggle, text animation, switcher, color, text, toggle switch",
+      "externalAssets": false,
+      "inlineSvg": false
+    },
+    {
+      "cat": "Radio-buttons",
+      "slug": "stupid-seahorse-9",
+      "role": "choice (segmented radio group)",
+      "tier": "additionally adopted source component (upstream original, not our design)",
+      "file": "raw/Radio-buttons/andrew-demchenk0_stupid-seahorse-9.html",
+      "bytes": 1571,
+      "sha256": "d0b435d6c672d2aec197fa54810d5cfd944881263fb6acd65f7e0c75a5262a05",
+      "permalink": "https://uiverse.io/andrew-demchenk0/stupid-seahorse-9",
+      "repoPath": "Radio-buttons/andrew-demchenk0_stupid-seahorse-9.html",
+      "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: radio, select, radio-buttons, options  */",
+      "tags": "radio, select, radio-buttons, options",
+      "externalAssets": false,
+      "inlineSvg": false
+    },
+    {
+      "cat": "Forms",
+      "slug": "afraid-cougar-9",
+      "role": "panel/card + square toggle + button + input (composite)",
+      "tier": "additionally adopted source component (upstream original, not our design)",
+      "file": "raw/Forms/andrew-demchenk0_afraid-cougar-9.html",
+      "bytes": 5321,
+      "sha256": "791fda9edbce04a8e5d6a70279db2851340708074ce3af69fe38ce766192a338",
+      "permalink": "https://uiverse.io/andrew-demchenk0/afraid-cougar-9",
+      "repoPath": "Forms/andrew-demchenk0_afraid-cougar-9.html",
+      "attributionComment": "/* From Uiverse.io by andrew-demchenk0 - Tags: 3d, form, sign-up, toggle, animated, login form, toggle switch, log in, sign up form, click animation */",
+      "tags": "3d, form, sign-up, toggle, animated, login form, toggle switch, log in, sign up form, click animation",
+      "externalAssets": false,
+      "inlineSvg": false
+    }
+  ],
+  "verification": {
+    "siteAccess": "uiverse.io returns HTTP 403 Cloudflare to plain HTTP clients and to a normal headless browser from this environment; not bypassed (see VERIFICATION.md)",
+    "primarySourceEvidence": "pinned official archive uiverse-io/galaxy@adbd2adde0a299a3956ea288fb444ec01891ca41",
+    "pageCaptures": "page-captures/ (2 Cloudflare-block proofs, 3 pinned-revision blob captures, 1 offline render proof)",
+    "localRender": "render-check/index.html — 5/5 frames paint offline, CSS-only, no external assets, srcdoc decodes byte-exact to each raw SHA-256",
+    "byteExactVsUpstream": true,
+    "retrievedDate": "2026-10-30",
+    "frozen": true
+  },
+  "commonGrammar": {
+    "outline": "border: 2px solid var(--main-color) [#323232]",
+    "restShadow": "box-shadow: 4px 4px var(--main-color) (hard offset, zero blur)",
+    "press": "box-shadow: 0px 0px + transform: translate(3px, 3px)",
+    "accent": "#2d8cf0 (input, switch, panel; not the button)",
+    "type": "15-17px / weight 600",
+    "motion": "transition: 0.3s"
+  },
+  "roleSpecificGeometry": {
+    "afraid-squid-51": "120x40, radius 5px",
+    "polite-stingray-67": "200x40, radius 5px",
+    "empty-penguin-100": "70x36 track radius 100px, 30px knob",
+    "stupid-seahorse-9": "250x36 group radius 34px, options radius 50px",
+    "afraid-cougar-9": "panel radius 5px, square 20px knob radius 5px"
+  },
+  "coherenceClaim": "Same author, same border/shadow/colour/press grammar. NOT an official design system; NOT a uniform radius; role-specific geometry is preserved as published.",
+  "localExtensionsNotSourced": [
+    "state feedback (loading / error / disabled) on the adopted grammar",
+    "menu / option list",
+    "Start page and settings-frame app-shell layout"
+  ]
+}
