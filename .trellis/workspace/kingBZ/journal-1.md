@@ -374,3 +374,36 @@ User explicitly changed the stage to standalone front-end preview only. Preserve
 ### Next Steps
 
 - None - task complete
+
+
+## Session 12: Expand persona preview with habits and template tabs
+
+**Date**: 2026-11-01
+**Task**: Expand persona preview with habits and template tabs
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Persisted preview-first goal: whole UI must be confirmed before real desktop/backend migration. Read-only audited current Coopanion habits and prompt sources. Persona now has two keyboard-operable top tabs: habits with behavior/display/sound (default speaking sound inside sound), and independently authored personality templates with local per-template drafts/new/copy/reset. Sound audition independently synthesized after explicit click. Browser full preview16scenes and persona6panel-size scenes plus draft/hover-limit/custom/audio interaction checks pass, no remote requests/storage. Actual application/backend diff0. Overall preview task stays open for user refinement; goal paused at this review stage, no migration enabled.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f5a9693` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
