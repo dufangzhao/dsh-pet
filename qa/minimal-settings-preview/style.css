@@ -1228,3 +1228,104 @@ dialog::backdrop {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* -------------------------------------------------------------------- 人设 */
+/* 顶部两个子栏在同一页里切换：不是第二套侧栏，也不占侧栏的位置。 */
+.persona-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.persona-tab {
+  position: relative;
+  padding: 10px 2px 11px;
+  border: 0;
+  background: none;
+  color: var(--ink-quiet);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.persona-tab:hover {
+  color: var(--ink);
+}
+.persona-tab[aria-selected='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.persona-tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.persona-tab:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.persona-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+[data-persona-custom][hidden] {
+  display: none;
+}
+.persona-panel[hidden] {
+  display: none;
+}
+/* 滑杆一行一项：标签、滑杆、读数。 */
+.persona-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.persona-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.persona-range__label {
+  flex: 0 0 62px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.persona-range__value {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--ink-quiet);
+  text-align: right;
+}
+/* 音效六类：两列开关，不为每个开关单开一张卡。 */
+.persona-switches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 26px;
+}
+.persona-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  cursor: pointer;
+}
+.persona-switch__label {
+  flex: 0 0 68px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.persona-frame-rate {
+  flex: 0 1 260px;
+}
+@media (max-width: 720px) {
+  .persona-switches {
+    grid-template-columns: 1fr;
+  }
+}

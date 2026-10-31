@@ -1468,126 +1468,773 @@
           <section class="page" data-page="persona" id="page-persona" hidden>
             <div class="page__head">
               <h2 class="page__title">人设</h2>
+              <span class="row__value" id="persona-draft-state" role="status">本地草稿</span>
             </div>
 
-            <article class="card" id="persona-card" data-persona-state="draft">
-              <div class="card__head">
-                <h3 class="card__title">基本设定</h3>
-                <span class="row__value" id="persona-draft-state" role="status">未保存</span>
-              </div>
-              <div class="card__body">
-                <div class="field-row">
-                  <div class="field field--grow">
-                    <label class="field__label" for="persona-pet-name">它的名字</label>
-                    <div class="inputForm">
-                      <input
-                        class="input"
-                        id="persona-pet-name"
-                        data-pref="petName"
-                        type="text"
-                        maxlength="40"
-                        value="小蓝"
-                        autocomplete="off"
-                        spellcheck="false"
-                      />
+            <div class="persona-tabs" role="tablist" aria-label="人设设置">
+              <button
+                type="button"
+                class="persona-tab"
+                role="tab"
+                id="persona-tab-habits"
+                aria-selected="true"
+                aria-controls="persona-habits"
+                tabindex="0"
+                data-persona-tab="habits"
+              >
+                习惯设置
+              </button>
+              <button
+                type="button"
+                class="persona-tab"
+                role="tab"
+                id="persona-tab-templates"
+                aria-selected="false"
+                aria-controls="persona-templates"
+                tabindex="-1"
+                data-persona-tab="templates"
+              >
+                人格模板
+              </button>
+            </div>
+
+            <div
+              class="persona-panel"
+              role="tabpanel"
+              id="persona-habits"
+              data-persona-panel="habits"
+              aria-labelledby="persona-tab-habits"
+            >
+              <article class="card" id="persona-card" data-persona-state="draft">
+                <div class="card__head">
+                  <h3 class="card__title">通用</h3>
+                </div>
+                <div class="card__body">
+                  <div class="field-row">
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-pet-name">它的名字</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="persona-pet-name"
+                          data-pref="petName"
+                          type="text"
+                          maxlength="40"
+                          value="小蓝"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                      </div>
+                    </div>
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-user-name">称呼你</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="persona-user-name"
+                          data-pref="userName"
+                          type="text"
+                          maxlength="40"
+                          value="你"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div class="field field--grow">
-                    <label class="field__label" for="persona-user-name">称呼你</label>
-                    <div class="inputForm">
-                      <input
-                        class="input"
-                        id="persona-user-name"
-                        data-pref="userName"
-                        type="text"
-                        maxlength="40"
-                        value="你"
-                        autocomplete="off"
-                        spellcheck="false"
-                      />
+
+                  <div class="field">
+                    <span class="field__label" id="persona-language-label">回复语言</span>
+                    <div
+                      class="segmented"
+                      role="radiogroup"
+                      aria-labelledby="persona-language-label"
+                    >
+                      <label class="segment"
+                        ><input
+                          type="radio"
+                          name="replyLanguage"
+                          data-pref="replyLanguage"
+                          value="zh-CN"
+                          checked
+                        /><span>简体中文</span></label
+                      >
+                      <label class="segment"
+                        ><input
+                          type="radio"
+                          name="replyLanguage"
+                          data-pref="replyLanguage"
+                          value="en"
+                        /><span>English</span></label
+                      >
                     </div>
                   </div>
                 </div>
+              </article>
 
-                <div class="field">
-                  <span class="field__label" id="persona-language-label">回复语言</span>
-                  <div class="segmented" role="radiogroup" aria-labelledby="persona-language-label">
-                    <label class="segment"
-                      ><input
-                        type="radio"
-                        name="replyLanguage"
-                        data-pref="replyLanguage"
-                        value="zh-CN"
-                        checked
-                      /><span>简体中文</span></label
+              <article class="card" id="persona-behavior-card">
+                <div class="card__head">
+                  <h3 class="card__title">行为与互动</h3>
+                </div>
+                <div class="card__body">
+                  <div class="field-row">
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-roam">走动</label>
+                      <div class="inputForm">
+                        <select class="select" id="persona-roam" data-pref="roam">
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="free"><span class="opt__name">常走动</span></option>
+                          <option value="calm" selected>
+                            <span class="opt__name">多待着</span>
+                          </option>
+                          <option value="off"><span class="opt__name">不乱动</span></option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-wake">回应模式</label>
+                      <div class="inputForm">
+                        <select class="select" id="persona-wake" data-pref="wake">
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="none"><span class="opt__name">安静</span></option>
+                          <option value="poke" selected><span class="opt__name">默认</span></option>
+                          <option value="all"><span class="opt__name">积极</span></option>
+                          <option value="custom"><span class="opt__name">自定义…</span></option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-self">自主配置权限</label>
+                      <div class="inputForm">
+                        <select class="select" id="persona-self" data-pref="self">
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="off"><span class="opt__name">禁止</span></option>
+                          <option value="default" selected>
+                            <span class="opt__name">默认</span>
+                          </option>
+                          <option value="any"><span class="opt__name">任意</span></option>
+                          <option value="custom"><span class="opt__name">自定义…</span></option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field" data-persona-custom="wake" hidden>
+                    <span class="field__label">直接回应的互动</span>
+                    <div class="persona-switches" role="group" aria-label="自定义回应互动">
+                      <label class="persona-switch"
+                        ><span class="persona-switch__label">戳一下</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="wakePoke" checked /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">摸头</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="wakePat" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">甩出去</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="wakeThrow" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">拎起放下</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="wakeDrop" /><i
+                            aria-hidden="true"
+                          ></i></span
+                      ></label>
+                    </div>
+                  </div>
+                  <div class="field" data-persona-custom="self" hidden>
+                    <span class="field__label">可自行调整</span>
+                    <div class="persona-switches" role="group" aria-label="自定义可直接调整的项目">
+                      <label class="persona-switch"
+                        ><span class="persona-switch__label">形象</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfFigure" checked /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">配色</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfPalette" checked /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">走动</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfRoam" checked /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">呼噜时长</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfSnore" checked /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">大小</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfSize" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">气泡尺寸</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfBubble" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">字体尺寸</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfFont" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">音效</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfSound" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">夜间模式</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfTheme" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">悬停按钮</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfHover" /><i
+                            aria-hidden="true"
+                          ></i></span></label
+                      ><label class="persona-switch"
+                        ><span class="persona-switch__label">称呼</span
+                        ><span class="switch"
+                          ><input type="checkbox" data-pref="selfUser" /><i
+                            aria-hidden="true"
+                          ></i></span
+                      ></label>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <span class="field__label" id="persona-hover-label">悬停按钮</span>
+                    <div
+                      class="choices"
+                      role="group"
+                      aria-labelledby="persona-hover-label"
+                      data-pref-group="hover"
                     >
-                    <label class="segment"
-                      ><input
-                        type="radio"
-                        name="replyLanguage"
-                        data-pref="replyLanguage"
-                        value="en"
-                      /><span>English</span></label
-                    >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="chat" checked /><span
+                          class="choice__name"
+                          >打字</span
+                        ></label
+                      >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="voice" checked /><span
+                          class="choice__name"
+                          >语音输入</span
+                        ></label
+                      >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="roam" /><span
+                          class="choice__name"
+                          >走动</span
+                        ></label
+                      >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="theme" /><span
+                          class="choice__name"
+                          >夜间模式</span
+                        ></label
+                      >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="sound" /><span
+                          class="choice__name"
+                          >音效</span
+                        ></label
+                      >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="dress" /><span
+                          class="choice__name"
+                          >装扮</span
+                        ></label
+                      >
+                      <label class="choice"
+                        ><input type="checkbox" name="hover" value="hide" /><span
+                          class="choice__name"
+                          >隐藏桌宠</span
+                        ></label
+                      >
+                    </div>
+                  </div>
+
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">双击打开打字框</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="doubleClickTyping" /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
                   </div>
                 </div>
+              </article>
 
-                <div class="field">
-                  <span class="field__label" id="persona-style-label">说话风格</span>
-                  <div class="segmented" role="radiogroup" aria-labelledby="persona-style-label">
-                    <label class="segment"
-                      ><input type="radio" name="style" data-pref="style" value="quiet" /><span
-                        >安静</span
-                      ></label
-                    >
-                    <label class="segment"
-                      ><input
-                        type="radio"
-                        name="style"
-                        data-pref="style"
-                        value="natural"
-                        checked
-                      /><span>默认</span></label
-                    >
-                    <label class="segment"
-                      ><input type="radio" name="style" data-pref="style" value="lively" /><span
-                        >活泼</span
-                      ></label
-                    >
+              <article class="card" id="persona-display-card">
+                <div class="card__head">
+                  <h3 class="card__title">显示</h3>
+                </div>
+                <div class="card__body">
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">状态气泡</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="statusBubble" checked /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">输入气泡</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="saidBubble" checked /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">全屏时自动隐藏</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="hideInFullscreen" /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">记住位置</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="rememberPosition" /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                  </div>
+
+                  <div class="persona-ranges">
+                    <div class="persona-range">
+                      <label class="persona-range__label" for="persona-bubble-font">字体尺寸</label>
+                      <input
+                        class="slider"
+                        type="range"
+                        id="persona-bubble-font"
+                        data-pref="bubbleFontSize"
+                        min="80"
+                        max="160"
+                        step="5"
+                        value="100"
+                      />
+                      <output
+                        class="persona-range__value"
+                        for="persona-bubble-font"
+                        data-value-for="bubbleFontSize"
+                        data-unit="%"
+                        >100%</output
+                      >
+                    </div>
+                    <div class="persona-range">
+                      <label class="persona-range__label" for="persona-bubble-speed"
+                        >气泡速度</label
+                      >
+                      <input
+                        class="slider"
+                        type="range"
+                        id="persona-bubble-speed"
+                        data-pref="bubbleSpeed"
+                        min="50"
+                        max="200"
+                        step="10"
+                        value="100"
+                      />
+                      <output
+                        class="persona-range__value"
+                        for="persona-bubble-speed"
+                        data-value-for="bubbleSpeed"
+                        data-unit="%"
+                        >100%</output
+                      >
+                    </div>
+                    <div class="persona-range">
+                      <label class="persona-range__label" for="persona-glow">外发光</label>
+                      <input
+                        class="slider"
+                        type="range"
+                        id="persona-glow"
+                        data-pref="glow"
+                        min="0"
+                        max="16"
+                        step="1"
+                        value="7"
+                      />
+                      <output
+                        class="persona-range__value"
+                        for="persona-glow"
+                        data-value-for="glow"
+                        data-unit=" px"
+                        >7 px</output
+                      >
+                    </div>
+                  </div>
+
+                  <div class="field-row">
+                    <div class="field persona-frame-rate">
+                      <label class="field__label" for="persona-frame-rate">帧率</label>
+                      <div class="inputForm">
+                        <select class="select" id="persona-frame-rate" data-pref="frameRate">
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="60" selected><span class="opt__name">60 帧</span></option>
+                          <option value="120"><span class="opt__name">120 帧</span></option>
+                          <option value="144"><span class="opt__name">144 帧</span></option>
+                          <option value="unlimited"><span class="opt__name">不限</span></option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">帧率锁定</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="lockFps" /><i aria-hidden="true"></i
+                      ></span>
+                    </label>
                   </div>
                 </div>
+              </article>
 
-                <div class="field">
-                  <label class="field__label" for="persona-prompt">人设正文</label>
-                  <div class="inputForm" data-multiline="true">
-                    <textarea
-                      class="input"
-                      id="persona-prompt"
-                      data-pref="personaPrompt"
-                      data-maxlength="16384"
-                      maxlength="16384"
-                      rows="8"
-                      spellcheck="false"
-                    >
-你是桌面上的桌宠，说话简短、温和，先听我说完。</textarea>
+              <article class="card" id="persona-sound-card">
+                <div class="card__head">
+                  <h3 class="card__title">音效</h3>
+                </div>
+                <div class="card__body">
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">播放音效</span></span>
+                      <span class="row__value">
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundEnabled" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </span>
+                    </label>
                   </div>
-                  <div class="row__value">
-                    <span
-                      data-show="persona-prompt-count"
-                      data-count-for="personaPrompt"
-                      data-count-max="16384"
-                      >23 / 16384 字符</span
+
+                  <div class="field" data-sound-dependent="master">
+                    <span class="field__label" id="persona-sound-kinds-label">分类</span>
+                    <div
+                      class="persona-switches"
+                      role="group"
+                      aria-labelledby="persona-sound-kinds-label"
                     >
+                      <label class="persona-switch">
+                        <span class="persona-switch__label">动作</span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundMove" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="persona-switch">
+                        <span class="persona-switch__label">互动</span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundTouch" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="persona-switch">
+                        <span class="persona-switch__label">表情</span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundFace" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="persona-switch">
+                        <span class="persona-switch__label">打呼噜</span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundSnore" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="persona-switch">
+                        <span class="persona-switch__label">说话</span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundTalk" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="persona-switch">
+                        <span class="persona-switch__label">按钮与提示</span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="soundUi" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="persona-ranges" data-sound-dependent="master">
+                    <div class="persona-range">
+                      <label class="persona-range__label" for="persona-snore">呼噜时长</label>
+                      <input
+                        class="slider"
+                        type="range"
+                        id="persona-snore"
+                        data-pref="snoreSeconds"
+                        min="0"
+                        max="30"
+                        step="1"
+                        value="0"
+                      />
+                      <output
+                        class="persona-range__value"
+                        for="persona-snore"
+                        data-value-for="snoreSeconds"
+                        data-unit=" 秒"
+                        >0 秒</output
+                      >
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label class="field__label" for="persona-voice">说话声</label>
+                    <div class="model-inline">
+                      <div class="inputForm">
+                        <select class="select" id="persona-voice" data-pref="speakingSound">
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="builtin" selected>
+                            <span class="opt__name">内置默认</span>
+                          </option>
+                          <option value="soft"><span class="opt__name">柔和</span></option>
+                          <option value="silent"><span class="opt__name">静音</span></option>
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn--compact"
+                        data-persona-action="preview-sound"
+                      >
+                        试听
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">念出气泡文字</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="speechEnabled" /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                  </div>
+
+                  <div class="field-row" data-speech-dependent="speech">
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-pitch-level">音高</label>
+                      <div class="inputForm">
+                        <select
+                          class="select"
+                          id="persona-pitch-level"
+                          data-pref="speechPitchLevel"
+                        >
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="low"><span class="opt__name">低</span></option>
+                          <option value="mid" selected><span class="opt__name">中</span></option>
+                          <option value="high"><span class="opt__name">高</span></option>
+                          <option value="custom"><span class="opt__name">自定义…</span></option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-speed-level">语速</label>
+                      <div class="inputForm">
+                        <select
+                          class="select"
+                          id="persona-speed-level"
+                          data-pref="speechSpeedLevel"
+                        >
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="low"><span class="opt__name">低</span></option>
+                          <option value="mid" selected><span class="opt__name">中</span></option>
+                          <option value="high"><span class="opt__name">高</span></option>
+                          <option value="custom"><span class="opt__name">自定义…</span></option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="persona-ranges" data-speech-dependent="speech">
+                    <div class="persona-range">
+                      <label class="persona-range__label" for="persona-pitch">音高</label>
+                      <input
+                        class="slider"
+                        type="range"
+                        id="persona-pitch"
+                        data-pref="speechPitch"
+                        min="200"
+                        max="700"
+                        step="10"
+                        value="400"
+                      />
+                      <output
+                        class="persona-range__value"
+                        for="persona-pitch"
+                        data-value-for="speechPitch"
+                        data-unit=" Hz"
+                        >400 Hz</output
+                      >
+                    </div>
+                    <div class="persona-range">
+                      <label class="persona-range__label" for="persona-speed">语速</label>
+                      <input
+                        class="slider"
+                        type="range"
+                        id="persona-speed"
+                        data-pref="speechSpeed"
+                        min="6"
+                        max="20"
+                        step="1"
+                        value="13"
+                      />
+                      <output
+                        class="persona-range__value"
+                        for="persona-speed"
+                        data-value-for="speechSpeed"
+                        data-unit=" 音节/秒"
+                        >13 音节/秒</output
+                      >
+                    </div>
                   </div>
                 </div>
+              </article>
+            </div>
 
-                <div class="card__foot">
-                  <button type="button" class="btn btn--primary" data-preview-action="persona-save">
-                    保存
-                  </button>
+            <div
+              class="persona-panel"
+              role="tabpanel"
+              id="persona-templates"
+              data-persona-panel="templates"
+              aria-labelledby="persona-tab-templates"
+              hidden
+            >
+              <article class="card" id="persona-template-card">
+                <div class="card__head">
+                  <h3 class="card__title">人格模板</h3>
                 </div>
-              </div>
-            </article>
+                <div class="card__body">
+                  <div class="field-row">
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-template-select">模板</label>
+                      <div class="inputForm">
+                        <select
+                          class="select"
+                          id="persona-template-select"
+                          data-pref="personaTemplate"
+                        >
+                          <button type="button" class="select__trigger">
+                            <selectedcontent class="select__selected"></selectedcontent>
+                            <span class="select__arrow" aria-hidden="true"></span>
+                          </button>
+                          <option value="default" selected>
+                            <span class="opt__name">默认</span>
+                          </option>
+                          <option value="warm"><span class="opt__name">温柔陪伴</span></option>
+                          <option value="lively"><span class="opt__name">活力伙伴</span></option>
+                          <option value="rational"><span class="opt__name">理性助手</span></option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="field field--grow">
+                      <label class="field__label" for="persona-template-name">模板名</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="persona-template-name"
+                          data-pref="personaTemplateName"
+                          type="text"
+                          maxlength="40"
+                          value="默认"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label class="field__label" for="persona-prompt">人格提示词</label>
+                    <div class="inputForm" data-multiline="true">
+                      <textarea
+                        class="input"
+                        id="persona-prompt"
+                        data-pref="personaPrompt"
+                        data-maxlength="16384"
+                        maxlength="16384"
+                        rows="8"
+                        placeholder="写下这个模板的人格提示词。"
+                        spellcheck="false"
+                      ></textarea>
+                    </div>
+                    <div class="row__value">
+                      <span data-count-for="personaPrompt" data-count-max="16384">0 / 16384</span>
+                    </div>
+                  </div>
+
+                  <div class="card__foot">
+                    <button type="button" class="btn" data-persona-action="new">新建</button>
+                    <button type="button" class="btn" data-persona-action="copy">复制</button>
+                    <button type="button" class="btn" data-persona-action="reset">重置</button>
+                    <button type="button" class="btn btn--primary" data-persona-action="save">
+                      保存模板
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
           </section>
 
           <section class="page" data-page="conversation" id="page-conversation" hidden>

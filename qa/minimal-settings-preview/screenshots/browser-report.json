@@ -174,15 +174,106 @@
             "id": "persona-pet-name",
             "left": 311,
             "right": 696,
-            "top": 241,
-            "bottom": 289
+            "top": 300,
+            "bottom": 348
           },
           {
             "id": "persona-user-name",
             "left": 734,
             "right": 1119,
-            "top": 241,
-            "bottom": 289
+            "top": 300,
+            "bottom": 348
+          },
+          {
+            "id": "persona-roam",
+            "left": 299,
+            "right": 563,
+            "top": 563,
+            "bottom": 611
+          },
+          {
+            "id": "persona-wake",
+            "left": 581,
+            "right": 845,
+            "top": 563,
+            "bottom": 611
+          },
+          {
+            "id": "persona-self",
+            "left": 863,
+            "right": 1127,
+            "top": 563,
+            "bottom": 611
+          },
+          {
+            "id": "persona-bubble-font",
+            "left": 372,
+            "right": 712,
+            "top": 1227.75,
+            "bottom": 1231.75
+          },
+          {
+            "id": "persona-bubble-speed",
+            "left": 372,
+            "right": 712,
+            "top": 1259.25,
+            "bottom": 1263.25
+          },
+          {
+            "id": "persona-glow",
+            "left": 372,
+            "right": 712,
+            "top": 1290.75,
+            "bottom": 1294.75
+          },
+          {
+            "id": "persona-frame-rate",
+            "left": 299,
+            "right": 557,
+            "top": 1348,
+            "bottom": 1396
+          },
+          {
+            "id": "persona-snore",
+            "left": 372,
+            "right": 712,
+            "top": 1773.75,
+            "bottom": 1777.75
+          },
+          {
+            "id": "persona-voice",
+            "left": 299,
+            "right": 1051,
+            "top": 1831,
+            "bottom": 1879
+          },
+          {
+            "id": "persona-pitch-level",
+            "left": 299,
+            "right": 704,
+            "top": 1989.5,
+            "bottom": 2037.5
+          },
+          {
+            "id": "persona-speed-level",
+            "left": 722,
+            "right": 1127,
+            "top": 1989.5,
+            "bottom": 2037.5
+          },
+          {
+            "id": "persona-pitch",
+            "left": 372,
+            "right": 712,
+            "top": 2064.25,
+            "bottom": 2068.25
+          },
+          {
+            "id": "persona-speed",
+            "left": 372,
+            "right": 712,
+            "top": 2095.75,
+            "bottom": 2099.75
           }
         ],
         "images": [
@@ -770,15 +861,106 @@
             "id": "persona-pet-name",
             "left": 143,
             "right": 457,
-            "top": 237,
-            "bottom": 285
+            "top": 296,
+            "bottom": 344
           },
           {
             "id": "persona-user-name",
             "left": 495,
             "right": 809,
-            "top": 237,
-            "bottom": 285
+            "top": 296,
+            "bottom": 344
+          },
+          {
+            "id": "persona-roam",
+            "left": 131,
+            "right": 465,
+            "top": 559,
+            "bottom": 607
+          },
+          {
+            "id": "persona-wake",
+            "left": 483,
+            "right": 817,
+            "top": 559,
+            "bottom": 607
+          },
+          {
+            "id": "persona-self",
+            "left": 131,
+            "right": 817,
+            "top": 651.5,
+            "bottom": 699.5
+          },
+          {
+            "id": "persona-bubble-font",
+            "left": 204,
+            "right": 544,
+            "top": 1316.25,
+            "bottom": 1320.25
+          },
+          {
+            "id": "persona-bubble-speed",
+            "left": 204,
+            "right": 544,
+            "top": 1347.75,
+            "bottom": 1351.75
+          },
+          {
+            "id": "persona-glow",
+            "left": 204,
+            "right": 544,
+            "top": 1379.25,
+            "bottom": 1383.25
+          },
+          {
+            "id": "persona-frame-rate",
+            "left": 131,
+            "right": 389,
+            "top": 1436.5,
+            "bottom": 1484.5
+          },
+          {
+            "id": "persona-snore",
+            "left": 204,
+            "right": 544,
+            "top": 1862.25,
+            "bottom": 1866.25
+          },
+          {
+            "id": "persona-voice",
+            "left": 131,
+            "right": 741,
+            "top": 1919.5,
+            "bottom": 1967.5
+          },
+          {
+            "id": "persona-pitch-level",
+            "left": 131,
+            "right": 465,
+            "top": 2078,
+            "bottom": 2126
+          },
+          {
+            "id": "persona-speed-level",
+            "left": 483,
+            "right": 817,
+            "top": 2078,
+            "bottom": 2126
+          },
+          {
+            "id": "persona-pitch",
+            "left": 204,
+            "right": 544,
+            "top": 2152.75,
+            "bottom": 2156.75
+          },
+          {
+            "id": "persona-speed",
+            "left": 204,
+            "right": 544,
+            "top": 2184.25,
+            "bottom": 2188.25
           }
         ],
         "images": [

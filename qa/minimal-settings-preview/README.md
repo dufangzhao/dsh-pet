@@ -14,4 +14,6 @@
 
 服务下拉的选中项与7个选项保留真实品牌图标，复用已有 [LobeHub 图标清单](../../apps/desktop/src/renderer/console/vendor-icons/manifest.json)（1.101.0，[MIT](../../apps/desktop/src/renderer/console/vendor-icons/LICENSE.txt)）。服务与两处语音下拉使用原生可定制select，在Chrome156验证展开画面、窄窗边界、键盘选择、Esc与外部关闭；没有增加JS菜单状态或图标副本。[展开效果](screenshots/provider-open-1200.png) · [下拉检查记录](screenshots/dropdown-report.json)。
 
+人设页顶部切换“习惯设置 / 人格模板”。习惯包括通用、行为互动、显示和音效；内置默认说话声位于音效区。人格模板支持独立草稿、新建、复制、重置与本次预览内保留，试听为独立合成音演示。[人设验证记录](screenshots/persona-report.json) · [习惯](screenshots/persona-1200.png) · [人格模板](screenshots/persona-templates-1200.png) · [音效](screenshots/persona-sound.png)。
+
 当前仅制作独立的HTML前端预览与本地演示交互，不接入真实桌宠、不调用服务商或麦克风，也不写入应用配置。接入草稿已隔离保存，等整套页面调整定稿后再统一迁移并实现对应后端。

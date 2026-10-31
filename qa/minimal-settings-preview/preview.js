@@ -2,7 +2,7 @@
  * 预览的本地状态：一份草稿 + 一次渲染。
  * 控件一律用原生 input/select，值只写在这份 state 里，不碰本机存储、不发请求。
  */
-/* global document */
+/* global document, window */
 (function () {
   'use strict';
 
@@ -22,7 +22,33 @@
     gemini: 'gemini-2.5-flash',
   };
 
+  var PERSONA_TEMPLATES = {
+    default: {
+      name: '默认伙伴',
+      prompt:
+        '# 身份\n你叫{{petName}}，是陪伴{{userName}}的桌面伙伴。\n\n# 相处方式\n用简短、自然的表达交流，先回应用户正在关心的事。用户专注工作时保持克制，不连续打断。\n\n# 个性与表达\n温和、好奇，有自己的偏好。触摸互动可以用动作或表情回应，不必每次说话。\n\n# 做事原则\n按实际可用的能力与用户授权行动。没有把握时说明不确定，操作结果以真实反馈为准。',
+    },
+    warm: {
+      name: '温柔陪伴',
+      prompt:
+        '# 身份\n你是{{petName}}，陪伴{{userName}}处理日常工作与心事。\n\n# 相处方式\n耐心倾听，回应具体感受。用户需要帮助时先给一个容易开始的小步骤，不替用户下结论。\n\n# 个性与表达\n温柔、细腻，语言平实，不堆砌安慰和夸奖。尊重独处，不催促对方继续聊天。\n\n# 做事原则\n只依据已知信息交流，遵守用户设置的边界。需要操作或访问资料时先确认可用权限。',
+    },
+    lively: {
+      name: '活力伙伴',
+      prompt:
+        '# 身份\n你叫{{petName}}，是{{userName}}身边轻快的桌面伙伴。\n\n# 相处方式\n交流主动但不过度，优先用一两句清楚的话回应。用户忙碌时等待，不连续发出提醒。\n\n# 个性与表达\n开朗、敏捷，偶尔开小玩笑。互动用短动作和轻松的语气表达，不喧宾夺主。\n\n# 做事原则\n先理解目标再行动，反馈具体结果，不编造进度、权限或完成状态。',
+    },
+    rational: {
+      name: '理性助手',
+      prompt:
+        '# 身份\n你是{{petName}}，协助{{userName}}梳理思路、安排任务和处理信息。\n\n# 相处方式\n先给结论，再补关键依据。复杂问题拆成少量步骤，只在缺少必要信息时提问。\n\n# 个性与表达\n冷静、坦诚，表达简洁。区分事实、推测和建议，不用夸张语气替代证据。\n\n# 做事原则\n尊重授权与隐私，涉及不可撤回的操作时先确认。说明真实限制并保留用户选择。',
+    },
+  };
+
   var state = {
+    personaPane: 'habits',
+    personaTemplate: 'default',
+    personaTemplates: {},
     petName: '小蓝',
     provider: 'deepseek',
     model: '',
@@ -42,16 +68,36 @@
     page: 'start',
   };
 
+  Object.keys(PERSONA_TEMPLATES).forEach(function (id) {
+    state.personaTemplates[id] = Object.assign({}, PERSONA_TEMPLATES[id]);
+  });
+
+  function prefValue(pref) {
+    if (pref === 'personaPrompt') return state.personaTemplates[state.personaTemplate].prompt;
+    if (pref === 'personaTemplateName') return state.personaTemplates[state.personaTemplate].name;
+    return state[pref];
+  }
+
+  function setPref(pref, value) {
+    if (pref === 'personaPrompt') state.personaTemplates[state.personaTemplate].prompt = value;
+    else if (pref === 'personaTemplateName')
+      state.personaTemplates[state.personaTemplate].name = value;
+    else state[pref] = value;
+  }
+
   document.querySelectorAll('[data-pref]').forEach(function (el) {
     var pref = el.dataset.pref;
+    if (pref === 'personaPrompt' || pref === 'personaTemplateName') return;
     if (Object.prototype.hasOwnProperty.call(state, pref)) return;
     if (el.type === 'radio' && !el.checked) return;
-    state[pref] =
+    setPref(
+      pref,
       el.type === 'checkbox'
         ? el.checked
         : el.type === 'range' || el.type === 'number'
           ? Number(el.value)
-          : el.value;
+          : el.value,
+    );
   });
 
   var navs = document.querySelectorAll('[data-nav]');
@@ -64,7 +110,7 @@
   /* 每次改动都从 state 回写到所有同名控件：同一项设置出现两次也只有一份值。 */
   function syncControls() {
     document.querySelectorAll('[data-pref]').forEach(function (el) {
-      var value = state[el.dataset.pref];
+      var value = prefValue(el.dataset.pref);
       if (el.type === 'checkbox') el.checked = Boolean(value);
       else if (el.type === 'radio') el.checked = el.value === value;
       else if (el.value !== value) el.value = value;
@@ -99,7 +145,126 @@
     },
   };
 
+  state.hover = Array.from(
+    document.querySelectorAll('[data-pref-group="hover"] input:checked'),
+    function (el) {
+      return el.value;
+    },
+  );
+  state.personaTemplateSerial = 0;
+  state.audioPlaying = false;
+
+  function setDisabled(group, disabled) {
+    group.querySelectorAll('input, select, button').forEach(function (el) {
+      el.disabled = disabled;
+    });
+  }
+
+  function renderPersona() {
+    document.querySelectorAll('[data-persona-tab]').forEach(function (button) {
+      var selected = button.dataset.personaTab === state.personaPane;
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
+    document.querySelectorAll('[data-persona-panel]').forEach(function (panel) {
+      panel.hidden = panel.dataset.personaPanel !== state.personaPane;
+    });
+    document.querySelectorAll('[data-persona-custom]').forEach(function (group) {
+      group.hidden = state[group.dataset.personaCustom] !== 'custom';
+    });
+    document.querySelectorAll('[data-value-for]').forEach(function (output) {
+      output.textContent = prefValue(output.dataset.valueFor) + (output.dataset.unit || '');
+    });
+    document.querySelectorAll('[data-pref-group="hover"] input').forEach(function (input) {
+      input.checked = state.hover.indexOf(input.value) !== -1;
+      input.disabled = state.hover.length >= 6 && !input.checked;
+    });
+    document.querySelectorAll('[data-sound-dependent]').forEach(function (group) {
+      setDisabled(group, !state.soundEnabled);
+    });
+    document.querySelectorAll('[data-speech-dependent]').forEach(function (group) {
+      setDisabled(group, !state.soundEnabled || !state.soundTalk || !state.speechEnabled);
+    });
+    controls('speakingSound')[0].disabled = !state.soundEnabled || !state.soundTalk;
+    controls('speechEnabled')[0].disabled = !state.soundEnabled;
+    var trial = document.querySelector('[data-persona-action="preview-sound"]');
+    trial.disabled =
+      !state.soundEnabled ||
+      !state.soundTalk ||
+      state.speakingSound === 'silent' ||
+      state.audioPlaying;
+    var select = document.getElementById('persona-template-select');
+    Object.keys(state.personaTemplates).forEach(function (id) {
+      var option = Array.from(select.options).find(function (item) {
+        return item.value === id;
+      });
+      if (!option) {
+        option = document.createElement('option');
+        option.value = id;
+        select.append(option);
+      }
+      option.textContent = state.personaTemplates[id].name;
+    });
+    select.value = state.personaTemplate;
+  }
+
+  function createPersonaTemplate(copy) {
+    state.personaTemplateSerial += 1;
+    var id = 'custom-' + state.personaTemplateSerial;
+    var current = state.personaTemplates[state.personaTemplate];
+    state.personaTemplates[id] = {
+      name: copy ? current.name + ' 副本' : '新建模板',
+      prompt: copy ? current.prompt : '',
+    };
+    state.personaTemplate = id;
+    renderPersona();
+    syncControls();
+    render();
+    document.getElementById('persona-template-name').focus();
+  }
+
+  async function previewSpeakingSound() {
+    state.audioPlaying = true;
+    renderPersona();
+    try {
+      var context = new window.AudioContext();
+      await context.resume();
+      var base = state.speechEnabled
+        ? state.speechPitch
+        : state.speakingSound === 'soft'
+          ? 380
+          : 480;
+      var step = 1 / (state.speechEnabled ? state.speechSpeed : 12);
+      var start = context.currentTime + 0.02;
+      [1, 1.16, 0.94, 1.08, 0.9].forEach(function (ratio, index) {
+        var oscillator = context.createOscillator();
+        var gain = context.createGain();
+        var at = start + index * step;
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(base * ratio, at);
+        gain.gain.setValueAtTime(0, at);
+        gain.gain.linearRampToValueAtTime(0.035, at + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + step * 0.8);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(at);
+        oscillator.stop(at + step * 0.85);
+        if (index === 4)
+          oscillator.onended = function () {
+            void context.close();
+            state.audioPlaying = false;
+            renderPersona();
+          };
+      });
+    } catch {
+      state.audioPlaying = false;
+      document.getElementById('persona-draft-state').textContent = '当前浏览器无法试听';
+      renderPersona();
+    }
+  }
+
   function render() {
+    renderPersona();
     document.body.style.colorScheme =
       state.themeMode === 'system' ? 'light dark' : state.themeMode || 'light';
     document.body.dataset.theme = state.themeMode || 'light';
@@ -140,7 +305,7 @@
     );
 
     document.querySelectorAll('[data-count-for]').forEach(function (el) {
-      var length = String(state[el.dataset.countFor] || '').length;
+      var length = String(prefValue(el.dataset.countFor) || '').length;
       el.textContent = length + (el.dataset.countMax ? ' / ' + el.dataset.countMax : '');
     });
 
@@ -189,6 +354,14 @@
 
   document.addEventListener('change', function (event) {
     var el = event.target;
+    var hover = el.closest('[data-pref-group=hover]');
+    if (hover) {
+      state.hover = Array.from(hover.querySelectorAll('input:checked'), function (input) {
+        return input.value;
+      });
+      renderPersona();
+      return;
+    }
     if (!el.dataset || !el.dataset.pref) return;
     var pref = el.dataset.pref;
     if (pref === 'themeScheme' && el.checked) {
@@ -197,12 +370,18 @@
       if (palette) Object.assign(state, palette);
     }
     if (el.type === 'color') customTheme = true;
-    state[pref] =
+    setPref(
+      pref,
       el.type === 'checkbox'
         ? el.checked
         : el.type === 'range' || el.type === 'number'
           ? Number(el.value)
-          : el.value;
+          : el.value,
+    );
+    if (pref === 'speechPitchLevel' && el.value !== 'custom')
+      state.speechPitch = { low: 300, mid: 400, high: 500 }[el.value];
+    if (pref === 'speechSpeedLevel' && el.value !== 'custom')
+      state.speechSpeed = { low: 10, mid: 13, high: 16 }[el.value];
     syncControls();
     render();
   });
@@ -214,8 +393,12 @@
       ['text', 'password', 'search', 'number', 'range', 'textarea', 'color'].indexOf(el.type) !== -1
     ) {
       if (el.type === 'color') customTheme = true;
-      state[el.dataset.pref] =
-        el.type === 'range' || el.type === 'number' ? Number(el.value) : el.value;
+      if (el.dataset.pref === 'speechPitch') state.speechPitchLevel = 'custom';
+      if (el.dataset.pref === 'speechSpeed') state.speechSpeedLevel = 'custom';
+      setPref(
+        el.dataset.pref,
+        el.type === 'range' || el.type === 'number' ? Number(el.value) : el.value,
+      );
       render();
     }
   });
@@ -288,6 +471,46 @@
   ['fetch-models-button', 'test-connection-button'].forEach(function (id) {
     document.getElementById(id).addEventListener('click', function () {
       document.getElementById('model-action-status').textContent = '预览模式';
+    });
+  });
+
+  document.querySelectorAll('[data-persona-tab]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      state.personaPane = button.dataset.personaTab;
+      render();
+    });
+    button.addEventListener('keydown', function (event) {
+      var tabs = Array.from(document.querySelectorAll('[data-persona-tab]'));
+      var index = tabs.indexOf(button);
+      if (event.key === 'ArrowRight') index = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') index = (index + tabs.length - 1) % tabs.length;
+      else if (event.key === 'Home') index = 0;
+      else if (event.key === 'End') index = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      state.personaPane = tabs[index].dataset.personaTab;
+      render();
+      tabs[index].focus();
+    });
+  });
+  document.querySelectorAll('[data-persona-action]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var action = button.dataset.personaAction;
+      if (action === 'new' || action === 'copy') {
+        createPersonaTemplate(action === 'copy');
+        return;
+      }
+      if (action === 'reset') {
+        var original = PERSONA_TEMPLATES[state.personaTemplate];
+        state.personaTemplates[state.personaTemplate].prompt = original ? original.prompt : '';
+        syncControls();
+        render();
+      } else if (action === 'preview-sound') {
+        void previewSpeakingSound();
+        return;
+      }
+      document.getElementById('persona-draft-state').textContent =
+        action === 'save' ? '本次预览草稿已保留' : '本地草稿';
     });
   });
 

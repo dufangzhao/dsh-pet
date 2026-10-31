@@ -159,6 +159,7 @@ try {
   }));
   assert.deepEqual(storage, { local: 0, session: 0 });
   await page.locator('[data-nav=persona]').click();
+  await page.locator('[data-persona-tab=templates]').click();
   await page.locator('#persona-prompt').fill('温和且简短');
   await expect(page.locator('[data-count-for=personaPrompt]')).toHaveText('5 / 16384');
   await page.locator('[data-nav=plugins]').click();
