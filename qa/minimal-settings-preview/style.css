@@ -308,19 +308,113 @@ body[data-motion='off'] * {
   flex: 1;
   min-width: 0;
   height: 100%;
-  padding-right: 20px;
   border: none;
   background: none;
   color: var(--ink);
   font: inherit;
-  appearance: none;
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7176' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 2px center;
 }
 .select:focus {
   outline: none;
+}
+
+/*
+ * 原生下拉（Chrome 156 实测 CSS.supports 与 ::picker(select) 都可用）：
+ * 键盘、方向键、Escape、外部点击关闭和现有 change 事件都交给原生 select，
+ * 这一层只补材料——白底、细灰线、10px 圆角、柔和弹出阴影、灰 hover、黑色选中勾、蓝色焦点。
+ */
+@supports (appearance: base-select) {
+  .select,
+  .select::picker(select) {
+    appearance: base-select;
+  }
+  .inputForm:has(> .select) {
+    padding: 0;
+  }
+  .select {
+    padding: 0 12px;
+  }
+  .select::picker-icon {
+    display: none;
+  }
+  .select > .select__trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+  }
+  .select__selected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .select__arrow {
+    flex: 0 0 16px;
+    margin-left: auto;
+    width: 16px;
+    height: 16px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7176' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    transition: transform 0.2s ease-in-out;
+  }
+  .select:open .select__arrow {
+    transform: rotate(180deg);
+  }
+  .select::picker(select) {
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    box-shadow: 0 12px 30px rgba(21, 23, 23, 0.12);
+  }
+  .select option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 6px 10px;
+    border-radius: var(--radius-field);
+    color: var(--ink);
+    font: inherit;
+  }
+  .select option:hover {
+    background: #f1f3f4;
+  }
+  .select option:checked {
+    background: none;
+    font-weight: 600;
+  }
+  .select option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+    color: var(--ink);
+  }
+  .select option:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: -2px;
+  }
+}
+
+.opt__mark {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+.opt__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .icon-btn {

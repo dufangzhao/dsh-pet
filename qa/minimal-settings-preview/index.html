@@ -202,13 +202,80 @@
                     <label class="field__label" for="provider-select">服务</label>
                     <div class="inputForm">
                       <select class="select" id="provider-select" data-pref="provider">
-                        <option value="deepseek">DeepSeek</option>
-                        <option value="qwen">通义千问</option>
-                        <option value="kimi">Kimi</option>
-                        <option value="glm">智谱 GLM</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="anthropic">Anthropic</option>
-                        <option value="gemini">Google Gemini</option>
+                        <button type="button" class="select__trigger">
+                          <selectedcontent class="select__selected"></selectedcontent>
+                          <span class="select__arrow" aria-hidden="true"></span>
+                        </button>
+                        <option value="deepseek">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">DeepSeek</span>
+                        </option>
+                        <option value="qwen">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">通义千问</span>
+                        </option>
+                        <option value="kimi">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">Kimi</span>
+                        </option>
+                        <option value="glm">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">智谱 GLM</span>
+                        </option>
+                        <option value="openai">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/openai.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">OpenAI</span>
+                        </option>
+                        <option value="anthropic">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">Anthropic</span>
+                        </option>
+                        <option value="gemini">
+                          <img
+                            class="opt__mark"
+                            src="../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg"
+                            alt=""
+                            width="20"
+                            height="20"
+                          />
+                          <span class="opt__name">Google Gemini</span>
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -582,8 +649,12 @@
                     <label class="field__label" for="voice-model-select">识别方式</label>
                     <div class="inputForm">
                       <select class="select" id="voice-model-select" data-pref="engine">
-                        <option value="local">本机离线识别</option>
-                        <option value="system">系统语音输入</option>
+                        <button type="button" class="select__trigger">
+                          <selectedcontent class="select__selected"></selectedcontent>
+                          <span class="select__arrow" aria-hidden="true"></span>
+                        </button>
+                        <option value="local"><span class="opt__name">本机离线识别</span></option>
+                        <option value="system"><span class="opt__name">系统语音输入</span></option>
                       </select>
                     </div>
                   </div>
@@ -591,9 +662,19 @@
                     <label class="field__label" for="voice-after-select">说完之后</label>
                     <div class="inputForm">
                       <select class="select" id="voice-after-select" data-pref="afterSpeech">
-                        <option value="manual">等我点「结束并识别」</option>
-                        <option value="auto">安静一会儿就识别</option>
-                        <option value="keep">只留下文字，不发送</option>
+                        <button type="button" class="select__trigger">
+                          <selectedcontent class="select__selected"></selectedcontent>
+                          <span class="select__arrow" aria-hidden="true"></span>
+                        </button>
+                        <option value="manual">
+                          <span class="opt__name">等我点「结束并识别」</span>
+                        </option>
+                        <option value="auto">
+                          <span class="opt__name">安静一会儿就识别</span>
+                        </option>
+                        <option value="keep">
+                          <span class="opt__name">只留下文字，不发送</span>
+                        </option>
                       </select>
                     </div>
                   </div>

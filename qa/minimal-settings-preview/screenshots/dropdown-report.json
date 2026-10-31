@@ -1,0 +1,69 @@
+{
+  "scope": "provider logos and three native styled select controls",
+  "errors": [],
+  "remoteRequests": [],
+  "captures": [
+    "provider-closed-1200.png",
+    "provider-open-1200.png",
+    "provider-closed-880.png",
+    "provider-open-880.png",
+    "voice-model-select-open-1200.png",
+    "voice-after-select-open-1200.png"
+  ],
+  "pickers": [
+    {
+      "id": "provider-select",
+      "width": 1200,
+      "options": 7
+    },
+    {
+      "id": "provider-select",
+      "width": 880,
+      "options": 7
+    }
+  ],
+  "browser": "156.0.8078.79",
+  "nativeSupport": {
+    "baseSelect": true,
+    "picker": true
+  },
+  "logos": [
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+      "ready": true
+    },
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+      "ready": true
+    },
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+      "ready": true
+    },
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+      "ready": true
+    },
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+      "ready": true
+    },
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+      "ready": true
+    },
+    {
+      "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+      "ready": true
+    }
+  ],
+  "interactions": {
+    "keyboardSelection": true,
+    "escape": true,
+    "outsideDismissal": true,
+    "providerLocalBinding": true,
+    "selectedLogo": true,
+    "voiceLocalBinding": true
+  },
+  "status": "passed"
+}

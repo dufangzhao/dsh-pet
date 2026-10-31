@@ -24,8 +24,8 @@
         "fields": [
           {
             "id": "provider-select",
-            "left": 311,
-            "right": 696,
+            "left": 299,
+            "right": 704,
             "top": 262,
             "bottom": 310
           },
@@ -47,6 +47,38 @@
         "images": [
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
             "ready": true
           },
           {
@@ -78,6 +110,38 @@
             "ready": true
           },
           {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
             "src": "assets/pet-minimal.svg",
             "ready": true
           },
@@ -102,15 +166,15 @@
         "fields": [
           {
             "id": "voice-model-select",
-            "left": 311,
-            "right": 696,
+            "left": 299,
+            "right": 704,
             "top": 349,
             "bottom": 397
           },
           {
             "id": "voice-after-select",
-            "left": 734,
-            "right": 1119,
+            "left": 722,
+            "right": 1127,
             "top": 349,
             "bottom": 397
           },
@@ -125,6 +189,38 @@
         "images": [
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
             "ready": true
           },
           {
@@ -152,8 +248,8 @@
         "fields": [
           {
             "id": "provider-select",
-            "left": 143,
-            "right": 457,
+            "left": 131,
+            "right": 465,
             "top": 258,
             "bottom": 306
           },
@@ -175,6 +271,38 @@
         "images": [
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
             "ready": true
           },
           {
@@ -206,6 +334,38 @@
             "ready": true
           },
           {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
             "src": "assets/pet-minimal.svg",
             "ready": true
           },
@@ -230,15 +390,15 @@
         "fields": [
           {
             "id": "voice-model-select",
-            "left": 143,
-            "right": 457,
+            "left": 131,
+            "right": 465,
             "top": 345,
             "bottom": 393
           },
           {
             "id": "voice-after-select",
-            "left": 495,
-            "right": 809,
+            "left": 483,
+            "right": 817,
             "top": 345,
             "bottom": 393
           },
@@ -253,6 +413,38 @@
         "images": [
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
             "ready": true
           },
           {

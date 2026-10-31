@@ -10,4 +10,6 @@
 
 页面结构、开关、分段选择、列表和设置组合是按同一视觉语言制作的本地扩展。图标复用项目已有Tabler outline；[简约形象](assets/pet-minimal.svg)与[圆头形象](assets/pet-round.svg)按项目PetAvatar的几何与默认配色导出，用作静态示例，不引入外部角色。
 
+服务下拉的选中项与7个选项保留真实品牌图标，复用已有 [LobeHub 图标清单](../../apps/desktop/src/renderer/console/vendor-icons/manifest.json)（1.101.0，[MIT](../../apps/desktop/src/renderer/console/vendor-icons/LICENSE.txt)）。服务与两处语音下拉使用原生可定制select，在Chrome156验证展开画面、窄窗边界、键盘选择、Esc与外部关闭；没有增加JS菜单状态或图标副本。[展开效果](screenshots/provider-open-1200.png) · [下拉检查记录](screenshots/dropdown-report.json)。
+
 本阶段仅作界面预览，使用示例内容与浏览器本地交互，不修改应用默认、不连接后台，也不保存真实资料。
