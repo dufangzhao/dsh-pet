@@ -308,3 +308,36 @@ Retained7real LobeHub provider logos in selected and expanded states. Styled3nat
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: Add Start model catalog reasoning and draft connection tests
+
+**Date**: 2026-11-01
+**Task**: Add Start model catalog reasoning and draft connection tests
+**Branch**: `feat/start-model-discovery`
+
+### Summary
+
+Integrated selected-provider model retrieval with typed or saved credentials, default/low/medium/high reasoning persistence and real protocol propagation, and nonmutating selected-draft diagnostics. Browser auth shares controls and saved-key reuse. Centralized lazy credential-client first use, removed duplicate runtime map. Deleted two navigation buttons from approved visual preview. pnpmcheck passed; isolated native seven-case workflow and six preview frames passed; normal settings opened. Controlled responses only, no live account calls or push. Evidence qa/start-model-settings/README.md.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a14b5f6` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
