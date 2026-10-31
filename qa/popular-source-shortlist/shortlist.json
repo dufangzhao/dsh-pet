@@ -1,0 +1,110 @@
+{
+  "capturedDate": "2026-10-31",
+  "popularityEvidence": "Uiverse category pages visibly select Favorites, positions preserved in ranking-evidence.json. Public markup shows no exact favorite count; ranks below are not counts.",
+  "previewEvidence": "Original website og:image files, downloaded without redesign; page and image hashes retained in preview-evidence.json.",
+  "items": [
+    {
+      "id": "micaelgomestavares_dull-walrus-66",
+      "url": "https://uiverse.io/micaelgomestavares/dull-walrus-66",
+      "status": 200,
+      "image": "https://imagedelivery.net/KMb5EadhEKC1gAE0LkjL1g/46c56d6b-7aae-4c83-17af-14cb03212000/public",
+      "complete": true,
+      "page": "pages/micaelgomestavares_dull-walrus-66.html",
+      "ranks": [
+        {
+          "category": "forms",
+          "rank": 6,
+          "rankingUrl": "https://uiverse.io/forms?orderBy=favorites"
+        }
+      ],
+      "imageFile": "images/micaelgomestavares_dull-walrus-66.png",
+      "imageMime": "image/png",
+      "imageSha256": "a694c2a98c246323f101b389ecf384d25243f8db7476f5ab83c63e07cf6ade86",
+      "imageBytes": 45409,
+      "name": "简洁黑白",
+      "recommendation": "优先推荐：文字层级、留白与输入边界清楚，黑色主按钮克制，适合日常设置界面。"
+    },
+    {
+      "id": "Yaya12085_short-panda-24",
+      "url": "https://uiverse.io/Yaya12085/short-panda-24",
+      "status": 200,
+      "image": "https://imagedelivery.net/KMb5EadhEKC1gAE0LkjL1g/a258c559-594e-46e4-8068-f1df7de58500/public",
+      "complete": true,
+      "page": "pages/Yaya12085_short-panda-24.html",
+      "ranks": [
+        {
+          "category": "forms",
+          "rank": 3,
+          "rankingUrl": "https://uiverse.io/forms?orderBy=favorites"
+        }
+      ],
+      "imageFile": "images/Yaya12085_short-panda-24.png",
+      "imageMime": "image/png",
+      "imageSha256": "cdb01d3c1e39423212992d47bb9b8aba7912d2130b583fcd130079c6ef735837",
+      "imageBytes": 30534,
+      "name": "深色紫调",
+      "recommendation": "优先推荐：深色中性底、单一紫色重点，边框和表单层级统一。"
+    },
+    {
+      "id": "Yaya12085_short-turtle-53",
+      "url": "https://uiverse.io/Yaya12085/short-turtle-53",
+      "status": 200,
+      "image": "https://imagedelivery.net/KMb5EadhEKC1gAE0LkjL1g/dc5a8f44-3fe4-4c9f-040b-47c828d80000/public",
+      "complete": true,
+      "page": "pages/Yaya12085_short-turtle-53.html",
+      "ranks": [
+        {
+          "category": "forms",
+          "rank": 7,
+          "rankingUrl": "https://uiverse.io/forms?orderBy=favorites"
+        }
+      ],
+      "imageFile": "images/Yaya12085_short-turtle-53.png",
+      "imageMime": "image/png",
+      "imageSha256": "32f8bbe0f4429a4d8d3636287d5af365c376012bf7a6af5b383f11ee04a89f3c",
+      "imageBytes": 35979,
+      "name": "浅色蓝调",
+      "recommendation": "清爽备选：白底、蓝色重点、轻量边框，适合较轻的桌宠工具。"
+    },
+    {
+      "id": "zanina-yassine_angry-shrimp-34",
+      "url": "https://uiverse.io/zanina-yassine/angry-shrimp-34",
+      "status": 200,
+      "image": "https://imagedelivery.net/KMb5EadhEKC1gAE0LkjL1g/46d139fa-df4c-4358-8fe6-ea0123517000/public",
+      "complete": true,
+      "page": "pages/zanina-yassine_angry-shrimp-34.html",
+      "ranks": [
+        {
+          "category": "forms",
+          "rank": 2,
+          "rankingUrl": "https://uiverse.io/forms?orderBy=favorites"
+        }
+      ],
+      "imageFile": "images/zanina-yassine_angry-shrimp-34.png",
+      "imageMime": "image/png",
+      "imageSha256": "84e77b1dd37cdcf14f8892e40232abbacc640106c1cee3186660fa3bb9ef925d",
+      "imageBytes": 41959,
+      "name": "中性灰面板",
+      "recommendation": "材料参考：灰色输入区与白色面板分层稳定；原件是支付表单，只参考材料，不移植支付内容。"
+    }
+  ],
+  "optionalControl": {
+    "id": "Galahhad_strong-squid-82",
+    "url": "https://uiverse.io/Galahhad/strong-squid-82",
+    "status": 200,
+    "image": "https://imagedelivery.net/KMb5EadhEKC1gAE0LkjL1g/e7cbfb9b-ba62-4027-9bb2-4b380ffc5e00/public",
+    "complete": true,
+    "page": "pages/Galahhad_strong-squid-82.html",
+    "ranks": [
+      {
+        "category": "switches",
+        "rank": 1,
+        "rankingUrl": "https://uiverse.io/switches?orderBy=favorites"
+      }
+    ],
+    "imageFile": "images/Galahhad_strong-squid-82.png",
+    "imageMime": "image/png",
+    "imageSha256": "36b6035e951f6d7c38935c62917c5404edea7eb4ceae074565746c97aca7644f",
+    "imageBytes": 37840
+  }
+}

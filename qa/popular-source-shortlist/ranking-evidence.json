@@ -1,0 +1,736 @@
+{
+  "capturedAt": "2026-10-31T12:02:54.340Z",
+  "metric": "Website Favorites sort order. No numeric favorite total is shown in these public list/detail responses; rankings are not claimed as counts.",
+  "rankings": [
+    {
+      "category": "forms",
+      "url": "https://uiverse.io/forms?orderBy=favorites",
+      "status": 200,
+      "favoritesSort": true,
+      "items": [
+        {
+          "rank": 1,
+          "url": "/Praashoo7/brave-moose-56",
+          "type": "form"
+        },
+        {
+          "rank": 2,
+          "url": "/zanina-yassine/angry-shrimp-34",
+          "type": "form"
+        },
+        {
+          "rank": 3,
+          "url": "/Yaya12085/short-panda-24",
+          "type": "form"
+        },
+        {
+          "rank": 4,
+          "url": "/andrew-demchenk0/afraid-cougar-9",
+          "type": "form"
+        },
+        {
+          "rank": 5,
+          "url": "/Smit-Prajapati/swift-liger-76",
+          "type": "form"
+        },
+        {
+          "rank": 6,
+          "url": "/micaelgomestavares/dull-walrus-66",
+          "type": "form"
+        },
+        {
+          "rank": 7,
+          "url": "/Yaya12085/short-turtle-53",
+          "type": "form"
+        },
+        {
+          "rank": 8,
+          "url": "/Yaya12085/yellow-goat-62",
+          "type": "form"
+        },
+        {
+          "rank": 9,
+          "url": "/zanina-yassine/warm-bulldog-97",
+          "type": "form"
+        },
+        {
+          "rank": 10,
+          "url": "/JohnnyCSilva/bad-cheetah-74",
+          "type": "form"
+        },
+        {
+          "rank": 11,
+          "url": "/ammarsaa/chatty-firefox-25",
+          "type": "form"
+        },
+        {
+          "rank": 12,
+          "url": "/guilhermeyohan/warm-mule-6",
+          "type": "form"
+        },
+        {
+          "rank": 13,
+          "url": "/gharsh11032000/bitter-cow-59",
+          "type": "form"
+        },
+        {
+          "rank": 14,
+          "url": "/akshat-patel28/rare-cobra-61",
+          "type": "form"
+        },
+        {
+          "rank": 15,
+          "url": "/Yaya12085/tender-moose-95",
+          "type": "form"
+        },
+        {
+          "rank": 16,
+          "url": "/zanina-yassine/quiet-turkey-90",
+          "type": "form"
+        },
+        {
+          "rank": 17,
+          "url": "/SSpisso/kind-cobra-45",
+          "type": "form"
+        },
+        {
+          "rank": 18,
+          "url": "/csemszepp/mean-dolphin-41",
+          "type": "form"
+        },
+        {
+          "rank": 19,
+          "url": "/zanina-yassine/light-dragonfly-12",
+          "type": "form"
+        },
+        {
+          "rank": 20,
+          "url": "/D3OXY/short-panther-37",
+          "type": "form"
+        },
+        {
+          "rank": 21,
+          "url": "/andrew-demchenk0/ordinary-lizard-16",
+          "type": "form"
+        },
+        {
+          "rank": 22,
+          "url": "/glisovic01/stale-chipmunk-33",
+          "type": "form"
+        },
+        {
+          "rank": 23,
+          "url": "/andrew-demchenk0/little-treefrog-9",
+          "type": "form"
+        },
+        {
+          "rank": 24,
+          "url": "/alexruix/stupid-lion-99",
+          "type": "form"
+        },
+        {
+          "rank": 25,
+          "url": "/ayyjayy2/sour-dog-94",
+          "type": "form"
+        },
+        {
+          "rank": 26,
+          "url": "/Phelix652/selfish-pug-28",
+          "type": "form"
+        }
+      ]
+    },
+    {
+      "category": "cards",
+      "url": "https://uiverse.io/cards?orderBy=favorites",
+      "status": 200,
+      "favoritesSort": true,
+      "items": [
+        {
+          "rank": 1,
+          "url": "/ElSombrero2/tricky-robin-67",
+          "type": "card"
+        },
+        {
+          "rank": 2,
+          "url": "/kamehame-ha/chilly-snake-91",
+          "type": "card"
+        },
+        {
+          "rank": 3,
+          "url": "/Praashoo7/black-lizard-62",
+          "type": "card"
+        },
+        {
+          "rank": 4,
+          "url": "/Smit-Prajapati/smart-liger-5",
+          "type": "card"
+        },
+        {
+          "rank": 5,
+          "url": "/gharsh11032000/selfish-owl-57",
+          "type": "card"
+        },
+        {
+          "rank": 6,
+          "url": "/joe-watson-sbf/rude-shrimp-21",
+          "type": "card"
+        },
+        {
+          "rank": 7,
+          "url": "/Smit-Prajapati/spicy-rat-83",
+          "type": "card"
+        },
+        {
+          "rank": 8,
+          "url": "/joe-watson-sbf/little-goat-24",
+          "type": "card"
+        },
+        {
+          "rank": 9,
+          "url": "/Admin12121/plastic-goose-38",
+          "type": "card"
+        },
+        {
+          "rank": 10,
+          "url": "/Tiagoadag/cuddly-catfish-6",
+          "type": "card"
+        },
+        {
+          "rank": 11,
+          "url": "/ilkhoeri/swift-panda-38",
+          "type": "card"
+        },
+        {
+          "rank": 12,
+          "url": "/codebykay101/ugly-lion-23",
+          "type": "card"
+        },
+        {
+          "rank": 13,
+          "url": "/Praashoo7/old-dingo-81",
+          "type": "card"
+        },
+        {
+          "rank": 14,
+          "url": "/Smit-Prajapati/massive-insect-5",
+          "type": "card"
+        },
+        {
+          "rank": 15,
+          "url": "/kennyotsu/witty-deer-12",
+          "type": "card"
+        },
+        {
+          "rank": 16,
+          "url": "/Pradeepsaranbishnoi/strong-treefrog-90",
+          "type": "card"
+        },
+        {
+          "rank": 17,
+          "url": "/eslam-hany/selfish-bobcat-73",
+          "type": "card"
+        },
+        {
+          "rank": 18,
+          "url": "/JohnnyCSilva/quick-chicken-16",
+          "type": "card"
+        },
+        {
+          "rank": 19,
+          "url": "/nazar-gavrylyk/terrible-gecko-91",
+          "type": "card"
+        },
+        {
+          "rank": 20,
+          "url": "/dylanharriscameron/stupid-mole-90",
+          "type": "card"
+        },
+        {
+          "rank": 21,
+          "url": "/Praashoo7/fat-horse-65",
+          "type": "card"
+        },
+        {
+          "rank": 22,
+          "url": "/vinodjangid07/horrible-eel-23",
+          "type": "card"
+        },
+        {
+          "rank": 23,
+          "url": "/gharsh11032000/tasty-frog-49",
+          "type": "card"
+        },
+        {
+          "rank": 24,
+          "url": "/Smit-Prajapati/stupid-bullfrog-39",
+          "type": "card"
+        },
+        {
+          "rank": 25,
+          "url": "/eslam-hany/nasty-zebra-54",
+          "type": "card"
+        },
+        {
+          "rank": 26,
+          "url": "/Spacious74/moody-owl-18",
+          "type": "card"
+        },
+        {
+          "rank": 27,
+          "url": "/MikeAndrewDesigner/fast-octopus-78",
+          "type": "card"
+        },
+        {
+          "rank": 28,
+          "url": "/MijailVillegas/kind-gecko-74",
+          "type": "card"
+        }
+      ]
+    },
+    {
+      "category": "inputs",
+      "url": "https://uiverse.io/inputs?orderBy=favorites",
+      "status": 200,
+      "favoritesSort": true,
+      "items": [
+        {
+          "rank": 1,
+          "url": "/Lakshay-art/curvy-earwig-22",
+          "type": "input"
+        },
+        {
+          "rank": 2,
+          "url": "/liyaxu123/warm-eel-62",
+          "type": "input"
+        },
+        {
+          "rank": 3,
+          "url": "/alexruix/slippery-snail-18",
+          "type": "input"
+        },
+        {
+          "rank": 4,
+          "url": "/AbanoubMagdy1/afraid-yak-99",
+          "type": "input"
+        },
+        {
+          "rank": 5,
+          "url": "/Galahhad/happy-dodo-17",
+          "type": "input"
+        },
+        {
+          "rank": 6,
+          "url": "/Maximinodotpy/thin-sheep-13",
+          "type": "input"
+        },
+        {
+          "rank": 7,
+          "url": "/vinodjangid07/good-donkey-28",
+          "type": "input"
+        },
+        {
+          "rank": 8,
+          "url": "/mrhyddenn/fluffy-bird-66",
+          "type": "input"
+        },
+        {
+          "rank": 9,
+          "url": "/VijinV/mean-goose-92",
+          "type": "input"
+        },
+        {
+          "rank": 10,
+          "url": "/dovatgabriel/mean-stingray-9",
+          "type": "input"
+        },
+        {
+          "rank": 11,
+          "url": "/seyed-mohsen-mousavi/chatty-frog-63",
+          "type": "input"
+        },
+        {
+          "rank": 12,
+          "url": "/ozgeozkaraa01/sharp-rattlesnake-74",
+          "type": "input"
+        },
+        {
+          "rank": 13,
+          "url": "/AmIt-DasIT/weak-donkey-85",
+          "type": "input"
+        },
+        {
+          "rank": 14,
+          "url": "/satyamchaudharydev/plastic-bobcat-37",
+          "type": "input"
+        },
+        {
+          "rank": 15,
+          "url": "/0xnihilism/wise-lizard-57",
+          "type": "input"
+        },
+        {
+          "rank": 16,
+          "url": "/alexruix/slippery-frog-10",
+          "type": "input"
+        },
+        {
+          "rank": 17,
+          "url": "/Satwinder04/pink-bat-77",
+          "type": "input"
+        },
+        {
+          "rank": 18,
+          "url": "/Praashoo7/tame-sloth-39",
+          "type": "input"
+        },
+        {
+          "rank": 19,
+          "url": "/EddyBel/rare-baboon-42",
+          "type": "input"
+        },
+        {
+          "rank": 20,
+          "url": "/Yaya12085/hungry-goat-59",
+          "type": "input"
+        },
+        {
+          "rank": 21,
+          "url": "/krlozCJ/splendid-starfish-73",
+          "type": "input"
+        },
+        {
+          "rank": 22,
+          "url": "/adamgiebl/hot-cat-14",
+          "type": "input"
+        },
+        {
+          "rank": 23,
+          "url": "/ercnersoy/dangerous-cat-78",
+          "type": "input"
+        },
+        {
+          "rank": 24,
+          "url": "/MijailVillegas/grumpy-horse-85",
+          "type": "input"
+        },
+        {
+          "rank": 25,
+          "url": "/garerim/bitter-donkey-79",
+          "type": "input"
+        },
+        {
+          "rank": 26,
+          "url": "/vinodjangid07/plastic-parrot-51",
+          "type": "input"
+        },
+        {
+          "rank": 27,
+          "url": "/TimTrayler/orange-bat-25",
+          "type": "input"
+        },
+        {
+          "rank": 28,
+          "url": "/Smit-Prajapati/brave-hound-66",
+          "type": "input"
+        }
+      ]
+    },
+    {
+      "category": "buttons",
+      "url": "https://uiverse.io/buttons?orderBy=favorites",
+      "status": 200,
+      "favoritesSort": true,
+      "items": [
+        {
+          "rank": 1,
+          "url": "/Praashoo7/smooth-crab-52",
+          "type": "button"
+        },
+        {
+          "rank": 2,
+          "url": "/vinodjangid07/smart-emu-83",
+          "type": "button"
+        },
+        {
+          "rank": 3,
+          "url": "/satyamchaudharydev/quick-chicken-50",
+          "type": "button"
+        },
+        {
+          "rank": 4,
+          "url": "/vinodjangid07/thin-duck-22",
+          "type": "button"
+        },
+        {
+          "rank": 5,
+          "url": "/Praashoo7/quick-fish-43",
+          "type": "button"
+        },
+        {
+          "rank": 6,
+          "url": "/cssbuttons-io/massive-mayfly-74",
+          "type": "button"
+        },
+        {
+          "rank": 7,
+          "url": "/david-mohseni/brave-shrimp-86",
+          "type": "button"
+        },
+        {
+          "rank": 8,
+          "url": "/adamgiebl/smart-moth-68",
+          "type": "button"
+        },
+        {
+          "rank": 9,
+          "url": "/MuhammadHasann/silent-lizard-44",
+          "type": "button"
+        },
+        {
+          "rank": 10,
+          "url": "/vinodjangid07/afraid-falcon-17",
+          "type": "button"
+        },
+        {
+          "rank": 11,
+          "url": "/StealthWorm/spotty-horse-48",
+          "type": "button"
+        },
+        {
+          "rank": 12,
+          "url": "/kamehame-ha/dull-dog-37",
+          "type": "button"
+        },
+        {
+          "rank": 13,
+          "url": "/barisdogansutcu/average-chipmunk-44",
+          "type": "button"
+        },
+        {
+          "rank": 14,
+          "url": "/cssbuttons-io/funny-dog-69",
+          "type": "button"
+        },
+        {
+          "rank": 15,
+          "url": "/MuhammadHasann/mean-bird-62",
+          "type": "button"
+        },
+        {
+          "rank": 16,
+          "url": "/satyamchaudharydev/afraid-yak-30",
+          "type": "button"
+        },
+        {
+          "rank": 17,
+          "url": "/marcelodolza/fat-zebra-11",
+          "type": "button"
+        },
+        {
+          "rank": 18,
+          "url": "/neerajbaniwal/hungry-mule-59",
+          "type": "button"
+        },
+        {
+          "rank": 19,
+          "url": "/JkHuger/fat-bat-0",
+          "type": "button"
+        },
+        {
+          "rank": 20,
+          "url": "/cssbuttons-io/stupid-impala-51",
+          "type": "button"
+        },
+        {
+          "rank": 21,
+          "url": "/barisdogansutcu/big-moose-69",
+          "type": "button"
+        },
+        {
+          "rank": 22,
+          "url": "/gharsh11032000/loud-chicken-53",
+          "type": "button"
+        },
+        {
+          "rank": 23,
+          "url": "/vinodjangid07/wonderful-squid-57",
+          "type": "button"
+        },
+        {
+          "rank": 24,
+          "url": "/marcelodolza/stupid-vampirebat-24",
+          "type": "button"
+        },
+        {
+          "rank": 25,
+          "url": "/akshat-patel28/brown-panther-60",
+          "type": "button"
+        },
+        {
+          "rank": 26,
+          "url": "/vinodjangid07/tall-termite-79",
+          "type": "button"
+        },
+        {
+          "rank": 27,
+          "url": "/adamgiebl/new-bird-34",
+          "type": "button"
+        },
+        {
+          "rank": 28,
+          "url": "/vinodjangid07/heavy-badger-29",
+          "type": "button"
+        }
+      ]
+    },
+    {
+      "category": "switches",
+      "url": "https://uiverse.io/switches?orderBy=favorites",
+      "status": 200,
+      "favoritesSort": true,
+      "items": [
+        {
+          "rank": 1,
+          "url": "/Galahhad/strong-squid-82",
+          "type": "switch"
+        },
+        {
+          "rank": 2,
+          "url": "/nazar-gavrylyk/evil-dragon-24",
+          "type": "switch"
+        },
+        {
+          "rank": 3,
+          "url": "/Galahhad/silent-robin-40",
+          "type": "switch"
+        },
+        {
+          "rank": 4,
+          "url": "/RiccardoRapelli/jolly-chicken-91",
+          "type": "switch"
+        },
+        {
+          "rank": 5,
+          "url": "/vinodjangid07/soft-octopus-29",
+          "type": "switch"
+        },
+        {
+          "rank": 6,
+          "url": "/andrew-demchenk0/honest-stingray-90",
+          "type": "switch"
+        },
+        {
+          "rank": 7,
+          "url": "/Nawsome/silent-owl-45",
+          "type": "switch"
+        },
+        {
+          "rank": 8,
+          "url": "/vinodjangid07/quick-moth-22",
+          "type": "switch"
+        },
+        {
+          "rank": 9,
+          "url": "/barisdogansutcu/tender-dingo-64",
+          "type": "switch"
+        },
+        {
+          "rank": 10,
+          "url": "/Nawsome/empty-snail-69",
+          "type": "switch"
+        },
+        {
+          "rank": 11,
+          "url": "/mobinkakei/strong-lizard-79",
+          "type": "switch"
+        },
+        {
+          "rank": 12,
+          "url": "/JkHuger/old-falcon-20",
+          "type": "switch"
+        },
+        {
+          "rank": 13,
+          "url": "/rishichawda/fluffy-robin-48",
+          "type": "switch"
+        },
+        {
+          "rank": 14,
+          "url": "/Madflows/fresh-fireant-15",
+          "type": "switch"
+        },
+        {
+          "rank": 15,
+          "url": "/satyamchaudharydev/shy-earwig-18",
+          "type": "switch"
+        },
+        {
+          "rank": 16,
+          "url": "/JustCode14/red-dingo-61",
+          "type": "switch"
+        },
+        {
+          "rank": 17,
+          "url": "/barisdogansutcu/smart-panda-14",
+          "type": "switch"
+        },
+        {
+          "rank": 18,
+          "url": "/alexruix/splendid-liger-23",
+          "type": "switch"
+        },
+        {
+          "rank": 19,
+          "url": "/MuhammadHasann/nasty-moth-15",
+          "type": "switch"
+        },
+        {
+          "rank": 20,
+          "url": "/JkHuger/curvy-liger-67",
+          "type": "switch"
+        },
+        {
+          "rank": 21,
+          "url": "/Shoh2008/average-monkey-56",
+          "type": "switch"
+        },
+        {
+          "rank": 22,
+          "url": "/mobinkakei/great-skunk-8",
+          "type": "switch"
+        },
+        {
+          "rank": 23,
+          "url": "/vinodjangid07/tame-eagle-29",
+          "type": "switch"
+        },
+        {
+          "rank": 24,
+          "url": "/Galahhad/modern-quail-75",
+          "type": "switch"
+        },
+        {
+          "rank": 25,
+          "url": "/njesenberger/brave-firefox-90",
+          "type": "switch"
+        },
+        {
+          "rank": 26,
+          "url": "/Galahhad/heavy-dog-14",
+          "type": "switch"
+        },
+        {
+          "rank": 27,
+          "url": "/Admin12121/massive-dodo-67",
+          "type": "switch"
+        },
+        {
+          "rank": 28,
+          "url": "/njesenberger/friendly-otter-40",
+          "type": "switch"
+        }
+      ]
+    }
+  ]
+}
