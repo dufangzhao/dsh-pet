@@ -1,0 +1,105 @@
+{
+  "overview": {
+    "title": "桌宠设置 · 外观预览",
+    "h1": "桌宠设置",
+    "bodyWidth": 1200,
+    "viewport": 1200,
+    "images": [
+      {
+        "src": "assets/pet-round.svg",
+        "complete": true,
+        "width": 150
+      },
+      {
+        "src": "assets/pet-minimal.svg",
+        "complete": true,
+        "width": 150
+      },
+      {
+        "src": "assets/pet-minimal.svg",
+        "complete": true,
+        "width": 150
+      }
+    ],
+    "buttons": [
+      {
+        "text": "开始",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "人设",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "装扮",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "对话",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "语音输入",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "扩展",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "权限与数据",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "关于",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "",
+        "label": "显示 Key",
+        "page": null
+      },
+      {
+        "text": "下一步：装扮桌宠",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "去语音输入",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "改形象与配色",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "回到开始",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "回到开始页填 Key",
+        "label": null,
+        "page": null
+      },
+      {
+        "text": "回到开始",
+        "label": null,
+        "page": null
+      }
+    ],
+    "links": []
+  },
+  "errors": [],
+  "remoteRequests": []
+}

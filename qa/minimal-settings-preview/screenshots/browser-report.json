@@ -1,0 +1,284 @@
+{
+  "scope": "selected minimal settings visual preview; no business services",
+  "errors": [],
+  "remoteRequests": [],
+  "screenshots": [
+    "start-1200.png",
+    "appearance-1200.png",
+    "voice-1200.png",
+    "start-880.png",
+    "appearance-880.png",
+    "voice-880.png"
+  ],
+  "pages": [
+    {
+      "page": "start",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [
+          {
+            "id": "provider-select",
+            "left": 311,
+            "right": 696,
+            "top": 262,
+            "bottom": 310
+          },
+          {
+            "id": "model-name-input",
+            "left": 734,
+            "right": 1119,
+            "top": 262,
+            "bottom": 310
+          },
+          {
+            "id": "api-key-input",
+            "left": 311,
+            "right": 1081,
+            "top": 356.5,
+            "bottom": 404.5
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "appearance",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "voice",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [
+          {
+            "id": "voice-model-select",
+            "left": 311,
+            "right": 696,
+            "top": 349,
+            "bottom": 397
+          },
+          {
+            "id": "voice-after-select",
+            "left": 734,
+            "right": 1119,
+            "top": 349,
+            "bottom": 397
+          },
+          {
+            "id": "voice-max-length-range",
+            "left": 300,
+            "right": 640,
+            "top": 450.25,
+            "bottom": 454.25
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "start",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [
+          {
+            "id": "provider-select",
+            "left": 143,
+            "right": 457,
+            "top": 258,
+            "bottom": 306
+          },
+          {
+            "id": "model-name-input",
+            "left": 495,
+            "right": 809,
+            "top": 258,
+            "bottom": 306
+          },
+          {
+            "id": "api-key-input",
+            "left": 143,
+            "right": 771,
+            "top": 352.5,
+            "bottom": 400.5
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "appearance",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "voice",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [
+          {
+            "id": "voice-model-select",
+            "left": 143,
+            "right": 457,
+            "top": 345,
+            "bottom": 393
+          },
+          {
+            "id": "voice-after-select",
+            "left": 495,
+            "right": 809,
+            "top": 345,
+            "bottom": 393
+          },
+          {
+            "id": "voice-max-length-range",
+            "left": 132,
+            "right": 472,
+            "top": 446.25,
+            "bottom": 450.25
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    }
+  ],
+  "interactions": {
+    "provider": true,
+    "keyVisibility": true,
+    "figure": true,
+    "size": true,
+    "scrollPreserved": true,
+    "draftsAcrossPreviewNavigation": true,
+    "storage": {
+      "local": 0,
+      "session": 0
+    }
+  },
+  "status": "passed"
+}

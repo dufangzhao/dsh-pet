@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>桌宠设置 · 外观预览</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- 设置台的一扇窗：标题栏 + 侧栏 + 内容区与真实产品同构；值只活在预览这一份草稿里。 -->
+    <div class="window" id="settings-window">
+      <header class="titlebar">
+        <img class="titlebar__mark" src="assets/pet-round.svg" alt="" width="22" height="22" />
+        <h1 class="titlebar__name">桌宠设置</h1>
+        <span class="titlebar__spacer"></span>
+        <p class="titlebar__note">示例内容，不写入应用配置</p>
+        <span class="badge" id="preview-badge">外观预览</span>
+      </header>
+
+      <div class="body">
+        <aside class="rail" aria-label="设置">
+          <nav class="rail__nav" aria-label="设置页导航" id="settings-nav">
+            <ul class="rail__list">
+              <li>
+                <button type="button" class="nav" data-nav="start" id="nav-start">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M7 4v16l13 -8l-13 -8" />
+                  </svg>
+                  <span class="nav__label">开始</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="nav" data-nav="persona">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M6 6a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2l0 -4"
+                    />
+                    <path d="M12 2v2" />
+                    <path d="M9 12v9" />
+                    <path d="M15 12v9" />
+                    <path d="M5 16l4 -2" />
+                    <path d="M15 14l4 2" />
+                    <path d="M9 18h6" />
+                    <path d="M10 8v.01" />
+                    <path d="M14 8v.01" />
+                  </svg>
+                  <span class="nav__label">人设</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="nav" data-nav="appearance" id="nav-appearance">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M15 4l6 2v5h-3v8a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-8h-3v-5l6 -2a3 3 0 0 0 6 0"
+                    />
+                  </svg>
+                  <span class="nav__label">装扮</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="nav" data-nav="conversation">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1"
+                    />
+                  </svg>
+                  <span class="nav__label">对话</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="nav" data-nav="voice" id="nav-voice">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 12h4l3 8l4 -16l3 8h4" />
+                  </svg>
+                  <span class="nav__label">语音输入</span>
+                </button>
+              </li>
+            </ul>
+            <ul class="rail__list rail__list--quiet">
+              <li>
+                <button type="button" class="nav" data-nav="plugins">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0 -1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h1a2 2 0 0 0 0 -4h-1a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1"
+                    />
+                  </svg>
+                  <span class="nav__label">扩展</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="nav" data-nav="permissions">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"
+                    />
+                  </svg>
+                  <span class="nav__label">权限与数据</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="nav" data-nav="about">
+                  <svg
+                    class="nav__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                    <path d="M12 9h.01" />
+                    <path d="M11 12h1v4h1" />
+                  </svg>
+                  <span class="nav__label">关于</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+          <p class="rail__meta" id="rail-summary">小蓝 · 简约 · 晨蓝 · 适中</p>
+        </aside>
+
+        <main class="content" id="settings-content" tabindex="-1">
+          <!-- ------------------------------------------------------------ 开始 -->
+          <section class="page" data-page="start" id="page-start">
+            <div class="page__head">
+              <h2 class="page__title">开始</h2>
+              <p class="page__summary">连接模型，调整桌宠与常用设置。</p>
+            </div>
+
+            <article class="card" id="model-connection-card">
+              <div class="card__head">
+                <h3 class="card__title">模型连接</h3>
+              </div>
+              <div class="card__body">
+                <div class="field-row">
+                  <div class="field field--grow">
+                    <label class="field__label" for="provider-select">服务</label>
+                    <div class="inputForm">
+                      <select class="select" id="provider-select" data-pref="provider">
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="qwen">通义千问</option>
+                        <option value="kimi">Kimi</option>
+                        <option value="glm">智谱 GLM</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="gemini">Google Gemini</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field field--grow">
+                    <label class="field__label" for="model-name-input">模型名</label>
+                    <div class="inputForm">
+                      <input
+                        class="input"
+                        id="model-name-input"
+                        data-pref="model"
+                        type="text"
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="api-key-input">API Key</label>
+                  <div class="inputForm">
+                    <input
+                      class="input"
+                      id="api-key-input"
+                      data-pref="key"
+                      type="password"
+                      placeholder="输入 API Key"
+                      autocomplete="off"
+                      spellcheck="false"
+                    />
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      id="api-key-toggle"
+                      aria-pressed="false"
+                      aria-label="显示 Key"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path
+                          d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
+                        />
+                      </svg>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
+                        <path
+                          d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87"
+                        />
+                        <path d="M3 3l18 18" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p class="field__hint">由所选模型服务提供。</p>
+                </div>
+
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    data-goto="appearance"
+                    id="start-next-cta"
+                  >
+                    下一步：装扮桌宠
+                  </button>
+                  <button type="button" class="btn" data-goto="voice">去语音输入</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card" id="start-pet-card">
+              <div class="card__head">
+                <h3 class="card__title">桌宠</h3>
+                <p class="card__note" data-show="visibleText">桌面显示中</p>
+              </div>
+              <div class="card__body card__body--split">
+                <div class="stage" data-stage id="pet-stage">
+                  <img
+                    class="stage__pet"
+                    data-pet-art
+                    src="assets/pet-minimal.svg"
+                    alt="桌宠预览"
+                    width="120"
+                    height="120"
+                  />
+                  <span class="stage__ground" aria-hidden="true"></span>
+                </div>
+                <div class="start__quick">
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"
+                        ><span class="row__label">在桌面显示</span
+                        ><span class="row__desc">关掉后预览里的它会淡下去</span></span
+                      >
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="visible" checked /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">保持置顶</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="alwaysOnTop" checked /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                    <label class="row">
+                      <span class="row__text"
+                        ><span class="row__label">暂时不回应</span
+                        ><span class="row__desc">暂停对话回应，保留桌宠显示</span></span
+                      >
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="paused" /><i aria-hidden="true"></i
+                      ></span>
+                    </label>
+                  </div>
+                  <p class="start__values">
+                    形态 <b data-show="figure">简约</b> · 配色 <b data-show="palette">晨蓝</b> ·
+                    大小 <b data-show="size">适中</b>
+                  </p>
+                  <button type="button" class="btn" data-goto="appearance">改形象与配色</button>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <!-- ------------------------------------------------------------ 装扮 -->
+          <section class="page" data-page="appearance" id="page-appearance" hidden>
+            <div class="page__head">
+              <h2 class="page__title">装扮</h2>
+              <p class="page__summary">桌面上的样子：形态、配色、大小和是否显示。</p>
+            </div>
+
+            <div class="appearance__grid">
+              <div class="appearance__main">
+                <article class="card" id="appearance-card">
+                  <div class="card__head">
+                    <h3 class="card__title">桌面形态与配色</h3>
+                    <p class="card__note">形态、配色与大小</p>
+                  </div>
+                  <div class="card__body">
+                    <div class="field">
+                      <span class="field__label" id="label-figure">形态</span>
+                      <div
+                        class="segmented"
+                        role="radiogroup"
+                        aria-labelledby="label-figure"
+                        id="appearance-figure-segmented"
+                      >
+                        <label class="segment"
+                          ><input
+                            type="radio"
+                            name="figure"
+                            data-pref="figure"
+                            value="minimal"
+                            checked
+                          /><span>简约</span></label
+                        >
+                        <label class="segment"
+                          ><input
+                            type="radio"
+                            name="figure"
+                            data-pref="figure"
+                            value="round"
+                          /><span>圆头</span></label
+                        >
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <span class="field__label" id="label-palette">配色</span>
+                      <div
+                        class="choices"
+                        role="radiogroup"
+                        aria-labelledby="label-palette"
+                        id="appearance-palette-list"
+                      >
+                        <label class="choice"
+                          ><input
+                            type="radio"
+                            name="palette"
+                            data-pref="palette"
+                            value="morning"
+                            checked
+                          /><span class="choice__swatch" data-halo="morning"></span
+                          ><span class="choice__name">晨蓝</span></label
+                        >
+                        <label class="choice"
+                          ><input
+                            type="radio"
+                            name="palette"
+                            data-pref="palette"
+                            value="lavender"
+                          /><span class="choice__swatch" data-halo="lavender"></span
+                          ><span class="choice__name">雪青</span></label
+                        >
+                        <label class="choice"
+                          ><input
+                            type="radio"
+                            name="palette"
+                            data-pref="palette"
+                            value="pine"
+                          /><span class="choice__swatch" data-halo="pine"></span
+                          ><span class="choice__name">松墨</span></label
+                        >
+                        <label class="choice"
+                          ><input
+                            type="radio"
+                            name="palette"
+                            data-pref="palette"
+                            value="orange"
+                          /><span class="choice__swatch" data-halo="orange"></span
+                          ><span class="choice__name">柿橙</span></label
+                        >
+                      </div>
+                      <p class="field__hint">选择一组配色，查看预览效果。</p>
+                    </div>
+
+                    <div class="field">
+                      <span class="field__label" id="label-size">大小</span>
+                      <div
+                        class="segmented"
+                        role="radiogroup"
+                        aria-labelledby="label-size"
+                        id="appearance-size-segmented"
+                      >
+                        <label class="segment"
+                          ><input type="radio" name="size" data-pref="size" value="small" /><span
+                            >小巧</span
+                          ></label
+                        >
+                        <label class="segment"
+                          ><input
+                            type="radio"
+                            name="size"
+                            data-pref="size"
+                            value="normal"
+                            checked
+                          /><span>适中</span></label
+                        >
+                        <label class="segment"
+                          ><input type="radio" name="size" data-pref="size" value="large" /><span
+                            >放大</span
+                          ></label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="card">
+                  <div class="card__head">
+                    <h3 class="card__title">在桌面上怎么待着</h3>
+                    <p class="card__note">只改窗口本身，不动角色形象</p>
+                  </div>
+                  <div class="card__body">
+                    <div class="rows">
+                      <label class="row">
+                        <span class="row__text"
+                          ><span class="row__label">在桌面显示</span
+                          ><span class="row__desc">隐藏后设置台与预览还在</span></span
+                        >
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="visible" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="row">
+                        <span class="row__text"><span class="row__label">保持置顶</span></span>
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="alwaysOnTop" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="row">
+                        <span class="row__text"
+                          ><span class="row__label">允许拖动</span
+                          ><span class="row__desc">预览里的场景不跟着挪</span></span
+                        >
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="draggable" checked /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                      <label class="row">
+                        <span class="row__text"
+                          ><span class="row__label">减少动画</span
+                          ><span class="row__desc">这一屏的动作与过渡一起收</span></span
+                        >
+                        <span class="switch"
+                          ><input type="checkbox" data-pref="reducedMotion" /><i
+                            aria-hidden="true"
+                          ></i
+                        ></span>
+                      </label>
+                    </div>
+                    <div class="card__foot">
+                      <button type="button" class="btn" data-goto="start">回到开始</button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div class="stage stage--aside" data-stage>
+                <img
+                  class="stage__pet"
+                  data-pet-art
+                  src="assets/pet-minimal.svg"
+                  alt="桌宠预览"
+                  width="120"
+                  height="120"
+                />
+                <span class="stage__ground" aria-hidden="true"></span>
+                <p class="stage__caption" data-show="visibleText">桌面显示中</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- -------------------------------------------------------- 语音输入 -->
+          <section class="page" data-page="voice" id="page-voice" hidden>
+            <div class="page__head">
+              <h2 class="page__title">语音输入</h2>
+              <p class="page__summary">本机识别、录音，以及说完之后怎么处理。</p>
+            </div>
+
+            <article class="card" id="voice-card">
+              <div class="card__head">
+                <h3 class="card__title">语音输入</h3>
+                <p class="card__note">识别与输入偏好</p>
+              </div>
+              <div class="card__body">
+                <div class="rows">
+                  <label class="row">
+                    <span class="row__text"
+                      ><span class="row__label">用语音说话</span
+                      ><span class="row__desc">关掉后仍然可以打字对话</span></span
+                    >
+                    <span class="row__value"
+                      ><span data-show="voiceEnabledText">开着</span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="voiceEnabled" checked /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </span>
+                  </label>
+                </div>
+
+                <div class="field-row">
+                  <div class="field field--grow">
+                    <label class="field__label" for="voice-model-select">识别方式</label>
+                    <div class="inputForm">
+                      <select class="select" id="voice-model-select" data-pref="engine">
+                        <option value="local">本机离线识别</option>
+                        <option value="system">系统语音输入</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field field--grow">
+                    <label class="field__label" for="voice-after-select">说完之后</label>
+                    <div class="inputForm">
+                      <select class="select" id="voice-after-select" data-pref="afterSpeech">
+                        <option value="manual">等我点「结束并识别」</option>
+                        <option value="auto">安静一会儿就识别</option>
+                        <option value="keep">只留下文字，不发送</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="voice-max-length-range">每句最长时长</label>
+                  <div class="slider-row">
+                    <input
+                      class="slider"
+                      type="range"
+                      id="voice-max-length-range"
+                      data-pref="maxSeconds"
+                      min="10"
+                      max="60"
+                      step="5"
+                      value="30"
+                    />
+                    <output
+                      class="slider__value"
+                      for="voice-max-length-range"
+                      data-show="maxSeconds"
+                      >30 秒</output
+                    >
+                  </div>
+                  <p class="field__hint">到点就自己收尾，不用等那一句话讲完。</p>
+                </div>
+
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    data-goto="start"
+                    id="voice-back-cta"
+                  >
+                    回到开始页填 Key
+                  </button>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <!-- ------------------------------------------------- 预览没铺开的页 -->
+          <section class="page" data-page="pending" id="page-pending" hidden>
+            <div class="page__head">
+              <h2 class="page__title" data-show="pageTitle">这一页</h2>
+              <p class="page__summary">
+                这次外观预览只做开始、装扮、语音输入三页，这一页没有铺开，也不在这里假装已经做好。
+              </p>
+            </div>
+            <div class="card__foot">
+              <button type="button" class="btn" data-goto="start">回到开始</button>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="preview.js"></script>
+  </body>
+</html>
