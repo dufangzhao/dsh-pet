@@ -242,3 +242,36 @@ Added four actual Uiverse source composites plus the current basis in an offline
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: Extend selected minimal style into pet settings
+
+**Date**: 2026-10-31
+**Task**: Extend selected minimal style into pet settings
+**Branch**: `feat/minimal-settings-preview`
+
+### Summary
+
+Expanded approved micaelgomestavares simple source language into realistic settings Start/Appearance/Voice previews. Reused project pet shapes and Tabler paths, added consistent local controls. Chrome1200/880 sixcaptures and local provider/key/figure/size/scroll/draft checks passed with0errors0remote0storage. Product source/default unchanged, preview opened, local commit only.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4923b5d` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
+- **Total Sessions**: 8
 - **Last Active**: 2026-10-31
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~244 | Active |
+| `journal-1.md` | ~277 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-10-31 | Extend selected minimal style into pet settings | `4923b5d` | `feat/minimal-settings-preview` |
 | 7 | 2026-10-31 | Preview additional website styles | `f501b34` | `feat/website-style-previews` |
 | 6 | 2026-10-30 | Adopt website-sourced Start foundation | `9d1ad67`, `2ef0b9d`, `eb8db0c` | `feat/site-sourced-controls` |
 | 5 | 2026-10-30 | 五种独立风格与控件体系 | `97e5fd4`, `ab670f3` | `feat/start-style-families` |
