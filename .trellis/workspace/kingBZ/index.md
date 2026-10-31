@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 10
+- **Total Sessions**: 11
 - **Last Active**: 2026-11-01
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~343 | Active |
+| `journal-1.md` | ~376 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 11 | 2026-11-01 | Keep complete settings work preview-only until approval | `5562139` | `feat/minimal-settings-preview-only` |
 | 10 | 2026-11-01 | Add Start model catalog reasoning and draft connection tests | `a14b5f6` | `feat/start-model-discovery` |
 | 9 | 2026-10-31 | Refine provider icons and settings dropdowns | `ea38151` | `feat/minimal-settings-preview` |
 | 8 | 2026-10-31 | Extend selected minimal style into pet settings | `4923b5d` | `feat/minimal-settings-preview` |

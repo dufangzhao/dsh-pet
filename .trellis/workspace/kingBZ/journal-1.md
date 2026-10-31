@@ -341,3 +341,36 @@ Integrated selected-provider model retrieval with typed or saved credentials, de
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: Keep complete settings work preview-only until approval
+
+**Date**: 2026-11-01
+**Task**: Keep complete settings work preview-only until approval
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+User explicitly changed the stage to standalone front-end preview only. Preserved prepared app integration on feat/minimal-settings-migration at7a32e3b, switched active work to feat/minimal-settings-preview-only based82e166f, restored real app source/build baseline, and made HTML/CSS independent. Eight preview pages, own minimal theme, plain controls, wide pet stage and Start palettes retained. Browser16scenes passed0errors0remote. Current task remains open for user visual refinement; no migration/backend work resumes before whole-interface approval.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5562139` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
