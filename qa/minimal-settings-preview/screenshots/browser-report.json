@@ -59,6 +59,55 @@
             "right": 1081,
             "top": 430,
             "bottom": 478
+          },
+          {
+            "id": "theme-scheme-name",
+            "left": 334,
+            "right": 1096,
+            "top": 1305,
+            "bottom": 1353
+          },
+          {
+            "id": "theme-paper",
+            "left": 334,
+            "right": 562.65625,
+            "top": 1399.5,
+            "bottom": 1447.5
+          },
+          {
+            "id": "theme-paper-2",
+            "left": 600.65625,
+            "right": 829.328125,
+            "top": 1399.5,
+            "bottom": 1447.5
+          },
+          {
+            "id": "theme-sheet",
+            "left": 867.328125,
+            "right": 1096,
+            "top": 1399.5,
+            "bottom": 1447.5
+          },
+          {
+            "id": "theme-ink",
+            "left": 334,
+            "right": 562.65625,
+            "top": 1492,
+            "bottom": 1540
+          },
+          {
+            "id": "theme-line",
+            "left": 600.65625,
+            "right": 829.328125,
+            "top": 1492,
+            "bottom": 1540
+          },
+          {
+            "id": "theme-accent",
+            "left": 867.328125,
+            "right": 1096,
+            "top": 1492,
+            "bottom": 1540
           }
         ],
         "images": [
@@ -195,57 +244,7 @@
           "left": 247,
           "right": 1179
         },
-        "fields": [
-          {
-            "id": "theme-scheme-name",
-            "left": 334,
-            "right": 1096,
-            "top": 1165,
-            "bottom": 1213
-          },
-          {
-            "id": "theme-paper",
-            "left": 334,
-            "right": 562.65625,
-            "top": 1259.5,
-            "bottom": 1307.5
-          },
-          {
-            "id": "theme-paper-2",
-            "left": 600.65625,
-            "right": 829.328125,
-            "top": 1259.5,
-            "bottom": 1307.5
-          },
-          {
-            "id": "theme-sheet",
-            "left": 867.328125,
-            "right": 1096,
-            "top": 1259.5,
-            "bottom": 1307.5
-          },
-          {
-            "id": "theme-ink",
-            "left": 334,
-            "right": 562.65625,
-            "top": 1352,
-            "bottom": 1400
-          },
-          {
-            "id": "theme-line",
-            "left": 600.65625,
-            "right": 829.328125,
-            "top": 1352,
-            "bottom": 1400
-          },
-          {
-            "id": "theme-accent",
-            "left": 867.328125,
-            "right": 1096,
-            "top": 1352,
-            "bottom": 1400
-          }
-        ],
+        "fields": [],
         "images": [
           {
             "src": "assets/pet-round.svg",
@@ -379,13 +378,6 @@
             "right": 1127,
             "top": 313,
             "bottom": 361
-          },
-          {
-            "id": "voice-max-length-range",
-            "left": 300,
-            "right": 640,
-            "top": 414.25,
-            "bottom": 418.25
           }
         ],
         "images": [
@@ -663,6 +655,55 @@
             "right": 771,
             "top": 426,
             "bottom": 474
+          },
+          {
+            "id": "theme-scheme-name",
+            "left": 166,
+            "right": 786,
+            "top": 1301,
+            "bottom": 1349
+          },
+          {
+            "id": "theme-paper",
+            "left": 166,
+            "right": 457,
+            "top": 1395.5,
+            "bottom": 1443.5
+          },
+          {
+            "id": "theme-paper-2",
+            "left": 495,
+            "right": 786,
+            "top": 1395.5,
+            "bottom": 1443.5
+          },
+          {
+            "id": "theme-sheet",
+            "left": 166,
+            "right": 457,
+            "top": 1488,
+            "bottom": 1536
+          },
+          {
+            "id": "theme-ink",
+            "left": 495,
+            "right": 786,
+            "top": 1488,
+            "bottom": 1536
+          },
+          {
+            "id": "theme-line",
+            "left": 166,
+            "right": 457,
+            "top": 1580.5,
+            "bottom": 1628.5
+          },
+          {
+            "id": "theme-accent",
+            "left": 495,
+            "right": 786,
+            "top": 1580.5,
+            "bottom": 1628.5
           }
         ],
         "images": [
@@ -799,57 +840,7 @@
           "left": 89,
           "right": 859
         },
-        "fields": [
-          {
-            "id": "theme-scheme-name",
-            "left": 166,
-            "right": 786,
-            "top": 1417,
-            "bottom": 1465
-          },
-          {
-            "id": "theme-paper",
-            "left": 166,
-            "right": 457,
-            "top": 1511.5,
-            "bottom": 1559.5
-          },
-          {
-            "id": "theme-paper-2",
-            "left": 495,
-            "right": 786,
-            "top": 1511.5,
-            "bottom": 1559.5
-          },
-          {
-            "id": "theme-sheet",
-            "left": 166,
-            "right": 457,
-            "top": 1604,
-            "bottom": 1652
-          },
-          {
-            "id": "theme-ink",
-            "left": 495,
-            "right": 786,
-            "top": 1604,
-            "bottom": 1652
-          },
-          {
-            "id": "theme-line",
-            "left": 166,
-            "right": 457,
-            "top": 1696.5,
-            "bottom": 1744.5
-          },
-          {
-            "id": "theme-accent",
-            "left": 495,
-            "right": 786,
-            "top": 1696.5,
-            "bottom": 1744.5
-          }
-        ],
+        "fields": [],
         "images": [
           {
             "src": "assets/pet-round.svg",
@@ -983,13 +974,6 @@
             "right": 817,
             "top": 309,
             "bottom": 357
-          },
-          {
-            "id": "voice-max-length-range",
-            "left": 132,
-            "right": 472,
-            "top": 410.25,
-            "bottom": 414.25
           }
         ],
         "images": [

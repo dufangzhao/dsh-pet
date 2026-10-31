@@ -106,6 +106,11 @@ try {
     );
   }
   await page.screenshot({ path: path.join(out, 'start-1142.png'), fullPage: true });
+  await page.locator('#start-pet-card').screenshot({ path: path.join(out, 'start-pet-wide.png') });
+  await page
+    .locator('#interface-theme-card')
+    .screenshot({ path: path.join(out, 'start-interface-theme.png') });
+  await expect(page.locator('#start-pet-card .start__quick')).toHaveCount(0);
   await page.locator('#reasoning-effort-select').selectOption('high');
   await page.locator('#test-connection-button').click();
   await expect(page.locator('#model-action-status')).toHaveText('预览模式');
@@ -165,14 +170,14 @@ try {
   await expect(page.locator('#preview-confirm-dialog')).toBeVisible();
   await expect(page.locator('#preview-confirm-dialog [autofocus]')).toBeFocused();
   await page.keyboard.press('Escape');
-  await page.locator('[data-nav=appearance]').click();
+  await page.locator('[data-nav=start]').click();
   await page
     .locator('label.segment')
     .filter({ has: page.locator('input[name=themeMode][value=dark]') })
     .click();
-  const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const dark = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
   assert.equal(dark, 'rgb(21, 23, 25)');
-  await page.screenshot({ path: path.join(out, 'appearance-dark-1200.png'), fullPage: true });
+  await page.screenshot({ path: path.join(out, 'start-dark-1200.png'), fullPage: true });
   await page
     .locator('label.segment')
     .filter({ has: page.locator('input[name=themeMode][value=light]') })

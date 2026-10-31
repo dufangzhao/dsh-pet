@@ -396,11 +396,18 @@
             </article>
 
             <article class="card" id="start-pet-card">
-              <div class="card__head">
-                <h3 class="card__title">桌宠</h3>
-              </div>
-              <div class="card__body card__body--split">
-                <div class="stage" data-stage id="pet-stage">
+              <div class="card__head"><h3 class="card__title">桌宠</h3></div>
+              <div class="card__body">
+                <div class="stage stage--wide" data-stage id="pet-stage">
+                  <button
+                    type="button"
+                    class="stage-theme"
+                    id="preview-scene-theme"
+                    aria-label="切换预览场景明暗"
+                    aria-pressed="false"
+                  >
+                    ☼
+                  </button>
                   <img
                     class="stage__pet"
                     data-pet-art
@@ -408,40 +415,233 @@
                     alt="桌宠预览"
                     width="120"
                     height="120"
-                  />
-                  <span class="stage__ground" aria-hidden="true"></span>
-                </div>
-                <div class="start__quick">
-                  <div class="rows rows--tight">
-                    <label class="row">
-                      <span class="row__text"><span class="row__label">在桌面显示</span></span>
-                      <span class="switch"
-                        ><input type="checkbox" data-pref="visible" checked /><i
-                          aria-hidden="true"
-                        ></i
-                      ></span>
-                    </label>
-                    <label class="row">
-                      <span class="row__text"><span class="row__label">保持置顶</span></span>
-                      <span class="switch"
-                        ><input type="checkbox" data-pref="alwaysOnTop" checked /><i
-                          aria-hidden="true"
-                        ></i
-                      ></span>
-                    </label>
-                    <label class="row">
-                      <span class="row__text"><span class="row__label">暂时不回应</span></span>
-                      <span class="switch"
-                        ><input type="checkbox" data-pref="paused" /><i aria-hidden="true"></i
-                      ></span>
-                    </label>
+                  /><span class="stage__ground" aria-hidden="true"></span>
+                  <div class="stage-toolbar" role="group" aria-label="预览状态">
+                    <button
+                      type="button"
+                      class="stage-tool"
+                      data-preview-pose="idle"
+                      aria-label="预览待机"
+                      title="待机"
+                      aria-pressed="true"
+                    >
+                      ○</button
+                    ><button
+                      type="button"
+                      class="stage-tool"
+                      data-preview-pose="listening"
+                      aria-label="预览聆听"
+                      title="聆听"
+                      aria-pressed="false"
+                    >
+                      ◉</button
+                    ><button
+                      type="button"
+                      class="stage-tool"
+                      data-preview-pose="replying"
+                      aria-label="预览回应"
+                      title="回应"
+                      aria-pressed="false"
+                    >
+                      ↗
+                    </button>
                   </div>
-                  <p class="start__values">
-                    形态 <b data-show="figure">简约</b> · 配色 <b data-show="palette">晨蓝</b> ·
-                    大小 <b data-show="size">适中</b>
-                  </p>
-                  <button type="button" class="btn" data-goto="appearance">改形象与配色</button>
                 </div>
+                <div class="preview-window-actions">
+                  <button type="button" class="btn btn--quiet" data-preview-visibility="false">
+                    在桌面隐藏</button
+                  ><button type="button" class="btn btn--quiet" data-preview-visibility="true">
+                    在桌面显示</button
+                  ><button type="button" class="btn btn--primary" data-goto="appearance">
+                    装扮
+                  </button>
+                </div>
+              </div>
+            </article>
+            <article class="card" id="interface-theme-card">
+              <div class="card__head">
+                <h3 class="card__title">界面配色</h3>
+                <span class="row__value" id="interface-theme-state" role="status">跟随系统</span>
+              </div>
+              <div class="card__body">
+                <div class="field">
+                  <span class="field__label" id="theme-mode-label">明暗挡位</span>
+                  <div class="segmented" role="radiogroup" aria-labelledby="theme-mode-label">
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="themeMode"
+                        data-pref="themeMode"
+                        value="light"
+                      /><span>浅色</span></label
+                    >
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="themeMode"
+                        data-pref="themeMode"
+                        value="dark"
+                      /><span>深色</span></label
+                    >
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="themeMode"
+                        data-pref="themeMode"
+                        value="system"
+                        checked
+                      /><span>跟随系统</span></label
+                    >
+                  </div>
+                </div>
+
+                <div class="theme-schemes" role="radiogroup" aria-label="界面配色方案">
+                  <label class="scheme-card"
+                    ><input
+                      type="radio"
+                      name="themeScheme"
+                      data-pref="themeScheme"
+                      value="slate-harbor"
+                      checked /><span class="scheme-card__name">简约</span
+                    ><span class="scheme-card__colors" aria-hidden="true"
+                      ><i style="background: #f2f4f5"></i><i style="background: #ffffff"></i
+                      ><i style="background: #151717"></i
+                      ><i style="background: #2d79f3"></i></span></label
+                  ><label class="scheme-card"
+                    ><input
+                      type="radio"
+                      name="themeScheme"
+                      data-pref="themeScheme"
+                      value="jade-dawn" /><span class="scheme-card__name">翠晓</span
+                    ><span class="scheme-card__colors" aria-hidden="true"
+                      ><i style="background: #eff1ee"></i><i style="background: #ffffff"></i
+                      ><i style="background: #24372a"></i
+                      ><i style="background: #34836b"></i></span></label
+                  ><label class="scheme-card"
+                    ><input
+                      type="radio"
+                      name="themeScheme"
+                      data-pref="themeScheme"
+                      value="clay-ember" /><span class="scheme-card__name">陶烬</span
+                    ><span class="scheme-card__colors" aria-hidden="true"
+                      ><i style="background: #f4efea"></i><i style="background: #ffffff"></i
+                      ><i style="background: #49362c"></i><i style="background: #ae7255"></i></span
+                  ></label>
+                </div>
+                <details class="card" id="interface-theme-palette">
+                  <summary class="card__head">
+                    <span class="card__title">自定义配色</span>
+                    <span class="row__value">6 色</span>
+                  </summary>
+                  <div class="card__body">
+                    <div class="field">
+                      <label class="field__label" for="theme-scheme-name">方案名</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="theme-scheme-name"
+                          data-pref="themeSchemeName"
+                          type="text"
+                          maxlength="40"
+                          value="简约"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="field-row">
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-paper">页面背景</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-paper"
+                            data-pref="themePaper"
+                            type="color"
+                            value="#f2f4f5"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-paper-2">侧栏背景</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-paper-2"
+                            data-pref="themePaper2"
+                            type="color"
+                            value="#f7f8f9"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-sheet">主卡片背景</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-sheet"
+                            data-pref="themeSheet"
+                            type="color"
+                            value="#ffffff"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-ink">主要文字</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-ink"
+                            data-pref="themeInk"
+                            type="color"
+                            value="#151717"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-line">细边界</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-line"
+                            data-pref="themeLine"
+                            type="color"
+                            value="#e6e8eb"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-accent">主强调</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-accent"
+                            data-pref="themeAccent"
+                            type="color"
+                            value="#2d79f3"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card__foot">
+                      <button
+                        type="button"
+                        class="btn btn--primary"
+                        data-preview-action="theme-save"
+                      >
+                        保存
+                      </button>
+                      <button type="button" class="btn" data-preview-action="theme-copy">
+                        复制
+                      </button>
+                      <button type="button" class="btn" data-preview-action="theme-reset">
+                        重置
+                      </button>
+                    </div>
+                  </div>
+                </details>
               </div>
             </article>
           </section>
@@ -629,160 +829,6 @@
                 <span class="stage__ground" aria-hidden="true"></span>
               </div>
             </div>
-
-            <article class="card" id="interface-theme-card">
-              <div class="card__head">
-                <h3 class="card__title">界面配色</h3>
-                <span class="row__value" id="interface-theme-state" role="status">跟随系统</span>
-              </div>
-              <div class="card__body">
-                <div class="field">
-                  <span class="field__label" id="theme-mode-label">明暗挡位</span>
-                  <div class="segmented" role="radiogroup" aria-labelledby="theme-mode-label">
-                    <label class="segment"
-                      ><input
-                        type="radio"
-                        name="themeMode"
-                        data-pref="themeMode"
-                        value="light"
-                      /><span>浅色</span></label
-                    >
-                    <label class="segment"
-                      ><input
-                        type="radio"
-                        name="themeMode"
-                        data-pref="themeMode"
-                        value="dark"
-                      /><span>深色</span></label
-                    >
-                    <label class="segment"
-                      ><input
-                        type="radio"
-                        name="themeMode"
-                        data-pref="themeMode"
-                        value="system"
-                        checked
-                      /><span>跟随系统</span></label
-                    >
-                  </div>
-                </div>
-
-                <details class="card" id="interface-theme-palette">
-                  <summary class="card__head">
-                    <span class="card__title">自定义配色</span>
-                    <span class="row__value">6 色</span>
-                  </summary>
-                  <div class="card__body">
-                    <div class="field">
-                      <label class="field__label" for="theme-scheme-name">方案名</label>
-                      <div class="inputForm">
-                        <input
-                          class="input"
-                          id="theme-scheme-name"
-                          data-pref="themeSchemeName"
-                          type="text"
-                          maxlength="40"
-                          value="原件"
-                          autocomplete="off"
-                          spellcheck="false"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="field-row">
-                      <div class="field field--grow">
-                        <label class="field__label" for="theme-paper">页面背景</label>
-                        <div class="inputForm">
-                          <input
-                            class="input"
-                            id="theme-paper"
-                            data-pref="themePaper"
-                            type="color"
-                            value="#f2f4f5"
-                          />
-                        </div>
-                      </div>
-                      <div class="field field--grow">
-                        <label class="field__label" for="theme-paper-2">侧栏背景</label>
-                        <div class="inputForm">
-                          <input
-                            class="input"
-                            id="theme-paper-2"
-                            data-pref="themePaper2"
-                            type="color"
-                            value="#f7f8f9"
-                          />
-                        </div>
-                      </div>
-                      <div class="field field--grow">
-                        <label class="field__label" for="theme-sheet">主卡片背景</label>
-                        <div class="inputForm">
-                          <input
-                            class="input"
-                            id="theme-sheet"
-                            data-pref="themeSheet"
-                            type="color"
-                            value="#ffffff"
-                          />
-                        </div>
-                      </div>
-                      <div class="field field--grow">
-                        <label class="field__label" for="theme-ink">主要文字</label>
-                        <div class="inputForm">
-                          <input
-                            class="input"
-                            id="theme-ink"
-                            data-pref="themeInk"
-                            type="color"
-                            value="#151717"
-                          />
-                        </div>
-                      </div>
-                      <div class="field field--grow">
-                        <label class="field__label" for="theme-line">细边界</label>
-                        <div class="inputForm">
-                          <input
-                            class="input"
-                            id="theme-line"
-                            data-pref="themeLine"
-                            type="color"
-                            value="#e6e8eb"
-                          />
-                        </div>
-                      </div>
-                      <div class="field field--grow">
-                        <label class="field__label" for="theme-accent">主强调</label>
-                        <div class="inputForm">
-                          <input
-                            class="input"
-                            id="theme-accent"
-                            data-pref="themeAccent"
-                            type="color"
-                            value="#2d79f3"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="card__foot">
-                      <button
-                        type="button"
-                        class="btn btn--primary"
-                        data-preview-action="theme-save"
-                      >
-                        保存
-                      </button>
-                      <button type="button" class="btn" data-preview-action="theme-copy">
-                        复制
-                      </button>
-                      <button type="button" class="btn" data-preview-action="theme-reset">
-                        重置
-                      </button>
-                    </div>
-                  </div>
-                </details>
-              </div>
-            </article>
           </section>
 
           <!-- -------------------------------------------------------- 语音输入 -->
@@ -846,26 +892,8 @@
                   </div>
                 </div>
 
-                <div class="field">
-                  <label class="field__label" for="voice-max-length-range">每句最长时长</label>
-                  <div class="slider-row">
-                    <input
-                      class="slider"
-                      type="range"
-                      id="voice-max-length-range"
-                      data-pref="maxSeconds"
-                      min="10"
-                      max="60"
-                      step="5"
-                      value="30"
-                    />
-                    <output
-                      class="slider__value"
-                      for="voice-max-length-range"
-                      data-show="maxSeconds"
-                      >30 秒</output
-                    >
-                  </div>
+                <div class="row">
+                  <span class="row__label">单次录音上限</span><span class="row__value">20 秒</span>
                 </div>
 
                 <div class="card__foot">
@@ -912,14 +940,11 @@
                     <textarea
                       class="input"
                       id="voice-transcript"
-                      data-pref="voiceDraft"
+                      readonly
                       rows="5"
                       spellcheck="false"
                     ></textarea>
                   </div>
-                </div>
-                <div class="card__foot">
-                  <button type="button" class="btn" data-preview-action="voice-send">发送</button>
                 </div>
               </div>
             </article>

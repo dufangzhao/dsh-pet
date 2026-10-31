@@ -39,7 +39,6 @@
     voiceEnabled: true,
     engine: 'local',
     afterSpeech: 'manual',
-    maxSeconds: 30,
     page: 'start',
   };
 
@@ -81,6 +80,24 @@
     themeAccent: '--blue',
   };
   var customTheme = false;
+  var presetThemes = {
+    'jade-dawn': {
+      themePaper: '#eff1ee',
+      themePaper2: '#e7eae6',
+      themeSheet: '#ffffff',
+      themeInk: '#24372a',
+      themeLine: '#d0d9d1',
+      themeAccent: '#34836b',
+    },
+    'clay-ember': {
+      themePaper: '#f4efea',
+      themePaper2: '#eee5dc',
+      themeSheet: '#ffffff',
+      themeInk: '#49362c',
+      themeLine: '#dfd2c8',
+      themeAccent: '#ae7255',
+    },
+  };
 
   function render() {
     document.body.style.colorScheme =
@@ -109,7 +126,6 @@
     setText('figure', FIGURE_LABEL[state.figure]);
     setText('palette', PALETTE_LABEL[state.palette]);
     setText('size', SIZE_LABEL[state.size]);
-    setText('maxSeconds', state.maxSeconds + ' 秒');
     setText('voiceEnabledText', state.voiceEnabled ? '开着' : '关着');
     setText('visibleText', state.visible ? '桌面显示中' : '桌面已隐藏');
     setText(
@@ -175,6 +191,11 @@
     var el = event.target;
     if (!el.dataset || !el.dataset.pref) return;
     var pref = el.dataset.pref;
+    if (pref === 'themeScheme' && el.checked) {
+      var palette = presetThemes[el.value];
+      customTheme = !!palette;
+      if (palette) Object.assign(state, palette);
+    }
     if (el.type === 'color') customTheme = true;
     state[pref] =
       el.type === 'checkbox'
@@ -240,6 +261,28 @@
       badge.textContent = '预览模式';
       badge.setAttribute('role', 'status');
     }
+  });
+
+  document.querySelectorAll('[data-preview-visibility]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      state.visible = button.dataset.previewVisibility === 'true';
+      syncControls();
+      render();
+    });
+  });
+  document.querySelectorAll('button[data-preview-pose]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      document.getElementById('pet-stage').dataset.previewPose = button.dataset.previewPose;
+      document.querySelectorAll('button[data-preview-pose]').forEach(function (item) {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+    });
+  });
+  document.getElementById('preview-scene-theme').addEventListener('click', function () {
+    var stage = document.getElementById('pet-stage');
+    var dark = stage.dataset.sceneDark !== 'true';
+    stage.dataset.sceneDark = String(dark);
+    this.setAttribute('aria-pressed', String(dark));
   });
 
   ['fetch-models-button', 'test-connection-button'].forEach(function (id) {

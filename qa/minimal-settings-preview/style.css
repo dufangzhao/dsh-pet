@@ -3,7 +3,290 @@
  * 白卡 20px 圆角、字段 1.5px #ecedec 边框 + 10px 圆角 + 50px 高、黑色 #151717 主按钮、#2d79f3 只给焦点与链接。
  * 这里补的是应用设置那一层的排布与开关/分段/下拉/列表/滑杆——同一套材料，不引第二套风格。
  */
+.stage.stage--wide {
+  width: 100%;
+  min-height: 228px;
+  padding: 12px 12px 44px;
+}
+.stage--wide .stage__ground {
+  bottom: 46px;
+}
+.stage-theme {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.stage-toolbar {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  border-top: 1px solid var(--line);
+  padding: 7px 12px;
+  background: var(--surface);
+}
+.stage-tool {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-quiet);
+  font: 18px/1 var(--font);
+  cursor: pointer;
+}
+.stage-tool[aria-pressed='true'] {
+  color: var(--ink);
+}
+.preview-window-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btn.btn--quiet {
+  border-color: transparent;
+  background: transparent;
+}
+.stage[data-scene-dark='true'] {
+  background-color: #20262d;
+  background-image: radial-gradient(#414b55 0.8px, transparent 0.8px);
+}
+.stage[data-preview-pose='listening'] .stage__pet {
+  transform: rotate(-4deg);
+}
+.stage[data-preview-pose='replying'] .stage__pet {
+  transform: translateY(-5px);
+}
+.theme-schemes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.scheme-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 88px;
+  gap: 18px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.scheme-card input {
+  position: absolute;
+  opacity: 0;
+}
+.scheme-card:has(input:checked) {
+  border-color: var(--ink);
+}
+.scheme-card:has(input:focus-visible) {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+.scheme-card__name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.scheme-card__colors {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+.scheme-card__colors i {
+  flex: 1;
+}
+.card__action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.status {
+  font-size: 13px;
+  color: var(--ink-quiet);
+  line-height: 1.5;
+}
+.status[data-tone='ok'] {
+  color: var(--ok);
+}
+.status[data-tone='danger'],
+.field__error {
+  color: var(--danger);
+}
+.status[data-tone='warn'] {
+  color: var(--warn);
+}
+.field__error {
+  margin: 0;
+  font-size: 13px;
+}
+.model-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: 12px;
+  top: 12px;
+  z-index: 5;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.page__actions {
+  margin-left: auto;
+}
+.rail__foot {
+  margin-top: auto;
+  padding: 10px 14px;
+}
+.content__notice {
+  margin-bottom: 16px;
+}
+.btn--small {
+  min-height: 34px;
+  padding: 0 12px;
+}
+.btn--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.titlebar__spacer {
+  flex: 1;
+}
+.titlebar__name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.titlebar > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-quiet);
+}
+.rail__list,
+.rail__list--quiet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rail__list--quiet {
+  border-top: 1px solid var(--line);
+  margin-top: 20px;
+  padding-top: 14px;
+}
+
+.card .pet-preview {
+  box-shadow: none;
+}
+html[data-console-style='minimal'] .pk-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--field);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-weight: 500;
+}
+html[data-console-style='minimal'] .pk-button--primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-primary);
+}
+html[data-console-style='minimal'] .pk-button--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+html[data-console-style='minimal'] .pk-button--quiet {
+  border-color: transparent;
+  background: transparent;
+}
+html[data-console-style='minimal'] .pk-dialog {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--ink);
+}
+html[data-console-style='minimal'] .pk-dialog__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+html[data-console-style='minimal'] .pk-dialog__body {
+  font-size: 14px;
+  line-height: 1.7;
+}
+button.stage__pet {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.page__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.page__actions .su-button {
+  min-height: 34px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--field);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+.theme-token__picker {
+  flex: 0 0 34px;
+  padding: 0;
+}
+.row__desc {
+  display: block;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--ink-quiet);
+}
+.switch > i {
+  pointer-events: none;
+}
 :root {
+  --ok: light-dark(#16734e, #6fd5a7);
+  --warn: light-dark(#8a5a12, #efca85);
+  --danger: light-dark(#b42318, #ff9690);
   color-scheme: light;
   --on-primary: light-dark(#ffffff, #151717);
   --ground: light-dark(#f2f4f5, #151719);
@@ -609,10 +892,7 @@ dialog::backdrop {
 .row__label {
   font-weight: 500;
 }
-.row__desc {
-  font-size: 12px;
-  color: var(--ink-quiet);
-}
+
 .row__value {
   display: flex;
   align-items: center;
