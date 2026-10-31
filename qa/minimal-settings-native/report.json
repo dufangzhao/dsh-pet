@@ -1,0 +1,95 @@
+{
+  "scope": "Actual Electron settings, isolated profile, local preferences/theme/pet effects; no online model or microphone calls",
+  "pages": [
+    {
+      "id": "start",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "persona",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "appearance",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "conversation",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "voice",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "plugins",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "permissions",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "about",
+      "width": 1200,
+      "overflow": false
+    },
+    {
+      "id": "start",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "persona",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "appearance",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "conversation",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "voice",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "plugins",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "permissions",
+      "width": 880,
+      "overflow": false
+    },
+    {
+      "id": "about",
+      "width": 880,
+      "overflow": false
+    }
+  ],
+  "cases": [
+    "persona name saves through the original profile owner",
+    "appearance selection saves through the original profile owner",
+    "theme mode and saved profile survive reloading the exact trusted settings URL",
+    "wide preview hide and show use the real desktop window owner",
+    "clicking the actual avatar still writes a real pet interaction"
+  ],
+  "approvals": [],
+  "pageErrors": [],
+  "status": "passed"
+}

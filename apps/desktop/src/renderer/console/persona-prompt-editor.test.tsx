@@ -68,9 +68,9 @@ describe('人设完整提示词编辑器', () => {
       ],
     });
     expect(html).toContain('实际发出的完整前缀');
-    expect(html).toContain('pk-prompt__segment-label">可用工具</span>');
-    const block = '<pre class="pk-prompt__segment-text">';
-    expect(html).toContain(block + '现在是 17:02\n今天还没有对话记录</pre>');
+    expect(html).toContain('可用工具');
+    expect(html).toContain('现在是 17:02\n今天还没有对话记录');
+    expect(html.indexOf('可用工具')).toBeLessThan(html.indexOf('运行环境'));
     expect(html.match(/<textarea/g)).toHaveLength(1);
   });
 

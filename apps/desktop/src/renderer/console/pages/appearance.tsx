@@ -1,25 +1,29 @@
-import type { JSX } from 'react';
+import { useId, type JSX } from 'react';
 
-import { Section } from '@pet/ui-kit';
+import type { ApplicationPreferences } from '@pet/contracts';
 
 import { saveChoice } from '../app-views.js';
 import { ConsoleStatus } from '../console-status.js';
 import { figureLabel, paletteLabel, sizeLabel } from '../labels.js';
+import { Card, Switch } from '../minimal-ui/controls.js';
 import { PET_PALETTES, PetPreview } from '../pet-preview.js';
-import { SettingsRow, SettingsRows } from '../settings-shell.js';
-import type { ApplicationPreferences } from '@pet/contracts';
-import type { ApplicationState, StringPreferenceField } from '../use-application.js';
+import type { ApplicationState } from '../use-application.js';
 
 export interface AppearancePageProps {
   app: ApplicationState;
   notify: (message: string, tone: 'ok' | 'danger') => void;
 }
 
+const FIGURES = ['minimal', 'round'] as const;
+const PALETTES = ['morning', 'lavender', 'pine', 'orange'] as const;
+const SIZES = ['small', 'normal', 'large'] as const;
+
 /**
  * 装扮页：形态、配色、大小与显示。
  *
  * 每一行都直接写进同一份偏好：桌面窗与预览读同一份值，改完这里桌面上的那一只就跟着变。
- * 选项只有宿主契约里存在的那几个，不摆没有消费者的开关。
+ * 选项只有宿主契约里存在的那几个，不摆没有消费者的开关；界面配色不在这里，
+ * 它属于开始页那间配色工作室。
  */
 export function AppearancePage({ app, notify }: AppearancePageProps): JSX.Element {
   const values = app.values;
@@ -32,185 +36,164 @@ export function AppearancePage({ app, notify }: AppearancePageProps): JSX.Elemen
       onRetry={app.refresh}
     >
       {values === null || app.snapshot === null ? null : (
-        <div className="pk-split">
-          <div className="pk-split__main">
-            <Section title="桌面形态与配色" description="这些选择保存后立即生效在桌面上。">
-              <SettingsRows>
-                <ChoiceRow
-                  label="桌面形态"
-                  values={values}
-                  field="figure"
-                  saving={app.saving}
-                  options={(['minimal', 'round'] as const).map((value) => ({
-                    value,
-                    text: figureLabel(value),
-                  }))}
-                  testId="pref-figure"
-                  onSave={(value) => void saveChoice(app, notify, { figure: value })}
-                />
-                <ChoiceRow
-                  label="配色"
-                  values={values}
-                  field="palette"
-                  saving={app.saving}
-                  options={(['morning', 'lavender', 'pine', 'orange'] as const).map((value) => ({
-                    value,
-                    text: paletteLabel(value),
-                    swatch: PET_PALETTES[value],
-                  }))}
-                  testId="pref-palette"
-                  onSave={(value) => void saveChoice(app, notify, { palette: value })}
-                />
-                <ChoiceRow
-                  label="大小"
-                  values={values}
-                  field="size"
-                  saving={app.saving}
-                  options={(['small', 'normal', 'large'] as const).map((value) => ({
-                    value,
-                    text: sizeLabel(value),
-                  }))}
-                  testId="pref-size"
-                  onSave={(value) => void saveChoice(app, notify, { size: value })}
-                />
-              </SettingsRows>
-            </Section>
+        <div className="appearance__grid">
+          <div className="appearance__main">
+            <Card title="桌面形态与配色">
+              <Segmented
+                label="形态"
+                name="figure"
+                value={values.figure}
+                options={FIGURES.map((value) => ({ value, text: figureLabel(value) }))}
+                disabled={app.saving}
+                testId="pref-figure"
+                onSelect={(value) => void saveChoice(app, notify, { figure: value })}
+              />
 
-            <Section title="在桌面上怎么待着" description="只改窗口本身，不动角色形象。">
-              <SettingsRows>
-                <SwitchRow
+              <Swatches
+                value={values.palette}
+                disabled={app.saving}
+                onSelect={(value) => void saveChoice(app, notify, { palette: value })}
+              />
+
+              <Segmented
+                label="大小"
+                name="size"
+                value={values.size}
+                options={SIZES.map((value) => ({ value, text: sizeLabel(value) }))}
+                disabled={app.saving}
+                testId="pref-size"
+                onSelect={(value) => void saveChoice(app, notify, { size: value })}
+              />
+            </Card>
+
+            <Card title="在桌面上怎么待着">
+              <div className="rows">
+                <Switch
                   label="在桌面显示桌宠"
                   checked={values.visible}
-                  onText="显示"
-                  offText="隐藏"
                   disabled={app.saving}
-                  description="隐藏后 tray 与设置台还在，预览仍可用同一份值画。"
-                  onSave={(next) => void saveChoice(app, notify, { visible: next })}
+                  onChange={(next) => void saveChoice(app, notify, { visible: next })}
                 />
-                <SwitchRow
+                <Switch
                   label="保持置顶"
                   checked={values.alwaysOnTop}
-                  onText="置顶"
-                  offText="跟随"
                   disabled={app.saving}
-                  onSave={(next) => void saveChoice(app, notify, { alwaysOnTop: next })}
+                  onChange={(next) => void saveChoice(app, notify, { alwaysOnTop: next })}
                 />
-                <SwitchRow
+                <Switch
                   label="允许拖动"
                   checked={values.draggable}
-                  onText="可拖动"
-                  offText="固定位置"
                   disabled={app.saving}
-                  description="拖动完成后会记进同一条日常记录。"
-                  onSave={(next) => void saveChoice(app, notify, { draggable: next })}
+                  onChange={(next) => void saveChoice(app, notify, { draggable: next })}
                 />
-                <SwitchRow
+                <Switch
                   label="减少动画"
                   checked={values.reducedMotion}
-                  onText="少动"
-                  offText="正常"
                   disabled={app.saving}
-                  description="桌面的角色动作随之收敛；系统若已设置减少动态，这里同样生效。"
-                  onSave={(next) => void saveChoice(app, notify, { reducedMotion: next })}
+                  onChange={(next) => void saveChoice(app, notify, { reducedMotion: next })}
                 />
-              </SettingsRows>
-            </Section>
+              </div>
+            </Card>
           </div>
 
-          <div className="pk-split__aside">
-            <PetPreview values={values} agent={app.snapshot.agent} />
-          </div>
+          <PetPreview values={values} agent={app.snapshot.agent} />
         </div>
       )}
     </ConsoleStatus>
   );
 }
 
-interface ChoiceRowProps<K extends StringPreferenceField> {
+interface SegmentedProps<T extends string> {
   label: string;
-  values: ApplicationPreferences;
-  field: K;
-  options: readonly {
-    value: ApplicationPreferences[K];
-    text: string;
-    swatch?: { top: string; bottom: string };
-  }[];
-  saving: boolean;
+  name: string;
+  value: T;
+  options: readonly { value: T; text: string }[];
+  disabled: boolean;
   testId: string;
-  onSave: (value: ApplicationPreferences[K]) => void;
+  onSelect: (value: T) => void;
 }
 
 /**
- * 一组互斥选择：原生 radio 保留方向键与读屏，
- * 选中态同时用文字加粗、边框变色和圆点表达，不靠颜色单独说话。
+ * 一组互斥选择：原生 radio 保留方向键与读屏，选中态同时用底色、字重和边框表达，
+ * 不靠颜色单独说话。
  */
-function ChoiceRow<K extends StringPreferenceField>(props: ChoiceRowProps<K>): JSX.Element {
-  const current = props.values[props.field];
+function Segmented<T extends string>({
+  label,
+  name,
+  value,
+  options,
+  disabled,
+  testId,
+  onSelect,
+}: SegmentedProps<T>): JSX.Element {
+  const labelId = useId();
 
   return (
-    <SettingsRow label={props.label} labelFor="group">
-      {({ labelledBy }) => (
-        <div className="pk-choices" role="radiogroup" aria-labelledby={labelledBy}>
-          {props.options.map((option) => (
-            <label className="pk-choice" key={option.value}>
-              <input
-                type="radio"
-                name={props.field}
-                value={option.value}
-                checked={current === option.value}
-                disabled={props.saving}
-                data-testid={`${props.testId}-${option.value}`}
-                onChange={() => props.onSave(option.value)}
-              />
-              {option.swatch === undefined ? null : (
-                <span
-                  className="pk-choice__swatch"
-                  style={{
-                    background: `linear-gradient(180deg, ${option.swatch.top}, ${option.swatch.bottom})`,
-                  }}
-                  aria-hidden="true"
-                />
-              )}
-              {option.text}
-            </label>
-          ))}
-        </div>
-      )}
-    </SettingsRow>
+    <div className="field">
+      <span className="field__label" id={labelId}>
+        {label}
+      </span>
+      <div className="segmented" role="radiogroup" aria-labelledby={labelId}>
+        {options.map((option) => (
+          <label className="segment" key={option.value}>
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={value === option.value}
+              disabled={disabled}
+              data-testid={`${testId}-${option.value}`}
+              onChange={() => onSelect(option.value)}
+            />
+            <span>{option.text}</span>
+          </label>
+        ))}
+      </div>
+    </div>
   );
 }
 
-interface SwitchRowProps {
-  label: string;
-  checked: boolean;
-  onText: string;
-  offText: string;
-  description?: string;
+interface SwatchesProps {
+  value: ApplicationPreferences['palette'];
   disabled: boolean;
-  onSave: (next: boolean) => void;
+  onSelect: (value: ApplicationPreferences['palette']) => void;
 }
 
-/** 开关用原生 checkbox，状态另有文字：关掉时读到的是「隐藏」，不是一盏灰掉的灯。 */
-function SwitchRow({
-  label,
-  checked,
-  onText,
-  offText,
-  description,
-  disabled,
-  onSave,
-}: SwitchRowProps): JSX.Element {
+/** 配色选择带上真实的色块：颜色来自 PetPreview 那一张表，不在这里另抄一份。 */
+function Swatches({ value, disabled, onSelect }: SwatchesProps): JSX.Element {
+  const labelId = useId();
+
   return (
-    <SettingsRow label={label} description={description}>
-      <label className="pk-choice">
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled={disabled}
-          onChange={(event) => onSave(event.target.checked)}
-        />
-        {checked ? onText : offText}
-      </label>
-    </SettingsRow>
+    <div className="field">
+      <span className="field__label" id={labelId}>
+        配色
+      </span>
+      <div className="choices" role="radiogroup" aria-labelledby={labelId}>
+        {PALETTES.map((palette) => {
+          const colors = PET_PALETTES[palette];
+          return (
+            <label className="choice" key={palette}>
+              <input
+                type="radio"
+                name="palette"
+                value={palette}
+                checked={value === palette}
+                disabled={disabled}
+                data-testid={`pref-palette-${palette}`}
+                onChange={() => onSelect(palette)}
+              />
+              <span
+                className="choice__swatch"
+                style={{
+                  background: `linear-gradient(180deg, ${colors.top}, ${colors.bottom})`,
+                }}
+                aria-hidden="true"
+              />
+              <span className="choice__name">{paletteLabel(palette)}</span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
   );
 }

@@ -182,13 +182,13 @@ describe('界面上的那一份就是记录里的那一份', () => {
   const sourceLight = BUILTIN_PALETTES[DEFAULT_SCHEME_ID]?.['light'];
   if (sourceLight === undefined) throw new Error('默认那条内置方案读不到');
 
-  it('默认方案落的槽就是上游那六个字面量', () => {
-    expect(sourceLight['sheet']).toBe('#fff');
-    expect(sourceLight['ink']).toBe('#323232');
-    expect(sourceLight['line-strong']).toBe('#323232');
-    expect(sourceLight['ink-dim']).toBe('#666');
-    expect(sourceLight['accent']).toBe('#2d8cf0');
-    expect(sourceLight['line']).toBe('#ccc');
+  it('默认方案跟随当前选定的简约表单配色，实验室原件字节独立保持', () => {
+    expect(sourceLight['sheet']).toBe('#ffffff');
+    expect(sourceLight['ink']).toBe('#151717');
+    expect(sourceLight['line-strong']).toBe('#aeb4bb');
+    expect(sourceLight['ink-dim']).toBe('#6b7176');
+    expect(sourceLight['accent']).toBe('#2d79f3');
+    expect(sourceLight['line']).toBe('#e6e8eb');
   });
 
   it('六个 token 读的就是这些槽，兜底写的是同一份上游字面量', () => {

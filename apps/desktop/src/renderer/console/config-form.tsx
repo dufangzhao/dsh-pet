@@ -1,8 +1,6 @@
 import type { JsonValue } from '@pet/contracts';
 import { Fragment, type JSX, type ReactNode } from 'react';
 
-import { Button, Field } from '@pet/ui-kit';
-
 import type { ConfigNode } from './config-schema.js';
 import {
   canonical,
@@ -12,6 +10,7 @@ import {
   type DraftPath,
   pointerOf,
 } from './config-draft.js';
+import { Button, Field, Select, type FieldControl } from './minimal-ui/controls.js';
 
 /** 生效方式只说保存后需要做什么，不暗示已经启用或可用。 */
 const APPLY_TEXT = {
@@ -41,9 +40,7 @@ export function ConfigForm(props: ConfigFormProps): JSX.Element {
   const root = props.root;
   return (
     <div className="config-form__body" data-config-field="">
-      {root.description === undefined ? null : (
-        <p className="config-group__description">{root.description}</p>
-      )}
+      {root.description === undefined ? null : <p className="row__desc">{root.description}</p>}
       {root.properties.map((child) => (
         <Fragment key={child.key}>{renderEntry(props, child, [child.key], child.title)}</Fragment>
       ))}
@@ -74,28 +71,6 @@ function isOptionalProperty(node: ConfigNode, path: DraftPath): boolean {
   return typeof path.at(-1) === 'string' && !node.required;
 }
 
-function presenceToggle(
-  props: ConfigFormProps,
-  node: ConfigNode,
-  path: DraftPath,
-  label: string,
-  present: boolean,
-): ReactNode {
-  return (
-    <label className="config-presence">
-      <input
-        type="checkbox"
-        className="pk-check"
-        checked={present}
-        disabled={props.disabled}
-        aria-label={`${label}：设置此项`}
-        onChange={(event) => props.onPresence(path, node, event.target.checked)}
-      />
-      <span>设置此项</span>
-    </label>
-  );
-}
-
 function descriptionOf(node: ConfigNode): string | undefined {
   if (!node.credentialRef) {
     return node.description;
@@ -103,6 +78,73 @@ function descriptionOf(node: ConfigNode): string | undefined {
   return node.description === undefined
     ? '只引用已声明的凭据，这里不输入也不验证真实 Key。'
     : `${node.description} 只引用已声明的凭据，不验证真实 Key。`;
+}
+
+/**
+ * 字段脚上的一行：「设置此项」与生效方式。
+ * 开关只在可选属性上出现；旁边那一句是这一项保存后要做什么。
+ */
+function FieldMeta({
+  label,
+  node,
+  path,
+  present,
+  disabled,
+  onPresence,
+}: {
+  label: string;
+  node: ConfigNode;
+  path: DraftPath;
+  present: boolean;
+  disabled: boolean;
+  onPresence: ConfigFormProps['onPresence'];
+}): JSX.Element {
+  return (
+    <div className="field-row">
+      {isOptionalProperty(node, path) ? (
+        <span className="row__value">
+          <span className="row__label">设置此项</span>
+          <span className="switch">
+            <input
+              type="checkbox"
+              role="switch"
+              aria-label={label + '：设置此项'}
+              checked={present}
+              disabled={disabled}
+              onChange={(event) => onPresence(path, node, event.target.checked)}
+            />
+            <i aria-hidden="true" />
+          </span>
+        </span>
+      ) : null}
+      <span className="row__desc">{APPLY_TEXT[node.apply]}</span>
+    </div>
+  );
+}
+
+/** 一个字段位的外壳：值在 data-config-field 里，脚上的开关与生效方式在外面。 */
+function FieldShell({
+  pointer,
+  kind,
+  children,
+  meta,
+  description,
+}: {
+  pointer: string;
+  kind: string;
+  children: ReactNode;
+  meta: ReactNode;
+  description: string | undefined;
+}): JSX.Element {
+  return (
+    <div className="field">
+      <div data-config-field={pointer} data-config-kind={kind}>
+        {children}
+      </div>
+      {meta}
+      {description === undefined ? null : <p className="row__desc">{description}</p>}
+    </div>
+  );
 }
 
 /**
@@ -119,29 +161,27 @@ function renderEntry(
   const present = optional ? isPresent(props.draft, path) : true;
   const pointer = pointerOf(path);
   const description = descriptionOf(node);
+  const meta = (
+    <FieldMeta
+      label={label}
+      node={node}
+      path={path}
+      present={present}
+      disabled={props.disabled}
+      onPresence={props.onPresence}
+    />
+  );
 
   if (optional && !present) {
     return (
-      <div className="config-field" data-config-field={pointer} data-config-kind={node.kind}>
-        <span className="pk-field__head">
-          <span className="pk-field__label">{label}</span>
-          {presenceToggle(props, node, path, label, false)}
-          <span className="config-apply">{APPLY_TEXT[node.apply]}</span>
-        </span>
-        {description === undefined ? null : <p className="pk-field__description">{description}</p>}
-        <p className="config-unset">未设置，保存时不写入这一项。</p>
-      </div>
+      <FieldShell pointer={pointer} kind={node.kind} meta={meta} description={description}>
+        <span className="field__label">{label}</span>
+        <p className="row__desc">未设置，保存时不写入这一项。</p>
+      </FieldShell>
     );
   }
 
-  const hint = (
-    <>
-      {optional ? presenceToggle(props, node, path, label, true) : null}
-      <span className="config-apply">{APPLY_TEXT[node.apply]}</span>
-    </>
-  );
-
-  return renderNode(props, node, path, label, description, hint);
+  return renderNode(props, node, path, label, description, meta, pointer);
 }
 
 function renderNode(
@@ -150,48 +190,43 @@ function renderNode(
   path: DraftPath,
   label: string,
   description: string | undefined,
-  hint: ReactNode,
+  meta: ReactNode,
+  pointer: string,
 ): ReactNode {
-  const pointer = pointerOf(path);
-
-  // const 只展示真实固定值，不给可编辑控件；可选 const 仍靠 hint 里的开关决定是否写入。
+  // const 只展示真实固定值，不给可编辑控件；可选 const 仍靠开关决定是否写入。
   if (node.constant !== undefined) {
     return (
-      <div className="config-field" data-config-field={pointer} data-config-kind="const">
-        <p className="config-static">
-          <span className="config-static__label">{label}</span>
-          <span className="config-static__value">固定为 {choiceLabel(node.constant)}</span>
-          {hint}
-        </p>
-        {description === undefined ? null : <p className="pk-field__description">{description}</p>}
-      </div>
+      <FieldShell pointer={pointer} kind="const" meta={meta} description={description}>
+        <span className="field__label">{label}</span>
+        <p className="row__value">{'固定为 ' + choiceLabel(node.constant)}</p>
+      </FieldShell>
     );
   }
 
   if (node.kind === 'object') {
     return (
-      <fieldset className="config-group" data-config-field={pointer} data-config-kind="object">
-        <legend className="config-group__legend">{label}</legend>
-        <div className="config-group__head">{hint}</div>
-        {description === undefined ? null : (
-          <p className="config-group__description">{description}</p>
-        )}
-        <div className="config-group__body">
-          {node.properties.map((child) => (
-            <Fragment key={child.key}>
-              {renderEntry(props, child, [...path, child.key], child.title)}
-            </Fragment>
-          ))}
-        </div>
-      </fieldset>
+      <div className="field">
+        <fieldset className="config-group" data-config-field={pointer} data-config-kind="object">
+          <legend className="config-group__legend">{label}</legend>
+          {description === undefined ? null : <p className="row__desc">{description}</p>}
+          <div className="config-group__body">
+            {node.properties.map((child) => (
+              <Fragment key={child.key}>
+                {renderEntry(props, child, [...path, child.key], child.title)}
+              </Fragment>
+            ))}
+          </div>
+        </fieldset>
+        {meta}
+      </div>
     );
   }
 
   if (node.kind === 'array') {
-    return renderArray(props, node, path, label, description, hint);
+    return renderArray(props, node, path, label, description, meta, pointer);
   }
 
-  return renderScalar(props, node, path, label, description, hint);
+  return renderScalar(props, node, path, label, description, meta, pointer);
 }
 
 function renderArray(
@@ -200,63 +235,63 @@ function renderArray(
   path: DraftPath,
   label: string,
   description: string | undefined,
-  hint: ReactNode,
+  meta: ReactNode,
+  pointer: string,
 ): ReactNode {
-  const pointer = pointerOf(path);
   const draft = draftAt(props.draft, path);
   const items = draft.t === 'array' ? draft.v : [];
   const error = props.errors[pointer];
   const full = node.maxItems !== undefined && items.length >= node.maxItems;
 
   return (
-    <fieldset className="config-group" data-config-field={pointer} data-config-kind="array">
-      <legend className="config-group__legend">{label}</legend>
-      <div className="config-group__head">{hint}</div>
-      {description === undefined ? null : (
-        <p className="config-group__description">{description}</p>
-      )}
-      <div className="config-group__body">
-        {items.length === 0 ? <p className="config-unset">还没有条目。</p> : null}
-        {items.map((_, index) => (
-          <div className="config-item" key={index} data-config-item={index}>
-            <div className="config-item__body">
-              {node.item === null ? (
-                <p className="config-unset">{UNSUPPORTED}</p>
-              ) : (
-                renderEntry(props, node.item, [...path, index], `${label} ${index + 1}`)
-              )}
+    <div className="field">
+      <fieldset className="config-group" data-config-field={pointer} data-config-kind="array">
+        <legend className="config-group__legend">{label}</legend>
+        {description === undefined ? null : <p className="row__desc">{description}</p>}
+        <div className="config-group__body">
+          {items.length === 0 ? <p className="row__desc">还没有条目。</p> : null}
+          {items.map((_, index) => (
+            <div className="config-item" key={index} data-config-item={index}>
+              <div className="config-item__body">
+                {node.item === null ? (
+                  <p className="row__desc">{UNSUPPORTED}</p>
+                ) : (
+                  renderEntry(props, node.item, [...path, index], `${label} ${index + 1}`)
+                )}
+              </div>
+              <Button
+                size="small"
+                variant="ghost"
+                disabled={props.disabled}
+                onClick={() => props.onRemoveItem(path, index)}
+              >
+                删除{label} {index + 1}
+              </Button>
             </div>
+          ))}
+          {error === undefined ? null : (
+            <p className="field__error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="config-actions">
             <Button
               size="small"
-              variant="quiet"
-              disabled={props.disabled}
-              onClick={() => props.onRemoveItem(path, index)}
+              disabled={props.disabled || full || node.item === null}
+              onClick={() => props.onAddItem(path)}
             >
-              删除{label} {index + 1}
+              添加{label}
             </Button>
+            {node.maxItems === undefined ? null : (
+              <span className="config-count">
+                {items.length} / {node.maxItems}
+              </span>
+            )}
           </div>
-        ))}
-        {error === undefined ? null : (
-          <p className="pk-field__error" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="config-actions">
-          <Button
-            size="small"
-            disabled={props.disabled || full || node.item === null}
-            onClick={() => props.onAddItem(path)}
-          >
-            添加{label}
-          </Button>
-          {node.maxItems === undefined ? null : (
-            <span className="config-count">
-              {items.length} / {node.maxItems}
-            </span>
-          )}
         </div>
-      </div>
-    </fieldset>
+      </fieldset>
+      {meta}
+    </div>
   );
 }
 
@@ -266,18 +301,21 @@ function renderScalar(
   path: DraftPath,
   label: string,
   description: string | undefined,
-  hint: ReactNode,
+  meta: ReactNode,
+  pointer: string,
 ): ReactNode {
   const draft = draftAt(props.draft, path);
-  const pointer = pointerOf(path);
+  const error = props.errors[pointer];
 
   return (
-    <div className="config-field" data-config-field={pointer} data-config-kind={node.kind}>
-      <Field label={label} hint={hint} description={description} error={props.errors[pointer]}>
-        {({ inputId, describedBy, invalid }) =>
-          renderControl(props, node, draft, path, inputId, describedBy, invalid)
-        }
-      </Field>
+    <div className="field">
+      <div data-config-field={pointer} data-config-kind={node.kind}>
+        <Field label={label} {...(error === undefined ? {} : { error })}>
+          {(control) => renderControl(props, node, draft, path, control)}
+        </Field>
+      </div>
+      {meta}
+      {description === undefined ? null : <p className="row__desc">{description}</p>}
     </div>
   );
 }
@@ -287,9 +325,7 @@ function renderControl(
   node: ConfigNode,
   draft: Draft,
   path: DraftPath,
-  inputId: string,
-  describedBy: string | undefined,
-  invalid: boolean,
+  control: FieldControl,
 ): ReactNode {
   const disabled = props.disabled;
   const set = (next: Draft): void => props.onChange(path, next);
@@ -297,70 +333,72 @@ function renderControl(
   if (node.choices !== undefined) {
     const value = draft.t === 'choice' ? draft.v : '';
     return (
-      <select
-        className="pk-input"
-        id={inputId}
+      <Select
+        id={control.inputId}
         value={value}
         disabled={disabled}
-        aria-describedby={describedBy}
-        aria-invalid={invalid ? 'true' : undefined}
+        aria-describedby={control.describedBy}
+        aria-invalid={control.invalid || undefined}
+        options={[
+          { value: '', label: '请选择…' },
+          ...node.choices.map((choice) => ({
+            value: canonical(choice),
+            label: choiceLabel(choice),
+          })),
+        ]}
         onChange={(event) => set({ t: 'choice', v: event.target.value })}
-      >
-        <option value="">请选择…</option>
-        {node.choices.map((choice) => (
-          <option key={canonical(choice)} value={canonical(choice)}>
-            {choiceLabel(choice)}
-          </option>
-        ))}
-      </select>
+      />
     );
   }
 
   switch (node.kind) {
     case 'boolean':
       return (
-        <input
-          type="checkbox"
-          className="pk-check"
-          id={inputId}
-          checked={draft.t === 'bool' && draft.v}
-          disabled={disabled}
-          aria-describedby={describedBy}
-          aria-invalid={invalid ? 'true' : undefined}
-          onChange={(event) => set({ t: 'bool', v: event.target.checked })}
-        />
+        <span className="switch">
+          <input
+            type="checkbox"
+            role="switch"
+            id={control.inputId}
+            checked={draft.t === 'bool' && draft.v}
+            disabled={disabled}
+            aria-describedby={control.describedBy}
+            aria-invalid={control.invalid || undefined}
+            onChange={(event) => set({ t: 'bool', v: event.target.checked })}
+          />
+          <i aria-hidden="true" />
+        </span>
       );
     case 'number':
     case 'integer':
       return (
         <input
-          className="pk-input"
-          id={inputId}
+          className="input"
+          id={control.inputId}
           type="text"
           inputMode={node.kind === 'integer' ? 'numeric' : 'decimal'}
           value={draft.t === 'number' ? draft.v : ''}
           disabled={disabled}
-          aria-describedby={describedBy}
-          aria-invalid={invalid ? 'true' : undefined}
+          aria-describedby={control.describedBy}
+          aria-invalid={control.invalid || undefined}
           onChange={(event) => set({ t: 'number', v: event.target.value })}
         />
       );
     case 'null':
-      return <p className="config-unset">这一项固定为空值（null）。</p>;
+      return <p className="row__desc">这一项固定为空值（null）。</p>;
     case 'string':
       return (
         <input
-          className="pk-input"
-          id={inputId}
+          className="input"
+          id={control.inputId}
           type="text"
           value={draft.t === 'text' ? draft.v : ''}
           disabled={disabled}
-          aria-describedby={describedBy}
-          aria-invalid={invalid ? 'true' : undefined}
+          aria-describedby={control.describedBy}
+          aria-invalid={control.invalid || undefined}
           onChange={(event) => set({ t: 'text', v: event.target.value })}
         />
       );
     default:
-      return <p className="config-unset">{UNSUPPORTED}</p>;
+      return <p className="row__desc">{UNSUPPORTED}</p>;
   }
 }

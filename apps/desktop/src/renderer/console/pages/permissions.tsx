@@ -8,9 +8,9 @@ import type {
   PermissionPreset,
 } from '@pet/contracts';
 import { ERROR_MESSAGES, PERMISSION_PRESETS, PERMISSION_PRESET_DESCRIPTIONS } from '@pet/contracts';
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useId, useState, type JSX, type ReactNode } from 'react';
 
-import { Button, Dialog, EmptyState, List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
+import { Dialog } from '@pet/ui-kit';
 
 import { ConsoleStatus } from '../console-status.js';
 import {
@@ -24,6 +24,7 @@ import {
   presetLabel,
   shortDigest,
 } from '../labels.js';
+import { Button, Card, Status } from '../minimal-ui/controls.js';
 import { AUDIT_PAGE_SIZE, useAudit, type AuditState } from '../use-audit.js';
 import { restoreKey, useSecurityActions, type SecurityOutcome } from '../use-security-actions.js';
 
@@ -133,80 +134,36 @@ export function PermissionsPage({
               onAnswer={answer}
             />
 
-            <Section
-              title="来源信任"
-              description="安装或启用插件是一次信任决定。信任只在本次运行有效，插件代码变化后需要重新确认。"
-            >
-              {security.plugins.length === 0 ? (
-                <EmptyState
-                  title="还没有可确认的插件"
-                  description="安装插件后，它的来源与包指纹会出现在这里。"
+            {security.plugins.length === 0 ? (
+              <Card title="来源信任">
+                <p className="row__desc">还没有可确认的插件</p>
+              </Card>
+            ) : (
+              security.plugins.map((plugin) => (
+                <TrustCard
+                  key={ownerKey(plugin.owner)}
+                  plugin={plugin}
+                  busy={actions.pending.has(ownerKey(plugin.owner))}
+                  onAsk={askTrust}
+                  onPreset={changePreset}
                 />
-              ) : (
-                <ul className="plugin-list" aria-label="插件来源信任">
-                  {security.plugins.map((plugin) => (
-                    <TrustRow
-                      key={ownerKey(plugin.owner)}
-                      plugin={plugin}
-                      busy={actions.pending.has(ownerKey(plugin.owner))}
-                      onAsk={askTrust}
-                    />
-                  ))}
-                </ul>
-              )}
-            </Section>
+              ))
+            )}
 
-            <Section
-              title="权限预设"
-              description="预设决定敏感操作是自动执行还是需要审批。切换立即生效，同样只在本次运行有效。"
-            >
-              {security.plugins.length === 0 ? (
-                <EmptyState
-                  title="还没有可设置的插件"
-                  description="安装插件后可以在这里调整它的权限预设。"
-                />
-              ) : (
-                <ul className="plugin-list" aria-label="插件权限预设">
-                  {security.plugins.map((plugin) => (
-                    <PresetRow
-                      key={ownerKey(plugin.owner)}
-                      plugin={plugin}
-                      busy={actions.pending.has(ownerKey(plugin.owner))}
-                      onPreset={changePreset}
-                    />
-                  ))}
-                </ul>
-              )}
-            </Section>
-
-            <Section
-              title="恢复内置功能"
-              description="卸载结果保存在本机，重启后也不会自己回来；在这里可以装回去。恢复只把功能放回插件列表，不确认信任，也不自动启用。"
-            >
-              {security.availableBuiltins.length === 0 ? (
-                <EmptyState
-                  title="没有可恢复的内置功能"
-                  description="卸载内置功能之后，它会出现在这里。"
-                />
-              ) : (
-                <ul className="plugin-list" aria-label="可恢复的内置功能">
-                  {security.availableBuiltins.map((builtin) => (
-                    <BuiltinRow
-                      key={builtin.pluginId}
-                      builtin={builtin}
-                      busy={actions.pending.has(restoreKey(builtin.pluginId))}
-                      onAsk={setRestoring}
-                    />
-                  ))}
-                </ul>
-              )}
-            </Section>
+            <BuiltinCard
+              builtins={security.availableBuiltins}
+              pending={actions.pending}
+              onAsk={setRestoring}
+            />
 
             <AuditSection audit={audit} names={names} />
 
-            <Section title="数据">
-              <EmptyState title="数据管理尚未接入" description="清除对话记录与导出数据暂不可用。" />
-            </Section>
+            <Card title="本地数据">
+              <div className="rows rows--tight">
+                <Row label="清除本地数据">暂不支持</Row>
+                <Row label="导出数据">暂不支持</Row>
+              </div>
+            </Card>
           </>
         )}
       </ConsoleStatus>
@@ -223,6 +180,18 @@ export function PermissionsPage({
 
 function namesOf(security: ConsoleSecuritySnapshot | null): ReadonlyMap<string, string> {
   return new Map(security?.plugins.map((plugin) => [ownerKey(plugin.owner), plugin.name]) ?? []);
+}
+
+/** 一行「名称在左、值在右」：四张卡片共用这一种排法。 */
+function Row({ label, children }: { label: string; children: ReactNode }): JSX.Element {
+  return (
+    <div className="row">
+      <span className="row__text">
+        <span className="row__label">{label}</span>
+      </span>
+      <span className="row__value">{children}</span>
+    </div>
+  );
 }
 
 /* ---- 待审批 ---- */
@@ -242,56 +211,48 @@ function ApprovalQueue({ prompts, names, pending, onAnswer }: ApprovalQueueProps
   const now = useNow(prompts.length > 0);
 
   return (
-    <Section
-      title="待审批请求"
-      description="每一项只对那一次操作有效，不形成长期授权。超时未答复会自动拒绝，晚到的答复会被丢弃。"
-    >
+    <Card title="待审批请求">
       {prompts.length === 0 ? (
-        <EmptyState
-          title="没有等待审批的请求"
-          description="插件发起需要审批的操作时会出现在这里。"
-        />
+        <p className="row__desc">没有等待审批的请求</p>
       ) : (
-        <ul className="approval-list" aria-label="待审批请求">
+        <div className="rows rows--tight">
           {prompts.map((prompt) => {
             const left = prompt.deadlineAt - now;
             const expired = left <= 0;
             const name = names.get(ownerKey(prompt.owner)) ?? prompt.owner.pluginId;
             const busy = pending.has(prompt.requestId);
             return (
-              <li className="approval-row" key={prompt.requestId}>
-                <div className="approval-row__head">
-                  <span className="approval-row__name">{name}</span>
-                  <span className="approval-row__deadline">
+              <div className="row" key={prompt.requestId}>
+                <span className="row__text">
+                  <span className="row__label">{name}</span>
+                  <span className="row__desc">{describePermission(prompt.permission)}</span>
+                  <span className="row__desc">
                     {expired ? '已超时，等待结果' : `剩余 ${secondsOf(left)} 秒`}
                   </span>
-                </div>
-                <p className="approval-row__permission">{describePermission(prompt.permission)}</p>
-                <div className="approval-row__actions">
+                </span>
+                <span className="row__value">
                   <Button
-                    size="small"
                     variant="primary"
                     disabled={expired || busy}
-                    data-testid={`approval-allow-${prompt.requestId}`}
+                    data-testid={'approval-allow-' + prompt.requestId}
                     onClick={() => onAnswer(prompt, true, name)}
                   >
                     同意这一次
                   </Button>
                   <Button
-                    size="small"
                     disabled={expired || busy}
-                    data-testid={`approval-deny-${prompt.requestId}`}
+                    data-testid={'approval-deny-' + prompt.requestId}
                     onClick={() => onAnswer(prompt, false, name)}
                   >
                     拒绝
                   </Button>
-                </div>
-              </li>
+                </span>
+              </div>
             );
           })}
-        </ul>
+        </div>
       )}
-    </Section>
+    </Card>
   );
 }
 
@@ -312,43 +273,86 @@ function secondsOf(left: number): number {
   return Math.max(1, Math.ceil(left / 1000));
 }
 
-/* ---- 来源信任 ---- */
+/* ---- 来源信任与权限预设 ---- */
 
-interface TrustRowProps {
+interface TrustCardProps {
   plugin: ConsoleSecurityPlugin;
   busy: boolean;
   onAsk: (plugin: ConsoleSecurityPlugin) => void;
+  onPreset: (plugin: ConsoleSecurityPlugin, preset: PermissionPreset) => void;
 }
 
-function TrustRow({ plugin, busy, onAsk }: TrustRowProps): JSX.Element {
+/**
+ * 一个插件的来源与权限：信任是这次运行的确认，预设决定敏感操作还要不要问。
+ * 两者都只对本次运行有效，所以放在同一张卡上，但各自说的是自己的事。
+ */
+function TrustCard({ plugin, busy, onAsk, onPreset }: TrustCardProps): JSX.Element {
+  const presetLabelId = useId();
+
   return (
-    <li className="plugin-row" data-owner-key={ownerKey(plugin.owner)}>
-      <div className="plugin-row__head">
-        <span className="plugin-row__name">{plugin.name}</span>
-        <StatusBadge tone={plugin.trusted ? 'ok' : 'warn'}>
+    <Card
+      title={plugin.name}
+      action={
+        <Status tone={plugin.trusted ? 'ok' : 'warn'}>
           {plugin.trusted ? '已确认可信' : '未确认'}
-        </StatusBadge>
-        <span className="plugin-row__meta">
-          {pluginOrigin(plugin.origin)} · 版本 {plugin.version}
-        </span>
+        </Status>
+      }
+    >
+      <div className="rows rows--tight">
+        <Row label="来源">{pluginOrigin(plugin.origin)}</Row>
+        <Row label="版本">{plugin.version}</Row>
       </div>
-      <p className="plugin-row__hint">
+
+      <p className="row__desc">
         {plugin.digest === null
           ? '还没有这个插件包的指纹，暂时无法确认来源。'
-          : `包指纹 ${shortDigest(plugin.digest)} · 确认只对这份代码有效`}
+          : `包指纹 ${shortDigest(plugin.digest)}`}
       </p>
-      <div className="plugin-row__actions">
+
+      <div className="field">
+        <span className="field__label" id={presetLabelId}>
+          权限预设
+        </span>
+        <p className="row__desc">
+          {plugin.blocked
+            ? '已暂停：所有敏感操作都会被拒绝。切换预设即可恢复。'
+            : `当前预设：${presetLabel(plugin.preset)}`}
+        </p>
+        <div className="choices" role="radiogroup" aria-labelledby={presetLabelId}>
+          {PERMISSION_PRESETS.map((preset) => (
+            <label className="choice" key={preset}>
+              <input
+                type="radio"
+                name={'preset-' + ownerKey(plugin.owner)}
+                value={preset}
+                /*
+                 * 暂停时一个都不选中：这样再点当前那一档也会触发 onChange，
+                 * 用户才有办法从“已暂停”回到正常状态。
+                 */
+                checked={plugin.preset === preset && !plugin.blocked}
+                disabled={busy}
+                onChange={() => onPreset(plugin, preset)}
+              />
+              <span className="row__text">
+                <span className="choice__name">{presetLabel(preset)}</span>
+                <span className="row__desc">{PERMISSION_PRESET_DESCRIPTIONS[preset]}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="card__foot">
         <Button
-          size="small"
           variant={plugin.trusted ? 'secondary' : 'primary'}
           disabled={busy || plugin.digest === null}
-          data-testid={`trust-${plugin.owner.pluginId}`}
+          data-testid={'trust-' + plugin.owner.pluginId}
           onClick={() => onAsk(plugin)}
         >
           {plugin.trusted ? '取消信任' : '确认来源信任'}
         </Button>
       </div>
-    </li>
+    </Card>
   );
 }
 
@@ -403,21 +407,12 @@ function TrustDialog({ request, onClose, onConfirm }: TrustDialogProps): JSX.Ele
 
 function TrustBody({ plugin }: { plugin: ConsoleSecurityPlugin }): JSX.Element {
   return (
-    <div className="package-dialog">
-      <dl className="package-dialog__facts">
-        <div>
-          <dt>版本</dt>
-          <dd>{plugin.version}</dd>
-        </div>
-        <div>
-          <dt>来源</dt>
-          <dd>{pluginOrigin(plugin.origin)}</dd>
-        </div>
-        <div>
-          <dt>包指纹</dt>
-          <dd className="package-dialog__digest">{plugin.digest ?? '未知'}</dd>
-        </div>
-      </dl>
+    <>
+      <div className="rows rows--tight">
+        <Row label="版本">{plugin.version}</Row>
+        <Row label="来源">{pluginOrigin(plugin.origin)}</Row>
+        <Row label="包指纹">{plugin.digest ?? '未知'}</Row>
+      </div>
       <p>
         确认后，这个插件可以在本次运行中启动。它声明的敏感操作仍然逐个询问，不会因为确认信任就自动通过。
       </p>
@@ -426,63 +421,15 @@ function TrustBody({ plugin }: { plugin: ConsoleSecurityPlugin }): JSX.Element {
       ) : (
         <>
           <p>它声明需要：</p>
-          <ul className="package-dialog__permissions">
+          <ul>
             {plugin.permissions.map((permission, index) => (
-              <li key={`${permission.kind}|${index}`}>{describePermission(permission)}</li>
+              <li key={permission.kind + '|' + index}>{describePermission(permission)}</li>
             ))}
           </ul>
         </>
       )}
-      <p className="console-muted">信任只在本次运行有效；插件代码变化后需要重新确认。</p>
-    </div>
-  );
-}
-
-/* ---- 权限预设 ---- */
-
-interface PresetRowProps {
-  plugin: ConsoleSecurityPlugin;
-  busy: boolean;
-  onPreset: (plugin: ConsoleSecurityPlugin, preset: PermissionPreset) => void;
-}
-
-function PresetRow({ plugin, busy, onPreset }: PresetRowProps): JSX.Element {
-  return (
-    <li className="plugin-row" data-owner-key={ownerKey(plugin.owner)}>
-      <fieldset className="preset-group">
-        <legend className="preset-group__legend">{plugin.name}</legend>
-        <p className="plugin-row__hint">
-          {plugin.blocked
-            ? '已暂停：所有敏感操作都会被拒绝。切换预设即可恢复。'
-            : `当前预设：${presetLabel(plugin.preset)}`}
-        </p>
-        <div className="preset-options">
-          {PERMISSION_PRESETS.map((preset) => (
-            <label className="preset-option" key={preset}>
-              <input
-                type="radio"
-                className="preset-option__radio"
-                name={`preset-${ownerKey(plugin.owner)}`}
-                value={preset}
-                /*
-                 * 暂停时一个都不选中：这样再点当前那一档也会触发 onChange，
-                 * 用户才有办法从“已暂停”回到正常状态。
-                 */
-                checked={plugin.preset === preset && !plugin.blocked}
-                disabled={busy}
-                onChange={() => onPreset(plugin, preset)}
-              />
-              <span className="preset-option__body">
-                <span className="preset-option__label">{presetLabel(preset)}</span>
-                <span className="preset-option__text">
-                  {PERMISSION_PRESET_DESCRIPTIONS[preset]}
-                </span>
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-    </li>
+      <p className="row__desc">信任只在本次运行有效；插件代码变化后需要重新确认。</p>
+    </>
   );
 }
 
@@ -499,54 +446,58 @@ function AuditSection({ audit, names }: AuditSectionProps): JSX.Element {
   const newest = Math.max(0, retained - AUDIT_PAGE_SIZE);
 
   return (
-    <Section
+    <Card
       title="审计"
-      description="每次请求与结果都记一条，只含元数据：谁、何时、什么类型、结果如何，不含内容与参数值。"
-      actions={
-        <button
-          type="button"
-          className="console-action"
+      action={
+        <Button
+          size="small"
+          variant="ghost"
           data-testid="audit-refresh"
-          onClick={audit.refresh}
           disabled={audit.loading}
+          onClick={audit.refresh}
         >
           {audit.loading ? '读取中…' : '刷新'}
-        </button>
+        </Button>
       }
     >
       {audit.error !== null ? (
-        <EmptyState
-          title="读取审计失败"
-          description={audit.error}
-          action={<Button onClick={audit.refresh}>重新读取</Button>}
-        />
+        <div className="card__foot" role="alert">
+          <Status tone="danger">{'读取审计失败：' + audit.error}</Status>
+          <Button size="small" onClick={audit.refresh}>
+            重新读取
+          </Button>
+        </div>
       ) : page === null ? (
-        <p className="console-muted">正在读取审计记录…</p>
+        <p className="row__desc">正在读取审计记录…</p>
       ) : page.entries.length === 0 ? (
-        <EmptyState
-          title="还没有记录"
-          description="插件发起权限请求或审批之后，这里会出现对应的记录。"
-        />
+        <p className="row__desc">还没有记录</p>
       ) : (
         <>
-          <List label="审计记录">
-            {page.entries.map((entry) => (
-              <ListItem
-                key={entry.id}
-                title={`${names.get(ownerKey(entry.owner)) ?? entry.owner.pluginId} · ${auditEvent(entry.event)}`}
-                description={describeEntry(entry)}
-                meta={clockTime(entry.at)}
-              />
-            ))}
-          </List>
-          <div className="audit-nav">
-            <span className="config-count">
-              第 {audit.offset + 1}–{audit.offset + page.entries.length} 条，共 {page.total} 条
-              {page.dropped > 0 ? `（更早的 ${page.dropped} 条已丢弃）` : ''}
-            </span>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">时间</th>
+                <th scope="col">插件</th>
+                <th scope="col">事件</th>
+                <th scope="col">摘要</th>
+              </tr>
+            </thead>
+            <tbody>
+              {page.entries.map((entry) => (
+                <tr key={entry.id}>
+                  <td>{clockTime(entry.at)}</td>
+                  <td>{names.get(ownerKey(entry.owner)) ?? entry.owner.pluginId}</td>
+                  <td>{eventText(entry)}</td>
+                  <td>{digestText(entry)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="row__desc">{rangeText(audit, page.total, page.dropped)}</p>
+          <div className="card__foot">
             <Button
               size="small"
-              variant="quiet"
+              variant="ghost"
               disabled={audit.loading || audit.offset === 0}
               onClick={() => audit.load(Math.max(0, audit.offset - AUDIT_PAGE_SIZE))}
             >
@@ -554,7 +505,7 @@ function AuditSection({ audit, names }: AuditSectionProps): JSX.Element {
             </Button>
             <Button
               size="small"
-              variant="quiet"
+              variant="ghost"
               disabled={audit.loading || audit.offset >= newest}
               onClick={() => audit.load(audit.offset + AUDIT_PAGE_SIZE)}
             >
@@ -563,28 +514,37 @@ function AuditSection({ audit, names }: AuditSectionProps): JSX.Element {
           </div>
         </>
       )}
-    </Section>
+    </Card>
   );
 }
 
-/** 一条审计的次要信息：来源、类型、指纹前缀，有错误码时补一句固定文案。 */
-function describeEntry(entry: AuditEntry): string {
-  const parts = [
-    auditSource(entry.source),
-    permissionKind(entry.kind),
-    `#${shortDigest(entry.targetHash)}`,
-  ];
-  if (entry.errorCode !== undefined) {
-    parts.push(ERROR_MESSAGES[entry.errorCode]);
-  }
-  return parts.join(' · ');
+/** 一条审计的事件那一格：来源、事件与权限类型。 */
+function eventText(entry: AuditEntry): string {
+  return [auditSource(entry.source), auditEvent(entry.event), permissionKind(entry.kind)].join(
+    ' · ',
+  );
+}
+
+/** 摘要只给前缀；有错误码时补一句固定文案。 */
+function digestText(entry: AuditEntry): string {
+  const head = '#' + shortDigest(entry.targetHash);
+  return entry.errorCode === undefined ? head : head + ' · ' + ERROR_MESSAGES[entry.errorCode];
+}
+
+/** 这一页覆盖了哪几条、总共多少条，以及被宿主丢弃的更早记录。 */
+function rangeText(audit: AuditState, total: number, dropped: number): string {
+  const first = audit.offset + 1;
+  const last = audit.offset + (audit.page?.entries.length ?? 0);
+  return (
+    `第 ${first}–${last} 条，共 ${total} 条` + (dropped > 0 ? `（更早的 ${dropped} 条已丢弃）` : '')
+  );
 }
 
 /* ---- 恢复内置功能 ---- */
 
-interface BuiltinRowProps {
-  builtin: ConsoleBuiltinPackage;
-  busy: boolean;
+interface BuiltinCardProps {
+  builtins: readonly ConsoleBuiltinPackage[];
+  pending: ReadonlySet<string>;
   onAsk: (builtin: ConsoleBuiltinPackage) => void;
 }
 
@@ -592,40 +552,40 @@ interface BuiltinRowProps {
  * 一个已卸载的内置功能。这里只说明它是什么、声明了什么，恢复本身要再确认一次：
  * 恢复不等于信任，也不会自动启用。
  */
-function BuiltinRow({ builtin, busy, onAsk }: BuiltinRowProps): JSX.Element {
+function BuiltinCard({ builtins, pending, onAsk }: BuiltinCardProps): JSX.Element {
   return (
-    <li className="plugin-row" data-builtin-id={builtin.pluginId}>
-      <div className="plugin-row__head">
-        <span className="plugin-row__name">{builtin.name}</span>
-        <span className="plugin-row__meta">
-          {pluginOrigin('builtin')} · 版本 {builtin.version} · 包指纹 {shortDigest(builtin.digest)}
-        </span>
-      </div>
-      {builtin.permissions.length === 0 ? (
-        <p className="plugin-row__hint">没有声明额外权限。</p>
+    <Card title="恢复内置功能">
+      {builtins.length === 0 ? (
+        <p className="row__desc">没有可恢复的内置功能</p>
       ) : (
-        <details className="plugin-row__permissions">
-          <summary className="plugin-row__summary">
-            声明的权限（{builtin.permissions.length}）· 这是请求，不是授权
-          </summary>
-          <ul className="plugin-row__permission-list">
-            {builtin.permissions.map((permission, index) => (
-              <li key={`${permission.kind}|${index}`}>{describePermission(permission)}</li>
-            ))}
-          </ul>
-        </details>
+        <div className="rows rows--tight">
+          {builtins.map((builtin) => (
+            <div className="row" key={builtin.pluginId}>
+              <span className="row__text">
+                <span className="row__label">{builtin.name}</span>
+                <span className="row__desc">
+                  {`内置 · 版本 ${builtin.version} · 包指纹 ${shortDigest(builtin.digest)}`}
+                </span>
+                <span className="row__desc">
+                  {builtin.permissions.length === 0
+                    ? '没有声明额外权限。'
+                    : builtin.permissions.map(describePermission).join('、')}
+                </span>
+              </span>
+              <span className="row__value">
+                <Button
+                  disabled={pending.has(restoreKey(builtin.pluginId))}
+                  data-testid={'restore-' + builtin.pluginId}
+                  onClick={() => onAsk(builtin)}
+                >
+                  恢复
+                </Button>
+              </span>
+            </div>
+          ))}
+        </div>
       )}
-      <div className="plugin-row__actions">
-        <Button
-          size="small"
-          disabled={busy}
-          data-testid={`restore-${builtin.pluginId}`}
-          onClick={() => onAsk(builtin)}
-        >
-          恢复
-        </Button>
-      </div>
-    </li>
+    </Card>
   );
 }
 
@@ -654,21 +614,15 @@ function RestoreDialog({ builtin, onClose, onConfirm }: RestoreDialogProps): JSX
       }
     >
       {builtin === null ? null : (
-        <div className="package-dialog">
+        <>
           <p>
             恢复只把这个内置功能放回插件列表。它不会因此被信任，也不会自动启用；之后仍要在“来源信任”里确认，再手动启用。
           </p>
-          <dl className="package-dialog__facts">
-            <div>
-              <dt>版本</dt>
-              <dd>{builtin.version}</dd>
-            </div>
-            <div>
-              <dt>包指纹</dt>
-              <dd className="package-dialog__digest">{builtin.digest}</dd>
-            </div>
-          </dl>
-        </div>
+          <div className="rows rows--tight">
+            <Row label="版本">{builtin.version}</Row>
+            <Row label="包指纹">{builtin.digest}</Row>
+          </div>
+        </>
       )}
     </Dialog>
   );

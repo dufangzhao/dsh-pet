@@ -1,9 +1,5 @@
 import { useCallback, useState, type JSX } from 'react';
 
-import type { ApplicationInteraction } from '@pet/contracts';
-
-import { Button, EmptyState, List, ListItem, Section, StatusBadge } from '@pet/ui-kit';
-
 import { ConsoleStatus } from '../console-status.js';
 import {
   clockTime,
@@ -12,6 +8,7 @@ import {
   interactionMode,
   interactionVia,
 } from '../labels.js';
+import { Button, Card, Status } from '../minimal-ui/controls.js';
 import type { ApplicationState } from '../use-application.js';
 import type { DemoState } from '../use-demo.js';
 import { DemoRecorder } from './demo-console.js';
@@ -29,129 +26,98 @@ export interface ConversationPageProps {
  */
 export function ConversationPage({ app, demo, notify }: ConversationPageProps): JSX.Element {
   return (
-    <div className="pk-split">
-      <div className="pk-split__main">
-        <Section
-          title="今天这一条"
-          description="它只是同一份记录的视图：不新建历史，也不新建聊天入口。"
-          actions={
-            <button
-              type="button"
-              className="console-action"
-              data-testid="history-refresh"
-              onClick={app.refresh}
-              disabled={app.loading}
-            >
-              {app.loading ? '读取中…' : '刷新'}
-            </button>
-          }
-        >
-          <ConsoleStatus
-            loading={app.loading}
-            error={app.error}
-            available={app.available}
-            onRetry={app.refresh}
-          >
-            {app.snapshot === null ? null : <History app={app} />}
-          </ConsoleStatus>
-        </Section>
-
-        <Section title="对它说" description="这一句会进同一条记录，回复也记在同一处。">
-          <ConsoleStatus
-            loading={demo.loading}
-            error={demo.error}
-            available={demo.available}
-            onRetry={demo.refresh}
-          >
-            {demo.snapshot === null ? null : (
-              <>
-                <p className="demo-phase">
-                  <StatusBadge tone={demoPhase(demo.snapshot.phase).tone}>
-                    {demoPhase(demo.snapshot.phase).text}
-                  </StatusBadge>
-                </p>
-                <DemoRecorder demo={demo} />
-                <LiveText demo={demo} />
-                <Compose demo={demo} notify={notify} />
-              </>
-            )}
-          </ConsoleStatus>
-        </Section>
-      </div>
-
-      <div className="pk-split__aside">
-        <p className="console-muted">
-          桌面上说的话、气泡里的选择与这里的输入，记的是同一只桌宠的同一份记录。
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function History({ app }: { app: ApplicationState }): JSX.Element {
-  const items = app.history;
-  if (items.length === 0) {
-    return (
-      <EmptyState
-        title="还没有日常互动记录"
-        description="对它说话、碰它一下，或在气泡里做一个选择，都会出现在这里。"
-      />
-    );
-  }
-  return (
     <>
-      {app.historyEarlier || app.historyError !== null ? (
-        <div className="history-earlier">
+      <Card title="今天这一条">
+        <div className="card__foot">
+          <Button data-testid="history-refresh" disabled={app.loading} onClick={app.refresh}>
+            {app.loading ? '读取中…' : '刷新'}
+          </Button>
           {app.historyEarlier ? (
             <Button
-              size="small"
-              disabled={app.historyLoading}
               data-testid="history-earlier"
+              disabled={app.historyLoading}
               onClick={app.loadEarlierHistory}
             >
               {app.historyLoading ? '读取中…' : '加载更早记录'}
             </Button>
           ) : null}
-          {app.historyError === null ? null : (
-            <p className="pb-row__error" role="alert" data-testid="history-earlier-error">
-              更早的记录没有读出来：{app.historyError}
-            </p>
-          )}
         </div>
-      ) : null}
-      <List label="日常互动记录">
-        {items.map((item) => (
-          <ListItem
-            key={item.id}
-            title={interactionKind(item.kind)}
-            description={item.text}
-            meta={clockTime(item.at)}
-            trailing={<Chips item={item} />}
-          />
-        ))}
-      </List>
+
+        {app.historyError === null ? null : (
+          <p role="alert" data-testid="history-earlier-error">
+            <Status tone="danger">更早的记录没有读出来：{app.historyError}</Status>
+          </p>
+        )}
+
+        <ConsoleStatus
+          loading={app.loading}
+          error={app.error}
+          available={app.available}
+          onRetry={app.refresh}
+        >
+          {app.snapshot === null ? null : <History app={app} />}
+        </ConsoleStatus>
+      </Card>
+
+      <ConsoleStatus
+        loading={demo.loading}
+        error={demo.error}
+        available={demo.available}
+        onRetry={demo.refresh}
+      >
+        {demo.snapshot === null ? null : (
+          <>
+            <Compose demo={demo} notify={notify} />
+            <Card title="语音" action={<Status>{demoPhase(demo.snapshot.phase).text}</Status>}>
+              <DemoRecorder demo={demo} />
+              <LiveText demo={demo} />
+            </Card>
+          </>
+        )}
+      </ConsoleStatus>
     </>
   );
 }
 
-/** 来源与回复方式都另有文字，颜色只是帮助扫读。 */
-function Chips({ item }: { item: ApplicationInteraction }): JSX.Element | null {
-  const chips: JSX.Element[] = [];
-  if (item.via !== undefined) {
-    chips.push(
-      <StatusBadge key="via" tone="neutral">
-        {interactionVia(item.via)}
-      </StatusBadge>,
+/** 时间线按升序读：越往下越新，和它说话的顺序一致。 */
+function History({ app }: { app: ApplicationState }): JSX.Element {
+  const items = app.history;
+  if (items.length === 0) {
+    return (
+      <div className="rows rows--tight">
+        <div className="row">
+          <span className="row__text">
+            <span className="row__label">还没有日常互动记录</span>
+            <span className="row__desc">
+              对它说话、碰它一下，或在气泡里做一个选择，都会出现在这里。
+            </span>
+          </span>
+        </div>
+      </div>
     );
   }
-  if (item.mode !== undefined) {
-    chips.push(
-      <StatusBadge key="mode" tone={item.mode === 'demo' ? 'warn' : 'neutral'}>
-        {interactionMode(item.mode)}
-      </StatusBadge>,
-    );
-  }
-  return chips.length === 0 ? null : <>{chips}</>;
+  return (
+    <div className="rows rows--tight">
+      {items.map((item) => (
+        <div
+          className="row"
+          key={item.id}
+          data-interaction-id={item.id}
+          data-interaction-kind={item.kind}
+        >
+          <span className="row__text">
+            <span className="row__label">{item.text}</span>
+          </span>
+          <span className="row__value">
+            {interactionKind(item.kind)}
+            {item.via === undefined ? null : ` · ${interactionVia(item.via)}`}
+            {` · ${clockTime(item.at)}`}
+            {item.mode === undefined ? null : <Status>{interactionMode(item.mode)}</Status>}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 /** 正在听、正在想的内容一块块回来，用 aria-live 播报，不弹提示。 */
@@ -172,7 +138,7 @@ function LiveText({ demo }: { demo: DemoState }): JSX.Element | null {
     return null;
   }
   return (
-    <p className="demo-transcript" role="status" aria-live="polite">
+    <p className="row__value" role="status" aria-live="polite">
       {line}
     </p>
   );
@@ -207,42 +173,57 @@ function Compose({
     return null;
   }
 
+  const sending = demo.pending.has('send');
+
   return (
-    <form
-      className="demo-compose"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void send();
-      }}
+    <Card
+      title="对它说"
+      action={
+        <span className="row__value" role="status">
+          {!snapshot.canSend
+            ? '还不能发送：先在开始页接上回复来源'
+            : sending
+              ? '正在送出…'
+              : '未发送'}
+        </span>
+      }
     >
-      <label className="demo-compose__label" htmlFor="conversation-input">
-        说点什么
-      </label>
-      <p className="console-muted">
-        {snapshot.canSend
-          ? '这句话和回复都会出现在上面那条记录里。'
-          : '现在还不能发送：先在开始页接上回复来源。'}
-      </p>
-      <textarea
-        id="conversation-input"
-        className="pk-input"
-        rows={2}
-        maxLength={2000}
-        value={draft}
-        data-testid="demo-input"
-        onChange={(event) => setDraft(event.target.value)}
-      />
-      <div className="demo-compose__actions">
-        <Button
-          type="submit"
-          size="small"
-          variant="primary"
-          disabled={!snapshot.canSend || draft.trim() === '' || demo.pending.has('send')}
-          data-testid="demo-send"
-        >
-          {demo.pending.has('send') ? '正在送出…' : '发送'}
-        </Button>
-      </div>
-    </form>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void send();
+        }}
+      >
+        <div className="field">
+          <label className="field__label" htmlFor="conversation-input">
+            说点什么
+          </label>
+          <div className="inputForm" data-multiline="true">
+            <textarea
+              className="input"
+              id="conversation-input"
+              rows={3}
+              maxLength={2000}
+              spellCheck={false}
+              value={draft}
+              data-testid="demo-input"
+              onChange={(event) => setDraft(event.target.value)}
+            />
+          </div>
+          <span className="row__value">{draft.length} / 2000 字符</span>
+        </div>
+
+        <div className="card__foot">
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!snapshot.canSend || draft.trim() === '' || sending}
+            data-testid="demo-send"
+          >
+            {sending ? '正在送出…' : '发送'}
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }

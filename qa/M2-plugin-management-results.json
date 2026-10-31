@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "at": "2026-10-27T14:14:32.073Z",
+  "at": "2026-10-31T18:48:30.553Z",
   "bridgeOnly": false,
   "sandboxOverride": true,
   "checks": [
@@ -16,33 +16,28 @@
     "lost-reply-does-not-claim-rollback-and-manual-refresh-recovers-state",
     "uninstall-cancel-does-not-delete",
     "uninstall-failure-keeps-entry-and-manual-retry-removes-package",
-    "danger-actions-and-three-theme-contrast",
+    "danger-actions-and-system-light-dark-contrast",
     "minimum-window-actions-remain-reachable",
     "uninstall-retains-config-data-vault-and-revokes-trust",
     "removed-code-is-not-rediscovered"
   ],
   "errors": [],
   "screenshots": [
-    "qa/screenshots/m2-plugin/plugin-list-2026-10-27T14-14-32-071Z.png",
-    "qa/screenshots/m2-plugin/uninstall-dialog-2026-10-27T14-14-32-071Z.png",
-    "qa/screenshots/m2-plugin/plugin-list-dark-2026-10-27T14-14-32-071Z.png",
-    "qa/screenshots/m2-plugin/plugin-minimum-2026-10-27T14-14-32-071Z.png"
+    "qa/screenshots/m2-plugin/plugin-list-2026-10-31T18-48-30-551Z.png",
+    "qa/screenshots/m2-plugin/uninstall-dialog-2026-10-31T18-48-30-551Z.png",
+    "qa/screenshots/m2-plugin/plugin-list-dark-2026-10-31T18-48-30-551Z.png",
+    "qa/screenshots/m2-plugin/plugin-minimum-2026-10-31T18-48-30-551Z.png"
   ],
   "themes": [
     {
       "theme": "light",
-      "measured": 36,
-      "minimum": 6.016692116437308
+      "measured": 26,
+      "minimum": 4.64828817899231
     },
     {
       "theme": "dark",
-      "measured": 36,
-      "minimum": 7.702933902594037
-    },
-    {
-      "theme": "system",
-      "measured": 36,
-      "minimum": 7.702933902594037
+      "measured": 26,
+      "minimum": 5.32921162976606
     }
   ],
   "runtime": {
@@ -244,11 +239,13 @@
     ]
   },
   "artifacts": {
-    "apps/desktop/dist/main/index.mjs": "5fd0b397d29af1043d398f8c1409eef0f9f9bd89efbd0456ee5d1f53c68af09e",
-    "apps/desktop/dist/preload/index.cjs": "2e5e59691f17e1794899874782921398a501a99157d3d4ada4b28d95703f27e8",
-    "apps/desktop/dist/renderer/console/index.html": "52e8160336ddd9a31cca697a23f790f0fde30dd9c63a34ad0b995ec711899769",
-    "apps/desktop/dist/renderer/console/assets/index-BnLmzRgc.css": "eec1e5a87ac44ed0466831d1e22e0302cc21c7ae432538d9ba4cfe0a4b425a71",
-    "apps/desktop/dist/renderer/console/assets/index-Bp9aN3nQ.js": "21aad9952b694e13f2266e16dea7d82ad59fd8351eabf48bdf627242731520d0"
+    "apps/desktop/dist/main/index.mjs": "4eb2367d57c48b176737eff34d44a30091828343b9d25c36618bb8e03ca12398",
+    "apps/desktop/dist/preload/index.cjs": "9c3331bd1afa42c48fe59c67643501322e77371356ad52b4d012822e01a147d9",
+    "apps/desktop/dist/renderer/console/index.html": "e8fe683c120479157c1634ffb03fcaa2b09837ab9b725e2e908f64c394d56acb",
+    "apps/desktop/dist/renderer/console/assets/capture-worklet-46cQJGH7.js": "8d33d5d8e948a777f72dc129ee800544feda97d856dd589f12acf8c285cb5216",
+    "apps/desktop/dist/renderer/console/assets/index-CZ3NDvAj.css": "03d36392b6093b2b1f12c6371ede2063da7833b3677985e40b2f489b108bbc55",
+    "apps/desktop/dist/renderer/console/assets/index-mMzgUPhF.js": "e615ad06ff539a7d6db6dfd4a5ef855fe58708a35f839aa492fa26bface46b17",
+    "apps/desktop/dist/renderer/console/assets/region-DBKOJ4mX.js": "a167f33becd5a547bfbf48ee8ac7fbc6a8cf4efc0ebe50327d9e40150a692436"
   },
   "shutdown": {
     "exitConfirmed": true,

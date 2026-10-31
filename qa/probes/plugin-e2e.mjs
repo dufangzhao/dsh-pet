@@ -269,7 +269,7 @@ try {
     await page.getByLabel('测试计数', { exact: true }).fill('9');
     await page.getByTestId('config-save').click();
     await expect(page.getByRole('status')).toContainText('已保存');
-    await page.getByRole('button', { name: '返回插件列表', exact: true }).click();
+    await page.getByRole('button', { name: '返回扩展列表', exact: true }).click();
     report.checks.push('existing-schema-draft-guard-and-persisted-activation-config');
     const before = await diag();
     await app.evaluate(() => globalThis.m2PluginQA.setSnapshotFailure(true));
@@ -310,7 +310,7 @@ try {
     assert.equal((await diag()).blockedTrusted, false);
     await row(ids.blocked).getByRole('button', { name: '前往权限与数据', exact: true }).click();
     await expect(
-      page.getByRole('heading', { name: '权限与数据', exact: true, level: 1 }),
+      page.getByRole('heading', { name: '权限与数据', exact: true, level: 2 }),
     ).toBeVisible();
     await page.getByTestId('nav-plugins').click();
     report.checks.push('untrusted-enable-error-new-generation-and-repair-navigation');
@@ -361,12 +361,9 @@ try {
     await page
       .locator('.pk-toast-region button')
       .evaluateAll((buttons) => buttons.forEach((button) => button.click()));
-    for (const theme of ['light', 'dark', 'system']) {
-      await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
-      await page
-        .getByTestId('theme-select')
-        .locator('input[value="' + theme + '"]')
-        .check();
+    // Explicit mode selection is covered by the complete-app probe.
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
       const samples = await page
         .locator('h1,h2,p,span.plugin-row__name,summary,button:not(:disabled),.pk-badge')
         .evaluateAll((nodes) =>
@@ -396,7 +393,7 @@ try {
       });
       if (theme === 'dark') await capture('plugin-list-dark');
     }
-    await page.getByTestId('theme-select').locator('input[value="light"]').check();
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     await (await app.browserWindow(page)).evaluate((window) => window.setSize(760, 560));
     await action(ids.fail, 'uninstall').scrollIntoViewIfNeeded();
     assert.equal(
@@ -408,7 +405,7 @@ try {
     assert.ok(box && box.x >= 0 && box.x + box.width <= width);
     await capture('plugin-minimum');
     report.checks.push(
-      'danger-actions-and-three-theme-contrast',
+      'danger-actions-and-system-light-dark-contrast',
       'minimum-window-actions-remain-reachable',
     );
   }

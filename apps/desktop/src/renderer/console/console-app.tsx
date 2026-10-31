@@ -4,9 +4,7 @@ import { useCallback, useRef, useState, type JSX } from 'react';
 import { Dialog, Toast, useToastStore } from '@pet/ui-kit';
 
 import { Button } from './original-ui/kit.js';
-import { SiteMorphIcon } from './site-ui/site-icons.js';
-import { SourceButton } from './site-ui/source-button.js';
-import { SourceRadioGroup } from './site-ui/source-radio.js';
+import { Button as MinimalButton } from './minimal-ui/controls.js';
 
 import type { AppView } from './app-views.js';
 import {
@@ -32,8 +30,7 @@ import { StartGuideAction, StartPage } from './pages/start.js';
 import { designLabEnabled } from './start-designs/registry.js';
 import { StyleFamilyGallery } from './style-families/gallery.js';
 import { VoicePage } from './pages/voice.js';
-import { SettingsShell } from './settings-shell.js';
-import { THEMES, themeAriaLabel, themeLabel, type Theme } from './theme.js';
+import { MinimalShell as SettingsShell } from './minimal-ui/shell.js';
 import { useApplication } from './use-application.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { useDemo } from './use-demo.js';
@@ -41,7 +38,6 @@ import { useModelConnection } from './use-model-connection.js';
 import { actionLabel, usePluginActions } from './use-plugin-actions.js';
 import { useSecurity } from './use-security.js';
 import { useStopAll } from './use-stop-all.js';
-import { useTheme } from './use-theme.js';
 
 const STOP_ALL = {
   title: '停止全部任务',
@@ -125,7 +121,6 @@ export function ConsoleApp(): JSX.Element {
   } | null>(null);
   const dirtyRef = useRef(false);
   const toasts = useToastStore();
-  const { theme, setTheme } = useTheme();
   const app = useApplication();
   const snapshotState = useConsoleSnapshot();
   const securityState = useSecurity();
@@ -350,7 +345,6 @@ export function ConsoleApp(): JSX.Element {
                 void models.setPaused(next);
               }}
             />
-            <ThemePicker theme={theme} onChange={setTheme} />
           </>
         }
       >
@@ -576,7 +570,7 @@ function RunToggle({
         {state.status}
       </span>
       {/* 按钮是来源那一件；折叠到 72px 时只剩这枚 vendored 的 play↔pause 真形变。 */}
-      <SourceButton
+      <MinimalButton
         size="small"
         className="pb-run__button"
         aria-pressed={ready ? paused : undefined}
@@ -585,48 +579,11 @@ function RunToggle({
         disabled={!state.enabled || busy}
         busy={busy}
         data-testid="model-pause"
-        leading={
-          <SiteMorphIcon
-            active={!(ready && paused)}
-            on="player-pause"
-            off="player-play"
-            size={16}
-          />
-        }
+
         onClick={() => onToggle(!paused)}
       >
         <span className="pb-run__label">{state.action}</span>
-      </SourceButton>
-    </div>
-  );
-}
-
-/**
- * 主题三态用原生 radio 组成的单选板（pb-choice）：三个选项互斥且都可见，
- * 比下拉少一次点击就能看清全部状态；选中那一档自己落成强调板。
- * 原生 radio 保留 Tab 进入、方向键切换与可见焦点，没有滑块轨道，也不需要第二份状态。
- */
-function ThemePicker({
-  theme,
-  onChange,
-}: {
-  theme: Theme;
-  onChange: (next: Theme) => void;
-}): JSX.Element {
-  return (
-    <div className="pb-modes">
-      <SourceRadioGroup
-        label={COPY.themeLabel}
-        name="console-theme"
-        value={theme}
-        onChange={(next) => onChange(next as Theme)}
-        data-testid="theme-select"
-        options={THEMES.map((candidate) => ({
-          value: candidate,
-          label: themeLabel(candidate),
-          ariaLabel: themeAriaLabel(candidate),
-        }))}
-      />
+      </MinimalButton>
     </div>
   );
 }

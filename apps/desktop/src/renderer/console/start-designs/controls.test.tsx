@@ -104,6 +104,7 @@ function model(over: Partial<StartModel> = {}): StartModel {
     refresh: noop,
     openPlugins: noop,
     appAvailable: true,
+    desktopAvailable: true,
     desktopShown: false,
     desktop: { mark: 'off', text: '桌宠未就绪' },
     pet: { values: null, agent: null },

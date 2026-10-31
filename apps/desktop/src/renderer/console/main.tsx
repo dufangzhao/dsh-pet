@@ -8,7 +8,9 @@ import { createRoot } from 'react-dom/client';
 import { ConsoleApp } from './console-app.js';
 import { applyStoredTheme } from './theme.js';
 import './console.css';
+import './minimal-ui/foundation.css';
 
+document.documentElement.dataset['consoleStyle'] = 'minimal';
 applyStoredTheme();
 
 const container = document.getElementById('root');

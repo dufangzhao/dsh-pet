@@ -132,6 +132,7 @@ export function stubModel(over: Partial<StartModel> = {}): StartModel {
     refresh: () => undefined,
     openPlugins: () => undefined,
     appAvailable: true,
+    desktopAvailable: true,
     desktopShown: true,
     desktop: { mark: 'on' as const, text: '在桌面上' },
     pet: {

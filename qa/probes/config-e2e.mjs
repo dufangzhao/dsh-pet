@@ -143,7 +143,6 @@ try {
     const revision = async value => expect.poll(async () => {
       const result = await inspect(); return result.ok ? result.value.snapshot?.revision ?? 0 : -1;
     }).toBe(value);
-    const chooseTheme = async theme => page.getByTestId('theme-select').locator('input[value="' + theme + '"]').check();
     await openConfig();
     await expect(page.getByLabel('线程数', { exact: true })).toHaveValue('2');
     await expect(page.getByLabel('词条 1', { exact: true })).toHaveValue('桌宠');
@@ -197,7 +196,7 @@ try {
     report.checks.push('client-errors-focus-and-description-without-write', 'unicode-input-and-number-array-validation', 'ui-first-save-creates-revision-one-with-valid-empty-values');
 
     await name().fill('立即改动');
-    await page.getByRole('checkbox', { name: '备注：设置此项', exact: true }).uncheck();
+    await page.getByRole('switch', { name: '备注：设置此项', exact: true }).uncheck();
     await expect(page.getByLabel('备注', { exact: true })).toHaveCount(0);
     await save().click(); await revision(2);
     assert.equal(Object.hasOwn((await inspect()).value.snapshot.data, 'note'), false);
@@ -249,17 +248,18 @@ try {
     await name().fill('显式重填'); await save().click(); await revision(8);
     report.checks.push('conflict-keeps-draft-without-overwrite-and-explicit-reload', 'failed-reload-does-not-leave-stale-editable-form');
 
-    await name().fill('不保存草稿'); await page.getByTestId('nav-voice').click();
+    await name().fill('不保存草稿'); await page.getByTestId('nav-about').click();
     await expect(page.getByRole('dialog')).toBeVisible(); await page.keyboard.press('Escape');
     await expect(name()).toHaveValue('不保存草稿');
-    await page.getByTestId('nav-voice').click();
+    await page.getByTestId('nav-about').click();
     await page.getByRole('dialog').getByRole('button', { name: '放弃改动', exact: true }).click();
-    await expect(page.getByRole('heading', { level: 1, name: '语音输入', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: '关于', exact: true })).toBeVisible();
     await openConfig(); await expect(name()).toHaveValue('显式重填');
     report.checks.push('unsaved-navigation-escape-keeps-draft-and-confirm-discards');
 
-    for (const theme of ['light', 'dark', 'system']) {
-      await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' }); await chooseTheme(theme);
+    // Explicit theme controls are covered in the complete-app probe; isolated hosts follow the system.
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
       const samples = await page.locator('h1,h2,p,label,legend,button:not(:disabled),input:not([type=checkbox]):not([type=radio]),select').evaluateAll(nodes => nodes.filter(el => el.checkVisibility()).map((el, index) => {
         const style = getComputedStyle(el), backgrounds = [], opacities = [];
         for (let parent = el; parent; parent = parent.parentElement) { const css = getComputedStyle(parent); backgrounds.push(css.backgroundColor); opacities.push(css.opacity); }
@@ -270,7 +270,7 @@ try {
       report.themes.push({ theme, measured: results.length, minimum: Math.min(...results.flatMap(result => result.cases.map(test => test.ratio))) });
       if (theme === 'dark') await capture(page, 'saved-dark');
     }
-    await chooseTheme('light');
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     await (await app.browserWindow(page)).evaluate(window => window.setSize(760, 560));
     await save().scrollIntoViewIfNeeded();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
@@ -278,7 +278,7 @@ try {
     assert.ok(bounds && bounds.x >= 0 && bounds.x + bounds.width <= viewport.width && bounds.y >= 0 && bounds.y + bounds.height <= viewport.height);
     await capture(page, 'minimum-size');
     await (await app.browserWindow(page)).evaluate(window => window.setSize(1040, 740));
-    report.checks.push('three-theme-config-contrast-and-reduced-motion', 'minimum-window-form-scroll-and-save-reachability');
+    report.checks.push('system-light-dark-config-contrast-and-reduced-motion', 'minimum-window-form-scroll-and-save-reachability');
     const reopened = app.waitForEvent('window'); await app.evaluate(() => globalThis.m2ConfigQA.reopen());
     page = await reopened; watch(page); await page.waitForURL('**/console/index.html');
     await openConfig(); await expect(name()).toHaveValue('显式重填');

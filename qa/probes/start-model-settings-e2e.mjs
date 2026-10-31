@@ -47,7 +47,7 @@ async function settle(testId, denyNetwork = false, untilDispatched = false) {
         )
       )
         return denied;
-    } else if ((await page.getByTestId(testId).getAttribute('data-busy')) !== 'true') {
+    } else if ((await page.getByTestId(testId).getAttribute('aria-busy')) !== 'true') {
       return denied;
     }
     await page.waitForTimeout(50);
@@ -105,7 +105,7 @@ try {
   await settle('model-fetch');
   await expect(page.getByTestId('model-list-result')).toContainText('已获取 2');
   assert.deepEqual(
-    await page.locator('#sc-model-list option').evaluateAll((all) => all.map((n) => n.value)),
+    await page.locator('datalist option').evaluateAll((all) => all.map((n) => n.value)),
     ['qa-deepseek-one', 'qa-deepseek-two'],
   );
   const after = await models();
@@ -146,14 +146,14 @@ try {
   await page.getByTestId('key-input').fill('QA_SLOW_FIXTURE_KEY');
   await page.getByTestId('model-fetch').click();
   await settle('model-fetch', false, true);
-  await page.getByTestId('model-pick-qwen').click();
+  await page.getByTestId('model-provider-select').selectOption('qwen');
   await page.getByTestId('key-input').fill('QA_QUERY_FIXTURE_KEY');
   await page.getByTestId('model-fetch').click();
   await settle('model-fetch');
   await expect(page.getByTestId('model-list-result')).toContainText('已获取 2');
   assert.ok(
     (
-      await page.locator('#sc-model-list option').evaluateAll((all) => all.map((n) => n.value))
+      await page.locator('datalist option').evaluateAll((all) => all.map((n) => n.value))
     ).every((v) => v.includes('qwen')),
   );
   await expect
@@ -165,7 +165,7 @@ try {
     .toBe(true);
   assert.ok(
     (
-      await page.locator('#sc-model-list option').evaluateAll((all) => all.map((n) => n.value))
+      await page.locator('datalist option').evaluateAll((all) => all.map((n) => n.value))
     ).every((v) => v.includes('qwen')),
   );
   report.cases.push(

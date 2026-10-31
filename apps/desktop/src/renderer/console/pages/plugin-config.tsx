@@ -1,10 +1,9 @@
 import type { OwnerRef } from '@pet/contracts';
 import { useCallback, useEffect, useRef, type JSX } from 'react';
 
-import { Button, EmptyState, Section } from '@pet/ui-kit';
-
 import { ConfigForm } from '../config-form.js';
 import { COPY } from '../copy.js';
+import { Button, Card, Status } from '../minimal-ui/controls.js';
 import { usePluginConfig } from '../use-config.js';
 
 export interface PluginConfigPanelProps {
@@ -53,13 +52,12 @@ export function PluginConfigPanel({
 
   if (!state.available) {
     return (
-      <>
-        <EmptyState
-          title={COPY.missingBridge}
-          description="请从桌宠的“设置”重新打开窗口。"
-          action={<Button onClick={onBack}>{COPY.backToPlugins}</Button>}
-        />
-      </>
+      <Card title={COPY.missingBridge}>
+        <p className="row__desc">请从桌宠的“设置”重新打开窗口。</p>
+        <div className="card__foot">
+          <Button onClick={onBack}>{COPY.backToPlugins}</Button>
+        </div>
+      </Card>
     );
   }
 
@@ -68,72 +66,65 @@ export function PluginConfigPanel({
 
   return (
     <>
-      <p className="console-muted">
-        配置由扩展自己声明。保存只会写入配置，不会自动启用它，也不会让模型变为可用。
-      </p>
-      <div className="config-toolbar">
-        <Button size="small" variant="quiet" onClick={onBack}>
+      <div className="card__foot">
+        <Button size="small" variant="ghost" onClick={onBack}>
           {backLabel}
         </Button>
-        <span className="config-toolbar__state">
-          {inspected === null
-            ? null
-            : saved === null
+        {inspected === null ? null : (
+          <span className="row__desc">
+            {saved === null
               ? '还没有保存过配置，这次保存会新建一条记录。'
               : `已保存版本 ${saved.revision} · Schema ${saved.schemaVersion}`}
-        </span>
+          </span>
+        )}
       </div>
 
-      {state.loading ? <p className="console-muted">{COPY.loading}</p> : null}
+      <Card title="配置项">
+        {state.loading ? <p className="row__desc">{COPY.loading}</p> : null}
 
-      {state.error === null ? null : (
-        <EmptyState
-          title="读取配置失败"
-          description={state.error}
-          action={<Button onClick={state.reload}>{COPY.retry}</Button>}
-        />
-      )}
+        {state.error === null ? null : (
+          <div className="card__foot" role="alert">
+            <Status tone="danger">{'读取配置失败：' + state.error}</Status>
+            <Button size="small" onClick={state.reload}>
+              {COPY.retry}
+            </Button>
+          </div>
+        )}
 
-      {state.conflict ? (
-        <div className="config-banner config-banner--warn" role="alert">
-          <p className="config-banner__text">
-            这份配置已被其他窗口改过。你的编辑还留在这里，但保存会被拒绝；请先重新读取再决定。
+        {state.conflict ? (
+          <div className="card__foot" role="alert">
+            <Status tone="danger">
+              这份配置已被其他窗口改过。你的编辑还留在这里，但保存会被拒绝；请先重新读取再决定。
+            </Status>
+            <Button size="small" onClick={state.reload}>
+              {COPY.retry}
+            </Button>
+          </div>
+        ) : null}
+
+        {errorCount === 0 ? null : (
+          <p className="row__desc" role="alert" tabIndex={-1} ref={summaryRef}>
+            <Status tone="danger">{`有 ${errorCount} 处需要修改，已标在对应字段下方。`}</Status>
           </p>
-          <Button size="small" onClick={state.reload}>
-            {COPY.retry}
-          </Button>
-        </div>
-      ) : null}
+        )}
 
-      {errorCount === 0 ? null : (
-        <div
-          className="config-banner config-banner--danger"
-          role="alert"
-          tabIndex={-1}
-          ref={summaryRef}
-        >
-          <p className="config-banner__text">有 {errorCount} 处需要修改，已标在对应字段下方。</p>
-        </div>
-      )}
+        {state.failure === null ? null : (
+          <p className="row__desc" role="alert">
+            <Status tone="danger">{'保存失败：' + state.failure}</Status>
+          </p>
+        )}
 
-      {state.failure === null ? null : (
-        <div className="config-banner config-banner--danger" role="alert">
-          <p className="config-banner__text">保存失败：{state.failure}</p>
-        </div>
-      )}
+        {state.notice === null ? null : (
+          <p className="config-banner" role="status">
+            {state.notice}
+          </p>
+        )}
 
-      {state.notice === null ? null : (
-        <p className="config-banner config-banner--ok" role="status">
-          {state.notice}
-        </p>
-      )}
-
-      {/* 读取中或读取失败时不给表单：过期的 revision 保存出去只会变成冲突。 */}
-      {state.loading ||
-      state.error !== null ||
-      state.root === null ||
-      state.draft === null ? null : (
-        <Section title="配置项">
+        {/* 读取中或读取失败时不给表单：过期的 revision 保存出去只会变成冲突。 */}
+        {state.loading ||
+        state.error !== null ||
+        state.root === null ||
+        state.draft === null ? null : (
           <form
             className="config-form"
             data-testid="config-form"
@@ -173,8 +164,8 @@ export function PluginConfigPanel({
               <span className="config-count">{dirty ? '有未保存的改动' : '没有未保存的改动'}</span>
             </div>
           </form>
-        </Section>
-      )}
+        )}
+      </Card>
     </>
   );
 }

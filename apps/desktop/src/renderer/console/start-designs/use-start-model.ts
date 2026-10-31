@@ -156,6 +156,7 @@ export interface StartModel {
 
   /* ---- 桌宠 ---- */
   appAvailable: boolean;
+  desktopAvailable: boolean;
   desktopShown: boolean;
   desktop: ReturnType<typeof desktopPresence>;
   pet: PetPreviewProps;
@@ -587,6 +588,7 @@ export function useStartModel(owners: StartOwners): StartModel {
     openPlugins: owners.onOpenPlugins,
 
     appAvailable: app.available,
+    desktopAvailable: app.snapshot?.desktop?.available === true,
     desktopShown: desktop.mark === 'on',
     desktop,
     pet,

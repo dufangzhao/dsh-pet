@@ -15,6 +15,8 @@ import type { ApplicationState } from '../use-application.js';
 import type { DemoState } from '../use-demo.js';
 import type { ModelConnectionState } from '../use-model-connection.js';
 import { StartGuideAction, startSlotsOf } from '../start-designs/sections.js';
+import { MinimalStart } from '../minimal-ui/start.js';
+import { MinimalThemeStudio } from '../minimal-ui/theme-studio.js';
 import { useStartModel } from '../start-designs/use-start-model.js';
 import { StartDesignLab } from '../start-designs/lab.js';
 import { SourceBoard, SOURCE_BOARD_SELECTORS } from '../site-ui/source-board.js';
@@ -57,6 +59,7 @@ export function StartPage({ onOpenStyles, ...props }: StartPageProps): JSX.Eleme
   }
 
   const lab = designLabEnabled();
+  if (!lab) return <MinimalStart model={model} themeStudio={<MinimalThemeStudio />} />;
   return (
     /* 归属容器包整屏：六个 token 从这一层往下走，Start 里每一块源件都按同一份归属显示。 */
     <SourceSurface>

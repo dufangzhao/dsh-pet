@@ -29,7 +29,7 @@ describe('配色工作室', () => {
 
   it('三块内置方案各叫自己的名字，不给一句通用标签盖过去', () => {
     const html = seeded();
-    for (const name of ['原件', '陶烬', '翠晓'])
+    for (const name of ['简约', '陶烬', '翠晓'])
       expect(html).toContain('<span class="su-tile__name">' + name + '</span>');
     expect(html).not.toContain('方案色带');
     // 只有选中那一张说 pressed：挡位已经不叠这层，其余方案也不装选中。
