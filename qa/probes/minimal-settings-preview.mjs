@@ -31,11 +31,20 @@ try {
   await page.goto(pathToFileURL(path.join(base, 'index.html')).href);
   for (const width of [1200, 880]) {
     await page.setViewportSize({ width, height: width === 1200 ? 900 : 760 });
-    for (const id of ['start', 'appearance', 'voice']) {
-      await page.locator('#nav-' + id).click();
+    for (const id of [
+      'start',
+      'persona',
+      'appearance',
+      'conversation',
+      'voice',
+      'plugins',
+      'permissions',
+      'about',
+    ]) {
+      await page.locator('[data-nav=' + id + ']').click();
       await expect(page.locator('#page-' + id)).toBeVisible();
       await expect(page.locator('.page:visible')).toHaveCount(1);
-      await expect(page.locator('#nav-' + id)).toHaveAttribute('aria-current', 'page');
+      await expect(page.locator('[data-nav=' + id + ']')).toHaveAttribute('aria-current', 'page');
       const geometry = await page.evaluate(() => {
         const content = document.getElementById('settings-content').getBoundingClientRect();
         const fields = Array.from(
@@ -85,6 +94,21 @@ try {
       report.pages.push({ page: id, width, geometry });
     }
   }
+  await page.setViewportSize({ width: 1142, height: 804 });
+  await page.locator('#nav-start').click();
+  for (const id of ['fetch-models-button', 'test-connection-button', 'reasoning-effort-select']) {
+    const control = page.locator('#' + id);
+    await expect(control).toBeVisible();
+    const rect = await control.boundingBox();
+    assert.ok(
+      rect && rect.x >= 0 && rect.x + rect.width <= 1142 && rect.y + rect.height <= 804,
+      'requested control is out of view',
+    );
+  }
+  await page.screenshot({ path: path.join(out, 'start-1142.png'), fullPage: true });
+  await page.locator('#reasoning-effort-select').selectOption('high');
+  await page.locator('#test-connection-button').click();
+  await expect(page.locator('#model-action-status')).toHaveText('预览模式');
   await page.setViewportSize({ width: 1200, height: 900 });
   await page.locator('#nav-start').click();
   await page.locator('#provider-select').selectOption('kimi');
@@ -129,7 +153,40 @@ try {
     session: window.sessionStorage.length,
   }));
   assert.deepEqual(storage, { local: 0, session: 0 });
+  await page.locator('[data-nav=persona]').click();
+  await page.locator('#persona-prompt').fill('温和且简短');
+  await expect(page.locator('[data-count-for=personaPrompt]')).toHaveText('5 / 16384');
+  await page.locator('[data-nav=plugins]').click();
+  await page.locator('[data-open-dialog=plugin-config-dialog]').click();
+  await expect(page.locator('#plugin-config-dialog')).toBeVisible();
+  await expect(page.locator('#plugin-config-dialog [autofocus]')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await page.locator('[data-confirm=uninstall]').first().click();
+  await expect(page.locator('#preview-confirm-dialog')).toBeVisible();
+  await expect(page.locator('#preview-confirm-dialog [autofocus]')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await page.locator('[data-nav=appearance]').click();
+  await page
+    .locator('label.segment')
+    .filter({ has: page.locator('input[name=themeMode][value=dark]') })
+    .click();
+  const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  assert.equal(dark, 'rgb(21, 23, 25)');
+  await page.screenshot({ path: path.join(out, 'appearance-dark-1200.png'), fullPage: true });
+  await page
+    .locator('label.segment')
+    .filter({ has: page.locator('input[name=themeMode][value=light]') })
+    .click();
+  const ids = await page.locator('[id]').evaluateAll((nodes) => nodes.map((n) => n.id));
+  assert.equal(new Set(ids).size, ids.length, 'duplicate UI id');
+  await expect(page.locator('.page__summary,.field__hint,.row__desc,.titlebar__note')).toHaveCount(
+    0,
+  );
   report.interactions = {
+    fullPageFields: true,
+    nativeDialogs: true,
+    cancelFocus: true,
+    darkTheme: true,
     provider: true,
     keyVisibility: true,
     figure: true,

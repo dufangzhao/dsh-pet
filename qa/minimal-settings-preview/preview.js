@@ -21,19 +21,13 @@
     anthropic: 'claude-sonnet-4-5',
     gemini: 'gemini-2.5-flash',
   };
-  var PENDING = {
-    persona: '人设',
-    conversation: '对话',
-    plugins: '扩展',
-    permissions: '权限与数据',
-    about: '关于',
-  };
 
   var state = {
     petName: '小蓝',
     provider: 'deepseek',
     model: '',
     key: '',
+    reasoningEffort: 'default',
     figure: 'minimal',
     palette: 'morning',
     size: 'normal',
@@ -48,6 +42,18 @@
     maxSeconds: 30,
     page: 'start',
   };
+
+  document.querySelectorAll('[data-pref]').forEach(function (el) {
+    var pref = el.dataset.pref;
+    if (Object.prototype.hasOwnProperty.call(state, pref)) return;
+    if (el.type === 'radio' && !el.checked) return;
+    state[pref] =
+      el.type === 'checkbox'
+        ? el.checked
+        : el.type === 'range' || el.type === 'number'
+          ? Number(el.value)
+          : el.value;
+  });
 
   var navs = document.querySelectorAll('[data-nav]');
   var pages = document.querySelectorAll('.page');
@@ -66,7 +72,29 @@
     });
   }
 
+  var themeFields = {
+    themePaper: '--ground',
+    themePaper2: '--surface-quiet',
+    themeSheet: '--surface',
+    themeInk: '--ink',
+    themeLine: '--line',
+    themeAccent: '--blue',
+  };
+  var customTheme = false;
+
   function render() {
+    document.body.style.colorScheme =
+      state.themeMode === 'system' ? 'light dark' : state.themeMode || 'light';
+    document.body.dataset.theme = state.themeMode || 'light';
+    document.getElementById('interface-theme-state').textContent = {
+      light: '浅色',
+      dark: '深色',
+      system: '跟随系统',
+    }[state.themeMode || 'system'];
+    Object.keys(themeFields).forEach(function (key) {
+      if (customTheme) document.body.style.setProperty(themeFields[key], state[key]);
+      else document.body.style.removeProperty(themeFields[key]);
+    });
     var px = SIZE_PX[state.size];
     document.querySelectorAll('[data-stage]').forEach(function (stage) {
       stage.dataset.palette = state.palette;
@@ -95,6 +123,11 @@
         SIZE_LABEL[state.size],
     );
 
+    document.querySelectorAll('[data-count-for]').forEach(function (el) {
+      var length = String(state[el.dataset.countFor] || '').length;
+      el.textContent = length + (el.dataset.countMax ? ' / ' + el.dataset.countMax : '');
+    });
+
     var model = controls('model')[0];
     model.placeholder = '例如 ' + MODEL_HINT[state.provider];
 
@@ -110,12 +143,9 @@
   }
 
   function showPage(id) {
-    var pending = PENDING[id] !== undefined;
     pages.forEach(function (page) {
       var name = page.dataset.page;
-      var on = pending ? name === 'pending' : name === id;
-      page.hidden = !on;
-      if (on && pending) setText('pageTitle', PENDING[id]);
+      page.hidden = name !== id;
     });
     navs.forEach(function (nav) {
       if (nav.dataset.nav === id) nav.setAttribute('aria-current', 'page');
@@ -145,8 +175,13 @@
     var el = event.target;
     if (!el.dataset || !el.dataset.pref) return;
     var pref = el.dataset.pref;
+    if (el.type === 'color') customTheme = true;
     state[pref] =
-      el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value;
+      el.type === 'checkbox'
+        ? el.checked
+        : el.type === 'range' || el.type === 'number'
+          ? Number(el.value)
+          : el.value;
     syncControls();
     render();
   });
@@ -154,8 +189,12 @@
   document.addEventListener('input', function (event) {
     var el = event.target;
     if (!el.dataset || !el.dataset.pref) return;
-    if (el.type === 'text' || el.type === 'password' || el.type === 'range') {
-      state[el.dataset.pref] = el.type === 'range' ? Number(el.value) : el.value;
+    if (
+      ['text', 'password', 'search', 'number', 'range', 'textarea', 'color'].indexOf(el.type) !== -1
+    ) {
+      if (el.type === 'color') customTheme = true;
+      state[el.dataset.pref] =
+        el.type === 'range' || el.type === 'number' ? Number(el.value) : el.value;
       render();
     }
   });
@@ -169,6 +208,44 @@
     keyToggle.setAttribute('aria-pressed', shown ? 'false' : 'true');
     keyToggle.setAttribute('aria-label', shown ? '显示 Key' : '隐藏 Key');
     keyInput.focus();
+  });
+
+  document.addEventListener('submit', function (event) {
+    if (event.target.method !== 'dialog') event.preventDefault();
+  });
+
+  document.addEventListener('click', function (event) {
+    var target = event.target.closest(
+      '[data-open-dialog], [data-close-dialog], [data-preview-action], [data-confirm]',
+    );
+    if (!target) return;
+    if (target.dataset.previewAction === 'theme-reset') {
+      Object.keys(themeFields).forEach(function (key) {
+        state[key] = controls(key)[0].defaultValue;
+      });
+      customTheme = false;
+      render();
+    }
+    if (target.dataset.confirm) {
+      document.getElementById('preview-confirm-title').textContent = target.textContent.trim();
+      var card = target.closest('.card');
+      document.getElementById('preview-confirm-item').textContent =
+        target.dataset.confirmItem || card.querySelector('.card__title').textContent;
+      document.getElementById('preview-confirm-dialog').showModal();
+    } else if (target.dataset.openDialog)
+      document.getElementById(target.dataset.openDialog).showModal();
+    else if (target.hasAttribute('data-close-dialog')) target.closest('dialog').close();
+    else {
+      var badge = document.getElementById('preview-badge');
+      badge.textContent = '预览模式';
+      badge.setAttribute('role', 'status');
+    }
+  });
+
+  ['fetch-models-button', 'test-connection-button'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () {
+      document.getElementById('model-action-status').textContent = '预览模式';
+    });
   });
 
   syncControls();

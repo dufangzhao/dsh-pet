@@ -4,11 +4,21 @@
   "remoteRequests": [],
   "screenshots": [
     "start-1200.png",
+    "persona-1200.png",
     "appearance-1200.png",
+    "conversation-1200.png",
     "voice-1200.png",
+    "plugins-1200.png",
+    "permissions-1200.png",
+    "about-1200.png",
     "start-880.png",
+    "persona-880.png",
     "appearance-880.png",
-    "voice-880.png"
+    "conversation-880.png",
+    "voice-880.png",
+    "plugins-880.png",
+    "permissions-880.png",
+    "about-880.png"
   ],
   "pages": [
     {
@@ -26,22 +36,104 @@
             "id": "provider-select",
             "left": 299,
             "right": 704,
-            "top": 262,
-            "bottom": 310
+            "top": 241,
+            "bottom": 289
+          },
+          {
+            "id": "reasoning-effort-select",
+            "left": 722,
+            "right": 1127,
+            "top": 241,
+            "bottom": 289
           },
           {
             "id": "model-name-input",
-            "left": 734,
-            "right": 1119,
-            "top": 262,
-            "bottom": 310
+            "left": 311,
+            "right": 1015,
+            "top": 335.5,
+            "bottom": 383.5
           },
           {
             "id": "api-key-input",
             "left": 311,
             "right": 1081,
-            "top": 356.5,
-            "bottom": 404.5
+            "top": 430,
+            "bottom": 478
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "persona",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [
+          {
+            "id": "persona-pet-name",
+            "left": 311,
+            "right": 696,
+            "top": 241,
+            "bottom": 289
+          },
+          {
+            "id": "persona-user-name",
+            "left": 734,
+            "right": 1119,
+            "top": 241,
+            "bottom": 289
           }
         ],
         "images": [
@@ -95,6 +187,116 @@
     },
     {
       "page": "appearance",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [
+          {
+            "id": "theme-scheme-name",
+            "left": 334,
+            "right": 1096,
+            "top": 1165,
+            "bottom": 1213
+          },
+          {
+            "id": "theme-paper",
+            "left": 334,
+            "right": 562.65625,
+            "top": 1259.5,
+            "bottom": 1307.5
+          },
+          {
+            "id": "theme-paper-2",
+            "left": 600.65625,
+            "right": 829.328125,
+            "top": 1259.5,
+            "bottom": 1307.5
+          },
+          {
+            "id": "theme-sheet",
+            "left": 867.328125,
+            "right": 1096,
+            "top": 1259.5,
+            "bottom": 1307.5
+          },
+          {
+            "id": "theme-ink",
+            "left": 334,
+            "right": 562.65625,
+            "top": 1352,
+            "bottom": 1400
+          },
+          {
+            "id": "theme-line",
+            "left": 600.65625,
+            "right": 829.328125,
+            "top": 1352,
+            "bottom": 1400
+          },
+          {
+            "id": "theme-accent",
+            "left": 867.328125,
+            "right": 1096,
+            "top": 1352,
+            "bottom": 1400
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "conversation",
       "width": 1200,
       "geometry": {
         "scrollWidth": 1200,
@@ -168,24 +370,212 @@
             "id": "voice-model-select",
             "left": 299,
             "right": 704,
-            "top": 349,
-            "bottom": 397
+            "top": 313,
+            "bottom": 361
           },
           {
             "id": "voice-after-select",
             "left": 722,
             "right": 1127,
-            "top": 349,
-            "bottom": 397
+            "top": 313,
+            "bottom": 361
           },
           {
             "id": "voice-max-length-range",
             "left": 300,
             "right": 640,
-            "top": 450.25,
-            "bottom": 454.25
+            "top": 414.25,
+            "bottom": 418.25
           }
         ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "plugins",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "permissions",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [
+          {
+            "id": "source-preset-level",
+            "left": 299,
+            "right": 1127,
+            "top": 502,
+            "bottom": 550
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "about",
+      "width": 1200,
+      "geometry": {
+        "scrollWidth": 1200,
+        "viewport": 1200,
+        "content": {
+          "left": 247,
+          "right": 1179
+        },
+        "fields": [],
         "images": [
           {
             "src": "assets/pet-round.svg",
@@ -250,22 +640,104 @@
             "id": "provider-select",
             "left": 131,
             "right": 465,
-            "top": 258,
-            "bottom": 306
+            "top": 237,
+            "bottom": 285
+          },
+          {
+            "id": "reasoning-effort-select",
+            "left": 483,
+            "right": 817,
+            "top": 237,
+            "bottom": 285
           },
           {
             "id": "model-name-input",
-            "left": 495,
-            "right": 809,
-            "top": 258,
-            "bottom": 306
+            "left": 143,
+            "right": 705,
+            "top": 331.5,
+            "bottom": 379.5
           },
           {
             "id": "api-key-input",
             "left": 143,
             "right": 771,
-            "top": 352.5,
-            "bottom": 400.5
+            "top": 426,
+            "bottom": 474
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "persona",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [
+          {
+            "id": "persona-pet-name",
+            "left": 143,
+            "right": 457,
+            "top": 237,
+            "bottom": 285
+          },
+          {
+            "id": "persona-user-name",
+            "left": 495,
+            "right": 809,
+            "top": 237,
+            "bottom": 285
           }
         ],
         "images": [
@@ -319,6 +791,116 @@
     },
     {
       "page": "appearance",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [
+          {
+            "id": "theme-scheme-name",
+            "left": 166,
+            "right": 786,
+            "top": 1417,
+            "bottom": 1465
+          },
+          {
+            "id": "theme-paper",
+            "left": 166,
+            "right": 457,
+            "top": 1511.5,
+            "bottom": 1559.5
+          },
+          {
+            "id": "theme-paper-2",
+            "left": 495,
+            "right": 786,
+            "top": 1511.5,
+            "bottom": 1559.5
+          },
+          {
+            "id": "theme-sheet",
+            "left": 166,
+            "right": 457,
+            "top": 1604,
+            "bottom": 1652
+          },
+          {
+            "id": "theme-ink",
+            "left": 495,
+            "right": 786,
+            "top": 1604,
+            "bottom": 1652
+          },
+          {
+            "id": "theme-line",
+            "left": 166,
+            "right": 457,
+            "top": 1696.5,
+            "bottom": 1744.5
+          },
+          {
+            "id": "theme-accent",
+            "left": 495,
+            "right": 786,
+            "top": 1696.5,
+            "bottom": 1744.5
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "conversation",
       "width": 880,
       "geometry": {
         "scrollWidth": 880,
@@ -392,24 +974,212 @@
             "id": "voice-model-select",
             "left": 131,
             "right": 465,
-            "top": 345,
-            "bottom": 393
+            "top": 309,
+            "bottom": 357
           },
           {
             "id": "voice-after-select",
             "left": 483,
             "right": 817,
-            "top": 345,
-            "bottom": 393
+            "top": 309,
+            "bottom": 357
           },
           {
             "id": "voice-max-length-range",
             "left": 132,
             "right": 472,
-            "top": 446.25,
-            "bottom": 450.25
+            "top": 410.25,
+            "bottom": 414.25
           }
         ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "plugins",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "permissions",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [
+          {
+            "id": "source-preset-level",
+            "left": 131,
+            "right": 817,
+            "top": 498,
+            "bottom": 546
+          }
+        ],
+        "images": [
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
+            "ready": true
+          },
+          {
+            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          }
+        ],
+        "unnamedNav": 0
+      }
+    },
+    {
+      "page": "about",
+      "width": 880,
+      "geometry": {
+        "scrollWidth": 880,
+        "viewport": 880,
+        "content": {
+          "left": 89,
+          "right": 859
+        },
+        "fields": [],
         "images": [
           {
             "src": "assets/pet-round.svg",
@@ -461,6 +1231,10 @@
     }
   ],
   "interactions": {
+    "fullPageFields": true,
+    "nativeDialogs": true,
+    "cancelFocus": true,
+    "darkTheme": true,
     "provider": true,
     "keyVisibility": true,
     "figure": true,

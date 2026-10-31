@@ -13,7 +13,6 @@
         <img class="titlebar__mark" src="assets/pet-round.svg" alt="" width="22" height="22" />
         <h1 class="titlebar__name">桌宠设置</h1>
         <span class="titlebar__spacer"></span>
-        <p class="titlebar__note">示例内容，不写入应用配置</p>
         <span class="badge" id="preview-badge">外观预览</span>
       </header>
 
@@ -181,7 +180,6 @@
               </li>
             </ul>
           </nav>
-          <p class="rail__meta" id="rail-summary">小蓝 · 简约 · 晨蓝 · 适中</p>
         </aside>
 
         <main class="content" id="settings-content" tabindex="-1">
@@ -189,7 +187,6 @@
           <section class="page" data-page="start" id="page-start">
             <div class="page__head">
               <h2 class="page__title">开始</h2>
-              <p class="page__summary">连接模型，调整桌宠与常用设置。</p>
             </div>
 
             <article class="card" id="model-connection-card">
@@ -280,16 +277,50 @@
                     </div>
                   </div>
                   <div class="field field--grow">
-                    <label class="field__label" for="model-name-input">模型名</label>
+                    <label class="field__label" for="reasoning-effort-select">思考强度</label>
                     <div class="inputForm">
-                      <input
-                        class="input"
-                        id="model-name-input"
-                        data-pref="model"
-                        type="text"
-                        autocomplete="off"
-                        spellcheck="false"
-                      />
+                      <select
+                        class="select"
+                        id="reasoning-effort-select"
+                        data-pref="reasoningEffort"
+                      >
+                        <button type="button" class="select__trigger">
+                          <selectedcontent class="select__selected"></selectedcontent>
+                          <span class="select__arrow" aria-hidden="true"></span>
+                        </button>
+                        <option value="default"><span class="opt__name">自动</span></option>
+                        <option value="low"><span class="opt__name">低</span></option>
+                        <option value="medium"><span class="opt__name">中</span></option>
+                        <option value="high"><span class="opt__name">高</span></option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field field--grow">
+                    <label class="field__label" for="model-name-input">模型名</label>
+                    <div class="model-inline">
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="model-name-input"
+                          data-pref="model"
+                          type="text"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn--compact"
+                        id="fetch-models-button"
+                        aria-describedby="model-action-status"
+                      >
+                        <span class="circle" aria-hidden="true"
+                          ><span class="icon arrow"></span></span
+                        ><span class="button-text">获取模型</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -344,7 +375,22 @@
                       </svg>
                     </button>
                   </div>
-                  <p class="field__hint">由所选模型服务提供。</p>
+                </div>
+
+                <p class="model-action-status" id="model-action-status" role="status"></p>
+
+                <div class="card__foot">
+                  <button type="button" class="btn btn--primary" data-preview-action="model-save">
+                    保存并开始
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    id="test-connection-button"
+                    aria-describedby="model-action-status"
+                  >
+                    测试连接
+                  </button>
                 </div>
               </div>
             </article>
@@ -352,7 +398,6 @@
             <article class="card" id="start-pet-card">
               <div class="card__head">
                 <h3 class="card__title">桌宠</h3>
-                <p class="card__note" data-show="visibleText">桌面显示中</p>
               </div>
               <div class="card__body card__body--split">
                 <div class="stage" data-stage id="pet-stage">
@@ -369,10 +414,7 @@
                 <div class="start__quick">
                   <div class="rows rows--tight">
                     <label class="row">
-                      <span class="row__text"
-                        ><span class="row__label">在桌面显示</span
-                        ><span class="row__desc">关掉后预览里的它会淡下去</span></span
-                      >
+                      <span class="row__text"><span class="row__label">在桌面显示</span></span>
                       <span class="switch"
                         ><input type="checkbox" data-pref="visible" checked /><i
                           aria-hidden="true"
@@ -388,10 +430,7 @@
                       ></span>
                     </label>
                     <label class="row">
-                      <span class="row__text"
-                        ><span class="row__label">暂时不回应</span
-                        ><span class="row__desc">暂停对话回应，保留桌宠显示</span></span
-                      >
+                      <span class="row__text"><span class="row__label">暂时不回应</span></span>
                       <span class="switch"
                         ><input type="checkbox" data-pref="paused" /><i aria-hidden="true"></i
                       ></span>
@@ -411,7 +450,6 @@
           <section class="page" data-page="appearance" id="page-appearance" hidden>
             <div class="page__head">
               <h2 class="page__title">装扮</h2>
-              <p class="page__summary">桌面上的样子：形态、配色、大小和是否显示。</p>
             </div>
 
             <div class="appearance__grid">
@@ -419,7 +457,6 @@
                 <article class="card" id="appearance-card">
                   <div class="card__head">
                     <h3 class="card__title">桌面形态与配色</h3>
-                    <p class="card__note">形态、配色与大小</p>
                   </div>
                   <div class="card__body">
                     <div class="field">
@@ -496,7 +533,6 @@
                           ><span class="choice__name">柿橙</span></label
                         >
                       </div>
-                      <p class="field__hint">选择一组配色，查看预览效果。</p>
                     </div>
 
                     <div class="field">
@@ -534,15 +570,11 @@
                 <article class="card">
                   <div class="card__head">
                     <h3 class="card__title">在桌面上怎么待着</h3>
-                    <p class="card__note">只改窗口本身，不动角色形象</p>
                   </div>
                   <div class="card__body">
                     <div class="rows">
                       <label class="row">
-                        <span class="row__text"
-                          ><span class="row__label">在桌面显示</span
-                          ><span class="row__desc">隐藏后设置台与预览还在</span></span
-                        >
+                        <span class="row__text"><span class="row__label">在桌面显示</span></span>
                         <span class="switch"
                           ><input type="checkbox" data-pref="visible" checked /><i
                             aria-hidden="true"
@@ -558,10 +590,7 @@
                         ></span>
                       </label>
                       <label class="row">
-                        <span class="row__text"
-                          ><span class="row__label">允许拖动</span
-                          ><span class="row__desc">预览里的场景不跟着挪</span></span
-                        >
+                        <span class="row__text"><span class="row__label">允许拖动</span></span>
                         <span class="switch"
                           ><input type="checkbox" data-pref="draggable" checked /><i
                             aria-hidden="true"
@@ -569,10 +598,7 @@
                         ></span>
                       </label>
                       <label class="row">
-                        <span class="row__text"
-                          ><span class="row__label">减少动画</span
-                          ><span class="row__desc">这一屏的动作与过渡一起收</span></span
-                        >
+                        <span class="row__text"><span class="row__label">减少动画</span></span>
                         <span class="switch"
                           ><input type="checkbox" data-pref="reducedMotion" /><i
                             aria-hidden="true"
@@ -581,7 +607,11 @@
                       </label>
                     </div>
                     <div class="card__foot">
-                      <button type="button" class="btn" data-goto="start">回到开始</button>
+                      <button type="button" class="btn" data-goto="start">
+                        <span class="circle" aria-hidden="true"
+                          ><span class="icon arrow"></span></span
+                        ><span class="button-text">回到开始</span>
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -597,30 +627,178 @@
                   height="120"
                 />
                 <span class="stage__ground" aria-hidden="true"></span>
-                <p class="stage__caption" data-show="visibleText">桌面显示中</p>
               </div>
             </div>
+
+            <article class="card" id="interface-theme-card">
+              <div class="card__head">
+                <h3 class="card__title">界面配色</h3>
+                <span class="row__value" id="interface-theme-state" role="status">跟随系统</span>
+              </div>
+              <div class="card__body">
+                <div class="field">
+                  <span class="field__label" id="theme-mode-label">明暗挡位</span>
+                  <div class="segmented" role="radiogroup" aria-labelledby="theme-mode-label">
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="themeMode"
+                        data-pref="themeMode"
+                        value="light"
+                      /><span>浅色</span></label
+                    >
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="themeMode"
+                        data-pref="themeMode"
+                        value="dark"
+                      /><span>深色</span></label
+                    >
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="themeMode"
+                        data-pref="themeMode"
+                        value="system"
+                        checked
+                      /><span>跟随系统</span></label
+                    >
+                  </div>
+                </div>
+
+                <details class="card" id="interface-theme-palette">
+                  <summary class="card__head">
+                    <span class="card__title">自定义配色</span>
+                    <span class="row__value">6 色</span>
+                  </summary>
+                  <div class="card__body">
+                    <div class="field">
+                      <label class="field__label" for="theme-scheme-name">方案名</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="theme-scheme-name"
+                          data-pref="themeSchemeName"
+                          type="text"
+                          maxlength="40"
+                          value="原件"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="field-row">
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-paper">页面背景</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-paper"
+                            data-pref="themePaper"
+                            type="color"
+                            value="#f2f4f5"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-paper-2">侧栏背景</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-paper-2"
+                            data-pref="themePaper2"
+                            type="color"
+                            value="#f7f8f9"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-sheet">主卡片背景</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-sheet"
+                            data-pref="themeSheet"
+                            type="color"
+                            value="#ffffff"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-ink">主要文字</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-ink"
+                            data-pref="themeInk"
+                            type="color"
+                            value="#151717"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-line">细边界</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-line"
+                            data-pref="themeLine"
+                            type="color"
+                            value="#e6e8eb"
+                          />
+                        </div>
+                      </div>
+                      <div class="field field--grow">
+                        <label class="field__label" for="theme-accent">主强调</label>
+                        <div class="inputForm">
+                          <input
+                            class="input"
+                            id="theme-accent"
+                            data-pref="themeAccent"
+                            type="color"
+                            value="#2d79f3"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card__foot">
+                      <button
+                        type="button"
+                        class="btn btn--primary"
+                        data-preview-action="theme-save"
+                      >
+                        保存
+                      </button>
+                      <button type="button" class="btn" data-preview-action="theme-copy">
+                        复制
+                      </button>
+                      <button type="button" class="btn" data-preview-action="theme-reset">
+                        重置
+                      </button>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </article>
           </section>
 
           <!-- -------------------------------------------------------- 语音输入 -->
           <section class="page" data-page="voice" id="page-voice" hidden>
             <div class="page__head">
               <h2 class="page__title">语音输入</h2>
-              <p class="page__summary">本机识别、录音，以及说完之后怎么处理。</p>
             </div>
 
             <article class="card" id="voice-card">
               <div class="card__head">
                 <h3 class="card__title">语音输入</h3>
-                <p class="card__note">识别与输入偏好</p>
               </div>
               <div class="card__body">
                 <div class="rows">
                   <label class="row">
-                    <span class="row__text"
-                      ><span class="row__label">用语音说话</span
-                      ><span class="row__desc">关掉后仍然可以打字对话</span></span
-                    >
+                    <span class="row__text"><span class="row__label">用语音说话</span></span>
                     <span class="row__value"
                       ><span data-show="voiceEnabledText">开着</span>
                       <span class="switch"
@@ -688,7 +866,6 @@
                       >30 秒</output
                     >
                   </div>
-                  <p class="field__hint">到点就自己收尾，不用等那一句话讲完。</p>
                 </div>
 
                 <div class="card__foot">
@@ -703,24 +880,901 @@
                 </div>
               </div>
             </article>
+            <article class="card" id="voice-recorder-card">
+              <div class="card__head">
+                <h3 class="card__title">录音与识别</h3>
+                <span class="row__value" id="voice-recorder-state" role="status">未录音</span>
+              </div>
+              <div class="card__body">
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    data-preview-action="voice-record-start"
+                  >
+                    开始录音
+                  </button>
+                  <button type="button" class="btn" data-preview-action="voice-record-end" disabled>
+                    结束并识别
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="voice-record-cancel"
+                    disabled
+                  >
+                    取消
+                  </button>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="voice-transcript">识别文字</label>
+                  <div class="inputForm" data-multiline="true">
+                    <textarea
+                      class="input"
+                      id="voice-transcript"
+                      data-pref="voiceDraft"
+                      rows="5"
+                      spellcheck="false"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button type="button" class="btn" data-preview-action="voice-send">发送</button>
+                </div>
+              </div>
+            </article>
           </section>
 
           <!-- ------------------------------------------------- 预览没铺开的页 -->
-          <section class="page" data-page="pending" id="page-pending" hidden>
+          <section class="page" data-page="plugins" id="page-plugins" hidden>
             <div class="page__head">
-              <h2 class="page__title" data-show="pageTitle">这一页</h2>
-              <p class="page__summary">
-                这次外观预览只做开始、装扮、语音输入三页，这一页没有铺开，也不在这里假装已经做好。
-              </p>
+              <h2 class="page__title">扩展</h2>
             </div>
-            <div class="card__foot">
-              <button type="button" class="btn" data-goto="start">回到开始</button>
+
+            <article
+              class="card"
+              id="plugins-runtime"
+              data-runtime-state="ready"
+              data-task-count="2"
+              data-task-ids="task-7f3a task-91c2"
+            >
+              <div class="card__head">
+                <h3 class="card__title">运行状态</h3>
+                <span class="row__value" id="plugins-runtime-state" role="status">已就绪</span>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">已启用</span></span>
+                    <span class="row__value" data-show="plugins-active-count">2</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">已停用</span></span>
+                    <span class="row__value" data-show="plugins-disabled-count">1</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">受保护</span></span>
+                    <span class="row__value" data-show="plugins-protected-count">1</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">进行中的任务</span></span>
+                    <span class="row__value"
+                      ><span data-show="plugins-task-count">2</span> 个 · 语音与对话、模型回复</span
+                    >
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button type="button" class="btn" data-preview-action="plugins-refresh">
+                    刷新
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugins-stop-all"
+                    data-confirm="stop-all"
+                    data-task-ids="task-7f3a task-91c2"
+                  >
+                    停止全部
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              data-plugin-id="web-search"
+              data-owner-id="plugin:web-search"
+              data-plugin-state="active"
+            >
+              <div class="card__head">
+                <h3 class="card__title">语音与对话</h3>
+                <span class="row__value" data-show="plugin-state-web-search">已启用</span>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">权限</span></span>
+                    <span class="row__value">麦克风、回复服务</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">配置</span></span>
+                    <span class="row__value">
+                      <span data-show="plugin-config-count-web-search">3 项</span>
+                      <button
+                        type="button"
+                        class="btn"
+                        data-open-dialog="plugin-config-dialog"
+                        data-plugin-id="web-search"
+                        data-owner-id="plugin:web-search"
+                      >
+                        配置
+                      </button>
+                    </span>
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugin-disable"
+                    data-confirm="disable"
+                    data-plugin-id="web-search"
+                    data-owner-id="plugin:web-search"
+                  >
+                    停用
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugin-uninstall"
+                    data-confirm="uninstall"
+                    data-plugin-id="web-search"
+                    data-owner-id="plugin:web-search"
+                  >
+                    卸载
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              data-plugin-id="voice-transcribe"
+              data-owner-id="plugin:voice-transcribe"
+              data-plugin-state="active"
+            >
+              <div class="card__head">
+                <h3 class="card__title">模型回复</h3>
+                <span class="row__value" data-show="plugin-state-voice-transcribe">已启用</span>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">权限</span></span>
+                    <span class="row__value">音频输入、本机语音模型</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">配置</span></span>
+                    <span class="row__value">无可调配置</span>
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugin-disable"
+                    data-confirm="disable"
+                    data-plugin-id="voice-transcribe"
+                    data-owner-id="plugin:voice-transcribe"
+                  >
+                    停用
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugin-uninstall"
+                    data-confirm="uninstall"
+                    data-plugin-id="voice-transcribe"
+                    data-owner-id="plugin:voice-transcribe"
+                  >
+                    卸载
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              data-plugin-id="local-index"
+              data-owner-id="plugin:local-index"
+              data-plugin-state="disabled"
+            >
+              <div class="card__head">
+                <h3 class="card__title">本机识别</h3>
+                <span class="row__value" data-show="plugin-state-local-index">已停用</span>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">权限</span></span>
+                    <span class="row__value">本机语音模型</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">配置</span></span>
+                    <span class="row__value" data-show="plugin-config-count-local-index">2 项</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">原因</span></span>
+                    <span class="row__value" data-show="plugin-reason-local-index">由你停用</span>
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugin-enable"
+                    data-plugin-id="local-index"
+                    data-owner-id="plugin:local-index"
+                  >
+                    启用
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="plugin-uninstall"
+                    data-confirm="uninstall"
+                    data-plugin-id="local-index"
+                    data-owner-id="plugin:local-index"
+                  >
+                    卸载
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              data-plugin-id="builtin-bridge"
+              data-owner-id="plugin:builtin-bridge"
+              data-plugin-state="protected"
+            >
+              <div class="card__head">
+                <h3 class="card__title">应用核心</h3>
+                <span class="row__value" data-show="plugin-state-builtin-bridge">受保护</span>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">权限</span></span>
+                    <span class="row__value">桌宠交互、日常记录</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">配置</span></span>
+                    <span class="row__value">不可调整</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">原因</span></span>
+                    <span class="row__value" data-show="plugin-reason-builtin-bridge"
+                      >内置组件，随应用提供</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <dialog
+              id="plugin-config-dialog"
+              aria-labelledby="plugin-config-title"
+              data-plugin-id="web-search"
+              data-owner-id="plugin:web-search"
+            >
+              <form method="dialog" class="card">
+                <div class="card__head">
+                  <h3 class="card__title" id="plugin-config-title">插件配置</h3>
+                  <span class="row__value" data-show="plugin-config-owner">语音与对话</span>
+                </div>
+                <div class="card__body">
+                  <div class="field">
+                    <label class="field__label" for="plugin-config-mode">回复方式</label>
+                    <div class="inputForm">
+                      <select class="select" id="plugin-config-mode" data-pref="pluginConfigMode">
+                        <button type="button" class="select__trigger">
+                          <selectedcontent class="select__selected"></selectedcontent
+                          ><span class="select__arrow" aria-hidden="true"></span>
+                        </button>
+                        <option value="demo" selected>离线脚本</option>
+                        <option value="deepseek">当前模型</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="rows rows--tight">
+                    <label class="row">
+                      <span class="row__text"><span class="row__label">识别完成后发送</span></span>
+                      <span class="switch"
+                        ><input type="checkbox" data-pref="pluginAutoSend" checked /><i
+                          aria-hidden="true"
+                        ></i
+                      ></span>
+                    </label>
+                  </div>
+
+                  <p class="model-action-status" id="plugin-config-status" role="status">草稿</p>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="submit"
+                    class="btn btn--primary"
+                    value="save"
+                    data-close-dialog
+                    data-preview-action="plugin-config-save"
+                    data-plugin-id="web-search"
+                    data-owner-id="plugin:web-search"
+                  >
+                    保存
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn"
+                    value="discard"
+                    data-close-dialog
+                    data-preview-action="plugin-config-discard"
+                    data-plugin-id="web-search"
+                    data-owner-id="plugin:web-search"
+                  >
+                    放弃修改
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn"
+                    value="cancel"
+                    data-close-dialog
+                    data-preview-action="plugin-config-back"
+                    data-plugin-id="web-search"
+                    data-owner-id="plugin:web-search"
+                    autofocus
+                  >
+                    返回
+                  </button>
+                </div>
+              </form>
+            </dialog>
+          </section>
+
+          <section class="page" data-page="permissions" id="page-permissions" hidden>
+            <div class="page__head">
+              <h2 class="page__title">权限与数据</h2>
             </div>
+
+            <article
+              class="card"
+              id="permissions-approvals"
+              data-approval-count="0"
+              data-approval-state="empty"
+            >
+              <div class="card__head">
+                <h3 class="card__title">待批准</h3>
+              </div>
+              <div class="card__body">
+                <div class="row__value" data-show="approval-empty">没有待批准的请求</div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              id="permissions-source"
+              data-source-id="ext-local"
+              data-source-trust="pending"
+            >
+              <div class="card__head">
+                <h3 class="card__title">来源信任</h3>
+                <span class="row__value" data-show="source-trust-state">待确认</span>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">来源</span></span>
+                    <span class="row__value">扩展源 · 本地</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">版本</span></span>
+                    <span class="row__value">1.4.2</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">摘要</span></span>
+                    <span class="row__value">sha256:9f2c1b7e…a71d4c</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="source-preset-level">预设级别</label>
+                  <div class="inputForm">
+                    <select class="select" id="source-preset-level" data-pref="sourcePresetLevel">
+                      <button type="button" class="select__trigger">
+                        <selectedcontent class="select__selected"></selectedcontent
+                        ><span class="select__arrow" aria-hidden="true"></span>
+                      </button>
+                      <option value="ask" selected>询问</option>
+                      <option value="deny">拒绝</option>
+                      <option value="local">本地</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="source-trust"
+                    data-confirm="source-trust"
+                    data-confirm-item="扩展源 · 1.4.2 · sha256:9f2c1b7e…a71d4c"
+                  >
+                    确认信任
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              id="permissions-restore"
+              data-builtin-id="builtin-bridge"
+              data-builtin-state="removed"
+            >
+              <div class="card__head">
+                <h3 class="card__title">已移除的内置组件</h3>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">应用核心</span></span>
+                    <span class="row__value" data-show="builtin-state">已移除</span>
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="builtin-restore"
+                    data-confirm="restore"
+                    data-builtin-id="builtin-bridge"
+                  >
+                    恢复
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              id="permissions-audit"
+              data-audit-page="0"
+              data-audit-page-size="3"
+            >
+              <div class="card__head">
+                <h3 class="card__title">审计记录</h3>
+              </div>
+              <div class="card__body">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">时间</th>
+                      <th scope="col">来源</th>
+                      <th scope="col">事件</th>
+                      <th scope="col">摘要</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr data-audit-id="evt-20261031-2114">
+                      <td><time datetime="2026-10-31T21:14">2026-10-31 21:14</time></td>
+                      <td>扩展源</td>
+                      <td>来源询问</td>
+                      <td>sha256:9f2c1b7e…a71d4c</td>
+                    </tr>
+                    <tr data-audit-id="evt-20261031-2002">
+                      <td><time datetime="2026-10-31T20:02">2026-10-31 20:02</time></td>
+                      <td>应用核心</td>
+                      <td>内置恢复</td>
+                      <td>builtin-bridge</td>
+                    </tr>
+                    <tr data-audit-id="evt-20261030-1847">
+                      <td><time datetime="2026-10-30T18:47">2026-10-30 18:47</time></td>
+                      <td>语音与对话</td>
+                      <td>权限请求</td>
+                      <td>task-7f3a</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="audit-earlier"
+                    data-audit-cursor="before:evt-20261030-1847"
+                  >
+                    更早
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="audit-newer"
+                    data-audit-cursor="after:evt-20261031-2114"
+                  >
+                    较新
+                  </button>
+                  <button type="button" class="btn" data-preview-action="audit-refresh">
+                    刷新
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card"
+              id="permissions-data"
+              data-data-clear="unsupported"
+              data-data-export="unsupported"
+            >
+              <div class="card__head">
+                <h3 class="card__title">本地数据</h3>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">清除本地数据</span></span>
+                    <span class="row__value">
+                      <span>暂不支持</span>
+                      <button type="button" class="btn" data-preview-action="data-clear" disabled>
+                        清除
+                      </button>
+                    </span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">导出数据</span></span>
+                    <span class="row__value">
+                      <span>暂不支持</span>
+                      <button type="button" class="btn" data-preview-action="data-export" disabled>
+                        导出
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="page" data-page="persona" id="page-persona" hidden>
+            <div class="page__head">
+              <h2 class="page__title">人设</h2>
+            </div>
+
+            <article class="card" id="persona-card" data-persona-state="draft">
+              <div class="card__head">
+                <h3 class="card__title">基本设定</h3>
+                <span class="row__value" id="persona-draft-state" role="status">未保存</span>
+              </div>
+              <div class="card__body">
+                <div class="field-row">
+                  <div class="field field--grow">
+                    <label class="field__label" for="persona-pet-name">它的名字</label>
+                    <div class="inputForm">
+                      <input
+                        class="input"
+                        id="persona-pet-name"
+                        data-pref="petName"
+                        type="text"
+                        maxlength="40"
+                        value="小蓝"
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                    </div>
+                  </div>
+                  <div class="field field--grow">
+                    <label class="field__label" for="persona-user-name">称呼你</label>
+                    <div class="inputForm">
+                      <input
+                        class="input"
+                        id="persona-user-name"
+                        data-pref="userName"
+                        type="text"
+                        maxlength="40"
+                        value="你"
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <span class="field__label" id="persona-language-label">回复语言</span>
+                  <div class="segmented" role="radiogroup" aria-labelledby="persona-language-label">
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="replyLanguage"
+                        data-pref="replyLanguage"
+                        value="zh-CN"
+                        checked
+                      /><span>简体中文</span></label
+                    >
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="replyLanguage"
+                        data-pref="replyLanguage"
+                        value="en"
+                      /><span>English</span></label
+                    >
+                  </div>
+                </div>
+
+                <div class="field">
+                  <span class="field__label" id="persona-style-label">说话风格</span>
+                  <div class="segmented" role="radiogroup" aria-labelledby="persona-style-label">
+                    <label class="segment"
+                      ><input type="radio" name="style" data-pref="style" value="quiet" /><span
+                        >安静</span
+                      ></label
+                    >
+                    <label class="segment"
+                      ><input
+                        type="radio"
+                        name="style"
+                        data-pref="style"
+                        value="natural"
+                        checked
+                      /><span>默认</span></label
+                    >
+                    <label class="segment"
+                      ><input type="radio" name="style" data-pref="style" value="lively" /><span
+                        >活泼</span
+                      ></label
+                    >
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="persona-prompt">人设正文</label>
+                  <div class="inputForm" data-multiline="true">
+                    <textarea
+                      class="input"
+                      id="persona-prompt"
+                      data-pref="personaPrompt"
+                      data-maxlength="16384"
+                      maxlength="16384"
+                      rows="8"
+                      spellcheck="false"
+                    >
+你是桌面上的桌宠，说话简短、温和，先听我说完。</textarea>
+                  </div>
+                  <div class="row__value">
+                    <span
+                      data-show="persona-prompt-count"
+                      data-count-for="personaPrompt"
+                      data-count-max="16384"
+                      >23 / 16384 字符</span
+                    >
+                  </div>
+                </div>
+
+                <div class="card__foot">
+                  <button type="button" class="btn btn--primary" data-preview-action="persona-save">
+                    保存
+                  </button>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="page" data-page="conversation" id="page-conversation" hidden>
+            <div class="page__head">
+              <h2 class="page__title">对话</h2>
+            </div>
+
+            <article
+              class="card"
+              id="conversation-history"
+              data-history-count="3"
+              data-history-order="asc"
+            >
+              <div class="card__head">
+                <h3 class="card__title">今天这一条</h3>
+              </div>
+              <div class="card__body">
+                <div class="card__foot">
+                  <button type="button" class="btn" data-preview-action="conversation-refresh">
+                    刷新
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-preview-action="conversation-load-earlier"
+                    data-history-cursor="before:int-1"
+                  >
+                    加载更早
+                  </button>
+                </div>
+                <div class="rows rows--tight">
+                  <div
+                    class="row"
+                    data-interaction-id="int-1"
+                    data-interaction-kind="user"
+                    data-via="console"
+                  >
+                    <span class="row__text"><span class="row__label">今天也一起待着吧</span></span>
+                    <span class="row__value">我说 · 设置台里 · 21:14</span>
+                  </div>
+                  <div
+                    class="row"
+                    data-interaction-id="int-2"
+                    data-interaction-kind="pet"
+                    data-via="console"
+                  >
+                    <span class="row__text"
+                      ><span class="row__label">好呀，我就在这儿。</span></span
+                    >
+                    <span class="row__value">桌宠说 · 设置台里 · 21:15</span>
+                  </div>
+                  <div
+                    class="row"
+                    data-interaction-id="int-3"
+                    data-interaction-kind="interaction"
+                    data-via="bubble"
+                  >
+                    <span class="row__text"><span class="row__label">碰了一下</span></span>
+                    <span class="row__value">动作 · 气泡里 · 21:16</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card" id="conversation-compose" data-send-state="draft">
+              <div class="card__head">
+                <h3 class="card__title">对它说</h3>
+                <span class="row__value" id="conversation-send-state" role="status">未发送</span>
+              </div>
+              <div class="card__body">
+                <div class="field">
+                  <label class="field__label" for="conversation-input">说点什么</label>
+                  <div class="inputForm" data-multiline="true">
+                    <textarea
+                      class="input"
+                      id="conversation-input"
+                      data-pref="conversationDraft"
+                      data-maxlength="2000"
+                      maxlength="2000"
+                      rows="3"
+                      spellcheck="false"
+                    ></textarea>
+                  </div>
+                  <div class="row__value">
+                    <span
+                      data-show="conversation-count"
+                      data-count-for="conversationDraft"
+                      data-count-max="2000"
+                      >0 / 2000 字符</span
+                    >
+                  </div>
+                </div>
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    data-preview-action="conversation-send"
+                  >
+                    发送
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card" id="conversation-record" data-record-state="idle">
+              <div class="card__head">
+                <h3 class="card__title">语音</h3>
+                <span class="row__value" id="conversation-record-state" role="status">未录音</span>
+              </div>
+              <div class="card__body">
+                <div class="card__foot">
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    data-preview-action="conversation-record-start"
+                  >
+                    开始录音
+                  </button>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="page" data-page="about" id="page-about" hidden>
+            <div class="page__head">
+              <h2 class="page__title">关于</h2>
+            </div>
+
+            <article
+              class="card"
+              id="about-version"
+              data-app-name="桌宠"
+              data-app-version="0.0.0"
+              data-app-license="MIT"
+            >
+              <div class="card__head">
+                <h3 class="card__title">版本</h3>
+              </div>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">应用名称</span></span>
+                    <span class="row__value">桌宠</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">版本</span></span>
+                    <span class="row__value">0.0.0</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">许可</span></span>
+                    <span class="row__value">MIT</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <details
+              class="card"
+              id="about-advanced"
+              data-electron="45"
+              data-node="24"
+              data-platform="win32-x64"
+            >
+              <summary class="card__head">
+                <span class="card__title">高级</span>
+                <span class="row__value">技术信息</span>
+              </summary>
+              <div class="card__body">
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">Electron</span></span>
+                    <span class="row__value">45</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">Node</span></span>
+                    <span class="row__value">24</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__text"><span class="row__label">平台</span></span>
+                    <span class="row__value">win32-x64</span>
+                  </div>
+                </div>
+              </div>
+            </details>
           </section>
         </main>
       </div>
     </div>
 
+    <dialog id="preview-confirm-dialog" aria-labelledby="preview-confirm-title">
+      <form method="dialog" class="card">
+        <div class="card__head">
+          <h3 class="card__title" id="preview-confirm-title">确认操作</h3>
+        </div>
+        <div class="card__body">
+          <output class="row__value" id="preview-confirm-item">未选择项目</output>
+          <div class="card__foot">
+            <button
+              type="submit"
+              class="btn btn--primary"
+              value="confirm"
+              data-preview-action="confirm-preview"
+            >
+              确认
+            </button>
+            <button type="submit" class="btn" value="cancel" data-close-dialog autofocus>
+              取消
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
     <script src="preview.js"></script>
   </body>
 </html>
