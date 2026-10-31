@@ -417,6 +417,38 @@ export class CredentialBroker {
     });
   }
 
+  /** Runtime and host controls share one lazy client per owner generation. */
+  clientForHost(owner: CredentialOwner, declaredKeys: readonly string[]): CredentialClient {
+    const session = this.#sessions.get(namespaceKey(namespace(owner)));
+    if (!session || session.owner.generation !== owner.generation)
+      return this.issueClient(owner, declaredKeys);
+    return Object.freeze({
+      withSecret: <T>(
+        keyId: string,
+        task: CredentialTask,
+        operation: (secret: string, signal: AbortSignal) => Promise<T>,
+      ) => this.use(session, keyId, task, operation),
+    });
+  }
+
+  /** Borrow the current generation for one operation, without saving a draft Key. */
+  async withSecretForHost<T>(
+    owner: CredentialOwner,
+    declaredKeys: readonly string[],
+    keyId: string,
+    task: CredentialTask,
+    operation: (secret: string, signal: AbortSignal) => Promise<T>,
+    suppliedSecret?: string,
+  ): Promise<T> {
+    this.clientForHost(owner, declaredKeys);
+    const session = this.#sessions.get(namespaceKey(namespace(owner)));
+    if (!session || session.owner.generation !== owner.generation)
+      throw new CredentialError('stale-owner');
+    if (suppliedSecret !== undefined && !secretText(suppliedSecret))
+      throw new CredentialError('invalid-input');
+    return this.use(session, keyId, task, operation, suppliedSecret);
+  }
+
   revoke(owner: CredentialOwner): void {
     const ns = namespace(owner);
     const id = namespaceKey(ns);
@@ -504,6 +536,7 @@ export class CredentialBroker {
     keyId: string,
     task: CredentialTask,
     operation: (secret: string, signal: AbortSignal) => Promise<T>,
+    suppliedSecret?: string,
   ): Promise<T> {
     if (
       !localId(keyId) ||
@@ -591,68 +624,74 @@ export class CredentialBroker {
       )
         throw new CredentialError('permission-denied');
       const useSignal = lease.signal ? AbortSignal.any([signal, lease.signal]) : signal;
-      const ciphertext = await abortable(
-        track(this.dependencies.store.read(locator(session.owner, keyId))),
-        useSignal,
-      );
-      this.check(session, task.signal, lease, keySignal);
-      if (!ciphertext) throw new CredentialError('not-ready');
-      if (
-        !(ciphertext instanceof Uint8Array) ||
-        ciphertext.byteLength === 0 ||
-        ciphertext.byteLength > MAX_CIPHERTEXT_BYTES
-      )
-        throw new CredentialError('unavailable');
-      const decrypted = await abortable(
-        track(this.dependencies.cipher.decrypt(Uint8Array.from(ciphertext))),
-        useSignal,
-      );
-      this.check(session, task.signal, lease, keySignal);
-      if (!decrypted || typeof decrypted.shouldReEncrypt !== 'boolean')
-        throw new CredentialError('unavailable');
-      if (decrypted.shouldReEncrypt) throw new CredentialError('not-ready');
-      const plaintext = decrypted.plaintext;
-      if (typeof plaintext !== 'string' || Buffer.byteLength(plaintext, 'utf8') > 64 * 1024)
-        throw new CredentialError('unavailable');
-      let payload: unknown;
-      try {
-        payload = JSON.parse(plaintext) as unknown;
-      } catch {
-        throw new CredentialError('unavailable');
-      }
-      if (!payload || typeof payload !== 'object' || Array.isArray(payload))
-        throw new CredentialError('unavailable');
-      const record = payload as Record<string, unknown>;
-      const storedOwner = record['owner'];
-      if (
-        record['version'] !== 1 ||
-        record['keyId'] !== keyId ||
-        !storedOwner ||
-        typeof storedOwner !== 'object' ||
-        Array.isArray(storedOwner)
-      )
-        throw new CredentialError('unavailable');
-      const stored = storedOwner as Record<string, unknown>;
-      if (
-        Object.keys(record).sort().join(',') !== 'keyId,owner,secret,version' ||
-        Object.keys(stored).sort().join(',') !== 'instanceId,pluginId' ||
-        stored['pluginId'] !== session.owner.pluginId ||
-        stored['instanceId'] !== session.owner.instanceId ||
-        !secretText(record['secret'])
-      )
-        throw new CredentialError('permission-denied');
-      const managed = this.#resolvers.get(key);
-      const secret = managed
-        ? await abortable(
-            track(
-              this.resolveManaged(session.owner, keyId, managed, useSignal, () =>
-                this.check(session, task.signal, lease ?? undefined, keySignal),
+      let secret: string;
+      if (suppliedSecret !== undefined) {
+        secret = suppliedSecret;
+      } else {
+        const ciphertext = await abortable(
+          track(this.dependencies.store.read(locator(session.owner, keyId))),
+          useSignal,
+        );
+        this.check(session, task.signal, lease, keySignal);
+        if (!ciphertext) throw new CredentialError('not-ready');
+        if (
+          !(ciphertext instanceof Uint8Array) ||
+          ciphertext.byteLength === 0 ||
+          ciphertext.byteLength > MAX_CIPHERTEXT_BYTES
+        )
+          throw new CredentialError('unavailable');
+        const decrypted = await abortable(
+          track(this.dependencies.cipher.decrypt(Uint8Array.from(ciphertext))),
+          useSignal,
+        );
+        this.check(session, task.signal, lease, keySignal);
+        if (!decrypted || typeof decrypted.shouldReEncrypt !== 'boolean')
+          throw new CredentialError('unavailable');
+        if (decrypted.shouldReEncrypt) throw new CredentialError('not-ready');
+        const plaintext = decrypted.plaintext;
+        if (typeof plaintext !== 'string' || Buffer.byteLength(plaintext, 'utf8') > 64 * 1024)
+          throw new CredentialError('unavailable');
+        let payload: unknown;
+        try {
+          payload = JSON.parse(plaintext) as unknown;
+        } catch {
+          throw new CredentialError('unavailable');
+        }
+        if (!payload || typeof payload !== 'object' || Array.isArray(payload))
+          throw new CredentialError('unavailable');
+        const record = payload as Record<string, unknown>;
+        const storedOwner = record['owner'];
+        if (
+          record['version'] !== 1 ||
+          record['keyId'] !== keyId ||
+          !storedOwner ||
+          typeof storedOwner !== 'object' ||
+          Array.isArray(storedOwner)
+        )
+          throw new CredentialError('unavailable');
+        const stored = storedOwner as Record<string, unknown>;
+        if (
+          Object.keys(record).sort().join(',') !== 'keyId,owner,secret,version' ||
+          Object.keys(stored).sort().join(',') !== 'instanceId,pluginId' ||
+          stored['pluginId'] !== session.owner.pluginId ||
+          stored['instanceId'] !== session.owner.instanceId ||
+          !secretText(record['secret'])
+        )
+          throw new CredentialError('permission-denied');
+        const managed = this.#resolvers.get(key);
+        const resolved = managed
+          ? await abortable(
+              track(
+                this.resolveManaged(session.owner, keyId, managed, useSignal, () =>
+                  this.check(session, task.signal, lease ?? undefined, keySignal),
+                ),
               ),
-            ),
-            useSignal,
-          )
-        : record['secret'];
-      if (secret === null) throw new CredentialError('not-ready');
+              useSignal,
+            )
+          : record['secret'];
+        if (resolved === null) throw new CredentialError('not-ready');
+        secret = resolved;
+      }
       this.redactor.add(secret);
       this.check(session, task.signal, lease, keySignal);
       let result: T;

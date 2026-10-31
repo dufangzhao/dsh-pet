@@ -1,6 +1,6 @@
 import type { JsonObject } from '@pet/contracts';
 import { afterEach, expect, it, vi } from 'vitest';
-import { respondCompatible } from './responses.mjs';
+import { respondCompatible, testModelConnection } from './responses.mjs';
 afterEach(() => vi.unstubAllGlobals());
 it('uses native Anthropic messages and preserves full tool calls and measured usage', async () => {
   const fetch = vi.fn(async (url: string, init: RequestInit) => {
@@ -112,7 +112,11 @@ it('replays a Gemini tool signature from canonical reasoning without a second hi
     });
   });
   vi.stubGlobal('fetch', fetch);
-  const endpoint = { id: 'fixture-g', baseUrl: 'https://fixture.invalid', protocol: 'gemini' };
+  const endpoint = {
+    id: 'fixture-g',
+    baseUrl: 'https://fixture.invalid',
+    protocol: 'gemini',
+  } as const;
   const first = (await respondCompatible(
     'fixture-secret',
     'fixture-model',
@@ -166,3 +170,55 @@ it('does not fabricate zero token usage when the native provider omits its usage
   expect(result.response.usage).toBeNull();
   expect(result.attempts[0]?.meters).toMatchObject({ input: null, output: null, total: null });
 });
+
+it.each(
+  (['anthropic', 'gemini'] as const).flatMap((protocol) =>
+    ([undefined, 'default', 'medium'] as const).map((effort) => ({ protocol, effort })),
+  ),
+)(
+  'maps native $protocol effort $effort and preserves absent/default behavior',
+  async ({ protocol, effort }) => {
+    const fetch = vi.fn(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(String(init.body));
+      if (protocol === 'anthropic') {
+        expect(body.max_tokens).toBe(256);
+        expect(body.messages).toEqual([
+          { role: 'user', content: [{ type: 'text', text: 'Reply with OK.' }] },
+        ]);
+        if (effort === 'medium') {
+          expect(body.thinking).toEqual({ type: 'adaptive' });
+          expect(body.output_config).toEqual({ effort: 'medium' });
+        } else {
+          expect(body).not.toHaveProperty('thinking');
+          expect(body).not.toHaveProperty('output_config');
+        }
+        return Response.json({
+          id: 'm1',
+          model: 'draft-model',
+          content: [{ type: 'text', text: 'OK' }],
+          stop_reason: 'end_turn',
+        });
+      }
+      expect(body.generationConfig.maxOutputTokens).toBe(256);
+      expect(body.contents).toEqual([{ role: 'user', parts: [{ text: 'Reply with OK.' }] }]);
+      if (effort === 'medium')
+        expect(body.generationConfig.thinkingConfig).toEqual({ thinkingLevel: 'MEDIUM' });
+      else expect(body.generationConfig).not.toHaveProperty('thinkingConfig');
+      return Response.json({
+        responseId: 'r1',
+        candidates: [{ content: { role: 'model', parts: [{ text: 'OK' }] }, finishReason: 'STOP' }],
+      });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(
+      testModelConnection(
+        { id: 'fixture-native', baseUrl: 'https://fixture.invalid', protocol },
+        'draft-model',
+        'fixture-native-key',
+        new AbortController().signal,
+        effort,
+      ),
+    ).resolves.toMatchObject({ ok: true, model: 'draft-model' });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  },
+);

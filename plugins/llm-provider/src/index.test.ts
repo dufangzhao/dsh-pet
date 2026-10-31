@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import type { JsonValue, Result } from '@pet/contracts';
+import type { JsonValue, ModelReasoningEffort, Result } from '@pet/contracts';
 import { makeError } from '@pet/contracts';
 import type { PluginContext, PluginTask } from '@pet/plugin-sdk';
 import plugin from './index.js';
@@ -7,7 +7,7 @@ const originalFetch = globalThis.fetch;
 afterEach(() => {
   globalThis.fetch = originalFetch;
 });
-async function fixture() {
+async function fixture(effort?: ModelReasoningEffort) {
   let respond!: (task: PluginTask, input: JsonValue) => Promise<JsonValue>;
   const chunks: string[] = [];
   const owner = { pluginId: 'pet.llm-provider', instanceId: 'default', generation: 1 };
@@ -30,7 +30,10 @@ async function fixture() {
             instanceId: 'default',
             schemaVersion: 1,
             revision: 1,
-            data: { model: 'deepseek-chat' },
+            data: {
+              model: 'deepseek-chat',
+              ...(effort ? { reasoningEfforts: { deepseek: effort } } : {}),
+            },
           },
         }),
       },
@@ -75,25 +78,31 @@ function events(values: string[]): Response {
     { status: 200 },
   );
 }
-it('streams actual SSE content using the credential callback and a fixed HTTPS target', async () => {
-  const f = await fixture();
-  const fetch = vi.fn(async (url, options) => {
-    expect(url).toBe('https://api.deepseek.com/chat/completions');
-    expect(options?.headers).toMatchObject({ authorization: 'Bearer fixture-not-a-real-key' });
-    return events([
-      'data: {"choices":[{"delta":{"content":"你"}}]}\n\n',
-      'data: {"choices":[{"delta":{"content":"好"}}]}\n\ndata: [DONE]\n\n',
-    ]);
-  });
-  globalThis.fetch = fetch;
-  expect(await f.respond(f.task, { text: '测试', context: [] })).toEqual({
-    text: '你好',
-    mode: 'deepseek',
-    errorCode: null,
-  });
-  expect(f.chunks.join('')).toBe('你好');
-  expect(fetch).toHaveBeenCalledOnce();
-});
+it.each([undefined, 'high'] as const)(
+  'streams actual SSE content with persisted effort %s using the credential callback',
+  async (effort) => {
+    const f = await fixture(effort);
+    const fetch = vi.fn(async (url, options) => {
+      expect(url).toBe('https://api.deepseek.com/chat/completions');
+      expect(options?.headers).toMatchObject({ authorization: 'Bearer fixture-not-a-real-key' });
+      const body = JSON.parse(String(options?.body));
+      if (effort) expect(body.reasoning_effort).toBe(effort);
+      else expect(body).not.toHaveProperty('reasoning_effort');
+      return events([
+        'data: {"choices":[{"delta":{"content":"你"}}]}\n\n',
+        'data: {"choices":[{"delta":{"content":"好"}}]}\n\ndata: [DONE]\n\n',
+      ]);
+    });
+    globalThis.fetch = fetch;
+    expect(await f.respond(f.task, { text: '测试', context: [] })).toEqual({
+      text: '你好',
+      mode: 'deepseek',
+      errorCode: null,
+    });
+    expect(f.chunks.join('')).toBe('你好');
+    expect(fetch).toHaveBeenCalledOnce();
+  },
+);
 it('does not manufacture a completed reply when the SSE stream is truncated', async () => {
   const f = await fixture();
   globalThis.fetch = vi.fn(async () =>

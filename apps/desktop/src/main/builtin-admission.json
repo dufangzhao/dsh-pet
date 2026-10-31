@@ -66,13 +66,13 @@
       "files": [
         {
           "relativePath": "plugin.json",
-          "sha256": "80b1b98b9a0698c328dd85c688ce9727158ffd912f07dd8af231bc7530d7faba",
-          "bytes": 12743
+          "sha256": "7ad56a052e42dee2be81492abc63958215293811cef757f87a5877b74e386561",
+          "bytes": 16128
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "3cd7d288449910159c53e0381ce111a61059e265aa014c3d4bdcecb2b8d5871d",
-          "bytes": 52330
+          "sha256": "a895f158e41acd2de9d89099f5c11571990cb35d33bc1847ae36289a3ce4ef2c",
+          "bytes": 55133
         }
       ]
     },

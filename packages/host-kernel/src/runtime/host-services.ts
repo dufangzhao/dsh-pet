@@ -12,11 +12,7 @@ import { capabilityPermissionAuthorizer } from '../permissions/adapters.js';
 import type { PermissionService } from '../permissions/kernel.js';
 import type { PluginManager } from './plugin-manager.js';
 import { jsonPreflight } from '@pet/contracts/validation';
-import {
-  type CredentialBroker,
-  CredentialError,
-  type CredentialClient,
-} from '../credentials/credential-broker.js';
+import { type CredentialBroker, CredentialError } from '../credentials/credential-broker.js';
 import { KnownSecretBoundary } from '../credentials/secret-boundary.js';
 import { exactKeys, record } from './worker-protocol.js';
 import type {
@@ -64,7 +60,6 @@ export interface HostServicesOptions {
 /** Main-process adapter only: never passed to plugin code. */
 export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHostPort {
   const boundary = new KnownSecretBoundary(options.credentials?.redactor);
-  const clients = new Map<string, { owner: OwnerRef; client: CredentialClient }>();
   return Object.freeze({
     allowJson: (value: JsonValue) => boundary.allowJson(value),
     allowFrame: (frame: MediaFrame) => boundary.allowFrame(frame),
@@ -88,20 +83,12 @@ export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHost
                 !options.manager.isLive(owner)
               )
                 return { ok: false, error: makeError('permission-denied', false) };
-              const id = JSON.stringify([owner.pluginId, owner.instanceId]);
-              let issued = clients.get(id);
-              if (!issued || issued.owner.generation !== owner.generation) {
-                const keys =
-                  snapshot.manifest.permissions?.flatMap((permission) =>
-                    permission.kind === 'credentials' ? permission.keys : [],
-                  ) ?? [];
-                issued = {
-                  owner: { ...owner },
-                  client: options.credentials!.issueClient(owner, [...new Set(keys)]),
-                };
-                clients.set(id, issued);
-              }
-              return await issued.client.withSecret(
+              const keys =
+                snapshot.manifest.permissions?.flatMap((permission) =>
+                  permission.kind === 'credentials' ? permission.keys : [],
+                ) ?? [];
+              const client = options.credentials!.clientForHost(owner, [...new Set(keys)]);
+              return await client.withSecret(
                 keyId,
                 { taskId, signal: AbortSignal.any([taskSignal, signal]) },
                 operation,

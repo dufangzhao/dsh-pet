@@ -1,0 +1,571 @@
+$ pnpm typecheck && pnpm test && pnpm test:qa && pnpm lint && pnpm format:check && pnpm build
+$ pnpm -r typecheck
+Scope: 21 of 22 workspace projects
+packages/contracts typecheck$ tsc --noEmit -p tsconfig.json
+packages/ui-kit typecheck$ tsc --noEmit -p tsconfig.json
+plugins/asr-cloud typecheck$ tsc --noEmit -p tsconfig.json
+plugins/audio-capture typecheck$ tsc --noEmit -p tsconfig.json
+plugins/asr-cloud typecheck: Done
+plugins/talk-key typecheck$ tsc --noEmit -p tsconfig.json
+plugins/audio-capture typecheck: Done
+packages/ui-kit typecheck: Done
+plugins/talk-key typecheck: Done
+packages/contracts typecheck: Done
+packages/plugin-sdk typecheck$ tsc --noEmit -p tsconfig.json
+packages/plugin-sdk typecheck: Done
+packages/host-kernel typecheck$ tsc --noEmit -p tsconfig.json
+plugins/agent-cortico typecheck$ tsc --noEmit -p tsconfig.json
+plugins/asr-local typecheck$ tsc --noEmit -p tsconfig.json
+plugins/avatar-default typecheck$ tsc --noEmit -p tsconfig.json
+plugins/agent-cortico typecheck: Done
+plugins/chat typecheck$ tsc --noEmit -p tsconfig.json
+plugins/avatar-default typecheck: Done
+plugins/llm-provider typecheck$ tsc --noEmit -p tsconfig.json
+plugins/asr-local typecheck: Done
+plugins/page-appearance typecheck$ tsc --noEmit -p tsconfig.json
+plugins/chat typecheck: Done
+plugins/page-conversation typecheck$ tsc --noEmit -p tsconfig.json
+plugins/page-appearance typecheck: Done
+plugins/page-persona typecheck$ tsc --noEmit -p tsconfig.json
+plugins/llm-provider typecheck: Done
+plugins/page-start typecheck$ tsc --noEmit -p tsconfig.json
+plugins/page-persona typecheck: Done
+plugins/page-voice typecheck$ tsc --noEmit -p tsconfig.json
+plugins/page-conversation typecheck: Done
+plugins/profile typecheck$ tsc --noEmit -p tsconfig.json
+plugins/page-start typecheck: Done
+plugins/voice-chat typecheck$ tsc --noEmit -p tsconfig.json
+packages/host-kernel typecheck: Done
+plugins/page-voice typecheck: Done
+plugins/profile typecheck: Done
+plugins/voice-chat typecheck: Done
+apps/desktop typecheck$ tsc --noEmit -p tsconfig.json
+packages/contract-tests typecheck$ tsc --noEmit -p tsconfig.json
+packages/contract-tests typecheck: Done
+apps/desktop typecheck: Done
+$ pnpm -r test
+Scope: 21 of 22 workspace projects
+packages/contracts test$ vitest run --passWithNoTests
+packages/ui-kit test$ vitest run --passWithNoTests
+plugins/asr-cloud test$ vitest run --passWithNoTests
+plugins/audio-capture test$ vitest run --passWithNoTests
+packages/contracts test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/packages/contracts
+plugins/asr-cloud test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/asr-cloud
+plugins/asr-cloud test: No test files found, exiting with code 0
+plugins/asr-cloud test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/asr-cloud test: exclude:  **/node_modules/**, **/.git/**
+plugins/audio-capture test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/audio-capture
+packages/ui-kit test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/packages/ui-kit
+plugins/audio-capture test: No test files found, exiting with code 0
+plugins/audio-capture test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/audio-capture test: exclude:  **/node_modules/**, **/.git/**
+packages/ui-kit test: No test files found, exiting with code 0
+packages/ui-kit test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+packages/ui-kit test: exclude:  **/node_modules/**, **/.git/**
+plugins/asr-cloud test: Done
+plugins/talk-key test$ vitest run --passWithNoTests
+plugins/audio-capture test: Done
+packages/ui-kit test: Done
+packages/contracts test:  ✓ src/runtime-contracts.test.ts (20 tests) 13ms
+packages/contracts test:  ✓ src/pet-prototype.test.ts (14 tests) 9ms
+packages/contracts test:  ✓ src/validation/json-preflight.test.ts (19 tests) 13ms
+packages/contracts test:  ✓ src/browser-safety.test.ts (32 tests) 196ms
+packages/contracts test:  ✓ src/host-status.test.ts (70 tests) 53ms
+packages/contracts test:  ✓ src/validation/manifest-limits.test.ts (12 tests) 230ms
+packages/contracts test:  ✓ src/validation/manifest.test.ts (75 tests) 250ms
+packages/contracts test:  ✓ src/validation/review-regressions.test.ts (6 tests) 200ms
+packages/contracts test:  ✓ src/task-media.test.ts (13 tests) 260ms
+packages/contracts test:  ✓ src/validation/control.test.ts (41 tests) 216ms
+packages/contracts test:  Test Files  10 passed (10)
+packages/contracts test:       Tests  302 passed (302)
+packages/contracts test:    Start at  23:50:25
+packages/contracts test:    Duration  997ms (tests 43%, import 42%, transform 10%, worker 4%)
+packages/contracts test: Done
+plugins/talk-key test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/talk-key
+plugins/talk-key test: No test files found, exiting with code 0
+plugins/talk-key test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/talk-key test: exclude:  **/node_modules/**, **/.git/**
+plugins/talk-key test: Done
+packages/plugin-sdk test$ vitest run --passWithNoTests
+packages/plugin-sdk test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/packages/plugin-sdk
+packages/plugin-sdk test:  ✓ src/index.test.ts (18 tests) 18ms
+packages/plugin-sdk test:  ✓ src/credential-lifetime-review.test.ts (2 tests) 12ms
+packages/plugin-sdk test:  ✓ src/host-review.test.ts (3 tests) 8ms
+packages/plugin-sdk test:  ✓ src/host.test.ts (33 tests) 34ms
+packages/plugin-sdk test:  ✓ src/credential-host.test.ts (42 tests) 34ms
+packages/plugin-sdk test:  ✓ src/examples/recording-provider.test.ts (2 tests) 151ms
+packages/plugin-sdk test:  Test Files  6 passed (6)
+packages/plugin-sdk test:       Tests  100 passed (100)
+packages/plugin-sdk test:    Start at  23:50:27
+packages/plugin-sdk test:    Duration  747ms (import 62%, transform 19%, tests 15%, worker 3%)
+packages/plugin-sdk test: Done
+packages/host-kernel test$ vitest run --passWithNoTests
+plugins/asr-local test$ vitest run --passWithNoTests
+plugins/avatar-default test$ vitest run --passWithNoTests
+plugins/agent-cortico test$ vitest run --passWithNoTests
+plugins/asr-local test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/asr-local
+packages/host-kernel test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/packages/host-kernel
+plugins/avatar-default test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/avatar-default
+plugins/asr-local test: No test files found, exiting with code 0
+plugins/asr-local test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/asr-local test: exclude:  **/node_modules/**, **/.git/**
+plugins/agent-cortico test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/agent-cortico
+plugins/avatar-default test: No test files found, exiting with code 0
+plugins/avatar-default test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/avatar-default test: exclude:  **/node_modules/**, **/.git/**
+plugins/asr-local test: Done
+plugins/chat test$ vitest run --passWithNoTests
+plugins/avatar-default test: Done
+plugins/llm-provider test$ vitest run --passWithNoTests
+plugins/agent-cortico test:  ✓ src/prefix-reload.test.mjs (1 test) 8ms
+plugins/agent-cortico test:  Test Files  1 passed (1)
+plugins/agent-cortico test:       Tests  1 passed (1)
+plugins/agent-cortico test:    Start at  23:50:28
+plugins/agent-cortico test:    Duration  730ms (transform 55%, import 38%, worker 4%, tests 3%)
+plugins/agent-cortico test: Done
+plugins/page-appearance test$ vitest run --passWithNoTests
+packages/host-kernel test:  ✓ src/runtime/worker-protocol.test.ts (3 tests) 276ms
+packages/host-kernel test:  ✓ src/permissions/review.test.ts (3 tests) 251ms
+packages/host-kernel test:  ✓ src/tasks/stop-all.test.ts (3 tests) 260ms
+packages/host-kernel test:  ✓ src/ipc/media-framing.test.ts (8 tests) 280ms
+plugins/chat test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/chat
+packages/host-kernel test:  ✓ src/ipc/control-endpoint.test.ts (11 tests) 327ms
+plugins/chat test: No test files found, exiting with code 0
+plugins/chat test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/chat test: exclude:  **/node_modules/**, **/.git/**
+packages/host-kernel test:  ✓ src/tasks/credit-sender.test.ts (4 tests) 303ms
+packages/host-kernel test:  ✓ src/ipc/media-port.test.ts (2 tests) 400ms
+packages/host-kernel test:    ✓ handles a write error without leaving an unhandled stream error 395ms
+plugins/llm-provider test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/llm-provider
+packages/host-kernel test:  ✓ src/tasks/media-peer.test.ts (5 tests) 442ms
+packages/host-kernel test:    ✓ transfers owned bytes and drains a normal end 424ms
+packages/host-kernel test:  ✓ src/runtime/worker-server.test.ts (6 tests) 661ms
+packages/host-kernel test:    ✓ only loads a discovered matching entry and exact manifest digest 362ms
+packages/host-kernel test:  ✓ src/runtime/discovery.test.ts (7 tests) 910ms
+packages/host-kernel test:    ✓ discovers without evaluating entry code and records bounded evidence 410ms
+packages/host-kernel test:    ✓ includes declared page artifacts in the source identity and rejects changed panel data 370ms
+packages/host-kernel test:  ✓ src/experiments/cordis-probe.test.ts (4 tests) 281ms
+plugins/page-appearance test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/page-appearance
+plugins/page-appearance test: No test files found, exiting with code 0
+plugins/page-appearance test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/page-appearance test: exclude:  **/node_modules/**, **/.git/**
+plugins/chat test: Done
+plugins/page-conversation test$ vitest run --passWithNoTests
+plugins/llm-provider test:  ✓ src/browser-plan.test.mjs (2 tests) 239ms
+plugins/llm-provider test:  ✓ src/model-setup.test.mjs (8 tests) 264ms
+plugins/llm-provider test:  ✓ src/index.test.ts (4 tests) 21ms
+plugins/llm-provider test:  ✓ src/native-protocols.test.ts (10 tests) 339ms
+packages/host-kernel test:  ✓ src/config/first-save.test.ts (6 tests) 584ms
+packages/host-kernel test:    ✓ inspects absent required data without writing, then creates revision one from a complete candidate 558ms
+packages/host-kernel test:  ✓ src/tasks/task-supervisor.test.ts (11 tests) 370ms
+packages/host-kernel test:    ✓ returns a bounded copied result with metadata-only ordered events 320ms
+packages/host-kernel test:  ✓ src/credentials/sensitive-peer-review.test.ts (8 tests) 548ms
+packages/host-kernel test:    ✓ does not accept an ACK before any delivery has started 506ms
+packages/host-kernel test:  ✓ src/ipc/work-completion.test.ts (6 tests) 557ms
+packages/host-kernel test:    ✓ holds client and handler capacity after cancellation until actual work returns 517ms
+packages/host-kernel test:  ✓ src/runtime/worker-credential-capacity.test.ts (1 test) 409ms
+packages/host-kernel test:    ✓ does not request a host credential when no local receive slot was reserved 406ms
+packages/host-kernel test:  ✓ src/credentials/sensitive-peer.test.ts (6 tests) 377ms
+packages/host-kernel test:    ✓ delivers once and keeps callback result out of the ACK 361ms
+packages/host-kernel test:  ✓ src/config/service.test.ts (9 tests) 539ms
+packages/host-kernel test:    ✓ initializes defaults and saves only validated fresh revisions 476ms
+plugins/llm-provider test:  ✓ src/responses.test.ts (17 tests) 513ms
+plugins/llm-provider test:    ✓ reuses the full Cortico Chat transport for tool calls and metering without exposing credentials 468ms
+plugins/llm-provider test:  Test Files  5 passed (5)
+plugins/llm-provider test:       Tests  41 passed (41)
+plugins/llm-provider test:    Start at  23:50:30
+plugins/llm-provider test:    Duration  2.04s (tests 48%, import 28%, transform 22%, worker 2%)
+plugins/llm-provider test: Done
+plugins/page-persona test$ vitest run --passWithNoTests
+packages/host-kernel test:  ✓ src/credentials/secret-boundary.test.ts (5 tests) 322ms
+packages/host-kernel test:  ✓ src/credentials/credential-work-stages.test.ts (3 tests) 45ms
+plugins/page-appearance test: Done
+plugins/page-start test$ vitest run --passWithNoTests
+packages/host-kernel test:  ✓ src/credentials/credential-work-capacity.test.ts (1 test) 26ms
+packages/host-kernel test:  ✓ src/credentials/credential-host-use.test.ts (6 tests) 25ms
+packages/host-kernel test:  ✓ src/credentials/file-ciphertext-store.test.ts (8 tests) 185ms
+packages/host-kernel test:  ✓ src/permissions/credential-integration.test.ts (1 test) 299ms
+packages/host-kernel test:  ✓ src/credentials/credential-broker.test.ts (22 tests) 49ms
+packages/host-kernel test:  ✓ src/config/file-store.test.ts (8 tests) 3196ms
+packages/host-kernel test:    ✓ publishes one namespace atomically and rejects a stale revision 1010ms
+packages/host-kernel test:    ✓ does not expose one instance through another namespace 347ms
+packages/host-kernel test:    ✓ retains corrupt records rather than silently overwriting defaults 600ms
+packages/host-kernel test:    ✓ does not write when cancellation precedes the commit fence 378ms
+packages/host-kernel test:    ✓ persists bounded JSON through a real write and a fresh store instance 370ms
+plugins/page-conversation test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/page-conversation
+plugins/page-conversation test: No test files found, exiting with code 0
+plugins/page-conversation test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/page-conversation test: exclude:  **/node_modules/**, **/.git/**
+packages/host-kernel test:  ✓ src/permissions/kernel.test.ts (7 tests) 349ms
+packages/host-kernel test:    ✓ SEC01/10: denies without declaration or an available host approval channel 305ms
+packages/host-kernel test:  ✓ src/credentials/secret-cipher.test.ts (8 tests) 18ms
+packages/host-kernel test:  ✓ src/experiments/talk-key-probe.test.ts (12 tests) 23ms
+packages/host-kernel test:  ✓ src/tasks/media-channel-review.test.ts (4 tests) 513ms
+packages/host-kernel test:    ✓ does not classify malformed frames as retryable quota while full 491ms
+packages/host-kernel test:  ✓ src/ipc/media-close.test.ts (2 tests) 16ms
+packages/host-kernel test:  ✓ src/experiments/wave-pcm.test.ts (12 tests) 15ms
+packages/host-kernel test:  ✓ src/credentials/metadata.test.ts (2 tests) 10ms
+plugins/page-conversation test: Done
+plugins/page-voice test$ vitest run --passWithNoTests
+packages/host-kernel test:  ✓ src/config/schema-review.test.ts (1 test) 24ms
+packages/host-kernel test:  ✓ src/runtime/identity.test.ts (2 tests) 7ms
+packages/host-kernel test:  ✓ src/credentials/redactor.test.ts (4 tests) 7ms
+packages/host-kernel test:  ✓ src/permissions/provider-leases.test.ts (2 tests) 21ms
+packages/host-kernel test:  Test Files  37 passed (37)
+packages/host-kernel test:       Tests  213 passed (213)
+packages/host-kernel test:    Start at  23:50:28
+packages/host-kernel test:    Duration  5.03s (tests 50%, import 39%, transform 8%, worker 3%)
+packages/host-kernel test:     Isolate  37 workers spawned · ~697ms startup each (spawn + environment, per file)
+packages/host-kernel test:              at least ~1.65s faster with isolate: false — reuses workers across files instead of one per file
+packages/host-kernel test: Done
+plugins/profile test$ vitest run --passWithNoTests
+plugins/page-persona test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/page-persona
+plugins/page-persona test: No test files found, exiting with code 0
+plugins/page-persona test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/page-persona test: exclude:  **/node_modules/**, **/.git/**
+plugins/page-persona test: Done
+plugins/voice-chat test$ vitest run --passWithNoTests
+plugins/page-start test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/page-start
+plugins/page-start test: No test files found, exiting with code 0
+plugins/page-start test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/page-start test: exclude:  **/node_modules/**, **/.git/**
+plugins/page-start test: Done
+plugins/page-voice test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/page-voice
+plugins/page-voice test: No test files found, exiting with code 0
+plugins/page-voice test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/page-voice test: exclude:  **/node_modules/**, **/.git/**
+plugins/page-voice test: Done
+plugins/profile test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/profile
+plugins/profile test: No test files found, exiting with code 0
+plugins/profile test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/profile test: exclude:  **/node_modules/**, **/.git/**
+plugins/profile test: Done
+plugins/voice-chat test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/plugins/voice-chat
+plugins/voice-chat test: No test files found, exiting with code 0
+plugins/voice-chat test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+plugins/voice-chat test: exclude:  **/node_modules/**, **/.git/**
+plugins/voice-chat test: Done
+apps/desktop test$ vitest run --passWithNoTests
+packages/contract-tests test$ vitest run --passWithNoTests
+apps/desktop test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/apps/desktop
+packages/contract-tests test:  RUN  v5.0.5 C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/桌宠/packages/contract-tests
+packages/contract-tests test:  ✓ src/config-schema-contract.test.ts (51 tests) 109ms
+apps/desktop test:  ✓ src/main/console-config-request.test.ts (5 tests) 477ms
+apps/desktop test:    ✓ uses the current disabled owner for pure inspection and a single Result on first save 444ms
+packages/contract-tests test:  ✓ src/task-event-contract.test.ts (4 tests) 648ms
+packages/contract-tests test:    ✓ publishes frozen ordered metadata rather than the business result 635ms
+apps/desktop test:  ✓ src/main/host-readiness.test.ts (6 tests) 516ms
+apps/desktop test:    ✓ makes the already-implemented capability service available without granting it 493ms
+apps/desktop test:  ✓ src/renderer/console/style-families/hearth.test.tsx (15 tests) 935ms
+apps/desktop test:  ✓ src/main/demo-history.test.ts (2 tests) 815ms
+apps/desktop test:    ✓ reads old data for recoverable migration without replacing it 792ms
+apps/desktop test:  ✓ src/main/builtin-manifests.test.ts (5 tests) 775ms
+apps/desktop test:    ✓ discovers and prepares the real asr-local plugin manifest 479ms
+packages/contract-tests test:  ✓ src/credential-repair-contract.test.ts (32 tests) 137ms
+packages/contract-tests test:  ✓ src/media-channel-contract.test.ts (46 tests) 760ms
+packages/contract-tests test:    ✓ 媒体通道身份绑定 (6)
+packages/contract-tests test:      ✓ 构造时快照并冻结 owner/stream/task，之后改动入参不再生效 519ms
+packages/contract-tests test:  ✓ src/task-capability-integration.test.ts (7 tests) 431ms
+packages/contract-tests test:    ✓ defaults to deny capability calls without invoking a provider 339ms
+packages/contract-tests test:  ✓ src/host-integration.test.ts (19 tests) 1176ms
+packages/contract-tests test:    ✓ real Cordis host lifecycle (8)
+packages/contract-tests test:      ✓ activates and reverses owned effects without exposing Cordis 654ms
+apps/desktop test:  ✓ src/renderer/console/style-families/prism.test.tsx (17 tests) 1398ms
+packages/contract-tests test:  ✓ src/fixtures.test.ts (12 tests) 27ms
+packages/contract-tests test:  ✓ src/fixtures/scripted-asr.test.ts (23 tests) 30ms
+packages/contract-tests test:  ✓ src/scripted-asr-integration.test.ts (13 tests) 1727ms
+packages/contract-tests test:    ✓ scripted ASR through the real host kernel (9)
+packages/contract-tests test:      ✓ returns the scripted transcript for a normal authorized call 690ms
+packages/contract-tests test:    ✓ scripted ASR coexists with the existing fixtures (4)
+packages/contract-tests test:      ✓ reports pending_restart instead of a clean disable when the reused stuck fixture blocks cleanup 528ms
+apps/desktop test:  ✓ src/main/builtin-registry.test.ts (2 tests) 2019ms
+apps/desktop test:    ✓ persists deliberate removal, preserves packaged code and only verifies the displayed restore token 1511ms
+apps/desktop test:    ✓ keeps protected builtin identities installed even if a prior removal marker exists 506ms
+apps/desktop test:  ✓ src/renderer/console/original-ui/theme-studio.test.tsx (4 tests) 280ms
+apps/desktop test:  ✓ src/main/console-plugin-request.test.ts (7 tests) 743ms
+apps/desktop test:    ✓ enables with the persisted candidate and returns the new owner and real contributions without a followup read 566ms
+apps/desktop test:  ✓ src/renderer/console/style-families/precision.test.tsx (7 tests) 293ms
+apps/desktop test:  ✓ src/renderer/console/style-families/workbench.test.tsx (5 tests) 331ms
+packages/contract-tests test:  ✓ src/permission-task-integration.test.ts (2 tests) 622ms
+packages/contract-tests test:    ✓ allows sensitive provider operations only for a real bound task participant 576ms
+packages/contract-tests test:  ✓ src/runtime-credential-boundary.test.ts (7 tests) 735ms
+packages/contract-tests test:    ✓ denies invented tasks before approval and decrypt 566ms
+apps/desktop test:  ✓ src/renderer/console/pages/app-pages.test.tsx (16 tests) 1030ms
+apps/desktop test:  ✓ src/main/model-query-controller.test.ts (5 tests) 365ms
+apps/desktop test:    ✓ selected-provider read-only model controls (5)
+apps/desktop test:      ✓ queries with the typed key without overwriting the saved credential or active configuration 345ms
+packages/contract-tests test:  ✓ src/permission-contract.test.ts (60 tests) 1137ms
+packages/contract-tests test:    ✓ trust and declaration scope (SEC-01) (16)
+packages/contract-tests test:      ✓ denies every sensitive request until the host confirms trust 495ms
+packages/contract-tests test:  ✓ src/contribution-lifecycle.test.ts (10 tests) 926ms
+packages/contract-tests test:    ✓ publishes five frozen declarations atomically only after activation succeeds 707ms
+apps/desktop test:  ✓ src/renderer/console/start-designs/controls.test.tsx (19 tests) 227ms
+packages/contract-tests test:  Test Files  13 passed (13)
+packages/contract-tests test:       Tests  286 passed (286)
+packages/contract-tests test:    Start at  23:50:35
+packages/contract-tests test:    Duration  5.09s (import 54%, tests 35%, transform 10%, worker 1%)
+apps/desktop test:  ✓ src/main/console-snapshot.test.ts (2 tests) 363ms
+apps/desktop test:    ✓ projects plugin metadata without entry paths or configuration 350ms
+packages/contract-tests test: Done
+apps/desktop test:  ✓ src/renderer/console/style-families/folio.test.tsx (10 tests) 179ms
+apps/desktop test:  ✓ src/main/console-security-request.test.ts (5 tests) 2276ms
+apps/desktop test:    ✓ binds trust to the displayed code fingerprint and exposes the actual preset 827ms
+apps/desktop test:    ✓ refuses changed code and revokes the old approval without evaluating the changed file 612ms
+apps/desktop test:    ✓ allows only a current one-shot approval and records metadata without content 408ms
+apps/desktop test:    ✓ revoking trust cancels pending approval and stops the actual owner 301ms
+apps/desktop test:  ✓ src/renderer/console/pages/permissions.test.tsx (11 tests) 198ms
+apps/desktop test:  ✓ src/renderer/console/theme-editor.test.tsx (7 tests) 156ms
+apps/desktop test:  ✓ src/renderer/pet/pet.test.tsx (75 tests) 150ms
+apps/desktop test:  ✓ src/main/model-oauth.test.ts (7 tests) 4014ms
+apps/desktop test:    ✓ completes a real loopback PKCE callback, verifies identity and rotates encrypted credentials before borrowing 1487ms
+apps/desktop test:    ✓ does not persist credentials for bad-nonce 467ms
+apps/desktop test:    ✓ does not persist credentials for missing-plan 471ms
+apps/desktop test:    ✓ removes permanently refused or downgraded login tokens (refresh-refused) 546ms
+apps/desktop test:    ✓ removes permanently refused or downgraded login tokens (refresh-scope-loss) 503ms
+apps/desktop test:  ✓ src/renderer/console/settings-shell.test.tsx (14 tests) 109ms
+apps/desktop test:  ✓ src/main/windows/pet-window.test.ts (37 tests) 72ms
+apps/desktop test:  ✓ src/main/plugin-removal.test.ts (3 tests) 89ms
+apps/desktop test:  ✓ src/main/model-catalog.test.ts (61 tests) 292ms
+apps/desktop test:  ✓ src/renderer/console/style-families/gallery.test.tsx (5 tests) 112ms
+apps/desktop test:  ✓ src/renderer/pet/pet.a11y.test.ts (47 tests) 83ms
+apps/desktop test:  ✓ src/renderer/console/persona-prompt-editor.test.tsx (7 tests) 37ms
+apps/desktop test:  ✓ src/renderer/console/site-ui/source-fidelity.test.ts (28 tests) 57ms
+apps/desktop test:  ✓ src/renderer/console/start-designs/variants/spine.test.tsx (4 tests) 32ms
+apps/desktop test:  ✓ src/renderer/console/theme.test.ts (19 tests) 28ms
+apps/desktop test:  ✓ src/renderer/console/original-ui/theme-controller.test.ts (12 tests) 37ms
+apps/desktop test:  ✓ src/main/approval-inbox.test.ts (3 tests) 30ms
+apps/desktop test:  ✓ src/renderer/console/site-ui/source-controls.test.tsx (13 tests) 46ms
+apps/desktop test:  ✓ src/renderer/console/config-form.test.tsx (4 tests) 55ms
+apps/desktop test:  ✓ src/renderer/console/original-ui/kit.test.tsx (13 tests) 59ms
+apps/desktop test:  ✓ src/renderer/console/start-designs/variants/stage.test.tsx (4 tests) 31ms
+apps/desktop test:  ✓ src/renderer/console/style-families/use-family-theme.test.tsx (6 tests) 38ms
+apps/desktop test:  ✓ src/renderer/console/start-designs/behavior.test.ts (24 tests) 21ms
+apps/desktop test:  ✓ src/renderer/console/config-draft.test.ts (14 tests) 21ms
+apps/desktop test:  ✓ src/main/windows/pet-geometry.test.ts (27 tests) 18ms
+apps/desktop test:  ✓ src/renderer/pet/expression.test.ts (4 tests) 18ms
+apps/desktop test:  ✓ src/main/host-request.test.ts (9 tests) 18ms
+apps/desktop test:  ✓ src/renderer/console/demo/capture-worklet.test.ts (6 tests) 21ms
+apps/desktop test:  ✓ src/main/console-request.test.ts (5 tests) 12ms
+apps/desktop test:  ✓ src/preload/console-bridge.test.ts (6 tests) 14ms
+apps/desktop test:  ✓ src/renderer/pet/demo-status.test.ts (15 tests) 15ms
+apps/desktop test:  ✓ src/renderer/console/style-families/registry.test.ts (5 tests) 21ms
+apps/desktop test:  ✓ src/main/model-connection-request.test.ts (8 tests) 18ms
+apps/desktop test:  ✓ src/preload/security-bridge.test.ts (2 tests) 13ms
+apps/desktop test:  ✓ src/main/ipc-request.test.ts (18 tests) 14ms
+apps/desktop test:  ✓ src/main/demo-request.test.ts (2 tests) 13ms
+apps/desktop test:  ✓ src/preload/host-bridge.test.ts (3 tests) 13ms
+apps/desktop test:  ✓ src/renderer/console/demo/microphone.test.ts (2 tests) 12ms
+apps/desktop test:  ✓ src/renderer/console/app-views.test.ts (6 tests) 13ms
+apps/desktop test:  ✓ src/renderer/console/preview-behavior.test.ts (4 tests) 9ms
+apps/desktop test:  ✓ src/renderer/console/history-page.test.ts (5 tests) 10ms
+apps/desktop test:  ✓ src/renderer/console/use-model-connection.test.ts (8 tests) 11ms
+apps/desktop test:  ✓ src/renderer/pet/compose-rules.test.ts (4 tests) 8ms
+apps/desktop test:  ✓ src/main/demo-media-permission.test.ts (1 test) 6ms
+apps/desktop test:  ✓ src/renderer/console/use-plugin-actions.test.ts (5 tests) 10ms
+apps/desktop test:  ✓ src/main/application-updates.test.ts (1 test) 8ms
+apps/desktop test:  ✓ src/renderer/console/start-designs/contracts.test.ts (3 tests) 11ms
+apps/desktop test:  ✓ src/renderer/console/pet-preview.test.ts (6 tests) 9ms
+apps/desktop test:  ✓ src/renderer/console/console-app.test.ts (3 tests) 5ms
+apps/desktop test:  Test Files  65 passed (65)
+apps/desktop test:       Tests  708 passed (708)
+apps/desktop test:    Start at  23:50:35
+apps/desktop test:    Duration  9.63s (import 42%, tests 39%, transform 16%, worker 3%)
+apps/desktop test:     Isolate  65 workers spawned · ~737ms startup each (spawn + environment, per file)
+apps/desktop test:              at least ~3.62s faster with isolate: false — reuses workers across files instead of one per file
+apps/desktop test: Done
+$ node --test --test-reporter=spec qa/probes/*.test.mjs
+▶ model.id 校验
+  ✔ 接受清单里的真实 id (1.9162ms)
+  ✔ 拒绝危险 id: "" (5.5118ms)
+  ✔ 拒绝危险 id: "../evil" (1.8681ms)
+  ✔ 拒绝危险 id: "a/b" (0.6029ms)
+  ✔ 拒绝危险 id: "a\\b" (0.5266ms)
+  ✔ 拒绝危险 id: "C:tmp" (0.3455ms)
+  ✔ 拒绝危险 id: "CON" (0.1528ms)
+  ✔ 拒绝危险 id: "con" (0.2871ms)
+  ✔ 拒绝危险 id: "nul.txt" (1.6328ms)
+  ✔ 拒绝危险 id: "x." (1.4607ms)
+  ✔ 拒绝危险 id: "Upper" (1.8424ms)
+  ✔ 拒绝危险 id: ".hidden" (0.3307ms)
+  ✔ 拒绝危险 id: "-lead" (0.1936ms)
+✔ model.id 校验 (41.4411ms)
+▶ 相对路径校验
+  ✔ 接受清单里的真实路径 (2.5323ms)
+  ✔ 拒绝危险路径: "/etc/passwd" (0.5235ms)
+  ✔ 拒绝危险路径: "C:/windows/x" (1.4906ms)
+  ✔ 拒绝危险路径: "C:\\windows\\x" (0.4958ms)
+  ✔ 拒绝危险路径: "../escape.txt" (0.1895ms)
+  ✔ 拒绝危险路径: "a/../../b" (0.1551ms)
+  ✔ 拒绝危险路径: "a//b" (0.1125ms)
+  ✔ 拒绝危险路径: "a\\b" (0.271ms)
+  ✔ 拒绝危险路径: "con/x.txt" (0.1739ms)
+  ✔ 拒绝危险路径: "x.txt:stream" (0.1135ms)
+  ✔ 拒绝危险路径: "./a" (0.1865ms)
+  ✔ 拒绝危险路径: "a/." (3.5141ms)
+  ✔ 拒绝危险路径: "a/ " (0.3373ms)
+  ✔ 解析后的路径不会逃出模型目录 (26.8129ms)
+✔ 相对路径校验 (38.6123ms)
+▶ 下载地址校验
+  ✔ 接受清单里的真实地址 (0.8333ms)
+  ✔ 拒绝 http (0.28ms)
+  ✔ 拒绝内嵌凭据 (0.2805ms)
+  ✔ 拒绝非 huggingface.co 主机 (0.1783ms)
+  ✔ 拒绝非 443 端口 (0.1702ms)
+  ✔ 拒绝 revision 不是 40 位 (0.3569ms)
+  ✔ 拒绝 revision 与地址不一致 (0.1935ms)
+  ✔ 拒绝文件名与 path 不一致 (0.2167ms)
+  ✔ 拒绝查询串 (0.1897ms)
+  ✔ 重定向主机白名单 (0.248ms)
+  ✔ 重定向目标必须 https 且在允许域 (0.3962ms)
+✔ 下载地址校验 (4.0069ms)
+▶ 哈希计算
+  ✔ git blob 头格式为 blob <n>\0 (0.4432ms)
+  ✔ git blob sha1 与已知向量一致 (0.7165ms)
+  ✔ sha256 与已知向量一致 (0.5319ms)
+  ✔ hashFileAt 同时给出字节数、sha256、git blob sha1 (13.4838ms)
+  ﹣ hashFileAt 拒绝符号链接 (3.2855ms) # OS refused test symlink: EPERM
+  ✔ compareHash 先比字节数再比哈希 (0.3793ms)
+  ✔ expectedHashOf 按条目选择算法并拒绝无效值 (0.4467ms)
+✔ 哈希计算 (20.0437ms)
+▶ 流式落盘
+  ✔ 按块写入并返回实测哈希 (16.6696ms)
+  ✔ 超过声明字节数立即中止 (3.5214ms)
+  ✔ 字节数不足时报 E_SIZE_MISMATCH (3.3542ms)
+  ✔ 拒绝超过单文件上限的期望字节数 (1.626ms)
+✔ 流式落盘 (25.7786ms)
+▶ 清单校验
+  ✔ 仓库中的真实清单通过校验 (14.4226ms)
+  ✔ 拒绝重复 id (0.4961ms)
+  ✔ 拒绝非 40 位 revision (0.2029ms)
+  ✔ 拒绝绝对路径 (0.2007ms)
+  ✔ 拒绝缺少哈希的条目 (0.208ms)
+  ✔ 拒绝与清单不一致的地址 (0.2308ms)
+  ✔ 拒绝超过单文件上限的声明字节数 (0.1981ms)
+  ✔ 拒绝不支持的 schemaVersion (0.1273ms)
+✔ 清单校验 (16.4949ms)
+▶ 日志脱敏
+  ✔ 去掉 CDN 签名查询串 (0.1899ms)
+✔ 日志脱敏 (0.2579ms)
+▶ 缓存目录安全
+  ✔ assertNoReparsePoint 对普通文件返回 true，对不存在返回 false (5.5633ms)
+  ✔ assertNoReparsePoint 拒绝目录联接点（junction） (2.082ms)
+  ✔ ensureSafeDirectory 拒绝联接点形式的模型目录 (2.7037ms)
+  ✔ ensureSafeDirectory 创建缺失的多级目录 (1.2065ms)
+✔ 缓存目录安全 (11.9023ms)
+▶ processFile
+  ✔ 下载成功时发布文件并返回实测哈希 (12.0655ms)
+  ✔ 子目录中的文件会自动创建父目录 (6.0732ms)
+  ✔ 父目录是联接点时拒绝写入 (2.7045ms)
+  ✔ 已存在且正确的文件被跳过，且不发起请求 (4.3637ms)
+  ✔ 已存在但哈希不符时拒绝，且不覆盖用户文件 (4.5692ms)
+  ✔ 下载内容哈希不符时不发布，并清理自己创建的 .part (4.2918ms)
+  ✔ 服务器 Content-Length 与清单不符时拒绝下载 (2.132ms)
+  ✔ 跟随到 Hugging Face CDN 的重定向 (4.3988ms)
+  ✔ 拒绝重定向到非 Hugging Face 主机 (3.6799ms)
+  ✔ 重定向次数有上限 (1.475ms)
+  ✔ 不携带任何凭据：请求头无 Authorization/Cookie，credentials 为 omit (3.6185ms)
+  ✔ HTTP 非 200 明确失败 (1.589ms)
+✔ processFile (51.9616ms)
+▶ runDownload 端到端（假网络）
+  ✔ 下载清单文件并写出收据 (12.8354ms)
+  ✔ 第二次运行跳过已校验文件 (15.6986ms)
+  ✔ --check 模式只校验不联网，缺文件时报失败 (7.3056ms)
+  ✔ --check 模式校验通过时报告 verified (8.7127ms)
+  ✔ 单个文件失败不会中断其它文件，但收据标记失败 (11.6355ms)
+  ✔ 未知 model.id 明确失败 (3.1967ms)
+✔ runDownload 端到端（假网络） (59.9953ms)
+▶ 返修回归：逐段路径检查（R1/R2）
+  ✔ assertSafeDirectoryChain 拒绝祖先联接点，且不穿过它创建目录 (3.69ms)
+  ✔ assertSafeDirectoryChain 不存在的根直接失败 (0.929ms)
+  ✔ runDownload 在 .cache 是联接点时失败且不发起下载 (5.4642ms)
+  ✔ --check 也逐段检查中间目录，联接点不能验成通过 (8.1396ms)
+  ✔ cacheRoot 参数不能逃出 repoRoot (1.2164ms)
+  ✔ toSafeSegmentsWithin 拒绝绝对路径与穿越 (0.2659ms)
+✔ 返修回归：逐段路径检查（R1/R2） (20.1067ms)
+▶ 返修回归：原子不覆盖发布（R3）
+  ✔ publishNoOverwrite 对已存在目标报 E_EXISTING_MISMATCH 且保留原内容 (6.3982ms)
+  ✔ publishNoOverwrite 不支持硬链接时失败，绝不退回覆盖改名 (4.1966ms)
+  ✔ processFile 发布后只删自己的 part，目标内容正确 (4.4336ms)
+  ✔ 并发写入者在发布前抢先创建目标时，processFile 失败且不覆盖 (7.1466ms)
+✔ 返修回归：原子不覆盖发布（R3） (22.7737ms)
+▶ 返修回归：超时与响应体释放
+  ✔ 等待响应头超时会中止并报 E_HEADERS_TIMEOUT (34.6409ms)
+  ✔ 请求本身抛错时报 E_NETWORK，不泄露原始堆栈 (0.456ms)
+  ✔ 非 200 响应会取消未消费的响应体 (0.5214ms)
+  ✔ 重定向响应也会取消响应体 (0.5359ms)
+  ✔ processFile 在响应头校验失败时取消响应体，且不落盘 (1.5518ms)
+  ✔ 下载总时限超时会中止流并报 E_DOWNLOAD_TIMEOUT (43.2921ms)
+--manifest 已移除：清单固定为 qa/M0-asr-fixtures.json，缓存固定为 .cache/asr-models（测试请直接调用 runDownload）
+--cache 已移除：清单固定为 qa/M0-asr-fixtures.json，缓存固定为 .cache/asr-models（测试请直接调用 runDownload）
+未知参数: --bogus
+  ✔ 空闲看门狗仍会在长时间无数据时报 E_IDLE_TIMEOUT (1008.4751ms)
+  ✔ 默认超时常量为正数 (0.4726ms)
+✔ 返修回归：超时与响应体释放 (1090.4366ms)
+▶ 返修回归：CLI 不再开放任意路径
+  ✔ --manifest 被拒绝并返回 2 (1.1685ms)
+  ✔ --cache 被拒绝并返回 2 (0.3518ms)
+  ✔ 未知参数仍被拒绝 (0.3219ms)
+✔ 返修回归：CLI 不再开放任意路径 (2.1367ms)
+▶ 脚本自身约束
+  ✔ 默认路径指向仓库清单与忽略缓存目录 (0.1452ms)
+  ✔ 源码不读取环境凭据，也不发送 Authorization (2.6779ms)
+  ✔ 只依赖 Node 内置模块 (1.9242ms)
+  ✔ 仓库 .gitignore 忽略 .cache/ (1.2169ms)
+✔ 脚本自身约束 (6.4267ms)
+✔ reject a junction in an ancestor of the cache root before any download (52.4265ms)
+✔ offline verification rejects a junction in an intermediate sample directory (43.5979ms)
+✔ atomic publication never overwrites a file appearing after the existence check (26.5841ms)
+✔ reports cleanup failure rather than claiming a fully cleaned download (9.5356ms)
+✔ known black/white and same-color vectors (2.6195ms)
+✔ identifies the original failing accent (0.539ms)
+✔ parses RGB, percentages and alpha (2.2293ms)
+✔ composites a translucent white surface over black (0.3856ms)
+✔ rejects unsupported or invalid colors rather than passing them (1.005ms)
+✔ checks both extreme backdrops and refuses unaccounted opacity (0.9506ms)
+✔ never samples F8 outside the owned foreground window (5.7538ms)
+✔ only emits transitions and samples exactly F8 (2.7498ms)
+✔ stop is idempotent and frees every owned timer/native handle (1.5039ms)
+✔ disconnect cleans up without sending on a closed IPC channel (1.8485ms)
+✔ watchdog ends sampling and reports bounded timing summary (1.8959ms)
+✔ invalid and null HWND values cannot arm the sampler (5.7063ms)
+ℹ tests 121
+ℹ suites 15
+ℹ pass 120
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 1609.3513
+$ eslint .
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ pnpm --filter @pet/desktop build
+$ node build.mjs
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 57 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/renderer/pet/index.html                   0.80 kB │ gzip:  0.55 kB
+dist/renderer/pet/assets/index-P2oW1mq2.css   19.09 kB │ gzip:  4.52 kB
+dist/renderer/pet/assets/index-9vutPO1i.js   260.07 kB │ gzip: 82.58 kB
+
+✓ built in 262ms
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 180 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/renderer/console/index.html                            0.82 kB │ gzip:   0.55 kB
+dist/renderer/console/assets/capture-worklet-46cQJGH7.js    1.06 kB
+dist/renderer/console/assets/index-BN1gB1t-.css           169.75 kB │ gzip:  28.36 kB
+dist/renderer/console/assets/region-B1NMROZh.js            12.65 kB │ gzip:   5.66 kB
+dist/renderer/console/assets/index-DCCUPjVt.js            631.30 kB │ gzip: 194.29 kB
+
+✓ built in 347ms
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

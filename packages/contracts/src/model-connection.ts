@@ -12,10 +12,19 @@ export interface ModelService {
   readonly available: boolean;
   readonly unavailableReason?: string;
 }
+export const MODEL_REASONING_EFFORTS = ['default', 'low', 'medium', 'high'] as const;
+export type ModelReasoningEffort = (typeof MODEL_REASONING_EFFORTS)[number];
+export interface ModelConnectionDraft {
+  readonly id: string;
+  readonly model: string;
+  readonly key?: string;
+  readonly reasoningEffort?: ModelReasoningEffort;
+}
 export interface SavedModelEndpoint {
   readonly id: string;
   readonly model: string;
   readonly keyConfigured: boolean;
+  readonly reasoningEffort?: ModelReasoningEffort;
 }
 export interface ModelConnectionSnapshot {
   readonly notice?: string;
@@ -35,6 +44,15 @@ export interface ModelConnectionOutcome {
     readonly reason?: string;
   };
 }
+export interface ModelDraftTestOutcome {
+  readonly id: string;
+  readonly model: string;
+  readonly test: ModelConnectionOutcome['test'];
+}
+export interface ModelCatalogResult {
+  readonly id: string;
+  readonly models: readonly string[];
+}
 export interface ModelSignInStatus {
   readonly phase: 'idle' | 'waiting' | 'done' | 'failed';
   readonly signedIn: boolean;
@@ -51,8 +69,14 @@ export interface ModelConnectionBridge {
     readonly model: string;
     readonly expectedRevision: number;
     readonly key?: string;
+    readonly reasoningEffort?: ModelReasoningEffort;
   }): Promise<Result<ModelConnectionOutcome>>;
   testConnection(): Promise<Result<ModelConnectionOutcome>>;
+  testSelected(request: ModelConnectionDraft): Promise<Result<ModelDraftTestOutcome>>;
+  getModels(request: {
+    readonly id: string;
+    readonly key?: string;
+  }): Promise<Result<ModelCatalogResult>>;
   openServicePage(request: { readonly id: string }): Promise<Result<null>>;
 }
 export const MODEL_CONNECTION_IPC = {
@@ -63,5 +87,7 @@ export const MODEL_CONNECTION_IPC = {
   run: 'model-connection:v1:run',
   save: 'model-connection:v1:save',
   test: 'model-connection:v1:test',
+  models: 'model-connection:v1:models',
+  testSelected: 'model-connection:v1:test-selected',
   open: 'model-connection:v1:open',
 } as const;

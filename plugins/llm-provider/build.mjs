@@ -6,6 +6,7 @@ import {
   MODEL_SERVICE_ENDPOINTS,
   modelProviderId,
 } from '../../packages/contracts/src/model-services.ts';
+import { MODEL_REASONING_EFFORTS } from '../../packages/contracts/src/model-connection.ts';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const available = MODEL_SERVICE_ENDPOINTS.filter((item) => item.available);
 const endpointOrigins = (item) =>
@@ -80,9 +81,24 @@ const manifest = {
             ]),
           ),
         },
+        reasoningEfforts: {
+          type: 'object',
+          additionalProperties: false,
+          properties: Object.fromEntries(
+            available.map((item) => [
+              item.id,
+              { type: 'string', enum: [...MODEL_REASONING_EFFORTS], default: 'default' },
+            ]),
+          ),
+        },
       },
     },
-    apply: { active: 'immediate', models: 'immediate', model: 'immediate' },
+    apply: {
+      active: 'immediate',
+      models: 'immediate',
+      model: 'immediate',
+      reasoningEfforts: 'immediate',
+    },
   },
 };
 await fs.writeFile(

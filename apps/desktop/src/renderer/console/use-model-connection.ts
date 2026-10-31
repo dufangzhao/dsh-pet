@@ -9,12 +9,16 @@
 import type {
   ModelConnectionBridge,
   ModelConnectionOutcome,
+  ModelCatalogResult,
+  ModelConnectionDraft,
+  ModelReasoningEffort,
   ModelConnectionSnapshot,
   ModelService,
   ModelSignInStatus,
   Result,
 } from '@pet/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { makeError } from '@pet/contracts';
 
 import { CALL_REJECTED, describeError } from './copy.js';
 
@@ -76,12 +80,18 @@ export interface ModelConnectionState {
   signIn: ModelSignInStatus | null;
   signingIn: boolean;
   refresh: () => void;
-  saveAndStart: (input: { id: string; model: string; key?: string }) => Promise<ModelSaveResult>;
+  saveAndStart: (input: ModelConnectionDraft) => Promise<ModelSaveResult>;
   testActive: () => Promise<ModelTestResult>;
+  testSelected: (input: ModelConnectionDraft) => Promise<ModelTestResult>;
+  getModels: (input: { id: string; key?: string }) => Promise<Result<ModelCatalogResult>>;
   setPaused: (paused: boolean) => Promise<ModelOutcome>;
   openServicePage: (id: string) => Promise<ModelOutcome>;
   /** 打开系统浏览器登录，每秒读一次状态，直到成功、失败或这次会话结束。 */
-  signInAndStart: (service: ModelService) => Promise<ModelSaveResult>;
+  signInAndStart: (
+    service: ModelService,
+    reasoningEffort?: ModelReasoningEffort,
+    model?: string,
+  ) => Promise<ModelSaveResult>;
   cancelSignIn: () => Promise<ModelOutcome>;
 }
 
@@ -200,8 +210,21 @@ export function useModelConnection(): ModelConnectionState {
     };
   }, [read]);
 
+  const getModels = useCallback(
+    async (input: { id: string; key?: string }): Promise<Result<ModelCatalogResult>> => {
+      const current = currentBridge();
+      if (current === undefined) return { ok: false, error: makeError('unavailable') };
+      try {
+        return await current.getModels(input);
+      } catch {
+        return { ok: false, error: makeError('unavailable') };
+      }
+    },
+    [],
+  );
+
   const saveAndStart = useCallback(
-    async (input: { id: string; model: string; key?: string }): Promise<ModelSaveResult> => {
+    async (input: ModelConnectionDraft): Promise<ModelSaveResult> => {
       const current = currentBridge();
       const notSaved = (error: string | null): ModelSaveResult => ({
         saved: false,
@@ -226,6 +249,9 @@ export function useModelConnection(): ModelConnectionState {
           model: input.model,
           expectedRevision: snapshot.revision,
           ...(input.key === undefined || input.key === '' ? {} : { key: input.key }),
+          ...(input.reasoningEffort === undefined
+            ? {}
+            : { reasoningEffort: input.reasoningEffort }),
         });
         if (!alive.current) {
           return notSaved(CALL_REJECTED);
@@ -275,6 +301,26 @@ export function useModelConnection(): ModelConnectionState {
       }
     }
   }, []);
+
+  const testSelected = useCallback(
+    async (input: ModelConnectionDraft): Promise<ModelTestResult> => {
+      const current = currentBridge();
+      if (current === undefined) return { ok: false, elapsedMs: null, reason: CALL_REJECTED };
+      setTesting(true);
+      try {
+        const result = await current.testSelected(input);
+        if (!result.ok) return { ok: false, elapsedMs: null, reason: describeError(result.error) };
+        if (result.value.id !== input.id || result.value.model !== input.model)
+          return { ok: false, elapsedMs: null, reason: '测试结果与当前配置不匹配。' };
+        return result.value.test;
+      } catch {
+        return { ok: false, elapsedMs: null, reason: CALL_REJECTED };
+      } finally {
+        if (alive.current) setTesting(false);
+      }
+    },
+    [],
+  );
 
   const setPaused = useCallback(
     async (paused: boolean): Promise<ModelOutcome> => {
@@ -345,7 +391,11 @@ export function useModelConnection(): ModelConnectionState {
   }, []);
 
   const signInAndStart = useCallback(
-    async (service: ModelService): Promise<ModelSaveResult> => {
+    async (
+      service: ModelService,
+      reasoningEffort?: ModelReasoningEffort,
+      selectedModel = service.defaultModel,
+    ): Promise<ModelSaveResult> => {
       const current = currentBridge();
       const stopped = (error: string | null): ModelSaveResult => ({
         saved: false,
@@ -376,7 +426,11 @@ export function useModelConnection(): ModelConnectionState {
           return stopped(started.value.reason ?? '登录没有完成。');
         }
         // 登录成功不等于接上了：接下来这一次保存与探测才是。
-        return await saveAndStart({ id: service.id, model: service.defaultModel });
+        return await saveAndStart({
+          id: service.id,
+          model: selectedModel,
+          ...(reasoningEffort === undefined ? {} : { reasoningEffort }),
+        });
       } catch {
         return stopped(CALL_REJECTED);
       } finally {
@@ -420,6 +474,8 @@ export function useModelConnection(): ModelConnectionState {
     },
     saveAndStart,
     testActive,
+    testSelected,
+    getModels,
     setPaused,
     openServicePage,
     signInAndStart,

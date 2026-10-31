@@ -9,11 +9,18 @@ import {
   makeError,
   type ModelConnectionSnapshot,
   type ModelConnectionOutcome,
+  type ModelCatalogResult,
+  type ModelConnectionDraft,
+  type ModelDraftTestOutcome,
+  type ModelReasoningEffort,
+  type ModelServiceEndpoint,
   type JsonObject,
   type JsonValue,
   type Result,
 } from '@pet/contracts';
-import { capabilityPermissionAuthorizer, KernelFault } from '@pet/host-kernel';
+import { capabilityPermissionAuthorizer, CredentialError, KernelFault } from '@pet/host-kernel';
+import { fetchModelCatalog } from './model-catalog.js';
+import { testModelConnection } from '../../../../plugins/llm-provider/src/responses.mjs';
 import type { DesktopHost } from './desktop-host.js';
 import type { ApplicationController } from './application-controller.js';
 import { admittedApplicationSource } from './application-admission.js';
@@ -32,11 +39,14 @@ export class ModelConnectionController {
     private readonly application: ApplicationController,
     private readonly changed: () => void,
     private readonly openExternal: (url: string) => Promise<void>,
+    private readonly catalogFetch: typeof fetch = fetch,
+    private readonly connectionTest: typeof testModelConnection = testModelConnection,
   ) {}
   async snapshot(): Promise<ModelConnectionSnapshot> {
     const cfg = await this.host.configs.get(identity);
     if (!cfg.ok) throw new KernelFault(cfg.error.code);
     const models = object(cfg.value.data['models']);
+    const reasoningEfforts = object(cfg.value.data['reasoningEfforts']);
     const endpoints = await Promise.all(
       MODEL_SERVICE_ENDPOINTS.filter((e) => e.available).map(async (e) => ({
         id: e.id,
@@ -47,6 +57,7 @@ export class ModelConnectionController {
               ? (models[e.id] as string)
               : e.defaultModel,
         keyConfigured: (await this.host.credentials?.hasSecret(identity, e.secretKey)) === true,
+        reasoningEffort: (reasoningEfforts?.[e.id] ?? 'default') as ModelReasoningEffort,
       })),
     );
     const activeId = typeof cfg.value.data['active'] === 'string' ? cfg.value.data['active'] : '';
@@ -173,6 +184,7 @@ export class ModelConnectionController {
     model: string,
     expectedRevision: number,
     key?: string,
+    reasoningEffort?: ModelReasoningEffort,
   ): Promise<Result<ModelConnectionOutcome>> {
     if (this.#busy) return { ok: false, error: makeError('not-ready', false) };
     const endpoint = modelService(id);
@@ -202,6 +214,10 @@ export class ModelConnectionController {
         {
           ...cfg.value.data,
           models: { ...previous, [id]: selected },
+          reasoningEfforts: {
+            ...object(cfg.value.data['reasoningEfforts']),
+            [id]: reasoningEffort ?? object(cfg.value.data['reasoningEfforts'])?.[id] ?? 'default',
+          },
           ...(id === 'deepseek' ? { model: selected } : {}),
         },
         expectedRevision,
@@ -249,6 +265,86 @@ export class ModelConnectionController {
     } finally {
       this.#busy = false;
     }
+  }
+  private async withProviderAccess<T>(
+    id: string,
+    key: string | undefined,
+    operation: (endpoint: ModelServiceEndpoint, secret: string, signal: AbortSignal) => Promise<T>,
+  ): Promise<Result<T>> {
+    const endpoint = modelService(id),
+      credentials = this.host.credentials;
+    if (!endpoint?.available || this.#busy) throw new KernelFault('not-ready');
+    if (!credentials) throw new KernelFault('unavailable');
+    if (
+      endpoint.auth === 'browser' &&
+      (key !== undefined || !this.auth || !(await this.auth.state()).signedIn)
+    )
+      throw new KernelFault('not-ready');
+    await this.enable();
+    const row = this.host.manager.get(identity);
+    if (!row || !this.host.manager.isActive(row.owner)) throw new KernelFault('not-ready');
+    const started = this.host.tasks.run(
+      row.owner,
+      async (task) => {
+        const network = await this.host.permissions.authorize(
+          row.owner,
+          task.taskId,
+          { kind: 'network', origins: [new URL(endpoint.baseUrl).origin] },
+          task.signal,
+        );
+        if (!network.ok) throw new KernelFault(network.error.code);
+        try {
+          const result = await credentials.withSecretForHost(
+            row.owner,
+            row.manifest.permissions?.flatMap((p) => (p.kind === 'credentials' ? p.keys : [])) ??
+              [],
+            endpoint.secretKey,
+            { ...task, signal: AbortSignal.any([task.signal, network.value.signal]) },
+            async (secret, signal): Promise<Result<T>> => {
+              try {
+                const value = await operation(endpoint, secret, signal);
+                if (credentials.redactor.contains(JSON.stringify(value)))
+                  return { ok: false, error: makeError('internal') };
+                return { ok: true, value };
+              } catch (error) {
+                return {
+                  ok: false,
+                  error: error instanceof KernelFault ? error.error : makeError('network'),
+                };
+              }
+            },
+            key?.trim() || undefined,
+          );
+          if (!result.ok) throw new KernelFault(result.error.code);
+          return result.value as JsonValue;
+        } catch (error) {
+          if (error instanceof CredentialError) throw new KernelFault(error.code);
+          throw error;
+        } finally {
+          network.value.close();
+        }
+      },
+      { timeoutMs: 60000 },
+    );
+    if (!started.ok) return started;
+    try {
+      return (await started.value.result) as Result<T>;
+    } finally {
+      started.value.release();
+    }
+  }
+  async getModels(id: string, key?: string): Promise<Result<ModelCatalogResult>> {
+    return this.withProviderAccess(id, key, async (endpoint, secret, signal) => ({
+      id,
+      models: [...(await fetchModelCatalog(endpoint, secret, signal, this.catalogFetch))],
+    }));
+  }
+  async testSelected(input: ModelConnectionDraft): Promise<Result<ModelDraftTestOutcome>> {
+    return this.withProviderAccess(input.id, input.key, async (endpoint, secret, signal) => ({
+      id: input.id,
+      model: input.model,
+      test: await this.connectionTest(endpoint, input.model, secret, signal, input.reasoningEffort),
+    }));
   }
   async testConnection(): Promise<Result<ModelConnectionOutcome>> {
     if (this.#busy) return { ok: false, error: makeError('not-ready', false) };

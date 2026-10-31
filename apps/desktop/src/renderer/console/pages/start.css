@@ -234,13 +234,52 @@
   gap: var(--pb-s-3);
 }
 
+/* 模型名与「获取模型」并排在一格里：两件仍各用来源控件自己的高度与投影，只底部对齐。 */
 .sc-fields__model {
-  flex: 0 1 20ch;
+  flex: 0 1 34ch;
   min-width: 0;
+}
+
+.sc-fields__modelrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--pb-s-2);
+  min-width: 0;
+}
+
+/* 这两件的宽度由这一格决定：输入跟着栏走，按钮只包住那几个字。 */
+.sc-fields__modelrow .su-input,
+.sc-fields__modelrow .su-button {
+  box-sizing: border-box;
+}
+
+.sc-fields__modelrow .su-input {
+  flex: 1 1 14ch;
+  min-width: 0;
+}
+
+.sc-fields__modelrow .su-button {
+  flex: 0 0 auto;
+}
+
+/* 取列表这一栏的那句话：沿用补充文字的字号，只在没取到时换成本机那一格危险色。 */
+.sc-model-result {
+  display: block;
+}
+
+.sc-model-result[data-state='error'] {
+  color: var(--pb-danger);
 }
 
 .sc-fields__key {
   flex: 1 1 26ch;
+  min-width: 0;
+}
+
+/* 思考强度挨着 Key：同一件来源控件的高度与描边，只把宽度收到四个中文词那一格。 */
+.sc-fields__effort {
+  flex: 0 1 14ch;
   min-width: 0;
 }
 

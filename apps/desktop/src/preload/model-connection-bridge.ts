@@ -5,6 +5,8 @@ import {
   type ModelSignInStatus,
   type ModelConnectionSnapshot,
   type ModelConnectionOutcome,
+  type ModelCatalogResult,
+  type ModelDraftTestOutcome,
   type Result,
 } from '@pet/contracts';
 export function createModelConnectionBridge(
@@ -28,6 +30,8 @@ export function createModelConnectionBridge(
     setPaused: fixed<ModelConnectionSnapshot>(IPC.run, 1),
     saveAndStart: fixed<ModelConnectionOutcome>(IPC.save, 1),
     testConnection: fixed<ModelConnectionOutcome>(IPC.test, 0),
+    getModels: fixed<ModelCatalogResult>(IPC.models, 1),
+    testSelected: fixed<ModelDraftTestOutcome>(IPC.testSelected, 1),
     openServicePage: fixed<null>(IPC.open, 1),
   });
 }

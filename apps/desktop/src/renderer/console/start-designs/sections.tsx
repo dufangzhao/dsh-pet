@@ -10,6 +10,9 @@
  */
 import { useState, type JSX } from 'react';
 
+import { MODEL_REASONING_EFFORTS } from '@pet/contracts';
+import type { ModelReasoningEffort } from '@pet/contracts';
+
 import { OriginalPetPreview } from '../original-ui/pet-preview.js';
 import { OriginalThemeStudio } from '../original-ui/theme-studio.js';
 import { SourceButton } from '../site-ui/source-button.js';
@@ -281,6 +284,32 @@ function SaveReceiptBoard({ model }: { model: StartModel }): JSX.Element | null 
 
 /* ------------------------------------------------------------------ 连接表单 */
 
+/** 思考强度的四个说法：值由契约给，字只在这里列一份，别处不再翻一遍。 */
+const REASONING_EFFORT_LABEL: Record<ModelReasoningEffort, string> = {
+  default: '自动',
+  low: '低',
+  medium: '中',
+  high: '高',
+};
+
+/**
+ * 模型名这一栏此刻的一句话：只说「取列表」这件事，不替保存或连接作证。
+ * 顺序就是这一栏的紧要程度：在等结果 → 没取到 → 那一家自己给的那句 → 列表是空的。
+ * 取列表成功不等于接上了：那句话由所有者给，这里只照读，不套 failureLine 那种「连接」说法。
+ */
+function modelListLine(list: StartModel['modelList']): string {
+  if (list.fetching) {
+    return '正在向这一家取模型名…';
+  }
+  if (list.error !== null) {
+    return list.error;
+  }
+  if (list.notice !== null) {
+    return list.notice;
+  }
+  return list.options.length === 0 ? '这一家现在没有可列的模型名，可以直接打。' : '';
+}
+
 /**
  * 这一家的接线：模型名、Key、保存并开始、测试连接、登录、申请 Key、换平台、管理扩展。
  *
@@ -301,7 +330,10 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
     );
   }
 
+  /* auth 种类与「这一屏的主要动作是登录还是写回」是两件事：本机已经登录过这一家时，
+     改的是模型名与思考强度，走的还是那颗「保存并开始」，不再重跑一次登录。 */
   const browserSignIn = model.picked.auth === 'browser';
+  const needsSignIn = browserSignIn && !model.keySaved;
 
   return (
     <form
@@ -310,7 +342,7 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
       data-mark={model.mark ?? 'draft'}
       onSubmit={(event) => {
         event.preventDefault();
-        if (browserSignIn) {
+        if (needsSignIn) {
           model.signIn();
         } else {
           model.save();
@@ -329,49 +361,29 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
         </span>
       </h3>
 
-      {browserSignIn ? (
-        <div className="sc-form__signin">
-          <SourceNotice tone="neutral" live={false}>
-            这一家用浏览器登录自己的账号，不填 API
-            Key。登录完成只是这台机器读到了登录，能不能接上还要看随后那一次写入。
-          </SourceNotice>
-          <div className="sc-actions">
-            <SourceButton
-              type="submit"
-              variant="primary"
-              busy={model.busy.signingIn}
-              disabled={!model.can.signIn}
-              data-testid="model-signin"
-            >
-              {model.busy.signingIn ? '正在等登录结果…' : '登录并连接'}
-            </SourceButton>
-            {model.busy.signingIn ? (
-              <SourceButton
-                size="small"
-                data-testid="model-signin-cancel"
-                onClick={model.cancelSignIn}
+      {/* 模型名、获取模型与思考强度对每一家都摆得出来；只有 API Key 与登录那一句分浏览器登录与否。 */}
+      <div className="sc-fields">
+        <SourceField
+          className="sc-fields__model"
+          label="模型名"
+          hint={
+            <>
+              {'可以直接打，也可以从下面这些名字里挑。'}
+              <span
+                className="sc-model-result"
+                id="sc-model-result"
+                role="status"
+                data-state={model.modelList.error === null ? 'plain' : 'error'}
+                data-testid="model-list-result"
               >
-                取消这次登录
-              </SourceButton>
-            ) : null}
-          </div>
-          {model.signing === null ? null : (
-            <p className="sc-wait" role="status" data-testid="model-signin-line">
-              {model.signing}
-            </p>
-          )}
-        </div>
-      ) : (
-        <div className="sc-fields">
-          <SourceField
-            className="sc-fields__model"
-            label="模型名"
-            {...(model.picked.models.length > 0
-              ? { hint: '可以直接打，也可以从这家列出的名字里挑。' }
-              : {})}
-            {...(model.model.trim() === '' ? { error: '模型名不能空着。' } : {})}
-          >
-            {(control) => (
+                {modelListLine(model.modelList)}
+              </span>
+            </>
+          }
+          {...(model.model.trim() === '' ? { error: '模型名不能空着。' } : {})}
+        >
+          {(control) => (
+            <div className="sc-fields__modelrow">
               <SourceInput
                 id={control.inputId}
                 aria-describedby={control.describedBy}
@@ -383,14 +395,25 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
                 data-testid="model-input"
                 onChange={(event) => model.setModel(event.target.value)}
               />
-            )}
-          </SourceField>
-          <datalist id="sc-model-list">
-            {model.picked.models.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
+              <SourceButton
+                size="small"
+                busy={model.modelList.fetching}
+                disabled={model.modelList.fetching || !model.modelList.allowed}
+                data-testid="model-fetch"
+                onClick={model.getModels}
+              >
+                {model.modelList.fetching ? '获取中' : '获取模型'}
+              </SourceButton>
+            </div>
+          )}
+        </SourceField>
+        <datalist id="sc-model-list">
+          {model.modelList.options.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
 
+        {browserSignIn ? null : (
           <SourceField
             className="sc-fields__key"
             label={model.picked.label + ' 的 API Key'}
@@ -418,7 +441,35 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
               />
             )}
           </SourceField>
+        )}
 
+        <SourceField
+          className="sc-fields__effort"
+          label="思考强度"
+          hint="这一家接话时想多深；拿不准就留在「自动」。"
+        >
+          {(control) => (
+            <select
+              className="su-input"
+              id={control.inputId}
+              aria-describedby={control.describedBy}
+              value={model.reasoningEffort}
+              disabled={model.busy.saving}
+              data-testid="model-reasoning-effort"
+              onChange={(event) => {
+                model.setReasoningEffort(event.target.value as ModelReasoningEffort);
+              }}
+            >
+              {MODEL_REASONING_EFFORTS.map((effort) => (
+                <option key={effort} value={effort}>
+                  {REASONING_EFFORT_LABEL[effort]}
+                </option>
+              ))}
+            </select>
+          )}
+        </SourceField>
+
+        {needsSignIn ? null : (
           <SourceButton
             type="submit"
             variant="primary"
@@ -428,8 +479,50 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
           >
             {model.busy.saving ? '正在写入这台机器…' : '保存并开始'}
           </SourceButton>
+        )}
+      </div>
+
+      {browserSignIn ? (
+        <div className="sc-form__signin">
+          <SourceNotice tone="neutral" live={false}>
+            这一家用浏览器登录自己的账号，不填 API
+            Key。登录完成只是这台机器读到了登录，能不能接上还要看随后那一次写入。
+          </SourceNotice>
+          {needsSignIn ? (
+            <div className="sc-actions">
+              <SourceButton
+                type="submit"
+                variant="primary"
+                busy={model.busy.signingIn}
+                disabled={!model.can.signIn}
+                data-testid="model-signin"
+              >
+                {model.busy.signingIn ? '正在等登录结果…' : '登录并连接'}
+              </SourceButton>
+              {model.busy.signingIn ? (
+                <SourceButton
+                  size="small"
+                  data-testid="model-signin-cancel"
+                  onClick={model.cancelSignIn}
+                >
+                  取消这次登录
+                </SourceButton>
+              ) : null}
+            </div>
+          ) : (
+            <p className="sc-wait" data-testid="model-signin-signed">
+              {
+                '这台机器已经登录过这一家，不用再登录一次：改完模型名或思考强度，用那颗「保存并开始」。'
+              }
+            </p>
+          )}
+          {model.signing === null ? null : (
+            <p className="sc-wait" role="status" data-testid="model-signin-line">
+              {model.signing}
+            </p>
+          )}
         </div>
-      )}
+      ) : null}
 
       <div className="sc-actions">
         <SourceButton
@@ -475,7 +568,14 @@ export function StartConnectForm({ model }: { model: StartModel }): JSX.Element 
         </SourceButton>
       </div>
 
-      {model.can.save || browserSignIn ? null : (
+      {/* 那颗按钮换了对象（测这一屏的草稿），它管什么就得在这儿说清楚，别等回执来解释。 */}
+      <p className="sc-wait" data-testid="model-test-scope">
+        {
+          '「测试连接」试的是这一屏正在填的这一份：服务商、模型名、Key 与思考强度。不保存，也不换在用的那一家。'
+        }
+      </p>
+
+      {model.can.save || needsSignIn ? null : (
         <p className="sc-hold" data-testid="model-save-reason">
           {model.reasons.save}
         </p>

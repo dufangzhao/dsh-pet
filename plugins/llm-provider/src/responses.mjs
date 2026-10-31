@@ -1,3 +1,4 @@
+import { MODEL_REASONING_EFFORTS } from '@pet/contracts';
 import {
   anthropicBody,
   anthropicChatResponse,
@@ -30,6 +31,16 @@ export async function respondCompatible(
   diagnostic = false,
   origins = [],
 ) {
+  signal.throwIfAborted();
+  const effort = endpoint.reasoningEffort;
+  if (
+    !['chat', 'responses', 'anthropic', 'gemini', 'browser'].includes(endpoint.protocol) ||
+    (effort !== undefined && !MODEL_REASONING_EFFORTS.includes(effort))
+  )
+    throw Object.assign(new Error('Unsupported reasoning setting'), { code: 'invalid-input' });
+  const explicitEffort = effort !== undefined && effort !== 'default' ? effort : undefined;
+  if (explicitEffort)
+    request = { ...request, reasoning: { ...request.reasoning, effort: explicitEffort } };
   if (!Client) {
     process.env.TSX_DISABLE_CACHE = '1';
     const { register } = await import('tsx/esm/api');
@@ -80,10 +91,10 @@ export async function respondCompatible(
         }
         return super.buildResponseBody(request, options);
       }
-      buildBody(_spec, messages, tools) {
+      buildBody(spec, messages, tools) {
         return this.endpoint.protocol === 'anthropic'
-          ? anthropicBody(this.model, messages, tools, this.maxTokens)
-          : geminiBody(messages, tools, this.maxTokens, this.signatures);
+          ? anthropicBody(this.model, messages, tools, this.maxTokens, spec.reasoningEffort)
+          : geminiBody(messages, tools, this.maxTokens, this.signatures, spec.reasoningEffort);
       }
       parseResponse(raw, request) {
         const parsed = super.parseResponse(
@@ -128,6 +139,7 @@ export async function respondCompatible(
           model: this.selected,
           messages,
           max_tokens: spec.maxTokens ?? 8192,
+          ...(spec.reasoningEffort ? { reasoning_effort: spec.reasoningEffort } : {}),
           ...(tools?.length
             ? {
                 tools: tools.map((t) => ({
@@ -184,7 +196,12 @@ export async function respondCompatible(
       ...(endpoint.protocol === 'browser' ? { onEvent: () => {} } : {}),
       diagnostic,
       role: diagnostic ? 'probe' : 'reply',
-      nativeSpec: { model, thinking: true, maxTokens: 8192 },
+      nativeSpec: {
+        model,
+        thinking: true,
+        maxTokens: diagnostic ? 256 : 8192,
+        ...(explicitEffort ? { reasoningEffort: explicitEffort } : {}),
+      },
       origin: {
         instance: endpoint.id,
         module: 'pet.llm-provider',
@@ -194,4 +211,66 @@ export async function respondCompatible(
     },
   );
   return JSON.parse(JSON.stringify(result));
+}
+
+/** One bounded generation through the same adapter used by normal replies. */
+export async function testModelConnection(endpoint, model, secret, signal, reasoningEffort) {
+  const started = performance.now();
+  try {
+    signal.throwIfAborted();
+    if (
+      typeof model !== 'string' ||
+      !model.trim() ||
+      model.length > 128 ||
+      [...model].some(
+        (character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127,
+      )
+    )
+      return { ok: false, elapsedMs: null, reason: 'invalid-input' };
+    const generation = await respondCompatible(
+      secret,
+      model,
+      {
+        model,
+        input: [
+          {
+            type: 'message',
+            role: 'user',
+            content: [{ type: 'input_text', text: 'Reply with OK.' }],
+          },
+        ],
+        max_output_tokens: 256,
+      },
+      signal,
+      { ...endpoint, reasoningEffort: reasoningEffort ?? endpoint.reasoningEffort },
+      true,
+    );
+    signal.throwIfAborted();
+    const response = generation?.response;
+    const ok =
+      response?.status === 'completed' &&
+      Array.isArray(response.output) &&
+      response.output.length > 0;
+    return {
+      ok,
+      elapsedMs: Math.round(performance.now() - started),
+      model,
+      ...(!ok ? { reason: '模型没有完成连接测试' } : {}),
+    };
+  } catch (error) {
+    const reason = signal.aborted
+      ? signal.reason?.name === 'TimeoutError'
+        ? 'timeout'
+        : 'cancelled'
+      : error?.code === 'invalid-input'
+        ? 'invalid-input'
+        : error?.status === 401 || error?.status === 403
+          ? 'auth-failed'
+          : error?.status === 429
+            ? 'rate-limited'
+            : error?.status === 408 || error?.status === 504 || error?.name === 'TimeoutError'
+              ? 'timeout'
+              : 'network';
+    return { ok: false, elapsedMs: Math.round(performance.now() - started), reason };
+  }
 }

@@ -7,9 +7,10 @@
  * 草稿住在这一处而不是版式内部：换版式的时候组件重绘、这一份状态不动，正在输入的模型名与 Key 不丢；
  * Key 只在内存里，不写存储、不进日志，保存动作发出后即清空。
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { describeError } from '../copy.js';
 
-import type { ModelService } from '@pet/contracts';
+import type { ModelService, ModelReasoningEffort } from '@pet/contracts';
 
 import type { AppView } from '../app-views.js';
 import type { ApplicationState } from '../use-application.js';
@@ -22,7 +23,6 @@ import type { ProviderRow, SaveReceipt, TestReceipt } from './behavior.js';
 import {
   canSave,
   canSignIn,
-  canTest,
   desktopPresence,
   failureLine,
   keyBlockReason,
@@ -39,7 +39,6 @@ import {
   siblingOf,
   signInBlockReason,
   signInLine,
-  testBlockReason,
   testReceiptOf,
 } from './behavior.js';
 
@@ -59,6 +58,7 @@ interface FieldDraft {
   readonly id: string;
   readonly model: string;
   readonly key: string;
+  readonly reasoningEffort: ModelReasoningEffort;
 }
 
 /** 目录里的一行连同它此刻的含义：控件只读这些结论，不再自己判断。 */
@@ -110,8 +110,18 @@ export interface StartModel {
   sibling: ModelService | undefined;
   model: string;
   key: string;
+  reasoningEffort: ModelReasoningEffort;
+  setReasoningEffort(value: ModelReasoningEffort): void;
   setModel(value: string): void;
   setKey(value: string): void;
+  modelList: {
+    fetching: boolean;
+    options: readonly string[];
+    error: string | null;
+    notice: string | null;
+    allowed: boolean;
+  };
+  getModels(): void;
 
   /* ---- 判断：正着说能不能，渲染处取反给 disabled ---- */
   can: { save: boolean; test: boolean; signIn: boolean };
@@ -168,6 +178,30 @@ export function useStartModel(owners: StartOwners): StartModel {
   const [tested, setTested] = useState<TestReceipt | null>(null);
   const [sending, setSending] = useState(false);
   const [visibility, setVisibility] = useState(false);
+  const catalogSequence = useRef(0);
+  const testSequence = useRef(0);
+  const clearTest = useCallback(() => {
+    testSequence.current += 1;
+    setTested(null);
+  }, []);
+  const [catalog, setCatalog] = useState<{
+    id: string;
+    fetching: boolean;
+    options: readonly string[];
+    error: string | null;
+    notice: string | null;
+  } | null>(null);
+  const clearCatalog = useCallback(() => {
+    catalogSequence.current += 1;
+    setCatalog(null);
+  }, []);
+  useEffect(
+    () => () => {
+      catalogSequence.current += 1;
+      testSequence.current += 1;
+    },
+    [],
+  );
 
   const picked = useMemo(
     () => resolvePicked(rows, pickedId, active?.id ?? null),
@@ -175,6 +209,10 @@ export function useStartModel(owners: StartOwners): StartModel {
   );
   const inUse = picked !== undefined && active !== null && active.id === picked.id;
   const keySaved = keySavedFor(snapshot, picked?.id);
+  useEffect(() => {
+    clearCatalog();
+    clearTest();
+  }, [picked?.id, clearCatalog, clearTest]);
 
   /**
    * 草稿的归属看端点 id：换了一家才从那一家的应有值重新起稿。
@@ -185,9 +223,53 @@ export function useStartModel(owners: StartOwners): StartModel {
   const draft =
     fields !== null && fields.id === picked?.id
       ? fields
-      : { id: picked?.id ?? '', model: seed, key: '' };
+      : {
+          id: picked?.id ?? '',
+          model: seed,
+          key: '',
+          reasoningEffort:
+            snapshot?.endpoints.find((e) => e.id === picked?.id)?.reasoningEffort ?? 'default',
+        };
   const model = draft.model;
   const key = draft.key;
+  const reasoningEffort = draft.reasoningEffort;
+
+  const currentCatalog = catalog?.id === picked?.id ? catalog : null;
+  const catalogAllowed =
+    models.available &&
+    picked?.available === true &&
+    snapshot?.credentialStorageAvailable === true &&
+    !models.saving &&
+    !models.signingIn &&
+    (key.trim().length > 0 || keySaved);
+  const getModels = useCallback(async () => {
+    if (!catalogAllowed || picked === undefined || currentCatalog?.fetching) return;
+    const id = picked.id,
+      sequence = ++catalogSequence.current;
+    setCatalog({ id, fetching: true, options: [], error: null, notice: null });
+    const result = await models.getModels({ id, ...(key.trim() ? { key: key.trim() } : {}) });
+    if (catalogSequence.current !== sequence) return;
+    if (result.ok && result.value.id === id) {
+      const options = result.value.models;
+      setCatalog({
+        id,
+        fetching: false,
+        options,
+        error: null,
+        notice: options.length
+          ? `已获取 ${options.length} 个模型。`
+          : '服务商没有返回可用模型，可以手动填写模型名。',
+      });
+    } else {
+      setCatalog({
+        id,
+        fetching: false,
+        options: [],
+        notice: null,
+        error: result.ok ? '模型列表与所选服务商不匹配。' : describeError(result.error),
+      });
+    }
+  }, [catalogAllowed, picked, currentCatalog?.fetching, models, key]);
 
   const choices = useMemo<ProviderChoice[]>(() => {
     const visible = searchRows(rows, query);
@@ -210,14 +292,25 @@ export function useStartModel(owners: StartOwners): StartModel {
         }),
         keySaved,
         // 只有当前那一家有"草稿"可言：其余行的注记讲它自己的真信息。
-        dirty: current && draftDiffers(stored, model, key),
+        dirty:
+          current &&
+          (draftDiffers(stored, model, key) ||
+            (stored?.reasoningEffort ?? 'default') !== reasoningEffort),
       };
     });
-  }, [rows, query, picked, active, snapshot, model, key]);
+  }, [rows, query, picked, active, snapshot, model, key, reasoningEffort]);
 
   const reasons = {
-    save: saveBlockReason({ saving: models.saving, picked, model, key, inUse }),
-    test: testBlockReason({ testing: models.testing, hasActive: active !== null }),
+    save: saveBlockReason({ saving: models.saving, picked, model, key, inUse, keySaved }),
+    test: models.testing
+      ? '正在测试连接。'
+      : !picked
+        ? '先选择服务商。'
+        : !model.trim()
+          ? '先填写模型名。'
+          : !catalogAllowed
+            ? '填入 Key 或使用已保存的凭据后再测试。'
+            : null,
     signIn: signInBlockReason({
       signingIn: models.signingIn,
       available: picked?.available === true,
@@ -229,42 +322,64 @@ export function useStartModel(owners: StartOwners): StartModel {
    * 一次写入或一次登录带回结论：回执分三条事实存着，Key 交出去就不留在输入框里。
    * 没写成功时一个字都不动——那是用户下一步要改的东西。
    */
-  const applySave = useCallback((result: ModelSaveResult, id: string, modelKept: string): void => {
-    setSaved(saveReceiptOf(result, id));
-    if (result.saved) {
-      // 回执板"现在在用"要能指着这一次真正写进去的那一家。
-      setSaveTargetId(id);
-      setFields({ id, model: modelKept, key: '' });
-    }
-  }, []);
+  const applySave = useCallback(
+    (
+      result: ModelSaveResult,
+      id: string,
+      modelKept: string,
+      effortKept: ModelReasoningEffort,
+    ): void => {
+      setSaved(saveReceiptOf(result, id));
+      if (result.saved) {
+        // 回执板"现在在用"要能指着这一次真正写进去的那一家。
+        setSaveTargetId(id);
+        setFields({ id, model: modelKept, key: '', reasoningEffort: effortKept });
+      }
+    },
+    [],
+  );
 
   const save = useCallback(async (): Promise<void> => {
     if (picked === undefined) {
       return;
     }
     const trimmed = key.trim();
-    if (trimmed === '' && !inUse) {
+    if (trimmed === '' && !inUse && !keySaved) {
       return;
     }
     const outcome = await models.saveAndStart({
       id: picked.id,
       model: model.trim(),
+      reasoningEffort,
       ...(trimmed === '' ? {} : { key: trimmed }),
     });
-    applySave(outcome, picked.id, model.trim());
-  }, [picked, key, inUse, model, models, applySave]);
+    applySave(outcome, picked.id, model.trim(), reasoningEffort);
+  }, [picked, key, inUse, keySaved, model, reasoningEffort, models, applySave]);
 
   const test = useCallback(async (): Promise<void> => {
-    setTested(testReceiptOf(await models.testActive()));
-  }, [models]);
+    if (!catalogAllowed || !picked || !model.trim() || models.testing) return;
+    const sequence = ++testSequence.current;
+    const result = await models.testSelected({
+      id: picked.id,
+      model: model.trim(),
+      reasoningEffort,
+      ...(key.trim() ? { key: key.trim() } : {}),
+    });
+    if (sequence === testSequence.current) setTested(testReceiptOf(result));
+  }, [catalogAllowed, picked, model, reasoningEffort, key, models]);
 
   const signIn = useCallback(async (): Promise<void> => {
     if (picked === undefined) {
       return;
     }
-    // 浏览器登录这家：成功后宿主记的是它默认的模型名。
-    applySave(await models.signInAndStart(picked), picked.id, picked.defaultModel);
-  }, [picked, models, applySave]);
+    // 登录完成后保存同一份模型与思考强度草稿。
+    applySave(
+      await models.signInAndStart(picked, reasoningEffort, model.trim()),
+      picked.id,
+      model.trim(),
+      reasoningEffort,
+    );
+  }, [picked, model, reasoningEffort, models, applySave]);
 
   const openKeyPage = useCallback(async (): Promise<void> => {
     if (picked === undefined) {
@@ -382,12 +497,40 @@ export function useStartModel(owners: StartOwners): StartModel {
     sibling: siblingOf(services, picked),
     model,
     key,
-    setModel: (value) => setFields({ id: draft.id, model: value, key: draft.key }),
-    setKey: (value) => setFields({ id: draft.id, model: draft.model, key: value }),
+    reasoningEffort,
+    setReasoningEffort: (value) => {
+      clearTest();
+      setFields({ ...draft, reasoningEffort: value });
+    },
+    setModel: (value) => {
+      clearTest();
+      setFields({ ...draft, model: value });
+    },
+    setKey: (value) => {
+      clearCatalog();
+      clearTest();
+      setFields({ ...draft, key: value });
+    },
+    modelList: {
+      fetching: currentCatalog?.fetching === true,
+      options: currentCatalog?.options ?? picked?.models ?? [],
+      error: currentCatalog?.error ?? null,
+      notice:
+        currentCatalog?.notice ??
+        (!catalogAllowed
+          ? picked?.auth === 'browser'
+            ? '先登录此服务商，再获取模型列表。'
+            : '填入 Key 或使用已保存的凭据后，可获取此服务商的模型。'
+          : null),
+      allowed: catalogAllowed,
+    },
+    getModels: () => {
+      void getModels();
+    },
 
     can: {
-      save: canSave({ saving: models.saving, picked, model, key, inUse }),
-      test: canTest({ testing: models.testing, hasActive: active !== null }),
+      save: canSave({ saving: models.saving, picked, model, key, inUse, keySaved }),
+      test: reasons.test === null,
       signIn: canSignIn({ signingIn: models.signingIn, available: picked?.available === true }),
     },
     reasons: {
@@ -409,7 +552,11 @@ export function useStartModel(owners: StartOwners): StartModel {
     tested,
     signing: signInLine(models.signIn?.phase, models.signIn?.signedIn === true),
 
-    pick: setPickedId,
+    pick: (id) => {
+      clearCatalog();
+      clearTest();
+      setPickedId(id);
+    },
     save: () => {
       void save();
     },
@@ -428,6 +575,8 @@ export function useStartModel(owners: StartOwners): StartModel {
     switchRegion: () => {
       const sibling = siblingOf(services, picked);
       if (sibling !== undefined) {
+        clearCatalog();
+        clearTest();
         setPickedId(sibling.id);
       }
     },

@@ -1,8 +1,10 @@
-import { respondCompatible } from './responses.mjs';
+import { respondCompatible, testModelConnection } from './responses.mjs';
 import { definePlugin, type PluginTask } from '@pet/plugin-sdk';
 import {
   MODEL_SERVICE_ENDPOINTS,
+  MODEL_REASONING_EFFORTS,
   modelProviderId,
+  type ModelReasoningEffort,
   type JsonValue,
   type JsonObject,
 } from '@pet/contracts';
@@ -15,6 +17,7 @@ export default definePlugin({
         const cfg = await ctx.host.config.get();
         if (!cfg.ok) return null;
         const models = object(cfg.value.data['models'] ?? null);
+        const efforts = object(cfg.value.data['reasoningEfforts'] ?? null);
         return {
           model:
             endpoint.id === 'deepseek' && typeof cfg.value.data['model'] === 'string'
@@ -22,6 +25,7 @@ export default definePlugin({
               : typeof models?.[endpoint.id] === 'string'
                 ? (models[endpoint.id] as string)
                 : endpoint.defaultModel,
+          reasoningEffort: (efforts?.[endpoint.id] ?? 'default') as ModelReasoningEffort,
         };
       };
       const request = async (
@@ -48,20 +52,9 @@ export default definePlugin({
         )
           return { errorCode: 'invalid-input' };
         const config = await selected();
-        const body = diagnostic
-          ? {
-              model: config?.model,
-              input: [
-                {
-                  type: 'message',
-                  role: 'user',
-                  content: [{ type: 'input_text', text: 'Reply with OK.' }],
-                },
-              ],
-              max_output_tokens: 256,
-            }
-          : object(value?.['request'] ?? null);
-        if (!body || !config || !ctx.host.credentials) return { errorCode: 'not-ready' };
+        const body = object(value?.['request'] ?? null);
+        if ((!diagnostic && !body) || !config || !ctx.host.credentials)
+          return { errorCode: 'not-ready' };
         const used = await ctx.host.credentials.withSecret(
           task,
           endpoint.secretKey,
@@ -99,30 +92,18 @@ export default definePlugin({
                   };
                 selectedModel = models.includes(config.model) ? config.model : models[0]!;
               }
-              const generation = await respondCompatible(
+              const requestEndpoint = { ...endpoint, reasoningEffort: config.reasoningEffort };
+              if (diagnostic)
+                return await testModelConnection(requestEndpoint, selectedModel, secret, signal);
+              return await respondCompatible(
                 secret,
                 selectedModel,
                 { ...body, model: selectedModel } as JsonObject,
                 signal,
-                endpoint,
-                diagnostic,
+                requestEndpoint,
+                false,
                 value?.['origins'],
               );
-              if (!diagnostic) return generation;
-              const response = object(object(generation)?.['response'] ?? null);
-              return {
-                ok:
-                  response?.['status'] === 'completed' &&
-                  Array.isArray(response['output']) &&
-                  response['output'].length > 0,
-                elapsedMs: Math.round(performance.now() - started),
-                model: selectedModel,
-                ...(response?.['status'] !== 'completed' ||
-                !Array.isArray(response['output']) ||
-                response['output'].length === 0
-                  ? { reason: '模型没有完成连接测试' }
-                  : {}),
-              };
             } catch (error) {
               const status =
                 error !== null && typeof error === 'object' && 'status' in error
@@ -130,13 +111,18 @@ export default definePlugin({
                   : undefined;
               const errorCode = signal.aborted
                 ? 'cancelled'
-                : status === 401 || status === 403
-                  ? 'auth-failed'
-                  : status === 429
-                    ? 'rate-limited'
-                    : status === 408 || status === 504
-                      ? 'timeout'
-                      : 'network';
+                : error !== null &&
+                    typeof error === 'object' &&
+                    'code' in error &&
+                    error.code === 'invalid-input'
+                  ? 'invalid-input'
+                  : status === 401 || status === 403
+                    ? 'auth-failed'
+                    : status === 429
+                      ? 'rate-limited'
+                      : status === 408 || status === 504
+                        ? 'timeout'
+                        : 'network';
               return diagnostic
                 ? {
                     ok: false,
@@ -169,6 +155,10 @@ export default definePlugin({
         const config = await ctx.host.config.get();
         if (!config.ok || typeof config.value.data['model'] !== 'string')
           return { text: '', mode: 'deepseek', errorCode: 'not-ready' };
+        const efforts = object(config.value.data['reasoningEfforts'] ?? null);
+        const effort = efforts?.['deepseek'] ?? 'default';
+        if (!MODEL_REASONING_EFFORTS.includes(effort as ModelReasoningEffort))
+          return { text: '', mode: 'deepseek', errorCode: 'invalid-input' };
         const messages: Array<{ role: string; content: string }> = [
           { role: 'system', content: '你是桌宠中的助手。清楚、简洁地回答用户。' },
         ];
@@ -206,6 +196,7 @@ export default definePlugin({
                     model: config.value.data['model'],
                     stream: true,
                     max_tokens: 512,
+                    ...(effort !== 'default' ? { reasoning_effort: effort } : {}),
                     messages,
                   }),
                 });

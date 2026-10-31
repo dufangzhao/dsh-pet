@@ -1,4 +1,9 @@
-import { makeError, type Result } from '@pet/contracts';
+import {
+  makeError,
+  MODEL_REASONING_EFFORTS,
+  type ModelReasoningEffort,
+  type Result,
+} from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { exactKeys, record, KernelFault, CredentialError } from '@pet/host-kernel';
 import { isTrustedPetSource, type PetRequestSource } from './ipc-request.js';
@@ -41,31 +46,63 @@ export async function handleModelConnectionRequest(
     if (typeof id !== 'string' || id.length > 128) return fail('invalid-input');
     if (action === 'open')
       return exactKeys(data, ['id']) ? await controller.openServicePage(id) : fail('invalid-input');
+    if (action === 'models') {
+      const key = data['key'];
+      if (
+        !exactKeys(data, ['id', ...(Object.hasOwn(data, 'key') ? ['key'] : [])]) ||
+        (key !== undefined &&
+          (typeof key !== 'string' ||
+            key.length > 4096 ||
+            [...key].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)))
+      )
+        return fail('invalid-input');
+      return await controller.getModels(id, key as string | undefined);
+    }
     const model = data['model'],
-      revision = data['expectedRevision'],
-      key = data['key'];
+      key = data['key'],
+      effort = data['reasoningEffort'];
+    const optional = [
+      ...(Object.hasOwn(data, 'key') ? ['key'] : []),
+      ...(Object.hasOwn(data, 'reasoningEffort') ? ['reasoningEffort'] : []),
+    ];
     if (
-      action !== 'save' ||
-      !exactKeys(data, [
-        'id',
-        'model',
-        'expectedRevision',
-        ...(Object.hasOwn(data, 'key') ? ['key'] : []),
-      ]) ||
+      !['save', 'testSelected'].includes(action) ||
       typeof model !== 'string' ||
       model.length > 128 ||
+      (key !== undefined &&
+        (typeof key !== 'string' ||
+          key.length > 4096 ||
+          [...key].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127))) ||
+      (effort !== undefined &&
+        (typeof effort !== 'string' ||
+          !MODEL_REASONING_EFFORTS.includes(effort as ModelReasoningEffort)))
+    )
+      return fail('invalid-input');
+    if (action === 'testSelected') {
+      if (!exactKeys(data, ['id', 'model', ...optional]) || !model.trim())
+        return fail('invalid-input');
+      return await controller.testSelected({
+        id,
+        model,
+        ...(key === undefined ? {} : { key: key as string }),
+        ...(effort === undefined ? {} : { reasoningEffort: effort as ModelReasoningEffort }),
+      });
+    }
+    const revision = data['expectedRevision'];
+    if (
+      !exactKeys(data, ['id', 'model', 'expectedRevision', ...optional]) ||
       typeof revision !== 'number' ||
       !Number.isSafeInteger(revision) ||
-      revision < 0 ||
-      (key !== undefined && (typeof key !== 'string' || key.length > 4096))
+      revision < 0
     )
       return fail('invalid-input');
-    if (
-      typeof key === 'string' &&
-      [...key].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)
-    )
-      return fail('invalid-input');
-    return await controller.saveAndStart(id, model, revision, key);
+    return await controller.saveAndStart(
+      id,
+      model,
+      revision,
+      key as string | undefined,
+      effort as ModelReasoningEffort | undefined,
+    );
   } catch (error) {
     return fail(
       error instanceof KernelFault

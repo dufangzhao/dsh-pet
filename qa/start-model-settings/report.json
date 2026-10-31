@@ -1,0 +1,147 @@
+{
+  "scope": "real Start/IPC/task/credential flow with controlled Main provider responses, no live account calls",
+  "approvals": [
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    },
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    },
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    },
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    },
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    },
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    },
+    {
+      "kind": "capability-use",
+      "allowed": true
+    },
+    {
+      "kind": "network",
+      "allowed": false
+    },
+    {
+      "kind": "network",
+      "allowed": true
+    },
+    {
+      "kind": "credentials",
+      "allowed": true
+    }
+  ],
+  "cases": [
+    "selected-provider fetch uses draft key without saving or activating",
+    "selected draft diagnostic includes high effort without save/activation",
+    "auth failure is shown without fake model success",
+    "changing the draft Key discards a late successful catalog completion",
+    "switching providers discards or cancels the previous query and preserves only the selected-provider catalog",
+    "save persists the selected effort while denied provider diagnostics do not claim an active connection",
+    "model retrieval after save uses the stored credential and the same runtime client"
+  ],
+  "pageErrors": [],
+  "calls": [
+    {
+      "host": "api.deepseek.com",
+      "path": "/models",
+      "method": "GET",
+      "credentialPresent": true,
+      "slow": false,
+      "effort": null,
+      "settled": true
+    },
+    {
+      "host": "api.deepseek.com",
+      "path": "/responses",
+      "method": "POST",
+      "credentialPresent": true,
+      "slow": false,
+      "effort": "high",
+      "settled": true,
+      "model": "qa-deepseek-one"
+    },
+    {
+      "host": "api.deepseek.com",
+      "path": "/models",
+      "method": "GET",
+      "credentialPresent": true,
+      "slow": false,
+      "effort": null,
+      "settled": true
+    },
+    {
+      "host": "api.deepseek.com",
+      "path": "/models",
+      "method": "GET",
+      "credentialPresent": true,
+      "slow": true,
+      "effort": null,
+      "settled": true
+    },
+    {
+      "host": "api.deepseek.com",
+      "path": "/models",
+      "method": "GET",
+      "credentialPresent": true,
+      "slow": true,
+      "effort": null,
+      "settled": true,
+      "aborted": true
+    },
+    {
+      "host": "dashscope.aliyuncs.com",
+      "path": "/compatible-mode/v1/models",
+      "method": "GET",
+      "credentialPresent": true,
+      "slow": false,
+      "effort": null,
+      "settled": true
+    },
+    {
+      "host": "dashscope.aliyuncs.com",
+      "path": "/compatible-mode/v1/models",
+      "method": "GET",
+      "credentialPresent": true,
+      "slow": false,
+      "effort": null,
+      "settled": true
+    }
+  ],
+  "status": "passed"
+}

@@ -414,9 +414,115 @@
             },
             "xai": { "type": "string", "default": "grok-4.3", "minLength": 1, "maxLength": 128 }
           }
+        },
+        "reasoningEfforts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "deepseek": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "qwen": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "qwen-intl": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "kimi": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "kimi-intl": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "glm": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "glm-intl": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "doubao": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "minimax": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "minimax-intl": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "stepfun": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "stepfun-plan": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "qianfan": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "openrouter": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "openai": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "chatgpt": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "anthropic": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "gemini": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            },
+            "xai": {
+              "type": "string",
+              "enum": ["default", "low", "medium", "high"],
+              "default": "default"
+            }
+          }
         }
       }
     },
-    "apply": { "active": "immediate", "models": "immediate", "model": "immediate" }
+    "apply": {
+      "active": "immediate",
+      "models": "immediate",
+      "model": "immediate",
+      "reasoningEfforts": "immediate"
+    }
   }
 }

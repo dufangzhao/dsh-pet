@@ -19,7 +19,7 @@ function nativeParts(content) {
     throw new Error('Unsupported native content');
   });
 }
-export function anthropicBody(model, messages, tools, maxTokens = 1024) {
+export function anthropicBody(model, messages, tools, maxTokens = 1024, reasoningEffort) {
   const system = messages
     .filter((m) => m.role === 'system' || m.role === 'developer')
     .map((m) => textOf(m.content))
@@ -53,6 +53,9 @@ export function anthropicBody(model, messages, tools, maxTokens = 1024) {
   return {
     model,
     max_tokens: maxTokens,
+    ...(reasoningEffort
+      ? { thinking: { type: 'adaptive' }, output_config: { effort: reasoningEffort } }
+      : {}),
     ...(system ? { system } : {}),
     messages: rows,
     ...(tools?.length
@@ -113,7 +116,13 @@ export function anthropicChatResponse(raw) {
       : {}),
   };
 }
-export function geminiBody(messages, tools, maxTokens = 1024, signatures = new Map()) {
+export function geminiBody(
+  messages,
+  tools,
+  maxTokens = 1024,
+  signatures = new Map(),
+  reasoningEffort,
+) {
   const system = messages
     .filter((m) => m.role === 'system' || m.role === 'developer')
     .map((m) => textOf(m.content))
@@ -164,7 +173,12 @@ export function geminiBody(messages, tools, maxTokens = 1024, signatures = new M
   return {
     contents,
     ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
-    generationConfig: { maxOutputTokens: maxTokens },
+    generationConfig: {
+      maxOutputTokens: maxTokens,
+      ...(reasoningEffort
+        ? { thinkingConfig: { thinkingLevel: reasoningEffort.toUpperCase() } }
+        : {}),
+    },
     ...(tools?.length
       ? {
           tools: [

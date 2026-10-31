@@ -207,6 +207,7 @@ export function saveBlockReason(options: {
   readonly model: string;
   readonly key: string;
   readonly inUse: boolean;
+  readonly keySaved?: boolean;
 }): string | null {
   if (options.saving) {
     return '上一次保存还没写完。';
@@ -220,7 +221,7 @@ export function saveBlockReason(options: {
   if (options.model.trim() === '') {
     return '模型名不能空着。';
   }
-  if (options.key.trim() === '' && !options.inUse) {
+  if (options.key.trim() === '' && !options.inUse && !options.keySaved) {
     return '这一家还没有可用的 Key：填一个，或改回在用的那一家。';
   }
   return null;

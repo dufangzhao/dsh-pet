@@ -214,6 +214,8 @@ function modelState(over: Partial<ModelConnectionState> = {}): ModelConnectionSt
     refresh: noop,
     saveAndStart: never,
     testActive: never,
+    testSelected: never,
+    getModels: never,
     setPaused: never,
     openServicePage: never,
     signInAndStart: never,
@@ -414,6 +416,7 @@ describe('开始页', () => {
           modelState({
             snapshot: modelSnapshot({
               active: { id: 'qwen', model: 'qwen3.8-flash', label: '通义千问' },
+              endpoints: [{ id: 'qwen', model: 'qwen3.8-flash', keyConfigured: true }],
             }),
           }),
         )}
