@@ -1,0 +1,30 @@
+[
+  {
+    "id": "soft-relief",
+    "label": "柔软浮雕",
+    "image": "qa\\website-style-previews\\screenshots\\raw-soft-relief.png",
+    "permalink": "https://uiverse.io/sameer2malik/lucky-insect-98",
+    "scope": "Unchanged raw form rendered locally; host margin, centering and background only."
+  },
+  {
+    "id": "holo-glass",
+    "label": "全息玻璃",
+    "image": "qa\\website-style-previews\\screenshots\\raw-holo-glass.png",
+    "permalink": "https://uiverse.io/KhelVers/honest-lionfish-67",
+    "scope": "Unchanged raw form rendered locally; host margin, centering and background only."
+  },
+  {
+    "id": "space-neon",
+    "label": "星空霓虹",
+    "image": "qa\\website-style-previews\\screenshots\\raw-space-neon.png",
+    "permalink": "https://uiverse.io/John-CFO/spicy-horse-10",
+    "scope": "Unchanged raw form rendered locally; host margin, centering and background only."
+  },
+  {
+    "id": "lavender-line",
+    "label": "紫色下划线",
+    "image": "qa\\website-style-previews\\screenshots\\raw-lavender-line.png",
+    "permalink": "https://uiverse.io/vinodjangid07/horrible-warthog-14",
+    "scope": "Unchanged raw form rendered locally; host margin, centering and background only."
+  }
+]

@@ -1,0 +1,304 @@
+{
+  "scope": "visual-only offline style previews",
+  "rawSources": [
+    {
+      "family": "hard-edge",
+      "file": "sources/hard-edge/andrew-demchenk0_afraid-squid-51.html",
+      "sha256": "11cfdd7d14b5b7c3268f8baa33298dac310ad81916cc129ee50fe3d30691f7f0"
+    },
+    {
+      "family": "hard-edge",
+      "file": "sources/hard-edge/andrew-demchenk0_polite-stingray-67.html",
+      "sha256": "02e77dbd3c0a45d5beff3c249fcc066b1914fb10951dca95983643fc48e7401e"
+    },
+    {
+      "family": "hard-edge",
+      "file": "sources/hard-edge/andrew-demchenk0_empty-penguin-100.html",
+      "sha256": "4a3cb08d7e4684838d47c56aec476432f54f1715bc9ab09d9256dbdd4731c4c7"
+    },
+    {
+      "family": "hard-edge",
+      "file": "sources/hard-edge/andrew-demchenk0_stupid-seahorse-9.html",
+      "sha256": "d0b435d6c672d2aec197fa54810d5cfd944881263fb6acd65f7e0c75a5262a05"
+    },
+    {
+      "family": "hard-edge",
+      "file": "sources/hard-edge/andrew-demchenk0_afraid-cougar-9.html",
+      "sha256": "791fda9edbce04a8e5d6a70279db2851340708074ce3af69fe38ce766192a338"
+    },
+    {
+      "family": "soft-relief",
+      "file": "sources/soft-relief/sameer2malik_lucky-insect-98.html",
+      "sha256": "d50289efe040b9e956b88dd076087c6be3084a14a87e81a82fa9ad11dd9c229c"
+    },
+    {
+      "family": "holo-glass",
+      "file": "sources/holo-glass/KhelVers_honest-lionfish-67.html",
+      "sha256": "483792b2038da13862c88777f66a2c537fc0dad6b7d974257f0b7f5dc99f671a"
+    },
+    {
+      "family": "space-neon",
+      "file": "sources/space-neon/John-CFO_spicy-horse-10.html",
+      "sha256": "47cb72f75a5272e6ef8a351c42b1dfe4e22e08fc783cc7be00b5b40ed9a349d4"
+    },
+    {
+      "family": "lavender-line",
+      "file": "sources/lavender-line/vinodjangid07_horrible-warthog-14.html",
+      "sha256": "7ee78a5725ca11cd5b72c6522c09c22acfb85efd5d3c4d7898b3ac73d160bef0"
+    }
+  ],
+  "styles": [
+    {
+      "id": "hard-edge",
+      "label": "墨线硬边",
+      "geometry": {
+        "button": {
+          "tag": "BUTTON",
+          "radius": "5px",
+          "shadow": "rgb(50, 50, 50) 4px 4px 0px 0px",
+          "border": "2px solid rgb(50, 50, 50)",
+          "background": "rgb(50, 50, 50) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "input": {
+          "tag": "INPUT",
+          "radius": "5px",
+          "shadow": "rgb(50, 50, 50) 4px 4px 0px 0px",
+          "border": "2px solid rgb(50, 50, 50)",
+          "background": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "fields": [
+          {
+            "left": 69,
+            "right": 855,
+            "top": 393.59375,
+            "bottom": 433.59375,
+            "width": 786
+          },
+          {
+            "left": 69,
+            "right": 855,
+            "top": 496.09375,
+            "bottom": 536.09375,
+            "width": 786
+          },
+          {
+            "left": 85,
+            "right": 863,
+            "top": 910.34375,
+            "bottom": 964.34375,
+            "width": 778
+          }
+        ],
+        "host": {
+          "left": 22,
+          "right": 902
+        },
+        "bodyScroll": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "id": "soft-relief",
+      "label": "柔软浮雕",
+      "geometry": {
+        "button": {
+          "tag": "DIV",
+          "radius": "32px",
+          "shadow": "rgba(255, 255, 255, 0.78) -3px -3px 5px 0px inset, rgba(209, 209, 209, 0.706) 3px 3px 5px 0px inset",
+          "border": "0px none rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "system-ui, \"Segoe UI\", \"Microsoft YaHei\", sans-serif"
+        },
+        "input": {
+          "tag": "INPUT",
+          "radius": "32px",
+          "shadow": "rgba(97, 97, 97, 0.075) 6px 6px 8px 0px inset, rgba(255, 255, 255, 0.78) 6px 6px 6px 0px",
+          "border": "0px none rgb(161, 161, 161)",
+          "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "fields": [
+          {
+            "left": 334.4375,
+            "right": 596.125,
+            "top": 455,
+            "bottom": 505,
+            "width": 261.6875
+          },
+          {
+            "left": 334.4375,
+            "right": 596.125,
+            "top": 547,
+            "bottom": 597,
+            "width": 261.6875
+          }
+        ],
+        "host": {
+          "left": 22,
+          "right": 902
+        },
+        "bodyScroll": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "id": "holo-glass",
+      "label": "全息玻璃",
+      "geometry": {
+        "button": {
+          "tag": "BUTTON",
+          "radius": "0px",
+          "shadow": "rgb(255, 255, 255) 0px 0px 2px 2px",
+          "border": "2px solid rgb(255, 255, 255)",
+          "background": "rgba(0, 0, 0, 0) linear-gradient(144deg, rgb(156, 17, 255), rgb(32, 0, 238) 50%, rgb(21, 255, 243)) repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "input": {
+          "tag": "INPUT",
+          "radius": "6px",
+          "shadow": "rgb(158, 229, 227) 0px 0px 1px 3px inset, rgba(24, 26, 96, 0.25) 0px 4px 4px 0px",
+          "border": "2px solid rgb(255, 255, 255)",
+          "background": "rgba(139, 255, 247, 0.486) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "fields": [
+          {
+            "left": 273.4375,
+            "right": 469.4375,
+            "top": 422.1875,
+            "bottom": 462.1875,
+            "width": 196
+          },
+          {
+            "left": 273.4375,
+            "right": 469.4375,
+            "top": 472.1875,
+            "bottom": 512.1875,
+            "width": 196
+          }
+        ],
+        "host": {
+          "left": 22,
+          "right": 902
+        },
+        "bodyScroll": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "id": "space-neon",
+      "label": "星空霓虹",
+      "geometry": {
+        "button": {
+          "tag": "BUTTON",
+          "radius": "3.9px",
+          "shadow": "rgb(255, 255, 255) 4px 5px 17px -4px",
+          "border": "2px solid rgb(255, 255, 255)",
+          "background": "rgb(192, 192, 192) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "monospace"
+        },
+        "input": {
+          "tag": "INPUT",
+          "radius": "0px",
+          "shadow": "rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "border": "2px solid rgb(255, 255, 255)",
+          "background": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "monospace"
+        },
+        "fields": [
+          {
+            "left": 287,
+            "right": 537,
+            "top": 368.578125,
+            "bottom": 404.578125,
+            "width": 250
+          },
+          {
+            "left": 287,
+            "right": 537,
+            "top": 430.578125,
+            "bottom": 466.578125,
+            "width": 250
+          }
+        ],
+        "host": {
+          "left": 22,
+          "right": 902
+        },
+        "bodyScroll": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "id": "lavender-line",
+      "label": "紫色下划线",
+      "geometry": {
+        "button": {
+          "tag": "BUTTON",
+          "radius": "0px",
+          "shadow": "none",
+          "border": "0px none rgb(255, 255, 255)",
+          "background": "rgb(126, 84, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "input": {
+          "tag": "INPUT",
+          "radius": "0px",
+          "shadow": "none",
+          "border": "",
+          "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+          "font": "Arial"
+        },
+        "fields": [
+          {
+            "left": 367.390625,
+            "right": 556.609375,
+            "top": 386,
+            "bottom": 416,
+            "width": 189.21875
+          },
+          {
+            "left": 367.390625,
+            "right": 556.609375,
+            "top": 446,
+            "bottom": 476,
+            "width": 189.21875
+          }
+        ],
+        "host": {
+          "left": 22,
+          "right": 902
+        },
+        "bodyScroll": 1280,
+        "viewport": 1280
+      }
+    }
+  ],
+  "errors": [],
+  "remoteRequests": [],
+  "screenshots": [
+    "hard-edge-wide.png",
+    "hard-edge-canvas.png",
+    "hard-edge-narrow.png",
+    "hard-edge-controls.png",
+    "soft-relief-wide.png",
+    "soft-relief-canvas.png",
+    "soft-relief-narrow.png",
+    "soft-relief-controls.png",
+    "holo-glass-wide.png",
+    "holo-glass-canvas.png",
+    "holo-glass-narrow.png",
+    "holo-glass-controls.png",
+    "space-neon-wide.png",
+    "space-neon-canvas.png",
+    "space-neon-narrow.png",
+    "space-neon-controls.png",
+    "lavender-line-wide.png",
+    "lavender-line-canvas.png",
+    "lavender-line-narrow.png",
+    "lavender-line-controls.png"
+  ],
+  "status": "passed"
+}

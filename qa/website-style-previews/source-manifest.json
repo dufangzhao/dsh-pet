@@ -1,0 +1,244 @@
+{
+  "version": 1,
+  "title": "网站风格预览",
+  "scope": "Visual-only local demo. No product defaults, real connection, save, credentials, Core or recording.",
+  "repository": {
+    "url": "https://github.com/uiverse-io/galaxy",
+    "revision": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+    "license": "sources/LICENSE.md"
+  },
+  "websiteAccess": "Normal Uiverse browser visit returned Cloudflare; source code comes from its official pinned public Galaxy archive. Morphicons website loaded normally.",
+  "icons": {
+    "website": "https://www.morphicons.com/",
+    "family": "Tabler outline",
+    "revision": "ed177a085b652fe04ec4f37ced867c94621e7840",
+    "data": "../../apps/desktop/src/renderer/console/site-ui/assets/tabler-icon-data.json",
+    "licenses": [
+      "../../apps/desktop/src/renderer/console/site-ui/assets/TABLER-LICENSE.txt",
+      "../../apps/desktop/src/renderer/console/site-ui/assets/MORPHICONS-LICENSE.txt"
+    ]
+  },
+  "allowedAdaptations": [
+    "Chinese sample labels and app-title replacement",
+    "Responsive width and preview canvas placement",
+    "Native semantic labels and local demo-only feedback",
+    "Whole-window composition derived from each original material; not an official complete design system"
+  ],
+  "families": [
+    {
+      "id": "hard-edge",
+      "label": "墨线硬边",
+      "summary": "当前方案：2px墨线、4px硬投影、按压位移与胶囊开关",
+      "current": true,
+      "sources": [
+        {
+          "author": "andrew-demchenk0",
+          "slug": "afraid-squid-51",
+          "category": "Buttons",
+          "roles": ["button"],
+          "selectors": {
+            "button": ".button"
+          },
+          "file": "sources/hard-edge/andrew-demchenk0_afraid-squid-51.html",
+          "permalink": "https://uiverse.io/andrew-demchenk0/afraid-squid-51",
+          "repositoryFile": "Buttons/andrew-demchenk0_afraid-squid-51.html",
+          "sha256": "11cfdd7d14b5b7c3268f8baa33298dac310ad81916cc129ee50fe3d30691f7f0",
+          "bytes": 593,
+          "license": "MIT"
+        },
+        {
+          "author": "andrew-demchenk0",
+          "slug": "polite-stingray-67",
+          "category": "Inputs",
+          "roles": ["input"],
+          "selectors": {
+            "input": ".input"
+          },
+          "file": "sources/hard-edge/andrew-demchenk0_polite-stingray-67.html",
+          "permalink": "https://uiverse.io/andrew-demchenk0/polite-stingray-67",
+          "repositoryFile": "Inputs/andrew-demchenk0_polite-stingray-67.html",
+          "sha256": "02e77dbd3c0a45d5beff3c249fcc066b1914fb10951dca95983643fc48e7401e",
+          "bytes": 704,
+          "license": "MIT"
+        },
+        {
+          "author": "andrew-demchenk0",
+          "slug": "empty-penguin-100",
+          "category": "Toggle-switches",
+          "roles": ["switch"],
+          "selectors": {
+            "switch": ".switch"
+          },
+          "file": "sources/hard-edge/andrew-demchenk0_empty-penguin-100.html",
+          "permalink": "https://uiverse.io/andrew-demchenk0/empty-penguin-100",
+          "repositoryFile": "Toggle-switches/andrew-demchenk0_empty-penguin-100.html",
+          "sha256": "4a3cb08d7e4684838d47c56aec476432f54f1715bc9ab09d9256dbdd4731c4c7",
+          "bytes": 1527,
+          "license": "MIT"
+        },
+        {
+          "author": "andrew-demchenk0",
+          "slug": "stupid-seahorse-9",
+          "category": "Radio-buttons",
+          "roles": ["radio"],
+          "selectors": {
+            "radio": ".wrapper"
+          },
+          "file": "sources/hard-edge/andrew-demchenk0_stupid-seahorse-9.html",
+          "permalink": "https://uiverse.io/andrew-demchenk0/stupid-seahorse-9",
+          "repositoryFile": "Radio-buttons/andrew-demchenk0_stupid-seahorse-9.html",
+          "sha256": "d0b435d6c672d2aec197fa54810d5cfd944881263fb6acd65f7e0c75a5262a05",
+          "bytes": 1571,
+          "license": "MIT"
+        },
+        {
+          "author": "andrew-demchenk0",
+          "slug": "afraid-cougar-9",
+          "category": "Forms",
+          "roles": ["panel"],
+          "selectors": {
+            "panel": ".flip-card__front"
+          },
+          "file": "sources/hard-edge/andrew-demchenk0_afraid-cougar-9.html",
+          "permalink": "https://uiverse.io/andrew-demchenk0/afraid-cougar-9",
+          "repositoryFile": "Forms/andrew-demchenk0_afraid-cougar-9.html",
+          "sha256": "791fda9edbce04a8e5d6a70279db2851340708074ce3af69fe38ce766192a338",
+          "bytes": 5321,
+          "license": "MIT"
+        }
+      ]
+    },
+    {
+      "id": "soft-relief",
+      "label": "柔软浮雕",
+      "author": "sameer2malik",
+      "slug": "lucky-insect-98",
+      "summary": "浅灰一体底、胶囊形内凹输入与外凸软阴影按钮",
+      "selectors": {
+        "panel": ".hero",
+        "form": ".form",
+        "input": ".input",
+        "button": ".submit, .btn"
+      },
+      "sources": [
+        {
+          "author": "sameer2malik",
+          "slug": "lucky-insect-98",
+          "category": "Forms",
+          "roles": ["panel", "input", "button"],
+          "selectors": {
+            "panel": ".hero",
+            "form": ".form",
+            "input": ".input",
+            "button": ".submit, .btn"
+          },
+          "file": "sources/soft-relief/sameer2malik_lucky-insect-98.html",
+          "permalink": "https://uiverse.io/sameer2malik/lucky-insect-98",
+          "repositoryFile": "Forms/sameer2malik_lucky-insect-98.html",
+          "sha256": "d50289efe040b9e956b88dd076087c6be3084a14a87e81a82fa9ad11dd9c229c",
+          "bytes": 2349,
+          "license": "MIT"
+        }
+      ]
+    },
+    {
+      "id": "holo-glass",
+      "label": "全息玻璃",
+      "author": "KhelVers",
+      "slug": "honest-lionfish-67",
+      "summary": "半透明青色玻璃、白描边、内发光、蓝紫渐变按钮与悬浮投影",
+      "selectors": {
+        "panel": ".form",
+        "input": ".form-content",
+        "button": ".form button",
+        "decoration": "#rays, #emiter"
+      },
+      "sources": [
+        {
+          "author": "KhelVers",
+          "slug": "honest-lionfish-67",
+          "category": "Forms",
+          "roles": ["panel", "input", "button"],
+          "selectors": {
+            "panel": ".form",
+            "input": ".form-content",
+            "button": ".form button",
+            "decoration": "#rays, #emiter"
+          },
+          "file": "sources/holo-glass/KhelVers_honest-lionfish-67.html",
+          "permalink": "https://uiverse.io/KhelVers/honest-lionfish-67",
+          "repositoryFile": "Forms/KhelVers_honest-lionfish-67.html",
+          "sha256": "483792b2038da13862c88777f66a2c537fc0dad6b7d974257f0b7f5dc99f671a",
+          "bytes": 10911,
+          "license": "MIT"
+        }
+      ]
+    },
+    {
+      "id": "space-neon",
+      "label": "星空霓虹",
+      "author": "John-CFO",
+      "slug": "spicy-horse-10",
+      "summary": "深色星空渐变、白色直角描边、等宽输入和扫光按钮",
+      "selectors": {
+        "panel": ".form",
+        "input": ".input-container input",
+        "button": ".submit",
+        "decoration": ".bg-stars, .star"
+      },
+      "sources": [
+        {
+          "author": "John-CFO",
+          "slug": "spicy-horse-10",
+          "category": "Forms",
+          "roles": ["panel", "input", "button"],
+          "selectors": {
+            "panel": ".form",
+            "input": ".input-container input",
+            "button": ".submit",
+            "decoration": ".bg-stars, .star"
+          },
+          "file": "sources/space-neon/John-CFO_spicy-horse-10.html",
+          "permalink": "https://uiverse.io/John-CFO/spicy-horse-10",
+          "repositoryFile": "Forms/John-CFO_spicy-horse-10.html",
+          "sha256": "47cb72f75a5272e6ef8a351c42b1dfe4e22e08fc783cc7be00b5b40ed9a349d4",
+          "bytes": 5946,
+          "license": "MIT"
+        }
+      ]
+    },
+    {
+      "id": "lavender-line",
+      "label": "紫色下划线",
+      "author": "vinodjangid07",
+      "slug": "horrible-warthog-14",
+      "summary": "白色软影卡、斜置圆角紫色块、下划线输入与扁平紫色按钮",
+      "selectors": {
+        "panel": ".form_main",
+        "input": ".inputField",
+        "button": "#button",
+        "decoration": ".form_main::before"
+      },
+      "sources": [
+        {
+          "author": "vinodjangid07",
+          "slug": "horrible-warthog-14",
+          "category": "Forms",
+          "roles": ["panel", "input", "button"],
+          "selectors": {
+            "panel": ".form_main",
+            "input": ".inputField",
+            "button": "#button",
+            "decoration": ".form_main::before"
+          },
+          "file": "sources/lavender-line/vinodjangid07_horrible-warthog-14.html",
+          "permalink": "https://uiverse.io/vinodjangid07/horrible-warthog-14",
+          "repositoryFile": "Forms/vinodjangid07_horrible-warthog-14.html",
+          "sha256": "7ee78a5725ca11cd5b72c6522c09c22acfb85efd5d3c4d7898b3ac73d160bef0",
+          "bytes": 3412,
+          "license": "MIT"
+        }
+      ]
+    }
+  ]
+}

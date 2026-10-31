@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>风格演示 · 示例数据，不保存</title>
+    <link rel="stylesheet" href="preview.css" />
+  </head>
+  <body data-style="" data-view="window" data-width="wide">
+    <header id="gallery-header">
+      <div>
+        <h1 id="gallery-title">网站来源风格 · 对比预览</h1>
+        <p id="gallery-notice" class="notice">
+          风格演示 · 示例数据，不保存：不接模型、密钥、麦克风、历史、存储与任何后台。
+        </p>
+      </div>
+      <p id="build-hint" class="hint">
+        数据由 build-preview.mjs 生成；来源包到位后重跑
+        <span class="kbd">node qa/website-style-previews/build-preview.mjs</span> 就多出几组。
+      </p>
+    </header>
+
+    <nav id="toolbar" aria-label="演示工具栏">
+      <div class="tool" id="style-picker" role="group" aria-label="风格选择"></div>
+      <div class="tool" id="view-switcher" role="group" aria-label="视图选择">
+        <button type="button" data-view="window">组合示意</button>
+        <button type="button" data-view="controls">控件板</button>
+        <button type="button" data-view="raw">来源原件</button>
+      </div>
+      <div class="tool" id="width-toggle" role="group" aria-label="画布宽度">
+        <button type="button" data-width="wide">宽 880</button>
+        <button type="button" data-width="narrow">窄 420</button>
+      </div>
+    </nav>
+
+    <main id="stage">
+      <p id="stage-empty" class="notice" hidden>没有可显示的风格：gallery-data.js 还没生成。</p>
+      <section id="panel-window" data-panel="window">
+        <div id="host-window" class="host"></div>
+      </section>
+      <section id="panel-controls" data-panel="controls" hidden>
+        <div id="grid-controls" class="host"></div>
+      </section>
+      <section id="panel-raw" data-panel="raw" hidden><div id="grid-raw"></div></section>
+    </main>
+
+    <footer id="attribution" aria-live="polite"></footer>
+
+    <script src="gallery-data.js"></script>
+    <script src="preview.js"></script>
+  </body>
+</html>
