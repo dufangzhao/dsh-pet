@@ -1,0 +1,4 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Actual architecture and secret ownership"}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Fixed IPC/task/credential/network boundaries"}
+{"file":".trellis/spec/frontend/project-patterns.md","reason":"Start owner and draft semantics"}
+{"file":".trellis/tasks/10-31-start-model-discovery/design.md","reason":"Frozen functional integration contract"}
