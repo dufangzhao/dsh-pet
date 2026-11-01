@@ -9,7 +9,6 @@
     "conversation-1200.png",
     "voice-1200.png",
     "plugins-1200.png",
-    "permissions-1200.png",
     "about-1200.png",
     "start-880.png",
     "persona-880.png",
@@ -17,7 +16,6 @@
     "conversation-880.png",
     "voice-880.png",
     "plugins-880.png",
-    "permissions-880.png",
     "about-880.png"
   ],
   "pages": [
@@ -161,6 +159,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -368,6 +374,14 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -452,6 +466,14 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -519,6 +541,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -635,6 +665,14 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -650,97 +688,13 @@
           "left": 247,
           "right": 1179
         },
-        "fields": [],
-        "images": [
-          {
-            "src": "assets/pet-round.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-round.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          }
-        ],
-        "unnamedNav": 0
-      }
-    },
-    {
-      "page": "permissions",
-      "width": 1200,
-      "geometry": {
-        "scrollWidth": 1200,
-        "viewport": 1200,
-        "content": {
-          "left": 247,
-          "right": 1179
-        },
         "fields": [
           {
-            "id": "source-preset-level",
-            "left": 299,
-            "right": 1127,
-            "top": 502,
-            "bottom": 550
+            "id": "plugin-search",
+            "left": 312,
+            "right": 876,
+            "top": 225,
+            "bottom": 259
           }
         ],
         "images": [
@@ -794,6 +748,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -878,6 +840,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1040,6 +1010,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1247,6 +1225,14 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1331,6 +1317,14 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1398,6 +1392,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1514,6 +1516,14 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1529,97 +1539,13 @@
           "left": 89,
           "right": 859
         },
-        "fields": [],
-        "images": [
-          {
-            "src": "assets/pet-round.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/deepseek-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/qwen-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/kimi-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/chatglm-color.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/openai.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/anthropic.svg",
-            "ready": true
-          },
-          {
-            "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-round.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          },
-          {
-            "src": "assets/pet-minimal.svg",
-            "ready": true
-          }
-        ],
-        "unnamedNav": 0
-      }
-    },
-    {
-      "page": "permissions",
-      "width": 880,
-      "geometry": {
-        "scrollWidth": 880,
-        "viewport": 880,
-        "content": {
-          "left": 89,
-          "right": 859
-        },
         "fields": [
           {
-            "id": "source-preset-level",
-            "left": 131,
-            "right": 817,
-            "top": 498,
-            "bottom": 546
+            "id": "plugin-search",
+            "left": 144,
+            "right": 566,
+            "top": 221,
+            "bottom": 255
           }
         ],
         "images": [
@@ -1673,6 +1599,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1757,6 +1691,14 @@
           },
           {
             "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {

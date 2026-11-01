@@ -38,7 +38,6 @@ try {
       'conversation',
       'voice',
       'plugins',
-      'permissions',
       'about',
     ]) {
       await page.locator('[data-nav=' + id + ']').click();

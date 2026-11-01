@@ -1,0 +1,10 @@
+{
+  "scope": "local plugin-owned settings navigation, no runtime integration",
+  "checks": [
+    "plugin lifecycle adds/removes its page; feature off keeps settings accessible; re-enable preserves feature configuration",
+    "removing current page falls back to plugins; recording and pending download previews stop; ordinary drafts survive"
+  ],
+  "errors": [],
+  "requests": [],
+  "status": "passed"
+}

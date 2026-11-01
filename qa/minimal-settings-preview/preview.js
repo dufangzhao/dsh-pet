@@ -98,6 +98,8 @@
     draggable: true,
     reducedMotion: false,
     paused: false,
+    builtinSpeechEnabled: true,
+    voicePluginEnabled: true,
     voiceEnabled: true,
     voiceEngine: 'funasr',
     voiceDownloads: {
@@ -115,6 +117,31 @@
     voiceRecordStartedAt: 0,
     voiceRecordMessage: '未录音',
     page: 'start',
+    conversationDraft: '',
+    conversationPending: false,
+    conversationEarlier: false,
+    conversationSerial: 3,
+    conversationRecords: [
+      {
+        id: 'int-1',
+        kind: 'user',
+        text: '今天也一起待着吧',
+        via: 'console',
+        at: Date.now() - 120000,
+      },
+      {
+        id: 'int-2',
+        kind: 'pet',
+        text: '好呀，我就在这儿。',
+        via: 'console',
+        at: Date.now() - 60000,
+      },
+      { id: 'int-3', kind: 'interaction', text: '你轻触了小蓝一下', via: 'bubble', at: Date.now() },
+    ],
+    pluginSearch: '',
+    pluginFilter: 'all',
+    modelReplyEnabled: true,
+    modelReplyInstalled: true,
   };
 
   Object.keys(PERSONA_TEMPLATES).forEach(function (id) {
@@ -208,6 +235,7 @@
   );
   state.personaTemplateSerial = 0;
   state.audioPlaying = false;
+  var speechPreviewAudio = null;
 
   function setDisabled(group, disabled) {
     group.querySelectorAll('input, select, button').forEach(function (el) {
@@ -242,9 +270,34 @@
     setDisabled(snoreOptions, snoreOptions.hidden);
     var speakingOptions = document.getElementById('persona-speaking-options');
     speakingOptions.hidden = !state.soundEnabled || !state.soundTalk;
-    setDisabled(speakingOptions, speakingOptions.hidden);
+    setDisabled(speakingOptions, speakingOptions.hidden || !state.builtinSpeechEnabled);
+    var manager = document.getElementById('manage-speech-plugins');
+    manager.disabled = false;
+    manager.hidden = state.builtinSpeechEnabled;
     var trial = document.querySelector('[data-persona-action="preview-sound"]');
-    trial.disabled = !state.soundEnabled || !state.soundTalk || state.audioPlaying;
+    controls('speakingSound')[0].disabled = speakingOptions.hidden || !state.builtinSpeechEnabled;
+    controls('speakingSound')[0]
+      .querySelectorAll('option')
+      .forEach(function (option) {
+        option.disabled = !state.builtinSpeechEnabled;
+      });
+    document.getElementById('speech-provider-state').textContent = state.builtinSpeechEnabled
+      ? ''
+      : '内置说话插件已停用';
+    document.getElementById('speech-plugin-state').textContent = state.builtinSpeechEnabled
+      ? '已启用'
+      : '已停用';
+    document.getElementById('speech-plugin-toggle').textContent = state.builtinSpeechEnabled
+      ? '停用'
+      : '启用';
+    document
+      .getElementById('speech-plugin-toggle')
+      .setAttribute('aria-pressed', String(state.builtinSpeechEnabled));
+    trial.disabled =
+      !state.builtinSpeechEnabled || !state.soundEnabled || !state.soundTalk || state.audioPlaying;
+    var speak = document.getElementById('bubble-speak');
+    speak.disabled = !state.builtinSpeechEnabled || !state.soundEnabled || !state.soundTalk;
+    speak.textContent = state.audioPlaying ? '停止声音' : '试听说话声';
     var select = document.getElementById('persona-template-select');
     Object.keys(state.personaTemplates).forEach(function (id) {
       var option = Array.from(select.options).find(function (item) {
@@ -275,12 +328,22 @@
     document.getElementById('persona-template-name').focus();
   }
 
+  function stopSpeakingPreview() {
+    var active = speechPreviewAudio;
+    speechPreviewAudio = null;
+    state.audioPlaying = false;
+    if (active) void active.close();
+    renderPersona();
+  }
+
   async function previewSpeakingSound() {
     state.audioPlaying = true;
     renderPersona();
     try {
       var context = new window.AudioContext();
+      speechPreviewAudio = context;
       await context.resume();
+      if (speechPreviewAudio !== context) return;
       var base = state.speechPitch * (state.speakingSound === 'soft' ? 0.9 : 1);
       var step = 1 / state.speechSpeed;
       var start = context.currentTime + 0.02;
@@ -299,12 +362,16 @@
         oscillator.stop(at + step * 0.85);
         if (index === 4)
           oscillator.onended = function () {
+            if (speechPreviewAudio !== context) return;
+            speechPreviewAudio = null;
             void context.close();
             state.audioPlaying = false;
             renderPersona();
           };
       });
     } catch {
+      if (context && speechPreviewAudio !== context) return;
+      speechPreviewAudio = null;
       state.audioPlaying = false;
       document.getElementById('persona-draft-state').textContent = '当前浏览器无法试听';
       renderPersona();
@@ -362,7 +429,8 @@
     }
     var available =
       engine.kind !== 'local' || state.voiceDownloads[state.voiceEngine].phase === 'ready';
-    var ready = state.voiceEnabled && state.voiceServiceRunning && available;
+    var ready =
+      state.voicePluginEnabled && state.voiceEnabled && state.voiceServiceRunning && available;
     document.getElementById('voice-service-state').textContent = state.voiceServiceRunning
       ? engine.kind === 'api'
         ? '接口配置预览'
@@ -371,7 +439,7 @@
           : '运行预览'
       : '已停止';
     document.getElementById('voice-service-start').disabled =
-      !state.voiceEnabled || state.voiceServiceRunning || !available;
+      !state.voicePluginEnabled || !state.voiceEnabled || state.voiceServiceRunning || !available;
     document.getElementById('voice-service-stop').disabled = !state.voiceServiceRunning;
     document.getElementById('voice-record-button').disabled = !ready;
     document.getElementById('voice-record-button').textContent = state.voiceRecording
@@ -395,14 +463,15 @@
       ? '收音状态预览'
       : '未收音';
     document.getElementById('page-voice').dataset.recording = String(state.voiceRecording);
-    document.getElementById('voice-plugin-state').textContent = state.voiceEnabled
+    document.getElementById('voice-plugin-state').textContent = state.voicePluginEnabled
       ? '已启用'
-      : '已关闭';
-    document.getElementById('voice-plugin-toggle').textContent = state.voiceEnabled
-      ? '关闭语音输入'
-      : '开启语音输入';
-    setText('plugins-active-count', state.voiceEnabled ? 3 : 2);
-    setText('plugins-disabled-count', state.voiceEnabled ? 0 : 1);
+      : '已停用';
+    document.getElementById('voice-plugin-toggle').textContent = state.voicePluginEnabled
+      ? '停用'
+      : '启用';
+    document
+      .getElementById('voice-plugin-toggle')
+      .setAttribute('aria-pressed', String(state.voicePluginEnabled));
   }
   function downloadVoiceModel() {
     var id = state.voiceEngine;
@@ -435,7 +504,13 @@
     return !message;
   }
   function startVoicePreview() {
-    if (!state.voiceEnabled || !state.voiceServiceRunning || state.voiceRecording) return;
+    if (
+      !state.voicePluginEnabled ||
+      !state.voiceEnabled ||
+      !state.voiceServiceRunning ||
+      state.voiceRecording
+    )
+      return;
     state.voiceRecording = true;
     state.voiceRecordStartedAt = window.performance.now();
     state.voiceRecordMessage = '录音预览中';
@@ -453,7 +528,19 @@
     renderVoice();
   }
 
+  function renderPageContributions() {
+    var enabled = state.voicePluginEnabled;
+    document.querySelector('[data-nav=voice]').closest('li').hidden = !enabled;
+    document
+      .querySelectorAll('[data-goto=voice], [data-preview-action=conversation-record-start]')
+      .forEach(function (button) {
+        button.disabled = !enabled;
+      });
+    if (!enabled && state.page === 'voice') state.page = 'plugins';
+  }
+
   function render() {
+    renderPageContributions();
     renderPersona();
     renderVoice();
     document.body.style.colorScheme =
@@ -521,6 +608,255 @@
 
     document.body.dataset.motion = state.reducedMotion ? 'off' : 'on';
     showPage(state.page);
+    renderPlugins();
+    renderConversation();
+  }
+
+  var conversationTimer = null;
+  var pendingConfirmation = null;
+
+  function chatEntry(record) {
+    var item = document.createElement('li');
+    item.className = 'chat-entry chat-entry--' + record.kind;
+    item.dataset.interactionId = record.id;
+    item.dataset.interactionKind = record.kind;
+    item.dataset.via = record.via;
+    item.title = new Date(record.at).toLocaleString('zh-CN');
+    if (record.kind === 'pet') {
+      var avatar = document.createElement('img');
+      avatar.className = 'chat-avatar';
+      avatar.src = state.outfitPacks[state.figure].image;
+      avatar.alt = state.petName;
+      item.append(avatar);
+    }
+    var bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = record.text;
+    item.append(bubble);
+    return item;
+  }
+
+  function renderConversation() {
+    var history = document.getElementById('conversation-history');
+    var stream = document.getElementById('conversation-stream');
+    var follow = stream.scrollHeight - stream.scrollTop - stream.clientHeight < 48;
+    state.conversationRecords.forEach(function (record, index) {
+      if (!stream.querySelector('[data-interaction-id="' + record.id + '"]'))
+        stream.insertBefore(chatEntry(record), stream.children[index] || null);
+    });
+    var thinking = document.getElementById('conversation-thinking');
+    if (state.conversationPending && !thinking) {
+      thinking = chatEntry({
+        id: 'thinking',
+        kind: 'pet',
+        text: '',
+        via: 'console',
+        at: Date.now(),
+      });
+      thinking.id = 'conversation-thinking';
+      thinking.removeAttribute('data-interaction-id');
+      thinking.classList.add('chat-entry--thinking');
+      thinking.setAttribute('aria-label', state.petName + ' 正在回复');
+      for (var i = 0; i < 3; i++) {
+        var dot = document.createElement('i');
+        dot.className = 'chat-dot';
+        thinking.querySelector('.chat-bubble').append(dot);
+      }
+      stream.append(thinking);
+    } else if (!state.conversationPending && thinking) thinking.remove();
+    if (thinking && state.conversationPending) stream.append(thinking);
+    history.dataset.historyCount = String(state.conversationRecords.length);
+    var status = document.getElementById('conversation-chat-status');
+    status.textContent = state.conversationPending
+      ? state.petName + ' 正在回复…'
+      : state.modelReplyEnabled && state.modelReplyInstalled
+        ? '等你说话'
+        : '回复已暂停';
+    status.dataset.tone = state.conversationPending ? 'busy' : 'idle';
+    var input = document.getElementById('conversation-input');
+    input.placeholder = '给' + state.petName + '发消息…';
+    var send = document.querySelector('[data-preview-action="conversation-send"]');
+    send.disabled = state.conversationPending || !state.conversationDraft.trim();
+    document.getElementById('conversation-send-state').textContent = state.conversationPending
+      ? '正在回复'
+      : state.conversationDraft.trim()
+        ? '待发送'
+        : '未发送';
+    document.getElementById('conversation-compose').dataset.sendState = state.conversationPending
+      ? 'sending'
+      : 'draft';
+    document.querySelector('[data-preview-action="conversation-load-earlier"]').disabled =
+      state.conversationEarlier;
+    if (state.page === 'conversation') {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+      if (follow) stream.scrollTop = stream.scrollHeight;
+    }
+  }
+
+  function appendConversation(kind, text, via) {
+    state.conversationSerial += 1;
+    state.conversationRecords.push({
+      id: 'int-' + state.conversationSerial,
+      kind: kind,
+      text: text,
+      via: via || 'console',
+      at: Date.now(),
+    });
+    renderConversation();
+  }
+
+  function stopConversation() {
+    if (!state.conversationPending) return;
+    window.clearTimeout(conversationTimer);
+    conversationTimer = null;
+    state.conversationPending = false;
+    appendConversation('interaction', '你停止了这次回复');
+  }
+
+  function sendConversation() {
+    var text = state.conversationDraft.trim();
+    if (!text || state.conversationPending) return;
+    state.conversationDraft = '';
+    syncControls();
+    appendConversation('user', text);
+    if (!state.modelReplyEnabled || !state.modelReplyInstalled) return;
+    state.conversationPending = true;
+    renderConversation();
+    // 只演示这一页的排版与状态，不调用模型，不进入真实桌宠记录。
+    conversationTimer = window.setTimeout(function () {
+      conversationTimer = null;
+      state.conversationPending = false;
+      appendConversation('pet', '我在呢，慢慢说，我听着。');
+    }, 700);
+  }
+
+  function renderPlugins() {
+    var count = 0;
+    var active =
+      1 +
+      Number(state.voicePluginEnabled) +
+      Number(state.builtinSpeechEnabled) +
+      Number(state.modelReplyEnabled && state.modelReplyInstalled);
+    document.querySelectorAll('#page-plugins article[data-plugin-id]').forEach(function (card) {
+      var id = card.dataset.pluginId;
+      var installed = id !== 'model-reply' || state.modelReplyInstalled;
+      var enabled =
+        id === 'voice-input'
+          ? state.voicePluginEnabled
+          : id === 'builtin-speech'
+            ? state.builtinSpeechEnabled
+            : id === 'model-reply'
+              ? state.modelReplyEnabled
+              : true;
+      var builtin = id !== 'model-reply';
+      card.dataset.pluginState = enabled
+        ? id === 'builtin-bridge'
+          ? 'protected'
+          : 'active'
+        : 'disabled';
+      var query = state.pluginSearch.trim().toLocaleLowerCase('zh-CN');
+      var searchable =
+        id +
+        ' ' +
+        card.querySelector('.card__title').textContent +
+        ' ' +
+        card.querySelector('.plugin-card__desc').textContent;
+      var match = !query || searchable.toLocaleLowerCase('zh-CN').includes(query);
+      var filter = state.pluginFilter;
+      card.hidden =
+        !installed ||
+        !match ||
+        (filter === 'active' && !enabled) ||
+        (filter === 'disabled' && enabled) ||
+        (filter === 'builtin' && !builtin);
+      if (!card.hidden) count++;
+      if (id === 'model-reply') {
+        var label = card.querySelector('[data-show="plugin-state-model-reply"]');
+        if (label) label.textContent = enabled ? '已启用' : '已停用';
+        var toggle = card.querySelector(
+          '[data-preview-action="plugin-disable"], [data-preview-action="plugin-enable"]',
+        );
+        toggle.dataset.previewAction = enabled ? 'plugin-disable' : 'plugin-enable';
+        toggle.textContent = enabled ? '停用' : '启用';
+        toggle.dataset.confirm = enabled ? 'disable-plugin' : 'enable-plugin';
+      }
+    });
+    setText('plugins-active-count', String(active));
+    setText(
+      'plugins-disabled-count',
+      String(
+        Number(!state.voicePluginEnabled) +
+          Number(!state.builtinSpeechEnabled) +
+          Number(state.modelReplyInstalled && !state.modelReplyEnabled),
+      ),
+    );
+    setText('plugins-protected-count', '1');
+    document.getElementById('plugins-empty').hidden = count > 0;
+    document.querySelectorAll('[data-plugin-filter]').forEach(function (button) {
+      button.setAttribute(
+        'aria-pressed',
+        String(button.dataset.pluginFilter === state.pluginFilter),
+      );
+    });
+  }
+
+  function previewAction(action, pluginId, interaction) {
+    if (action === 'conversation-send') sendConversation();
+    else if (action === 'conversation-interact') {
+      var messages = {
+        touch: '你轻触了' + state.petName + '一下',
+        stroke: '你摸了摸' + state.petName,
+        'pick-up': '你把' + state.petName + '抱了起来',
+        'put-down': '你把' + state.petName + '放了下来',
+      };
+      appendConversation('interaction', messages[interaction], 'bubble');
+    } else if (action === 'conversation-refresh') renderConversation();
+    else if (action === 'conversation-load-earlier' && !state.conversationEarlier) {
+      var stream = document.getElementById('conversation-stream');
+      var top = stream.scrollTop,
+        height = stream.scrollHeight;
+      state.conversationEarlier = true;
+      state.conversationRecords.unshift(
+        {
+          id: 'earlier-1',
+          kind: 'user',
+          text: '早上好。',
+          via: 'bubble',
+          at: Date.now() - 3600000,
+        },
+        {
+          id: 'earlier-2',
+          kind: 'pet',
+          text: '早上好，今天也一起慢慢来。',
+          via: 'bubble',
+          at: Date.now() - 3500000,
+        },
+      );
+      renderConversation();
+      stream.scrollTop = top + stream.scrollHeight - height;
+    } else if (action === 'plugin-enable' || action === 'plugin-disable') {
+      if (pluginId === 'model-reply') {
+        state.modelReplyEnabled = action === 'plugin-enable';
+        if (!state.modelReplyEnabled) stopConversation();
+      }
+      syncControls();
+      render();
+    } else if (action === 'plugin-uninstall' && pluginId === 'model-reply') {
+      state.modelReplyInstalled = false;
+      stopConversation();
+      render();
+      document.getElementById('plugin-search').focus();
+    } else if (action === 'plugins-stop-all') {
+      stopConversation();
+      setText('plugins-task-count', '0');
+      document.getElementById('plugins-runtime').dataset.taskCount = '0';
+    } else if (action === 'plugin-config-save')
+      document.getElementById('plugin-config-status').textContent = '本地预览';
+    else if (action === 'conversation-record-start') {
+      state.page = 'voice';
+      render();
+    }
   }
 
   function setText(key, value) {
@@ -531,6 +867,10 @@
   }
 
   function showPage(id) {
+    if (id === 'voice' && !state.voicePluginEnabled) {
+      state.page = 'plugins';
+      id = state.page;
+    }
     pages.forEach(function (page) {
       var name = page.dataset.page;
       page.hidden = name !== id;
@@ -585,6 +925,13 @@
           ? Number(el.value)
           : el.value,
     );
+    if (pref === 'bubbleScene') resetBubblePreview();
+    if (pref === 'bubblePosition') renderBubblePreview();
+    if (
+      (pref === 'soundEnabled' && !state.soundEnabled) ||
+      (pref === 'soundTalk' && !state.soundTalk)
+    )
+      stopSpeakingPreview();
     if (pref === 'voiceEnabled' && !state.voiceEnabled) {
       state.voiceServiceRunning = false;
       stopVoicePreview('未录音');
@@ -653,17 +1000,62 @@
     }
     if (target.dataset.confirm) {
       document.getElementById('preview-confirm-title').textContent = target.textContent.trim();
+      pendingConfirmation = {
+        action: target.dataset.previewAction,
+        pluginId: target.dataset.pluginId,
+      };
       var card = target.closest('.card');
       document.getElementById('preview-confirm-item').textContent =
-        target.dataset.confirmItem || card.querySelector('.card__title').textContent;
-      document.getElementById('preview-confirm-dialog').showModal();
+        target.dataset.confirmItem ||
+        (card && card.querySelector('.card__title')
+          ? card.querySelector('.card__title').textContent
+          : target.textContent.trim());
+      var confirm = document.getElementById('preview-confirm-dialog');
+      confirm.returnValue = '';
+      confirm.showModal();
     } else if (target.dataset.openDialog)
       document.getElementById(target.dataset.openDialog).showModal();
-    else if (target.hasAttribute('data-close-dialog')) target.closest('dialog').close();
-    else {
+    else if (target.hasAttribute('data-close-dialog')) {
+      previewAction(target.dataset.previewAction, target.dataset.pluginId);
+      target.closest('dialog').close();
+    } else {
       var badge = document.getElementById('preview-badge');
       badge.textContent = '预览模式';
       badge.setAttribute('role', 'status');
+      previewAction(
+        target.dataset.previewAction,
+        target.dataset.pluginId,
+        target.dataset.interaction,
+      );
+    }
+  });
+
+  document.getElementById('preview-confirm-dialog').addEventListener('close', function () {
+    var pending = pendingConfirmation;
+    pendingConfirmation = null;
+    if (this.returnValue === 'confirm' && pending) previewAction(pending.action, pending.pluginId);
+  });
+  document.getElementById('plugin-search').addEventListener('input', function () {
+    state.pluginSearch = this.value;
+    renderPlugins();
+  });
+  document.querySelectorAll('[data-plugin-filter]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      state.pluginFilter = button.dataset.pluginFilter;
+      renderPlugins();
+    });
+  });
+  document
+    .querySelector('[data-chat-action="toggle-console"]')
+    .addEventListener('click', function () {
+      var panel = document.getElementById('conversation-console');
+      panel.hidden = !panel.hidden;
+      this.setAttribute('aria-expanded', String(!panel.hidden));
+    });
+  document.getElementById('conversation-input').addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+      event.preventDefault();
+      sendConversation();
     }
   });
 
@@ -905,8 +1297,14 @@
         else startVoicePreview();
       } else if (action === 'cancel-recording') stopVoicePreview('已取消预览');
       else if (action === 'toggle-plugin') {
-        state.voiceEnabled = !state.voiceEnabled;
-        if (!state.voiceEnabled) {
+        state.voicePluginEnabled = !state.voicePluginEnabled;
+        if (!state.voicePluginEnabled) {
+          Object.keys(voiceDownloadTimers).forEach(function (id) {
+            window.clearInterval(voiceDownloadTimers[id]);
+            delete voiceDownloadTimers[id];
+            state.voiceDownloads[id].phase = 'absent';
+            state.voiceDownloads[id].progress = 0;
+          });
           state.voiceServiceRunning = false;
           stopVoicePreview('未录音');
         }
@@ -958,7 +1356,7 @@
       event.target.closest('input,textarea,select,[contenteditable=true],dialog')
     )
       return;
-    if (!state.voiceEnabled || !state.voiceServiceRunning) return;
+    if (!state.voicePluginEnabled || !state.voiceEnabled || !state.voiceServiceRunning) return;
     event.preventDefault();
     if (state.voiceRecording) {
       stopVoicePreview('已结束预览');
@@ -982,6 +1380,265 @@
     Object.values(voiceDownloadTimers).forEach(function (timer) {
       window.clearInterval(timer);
     });
+  });
+
+  document.querySelectorAll('[data-speech-action]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      if (button.dataset.speechAction === 'toggle') {
+        state.builtinSpeechEnabled = !state.builtinSpeechEnabled;
+        if (!state.builtinSpeechEnabled) stopSpeakingPreview();
+        render();
+      } else {
+        state.personaPane = 'habits';
+        state.page = 'persona';
+        render();
+        document.getElementById('persona-sound-card').scrollIntoView({ block: 'start' });
+      }
+    });
+  });
+
+  var BUBBLE_SCENES = {
+    reply: '今天也在这里陪着你。\n不着急，先做眼前的一件小事。',
+    thinking: '',
+    typewriter: '窗外慢慢暗下来了。先把今天做到的事情记下来，剩下的明天再继续。',
+    choices: '接下来想怎么待一会儿？',
+    input: '想聊什么？',
+    error: '这次没有完成。可以检查设置，或者稍后再试。',
+    long: '有时候，陪伴不需要很多话。\n\n你忙的时候，我可以安静地待在旁边；你想说话的时候，再慢慢讲给我听。\n\n先照顾好眼前的一点点事情，不必一次完成全部。\n\n这是一段用于检查气泡换行和滚动的长文本。https://example.test/a-very-long-path-without-spaces/keep-the-bubble-inside-the-window\n\n把节奏放慢一点，也没关系。',
+  };
+  var bubbleTimer = null;
+  state.bubbleScene = 'reply';
+  state.bubblePosition = 'center';
+  state.bubbleNight = false;
+  state.bubbleDismissed = false;
+  state.bubbleReply = '';
+  state.bubbleInput = '';
+  state.bubbleUser = '';
+  state.bubbleRevealed = 0;
+  function positionBubblePreview() {
+    if (!document.getElementById('pet-bubble-dialog').open) return;
+    var scene = document.getElementById('bubble-preview-scene'),
+      pet = document.getElementById('bubble-pet-anchor'),
+      bubble = document.getElementById('pet-bubble'),
+      user = document.getElementById('bubble-user-message');
+    var x =
+      state.bubblePosition === 'left'
+        ? 76
+        : state.bubblePosition === 'right'
+          ? scene.clientWidth - 76
+          : scene.clientWidth / 2;
+    pet.style.left = x + 'px';
+    var bottom = scene.clientHeight - pet.offsetTop + 18;
+    bubble.style.maxWidth = Math.min(318, scene.clientWidth - 24) + 'px';
+    bubble.style.maxHeight =
+      Math.max(120, scene.clientHeight - bottom - (user.hidden ? 16 : 86)) + 'px';
+    bubble.style.bottom = bottom + 'px';
+    var left = Math.max(
+      12,
+      Math.min(scene.clientWidth - bubble.offsetWidth - 12, x - bubble.offsetWidth / 2),
+    );
+    bubble.style.left = left + 'px';
+    bubble.style.setProperty(
+      '--bubble-tail-x',
+      Math.max(22, Math.min(bubble.offsetWidth - 22, x - left)) + 'px',
+    );
+    user.style.left =
+      Math.max(12, Math.min(scene.clientWidth - user.offsetWidth - 12, x - user.offsetWidth / 2)) +
+      'px';
+    user.style.bottom = bottom + (bubble.hidden ? 0 : bubble.offsetHeight + 8) + 'px';
+  }
+  function renderBubblePreview() {
+    if (!document.getElementById('pet-bubble-dialog').open) return;
+    var scene = state.bubbleScene,
+      main = document.getElementById('pet-bubble');
+    document.getElementById('bubble-preview-scene').classList.toggle('is-dark', state.bubbleNight);
+    document.getElementById('bubble-scene-theme').textContent = state.bubbleNight
+      ? '浅色场景'
+      : '深色场景';
+    main.hidden = state.bubbleDismissed;
+    main.classList.toggle('is-status', scene === 'thinking');
+    main.dataset.scene = scene;
+    var text = state.bubbleReply || BUBBLE_SCENES[scene],
+      content = document.getElementById('bubble-content');
+    content.textContent = scene === 'typewriter' ? text.slice(0, state.bubbleRevealed) : text;
+    content.hidden = scene === 'thinking';
+    var status = document.getElementById('bubble-status');
+    status.hidden = scene !== 'thinking';
+    status.textContent = '';
+    if (scene === 'thinking') {
+      status.setAttribute('aria-label', '正在思考');
+      var dots = document.createElement('span');
+      dots.className = 'bubble-thinking-dots';
+      dots.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < 3; i++) dots.append(document.createElement('i'));
+      status.append(dots);
+    }
+    document.getElementById('bubble-dismiss').hidden =
+      !['choices', 'input', 'error'].includes(scene) || !!state.bubbleReply;
+    document.getElementById('bubble-composer').hidden = scene !== 'input' || !!state.bubbleReply;
+    var choices = document.getElementById('bubble-choices');
+    choices.replaceChildren();
+    if (!state.bubbleReply && (scene === 'choices' || scene === 'error'))
+      (scene === 'choices' ? ['继续聊天', '安静陪着我'] : ['打开设置', '知道了']).forEach(
+        function (label, index) {
+          var button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'bubble-choice';
+          button.dataset.bubbleChoice = String(index);
+          button.textContent = (scene === 'choices' ? index + 1 + '  ' : '') + label;
+          button.addEventListener('click', function () {
+            answerBubblePreview(index);
+          });
+          choices.append(button);
+        },
+      );
+    choices.hidden = !choices.children.length;
+    document.getElementById('bubble-stop').hidden =
+      scene !== 'typewriter' || state.bubbleRevealed >= text.length;
+    var user = document.getElementById('bubble-user-message');
+    user.textContent = state.bubbleUser;
+    user.hidden = !state.bubbleUser;
+    var pack = state.outfitPacks[state.figure],
+      palette = pack.palettes.find(function (item) {
+        return item.id === state.palette;
+      }),
+      art = document.querySelector('[data-bubble-pet]');
+    art.src = (palette && palette.image) || pack.image;
+    art.dataset.palette = (palette && palette.tone) || 'morning';
+    document.getElementById('bubble-send').disabled = !state.bubbleInput.trim();
+    positionBubblePreview();
+  }
+  function resetBubblePreview() {
+    window.clearInterval(bubbleTimer);
+    bubbleTimer = null;
+    state.bubbleReply = '';
+    state.bubbleUser = '';
+    state.bubbleDismissed = false;
+    var text = BUBBLE_SCENES[state.bubbleScene];
+    state.bubbleRevealed = text.length;
+    if (
+      state.bubbleScene === 'typewriter' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      state.bubbleRevealed = 0;
+      bubbleTimer = window.setInterval(function () {
+        state.bubbleRevealed += 1;
+        if (state.bubbleRevealed >= text.length) {
+          window.clearInterval(bubbleTimer);
+          bubbleTimer = null;
+        }
+        renderBubblePreview();
+      }, 45);
+    }
+    renderBubblePreview();
+    if (state.bubbleScene === 'input') document.getElementById('bubble-input').focus();
+  }
+  function answerBubblePreview(index) {
+    if (state.bubbleScene === 'error') {
+      if (index === 0) {
+        document.getElementById('pet-bubble-dialog').close();
+        state.page = 'plugins';
+        render();
+      } else {
+        state.bubbleDismissed = true;
+        renderBubblePreview();
+      }
+      return;
+    }
+    state.bubbleReply = index === 0 ? '好呀，你慢慢说，我在听。' : '那我安静地陪着你。';
+    renderBubblePreview();
+    document.getElementById('bubble-replay').focus();
+  }
+  function sendBubblePreview() {
+    var text = state.bubbleInput.trim();
+    if (!text) return;
+    state.bubbleUser = text;
+    state.bubbleReply = '收到了，我在这里。';
+    state.bubbleInput = '';
+    document.getElementById('bubble-input').value = '';
+    renderBubblePreview();
+    document.getElementById('bubble-replay').focus();
+  }
+  function openBubblePreview() {
+    document.getElementById('pet-bubble-dialog').showModal();
+    resetBubblePreview();
+    window.requestAnimationFrame(positionBubblePreview);
+  }
+  document.getElementById('open-bubble-preview').addEventListener('click', openBubblePreview);
+  document.getElementById('bubble-dialog-close').addEventListener('click', function () {
+    document.getElementById('pet-bubble-dialog').close();
+  });
+  document.getElementById('pet-bubble-dialog').addEventListener('close', function () {
+    window.clearInterval(bubbleTimer);
+    bubbleTimer = null;
+    stopSpeakingPreview();
+    if (state.page === 'start') document.getElementById('open-bubble-preview').focus();
+    else document.querySelector('[data-nav=' + state.page + ']').focus();
+  });
+  document.getElementById('bubble-replay').addEventListener('click', resetBubblePreview);
+  document.getElementById('bubble-dismiss').addEventListener('click', function () {
+    state.bubbleDismissed = true;
+    renderBubblePreview();
+    document.getElementById('bubble-replay').focus();
+  });
+  document.getElementById('bubble-scene-theme').addEventListener('click', function () {
+    state.bubbleNight = !state.bubbleNight;
+    renderBubblePreview();
+  });
+  document.getElementById('bubble-stop').addEventListener('click', function () {
+    window.clearInterval(bubbleTimer);
+    bubbleTimer = null;
+    state.bubbleRevealed = BUBBLE_SCENES[state.bubbleScene].length;
+    renderBubblePreview();
+  });
+  document.getElementById('bubble-speak').addEventListener('click', function () {
+    if (state.audioPlaying) stopSpeakingPreview();
+    else void previewSpeakingSound();
+  });
+  document.getElementById('bubble-send').addEventListener('click', sendBubblePreview);
+  document.getElementById('bubble-input').addEventListener('input', function () {
+    state.bubbleInput = this.value;
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+    document.getElementById('bubble-send').disabled = !state.bubbleInput.trim();
+    positionBubblePreview();
+  });
+  document.getElementById('bubble-input').addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+      event.preventDefault();
+      sendBubblePreview();
+    }
+  });
+  document.addEventListener('keydown', function (event) {
+    if (!document.getElementById('pet-bubble-dialog').open || event.isComposing) return;
+    if (
+      event.key === 'Escape' &&
+      !state.bubbleDismissed &&
+      ['choices', 'input'].includes(state.bubbleScene)
+    ) {
+      event.preventDefault();
+      state.bubbleDismissed = true;
+      renderBubblePreview();
+      document.getElementById('bubble-replay').focus();
+      return;
+    }
+    if (
+      state.bubbleScene === 'choices' &&
+      !state.bubbleReply &&
+      !state.bubbleDismissed &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !event.metaKey &&
+      !event.target.closest('input,textarea,select') &&
+      ['1', '2'].includes(event.key)
+    ) {
+      event.preventDefault();
+      answerBubblePreview(Number(event.key) - 1);
+    }
+  });
+  window.addEventListener('resize', positionBubblePreview);
+  window.addEventListener('pagehide', function () {
+    window.clearInterval(bubbleTimer);
   });
 
   renderOutfitRows();

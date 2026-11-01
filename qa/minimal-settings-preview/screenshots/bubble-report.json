@@ -1,0 +1,11 @@
+{
+  "scope": "bubble and speech-provider local preview; no backend",
+  "checks": [
+    "six reusable bubble scenes and left/center/right anchors stay inside1200/880/620 previews; long text scrolls",
+    "text reveal completion, mouse/digit choices, composer newline/IME/send, scene theme and focus return",
+    "speech provider disable retains selection/text, blocks audition, cancels owned audio; error action stays in preview; no device/network/storage"
+  ],
+  "errors": [],
+  "requests": [],
+  "status": "passed"
+}

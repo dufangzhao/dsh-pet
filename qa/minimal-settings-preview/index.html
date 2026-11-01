@@ -140,25 +140,7 @@
                   <span class="nav__label">插件</span>
                 </button>
               </li>
-              <li>
-                <button type="button" class="nav" data-nav="permissions">
-                  <svg
-                    class="nav__icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"
-                    />
-                  </svg>
-                  <span class="nav__label">权限与数据</span>
-                </button>
-              </li>
+
               <li>
                 <button type="button" class="nav" data-nav="about">
                   <svg
@@ -399,6 +381,9 @@
               <div class="card__head"><h3 class="card__title">桌宠</h3></div>
               <div class="card__body">
                 <div class="stage stage--wide" data-stage id="pet-stage">
+                  <button type="button" class="btn bubble-preview-entry" id="open-bubble-preview">
+                    气泡预览
+                  </button>
                   <button
                     type="button"
                     class="stage-theme"
@@ -1072,113 +1057,224 @@
               <h2 class="page__title">插件</h2>
             </div>
 
+            <!-- 运行统计收成一条工具条，具体插件在下面的卡片里。 -->
             <article
-              class="card"
+              class="plugin-toolbar"
               id="plugins-runtime"
               data-runtime-state="ready"
               data-task-count="2"
               data-task-ids="task-7f3a task-91c2"
             >
-              <div class="card__head">
-                <h3 class="card__title">运行状态</h3>
-                <span class="row__value" id="plugins-runtime-state" role="status">已就绪</span>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">已启用</span></span>
-                    <span class="row__value" data-show="plugins-active-count">2</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">已停用</span></span>
-                    <span class="row__value" data-show="plugins-disabled-count">1</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">受保护</span></span>
-                    <span class="row__value" data-show="plugins-protected-count">2</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">进行中的任务</span></span>
-                    <span class="row__value"><span data-show="plugins-task-count">0</span></span>
-                  </div>
-                </div>
-                <div class="card__foot">
-                  <button type="button" class="btn" data-preview-action="plugins-refresh">
-                    刷新
-                  </button>
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="plugins-stop-all"
-                    data-confirm="stop-all"
-                    data-task-ids="task-7f3a task-91c2"
-                  >
-                    停止全部
-                  </button>
-                </div>
-              </div>
+              <span class="plugin-toolbar__state" id="plugins-runtime-state" role="status"
+                >已就绪</span
+              >
+              <span class="plugin-toolbar__stats">
+                <span><b data-show="plugins-active-count">2</b> 启用</span>
+                <span><b data-show="plugins-disabled-count">1</b> 停用</span>
+                <span><b data-show="plugins-protected-count">2</b> 受保护</span>
+                <span><b data-show="plugins-task-count">0</b> 进行中</span>
+              </span>
+              <span class="plugin-toolbar__actions">
+                <button type="button" class="btn" data-preview-action="plugins-refresh">
+                  刷新
+                </button>
+                <button
+                  type="button"
+                  class="btn"
+                  data-preview-action="plugins-stop-all"
+                  data-confirm="stop-all"
+                  data-confirm-item="停止全部任务"
+                  data-task-ids="task-7f3a task-91c2"
+                >
+                  停止全部
+                </button>
+              </span>
             </article>
 
-            <article
-              class="card"
-              data-plugin-id="voice-input"
-              data-owner-id="plugin:voice-input"
-              data-plugin-state="protected"
-            >
-              <div class="card__head">
-                <h3 class="card__title">语音输入</h3>
-                <span class="row__value" id="voice-plugin-state">已启用</span>
+            <div class="plugin-tools">
+              <div class="plugin-search">
+                <svg
+                  class="plugin-search__icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 10a7 7 0 1 0 14 0a7 7 0 0 0 -14 0" />
+                  <path d="M21 21l-6 -6" />
+                </svg>
+                <input
+                  class="plugin-search__input"
+                  id="plugin-search"
+                  type="search"
+                  aria-label="搜索插件"
+                  placeholder="搜索插件"
+                  autocomplete="off"
+                />
               </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__label">来源</span><span class="row__value">系统内置</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__label">权限</span
-                    ><span class="row__value">麦克风、本机识别</span>
+              <div class="plugin-filters" role="group" aria-label="筛选插件">
+                <button
+                  type="button"
+                  class="btn plugin-filter"
+                  data-plugin-filter="all"
+                  aria-pressed="true"
+                >
+                  全部
+                </button>
+                <button
+                  type="button"
+                  class="btn plugin-filter"
+                  data-plugin-filter="active"
+                  aria-pressed="false"
+                >
+                  已启用
+                </button>
+                <button
+                  type="button"
+                  class="btn plugin-filter"
+                  data-plugin-filter="disabled"
+                  aria-pressed="false"
+                >
+                  已停用
+                </button>
+                <button
+                  type="button"
+                  class="btn plugin-filter"
+                  data-plugin-filter="builtin"
+                  aria-pressed="false"
+                >
+                  内置
+                </button>
+              </div>
+            </div>
+
+            <div class="plugins-grid">
+              <article
+                class="card plugin-card"
+                data-plugin-id="voice-input"
+                data-owner-id="plugin:voice-input"
+                data-plugin-state="active"
+                data-plugin-builtin="true"
+              >
+                <div class="plugin-card__top">
+                  <span class="plugin-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M9 2a3 3 0 0 0 -3 3v7a3 3 0 0 0 6 0v-7a3 3 0 0 0 -3 -3" />
+                      <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+                      <path d="M12 19v3" />
+                    </svg>
+                  </span>
+                  <div class="plugin-card__id">
+                    <h3 class="card__title">语音输入</h3>
+                    <p class="plugin-card__desc">按住说话，松开就变成文字。</p>
                   </div>
                 </div>
+                <p class="plugin-card__meta">
+                  <span class="plugin-tag">内置</span>
+                  <span class="plugin-state" id="voice-plugin-state">已启用</span>
+                </p>
                 <div class="card__foot">
-                  <button type="button" class="btn" data-goto="voice">设置</button
-                  ><button
+                  <button type="button" class="btn" data-goto="voice">设置</button>
+                  <button
                     type="button"
                     class="btn"
                     id="voice-plugin-toggle"
                     data-voice-action="toggle-plugin"
+                    aria-pressed="true"
                   >
-                    关闭语音输入
+                    停用
                   </button>
                 </div>
-              </div>
-            </article>
+              </article>
 
-            <article
-              class="card"
-              data-plugin-id="model-reply"
-              data-owner-id="plugin:model-reply"
-              data-plugin-state="active"
-            >
-              <div class="card__head">
-                <h3 class="card__title">模型回复</h3>
-                <span class="row__value" data-show="plugin-state-model-reply">已启用</span>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">权限</span></span>
-                    <span class="row__value">网络、当前模型服务</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">配置</span></span>
-                    <span class="row__value"
-                      ><button type="button" class="btn" data-open-dialog="plugin-config-dialog">
-                        配置
-                      </button></span
+              <article
+                class="card plugin-card"
+                data-plugin-id="builtin-speech"
+                data-owner-id="plugin:builtin-speech"
+                data-plugin-state="active"
+                data-plugin-builtin="true"
+              >
+                <div class="plugin-card__top">
+                  <span class="plugin-icon" aria-hidden="true"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
                     >
+                      <path d="M11 5l-6 4H2v6h3l6 4z" />
+                      <path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" /></svg
+                  ></span>
+                  <div class="plugin-card__id">
+                    <h3 class="card__title">内置说话</h3>
+                    <p class="plugin-card__desc">桌宠默认的短音节说话声。</p>
                   </div>
                 </div>
+                <p class="plugin-card__meta">
+                  <span class="plugin-tag">内置</span
+                  ><span class="plugin-state" id="speech-plugin-state">已启用</span>
+                </p>
                 <div class="card__foot">
+                  <button type="button" class="btn" data-speech-action="settings">设置</button
+                  ><button
+                    type="button"
+                    class="btn"
+                    id="speech-plugin-toggle"
+                    data-speech-action="toggle"
+                    aria-pressed="true"
+                  >
+                    停用
+                  </button>
+                </div>
+              </article>
+
+              <article
+                class="card plugin-card"
+                data-plugin-id="model-reply"
+                data-owner-id="plugin:model-reply"
+                data-plugin-state="active"
+              >
+                <div class="plugin-card__top">
+                  <span class="plugin-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M8 9h8" />
+                      <path d="M8 13h6" />
+                      <path
+                        d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z"
+                      />
+                    </svg>
+                  </span>
+                  <div class="plugin-card__id">
+                    <h3 class="card__title">模型回复</h3>
+                    <p class="plugin-card__desc">把桌宠想说的写成一句自然的话。</p>
+                  </div>
+                </div>
+                <p class="plugin-card__meta">
+                  <span class="plugin-state" data-show="plugin-state-model-reply">已启用</span>
+                </p>
+                <div class="card__foot">
+                  <button type="button" class="btn" data-open-dialog="plugin-config-dialog">
+                    配置
+                  </button>
                   <button
                     type="button"
                     class="btn"
@@ -1200,38 +1296,45 @@
                     卸载
                   </button>
                 </div>
-              </div>
-            </article>
+              </article>
 
-            <article
-              class="card"
-              data-plugin-id="builtin-bridge"
-              data-owner-id="plugin:builtin-bridge"
-              data-plugin-state="protected"
-            >
-              <div class="card__head">
-                <h3 class="card__title">应用核心</h3>
-                <span class="row__value" data-show="plugin-state-builtin-bridge">受保护</span>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">权限</span></span>
-                    <span class="row__value">桌宠交互、日常记录</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">配置</span></span>
-                    <span class="row__value">不可调整</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">原因</span></span>
-                    <span class="row__value" data-show="plugin-reason-builtin-bridge"
-                      >内置组件，随应用提供</span
+              <article
+                class="card plugin-card"
+                data-plugin-id="builtin-bridge"
+                data-owner-id="plugin:builtin-bridge"
+                data-plugin-state="protected"
+                data-plugin-builtin="true"
+              >
+                <div class="plugin-card__top">
+                  <span class="plugin-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
                     >
+                      <path d="M12 3l8 4.5v9l-8 4.5l-8 -4.5v-9l8 -4.5" />
+                      <path d="M12 12l8 -4.5" />
+                      <path d="M12 12v9" />
+                      <path d="M12 12l-8 -4.5" />
+                    </svg>
+                  </span>
+                  <div class="plugin-card__id">
+                    <h3 class="card__title">应用核心</h3>
+                    <p class="plugin-card__desc">桌宠的交互和日常记录都从这里走。</p>
                   </div>
                 </div>
-              </div>
-            </article>
+                <p class="plugin-card__meta">
+                  <span class="plugin-tag">内置</span>
+                  <span class="plugin-state" data-show="plugin-state-builtin-bridge">受保护</span>
+                </p>
+                <p class="plugin-card__note" data-show="plugin-reason-builtin-bridge">随应用提供</p>
+              </article>
+            </div>
+
+            <p class="plugin-empty" id="plugins-empty" hidden>没有找到插件，换个关键词试试。</p>
 
             <dialog
               id="plugin-config-dialog"
@@ -1298,206 +1401,6 @@
                 </div>
               </form>
             </dialog>
-          </section>
-
-          <section class="page" data-page="permissions" id="page-permissions" hidden>
-            <div class="page__head">
-              <h2 class="page__title">权限与数据</h2>
-            </div>
-
-            <article
-              class="card"
-              id="permissions-approvals"
-              data-approval-count="0"
-              data-approval-state="empty"
-            >
-              <div class="card__head">
-                <h3 class="card__title">待批准</h3>
-              </div>
-              <div class="card__body">
-                <div class="row__value" data-show="approval-empty">没有待批准的请求</div>
-              </div>
-            </article>
-
-            <article
-              class="card"
-              id="permissions-source"
-              data-source-id="ext-local"
-              data-source-trust="pending"
-            >
-              <div class="card__head">
-                <h3 class="card__title">来源信任</h3>
-                <span class="row__value" data-show="source-trust-state">待确认</span>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">来源</span></span>
-                    <span class="row__value">插件源 · 本地</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">版本</span></span>
-                    <span class="row__value">1.4.2</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">摘要</span></span>
-                    <span class="row__value">sha256:9f2c1b7e…a71d4c</span>
-                  </div>
-                </div>
-                <div class="field">
-                  <label class="field__label" for="source-preset-level">预设级别</label>
-                  <div class="inputForm">
-                    <select class="select" id="source-preset-level" data-pref="sourcePresetLevel">
-                      <button type="button" class="select__trigger">
-                        <selectedcontent class="select__selected"></selectedcontent
-                        ><span class="select__arrow" aria-hidden="true"></span>
-                      </button>
-                      <option value="ask" selected>询问</option>
-                      <option value="deny">拒绝</option>
-                      <option value="local">本地</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="source-trust"
-                    data-confirm="source-trust"
-                    data-confirm-item="插件源 · 1.4.2 · sha256:9f2c1b7e…a71d4c"
-                  >
-                    确认信任
-                  </button>
-                </div>
-              </div>
-            </article>
-
-            <article
-              class="card"
-              id="permissions-restore"
-              data-builtin-id="builtin-bridge"
-              data-builtin-state="removed"
-            >
-              <div class="card__head">
-                <h3 class="card__title">已移除的内置组件</h3>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">应用核心</span></span>
-                    <span class="row__value" data-show="builtin-state">已移除</span>
-                  </div>
-                </div>
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="builtin-restore"
-                    data-confirm="restore"
-                    data-builtin-id="builtin-bridge"
-                  >
-                    恢复
-                  </button>
-                </div>
-              </div>
-            </article>
-
-            <article
-              class="card"
-              id="permissions-audit"
-              data-audit-page="0"
-              data-audit-page-size="3"
-            >
-              <div class="card__head">
-                <h3 class="card__title">审计记录</h3>
-              </div>
-              <div class="card__body">
-                <table>
-                  <thead>
-                    <tr>
-                      <th scope="col">时间</th>
-                      <th scope="col">来源</th>
-                      <th scope="col">事件</th>
-                      <th scope="col">摘要</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr data-audit-id="evt-20261031-2114">
-                      <td><time datetime="2026-10-31T21:14">2026-10-31 21:14</time></td>
-                      <td>插件源</td>
-                      <td>来源询问</td>
-                      <td>sha256:9f2c1b7e…a71d4c</td>
-                    </tr>
-                    <tr data-audit-id="evt-20261031-2002">
-                      <td><time datetime="2026-10-31T20:02">2026-10-31 20:02</time></td>
-                      <td>应用核心</td>
-                      <td>内置恢复</td>
-                      <td>builtin-bridge</td>
-                    </tr>
-                    <tr data-audit-id="evt-20261030-1847">
-                      <td><time datetime="2026-10-30T18:47">2026-10-30 18:47</time></td>
-                      <td>语音输入</td>
-                      <td>权限请求</td>
-                      <td>task-7f3a</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="audit-earlier"
-                    data-audit-cursor="before:evt-20261030-1847"
-                  >
-                    更早
-                  </button>
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="audit-newer"
-                    data-audit-cursor="after:evt-20261031-2114"
-                  >
-                    较新
-                  </button>
-                  <button type="button" class="btn" data-preview-action="audit-refresh">
-                    刷新
-                  </button>
-                </div>
-              </div>
-            </article>
-
-            <article
-              class="card"
-              id="permissions-data"
-              data-data-clear="unsupported"
-              data-data-export="unsupported"
-            >
-              <div class="card__head">
-                <h3 class="card__title">本地数据</h3>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">清除本地数据</span></span>
-                    <span class="row__value">
-                      <span>暂不支持</span>
-                      <button type="button" class="btn" data-preview-action="data-clear" disabled>
-                        清除
-                      </button>
-                    </span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">导出数据</span></span>
-                    <span class="row__value">
-                      <span>暂不支持</span>
-                      <button type="button" class="btn" data-preview-action="data-export" disabled>
-                        导出
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </article>
           </section>
 
           <section class="page" data-page="persona" id="page-persona" hidden>
@@ -2066,6 +1969,15 @@
                     </div>
 
                     <div id="persona-speaking-options" class="sound-options">
+                      <p class="asset-status" id="speech-provider-state" role="status"></p>
+                      <button
+                        type="button"
+                        class="btn btn--quiet"
+                        id="manage-speech-plugins"
+                        data-goto="plugins"
+                      >
+                        插件管理
+                      </button>
                       <div class="field">
                         <label class="field__label" for="persona-voice">说话声</label>
                         <div class="model-inline">
@@ -2268,9 +2180,21 @@
             </div>
           </section>
 
-          <section class="page" data-page="conversation" id="page-conversation" hidden>
-            <div class="page__head">
-              <h2 class="page__title">对话</h2>
+          <section class="page page--chat" data-page="conversation" id="page-conversation" hidden>
+            <div class="chat-head">
+              <div class="chat-head__title">
+                <h2 class="page__title">对话</h2>
+                <span id="conversation-chat-status" role="status">在线</span>
+              </div>
+              <button
+                type="button"
+                class="btn chat-console-toggle"
+                data-chat-action="toggle-console"
+                aria-expanded="false"
+                aria-controls="conversation-console"
+              >
+                控制台
+              </button>
             </div>
 
             <article
@@ -2279,114 +2203,126 @@
               data-history-count="3"
               data-history-order="asc"
             >
-              <div class="card__head">
-                <h3 class="card__title">今天这一条</h3>
-              </div>
-              <div class="card__body">
-                <div class="card__foot">
-                  <button type="button" class="btn" data-preview-action="conversation-refresh">
-                    刷新
-                  </button>
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="conversation-load-earlier"
-                    data-history-cursor="before:int-1"
-                  >
-                    加载更早
-                  </button>
-                </div>
-                <div class="rows rows--tight">
-                  <div
-                    class="row"
-                    data-interaction-id="int-1"
-                    data-interaction-kind="user"
-                    data-via="console"
-                  >
-                    <span class="row__text"><span class="row__label">今天也一起待着吧</span></span>
-                    <span class="row__value">我说 · 设置台里 · 21:14</span>
-                  </div>
-                  <div
-                    class="row"
-                    data-interaction-id="int-2"
-                    data-interaction-kind="pet"
-                    data-via="console"
-                  >
-                    <span class="row__text"
-                      ><span class="row__label">好呀，我就在这儿。</span></span
+              <!-- 设置都收进这里：展开才出现，不挤占聊天。 -->
+              <div class="chat-console" id="conversation-console" hidden>
+                <div class="chat-console__group">
+                  <p class="chat-console__label">互动</p>
+                  <div class="chat-console__buttons">
+                    <button
+                      type="button"
+                      class="btn"
+                      data-preview-action="conversation-interact"
+                      data-interaction="touch"
                     >
-                    <span class="row__value">桌宠说 · 设置台里 · 21:15</span>
+                      轻触
+                    </button>
+                    <button
+                      type="button"
+                      class="btn"
+                      data-preview-action="conversation-interact"
+                      data-interaction="stroke"
+                    >
+                      抚摸
+                    </button>
+                    <button
+                      type="button"
+                      class="btn"
+                      data-preview-action="conversation-interact"
+                      data-interaction="pick-up"
+                    >
+                      提起
+                    </button>
+                    <button
+                      type="button"
+                      class="btn"
+                      data-preview-action="conversation-interact"
+                      data-interaction="put-down"
+                    >
+                      放下
+                    </button>
                   </div>
-                  <div
-                    class="row"
-                    data-interaction-id="int-3"
-                    data-interaction-kind="interaction"
-                    data-via="bubble"
-                  >
-                    <span class="row__text"><span class="row__label">碰了一下</span></span>
-                    <span class="row__value">动作 · 气泡里 · 21:16</span>
+                </div>
+                <div class="chat-console__group">
+                  <p class="chat-console__label">记录</p>
+                  <div class="chat-console__buttons">
+                    <button type="button" class="btn" data-preview-action="conversation-refresh">
+                      刷新
+                    </button>
+                    <button
+                      type="button"
+                      class="btn"
+                      data-preview-action="conversation-load-earlier"
+                      data-history-cursor="before:int-1"
+                    >
+                      加载更早
+                    </button>
+                  </div>
+                </div>
+                <div class="chat-console__group" id="conversation-record" data-record-state="idle">
+                  <p class="chat-console__label">语音</p>
+                  <div class="chat-console__buttons">
+                    <span class="chat-console__value" id="conversation-record-state" role="status"
+                      >未录音</span
+                    >
+                    <button
+                      type="button"
+                      class="btn"
+                      data-preview-action="conversation-record-start"
+                    >
+                      开始录音
+                    </button>
                   </div>
                 </div>
               </div>
+
+              <ul
+                class="chat-stream"
+                id="conversation-stream"
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions"
+                aria-label="对话记录"
+                tabindex="0"
+              ></ul>
             </article>
 
-            <article class="card" id="conversation-compose" data-send-state="draft">
-              <div class="card__head">
-                <h3 class="card__title">对它说</h3>
-                <span class="row__value" id="conversation-send-state" role="status">未发送</span>
+            <div class="chat-composer" id="conversation-compose" data-send-state="draft">
+              <div class="chat-composer__field">
+                <textarea
+                  class="chat-input"
+                  id="conversation-input"
+                  data-pref="conversationDraft"
+                  data-maxlength="2000"
+                  maxlength="2000"
+                  rows="1"
+                  aria-label="说点什么"
+                  placeholder="对它说点什么…"
+                  spellcheck="false"
+                ></textarea>
+                <p class="chat-send-state" id="conversation-send-state" role="status" hidden>
+                  未发送
+                </p>
               </div>
-              <div class="card__body">
-                <div class="field">
-                  <label class="field__label" for="conversation-input">说点什么</label>
-                  <div class="inputForm" data-multiline="true">
-                    <textarea
-                      class="input"
-                      id="conversation-input"
-                      data-pref="conversationDraft"
-                      data-maxlength="2000"
-                      maxlength="2000"
-                      rows="3"
-                      spellcheck="false"
-                    ></textarea>
-                  </div>
-                  <div class="row__value">
-                    <span
-                      data-show="conversation-count"
-                      data-count-for="conversationDraft"
-                      data-count-max="2000"
-                      >0 / 2000 字符</span
-                    >
-                  </div>
-                </div>
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn btn--primary"
-                    data-preview-action="conversation-send"
-                  >
-                    发送
-                  </button>
-                </div>
-              </div>
-            </article>
-
-            <article class="card" id="conversation-record" data-record-state="idle">
-              <div class="card__head">
-                <h3 class="card__title">语音</h3>
-                <span class="row__value" id="conversation-record-state" role="status">未录音</span>
-              </div>
-              <div class="card__body">
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn btn--primary"
-                    data-preview-action="conversation-record-start"
-                  >
-                    开始录音
-                  </button>
-                </div>
-              </div>
-            </article>
+              <button
+                type="button"
+                class="btn btn--primary chat-send"
+                data-preview-action="conversation-send"
+                aria-label="发送消息"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M4 12h13" />
+                  <path d="M12 6l6 6l-6 6" />
+                </svg>
+              </button>
+            </div>
           </section>
 
           <section class="page" data-page="about" id="page-about" hidden>
@@ -2501,6 +2437,76 @@
           </div>
         </div>
       </form>
+    </dialog>
+    <dialog id="pet-bubble-dialog" aria-labelledby="pet-bubble-dialog-title">
+      <header class="bubble-demo-header">
+        <h3 id="pet-bubble-dialog-title">桌宠气泡</h3>
+        <button type="button" class="btn" id="bubble-dialog-close">关闭</button>
+      </header>
+      <div class="bubble-demo-toolbar">
+        <label class="field"
+          ><span class="field__label">场景</span
+          ><span class="inputForm"
+            ><select class="select" id="bubble-scene-select" data-pref="bubbleScene">
+              <button type="button" class="select__trigger">
+                <selectedcontent class="select__selected"></selectedcontent
+                ><span class="select__arrow" aria-hidden="true"></span>
+              </button>
+              <option value="reply">回复</option>
+              <option value="thinking">思考</option>
+              <option value="typewriter">逐字显示</option>
+              <option value="choices">选项</option>
+              <option value="input">输入</option>
+              <option value="error">错误提示</option>
+              <option value="long">长文本</option>
+            </select></span
+          ></label
+        ><label class="field"
+          ><span class="field__label">位置</span
+          ><span class="inputForm"
+            ><select class="select" id="bubble-position-select" data-pref="bubblePosition">
+              <button type="button" class="select__trigger">
+                <selectedcontent class="select__selected"></selectedcontent
+                ><span class="select__arrow" aria-hidden="true"></span>
+              </button>
+              <option value="center">居中</option>
+              <option value="left">左侧</option>
+              <option value="right">右侧</option>
+            </select></span
+          ></label
+        >
+        <div class="bubble-demo-actions">
+          <button type="button" class="btn" id="bubble-scene-theme">深色场景</button
+          ><button type="button" class="btn" id="bubble-replay">重播</button
+          ><button type="button" class="btn" id="bubble-speak">试听说话声</button>
+        </div>
+      </div>
+      <div class="bubble-demo-scene" id="bubble-preview-scene">
+        <div class="bubble-user-line" id="bubble-user-message" hidden></div>
+        <div class="pet-preview-bubble" id="pet-bubble">
+          <button type="button" id="bubble-dismiss" aria-label="关闭气泡" hidden>×</button>
+          <div id="bubble-status" role="status" hidden></div>
+          <div id="bubble-content"></div>
+          <div id="bubble-choices" hidden></div>
+          <div id="bubble-composer" hidden>
+            <textarea
+              id="bubble-input"
+              aria-label="气泡输入"
+              placeholder="写一句话…"
+              maxlength="500"
+              rows="2"
+            ></textarea
+            ><button type="button" id="bubble-send" disabled>发送</button>
+          </div>
+          <button type="button" id="bubble-stop" hidden>显示全文</button>
+        </div>
+        <div id="bubble-pet-anchor">
+          <img src="assets/pet-minimal.svg" data-bubble-pet alt="桌宠" /><span
+            class="bubble-pet-shadow"
+            aria-hidden="true"
+          ></span>
+        </div>
+      </div>
     </dialog>
     <script src="preview.js"></script>
   </body>

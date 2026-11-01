@@ -1,6 +1,6 @@
 # 设置前端与后端契约映射
 
-本文是八页设置预览的统一接入说明：现有调用以当前工作区源码为准，新增需求标为“待开发”。
+本文是设置预览与插件贡献页面的统一接入说明：现有调用以当前工作区源码为准，新增需求标为“待开发”。
 当前 [HTML 预览](../qa/minimal-settings-preview/index.html) 与 [本地交互](../qa/minimal-settings-preview/preview.js) 尚未连接真实桌宠；本文不实现后端。
 既有运行语义见 [应用契约指南](../.trellis/spec/shared/plugin-application-contracts.md)，具体请求类型以文内链接的 contracts 为准。
 
@@ -29,7 +29,27 @@
 - 确认框取消／Esc 不发变更请求；明确拒绝审批才提交 approved:false。录音取消与登录取消使用各自限定方法。
 - 本文不新增 HTTP 服务、任意 IPC 调用或通用命令入口；`runPageAction` 仅用于宿主已声明的同 owner 页面动作。
 
-## 八页功能总表
+## 设置外壳与插件贡献页面
+
+设置窗口和导航外壳目前由宿主提供；插件可以贡献设置分栏。当前HTML是独立预览，页面出现/消失只演示目标行为，不代表已经加载运行时插件。
+
+已有链路：插件清单声明 panel JSON → 激活时 contribute → PluginManager登记活跃owner贡献 → applicationPages投影 → ApplicationSnapshot.pages → 设置外壳按清单生成导航。停用、故障或卸载撤回贡献；页面消失后选择返回插件管理，旧owner generation的动作不再有效。
+
+证据：[页面投影](../apps/desktop/src/main/application-pages.ts)、[侧栏生成与选中处理](../apps/desktop/src/renderer/console/app-views.ts)、[设置外壳消费页面](../apps/desktop/src/renderer/console/console-app.tsx)、[插件生命周期](../packages/host-kernel/src/runtime/plugin-manager.ts)。当前通用页面支持Schema配置与宿主声明动作；特色React视图仍编入宿主，不支持任意插件JS/DOM注入。
+
+| 状态或动作 | 设置分栏与运行行为 |
+|---|---|
+| 启用提供设置页的插件 | 插件激活并注册自身页面后，宿主快照加入该页，侧栏出现一次。纯能力插件未声明页面时不增加分栏。 |
+| 停用该插件 | 撤回页面/动作，停止该owner的任务和订阅；若用户正在该页，回到插件管理；配置保留。 |
+| 再次启用 | 使用新的活跃owner重新注册，读取保留配置，不复用失效世代动作。 |
+| 关闭插件内的语音功能 | 仅关闭输入功能并结束其录音，插件本身仍启用，设置页保留。 |
+| 移除独立权限与数据页 | 主导航不再显示；来源/权限信息可在插件详情按需呈现，敏感审批仍由宿主负责。底层安全校验和现有接口不随页面删除。 |
+
+语音当前仍分为 pet.page-voice（页面）、pet.asr-local（ASR）、pet.voice-chat（流程）。后两者的启停或profile.voiceEnabled变化尚未绑定页面撤回。正式实现应让用户启用的“语音输入”功能插件拥有该页面贡献，沿用统一插件模型和现有页面投影；底层能力提供者仍可独立，必要的内置视图映射/来源校验需随归属迁移。不得用隐藏固定菜单代替运行时贡献和owner清理。
+
+预览使用 voicePluginEnabled 演示插件生命周期，voiceEnabled保留为功能开关。正式接入分别读取 ConsolePlugin.state 与有效ApplicationSnapshot.pages，不新增第二份前端插件注册真相或把这两个值合成一个开关。
+
+## 界面功能与宿主职责
 
 | 页面 | 操作／设置组 | 现有 owner 与接入点 | 新预览的缺口 |
 |---|---|---|---|
@@ -39,7 +59,7 @@
 | 对话 | 刷新、更早历史、文字发送、开始录音 | A 的统一历史；D 的发送和唯一录音会话 | 不增加第二历史、附件、新会话或逐条删除 |
 | 语音输入 | 输入开关、识别设置、开始／结束识别／取消 | A voiceEnabled；D；C 保存 ASR／voice 配置 | 系统输入与静音结束识别无等价现有契约 |
 | 插件 | 运行状态、停止全部、启停／卸载、配置 | C 的当前插件 owner、配置 schema／revision | 没有安装、商店、更新或重启命令 |
-| 权限与数据 | 审批、来源信任、预设、内置恢复、审计 | C 的精确 owner／任务／摘要范围 | 全数据清除／导出不可用 |
+| 插件详情/宿主安全 | 审批、来源信任、预设、内置恢复、审计 | C 的精确 owner／任务／摘要范围 | 全数据清除／导出不可用 |
 | 关于 | 名称、版本、许可、技术信息 | C 快照的 app 元数据；静态许可信息 | 不增加更新、遥测或诊断上传 |
 
 ### 开始：模型连接与桌宠
@@ -97,6 +117,7 @@
 | 保存识别后发送 | C.saveConfig({owner:voiceOwner,expectedRevision:voiceRevision,data:{mode,autoSend}}) | ConfigSave；mode=demo/deepseek |
 
 统一历史按数值 cursor 升序展示；limit 为 1–200，现有 hook 每次 50；预览 before:int-1 不是请求值。
+聊天窗口把同一历史中的用户文字、桌宠回复和互动事件混排：用户靠右、桌宠带头像靠左、轻触/抚摸/提起/放下等事件居中。后续真实接入仍从 A.getSnapshot() 和 A.onChanged 读取并按记录身份追加；设置台与桌宠气泡不能各自生成第二份历史。等待/流式状态取 DemoSnapshot.phase，失败不伪装为回复；输入法确认不发送、Shift+Enter 换行、发送成功才清理草稿，跨页保留未发送文字。更早记录前插时保留当前阅读位置，新记录仅在原本接近底部时跟随。当前 HTML 中的示例回复/互动仅演示页面，不代表宿主已记录或模型已响应。
 文字发送上限 2000；宿主拒绝时保留草稿，不本地生成用户／回复记录；getHistory 缺失就禁用更早分页。
 [语音配置 owner](../apps/desktop/src/renderer/console/use-demo-settings.ts) 与 revision 来自 DemoSnapshot.settings；两份现有配置均立即生效。
 DemoSnapshot 还提供模型缓存／streaming、preparedModelId、canRecord/canSend、phase、transcript、错误及 maxRecordingSeconds。
@@ -108,7 +129,7 @@ DemoSnapshot 还提供模型缓存／streaming、preparedModelId、canRecord/can
 
 ### 系统内置语音输入插件：待开发契约
 
-产品级入口为一个系统内置插件，插件页提供设置入口与开启/关闭；关闭输入不等于卸载插件或停用整个核心。已有 pet.asr-local、pet.voice-chat、DemoBridge 和唯一 useDemo 采集所有者应复用，不能在新页面另建并行录音器。当前插件页条目只是预览中的产品结构。
+产品级入口为一个系统内置插件，插件页提供启用/停用与设置入口，插件生命周期决定设置分栏是否存在；页面内的voiceEnabled只决定是否允许语音输入，关闭功能不撤回设置页。已有 pet.asr-local、pet.voice-chat、DemoBridge 和唯一 useDemo 采集所有者应复用，不能在新页面另建并行录音器。当前插件页条目只是预览中的产品结构。
 
 | 逻辑操作 | 输入/快照字段提案 | 返回/生效要求 |
 |---|---|---|
@@ -173,6 +194,41 @@ ConsoleSecurityChange={snapshot,security,operationError}；[生命周期动作](
 
 C.getSnapshot() 返回 app.name/version/electron/node/platform；预览 0.0.0、45、24 等均应替换成宿主值。
 现有 app 类型没有 license 字段；许可继续读取构建／归属静态信息，不发明许可查询接口。
+
+## 语音输出插件与自定义TTS（待开发）
+
+内置说话是可停用的内置插件，不属于受保护的应用核心。当前默认声音只在HTML里用短音节拟声演示，不是能读出文字的真实TTS。语音输入（ASR）、模型回复（文本生成）和语音输出必须分开；停用声音提供者不删除文字气泡或停止模型回复。
+
+现有统一插件SDK已提供ProviderDeclaration、PluginTask.signal和media输入/输出；现有能力清单尚无语音输出、音频格式描述或生产播放所有者。参见[能力契约](../packages/contracts/src/capability.ts)、[统一插件SDK](../packages/plugin-sdk/src/index.ts)、[媒体传输](../packages/contracts/src/media.ts)、[显式提供者解析](../packages/host-kernel/src/runtime/capability-registry.ts)。以下仅为后续逻辑契约，不是已注册能力或桥。
+
+| 逻辑项 | 提案与责任 |
+|---|---|
+| 共用能力 | 一个中立语音输出能力（例如speech.output@1），内置拟声与用户TTS实现同一接口，仍是统一插件模型。通过features区分拟声/TTS及支持的语音参数，不另建TTS插件SDK。 |
+| 请求 | 文本、消息/话段ID、语言、provider范围内的voiceId及支持的options；任务带取消信号。不要把语音输入开关voiceEnabled作为声音输出开关。 |
+| 结果 | JSON只返回音频描述与media引用；音频字节通过现有media通道。codec/sampleRate/channels/分片顺序必须在正式契约里明确，不能把字节转JSON数组或base64。 |
+| 提供者选择 | 使用稳定selector{pluginId,instanceId,providerId}和voiceId。执行时绑定当前OwnerRef世代；插件停用/缺失则不可用，不自动回退到默认或其他提供者。 |
+| 配置 | 提供者提供声线目录、支持的音高/语速范围和配置schema。云TTS的端点/模型与凭据仍走插件配置/凭据服务，状态只返回keySaved，不在气泡或偏好里保存明文Key。 |
+| 播放 | 宿主/前端共用一个受控播放器，按话段顺序播放；声音任务独立于回复文本任务。文本保留，语音失败单独显示。 |
+| 停止与停用 | 取消当前/排队合成，关闭media流并停止播放；拒收旧generation的迟到音频。停用内置说话不撤回人设/气泡页面，也不关闭语音输入插件。 |
+| 页面贡献 | 自定义TTS可声明自己的配置页，沿用插件页面贡献规则。人设音效中的声音选择器显示已注册提供者/声线；未实现的自定义提供者不预放假条目。 |
+
+当前预览里builtin/soft属于同一个“内置说话”插件。停用后保留选择并标记不可用，试听禁用，可前往插件管理重新启用；文字和气泡预览照常展示。真实自定义TTS、媒体播放和能力注册仍待整体迁移实现。
+
+## 桌宠气泡预览与接入边界
+
+设置HTML中的气泡工作台仅演示产品样式/交互。参考Coopanion的共用主气泡（说话/选择/输入/状态）及无尾用户气泡结构，保留本项目角色和黑白主题；不复制参考实现/角色。思考只显示状态点，不展示推理内容。
+
+| 场景 | 前端责任与后续接入 |
+|---|---|
+| 说话与逐字显示 | 接收已允许外显的完整话段，再逐字呈现；不是直接展示模型原始token流。显现停止只完成/停止展示，不自行宣称已取消模型任务。 |
+| 状态 | 使用宿主允许公开的任务摘要/阶段。对话、选项、输入优先于背景状态；不同时叠多层思考泡泡。 |
+| 选项/应用对话 | 沿用ApplicationSnapshot.dialog及answer({id,step,choice,text?})，绑定当前owner/对话状态；pending时避免重复提交，错误保留当前选择。 |
+| 输入 | 只有前端草稿，发送走既有统一对话入口；Enter/Shift+Enter/IME语义明确，不为气泡建立第二套历史/录音所有者。 |
+| 用户气泡 | 从同一实际用户事件投影，控制堆叠/溢出/淡出；预览本地文字不写真实记录。 |
+| 错误 | 使用同一对话几何与可恢复动作，不把示例重试当后端成功。 |
+| 布局 | 根据桌宠锚点、气泡尺寸和视口边界定位，限制窄窗/长文溢出并支持减少动画。关闭/返回焦点不启动外部应用。 |
+
+生产桌宠当前PetBubble仍是文本显示；新的样式、动作与输出提供者接线只在整套前端确认后整体迁入。
 
 ## 仅本地 UI 与现有主题 owner
 
