@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 12
+- **Total Sessions**: 13
 - **Last Active**: 2026-11-01
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~409 | Active |
+| `journal-1.md` | ~442 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 13 | 2026-11-01 | Simplify sound disclosure and dress preview | `f5186fd` | `feat/minimal-settings-preview-only` |
 | 12 | 2026-11-01 | Expand persona preview with habits and template tabs | `f5a9693` | `feat/minimal-settings-preview-only` |
 | 11 | 2026-11-01 | Keep complete settings work preview-only until approval | `5562139` | `feat/minimal-settings-preview-only` |
 | 10 | 2026-11-01 | Add Start model catalog reasoning and draft connection tests | `a14b5f6` | `feat/start-model-discovery` |

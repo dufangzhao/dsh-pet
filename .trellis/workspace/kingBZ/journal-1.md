@@ -407,3 +407,36 @@ Persisted preview-first goal: whole UI must be confirmed before real desktop/bac
 ### Next Steps
 
 - None - task complete
+
+
+## Session 13: Simplify sound disclosure and dress preview
+
+**Date**: 2026-11-01
+**Task**: Simplify sound disclosure and dress preview
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Preview-only iteration: master sound reveals categories; talk reveals voice/pitch/rate/trial; removed duplicate speechEnabled toggle while preserving collapsed values. Appearance now has large own-pet stage and thumbnail/import rows, with unavailable clothing left blank. Added in-memory local image import with cancellation/error preservation and clothing clearing. Full16page scenes plus persona and appearance focused browser checks pass at1200/1142/880, no remote requests/storage; lint clean, actual app/backend diff0. Three existing pose demonstrations retained; full behavior preview/resources and pack parsing stay future work. DeepSeekmax worker failed with no output this round; parent completed selected-style implementation. Overall UI review remains open, migration deferred.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f5186fd` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
