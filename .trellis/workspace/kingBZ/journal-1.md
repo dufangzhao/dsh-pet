@@ -440,3 +440,36 @@ Preview-only iteration: master sound reveals categories; talk reveals voice/pitc
 ### Next Steps
 
 - None - task complete
+
+
+## Session 14: Bind outfit packs and map backend APIs
+
+**Date**: 2026-11-01
+**Task**: Bind outfit packs and map backend APIs
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Preview-only continuation: one import-outfit button now imports a single embedded-image preview package, binding base figure/palettes/clothing; selecting a figure switches all package-owned options, no cross-pack leftovers. Snore duration shown only with soundSnore and soundEnabled, preserving the chosen value. Canonical docs/frontend-api-contract.md covers eight-page existing fixed bridge requests/results, local-only UI and unimplemented settings with CAS/ownership/saved-applied/error/cancel semantics. Outfit proposals keep profile one owner and current JSON format explicitly local demo. Nineteen source links valid. Full16scenes, focused outfit import/switch/failure/cancel and persona/snore tests pass; lint clean, backend/app implementation unchanged. Goal remains paused for whole-UI review, no native integration. Local work saved, no push.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `132727e` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
