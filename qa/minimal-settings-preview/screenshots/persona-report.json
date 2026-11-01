@@ -3,7 +3,7 @@
   "checks": [
     "custom behavior controls and six-button hover limit",
     "top tabs preserve drafts; each template draft is independent; copy/new/reset stay local",
-    "default speaking sound belongs to sound; master/talk/speech dependencies; sound only on explicit click",
+    "default speaking sound belongs to sound; master/talk progressive disclosure; sound only on explicit click",
     "both panels fit wide/narrow widths; no duplicate IDs, storage, remote requests, app calls or microphone use"
   ],
   "pageErrors": [],

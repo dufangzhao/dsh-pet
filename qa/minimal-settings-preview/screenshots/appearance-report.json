@@ -1,0 +1,11 @@
+{
+  "scope": "standalone appearance image preview; no app/backend writes",
+  "checks": [
+    "large stage and three compact asset rows fit three widths; clothing initially empty",
+    "selection updates stage and thumbnails; local scene/pose controls; import cancel/success/error, clothing clear and draft navigation",
+    "imports remain in page memory and disappear on reload; no network/storage/backend access"
+  ],
+  "errors": [],
+  "remoteRequests": [],
+  "status": "passed"
+}

@@ -92,14 +92,22 @@ try {
   const sound = page.locator('#persona-sound-card');
   await expect(sound.locator('#persona-voice')).toHaveValue('builtin');
   await expect(page.locator('#persona-templates #persona-voice')).toHaveCount(0);
-  await expect(page.locator('#persona-pitch-level')).toBeDisabled();
+  await expect(page.locator('[data-pref=speechEnabled]')).toHaveCount(0);
+  await expect(page.locator('#persona-pitch-level')).toBeEnabled();
   await page.locator('[data-pref=soundEnabled]').uncheck();
+  await expect(page.locator('#persona-sound-options')).toBeHidden();
+  await sound.screenshot({ path: path.join(out, 'persona-sound-off.png') });
   await expect(page.locator('[data-pref=soundTalk]')).toBeDisabled();
   await expect(page.locator('#persona-voice')).toBeDisabled();
   await expect(page.locator('[data-persona-action=preview-sound]')).toBeDisabled();
   assert.equal(await page.evaluate(() => window.__personaAudioContexts), 0);
   await page.locator('[data-pref=soundEnabled]').check();
-  await page.locator('[data-pref=speechEnabled]').check();
+  await expect(page.locator('#persona-sound-options')).toBeVisible();
+  await page.locator('[data-pref=soundTalk]').uncheck();
+  await expect(page.locator('#persona-speaking-options')).toBeHidden();
+  await sound.screenshot({ path: path.join(out, 'persona-sound-no-talk.png') });
+  await page.locator('[data-pref=soundTalk]').check();
+  await expect(page.locator('#persona-speaking-options')).toBeVisible();
   await expect(page.locator('#persona-pitch-level')).toBeEnabled();
   await page.locator('#persona-pitch-level').selectOption('high');
   await expect(page.locator('#persona-pitch')).toHaveValue('500');
@@ -109,7 +117,7 @@ try {
   await expect.poll(() => page.evaluate(() => window.__personaAudioContexts)).toBe(1);
   await expect(page.locator('[data-persona-action=preview-sound]')).toBeEnabled();
   report.checks.push(
-    'default speaking sound belongs to sound; master/talk/speech dependencies; sound only on explicit click',
+    'default speaking sound belongs to sound; master/talk progressive disclosure; sound only on explicit click',
   );
   for (const width of [1200, 880, 1142]) {
     await page.setViewportSize({ width, height: width === 880 ? 760 : width === 1142 ? 804 : 900 });

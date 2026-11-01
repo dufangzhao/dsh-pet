@@ -16,4 +16,6 @@
 
 人设页顶部切换“习惯设置 / 人格模板”。习惯包括通用、行为互动、显示和音效；内置默认说话声位于音效区。人格模板支持独立草稿、新建、复制、重置与本次预览内保留，试听为独立合成音演示。[人设验证记录](screenshots/persona-report.json) · [习惯](screenshots/persona-1200.png) · [人格模板](screenshots/persona-templates-1200.png) · [音效](screenshots/persona-sound.png)。
 
+装扮采用上方大预览框与下方形象/配色/服装缩略图行。服装未制作时留空；图片导入只在本次页面中预览。音效按“播放音效→说话”逐级展开，删除重复的念出气泡文字开关。[装扮效果](screenshots/appearance-assets-1200.png) · [装扮验证](screenshots/appearance-report.json)。
+
 当前仅制作独立的HTML前端预览与本地演示交互，不接入真实桌宠、不调用服务商或麦克风，也不写入应用配置。接入草稿已隔离保存，等整套页面调整定稿后再统一迁移并实现对应后端。

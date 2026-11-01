@@ -49,6 +49,9 @@
     personaPane: 'habits',
     personaTemplate: 'default',
     personaTemplates: {},
+    importedAssets: { figure: {}, palette: {}, clothing: {} },
+    clothing: '',
+    importSerial: 0,
     petName: '小蓝',
     provider: 'deepseek',
     model: '',
@@ -179,14 +182,12 @@
       input.checked = state.hover.indexOf(input.value) !== -1;
       input.disabled = state.hover.length >= 6 && !input.checked;
     });
-    document.querySelectorAll('[data-sound-dependent]').forEach(function (group) {
-      setDisabled(group, !state.soundEnabled);
-    });
-    document.querySelectorAll('[data-speech-dependent]').forEach(function (group) {
-      setDisabled(group, !state.soundEnabled || !state.soundTalk || !state.speechEnabled);
-    });
-    controls('speakingSound')[0].disabled = !state.soundEnabled || !state.soundTalk;
-    controls('speechEnabled')[0].disabled = !state.soundEnabled;
+    var soundOptions = document.getElementById('persona-sound-options');
+    soundOptions.hidden = !state.soundEnabled;
+    setDisabled(soundOptions, !state.soundEnabled);
+    var speakingOptions = document.getElementById('persona-speaking-options');
+    speakingOptions.hidden = !state.soundEnabled || !state.soundTalk;
+    setDisabled(speakingOptions, speakingOptions.hidden);
     var trial = document.querySelector('[data-persona-action="preview-sound"]');
     trial.disabled =
       !state.soundEnabled ||
@@ -229,12 +230,8 @@
     try {
       var context = new window.AudioContext();
       await context.resume();
-      var base = state.speechEnabled
-        ? state.speechPitch
-        : state.speakingSound === 'soft'
-          ? 380
-          : 480;
-      var step = 1 / (state.speechEnabled ? state.speechSpeed : 12);
+      var base = state.speechPitch * (state.speakingSound === 'soft' ? 0.9 : 1);
+      var step = 1 / state.speechSpeed;
       var start = context.currentTime + 0.02;
       [1, 1.16, 0.94, 1.08, 0.9].forEach(function (ratio, index) {
         var oscillator = context.createOscillator();
@@ -278,30 +275,47 @@
       else document.body.style.removeProperty(themeFields[key]);
     });
     var px = SIZE_PX[state.size];
+    var figureImport = state.importedAssets.figure[state.figure];
+    var paletteImport = state.importedAssets.palette[state.palette];
+    var figureSource = figureImport ? figureImport.url : PET_ART[state.figure];
+    var artSource = paletteImport ? paletteImport.url : figureSource;
+    var figureLabel = figureImport ? figureImport.name : FIGURE_LABEL[state.figure];
+    var paletteLabel = paletteImport ? paletteImport.name : PALETTE_LABEL[state.palette];
     document.querySelectorAll('[data-stage]').forEach(function (stage) {
       stage.dataset.palette = state.palette;
       stage.dataset.hidden = state.visible ? 'false' : 'true';
       stage.querySelectorAll('[data-pet-art]').forEach(function (art) {
-        art.src = PET_ART[state.figure];
+        art.src = artSource;
+        art.dataset.artPalette = paletteImport ? 'morning' : state.palette;
         art.width = px;
         art.height = px;
       });
     });
 
-    setText('figure', FIGURE_LABEL[state.figure]);
-    setText('palette', PALETTE_LABEL[state.palette]);
+    document.getElementById('appearance-stage').style.setProperty('--pet-preview-size', px + 'px');
+    document.querySelectorAll('#appearance-palette-list [data-thumb-art]').forEach(function (art) {
+      art.src = figureSource;
+    });
+    var avatar = document.querySelector('.appearance-avatar');
+    var clothing = avatar.querySelector('.appearance-clothing');
+    if (state.clothing) {
+      if (!clothing) {
+        clothing = document.createElement('img');
+        clothing.className = 'appearance-clothing';
+        clothing.alt = '服装预览';
+        avatar.append(clothing);
+      }
+      clothing.src = state.importedAssets.clothing[state.clothing].url;
+    } else if (clothing) clothing.remove();
+    document.getElementById('clear-clothing').hidden = !state.clothing;
+    setText('figure', figureLabel);
+    setText('palette', paletteLabel);
     setText('size', SIZE_LABEL[state.size]);
     setText('voiceEnabledText', state.voiceEnabled ? '开着' : '关着');
     setText('visibleText', state.visible ? '桌面显示中' : '桌面已隐藏');
     setText(
       'railSummary',
-      state.petName +
-        ' · ' +
-        FIGURE_LABEL[state.figure] +
-        ' · ' +
-        PALETTE_LABEL[state.palette] +
-        ' · ' +
-        SIZE_LABEL[state.size],
+      state.petName + ' · ' + figureLabel + ' · ' + paletteLabel + ' · ' + SIZE_LABEL[state.size],
     );
 
     document.querySelectorAll('[data-count-for]').forEach(function (el) {
@@ -378,6 +392,7 @@
           ? Number(el.value)
           : el.value,
     );
+    if (pref === 'figure' && state.importedAssets.palette[state.palette]) state.palette = 'morning';
     if (pref === 'speechPitchLevel' && el.value !== 'custom')
       state.speechPitch = { low: 300, mid: 400, high: 500 }[el.value];
     if (pref === 'speechSpeedLevel' && el.value !== 'custom')
@@ -511,6 +526,100 @@
       }
       document.getElementById('persona-draft-state').textContent =
         action === 'save' ? '本次预览草稿已保留' : '本地草稿';
+    });
+  });
+
+  var importKind = 'figure';
+  var fileInput = document.getElementById('appearance-file-input');
+  var importStatus = document.getElementById('appearance-import-status');
+  document.querySelectorAll('[data-asset-import]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      importKind = button.dataset.assetImport;
+      fileInput.click();
+    });
+  });
+  fileInput.addEventListener('change', async function () {
+    var file = fileInput.files[0];
+    if (!file) return;
+    var kind = importKind;
+    fileInput.value = '';
+    if (
+      !['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'].includes(file.type)
+    ) {
+      importStatus.textContent = '请选择图片文件';
+      importStatus.setAttribute('role', 'alert');
+      return;
+    }
+    var url = window.URL.createObjectURL(file);
+    try {
+      await new Promise(function (resolve, reject) {
+        var image = new window.Image();
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = url;
+      });
+    } catch {
+      window.URL.revokeObjectURL(url);
+      importStatus.textContent = '无法读取这张图片';
+      importStatus.setAttribute('role', 'alert');
+      return;
+    }
+    state.importSerial += 1;
+    var id = 'import-' + state.importSerial;
+    var name = file.name.replace(/\.[^.]+$/, '');
+    state.importedAssets[kind][id] = { name: name, url: url };
+    state[kind] = id;
+    if (kind === 'figure') state.palette = 'morning';
+    var list = document.getElementById('appearance-' + kind + '-list');
+    list.querySelectorAll('[data-empty-slot]').forEach(function (slot) {
+      slot.remove();
+    });
+    var label = document.createElement('label');
+    label.className = 'asset-tile';
+    var input = document.createElement('input');
+    input.type = 'radio';
+    input.name = kind;
+    input.dataset.pref = kind;
+    input.value = id;
+    var thumb = document.createElement('img');
+    thumb.src = url;
+    thumb.alt = '';
+    thumb.width = 64;
+    thumb.height = 64;
+    var title = document.createElement('span');
+    title.textContent = name;
+    label.append(input, thumb, title);
+    list.insertBefore(label, list.querySelector('[data-asset-import]'));
+    importStatus.textContent = '本次预览已导入：' + name;
+    importStatus.setAttribute('role', 'status');
+    syncControls();
+    render();
+  });
+  document.getElementById('clear-clothing').addEventListener('click', function () {
+    state.clothing = '';
+    syncControls();
+    render();
+  });
+  document.querySelector('[data-appearance-scene]').addEventListener('click', function () {
+    var stage = document.getElementById('appearance-stage');
+    var dark = stage.dataset.sceneDark !== 'true';
+    stage.dataset.sceneDark = String(dark);
+    this.setAttribute('aria-pressed', String(dark));
+  });
+  document.querySelectorAll('[data-appearance-pose]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      document.getElementById('appearance-stage').dataset.previewPose =
+        button.dataset.appearancePose;
+      document.querySelectorAll('[data-appearance-pose]').forEach(function (item) {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+    });
+  });
+  window.addEventListener('pagehide', function () {
+    Object.values(state.importedAssets).forEach(function (group) {
+      Object.values(group).forEach(function (asset) {
+        window.URL.revokeObjectURL(asset.url);
+      });
     });
   });
 

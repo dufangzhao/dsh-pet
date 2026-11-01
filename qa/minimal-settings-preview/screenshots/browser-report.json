@@ -154,6 +154,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -251,29 +275,29 @@
             "id": "persona-pitch-level",
             "left": 299,
             "right": 704,
-            "top": 1989.5,
-            "bottom": 2037.5
+            "top": 1925.5,
+            "bottom": 1973.5
           },
           {
             "id": "persona-speed-level",
             "left": 722,
             "right": 1127,
-            "top": 1989.5,
-            "bottom": 2037.5
+            "top": 1925.5,
+            "bottom": 1973.5
           },
           {
             "id": "persona-pitch",
             "left": 372,
             "right": 712,
-            "top": 2064.25,
-            "bottom": 2068.25
+            "top": 2000.25,
+            "bottom": 2004.25
           },
           {
             "id": "persona-speed",
             "left": 372,
             "right": 712,
-            "top": 2095.75,
-            "bottom": 2099.75
+            "top": 2031.75,
+            "bottom": 2035.75
           }
         ],
         "images": [
@@ -311,6 +335,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -380,6 +428,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -431,6 +503,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -515,6 +611,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -566,6 +686,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -643,6 +787,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -694,6 +862,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -841,6 +1033,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -938,29 +1154,29 @@
             "id": "persona-pitch-level",
             "left": 131,
             "right": 465,
-            "top": 2078,
-            "bottom": 2126
+            "top": 2014,
+            "bottom": 2062
           },
           {
             "id": "persona-speed-level",
             "left": 483,
             "right": 817,
-            "top": 2078,
-            "bottom": 2126
+            "top": 2014,
+            "bottom": 2062
           },
           {
             "id": "persona-pitch",
             "left": 204,
             "right": 544,
-            "top": 2152.75,
-            "bottom": 2156.75
+            "top": 2088.75,
+            "bottom": 2092.75
           },
           {
             "id": "persona-speed",
             "left": 204,
             "right": 544,
-            "top": 2184.25,
-            "bottom": 2188.25
+            "top": 2120.25,
+            "bottom": 2124.25
           }
         ],
         "images": [
@@ -998,6 +1214,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1067,6 +1307,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1118,6 +1382,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1202,6 +1490,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1253,6 +1565,30 @@
           },
           {
             "src": "../../apps/desktop/src/renderer/console/vendor-icons/gemini-color.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
             "ready": true
           },
           {
@@ -1330,6 +1666,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1390,6 +1750,30 @@
           {
             "src": "assets/pet-minimal.svg",
             "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-round.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
+          },
+          {
+            "src": "assets/pet-minimal.svg",
+            "ready": true
           }
         ],
         "unnamedNav": 0
@@ -1404,7 +1788,8 @@
     "provider": true,
     "keyVisibility": true,
     "figure": true,
-    "size": true,
+    "thumbnailSelection": true,
+    "emptyClothing": true,
     "scrollPreserved": true,
     "draftsAcrossPreviewNavigation": true,
     "storage": {

@@ -126,30 +126,22 @@ try {
   await expect(page.locator('#api-key-input')).toHaveAttribute('type', 'password');
   await page.setViewportSize({ width: 880, height: 620 });
   await page.locator('#nav-appearance').click();
-  await page
-    .locator('label.segment')
-    .filter({ has: page.locator('input[name=figure][value=round]') })
-    .click();
+  await page.locator('#appearance-figure-list input[value=round]').check();
   await expect(page.locator('#page-appearance [data-pet-art]')).toHaveAttribute(
     'src',
     'assets/pet-round.svg',
   );
-  await page
-    .locator('label.segment')
-    .filter({ has: page.locator('input[name=size][value=large]') })
-    .click();
-  await expect(page.locator('#page-appearance [data-pet-art]')).toHaveAttribute('width', '152');
-  const row = page
-    .locator('#page-appearance label.row')
-    .filter({ has: page.locator('input[data-pref=draggable]') });
-  await row.scrollIntoViewIfNeeded();
+  const tile = page
+    .locator('#appearance-palette-list label')
+    .filter({ has: page.locator('input[value=orange]') });
+  await tile.scrollIntoViewIfNeeded();
   const before = await page.locator('#settings-content').evaluate((el) => el.scrollTop);
-  await row.click();
-  assert.ok(before > 0, 'scroll regression scenario must begin below the top');
+  await tile.click();
   const after = await page.locator('#settings-content').evaluate((el) => el.scrollTop);
-  assert.ok(Math.abs(after - before) < 2, 'local control reset the settings scroll position');
-  await expect(page.locator('#page-appearance input[data-pref=draggable]')).not.toBeChecked();
-  await row.click();
+  assert.ok(before > 0, 'scroll scenario must begin below top');
+  assert.ok(Math.abs(after - before) < 2, 'thumbnail choice reset scroll');
+  await expect(page.locator('#appearance-stage')).toHaveAttribute('data-palette', 'orange');
+  await expect(page.locator('#appearance-clothing-list img')).toHaveCount(0);
   await page.locator('#nav-start').click();
   await expect(page.locator('#model-name-input')).toHaveValue('demo-model');
   await expect(page.locator('#api-key-input')).toHaveValue('DEMO_PREVIEW_KEY');
@@ -196,7 +188,8 @@ try {
     provider: true,
     keyVisibility: true,
     figure: true,
-    size: true,
+    thumbnailSelection: true,
+    emptyClothing: true,
     scrollPreserved: true,
     draftsAcrossPreviewNavigation: true,
     storage,
