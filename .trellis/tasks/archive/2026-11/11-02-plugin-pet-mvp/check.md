@@ -1,6 +1,6 @@
 # 验证记录
 
-完整工作区pnpm check通过：类型、全部工作区测试、121项QA（120通过、1项既有跳过）、ESLint、Prettier及原生构建。最终原生报告与截图见[验收证据](../../../qa/plugin-pet-mvp/README.md)。
+完整工作区pnpm check通过：类型、全部工作区测试、121项QA（120通过、1项既有跳过）、ESLint、Prettier及原生构建。最终原生报告与截图见[验收证据](../../../../../qa/plugin-pet-mvp/README.md)。
 
 原生覆盖公开WAV→唯一采集→SenseVoice→统一Core记录→真实System.Speech PCM→实际WebAudio回执；输入监听超过32秒仍活跃，停用语音模块撤回其设置页，主题/声音关闭及重启保留通过。
 
