@@ -38,7 +38,7 @@
 | 装扮 | 形象、配色、服装、一个装扮包导入、脱下 | A profile 的内置 figure/palette/size 与窗口偏好 | 自定义装扮包目录／导入／应用、服装待开发 |
 | 对话 | 刷新、更早历史、文字发送、开始录音 | A 的统一历史；D 的发送和唯一录音会话 | 不增加第二历史、附件、新会话或逐条删除 |
 | 语音输入 | 输入开关、识别设置、开始／结束识别／取消 | A voiceEnabled；D；C 保存 ASR／voice 配置 | 系统输入与静音结束识别无等价现有契约 |
-| 扩展 | 运行状态、停止全部、启停／卸载、配置 | C 的当前插件 owner、配置 schema／revision | 没有安装、商店、更新或重启命令 |
+| 插件 | 运行状态、停止全部、启停／卸载、配置 | C 的当前插件 owner、配置 schema／revision | 没有安装、商店、更新或重启命令 |
 | 权限与数据 | 审批、来源信任、预设、内置恢复、审计 | C 的精确 owner／任务／摘要范围 | 全数据清除／导出不可用 |
 | 关于 | 名称、版本、许可、技术信息 | C 快照的 app 元数据；静态许可信息 | 不增加更新、遥测或诊断上传 |
 
@@ -100,14 +100,33 @@
 文字发送上限 2000；宿主拒绝时保留草稿，不本地生成用户／回复记录；getHistory 缺失就禁用更早分页。
 [语音配置 owner](../apps/desktop/src/renderer/console/use-demo-settings.ts) 与 revision 来自 DemoSnapshot.settings；两份现有配置均立即生效。
 DemoSnapshot 还提供模型缓存／streaming、preparedModelId、canRecord/canSend、phase、transcript、错误及 maxRecordingSeconds。
-预览 engine=local/system 不等于 modelId；当前只确认本地 ASR 模型通路，系统语音输入待开发。
-afterSpeech=manual/auto/keep 也不是 autoSend 的枚举：静音后识别待开发，autoSend 仅表示识别完成后发送。
-“只留下文字”可对应 autoSend=false 的意图，但正式接线前须确定与手动结束选项的独立关系；不要静默丢掉其中一个设置。
+语音输入页按系统内置插件规划：引擎、模型、麦克风、可修改的说话按键和识别结果属于同一产品入口，复用现有采集/识别能力与唯一录音会话。当前后端仍是已有插件组合，新的内置插件设置/服务控制/按键契约尚待实现。旧 engine=local/system 和 afterSpeech 选择已从本轮页面移除，不再映射为用户收音模式设置。
 [useDemo](../apps/desktop/src/renderer/console/use-demo.ts) 跨页保留同一采集；结束由 ended 回调只提交一次 finish。
 主动取消才调用 D.cancel；窗口关闭／采集失败清理本地设备并保留宿主错误；voiceEnabled=false 会禁止新录音并取消已有语音意图。
 录音上限取宿主 maxRecordingSeconds，不能把预览的 20 秒写成后端固定承诺。
 
-### 扩展、权限与数据：精确 owner 和真实回执
+
+### 系统内置语音输入插件：待开发契约
+
+产品级入口为一个系统内置插件，插件页提供设置入口与开启/关闭；关闭输入不等于卸载插件或停用整个核心。已有 pet.asr-local、pet.voice-chat、DemoBridge 和唯一 useDemo 采集所有者应复用，不能在新页面另建并行录音器。当前插件页条目只是预览中的产品结构。
+
+| 逻辑操作 | 输入/快照字段提案 | 返回/生效要求 |
+|---|---|---|
+| 读取设置与能力 | enabled、engineId、modelId、microphoneId、speechKeyCode、revision；引擎/模型/设备目录及平台可用性 | 列表与有效值来自宿主，当前 FunASR/SenseVoice/系统默认只是页面样例，不代表已访问用户设备。 |
+| 保存设置 | 当前owner、expectedRevision和完整设置候选 | 返回保存后的有效设置；按键冲突、设备不存在、模型不可用必须明确返回错误并保留原设置。 |
+| 启动/停止识别服务 | 当前插件owner及已选引擎/模型 | 返回实际服务阶段与错误；不把 PluginManager 启停或录音 begin/finish 冒充识别服务控制。当前没有等价的固定服务控制接口。 |
+| 更改说话按键 | 一个物理键 code，默认 AltLeft；界面先捕获草稿再保存 | 正式全局注册由系统内置插件的受控能力持有，返回实际可用性/冲突；取消不保存，旧绑定仅在新绑定成功后替换。 |
+| 输入音量、识别结果 | 同一采集会话的电平、partial/final transcript、阶段与错误 | 来自真实音频与识别事件；当前预览电平为0、不打开麦克风、不生成假的识别文本。 |
+
+按键行为固定且同时生效，不提供 captureMode/holdOnly/toggleOnly 等用户设置，也不在页面展示收音方案：
+
+- 空闲时首次 keydown 立即开始同一录音会话，不为等待长按判定而截掉开头。
+- 持续按住后 keyup 结束；短按抬起后继续录音，再次 keydown 结束。预览用250ms作为内部判定常量，正式值由插件契约固定，用户不可调。
+- 忽略按键自动重复；一次结束只提交一次 finish。取消、服务停止、输入关闭应结束当前会话；换页不创建第二会话。
+- 更改按键对话框中的键只用于捕获新绑定；页面文字输入不触发录音。当前预览键监听仅在语音页面生效，正式全局按键能力仍待开发。
+- 已删除收音方式选择、按住时才打开麦克风及其蓝牙耳机相关行为；不为这些已移除功能保留设置开关。
+
+### 插件、权限与数据：精确 owner 和真实回执
 
 方法见 [ConsoleBridge](../packages/contracts/src/console.ts)，数据见 [配置契约](../packages/contracts/src/config.ts) 与 [安全契约](../packages/contracts/src/security.ts)。
 
@@ -126,7 +145,7 @@ afterSpeech=manual/auto/keep 也不是 autoSend 的枚举：静音后识别待�
 | 翻页／刷新审计 | C.getAudit({offset:number,limit:number}) | ConsoleAuditPage：entries、total、dropped |
 
 插件行使用当前 owner／lifecycle／protected 决定动作；预览 plugin:web-search 等字符串不是完整 OwnerRef。
-配置由 definition.schema/defaults/fields 驱动；预览 mode/autoSend 仅为一份配置示例，不是所有插件的固定字段。
+配置由 definition.schema/defaults/fields 驱动；预览回复模式仅为一份配置示例，不是所有插件的固定字段。
 读取缺记录不创建默认；保存失败保留 dirty draft，冲突需显式重读。放弃／返回是草稿操作，不调用后端“撤销保存”。
 changeMode 的 reload/restart 是所需生效方式，不代表宿主已执行重载／重启；当前没有对应新增命令。
 ConsoleSecurityChange={snapshot,security,operationError}；[生命周期动作](../apps/desktop/src/renderer/console/use-plugin-actions.ts) 与 [安全动作](../apps/desktop/src/renderer/console/use-security-actions.ts) 都先采用快照再判断动作结果。
@@ -167,7 +186,7 @@ previewPalette 不落盘，离开编辑器调用 resetPreview；六色预览接�
 | 显示数值 | bubbleFontSize=80–160，步长5；bubbleSpeed=50–200，步长10；glow=0–16 | 当前显示百分比／效果值，正式单位和生效口径待契约确认 |
 | 帧率 | frameRate=60/120/144/unlimited；lockFps：boolean | 需真实渲染 owner 支持，选择值不代表测得帧率 |
 | 音效总开关／类别 | soundEnabled；soundMove/soundTouch/soundFace/soundSnore/soundTalk/soundUi：boolean | 总开关控制音效区；说话类别控制说话声区，打呼噜类别控制呼噜时长；关闭后隐藏并保留原值；与语音输入 voiceEnabled 分开 |
-| 呼噜／说话声 | snoreSeconds=0–30；speakingSound=builtin/soft/silent | 声音资源和 0 秒含义待正式确认；静音禁用试听 |
+| 呼噜／说话声 | snoreSeconds=0–30；speakingSound=builtin/soft | 声音资源和 0 秒含义待正式确认；不另设静音声源，关闭说话或总音效即可 |
 | 音高／语速 | speechPitchLevel/speechSpeedLevel=low/mid/high/custom；speechPitch=200–700，步长10；speechSpeed=6–20，步长1 | 当前仅合成试听值，正式声音引擎、单位／预设映射待定义 |
 | 模板库 | personaTemplate、personaTemplateName、personaPrompt；内置 default/warm/lively/rational；新建／复制／重置／保存 | 库持久化、选择／应用与单份 personaPrompt 保存分开建模 |
 

@@ -83,8 +83,15 @@
     reducedMotion: false,
     paused: false,
     voiceEnabled: true,
-    engine: 'local',
-    afterSpeech: 'manual',
+    voiceEngine: 'funasr',
+    voiceModel: 'sensevoice',
+    voiceMicrophone: 'default',
+    voiceHotkey: 'AltLeft',
+    voiceServiceRunning: false,
+    voiceRecording: false,
+    voicePressedAt: null,
+    voiceRecordStartedAt: 0,
+    voiceRecordMessage: '未录音',
     page: 'start',
   };
 
@@ -215,11 +222,7 @@
     speakingOptions.hidden = !state.soundEnabled || !state.soundTalk;
     setDisabled(speakingOptions, speakingOptions.hidden);
     var trial = document.querySelector('[data-persona-action="preview-sound"]');
-    trial.disabled =
-      !state.soundEnabled ||
-      !state.soundTalk ||
-      state.speakingSound === 'silent' ||
-      state.audioPlaying;
+    trial.disabled = !state.soundEnabled || !state.soundTalk || state.audioPlaying;
     var select = document.getElementById('persona-template-select');
     Object.keys(state.personaTemplates).forEach(function (id) {
       var option = Array.from(select.options).find(function (item) {
@@ -286,8 +289,80 @@
     }
   }
 
+  var VOICE_HOLD_MS = 250;
+  var voiceTimer = null;
+  var pendingVoiceKey = null;
+  function voiceKeyLabel(code) {
+    var names = {
+      AltLeft: '左 Alt',
+      AltRight: '右 Alt',
+      ControlLeft: '左 Ctrl',
+      ControlRight: '右 Ctrl',
+      ShiftLeft: '左 Shift',
+      ShiftRight: '右 Shift',
+      MetaLeft: '左 Win',
+      MetaRight: '右 Win',
+      Space: '空格',
+    };
+    return names[code] || code.replace(/^Key/, '').replace(/^Digit/, '');
+  }
+  function updateVoiceTime() {
+    var seconds = state.voiceRecording
+      ? Math.floor((window.performance.now() - state.voiceRecordStartedAt) / 1000)
+      : 0;
+    document.getElementById('voice-record-time').textContent =
+      Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+  }
+  function renderVoice() {
+    var ready = state.voiceEnabled && state.voiceServiceRunning;
+    document.getElementById('voice-service-state').textContent = state.voiceServiceRunning
+      ? '运行预览'
+      : '已停止';
+    document.getElementById('voice-service-start').disabled =
+      !state.voiceEnabled || state.voiceServiceRunning;
+    document.getElementById('voice-service-stop').disabled = !state.voiceServiceRunning;
+    document.getElementById('voice-record-button').disabled = !ready;
+    document.getElementById('voice-record-button').textContent = state.voiceRecording
+      ? '结束录音'
+      : '开始录音';
+    document.getElementById('voice-record-cancel').disabled = !state.voiceRecording;
+    document.getElementById('voice-recorder-state').textContent = state.voiceRecordMessage;
+    document.getElementById('voice-hotkey-value').textContent = voiceKeyLabel(state.voiceHotkey);
+    document.getElementById('voice-key-change').disabled = state.voiceRecording;
+    ['voice-engine-select', 'voice-model-select', 'voice-microphone-select'].forEach(function (id) {
+      document.getElementById(id).disabled = state.voiceRecording;
+    });
+    document.getElementById('page-voice').dataset.recording = String(state.voiceRecording);
+    var pluginState = document.getElementById('voice-plugin-state');
+    pluginState.textContent = state.voiceEnabled ? '已启用' : '已关闭';
+    document.getElementById('voice-plugin-toggle').textContent = state.voiceEnabled
+      ? '关闭语音输入'
+      : '开启语音输入';
+    setText('plugins-active-count', state.voiceEnabled ? 3 : 2);
+    setText('plugins-disabled-count', state.voiceEnabled ? 0 : 1);
+  }
+  function startVoicePreview() {
+    if (!state.voiceEnabled || !state.voiceServiceRunning || state.voiceRecording) return;
+    state.voiceRecording = true;
+    state.voiceRecordStartedAt = window.performance.now();
+    state.voiceRecordMessage = '录音预览中';
+    voiceTimer = window.setInterval(updateVoiceTime, 250);
+    updateVoiceTime();
+    renderVoice();
+  }
+  function stopVoicePreview(message) {
+    state.voiceRecording = false;
+    state.voicePressedAt = null;
+    state.voiceRecordMessage = message;
+    window.clearInterval(voiceTimer);
+    voiceTimer = null;
+    updateVoiceTime();
+    renderVoice();
+  }
+
   function render() {
     renderPersona();
+    renderVoice();
     document.body.style.colorScheme =
       state.themeMode === 'system' ? 'light dark' : state.themeMode || 'light';
     document.body.dataset.theme = state.themeMode || 'light';
@@ -337,7 +412,6 @@
     setText('figure', figureLabel);
     setText('palette', paletteLabel);
     setText('size', SIZE_LABEL[state.size]);
-    setText('voiceEnabledText', state.voiceEnabled ? '开着' : '关着');
     setText('visibleText', state.visible ? '桌面显示中' : '桌面已隐藏');
     setText(
       'railSummary',
@@ -418,6 +492,14 @@
           ? Number(el.value)
           : el.value,
     );
+    if (pref === 'voiceEnabled' && !state.voiceEnabled) {
+      state.voiceServiceRunning = false;
+      stopVoicePreview('未录音');
+    }
+    if (pref === 'voiceModel') {
+      state.voiceServiceRunning = false;
+      stopVoicePreview('未录音');
+    }
     if (pref === 'speechPitchLevel' && el.value !== 'custom')
       state.speechPitch = { low: 300, mid: 400, high: 500 }[el.value];
     if (pref === 'speechSpeedLevel' && el.value !== 'custom')
@@ -704,6 +786,90 @@
         item.setAttribute('aria-pressed', String(item === button));
       });
     });
+  });
+
+  var voiceKeyDialog = document.getElementById('voice-key-dialog');
+  document.querySelectorAll('[data-voice-action]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var action = button.dataset.voiceAction;
+      if (action === 'start-service') {
+        state.voiceServiceRunning = true;
+        renderVoice();
+      } else if (action === 'stop-service') {
+        state.voiceServiceRunning = false;
+        stopVoicePreview('未录音');
+      } else if (action === 'toggle-recording') {
+        if (state.voiceRecording) stopVoicePreview('已结束预览');
+        else startVoicePreview();
+      } else if (action === 'cancel-recording') stopVoicePreview('已取消预览');
+      else if (action === 'toggle-plugin') {
+        state.voiceEnabled = !state.voiceEnabled;
+        if (!state.voiceEnabled) {
+          state.voiceServiceRunning = false;
+          stopVoicePreview('未录音');
+        }
+        syncControls();
+        render();
+      }
+    });
+  });
+  document.getElementById('voice-key-change').addEventListener('click', function () {
+    pendingVoiceKey = null;
+    document.getElementById('voice-key-candidate').textContent = '按下新按键';
+    document.getElementById('voice-key-save').disabled = true;
+    voiceKeyDialog.showModal();
+    document.getElementById('voice-key-capture').focus();
+  });
+  document.getElementById('voice-key-cancel').addEventListener('click', function () {
+    voiceKeyDialog.close();
+  });
+  document.getElementById('voice-key-save').addEventListener('click', function () {
+    state.voiceHotkey = pendingVoiceKey;
+    renderVoice();
+    voiceKeyDialog.close();
+  });
+  voiceKeyDialog.addEventListener('close', function () {
+    pendingVoiceKey = null;
+    document.getElementById('voice-key-change').focus();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (voiceKeyDialog.open) {
+      if (event.key === 'Escape' || event.key === 'Tab') return;
+      event.preventDefault();
+      if (event.repeat) return;
+      pendingVoiceKey = event.code;
+      document.getElementById('voice-key-candidate').textContent = voiceKeyLabel(event.code);
+      document.getElementById('voice-key-save').disabled = false;
+      return;
+    }
+    if (
+      state.page !== 'voice' ||
+      event.code !== state.voiceHotkey ||
+      event.repeat ||
+      event.target.closest('input,textarea,select,[contenteditable=true],dialog')
+    )
+      return;
+    if (!state.voiceEnabled || !state.voiceServiceRunning) return;
+    event.preventDefault();
+    if (state.voiceRecording) {
+      stopVoicePreview('已结束预览');
+      return;
+    }
+    state.voicePressedAt = window.performance.now();
+    startVoicePreview();
+  });
+  document.addEventListener('keyup', function (event) {
+    if (event.code !== state.voiceHotkey || state.voicePressedAt === null) return;
+    event.preventDefault();
+    var held = window.performance.now() - state.voicePressedAt;
+    state.voicePressedAt = null;
+    if (held >= VOICE_HOLD_MS) stopVoicePreview('已结束预览');
+  });
+  window.addEventListener('blur', function () {
+    if (state.voicePressedAt !== null) stopVoicePreview('已取消预览');
+  });
+  window.addEventListener('pagehide', function () {
+    window.clearInterval(voiceTimer);
   });
 
   renderOutfitRows();

@@ -1,0 +1,11 @@
+{
+  "scope": "standalone voice input preview, no device or backend access",
+  "checks": [
+    "both fixed key gestures work simultaneously; repeat keydown does not start or end twice",
+    "key change/save/cancel focus; old key inactive; editable fields ignored; no fabricated transcript",
+    "one built-in plugin shares the enable setting; disabling cancels preview; no microphone/network/storage access"
+  ],
+  "errors": [],
+  "requests": [],
+  "status": "passed"
+}

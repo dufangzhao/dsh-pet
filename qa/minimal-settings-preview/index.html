@@ -137,7 +137,7 @@
                       d="M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0 -1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h1a2 2 0 0 0 0 -4h-1a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1"
                     />
                   </svg>
-                  <span class="nav__label">扩展</span>
+                  <span class="nav__label">插件</span>
                 </button>
               </li>
               <li>
@@ -821,118 +821,155 @@
 
           <!-- -------------------------------------------------------- 语音输入 -->
           <section class="page" data-page="voice" id="page-voice" hidden>
-            <div class="page__head">
-              <h2 class="page__title">语音输入</h2>
-            </div>
-
+            <div class="page__head"><h2 class="page__title">语音输入</h2></div>
             <article class="card" id="voice-card">
               <div class="card__head">
-                <h3 class="card__title">语音输入</h3>
+                <h3 class="card__title">开启语音输入</h3>
+                <label class="switch" aria-label="开启语音输入"
+                  ><input type="checkbox" data-pref="voiceEnabled" checked /><i
+                    aria-hidden="true"
+                  ></i
+                ></label>
               </div>
-              <div class="card__body">
-                <div class="rows">
-                  <label class="row">
-                    <span class="row__text"><span class="row__label">用语音说话</span></span>
-                    <span class="row__value"
-                      ><span data-show="voiceEnabledText">开着</span>
-                      <span class="switch"
-                        ><input type="checkbox" data-pref="voiceEnabled" checked /><i
-                          aria-hidden="true"
-                        ></i
-                      ></span>
-                    </span>
-                  </label>
-                </div>
-
+              <div class="card__body" id="voice-settings">
                 <div class="field-row">
-                  <div class="field field--grow">
-                    <label class="field__label" for="voice-model-select">识别方式</label>
+                  <div class="field">
+                    <label class="field__label" for="voice-engine-select">识别引擎</label>
                     <div class="inputForm">
-                      <select class="select" id="voice-model-select" data-pref="engine">
+                      <select class="select" id="voice-engine-select" data-pref="voiceEngine">
                         <button type="button" class="select__trigger">
-                          <selectedcontent class="select__selected"></selectedcontent>
-                          <span class="select__arrow" aria-hidden="true"></span>
+                          <selectedcontent class="select__selected"></selectedcontent
+                          ><span class="select__arrow" aria-hidden="true"></span>
                         </button>
-                        <option value="local"><span class="opt__name">本机离线识别</span></option>
-                        <option value="system"><span class="opt__name">系统语音输入</span></option>
+                        <option value="funasr">
+                          <span class="opt__name">FunASR（本机识别）</span>
+                        </option>
                       </select>
                     </div>
                   </div>
-                  <div class="field field--grow">
-                    <label class="field__label" for="voice-after-select">说完之后</label>
+                  <div class="field">
+                    <label class="field__label" for="voice-model-select">识别模型</label>
                     <div class="inputForm">
-                      <select class="select" id="voice-after-select" data-pref="afterSpeech">
+                      <select class="select" id="voice-model-select" data-pref="voiceModel">
                         <button type="button" class="select__trigger">
-                          <selectedcontent class="select__selected"></selectedcontent>
-                          <span class="select__arrow" aria-hidden="true"></span>
+                          <selectedcontent class="select__selected"></selectedcontent
+                          ><span class="select__arrow" aria-hidden="true"></span>
                         </button>
-                        <option value="manual">
-                          <span class="opt__name">等我点「结束并识别」</span>
+                        <option value="sensevoice">
+                          <span class="opt__name">SenseVoice Small INT8</span>
                         </option>
-                        <option value="auto">
-                          <span class="opt__name">安静一会儿就识别</span>
-                        </option>
-                        <option value="keep">
-                          <span class="opt__name">只留下文字，不发送</span>
+                        <option value="paraformer">
+                          <span class="opt__name">Paraformer 中文流式 INT8</span>
                         </option>
                       </select>
                     </div>
                   </div>
                 </div>
-
-                <div class="row">
-                  <span class="row__label">单次录音上限</span><span class="row__value">20 秒</span>
+                <div class="rows rows--tight">
+                  <div class="row">
+                    <span class="row__label">识别服务</span>
+                    <div class="voice-inline">
+                      <span class="voice-service-state" id="voice-service-state" role="status"
+                        >已停止</span
+                      ><button
+                        type="button"
+                        class="btn btn--small"
+                        id="voice-service-start"
+                        data-voice-action="start-service"
+                      >
+                        启动</button
+                      ><button
+                        type="button"
+                        class="btn btn--small"
+                        id="voice-service-stop"
+                        data-voice-action="stop-service"
+                        disabled
+                      >
+                        停止
+                      </button>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <span class="row__label">模型状态</span
+                    ><span class="row__value" id="voice-model-state">未检查</span>
+                  </div>
                 </div>
-
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn btn--primary"
-                    data-goto="start"
-                    id="voice-back-cta"
-                  >
-                    回到开始页填 Key
-                  </button>
+              </div>
+            </article>
+            <article class="card" id="voice-device-card">
+              <div class="card__head"><h3 class="card__title">设备与按键</h3></div>
+              <div class="card__body">
+                <div class="field-row">
+                  <div class="field">
+                    <label class="field__label" for="voice-microphone-select">麦克风</label>
+                    <div class="inputForm">
+                      <select
+                        class="select"
+                        id="voice-microphone-select"
+                        data-pref="voiceMicrophone"
+                      >
+                        <button type="button" class="select__trigger">
+                          <selectedcontent class="select__selected"></selectedcontent
+                          ><span class="select__arrow" aria-hidden="true"></span>
+                        </button>
+                        <option value="default"><span class="opt__name">系统默认</span></option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field field--grow">
+                    <span class="field__label" id="voice-key-label">说话按键</span>
+                    <div class="voice-hotkey-field" role="group" aria-labelledby="voice-key-label">
+                      <kbd id="voice-hotkey-value">左 Alt</kbd
+                      ><button type="button" class="btn" id="voice-key-change">更改</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="voice-level">
+                  <span id="voice-level-label">输入音量</span
+                  ><meter
+                    id="voice-level-meter"
+                    min="0"
+                    max="1"
+                    value="0"
+                    aria-labelledby="voice-level-label"
+                  ></meter>
                 </div>
               </div>
             </article>
             <article class="card" id="voice-recorder-card">
               <div class="card__head">
-                <h3 class="card__title">录音与识别</h3>
+                <h3 class="card__title">识别结果</h3>
                 <span class="row__value" id="voice-recorder-state" role="status">未录音</span>
               </div>
               <div class="card__body">
-                <div class="card__foot">
+                <div class="voice-record-actions">
                   <button
                     type="button"
                     class="btn btn--primary"
-                    data-preview-action="voice-record-start"
-                  >
-                    开始录音
-                  </button>
-                  <button type="button" class="btn" data-preview-action="voice-record-end" disabled>
-                    结束并识别
-                  </button>
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="voice-record-cancel"
+                    id="voice-record-button"
+                    data-voice-action="toggle-recording"
                     disabled
                   >
-                    取消
-                  </button>
+                    开始录音</button
+                  ><button
+                    type="button"
+                    class="btn"
+                    id="voice-record-cancel"
+                    data-voice-action="cancel-recording"
+                    disabled
+                  >
+                    取消</button
+                  ><span class="row__value" id="voice-record-time" aria-label="录音时长">0:00</span>
                 </div>
-                <div class="field">
-                  <label class="field__label" for="voice-transcript">识别文字</label>
-                  <div class="inputForm" data-multiline="true">
-                    <textarea
-                      class="input"
-                      id="voice-transcript"
-                      readonly
-                      rows="5"
-                      spellcheck="false"
-                    ></textarea>
-                  </div>
+                <div class="inputForm voice-transcript" data-multiline="true">
+                  <textarea
+                    class="input"
+                    id="voice-transcript"
+                    aria-label="识别结果"
+                    readonly
+                    rows="5"
+                    placeholder="暂无识别结果"
+                  ></textarea>
                 </div>
               </div>
             </article>
@@ -941,7 +978,7 @@
           <!-- ------------------------------------------------- 预览没铺开的页 -->
           <section class="page" data-page="plugins" id="page-plugins" hidden>
             <div class="page__head">
-              <h2 class="page__title">扩展</h2>
+              <h2 class="page__title">插件</h2>
             </div>
 
             <article
@@ -967,13 +1004,11 @@
                   </div>
                   <div class="row">
                     <span class="row__text"><span class="row__label">受保护</span></span>
-                    <span class="row__value" data-show="plugins-protected-count">1</span>
+                    <span class="row__value" data-show="plugins-protected-count">2</span>
                   </div>
                   <div class="row">
                     <span class="row__text"><span class="row__label">进行中的任务</span></span>
-                    <span class="row__value"
-                      ><span data-show="plugins-task-count">2</span> 个 · 语音与对话、模型回复</span
-                    >
+                    <span class="row__value"><span data-show="plugins-task-count">0</span></span>
                   </div>
                 </div>
                 <div class="card__foot">
@@ -995,56 +1030,33 @@
 
             <article
               class="card"
-              data-plugin-id="web-search"
-              data-owner-id="plugin:web-search"
-              data-plugin-state="active"
+              data-plugin-id="voice-input"
+              data-owner-id="plugin:voice-input"
+              data-plugin-state="protected"
             >
               <div class="card__head">
-                <h3 class="card__title">语音与对话</h3>
-                <span class="row__value" data-show="plugin-state-web-search">已启用</span>
+                <h3 class="card__title">语音输入</h3>
+                <span class="row__value" id="voice-plugin-state">已启用</span>
               </div>
               <div class="card__body">
                 <div class="rows rows--tight">
                   <div class="row">
-                    <span class="row__text"><span class="row__label">权限</span></span>
-                    <span class="row__value">麦克风、回复服务</span>
+                    <span class="row__label">来源</span><span class="row__value">系统内置</span>
                   </div>
                   <div class="row">
-                    <span class="row__text"><span class="row__label">配置</span></span>
-                    <span class="row__value">
-                      <span data-show="plugin-config-count-web-search">3 项</span>
-                      <button
-                        type="button"
-                        class="btn"
-                        data-open-dialog="plugin-config-dialog"
-                        data-plugin-id="web-search"
-                        data-owner-id="plugin:web-search"
-                      >
-                        配置
-                      </button>
-                    </span>
+                    <span class="row__label">权限</span
+                    ><span class="row__value">麦克风、本机识别</span>
                   </div>
                 </div>
                 <div class="card__foot">
-                  <button
+                  <button type="button" class="btn" data-goto="voice">设置</button
+                  ><button
                     type="button"
                     class="btn"
-                    data-preview-action="plugin-disable"
-                    data-confirm="disable"
-                    data-plugin-id="web-search"
-                    data-owner-id="plugin:web-search"
+                    id="voice-plugin-toggle"
+                    data-voice-action="toggle-plugin"
                   >
-                    停用
-                  </button>
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="plugin-uninstall"
-                    data-confirm="uninstall"
-                    data-plugin-id="web-search"
-                    data-owner-id="plugin:web-search"
-                  >
-                    卸载
+                    关闭语音输入
                   </button>
                 </div>
               </div>
@@ -1052,23 +1064,27 @@
 
             <article
               class="card"
-              data-plugin-id="voice-transcribe"
-              data-owner-id="plugin:voice-transcribe"
+              data-plugin-id="model-reply"
+              data-owner-id="plugin:model-reply"
               data-plugin-state="active"
             >
               <div class="card__head">
                 <h3 class="card__title">模型回复</h3>
-                <span class="row__value" data-show="plugin-state-voice-transcribe">已启用</span>
+                <span class="row__value" data-show="plugin-state-model-reply">已启用</span>
               </div>
               <div class="card__body">
                 <div class="rows rows--tight">
                   <div class="row">
                     <span class="row__text"><span class="row__label">权限</span></span>
-                    <span class="row__value">音频输入、本机语音模型</span>
+                    <span class="row__value">网络、当前模型服务</span>
                   </div>
                   <div class="row">
                     <span class="row__text"><span class="row__label">配置</span></span>
-                    <span class="row__value">无可调配置</span>
+                    <span class="row__value"
+                      ><button type="button" class="btn" data-open-dialog="plugin-config-dialog">
+                        配置
+                      </button></span
+                    >
                   </div>
                 </div>
                 <div class="card__foot">
@@ -1077,8 +1093,8 @@
                     class="btn"
                     data-preview-action="plugin-disable"
                     data-confirm="disable"
-                    data-plugin-id="voice-transcribe"
-                    data-owner-id="plugin:voice-transcribe"
+                    data-plugin-id="model-reply"
+                    data-owner-id="plugin:model-reply"
                   >
                     停用
                   </button>
@@ -1087,57 +1103,8 @@
                     class="btn"
                     data-preview-action="plugin-uninstall"
                     data-confirm="uninstall"
-                    data-plugin-id="voice-transcribe"
-                    data-owner-id="plugin:voice-transcribe"
-                  >
-                    卸载
-                  </button>
-                </div>
-              </div>
-            </article>
-
-            <article
-              class="card"
-              data-plugin-id="local-index"
-              data-owner-id="plugin:local-index"
-              data-plugin-state="disabled"
-            >
-              <div class="card__head">
-                <h3 class="card__title">本机识别</h3>
-                <span class="row__value" data-show="plugin-state-local-index">已停用</span>
-              </div>
-              <div class="card__body">
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">权限</span></span>
-                    <span class="row__value">本机语音模型</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">配置</span></span>
-                    <span class="row__value" data-show="plugin-config-count-local-index">2 项</span>
-                  </div>
-                  <div class="row">
-                    <span class="row__text"><span class="row__label">原因</span></span>
-                    <span class="row__value" data-show="plugin-reason-local-index">由你停用</span>
-                  </div>
-                </div>
-                <div class="card__foot">
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="plugin-enable"
-                    data-plugin-id="local-index"
-                    data-owner-id="plugin:local-index"
-                  >
-                    启用
-                  </button>
-                  <button
-                    type="button"
-                    class="btn"
-                    data-preview-action="plugin-uninstall"
-                    data-confirm="uninstall"
-                    data-plugin-id="local-index"
-                    data-owner-id="plugin:local-index"
+                    data-plugin-id="model-reply"
+                    data-owner-id="plugin:model-reply"
                   >
                     卸载
                   </button>
@@ -1178,13 +1145,13 @@
             <dialog
               id="plugin-config-dialog"
               aria-labelledby="plugin-config-title"
-              data-plugin-id="web-search"
-              data-owner-id="plugin:web-search"
+              data-plugin-id="model-reply"
+              data-owner-id="plugin:model-reply"
             >
               <form method="dialog" class="card">
                 <div class="card__head">
                   <h3 class="card__title" id="plugin-config-title">插件配置</h3>
-                  <span class="row__value" data-show="plugin-config-owner">语音与对话</span>
+                  <span class="row__value" data-show="plugin-config-owner">模型回复</span>
                 </div>
                 <div class="card__body">
                   <div class="field">
@@ -1200,17 +1167,6 @@
                       </select>
                     </div>
                   </div>
-                  <div class="rows rows--tight">
-                    <label class="row">
-                      <span class="row__text"><span class="row__label">识别完成后发送</span></span>
-                      <span class="switch"
-                        ><input type="checkbox" data-pref="pluginAutoSend" checked /><i
-                          aria-hidden="true"
-                        ></i
-                      ></span>
-                    </label>
-                  </div>
-
                   <p class="model-action-status" id="plugin-config-status" role="status">草稿</p>
                 </div>
                 <div class="card__foot">
@@ -1220,8 +1176,8 @@
                     value="save"
                     data-close-dialog
                     data-preview-action="plugin-config-save"
-                    data-plugin-id="web-search"
-                    data-owner-id="plugin:web-search"
+                    data-plugin-id="model-reply"
+                    data-owner-id="plugin:model-reply"
                   >
                     保存
                   </button>
@@ -1231,8 +1187,8 @@
                     value="discard"
                     data-close-dialog
                     data-preview-action="plugin-config-discard"
-                    data-plugin-id="web-search"
-                    data-owner-id="plugin:web-search"
+                    data-plugin-id="model-reply"
+                    data-owner-id="plugin:model-reply"
                   >
                     放弃修改
                   </button>
@@ -1242,8 +1198,8 @@
                     value="cancel"
                     data-close-dialog
                     data-preview-action="plugin-config-back"
-                    data-plugin-id="web-search"
-                    data-owner-id="plugin:web-search"
+                    data-plugin-id="model-reply"
+                    data-owner-id="plugin:model-reply"
                     autofocus
                   >
                     返回
@@ -1286,7 +1242,7 @@
                 <div class="rows rows--tight">
                   <div class="row">
                     <span class="row__text"><span class="row__label">来源</span></span>
-                    <span class="row__value">扩展源 · 本地</span>
+                    <span class="row__value">插件源 · 本地</span>
                   </div>
                   <div class="row">
                     <span class="row__text"><span class="row__label">版本</span></span>
@@ -1317,7 +1273,7 @@
                     class="btn"
                     data-preview-action="source-trust"
                     data-confirm="source-trust"
-                    data-confirm-item="扩展源 · 1.4.2 · sha256:9f2c1b7e…a71d4c"
+                    data-confirm-item="插件源 · 1.4.2 · sha256:9f2c1b7e…a71d4c"
                   >
                     确认信任
                   </button>
@@ -1377,7 +1333,7 @@
                   <tbody>
                     <tr data-audit-id="evt-20261031-2114">
                       <td><time datetime="2026-10-31T21:14">2026-10-31 21:14</time></td>
-                      <td>扩展源</td>
+                      <td>插件源</td>
                       <td>来源询问</td>
                       <td>sha256:9f2c1b7e…a71d4c</td>
                     </tr>
@@ -1389,7 +1345,7 @@
                     </tr>
                     <tr data-audit-id="evt-20261030-1847">
                       <td><time datetime="2026-10-30T18:47">2026-10-30 18:47</time></td>
-                      <td>语音与对话</td>
+                      <td>语音输入</td>
                       <td>权限请求</td>
                       <td>task-7f3a</td>
                     </tr>
@@ -2032,7 +1988,6 @@
                                 <span class="opt__name">内置默认</span>
                               </option>
                               <option value="soft"><span class="opt__name">柔和</span></option>
-                              <option value="silent"><span class="opt__name">静音</span></option>
                             </select>
                           </div>
                           <button
@@ -2427,6 +2382,30 @@
             </button>
             <button type="submit" class="btn" value="cancel" data-close-dialog autofocus>
               取消
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+    <dialog class="preview-dialog" id="voice-key-dialog" aria-labelledby="voice-key-dialog-title">
+      <form method="dialog">
+        <div class="card__head">
+          <h3 class="card__title" id="voice-key-dialog-title">更改说话按键</h3>
+        </div>
+        <div class="card__body">
+          <div
+            class="voice-key-capture"
+            id="voice-key-capture"
+            tabindex="0"
+            role="group"
+            aria-label="新说话按键"
+          >
+            <span id="voice-key-candidate">按下新按键</span>
+          </div>
+          <div class="card__foot">
+            <button type="button" class="btn" id="voice-key-cancel">取消</button
+            ><button type="button" class="btn btn--primary" id="voice-key-save" disabled>
+              保存
             </button>
           </div>
         </div>

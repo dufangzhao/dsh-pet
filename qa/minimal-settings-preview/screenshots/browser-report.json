@@ -553,18 +553,25 @@
         },
         "fields": [
           {
-            "id": "voice-model-select",
+            "id": "voice-engine-select",
             "left": 299,
             "right": 704,
-            "top": 313,
-            "bottom": 361
+            "top": 250,
+            "bottom": 298
           },
           {
-            "id": "voice-after-select",
+            "id": "voice-model-select",
             "left": 722,
             "right": 1127,
-            "top": 313,
-            "bottom": 361
+            "top": 250,
+            "bottom": 298
+          },
+          {
+            "id": "voice-microphone-select",
+            "left": 299,
+            "right": 704,
+            "top": 547,
+            "bottom": 595
           }
         ],
         "images": [
@@ -1432,18 +1439,25 @@
         },
         "fields": [
           {
-            "id": "voice-model-select",
+            "id": "voice-engine-select",
             "left": 131,
             "right": 465,
-            "top": 309,
-            "bottom": 357
+            "top": 246,
+            "bottom": 294
           },
           {
-            "id": "voice-after-select",
+            "id": "voice-model-select",
             "left": 483,
             "right": 817,
-            "top": 309,
-            "bottom": 357
+            "top": 246,
+            "bottom": 294
+          },
+          {
+            "id": "voice-microphone-select",
+            "left": 131,
+            "right": 465,
+            "top": 543,
+            "bottom": 591
           }
         ],
         "images": [
