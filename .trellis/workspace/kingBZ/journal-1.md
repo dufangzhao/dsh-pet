@@ -506,3 +506,36 @@ Standalone preview iteration: removed silent speaking-sound choice, renamed visi
 ### Next Steps
 
 - None - task complete
+
+
+## Session 16: Complete ASR engine and microphone preview content
+
+**Date**: 2026-11-01
+**Task**: Complete ASR engine and microphone preview content
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Completed omitted voice preview details after read-only source audit: FunASR/SenseVoiceSmall INT8 and Whisper small INT8 are fixed local entries with228/358MB language/status/download-progress preview, Windows engine has system-managed model information, OpenAI-compatible API has URL/model/optional password key with validation and show/hide. Microphone selector includes default and two clearly labeled samples with capture state and zero live meter. Engine-specific panels, independent model sample states/API draft retention, input invalidation, fixed dual-key behavior and all16page scenes pass; clock.runFor used for interval progress. No model/network/download/device/storage calls; actual app/backend unchanged. API map updated with catalog/install/API credentials/devicechange future responsibilities; preview-first goal remains pending whole-interface approval.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d60a07d` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

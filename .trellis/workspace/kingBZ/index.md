@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 15
+- **Total Sessions**: 16
 - **Last Active**: 2026-11-01
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~508 | Active |
+| `journal-1.md` | ~541 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 16 | 2026-11-01 | Complete ASR engine and microphone preview content | `d60a07d` | `feat/minimal-settings-preview-only` |
 | 15 | 2026-11-01 | Preview built-in voice input and fixed speech-key gestures | `1875b46` | `feat/minimal-settings-preview-only` |
 | 14 | 2026-11-01 | Bind outfit packs and map backend APIs | `132727e` | `feat/minimal-settings-preview-only` |
 | 13 | 2026-11-01 | Simplify sound disclosure and dress preview | `f5186fd` | `feat/minimal-settings-preview-only` |
