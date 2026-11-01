@@ -31,6 +31,8 @@ describe('回车只在不是输入法选词时才算发送', () => {
     expect(isSubmitEnter({ key: 'Enter' })).toBe(true);
     expect(isSubmitEnter({ key: 'Enter', isComposing: false })).toBe(true);
     expect(isSubmitEnter({ key: 'Enter', isComposing: true })).toBe(false);
+    expect(isSubmitEnter({ key: 'Enter', shiftKey: true })).toBe(false);
+    expect(isSubmitEnter({ key: 'Enter', shiftKey: true, isComposing: true })).toBe(false);
     // 组词阶段浏览器给的 keyCode 是 229，有些输入法只给这个。
     expect(isSubmitEnter({ key: 'Enter', keyCode: 229 })).toBe(false);
     expect(isSubmitEnter({ key: 'a' })).toBe(false);

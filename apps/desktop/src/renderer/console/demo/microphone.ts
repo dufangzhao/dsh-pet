@@ -204,7 +204,12 @@ export async function createMicrophoneCapture(
     return handle;
   }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: { ideal: 1 } } });
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: { ideal: 1 },
+        ...(ticket.microphoneId ? { deviceId: { exact: ticket.microphoneId } } : {}),
+      },
+    });
     if (abandoned()) return handle; // 授权还挂着就放弃了：晚到的 stream 立刻停
     context = new AudioContext({ sampleRate: ticket.sampleRate });
     if (context.sampleRate !== ticket.sampleRate) {

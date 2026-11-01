@@ -1,8 +1,17 @@
 import { ModelOAuth } from './model-oauth.js';
+import { PresentationController, handlePresentationRequest } from './presentation-controller.js';
+import {
+  SpeechOutputController,
+  handleSpeechOutputRequest,
+  type SpeechOutputAction,
+} from './speech-output-controller.js';
+import { VoiceInputController, handleVoiceInputRequest } from './voice-input-controller.js';
+import { PRESENTATION_IPC, SPEECH_OUTPUT_IPC, VOICE_INPUT_IPC } from '@pet/contracts';
 import { ModelConnectionController } from './model-connection-controller.js';
 import { handleModelConnectionRequest } from './model-connection-request.js';
 import { MODEL_CONNECTION_IPC, START_DESIGN_LAB_FLAG } from '@pet/contracts';
 import { ApplicationController } from './application-controller.js';
+import { migrateApplicationProfile } from './application-profile-migration.js';
 import { handleApplicationRequest } from './application-request.js';
 import { APPLICATION_IPC, APPLICATION_DEFAULTS, type ApplicationPreferences } from '@pet/contracts';
 import {
@@ -27,7 +36,7 @@ import { ConsoleSecurityRequests } from './console-security-request.js';
 import { DemoController } from './demo-controller.js';
 import { createDemoTray } from './demo-tray.js';
 import { handleDemoRequest, type DemoAction } from './demo-request.js';
-import { demoReadiness } from './demo-readiness.js';
+import { mvpReadiness } from './mvp-readiness.js';
 import { installDemoMediaPermission } from './demo-media-permission.js';
 import { DEMO_IPC, DEMO_PLUGIN_IDS } from '@pet/contracts';
 import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
@@ -80,6 +89,12 @@ let host: DesktopHost | undefined;
 let demo: DemoController | undefined;
 let application: ApplicationController | undefined;
 let models: ModelConnectionController | undefined;
+let speech: SpeechOutputController | undefined;
+let voice: VoiceInputController | undefined;
+const presentation = new PresentationController(() => {
+  for (const target of [window, settings.current])
+    if (target && !target.isDestroyed()) target.webContents.send(PRESENTATION_IPC.changed);
+});
 let preferences: Readonly<ApplicationPreferences> = APPLICATION_DEFAULTS;
 let tray: ReturnType<typeof createDemoTray> | undefined;
 let hostStarting: Promise<DesktopHost> | undefined;
@@ -111,6 +126,14 @@ function quitWithCode(code: number): void {
     ipcMain.removeHandler(channel);
   tray?.destroy();
   tray = undefined;
+  speech?.close();
+  voice?.close();
+  for (const channel of [
+    ...Object.values(SPEECH_OUTPUT_IPC),
+    ...Object.values(VOICE_INPUT_IPC),
+    ...Object.values(PRESENTATION_IPC),
+  ])
+    ipcMain.removeHandler(channel);
   models?.close();
   application?.close();
   demo?.close();
@@ -184,8 +207,9 @@ const startup = app
         if (target && !target.isDestroyed()) target.webContents.send(DEMO_IPC.changed);
     };
     hostStarting = DesktopHost.create({
-      adapters: demoReadiness(modelRoot),
+      adapters: mvpReadiness(modelRoot),
       onChanged: () => {
+        speech?.onHostChanged();
         if (application) void application.refreshPreferences().catch(() => notifyApplication());
         else notifyApplication();
       },
@@ -195,11 +219,14 @@ const startup = app
           else writer.cancel();
         },
         output: (reference, reader) => {
+          if (speech?.output(reference, reader) || voice?.output(reference, reader)) return;
           if (demo) demo.output(reference, reader);
           else reader.cancel();
         },
-        capabilityTask: (parent, child, capability, method) =>
-          demo?.capabilityTask(parent, child, capability, method),
+        capabilityTask: (parent, child, capability, method) => {
+          if (speech?.capabilityTask(parent, child, capability, method)) return;
+          demo?.capabilityTask(parent, child, capability, method);
+        },
       },
       ...(cipher ? { cipher } : {}),
       executable: process.execPath,
@@ -214,19 +241,95 @@ const startup = app
       await host.shutdown();
       return;
     }
-    demo = await DemoController.create(host!, modelRoot, notifyDemo);
+    const migratedProfile = await migrateApplicationProfile(host!);
+    if (!migratedProfile.ok)
+      throw new Error('Profile migration failed: ' + migratedProfile.error.code);
+    demo = await DemoController.create(host!, modelRoot, notifyDemo, (text, id) => {
+      void speech?.speak(text, id);
+    });
     application = await ApplicationController.create(
       host!,
       demo,
       app.getPath('userData'),
       notifyApplication,
       (next) => {
+        const speechWasAllowed = preferences.soundEnabled && preferences.speechEnabled;
         preferences = next;
+        if (!next.voiceEnabled) voice?.onVoiceDisabled();
+        if (speechWasAllowed && (!next.soundEnabled || !next.speechEnabled)) void speech?.stop();
+        speech?.onHostChanged();
         if (!next.draggable) controller?.endDrag();
         if (window && !window.isDestroyed()) window.setAlwaysOnTop(next.alwaysOnTop);
         syncAvatar();
       },
     );
+    const requestSource = (event: IpcMainInvokeEvent) => {
+      const source = windowSource(event, settings.current, consoleUrl);
+      return isTrustedPetSource(source)
+        ? { ...source, role: 'console' as const }
+        : { ...windowSource(event, window, expectedUrl), role: 'pet' as const };
+    };
+    const notifySpeech = () => {
+      for (const target of [window, settings.current])
+        if (target && !target.isDestroyed()) target.webContents.send(SPEECH_OUTPUT_IPC.changed);
+      void application?.refreshPreferences();
+    };
+    speech = new SpeechOutputController(host, notifySpeech, (event, payload) => {
+      if (window && !window.isDestroyed())
+        window.webContents.send(SPEECH_OUTPUT_IPC.audio, event, payload);
+    });
+    const notifyVoice = () => {
+      for (const target of [window, settings.current])
+        if (target && !target.isDestroyed()) target.webContents.send(VOICE_INPUT_IPC.changed);
+      notifyDemo();
+    };
+    voice = new VoiceInputController(
+      host,
+      modelRoot,
+      demo,
+      notifyVoice,
+      (id) => !application!.pluginWasDisabled(id),
+      async (enabled) => {
+        const current = await application!.snapshot();
+        if (!current.profile) return { ok: false, error: makeError('not-ready', false) };
+        return application!.saveProfile(current.profile.revision, {
+          ...current.profile.data,
+          voiceEnabled: enabled,
+        });
+      },
+    );
+    for (const [action, channel] of Object.entries(PRESENTATION_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handlePresentationRequest(
+            requestSource(event),
+            action as 'snapshot' | 'publish',
+            args,
+            presentation,
+          ),
+        );
+    for (const [action, channel] of Object.entries(SPEECH_OUTPUT_IPC))
+      if (!['changed', 'audio'].includes(action))
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleSpeechOutputRequest(
+            requestSource(event),
+            action as SpeechOutputAction,
+            args,
+            speech!,
+          ),
+        );
+    for (const [action, channel] of Object.entries(VOICE_INPUT_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleVoiceInputRequest(
+            requestSource(event),
+            action as
+              'snapshot' | 'saveSettings' | 'saveApiKey' | 'start' | 'stop' | 'installModel',
+            args,
+            voice!,
+          ),
+        );
+
     application.desktopStatus = () => {
       const avatar = host?.manager.get({ pluginId: DEMO_PLUGIN_IDS.avatar, instanceId: 'default' });
       const available =
@@ -284,7 +387,7 @@ const startup = app
     if (acceptanceTrace)
       Object.assign(globalThis, { petDemoAcceptance: { events: acceptanceTrace } });
     for (const [action, channel] of Object.entries(DEMO_IPC))
-      if (action !== 'changed')
+      if (!['changed', 'recordingRequested'].includes(action))
         ipcMain.handle(channel, async (event, ...args: unknown[]) => {
           const consoleSource = windowSource(event, settings.current, consoleUrl);
           const source = isTrustedPetSource(consoleSource)
@@ -380,6 +483,8 @@ const startup = app
       handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () => {
         const status = host!.stopAll();
         demo?.onAllStopped();
+        voice?.onVoiceDisabled();
+        void speech?.stop();
         return status;
       }),
     );
@@ -466,6 +571,20 @@ const startup = app
     window.webContents.on('did-finish-load', () => {
       if (controller) broadcast(controller.getSnapshot());
     });
+    await settings.open(false);
+    const captureWindow = settings.current;
+    if (captureWindow) {
+      demo.setRecordingOwner(captureWindow.webContents.id, (request) => {
+        const target = settings.current;
+        if (!target || target.isDestroyed()) return false;
+        target.webContents.send(DEMO_IPC.recordingRequested, request);
+        return true;
+      });
+      captureWindow.webContents.on('render-process-gone', () => {
+        demo?.setRecordingOwner(null);
+      });
+    }
+    void voice.restore();
     window.webContents.on('did-fail-load', () => {
       console.error('M0 renderer failed to load');
       quitWithCode(1);

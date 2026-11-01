@@ -72,12 +72,87 @@
           "type": "boolean",
           "title": "识别完成后发送",
           "default": true
+        },
+        "engine": {
+          "type": "string",
+          "enum": ["sensevoice", "whisper-small", "windows-sapi", "openai"],
+          "default": "sensevoice",
+          "title": "识别引擎"
+        },
+        "microphoneId": {
+          "type": "string",
+          "maxLength": 512,
+          "default": "",
+          "title": "麦克风"
+        },
+        "talkKeyCode": {
+          "type": "string",
+          "enum": [
+            "AltRight",
+            "AltLeft",
+            "ControlRight",
+            "ControlLeft",
+            "ShiftRight",
+            "ShiftLeft",
+            "CapsLock",
+            "Space",
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "F7",
+            "F8",
+            "F9",
+            "F10",
+            "F11",
+            "F12"
+          ],
+          "default": "AltRight",
+          "title": "说话键"
+        },
+        "talkKeyLabel": {
+          "type": "string",
+          "maxLength": 32,
+          "default": "右 Alt",
+          "title": "说话键名称"
+        },
+        "cloudModel": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1,
+          "default": "whisper-1",
+          "title": "云端转写模型"
+        },
+        "cloudBaseUrl": {
+          "type": "string",
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "兼容 API 地址",
+          "default": "https://api.openai.com/v1"
         }
       }
     },
     "apply": {
       "mode": "immediate",
-      "autoSend": "immediate"
+      "autoSend": "immediate",
+      "engine": "immediate",
+      "microphoneId": "immediate",
+      "talkKeyCode": "immediate",
+      "talkKeyLabel": "immediate",
+      "cloudModel": "immediate",
+      "cloudBaseUrl": "immediate"
     }
-  }
+  },
+  "contributes": [
+    {
+      "id": "page",
+      "kind": "panel",
+      "title": {
+        "zh-CN": "语音输入"
+      },
+      "entry": "ui/page.json"
+    }
+  ]
 }

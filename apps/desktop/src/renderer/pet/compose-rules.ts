@@ -28,6 +28,12 @@ export function isSubmitEnter(event: {
   key: string;
   isComposing?: boolean;
   keyCode?: number;
+  shiftKey?: boolean;
 }): boolean {
-  return event.key === 'Enter' && event.isComposing !== true && event.keyCode !== 229;
+  return (
+    event.key === 'Enter' &&
+    event.shiftKey !== true &&
+    event.isComposing !== true &&
+    event.keyCode !== 229
+  );
 }

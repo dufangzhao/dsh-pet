@@ -17,6 +17,7 @@ export interface PreparedConfigDefinition extends ConfigDefinition {
 type Kind = 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null';
 interface Node {
   type: Kind;
+  nullable: boolean;
   schema: JsonObject;
   properties: Record<string, Node>;
   item: Node | undefined;
@@ -46,6 +47,7 @@ function matches(node: Node, value: JsonValue, annotations = true): boolean {
     if (Array.isArray(s['enum']) && !s['enum'].some((v) => canonical(v) === canonical(value)))
       return false;
   }
+  if (value === null && node.nullable) return true;
   switch (node.type) {
     case 'null':
       return value === null;
@@ -108,7 +110,11 @@ export function prepareConfigDefinition(
   try {
     const build = (raw: JsonObject, pointer: string, depth: number, track = true): Node => {
       if (depth > 8 || ++count > 256) throw new Error('Schema budget');
-      const type = raw['type'];
+      const declaredType = raw['type'];
+      const nullable =
+        Array.isArray(declaredType) && declaredType.length === 2 && declaredType.includes('null');
+      const type = nullable ? declaredType.find((value) => value !== 'null') : declaredType;
+      if (nullable && (depth === 0 || type === 'null')) throw new Error('Invalid nullable type');
       if (
         typeof type !== 'string' ||
         !['object', 'array', 'string', 'number', 'integer', 'boolean', 'null'].includes(type)
@@ -141,6 +147,7 @@ export function prepareConfigDefinition(
       const schema: JsonObject = { ...raw };
       const node: Node = {
         type: type as Kind,
+        nullable,
         schema,
         properties: Object.create(null) as Record<string, Node>,
         item: undefined,
@@ -174,7 +181,8 @@ export function prepareConfigDefinition(
           const child = obj(value);
           if (!child) throw new Error('Invalid field schema');
           if (
-            child['type'] === 'string' &&
+            (child['type'] === 'string' ||
+              (Array.isArray(child['type']) && child['type'].includes('string'))) &&
             /^(apikey|password|accesstoken|clientsecret|secret|authorization)$/.test(
               key.replace(/[_-]/g, '').toLowerCase(),
             ) &&

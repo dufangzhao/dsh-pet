@@ -174,7 +174,7 @@ export function createRuntimeHostPort(options: HostServicesOptions): RuntimeHost
           capabilityPermissionAuthorizer(options.permissions, options.manager),
           {
             signal: AbortSignal.any([parent, context.signal]),
-            timeoutMs: Math.min(context.budgetMs, 30000),
+            timeoutMs: Math.min(context.budgetMs ?? 30000, 30000),
           },
         );
         if (!task.ok) return task;

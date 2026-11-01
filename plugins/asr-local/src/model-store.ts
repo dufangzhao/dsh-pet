@@ -2,11 +2,11 @@ import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
-import { LOCAL_ASR_MODELS, type LocalAsrModel } from '@pet/contracts';
+import { VOICE_INPUT_LOCAL_MODELS, type LocalAsrModel } from '@pet/contracts';
 const equalPath = (a: string, b: string) =>
   process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b;
 export function localModel(id: unknown): LocalAsrModel {
-  const model = LOCAL_ASR_MODELS.find((model) => model.id === id);
+  const model = VOICE_INPUT_LOCAL_MODELS.find((model) => model.id === id);
   if (!model) throw new Error('unsupported-model');
   return model;
 }

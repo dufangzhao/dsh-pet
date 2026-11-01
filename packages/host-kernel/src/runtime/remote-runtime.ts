@@ -482,12 +482,17 @@ export class RemoteRuntimeDriver implements RuntimeDriver {
     signal: AbortSignal,
     deadline?: number,
   ): Promise<JsonValue> {
-    const budget = deadline === undefined ? 30000 : Math.floor(deadline - performance.now());
-    if (budget < 1) throw new KernelFault('timeout');
+    const budget =
+      deadline === undefined
+        ? method === 'runtime.invoke'
+          ? null
+          : 30000
+        : Math.floor(deadline - performance.now());
+    if (budget !== null && budget < 1) throw new KernelFault('timeout');
     const result = await this.#endpoint.request(method, payload, {
       taskId,
       signal,
-      budgetMs: Math.min(budget, 86400000),
+      budgetMs: budget === null ? null : Math.min(budget, 86400000),
       waitForWork: true,
     });
     if (!this.#exited && this.#endpoint.diagnostics().closed) await this.#exit;

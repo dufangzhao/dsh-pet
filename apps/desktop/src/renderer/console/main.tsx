@@ -9,6 +9,7 @@ import { ConsoleApp } from './console-app.js';
 import { applyStoredTheme } from './theme.js';
 import './console.css';
 import './minimal-ui/foundation.css';
+import './minimal-ui/settings-sections.css';
 
 document.documentElement.dataset['consoleStyle'] = 'minimal';
 applyStoredTheme();

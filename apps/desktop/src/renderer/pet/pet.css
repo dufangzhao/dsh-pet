@@ -15,7 +15,7 @@
  * - 控件边界与焦点环是“非文本”，对相邻表面 >= 3:1；
  * - 面板、气泡与提示是半透明的，必须按黑底与白底两种极端合成后再算，不能只看纯白。
  * 这些数字由 pet.a11y.test.ts 直接读取本文件的真实声明复算，改色不改测试会失败。
- * 色相保持不变：蓝色系主色 + 暖橙错误色，只是整体压深到满足对比度。
+ * 默认界面使用黑白色；共享设置主题覆盖这些变量，角色保留自己的蓝色。
  */
 :root {
   --pet-ink: #1c2430; /* 15.62:1 于白底 */
@@ -23,12 +23,16 @@
   --pet-ink-muted: #4c586e; /* 禁用态文字，仍 >= 4.5:1，不靠降低不透明度 */
   --pet-surface: rgba(255, 255, 255, 0.94);
   --pet-surface-strong: rgba(255, 255, 255, 0.98);
+  --pet-surface-quiet: #f1f3f7;
+  --pet-field: #fff;
+  --pet-on-primary: #fff;
+  --pet-character-ink: #1c2430;
   --pet-border: rgba(28, 36, 48, 0.14); /* 装饰性分隔线，不承担控件边界语义 */
   --pet-control-line: #74808f; /* 控件边界：白底 4.02:1，黑底合成 3.53:1 */
-  --pet-focus: #0b57d0; /* 焦点环：白底 6.39:1，黑底合成 6.12:1 */
-  --pet-accent: #3766dc; /* 选中底色，白字 5.13:1；对白底 5.13:1 */
-  --pet-accent-strong: #2b52bb; /* 选中悬停，白字仍 >= 4.5:1 */
-  --pet-accent-wash: #eef3ff; /* 悬停底色，正文仍 >= 4.5:1 */
+  --pet-focus: #151717;
+  --pet-accent: #151717;
+  --pet-accent-strong: #000;
+  --pet-accent-wash: #f1f3f3;
   --pet-body-top: #eef4ff;
   --pet-body-bottom: #b9cdf2;
   --pet-face: #f9fcff;
@@ -172,7 +176,7 @@ body {
 /* ---------- 角色基础元素 ---------- */
 
 .pet-avatar__eye {
-  fill: var(--pet-ink);
+  fill: var(--pet-character-ink);
   transform-box: fill-box;
   transform-origin: center;
   transition:
@@ -182,7 +186,7 @@ body {
 
 .pet-avatar__brow,
 .pet-avatar__mouth {
-  stroke: var(--pet-ink);
+  stroke: var(--pet-character-ink);
   stroke-width: 2.4;
   fill: none;
   stroke-linecap: round;
@@ -397,7 +401,7 @@ body {
   border-radius: 10px;
   /* 控件边界属于非文本对比要求（>=3:1），装饰性的 --pet-border 不够。 */
   border: 1px solid var(--pet-control-line);
-  background: #fff;
+  background: var(--pet-field);
   color: var(--pet-ink);
   font: inherit;
   font-size: 12px;
@@ -420,8 +424,8 @@ body {
 .pet-dialog__choice[data-primary='true'] {
   background: var(--pet-accent);
   border-color: var(--pet-accent);
-  /* 选中态白字对 #3766dc 为 5.13:1，满足普通文字 4.5:1。 */
-  color: #fff;
+  /* 选中态读取同一组主色与对应文字色。 */
+  color: var(--pet-on-primary);
 }
 
 .pet-dialog__choice[data-primary='true']:hover:not(:disabled) {
@@ -448,7 +452,7 @@ body {
 .pet-menu__quit:disabled,
 .pet-composer__send:disabled,
 .pet-root__retry:disabled {
-  background: #f1f3f7;
+  background: var(--pet-surface-quiet);
   /* 禁用态边界仍要 >= 3:1（对自身底色 3.12、对白底 3.47），
    * 否则“看得出是按钮但按不动”这件事只能靠颜色以外的线索猜。 */
   border-color: #828a9a;
@@ -458,7 +462,7 @@ body {
 
 .pet-dialog__input:disabled,
 .pet-composer__input:disabled {
-  background: #f1f3f7;
+  background: var(--pet-surface-quiet);
   border-color: #828a9a;
   color: var(--pet-ink-muted);
 }
@@ -487,7 +491,7 @@ body {
   padding: 6px 8px;
   border-radius: 10px;
   border: 1px solid var(--pet-control-line);
-  background: #fff;
+  background: var(--pet-field);
   color: var(--pet-ink);
   font: inherit;
   font-size: 13px;
@@ -714,249 +718,6 @@ body {
   align-self: flex-start;
 }
 
-/*
- * 紧凑档：只在 **CSS 视口** 真的变窄时启用（用户放大页面，或窗口被主进程缩小）。
- *
- * 命名与归因必须说清楚：379/319/279 三个断点对应的是 CSS 视口宽度，
- * 既不是系统 DPI，也不是 devicePixelRatio。窗口固定 380×420 DIP 时，把系统缩放
- * 从 100% 调到 150% 只会让 devicePixelRatio 变大，innerWidth/innerHeight 仍是
- * 380×420，这三档根本不会命中；只有页面缩放（zoomFactor）或窗口本身变小，
- * CSS 视口才会真的缩到 304×336 / 253×280。所以真实判据只能是读回的
- * innerWidth/innerHeight，不能假定“DPI 变高 → CSS 视口一定缩小”。
- *
- * 每一档只压缩留白与装饰元素，不缩字号、不藏退出、不藏气泡与提示：
- * - 角色按档缩小（仍是可拖动的绘制面，命中区由 SVG 实际形状计算，不依赖 CSS 尺寸）；
- *   档里同时写全三个 size 选择器，否则 .pet-root[data-size] 的特异性更高，
- *   用户选的尺寸会把紧凑档彻底盖掉；
- * - 角色与气泡改成横排，把纵向堆叠浪费的空白还回去，高度让给提示与菜单；
- * - 气泡与提示永远完整换行可见，不用省略号、更不用 1×1 + clip-path 视觉隐藏
- *   （aria-live 只是附加播报通道，不能代替视觉反馈）；
- * - 只隐藏纯装饰的元素，它不承载唯一信息。
- */
-@media (max-width: 379px) {
-  .pet-root,
-  .pet-root[data-size='small'],
-  .pet-root[data-size='normal'],
-  .pet-root[data-size='large'] {
-    --pet-avatar-size: 104px;
-  }
-
-  .pet-root {
-    gap: 3px;
-    padding: 4px 8px 5px;
-  }
-
-  /* 横排：角色在左、气泡或提示在右，纵向省下的高度全部留给菜单与提示条。 */
-  .pet-root__avatar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .pet-root__panel {
-    gap: 3px;
-  }
-
-  .pet-avatar {
-    flex: 0 0 auto;
-  }
-
-  /*
-   * 气泡与提示的 flex-basis 都是 150px：宽度够时和角色并排，不够时自动折到
-   * 下一行并占满整行宽度——两种情形下都完整换行显示，不截断。
-   * min-width: 0 是 flex 子项允许收缩的前提，否则内容宽度会把它们撑出视口。
-   */
-  .pet-bubble,
-  .pet-dialog {
-    flex: 1 1 150px;
-    min-width: 0;
-    max-width: none;
-  }
-
-  .pet-bubble {
-    padding: 4px 8px;
-  }
-
-  .pet-dialog {
-    padding: 6px 8px;
-  }
-
-  /* 长串（如 window.pet）也要能在窄列里断开，不能撑出横向溢出。 */
-  .pet-bubble__text {
-    overflow-wrap: anywhere;
-  }
-
-  .pet-menu {
-    padding: 5px 8px;
-  }
-}
-
-/* CSS 视口窄于 320px（页面缩放约 125% 时读回 304×336）：再压一档，仍不缩字号、不藏退出。 */
-@media (max-width: 319px) {
-  .pet-root,
-  .pet-root[data-size='small'],
-  .pet-root[data-size='normal'],
-  .pet-root[data-size='large'] {
-    --pet-avatar-size: 88px;
-  }
-
-  .pet-root {
-    gap: 3px;
-    padding: 3px 8px 4px;
-  }
-
-  .pet-menu {
-    padding: 5px 8px;
-  }
-}
-
-/*
- * CSS 视口窄于 280px（页面缩放约 150% 时读回 253×280）：可用宽度只有 227px。
- *
- * 这一档的硬约束是三条，任何布局都必须同时满足：
- * 1. 气泡与提示是已确认的视觉反馈，**必须真实可见**——不允许 1×1 / clip-path /
- *    display:none / visibility:hidden / text-indent 之类的视觉隐藏，也不允许
- *    只剩 aria-live；只有 aria-live 不算“可见”。
- * 2. 字号（>= 12px）、对比度、44×44 点击目标一律不降。
- * 3. 退出按钮与必要错误信息必须始终可见可达。
- *
- * 因此这里不试图把角色、气泡、提示、四个按钮全部塞进一屏：
- * 提示自己限制高度并可纵向滚动，菜单留在滚动区外，角色缩到 56px 与气泡并排（省掉一整行）。
- */
-@media (max-width: 279px) {
-  .pet-root,
-  .pet-root[data-size='small'],
-  .pet-root[data-size='normal'],
-  .pet-root[data-size='large'] {
-    --pet-avatar-size: 56px;
-  }
-
-  .pet-root {
-    gap: 2px;
-    padding: 2px 4px 3px;
-  }
-
-  .pet-root__avatar {
-    gap: 4px;
-  }
-
-  .pet-root__panel {
-    /* min-height: 0 让面板能在 flex 列里被压缩，提示的滚动才轮得到它自己。 */
-    min-height: 0;
-    gap: 2px;
-  }
-
-  /* 气泡与提示：显式声明可见与完整换行，防止被上面的横排规则或后续改动挤没。 */
-  .pet-bubble,
-  .pet-dialog {
-    flex: 1 1 140px;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .pet-bubble {
-    padding: 3px 6px;
-  }
-
-  .pet-dialog {
-    /* 更矮的可用高度：能滚，但绝不裁掉整块。 */
-    max-height: 210px;
-    padding: 4px 6px;
-  }
-
-  .pet-bubble__text,
-  .pet-dialog__text {
-    overflow: visible;
-    white-space: normal;
-    text-overflow: clip;
-  }
-
-  .pet-menu {
-    min-height: 0;
-    gap: 2px;
-    padding: 3px 4px;
-  }
-
-  .pet-menu__actions {
-    gap: 2px;
-  }
-
-  /* 面板内边距收到 4px：这是让 44×44 按钮仍尽量排成一行、省下一整行高度的关键。 */
-  .pet-dialog__choice,
-  .pet-menu__button,
-  .pet-menu__quit,
-  .pet-composer__send,
-  .pet-root__retry {
-    padding: 6px 4px;
-  }
-}
-
-/*
- * 矮视口兜底：宽度够但高度不够时（例如窗口被主进程压矮、或宽屏低分辨率缩放），
- * 只按宽度分档会漏掉——281×280、360×280 这类"宽而矮"的视口既不命中 279px 档，
- * 又装不下全部内容，菜单与错误提示会被顶出窗口。
- *
- * 这里只补"允许滚动"这一件事，布局形态与配色都不变：提示自己滚，
- * 菜单留在它外面，退出始终可达。380×420 不会命中（420 > 380），正常窗口不受影响。
- */
-@media (max-height: 380px) {
-  .pet-root__panel {
-    min-height: 0;
-  }
-
-  .pet-dialog {
-    max-height: 190px;
-  }
-}
-
-/*
- * 有提示在前时收一点留白，让提示、菜单和退出同时都在窗口里。
- * 提示条不截断、不隐藏，退出按钮始终保留。
- *
- * 只作用于正常 380 宽窗口：这一档的留白预算按 380×420 反推，用在这里刚好装下。
- * 窄视口档有自己更紧的留白预算，若让这两条 :has() 规则（特异性 0,3,0）盖过去，
- * 反而会把 253×280 里的内边距顶回去，把提示挤出视口。
- */
-@media (min-width: 380px) {
-  .pet-root:has(.pet-dialog) {
-    gap: 3px;
-    padding-bottom: 4px;
-  }
-
-  .pet-root:has(.pet-dialog) .pet-root__avatar {
-    gap: 2px;
-  }
-
-  /* 提示在前时角色让位：把高度还给真正要点的控件。 */
-  .pet-root[data-dialog='true'],
-  .pet-root[data-dialog='true'][data-size='small'],
-  .pet-root[data-dialog='true'][data-size='normal'],
-  .pet-root[data-dialog='true'][data-size='large'] {
-    --pet-avatar-size: 104px;
-  }
-
-  .pet-root:has(.pet-root__notice) {
-    gap: 3px;
-    padding-bottom: 4px;
-  }
-
-  .pet-root:has(.pet-root__notice) .pet-root__avatar {
-    gap: 2px;
-  }
-
-  .pet-root:has(.pet-root__notice) .pet-root__panel {
-    gap: 3px;
-  }
-
-  .pet-root:has(.pet-root__notice) .pet-menu {
-    gap: 3px;
-    padding: 5px 8px;
-  }
-}
-
-/* ---------- 无障碍：尊重系统减少动态效果，也尊重 profile 的显式选择 ---------- */
-
 @media (prefers-reduced-motion: reduce) {
   .pet-avatar *,
   .pet-avatar {
@@ -1025,4 +786,322 @@ body {
     color: GrayText;
     opacity: 1;
   }
+}
+
+/* Native MVP: quiet at rest, explicit input, and transient host speech. */
+.pet-root {
+  padding: 0;
+  --pet-floor: 8px;
+}
+.pet-root__avatar {
+  position: absolute;
+  left: 50%;
+  bottom: var(--pet-floor);
+  width: var(--pet-avatar-size);
+  height: var(--pet-avatar-size);
+  min-height: 0;
+  transform: translateX(-50%);
+  gap: 0;
+}
+.pet-avatar {
+  filter: drop-shadow(0 6px 14px rgba(28, 36, 48, 0.18))
+    drop-shadow(0 0 var(--pet-glow, 0px) var(--pet-halo));
+}
+.pet-avatar:focus-visible {
+  outline: 3px solid var(--pet-focus);
+  outline-offset: -10px;
+  border-radius: 50%;
+}
+.pet-tools {
+  position: absolute;
+  left: calc(100% - 20px);
+  top: calc(var(--pet-avatar-size) * 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+}
+.pet-tools__buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.pet-tools__mic {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pet-tool,
+.pet-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 7px;
+  border: 1px solid var(--pet-control-line);
+  border-radius: 50%;
+  color: var(--pet-ink);
+  background: var(--pet-surface-strong);
+  font: inherit;
+  font-size: 22px;
+  line-height: 1;
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+.pet-icon-button {
+  width: 44px;
+  height: 44px;
+}
+.pet-tool {
+  width: 34px;
+  height: 34px;
+}
+.pet-tool svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.pet-tool:hover:not(:disabled),
+.pet-icon-button:hover:not(:disabled) {
+  background: var(--pet-accent-wash);
+}
+.pet-tool[aria-pressed='true'] {
+  background: var(--pet-accent);
+  color: var(--pet-on-primary);
+  border-color: var(--pet-accent);
+}
+.pet-tool:disabled,
+.pet-icon-button:disabled {
+  cursor: not-allowed;
+  color: var(--pet-ink-muted);
+  background: var(--pet-surface-quiet);
+}
+.pet-tool:focus-visible,
+.pet-icon-button:focus-visible {
+  outline: 3px solid var(--pet-focus);
+  outline-offset: 2px;
+}
+.pet-tools__key {
+  position: absolute;
+  top: calc(100% - 2px);
+  border: 1px solid var(--pet-border);
+  border-radius: 4px;
+  padding: 0 4px;
+  background: var(--pet-surface-strong);
+  color: var(--pet-ink);
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.pet-root__content {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: calc(var(--pet-floor) + var(--pet-avatar-size) - 4px);
+  max-height: calc(100% - var(--pet-avatar-size) - 16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  width: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.pet-root__compose {
+  width: 100%;
+  max-width: 340px;
+  flex: 0 0 auto;
+  pointer-events: auto;
+}
+.pet-root__compose[hidden] {
+  display: none;
+}
+.pet-composer {
+  width: 100%;
+  padding: 3px;
+  border: 1px solid var(--pet-border);
+  border-radius: 18px;
+  background: var(--pet-surface-strong);
+  color: var(--pet-ink);
+  pointer-events: auto;
+}
+.pet-bubble__compose {
+  align-items: flex-end;
+  gap: 4px;
+}
+.pet-composer__field {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0;
+}
+.pet-composer__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.pet-composer__input {
+  border: 0;
+  border-radius: 14px;
+  field-sizing: content;
+  resize: none;
+  width: 100%;
+  min-height: 44px;
+  max-height: 132px;
+  overflow-y: auto;
+  padding: 6px 8px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--pet-ink);
+  background: transparent;
+}
+.pet-composer:focus-within {
+  outline: 2px solid var(--pet-focus);
+  outline-offset: -1px;
+}
+.pet-composer__input:focus-visible {
+  outline: none;
+}
+.pet-composer__send {
+  padding: 6px 10px;
+  background: var(--pet-accent);
+  border-color: var(--pet-accent);
+  color: var(--pet-on-primary);
+  border-radius: 14px;
+}
+.pet-bubble {
+  flex: 0 0 auto;
+  padding: 3px 4px 3px 10px;
+  min-height: 44px;
+  max-height: 130px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  font-size: var(--pet-bubble-font, 13px);
+  color: var(--pet-ink);
+  pointer-events: auto;
+}
+.pet-bubble__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.pet-bubble__line {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 0;
+}
+.pet-bubble__text {
+  white-space: pre-wrap;
+}
+.pet-bubble--error {
+  color: var(--pet-error);
+}
+.pet-root__panel {
+  position: absolute;
+  z-index: 5;
+  top: 8px;
+  right: 12px;
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  pointer-events: auto;
+}
+.pet-menu {
+  position: relative;
+  padding: 8px;
+  background: var(--pet-surface-strong);
+  color: var(--pet-ink);
+}
+.pet-menu__name {
+  display: block;
+  padding-right: 44px;
+}
+.pet-menu__close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.pet-menu__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding-top: 40px;
+}
+.pet-menu__quit {
+  grid-column: 1 / -1;
+}
+.pet-dialog {
+  position: relative;
+  flex: 0 0 auto;
+  max-height: 100%;
+  font-size: var(--pet-bubble-font, 13px);
+}
+.pet-dialog__dismiss {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.pet-dialog__title {
+  min-height: 44px;
+  padding-right: 44px;
+}
+@media (max-width: 280px), (max-height: 380px) {
+  .pet-root,
+  .pet-root[data-size='small'],
+  .pet-root[data-size='large'] {
+    --pet-avatar-size: 90px;
+    gap: 4px;
+    padding: 4px 8px;
+  }
+  .pet-composer__send {
+    padding: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-tool,
+  .pet-icon-button {
+    transition: none;
+  }
+}
+.pet-root[data-reduced-motion='true'] .pet-tool,
+.pet-root[data-reduced-motion='true'] .pet-icon-button {
+  transition: none;
+}
+@media (forced-colors: active) {
+  .pet-tool,
+  .pet-icon-button,
+  .pet-composer {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+  }
+  .pet-tool:focus-visible,
+  .pet-icon-button:focus-visible,
+  .pet-avatar:focus-visible {
+    outline-color: Highlight;
+  }
+  .pet-tool:disabled,
+  .pet-icon-button:disabled {
+    color: GrayText;
+  }
+}
+.pet-composer__send:hover:not(:disabled) {
+  background: var(--pet-accent-strong);
+  border-color: var(--pet-accent-strong);
+  color: var(--pet-on-primary);
 }

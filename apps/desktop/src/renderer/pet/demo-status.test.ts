@@ -16,6 +16,8 @@ import { describe, expect, it } from 'vitest';
 import { PET_COPY } from './copy.js';
 import {
   BUBBLE_TEXT_LIMIT,
+  demoBubbleEvent,
+  bubbleLifetime,
   clipBubbleText,
   demoBubbleText,
   describeDemo,
@@ -202,9 +204,12 @@ describe('Demo 桥的边界校验', () => {
     getSnapshot: () => Promise.resolve({ ok: true, value: null }),
     onChanged: () => () => {},
     cancel: () => Promise.resolve({ ok: true, value: null }),
+    sendText: () => Promise.resolve({ ok: true, value: null }),
+    requestRecording: () =>
+      Promise.resolve({ ok: true, value: { id: 'request-1', action: 'toggle' } }),
   } as unknown as DemoBridge;
 
-  it('接受提供这三个方法的桥', () => {
+  it('接受完整的 pet 发送与录音请求桥', () => {
     expect(isDemoBridge(bridge)).toBe(true);
     expect(readDemoBridge({ petDemo: bridge })).toBe(bridge);
   });
@@ -212,6 +217,8 @@ describe('Demo 桥的边界校验', () => {
   it('半套接口、版本不对或没有 petDemo 都算没连上', () => {
     expect(isDemoBridge({ ...bridge, onChanged: undefined })).toBe(false);
     expect(isDemoBridge({ ...bridge, cancel: undefined })).toBe(false);
+    expect(isDemoBridge({ ...bridge, requestRecording: undefined })).toBe(false);
+    expect(isDemoBridge({ ...bridge, sendText: undefined })).toBe(false);
     expect(isDemoBridge({ ...bridge, version: 2 })).toBe(false);
     expect(isDemoBridge(null)).toBe(false);
     expect(readDemoBridge({})).toBeNull();
@@ -224,5 +231,49 @@ describe('回复模式只翻译宿主给的值', () => {
     const mode: DemoReplyMode = 'demo';
     expect(replyBubble(mode, '内容')).toContain(PET_COPY.replyTag);
     expect(replyBubble('deepseek', '内容')).not.toContain(PET_COPY.replyTag);
+  });
+});
+
+describe('新事件气泡不重播历史', () => {
+  const answer = {
+    id: 'answer-1',
+    role: 'assistant' as const,
+    text: '真实的完整回复'.repeat(30),
+    mode: 'deepseek' as const,
+    at: 2,
+  };
+  it('首次读取待机与已有历史都不弹出气泡', () => {
+    expect(demoBubbleEvent(null, snapshot())).toBeNull();
+    expect(demoBubbleEvent(null, snapshot({ messages: [answer] }))).toBeNull();
+  });
+  it('新回复只认消息标识，保留完整文本且不会在无关刷新时重播', () => {
+    const before = snapshot();
+    const after = snapshot({ messages: [answer] });
+    expect(demoBubbleEvent(before, after)).toEqual({
+      key: 'reply:answer-1',
+      kind: 'reply',
+      text: answer.text,
+    });
+    expect(demoBubbleEvent(after, { ...after, canRecord: true })).toBeNull();
+  });
+  it('真实流式回复与录音阶段可见，返回待机后不编一条文案', () => {
+    expect(
+      demoBubbleEvent(null, snapshot({ phase: 'responding', partialReply: '宿主正在回复' }))?.kind,
+    ).toBe('reply');
+    expect(demoBubbleEvent(null, snapshot({ phase: 'recording' }))?.kind).toBe('status');
+    expect(demoBubbleEvent(snapshot({ phase: 'recording' }), snapshot())).toBeNull();
+  });
+  it('错误来自真实回执且显式保留脚本演示标记', () => {
+    expect(demoBubbleEvent(null, snapshot({ error: makeError('microphone-denied') }))?.kind).toBe(
+      'error',
+    );
+    expect(
+      demoBubbleEvent(snapshot(), snapshot({ messages: [{ ...answer, mode: 'demo' }] }))?.text,
+    ).toContain(PET_COPY.replyTag);
+  });
+  it('阅读时间受字体速度设置控制并有上限', () => {
+    expect(bubbleLifetime('短句', 100)).toBe(4500);
+    expect(bubbleLifetime('短句', 200)).toBe(2250);
+    expect(bubbleLifetime('长'.repeat(1000), 100)).toBe(20000);
   });
 });

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.system-tts",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "Windows系统朗读",
+    "en": "Windows spoken voice"
+  },
+  "description": {
+    "zh-CN": "使用已安装的Windows语音离线朗读，不联网",
+    "en": "Read text offline with an installed Windows voice"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs",
+    "workers": {
+      "synthesizer": "dist/system-speech.ps1"
+    }
+  },
+  "provides": [
+    {
+      "id": "system",
+      "capability": "speech.output@1",
+      "features": {
+        "kind": "voice",
+        "methodPermissions": {
+          "synthesize": [
+            {
+              "kind": "process",
+              "workers": ["synthesizer"]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "process",
+      "workers": ["synthesizer"]
+    }
+  ]
+}

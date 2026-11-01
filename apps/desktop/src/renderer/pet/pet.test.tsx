@@ -490,7 +490,8 @@ describe('角色渲染', () => {
     const html = markup(<PetAvatar state="idle" />);
     expect(html).toContain('data-testid="pet-avatar"');
     expect(html).toContain('data-state="idle"');
-    expect(html).toContain('role="img"');
+    expect(html).toContain('role="button"');
+    expect(html).toContain('tabindex="0"');
     // 不使用远端资源：除 SVG 命名空间外没有 http(s) 引用，也没有 <image> 标签。
     expect(html.replace(/xmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, '')).not.toMatch(/https?:/);
     expect(html).not.toContain('<image');
@@ -516,7 +517,7 @@ describe('角色渲染', () => {
 
 describe('气泡、提示与菜单', () => {
   it('气泡用 status 角色播报状态文案', () => {
-    const html = markup(<PetBubble state="thinking" />);
+    const html = markup(<PetBubble state="thinking" text={PET_COPY.stateBubbles.thinking} />);
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-live="polite"');
     expect(html).toContain(PET_COPY.stateBubbles.thinking);
@@ -526,9 +527,7 @@ describe('气泡、提示与菜单', () => {
     const html = markup(<PetBubble state="listening" text="今天阴天，适合写代码。" />);
     expect(html).toContain('今天阴天，适合写代码。');
     expect(html).toContain('role="status"');
-    expect(markup(<PetBubble state="listening" text={null} />)).toContain(
-      PET_COPY.stateBubbles.listening,
-    );
+    expect(markup(<PetBubble state="listening" text={null} />)).toBe('');
   });
 
   it('菜单只有真实入口：设置、引导、停止（宿主说能停才出现）与退出', () => {
@@ -648,7 +647,7 @@ describe('气泡、提示与菜单', () => {
     expect(tag(html, 'pet-dialog-input-text')).toContain('disabled');
   });
 
-  it('空白不给发送，但输入框仍可编辑；宿主不能发时才禁用输入', () => {
+  it('空白不给发送，宿主未就绪时仍能保留和编辑草稿', () => {
     const ready = markup(<PetComposer canSend sending={false} onSend={async () => true} />);
     expect(tag(ready, 'pet-composer-input')).not.toContain('disabled');
     // 空输入只禁用发送按钮，输入框照样能打字。
@@ -658,7 +657,9 @@ describe('气泡、提示与菜单', () => {
     const blocked = markup(
       <PetComposer canSend={false} sending={false} onSend={async () => true} />,
     );
-    expect(tag(blocked, 'pet-composer-input')).toContain('disabled');
+    expect(tag(blocked, 'pet-composer-input')).not.toContain('disabled');
+    expect(tag(blocked, 'pet-composer-input')).toContain('rows="1"');
+    expect(tag(blocked, 'pet-composer-input')).toContain('<textarea');
     expect(tag(blocked, 'pet-composer-send')).toContain('disabled');
   });
 });
@@ -1054,12 +1055,13 @@ describe('边界2：StrictMode 下会话可重复初始化', () => {
 });
 
 describe('页面骨架', () => {
-  it('无桥时仍渲染舞台、角色与菜单，并给出说明', () => {
+  it('无桥时渲染角色与实际错误，菜单和输入框保持关闭', () => {
     const html = markup(<PetApp bridge={null} />);
     expect(html).toContain('data-testid="pet-stage"');
     expect(html).toContain('data-testid="pet-avatar"');
-    expect(html).toContain('data-testid="pet-menu"');
-    expect(html).toContain('data-testid="pet-notice"');
+    expect(html).not.toContain('data-testid="pet-menu"');
+    expect(html).not.toContain('data-testid="pet-composer"');
+    expect(html).toContain('data-testid="pet-bubble"');
     expect(html).toContain(PET_COPY.bridgeMissing);
   });
 

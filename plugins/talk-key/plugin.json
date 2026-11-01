@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.talk-key",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "说话键"
+  },
+  "description": {
+    "zh-CN": "只观察所选的一个物理键，按下立即开始，长按松开结束"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "keyboard",
+      "capability": "input.talkKey@1"
+    }
+  ],
+  "consumes": [
+    {
+      "capability": "input.talkKey@1",
+      "optional": true
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "capability-use",
+      "capability": "input.talkKey@1"
+    }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "required": []
+    },
+    "apply": {}
+  }
+}

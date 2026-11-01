@@ -196,10 +196,28 @@ describe('type and keyword subset', () => {
   });
 
   it('rejects unsupported or composite types', () => {
-    const types: unknown[] = ['any', 'Object', 'array ', ['string', 'null'], 1, null, undefined];
+    const types: unknown[] = [
+      'any',
+      'Object',
+      'array ',
+      ['string', 'number'],
+      ['string', 'number', 'null'],
+      1,
+      null,
+      undefined,
+    ];
     for (const type of types) {
       expectRejected(prepare(closedObject({ field: { type } as unknown as JsonObject })));
     }
+  });
+
+  it('accepts only the explicit nullable type union', () => {
+    const p = preparedOf(
+      closedObject({ voice: { type: ['string', 'null'], maxLength: 32, default: null } }),
+    );
+    expect(p.validate({ voice: null }).ok).toBe(true);
+    expect(p.validate({ voice: 'system' }).ok).toBe(true);
+    expect(p.validate({ voice: 42 }).ok).toBe(false);
   });
 
   it('rejects unknown keywords on objects and fields', () => {

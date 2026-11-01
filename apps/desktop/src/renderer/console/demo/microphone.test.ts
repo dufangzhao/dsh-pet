@@ -60,6 +60,27 @@ test('取消后 getUserMedia 迟到 resolve：晚到的 stream 立刻停，不 e
   handle.dispose(); // 重复放弃同样安全
 });
 
+test('选定的真实麦克风 ID 进入唯一录音器的 exact 设备约束', async () => {
+  const controller = new AbortController(),
+    getUserMedia = vi.fn(async () => {
+      throw new DOMException('Device unavailable', 'NotFoundError');
+    });
+  vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
+  await createMicrophoneCapture(
+    { ...ticket, microphoneId: 'physical-mic-2' },
+    {
+      signal: controller.signal,
+      ready: async () => {},
+      push: async () => {},
+      ended: async () => {},
+      failed: vi.fn(),
+    },
+  );
+  expect(getUserMedia).toHaveBeenCalledWith({
+    audio: { channelCount: { ideal: 1 }, deviceId: { exact: 'physical-mic-2' } },
+  });
+});
+
 test('signal 事先已取消：连设备都不请求，也不给出任何结论', async () => {
   const controller = new AbortController();
   controller.abort();

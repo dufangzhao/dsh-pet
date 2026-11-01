@@ -4,12 +4,15 @@ const object = (value: JsonValue) =>
   value && typeof value === 'object' && !Array.isArray(value) ? value : null;
 export default definePlugin({
   activate(ctx) {
+    ctx.contribute('page');
     ctx.provide('voice', {
       prepare: async (task, input) => {
         const body = object(input);
         if (!body || typeof body['model'] !== 'string') return { errorCode: 'invalid-input' };
         const result = await ctx.host.capabilities.invoke(task, 'speech.asr@1', 'prepare', {
           model: body['model'],
+          cloudModel: body['cloudModel'] ?? 'whisper-1',
+          cloudBaseUrl: body['cloudBaseUrl'] ?? 'https://api.openai.com/v1',
         });
         return result.ok ? result.value : { errorCode: result.error.code };
       },
@@ -28,6 +31,8 @@ export default definePlugin({
             return { transcript: '', reply: '', errorCode: 'invalid-input' };
           const heard = await ctx.host.capabilities.invoke(task, 'speech.asr@1', 'transcribe', {
             model: body['model'],
+            cloudModel: body['cloudModel'] ?? 'whisper-1',
+            cloudBaseUrl: body['cloudBaseUrl'] ?? 'https://api.openai.com/v1',
           });
           if (!heard.ok) return { transcript: '', reply: '', errorCode: heard.error.code };
           const value = object(heard.value);

@@ -19,7 +19,7 @@ import {
 
 /*
  * ApplicationPreferences 带 JSON 索引签名，keyof 只会回 string | number，
- * 拿不到具体字段名。能单独改的项一共这十三个，与冻结的契约一一对应：
+ * 拿不到具体字段名。可单独修改的字段与当前应用契约一一对应：
  * 少写或多写都会在 save 的 Partial<ApplicationPreferences> 上暴露出来。
  */
 export type PreferenceField =
@@ -35,7 +35,50 @@ export type PreferenceField =
   | 'alwaysOnTop'
   | 'draggable'
   | 'reducedMotion'
-  | 'voiceEnabled';
+  | 'voiceEnabled'
+  | 'roam'
+  | 'wake'
+  | 'self'
+  | 'hover'
+  | 'bubbleFontSize'
+  | 'bubbleSpeed'
+  | 'glow'
+  | 'frameRate'
+  | 'snoreSeconds'
+  | 'personaTemplate'
+  | 'personaTemplates'
+  | 'wakePoke'
+  | 'wakePat'
+  | 'wakeThrow'
+  | 'wakeDrop'
+  | 'selfFigure'
+  | 'selfPalette'
+  | 'selfRoam'
+  | 'selfSnore'
+  | 'selfSize'
+  | 'selfBubble'
+  | 'selfFont'
+  | 'selfSound'
+  | 'selfTheme'
+  | 'selfHover'
+  | 'selfUser'
+  | 'doubleClickTyping'
+  | 'statusBubble'
+  | 'saidBubble'
+  | 'hideInFullscreen'
+  | 'rememberPosition'
+  | 'lockFps'
+  | 'soundEnabled'
+  | 'soundMove'
+  | 'soundTouch'
+  | 'soundFace'
+  | 'soundSnore'
+  | 'soundUi'
+  | 'speechEnabled'
+  | 'speechProvider'
+  | 'speechVoice'
+  | 'speechRate'
+  | 'speechVolume';
 
 /** 取值为字符串的那几项：单选组只需要它们，checkbox 走另一条路。 */
 export type StringPreferenceField = {
@@ -70,7 +113,7 @@ export interface ApplicationState {
   edit: <K extends PreferenceField>(field: K, value: ApplicationPreferences[K]) => void;
   /**
    * 提交一次改动：patch 里有什么就改什么，其余字段用宿主当前那份。
-   * expectedRevision 用宿主刚给的 revision；没有记录时为 0，即新建第一条。
+   * 草稿绑定首次编辑的 revision；没有草稿时用当前 revision，没有记录时为 0。
    */
   save: (patch: Partial<ApplicationPreferences>) => Promise<ApplicationOutcome>;
   /** 请应用重新播放上手引导；结果来自宿主返回的快照。 */
@@ -139,7 +182,11 @@ export function useApplication(): ApplicationState {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [conflict, setConflict] = useState(false);
-  const [drafts, setDrafts] = useState<Partial<ApplicationPreferences>>({});
+  const [draft, setDraft] = useState<{
+    data: Partial<ApplicationPreferences>;
+    revision: number | null;
+  }>({ data: {}, revision: null });
+  const drafts = draft.data;
   const [earlier, setEarlier] = useState<EarlierHistory>(EMPTY_EARLIER);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -229,9 +276,19 @@ export function useApplication(): ApplicationState {
 
   const edit = useCallback(
     <K extends PreferenceField>(field: K, value: ApplicationPreferences[K]) => {
-      setDrafts((current) => setField(current, field, value));
+      setDraft((current) => {
+        const data =
+          value === base[field]
+            ? dropFields(current.data, [field])
+            : setField(current.data, field, value);
+        return {
+          data,
+          revision:
+            Object.keys(data).length === 0 ? null : (current.revision ?? stored?.revision ?? 0),
+        };
+      });
     },
-    [],
+    [base, stored],
   );
 
   const save = useCallback(
@@ -251,7 +308,8 @@ export function useApplication(): ApplicationState {
       setSaving(true);
       try {
         const result = await current.saveProfile({
-          expectedRevision: profile?.revision ?? 0,
+          expectedRevision:
+            edited.size > 0 ? (draft.revision ?? profile?.revision ?? 0) : (profile?.revision ?? 0),
           data: merge(profile?.data ?? APPLICATION_DEFAULTS, patch),
         });
         if (!alive.current) {
@@ -262,7 +320,19 @@ export function useApplication(): ApplicationState {
           setError(null);
           setConflict(false);
           // 交出去的那几项以宿主返回的为准，其余草稿继续留着。
-          setDrafts((now) => dropFields(now, Object.keys(patch)));
+          setDraft((now) => {
+            const remaining = dropFields(now.data, Object.keys(patch));
+            const saved = result.value.profile?.data ?? APPLICATION_DEFAULTS;
+            const data = dropFields(
+              remaining,
+              Object.keys(remaining).filter((field) => remaining[field] === saved[field]),
+            );
+            return {
+              data,
+              revision:
+                Object.keys(data).length === 0 ? null : (result.value.profile?.revision ?? 0),
+            };
+          });
           return OK;
         }
         if (result.error.code === 'conflict') {
@@ -283,7 +353,7 @@ export function useApplication(): ApplicationState {
         }
       }
     },
-    [snapshot],
+    [snapshot, draft],
   );
 
   const startGuide = useCallback(async (): Promise<ApplicationOutcome> => {
@@ -426,6 +496,8 @@ export function useApplication(): ApplicationState {
     loading,
     error,
     refresh: () => {
+      setDraft({ data: {}, revision: null });
+      setConflict(false);
       void read(true);
     },
     values,

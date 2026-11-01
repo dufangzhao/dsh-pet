@@ -47,6 +47,60 @@ const STOPPABLE: ReadonlySet<DemoPhase> = new Set([
  */
 export const BUBBLE_TEXT_LIMIT = 56;
 
+export interface PetBubbleEvent {
+  readonly key: string;
+  readonly kind: 'status' | 'reply' | 'error';
+  readonly text: string;
+}
+
+/** A saved history entry is not a new event when the pet window starts. */
+export function demoBubbleEvent(
+  previous: DemoSnapshot | null,
+  snapshot: DemoSnapshot,
+): PetBubbleEvent | null {
+  if (snapshot.error !== null) {
+    const text = `${PET_COPY.errorPrefix}${errorMessage(snapshot.error)}`;
+    return { key: `error:${snapshot.intentId}:${text}`, kind: 'error', text };
+  }
+  const partial = snapshot.partialReply.trim();
+  if (snapshot.phase === 'responding' && partial !== '') {
+    const text = snapshot.settings.replyMode === 'demo' ? PET_COPY.replyTag + partial : partial;
+    return { key: `partial:${snapshot.intentId}:${partial}`, kind: 'reply', text };
+  }
+  const last = lastAssistantReply(snapshot);
+  if (previous !== null && last !== null && last.id !== lastAssistantReply(previous)?.id) {
+    const text = last.mode === 'demo' ? PET_COPY.replyTag + last.text : last.text;
+    return { key: `reply:${last.id}`, kind: 'reply', text };
+  }
+  if (snapshot.phase === 'idle' || snapshot.phase === 'setup') return null;
+  const transcript = snapshot.partialTranscript.trim();
+  const text =
+    transcript !== ''
+      ? clipBubbleText(transcript, 'tail')
+      : {
+          preparing: '正在准备语音输入…',
+          arming: '正在打开麦克风…',
+          recording: '正在听你说话…',
+          recognizing: '正在识别…',
+          thinking: '正在思考…',
+          responding: '正在回答…',
+          saving: '正在保存…',
+          stopping: '正在停止…',
+          error: PET_COPY.stateBubbles.error,
+        }[snapshot.phase];
+  return {
+    key: `status:${snapshot.intentId}:${snapshot.phase}:${transcript}`,
+    kind: 'status',
+    text,
+  };
+}
+
+export function bubbleLifetime(text: string, speed: number): number {
+  return Math.round(
+    (Math.min(20000, Math.max(4500, 2500 + Array.from(text).length * 100)) * 100) / speed,
+  );
+}
+
 export interface DemoStatus {
   /** 已经读到宿主快照，真实阶段与文本可以覆盖窗口原型自己的状态。 */
   live: boolean;
@@ -76,7 +130,7 @@ export function replyBubble(mode: DemoReplyMode | null, text: string): string {
   return mode === 'demo' ? `${PET_COPY.replyTag}${clipped}` : clipped;
 }
 
-function lastAssistantReply(snapshot: DemoSnapshot): DemoMessage | null {
+export function lastAssistantReply(snapshot: DemoSnapshot): DemoMessage | null {
   for (let index = snapshot.messages.length - 1; index >= 0; index -= 1) {
     const message = snapshot.messages[index];
     if (message !== undefined && message.role === 'assistant') return message;

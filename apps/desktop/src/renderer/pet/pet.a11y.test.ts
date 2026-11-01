@@ -403,10 +403,12 @@ describe('非文本对比度：控件边界与焦点环', () => {
 });
 
 describe('颜色方向与语义 token 约束', () => {
-  it('主色仍是蓝色系：蓝通道明显高于红通道', () => {
+  it('默认界面主色是克制的黑色，角色保留独立配色', () => {
     const accent = color('--pet-accent');
-    expect(accent.b).toBeGreaterThan(accent.r + 60);
-    expect(accent.b).toBeGreaterThan(accent.g + 30);
+    expect(Math.max(accent.r, accent.g, accent.b)).toBeLessThan(40);
+    expect(
+      Math.max(accent.r, accent.g, accent.b) - Math.min(accent.r, accent.g, accent.b),
+    ).toBeLessThanOrEqual(4);
   });
 
   it('错误色仍是暖橙色系：红通道明显高于蓝通道', () => {
@@ -636,8 +638,9 @@ describe('气泡在任何视口都必须真实可见', () => {
     }
   });
 
-  it('全局范围内不存在 clip-path: inset(50%) 这类视觉隐藏写法', () => {
+  it('只有紧凑输入框的无障碍标签可视觉隐藏，气泡正文仍可见', () => {
     for (const rule of rules) {
+      if (normalizeSelector(rule.selector) === '.pet-composer__label') continue;
       const clipPath = rule.declarations['clip-path'];
       if (clipPath === undefined) continue;
       expect(
@@ -686,106 +689,41 @@ describe('退出按钮与错误提示在任何视口都不得隐藏', () => {
   });
 });
 
-/**
- * 253×280 档（CSS 视口 < 280px）的取舍必须写死在样式里，而不是靠人记住：
- * 空间确实装不下全部内容，于是可操作提示（.pet-dialog）自己限高滚动，
- * 菜单与退出留在滚动区外，角色缩到 56px 与气泡并排。若以后有人把提示的
- * 自身滚动去掉，这里会失败。
- */
-describe('极小视口：只有提示自己滚动，菜单与退出不藏', () => {
-  function narrowRules(selector: string): CssRule[] {
-    return rules.filter(
-      (rule) =>
-        normalizeSelector(rule.selector) === selector &&
-        rule.conditions.some((condition) => condition.includes('max-width: 279px')),
-    );
-  }
-
-  it('存在 max-width: 279px 的媒体查询', () => {
-    expect(rules.some((rule) => rule.conditions.some((c) => c.includes('max-width: 279px')))).toBe(
-      true,
-    );
-  });
-
-  it('提示自己限高并纵向滚动，内容不会被顶出窗口', () => {
-    const base = rulesFor('.pet-dialog')[0];
-    expect(base?.declarations['overflow-y']).toBe('auto');
-    expect(base?.declarations['max-height']).toMatch(/^\d+px$/);
-    // 窄档只调预算，不换滚动方式：提示仍是可滚动的整块。
-    const narrow = narrowRules('.pet-dialog');
-    expect(narrow.length, '279px 档缺少 .pet-dialog 规则').toBeGreaterThan(0);
-    expect(narrow.some((rule) => rule.declarations['max-height'] === '210px')).toBe(true);
-  });
-
-  it('菜单自己不是滚动容器，退出按钮不会随内容被卷走', () => {
-    for (const selector of ['.pet-menu', '.pet-root__panel']) {
-      for (const rule of rules) {
-        if (normalizeSelector(rule.selector) !== selector) continue;
-        expect(
-          rule.declarations['overflow-y'],
-          selector + ' 自己开了纵向滚动，退出按钮会被卷进滚动内容里',
-        ).not.toBe('auto');
-      }
-    }
-    // 窄档必须允许面板被压缩，并把高度让给提示自己的滚动。
+describe('紧凑视口保留实际控件与可滚动内容', () => {
+  it('窄或矮视口缩小角色，并给内容留出空间', () => {
     expect(
-      narrowRules('.pet-root__panel').some((rule) => rule.declarations['min-height'] === '0'),
-    ).toBe(true);
-  });
-
-  it('退出按钮不用 sticky/absolute/fixed 浮起来盖住提示', () => {
-    // 回归：sticky 吸底会让退出按钮浮在滚动内容上方，等于降低点击目标。
-    for (const rule of rules) {
-      if (normalizeSelector(rule.selector) !== '.pet-menu__quit') continue;
-      const condition = rule.conditions.join(' ') || '无条件';
-      const position = rule.declarations['position'];
-      if (position === undefined) continue;
-      expect(
-        ['sticky', 'absolute', 'fixed'],
-        '.pet-menu__quit 在 ' +
-          condition +
-          ' 下用 position: ' +
-          position +
-          ' 脱离正常流，会盖住滚动内容',
-      ).not.toContain(position);
-    }
-  });
-
-  it('矮视口（宽而矮）也有兜底，不靠按宽度分档漏掉', () => {
-    // 回归：281×280、360×280 这类视口既不命中 279px 档，又装不下全部内容。
-    // 按高度补一档，只收紧高度预算，不改布局形态。
-    const shortTier = rules.filter((rule) =>
-      rule.conditions.some((condition) => condition.includes('max-height: 380px')),
-    );
-    expect(shortTier.length, '缺少矮视口兜底媒体查询').toBeGreaterThan(0);
-    const panel = shortTier.filter(
-      (rule) => normalizeSelector(rule.selector) === '.pet-root__panel',
-    );
-    expect(
-      panel.some((rule) => rule.declarations['min-height'] === '0'),
-      '矮视口下菜单面板仍不可压缩',
-    ).toBe(true);
-    const dialog = shortTier.filter((rule) => normalizeSelector(rule.selector) === '.pet-dialog');
-    expect(
-      dialog.some((rule) => rule.declarations['max-height'] === '190px'),
-      '矮视口下提示没有收紧高度预算',
-    ).toBe(true);
-    // 正常 380×420 的高度是 420 > 380，这一档不会命中，正常窗口行为不受影响。
-    expect(380).toBeLessThan(420);
-  });
-
-  it('角色与菜单是同一个 flex 列里的两块，菜单永远排在最下面', () => {
-    const root = rulesFor('.pet-root')[0];
-    expect(root?.declarations['display']).toBe('flex');
-    expect(root?.declarations['flex-direction']).toBe('column');
-    // 面板自己也是 flex 列：菜单、提示条、重读按钮纵向排布并允许收缩。
-    const panel = rulesFor('.pet-root__panel');
-    expect(
-      panel.some(
-        (rule) =>
-          rule.declarations['display'] === 'flex' &&
-          rule.declarations['flex-direction'] === 'column',
+      rules.some((rule) =>
+        rule.conditions.some((condition) => condition.includes('max-width: 280px')),
       ),
     ).toBe(true);
+    expect(
+      rules.some((rule) =>
+        rule.conditions.some((condition) => condition.includes('max-height: 380px')),
+      ),
+    ).toBe(true);
+    expect(declaration('.pet-root__content', 'min-height')).toBe('0');
+    expect(declaration('.pet-root__content', 'overflow-y')).toBe('auto');
+  });
+  it('菜单限于窗口内并可滚动，退出按钮仍在正常流内', () => {
+    const menu = rulesFor('.pet-root__panel').at(-1);
+    expect(menu?.declarations['max-height']).toBe('calc(100% - 16px)');
+    expect(menu?.declarations['overflow-y']).toBe('auto');
+    expect(
+      rulesFor('.pet-menu__quit').every(
+        (rule) => !['fixed', 'sticky', 'absolute'].includes(rule.declarations['position'] ?? ''),
+      ),
+    ).toBe(true);
+  });
+  it('一行输入按内容增高，六行后在输入框内滚动', () => {
+    const textarea = rulesFor('.pet-composer__input').at(-1);
+    expect(textarea?.declarations['field-sizing']).toBe('content');
+    expect(textarea?.declarations['max-height']).toBe('132px');
+    expect(textarea?.declarations['line-height']).toBe('20px');
+    expect(textarea?.declarations['overflow-y']).toBe('auto');
+  });
+  it('两个侧边圆形工具使用明确要求的 34px 目标并保留可见焦点', () => {
+    expect(declarationPx('.pet-tool', 'width')).toBe(34);
+    expect(declarationPx('.pet-tool', 'height')).toBe(34);
+    expect(declaration('.pet-tool:focus-visible', 'outline')).toContain('var(--pet-focus)');
   });
 });

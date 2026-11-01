@@ -1,3 +1,13 @@
+import { createPresentationBridge } from './presentation-bridge.js';
+import { createSpeechOutputBridge } from './speech-output-bridge.js';
+import { createVoiceInputBridge } from './voice-input-bridge.js';
+import {
+  PRESENTATION_IPC,
+  SPEECH_OUTPUT_IPC,
+  VOICE_INPUT_IPC,
+  type DemoRecordingReceipt,
+  type SpeechOutputAudioEvent,
+} from '@pet/contracts';
 import { createModelConnectionBridge } from './model-connection-bridge.js';
 import { createApplicationBridge } from './application-bridge.js';
 import { APPLICATION_IPC, START_DESIGN_LAB_ARG } from '@pet/contracts';
@@ -85,6 +95,14 @@ contextBridge.exposeInMainWorld(
         demoListeners.delete(listener);
       };
     },
+    (listener) => {
+      const receive = (_event: Electron.IpcRendererEvent, request: DemoRecordingReceipt) =>
+        listener(request);
+      ipcRenderer.on(DEMO_IPC.recordingRequested, receive);
+      return () => {
+        ipcRenderer.removeListener(DEMO_IPC.recordingRequested, receive);
+      };
+    },
   ),
 );
 const securityListeners = new Set<() => void>();
@@ -161,6 +179,46 @@ contextBridge.exposeInMainWorld(
       applicationListeners.add(listener);
       return () => {
         applicationListeners.delete(listener);
+      };
+    },
+  ),
+);
+
+const subscribeChanged = (channel: string, listener: () => void) => {
+  const receive = () => listener();
+  ipcRenderer.on(channel, receive);
+  return () => {
+    ipcRenderer.removeListener(channel, receive);
+  };
+};
+contextBridge.exposeInMainWorld(
+  'petPresentation',
+  createPresentationBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => subscribeChanged(PRESENTATION_IPC.changed, listener),
+  ),
+);
+contextBridge.exposeInMainWorld(
+  'petVoiceInput',
+  createVoiceInputBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => subscribeChanged(VOICE_INPUT_IPC.changed, listener),
+  ),
+);
+contextBridge.exposeInMainWorld(
+  'petSpeechOutput',
+  createSpeechOutputBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => subscribeChanged(SPEECH_OUTPUT_IPC.changed, listener),
+    (listener) => {
+      const receive = (
+        _event: Electron.IpcRendererEvent,
+        event: SpeechOutputAudioEvent,
+        payload?: Uint8Array,
+      ) => listener(event, payload);
+      ipcRenderer.on(SPEECH_OUTPUT_IPC.audio, receive);
+      return () => {
+        ipcRenderer.removeListener(SPEECH_OUTPUT_IPC.audio, receive);
       };
     },
   ),

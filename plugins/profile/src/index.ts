@@ -1,8 +1,14 @@
 import { definePlugin } from '@pet/plugin-sdk';
+import { APPLICATION_DEFAULTS } from '@pet/contracts';
 import type { JsonValue, JsonObject } from '@pet/contracts';
 const object = (value: JsonValue): JsonObject | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null;
 export default definePlugin({
+  async migrateConfig(request) {
+    if (request.fromVersion !== 1 || request.toVersion !== 2)
+      throw new Error('unsupported-profile-version');
+    return { ...structuredClone(APPLICATION_DEFAULTS), ...request.data };
+  },
   activate(ctx) {
     ctx.provide('profile', {
       read: async () => {

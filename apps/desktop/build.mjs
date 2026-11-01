@@ -39,6 +39,10 @@ await bundle({
   target: 'node24',
   external: ['sherpa-onnx-node'],
 });
+await fs.copyFile(
+  path.join(workspace, 'plugins/system-tts/src/system-speech.ps1'),
+  path.join(workspace, 'plugins/system-tts/dist/system-speech.ps1'),
+);
 const admissionEntry = path.join(workspace, '.cache/build-admission/index.cjs');
 await bundle({
   entryPoints: [path.join(root, 'scripts/builtin-admission.ts')],

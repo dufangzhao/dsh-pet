@@ -13,7 +13,7 @@ export default definePlugin({
           return { errorCode: 'asr-failed' };
         let id: string;
         try {
-          id = localModel(input['model']).id;
+          id = input['model'] === 'windows-sapi' ? 'windows-sapi' : localModel(input['model']).id;
         } catch {
           return { errorCode: 'asr-failed' };
         }

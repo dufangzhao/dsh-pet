@@ -6,7 +6,7 @@
     "zh-CN": "本地语音识别"
   },
   "description": {
-    "zh-CN": "使用已缓存的SenseVoice或Paraformer，在本机处理录音"
+    "zh-CN": "使用 FunASR / SenseVoice、固定 Whisper Small 或 Windows 已安装的 SAPI 识别器处理同一份录音"
   },
   "license": "MIT",
   "host": "^1.0.0",
@@ -57,6 +57,15 @@
     {
       "kind": "capability-use",
       "capability": "speech.asr@1"
+    },
+    {
+      "kind": "network",
+      "origins": ["https://modelscope.cn", "https://huggingface.co"]
+    },
+    {
+      "kind": "files",
+      "scope": "resources",
+      "access": "write"
     }
   ],
   "resources": [
@@ -83,6 +92,22 @@
       "sha256": "f3cca9f77bb9d93c8fcbfb63ae617b6b1ee96818df3aa3b151c40658fe38594f",
       "license": "upstream model terms",
       "shared": true
+    },
+    {
+      "id": "whisper-small-encoder",
+      "url": "https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small/resolve/8f3c18b358db4d1f2fc1eae49d75cd20989e4309/small-encoder.int8.onnx",
+      "bytes": 112442483,
+      "sha256": "4cbe7b22fa9026b843b60a68640c747de05bafb1a11b57edc0e66c232d9f33a9",
+      "license": "MIT (Whisper)",
+      "shared": true
+    },
+    {
+      "id": "whisper-small-decoder",
+      "url": "https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small/resolve/8f3c18b358db4d1f2fc1eae49d75cd20989e4309/small-decoder.int8.onnx",
+      "bytes": 262226114,
+      "sha256": "acad50b5c782696e91b55914cc5ab4f756f1532f76e22aa6fc615f39fb69a8ee",
+      "license": "MIT (Whisper)",
+      "shared": true
     }
   ],
   "config": {
@@ -95,7 +120,13 @@
         "model": {
           "type": "string",
           "title": "本地模型",
-          "enum": ["sensevoice-small-int8", "streaming-paraformer-zh-en-int8"]
+          "default": "sensevoice-small-int8",
+          "enum": [
+            "sensevoice-small-int8",
+            "streaming-paraformer-zh-en-int8",
+            "whisper-small-int8",
+            "windows-sapi"
+          ]
         }
       }
     },

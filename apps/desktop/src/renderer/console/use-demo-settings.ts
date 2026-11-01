@@ -62,7 +62,15 @@ export function useDemoSettings(): DemoSettingsState {
       inFlight.current.add(setting);
       setPending((current) => new Set(current).add(setting));
       try {
-        const result = await bridge.saveConfig({ owner, expectedRevision, data });
+        const inspected = await bridge.inspectConfig(owner);
+        if (!inspected.ok) return failure(describeError(inspected.error));
+        if ((inspected.value.snapshot?.revision ?? 0) !== expectedRevision)
+          return failure(CONFLICT_TEXT);
+        const candidate = {
+          ...(inspected.value.snapshot?.data ?? inspected.value.definition.defaults),
+          ...data,
+        };
+        const result = await bridge.saveConfig({ owner, expectedRevision, data: candidate });
         if (!result.ok) {
           return result.error.code === 'conflict'
             ? failure(CONFLICT_TEXT)

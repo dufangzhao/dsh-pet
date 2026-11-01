@@ -1,11 +1,10 @@
 import type { ConsolePlugin, ConsolePluginAction, ConsoleSnapshot } from '@pet/contracts';
 import { errorMessage } from '@pet/contracts';
-import { useEffect, useRef, type JSX, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 
 import { ConsoleStatus } from '../console-status.js';
 import { COPY } from '../copy.js';
 import {
-  contributionKind,
   describePermission,
   hostRuntime,
   ownerKey,
@@ -13,7 +12,7 @@ import {
   pluginState,
   taskSummary,
 } from '../labels.js';
-import { Button, Card, Status, type StatusTone } from '../minimal-ui/controls.js';
+import { Button, Status, type StatusTone } from '../minimal-ui/controls.js';
 import { actionLabel } from '../use-plugin-actions.js';
 
 export interface PluginsPageProps {
@@ -22,56 +21,6 @@ export interface PluginsPageProps {
   error: string | null;
   available: boolean;
   onRetry: () => void;
-  /** 打开某个插件的配置面板；不传就不渲染入口。 */
-  onOpenConfig: ((plugin: ConsolePlugin) => void) | undefined;
-  /** 前往权限与数据页；由外壳提供，页内不自己改路由。 */
-  onOpenPermissions: () => void;
-  /** 正在进行的动作，键是 ownerKey。 */
-  pending: ReadonlyMap<string, ConsolePluginAction>;
-  /** 发起启用/停用/卸载；确认由外壳统一处理。 */
-  onAction: (plugin: ConsolePlugin, action: ConsolePluginAction) => void;
-  /** 运行状态这一块要发起「停止全部任务」；确认框仍然在外壳里。 */
-  onRequestStopAll: () => void;
-  stopping: boolean;
-}
-
-/** 插件页：真实插件列表、声明权限、状态与修复入口。 */
-export function PluginsPage({
-  snapshot,
-  loading,
-  error,
-  available,
-  onRetry,
-  onOpenConfig,
-  onOpenPermissions,
-  pending,
-  onAction,
-  onRequestStopAll,
-  stopping,
-}: PluginsPageProps): JSX.Element {
-  return (
-    <ConsoleStatus loading={loading} error={error} available={available} onRetry={onRetry}>
-      {snapshot === null ? null : (
-        <PluginContent
-          snapshot={snapshot}
-          loading={loading}
-          onRetry={onRetry}
-          onOpenConfig={onOpenConfig}
-          onOpenPermissions={onOpenPermissions}
-          pending={pending}
-          onAction={onAction}
-          onRequestStopAll={onRequestStopAll}
-          stopping={stopping}
-        />
-      )}
-    </ConsoleStatus>
-  );
-}
-
-interface PluginContentProps {
-  snapshot: ConsoleSnapshot;
-  loading: boolean;
-  onRetry: () => void;
   onOpenConfig: ((plugin: ConsolePlugin) => void) | undefined;
   onOpenPermissions: () => void;
   pending: ReadonlyMap<string, ConsolePluginAction>;
@@ -80,96 +29,118 @@ interface PluginContentProps {
   stopping: boolean;
 }
 
-/** 一行「名称在左、值在右」：插件与运行状态共用这一种排法。 */
-function Row({ label, children }: { label: string; children: ReactNode }): JSX.Element {
-  return (
-    <div className="row">
-      <span className="row__text">
-        <span className="row__label">{label}</span>
-      </span>
-      <span className="row__value">{children}</span>
-    </div>
-  );
-}
+type PluginFilter = 'all' | 'active' | 'disabled' | 'builtin';
+const FILTERS: readonly { id: PluginFilter; label: string }[] = [
+  { id: 'all', label: '全部' },
+  { id: 'active', label: '已启用' },
+  { id: 'disabled', label: '已停用' },
+  { id: 'builtin', label: '内置' },
+];
 
 function toneOf(tone: ReturnType<typeof hostRuntime>['tone']): StatusTone {
   return tone === 'neutral' ? 'muted' : tone;
 }
 
-function PluginContent({
-  snapshot,
-  loading,
-  onRetry,
-  onOpenConfig,
-  onOpenPermissions,
-  pending,
-  onAction,
-  onRequestStopAll,
-  stopping,
-}: PluginContentProps): JSX.Element {
-  // 贡献条目只带 owner，按 owner 找显示名；找不到时退回技术 id。
-  const names = new Map(snapshot.plugins.map((plugin) => [ownerKey(plugin.owner), plugin.name]));
-
+/** Search and filters project the current owner snapshots; actions retain their full owner. */
+export function PluginsPage(props: PluginsPageProps): JSX.Element {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<PluginFilter>('all');
+  const plugins = props.snapshot?.plugins ?? [];
+  const search = query.trim().toLocaleLowerCase();
+  const visible = plugins.filter(
+    (plugin) =>
+      (filter === 'all' ||
+        (filter === 'builtin' ? plugin.origin === 'builtin' : plugin.state === filter)) &&
+      (plugin.name + ' ' + plugin.owner.pluginId).toLocaleLowerCase().includes(search),
+  );
   return (
-    <>
-      <RunSection
-        host={snapshot.host}
-        plugins={snapshot.plugins}
-        loading={loading}
-        stopping={stopping}
-        onRequestStopAll={onRequestStopAll}
-        onRetry={onRetry}
-      />
-
-      {snapshot.plugins.length === 0 ? (
-        <Card title="已安装">
-          <p className="row__desc">尚未安装插件。</p>
-        </Card>
-      ) : (
-        snapshot.plugins.map((plugin) => (
-          <div key={ownerKey(plugin.owner)} data-owner-key={ownerKey(plugin.owner)}>
-            <PluginCard
-              plugin={plugin}
-              pending={pending.get(ownerKey(plugin.owner))}
-              onOpenConfig={onOpenConfig}
-              onOpenPermissions={onOpenPermissions}
-              onAction={onAction}
-            />
+    <ConsoleStatus
+      loading={props.loading}
+      error={props.error}
+      available={props.available}
+      onRetry={props.onRetry}
+    >
+      {props.snapshot === null ? null : (
+        <>
+          <RunSection
+            snapshot={props.snapshot}
+            loading={props.loading}
+            stopping={props.stopping}
+            onRequestStopAll={props.onRequestStopAll}
+            onRetry={props.onRetry}
+            onOpenPermissions={props.onOpenPermissions}
+          />
+          <div className="plugin-tools">
+            <label className="plugin-search">
+              <svg
+                className="plugin-search__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                aria-hidden="true"
+              >
+                <circle cx="10" cy="10" r="6" />
+                <path d="m15 15 5 5" />
+              </svg>
+              <input
+                type="search"
+                className="plugin-search__input"
+                value={query}
+                aria-label="搜索插件"
+                placeholder="搜索插件"
+                data-testid="plugin-search"
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </label>
+            <div className="plugin-filters" role="group" aria-label="筛选插件">
+              {FILTERS.map((item) => (
+                <Button
+                  key={item.id}
+                  className="plugin-filter"
+                  aria-pressed={filter === item.id}
+                  data-testid={'plugin-filter-' + item.id}
+                  onClick={() => setFilter(item.id)}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </div>
           </div>
-        ))
+          <p className="row__value" role="status" aria-live="polite">
+            {visible.length} / {plugins.length} 个插件
+          </p>
+          {visible.length === 0 ? (
+            <div className="plugin-empty">
+              <p>{plugins.length === 0 ? '尚未安装插件。' : '没有符合搜索条件的插件。'}</p>
+              {plugins.length > 0 ? (
+                <Button
+                  onClick={() => {
+                    setQuery('');
+                    setFilter('all');
+                  }}
+                >
+                  清除筛选
+                </Button>
+              ) : null}
+            </div>
+          ) : (
+            <div className="plugins-grid">
+              {visible.map((plugin) => (
+                <PluginCard
+                  key={ownerKey(plugin.owner)}
+                  plugin={plugin}
+                  pending={props.pending.get(ownerKey(plugin.owner))}
+                  onOpenConfig={props.onOpenConfig}
+                  onOpenPermissions={props.onOpenPermissions}
+                  onAction={props.onAction}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
-
-      <Card title="贡献目录">
-        {snapshot.contributions.length === 0 ? (
-          <p className="row__desc">没有插件注册界面条目。</p>
-        ) : (
-          <div className="rows rows--tight">
-            {snapshot.contributions.map((item) => (
-              <Row key={ownerKey(item.owner) + '|' + item.id} label={item.title}>
-                {(names.get(ownerKey(item.owner)) ?? item.owner.pluginId) +
-                  ' · ' +
-                  contributionKind(item.kind)}
-              </Row>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      <details className="card">
-        <summary className="card__head">
-          <span className="card__title">高级</span>
-        </summary>
-        <div className="card__body">
-          <div className="rows rows--tight">
-            {snapshot.plugins.map((plugin) => (
-              <Row key={ownerKey(plugin.owner)} label={plugin.name}>
-                {plugin.owner.instanceId + ' · 第 ' + plugin.owner.generation + ' 代'}
-              </Row>
-            ))}
-          </div>
-        </div>
-      </details>
-    </>
+    </ConsoleStatus>
   );
 }
 
@@ -181,12 +152,6 @@ interface PluginCardProps {
   onAction: (plugin: ConsolePlugin, action: ConsolePluginAction) => void;
 }
 
-/**
- * 一个插件：状态、来源、版本、声明权限、错误与修复入口。
- *
- * 可做的动作由状态决定（见 actionsFor）。宿主会拒绝的动作不渲染，
- * 先在这里说清楚，比点了再报错好。
- */
 function PluginCard({
   plugin,
   pending,
@@ -195,38 +160,50 @@ function PluginCard({
   onAction,
 }: PluginCardProps): JSX.Element {
   const state = pluginState(plugin.state);
-  const busy = pending !== undefined;
   const repair = repairHint(plugin);
   const actions = actionsFor(plugin);
-  const hasConfig = onOpenConfig !== undefined;
-  const hasRepair = repair !== null && repair.permissions;
-
+  const busy = pending !== undefined;
   return (
-    <Card title={plugin.name} action={<Status tone={toneOf(state.tone)}>{state.text}</Status>}>
-      <div className="rows rows--tight">
-        <Row label="来源">
-          {pluginOrigin(plugin.origin) +
-            ' · 版本 ' +
-            plugin.version +
-            (plugin.protected ? ' · 受保护' : '')}
-        </Row>
-        {plugin.reason === undefined ? null : (
-          <Row label="原因">
-            <Status tone="danger">{errorMessage(plugin.reason)}</Status>
-          </Row>
-        )}
-      </div>
-
-      <PluginPermissions permissions={plugin.permissions} />
-
-      {repair === null ? null : <p className="row__desc">{repair.text}</p>}
-
-      {actions.length === 0 && !hasConfig && !hasRepair ? null : (
+    <article
+      className="card plugin-card"
+      data-owner-key={ownerKey(plugin.owner)}
+      data-plugin-id={plugin.owner.pluginId}
+      data-plugin-state={plugin.state}
+      data-plugin-builtin={plugin.origin === 'builtin'}
+    >
+      <div className="card__body">
+        <div className="plugin-card__top">
+          <span className="plugin-icon" aria-hidden="true">
+            {plugin.name.slice(0, 1)}
+          </span>
+          <div className="plugin-card__id">
+            <h2 className="card__title">{plugin.name}</h2>
+            <p className="plugin-card__desc">
+              {plugin.protected
+                ? '应用基础功能'
+                : plugin.origin === 'builtin'
+                  ? '随应用提供，可单独启用或停用'
+                  : '你安装的插件'}
+            </p>
+          </div>
+        </div>
+        <div className="plugin-card__meta">
+          <span className="plugin-tag">{pluginOrigin(plugin.origin)}</span>
+          <span>版本 {plugin.version}</span>
+          <Status tone={toneOf(state.tone)}>{state.text}</Status>
+          {plugin.protected ? <span className="plugin-tag">受保护</span> : null}
+        </div>
+        {plugin.reason ? (
+          <p className="plugin-card__note" role="alert">
+            {errorMessage(plugin.reason)}
+          </p>
+        ) : null}
+        {repair ? <p className="plugin-card__note">{repair.text}</p> : null}
+        <PluginPermissions permissions={plugin.permissions} />
         <div className="card__foot">
           {actions.map((action) => (
             <Button
               key={action}
-              /* 内置功能的卸载可以恢复，不用危险色把两件事说成同一件。 */
               variant={action === 'uninstall' && plugin.origin === 'user' ? 'danger' : 'secondary'}
               disabled={busy}
               data-testid={'plugin-' + action + '-' + plugin.owner.pluginId}
@@ -235,14 +212,10 @@ function PluginCard({
               {pending === action ? pendingLabel(action) : actionLabel(action)}
             </Button>
           ))}
-          {hasRepair ? (
-            <Button variant="ghost" onClick={onOpenPermissions}>
-              {COPY.goPermissions}
-            </Button>
-          ) : null}
-          {hasConfig ? (
+          {onOpenConfig ? (
             <Button
               variant="ghost"
+              disabled={busy}
               data-testid={'plugin-config-' + plugin.owner.pluginId}
               aria-label={'配置 ' + plugin.name}
               onClick={() => onOpenConfig(plugin)}
@@ -250,9 +223,14 @@ function PluginCard({
               {COPY.config}
             </Button>
           ) : null}
+          {repair?.permissions ? (
+            <Button variant="ghost" onClick={onOpenPermissions}>
+              {COPY.goPermissions}
+            </Button>
+          ) : null}
         </div>
-      )}
-    </Card>
+      </div>
+    </article>
   );
 }
 
@@ -362,84 +340,78 @@ function PluginPermissions({
   );
 }
 
-/**
- * 运行状态：这一页管的就是本机在跑的东西，所以它排在插件列表上面。
- * 只报确切的计数——有空闲、有任务、有未就绪插件是三件不同的事；
- * 刷新与停止入口都收在这一节的脚上。
- */
 function RunSection({
-  host,
-  plugins,
+  snapshot,
   loading,
   stopping,
   onRequestStopAll,
   onRetry,
+  onOpenPermissions,
 }: {
-  host: ConsoleSnapshot['host'];
-  plugins: readonly ConsolePlugin[];
+  snapshot: ConsoleSnapshot;
   loading: boolean;
   stopping: boolean;
   onRequestStopAll: () => void;
   onRetry: () => void;
+  onOpenPermissions: () => void;
 }): JSX.Element {
+  const host = snapshot.host;
   const runtime = hostRuntime(host.runtime);
   const busy = host.runningTasks > 0 || host.pendingWork > 0;
-  const taskRef = useRef<HTMLDivElement>(null);
-  const hadStopRef = useRef(busy);
-  const disabledCount = plugins.filter((plugin) => plugin.state === 'disabled').length;
-  const protectedCount = plugins.filter((plugin) => plugin.protected).length;
-
-  /*
-   * 任务可能在确认框打开期间自然结束，停止入口随之卸载，焦点会掉到 body。
-   * 只在「入口刚消失且焦点确实无人接管」时，把它就近交给任务行。
-   */
+  const toolbar = useRef<HTMLDivElement>(null);
+  const hadStop = useRef(busy);
   useEffect(() => {
-    const vanished = hadStopRef.current && !busy;
-    hadStopRef.current = busy;
-    if (vanished && document.activeElement === document.body) {
-      taskRef.current?.focus();
-    }
+    const vanished = hadStop.current && !busy;
+    hadStop.current = busy;
+    if (vanished && document.activeElement === document.body) toolbar.current?.focus();
   }, [busy]);
-
   return (
-    <Card title="运行状态" action={<Status tone={toneOf(runtime.tone)}>{runtime.text}</Status>}>
-      <div className="rows rows--tight">
-        <Row label="已安装">{host.installedPlugins}</Row>
-        <Row label="已启用">{host.activePlugins}</Row>
-        <Row label="已停用">{disabledCount}</Row>
-        <Row label="受保护">{protectedCount}</Row>
-        <div className="row" ref={taskRef} tabIndex={-1}>
-          <span className="row__text">
-            <span className="row__label">任务</span>
-          </span>
-          <span className="row__value">{taskSummary(host.runningTasks, host.pendingWork)}</span>
-        </div>
-        {host.unreadyPlugins === 0 ? null : <Row label="未就绪">{host.unreadyPlugins}</Row>}
-        {host.pendingRestartPlugins === 0 ? null : (
-          <Row label="待重启">{host.pendingRestartPlugins}</Row>
-        )}
-      </div>
-
-      <div className="card__foot">
-        <Button data-testid="console-refresh" disabled={loading} onClick={onRetry}>
+    <div
+      className="plugin-toolbar"
+      data-runtime-state={host.runtime}
+      aria-label="运行状态"
+      ref={toolbar}
+      tabIndex={-1}
+    >
+      <span className="plugin-toolbar__state" role="status">
+        <Status tone={toneOf(runtime.tone)}>{runtime.text}</Status>
+      </span>
+      <span className="plugin-toolbar__stats">
+        <span>
+          已安装 <b>{host.installedPlugins}</b>
+        </span>
+        <span>
+          已启用 <b>{host.activePlugins}</b>
+        </span>
+        <span>{taskSummary(host.runningTasks, host.pendingWork)}</span>
+        {host.unreadyPlugins > 0 ? (
+          <Status tone="warn">{host.unreadyPlugins} 个未就绪</Status>
+        ) : null}
+        {host.pendingRestartPlugins > 0 ? (
+          <Status tone="warn">{host.pendingRestartPlugins} 个待重启</Status>
+        ) : null}
+      </span>
+      <span className="plugin-toolbar__actions">
+        <Button size="small" data-testid="console-refresh" disabled={loading} onClick={onRetry}>
           {loading ? COPY.refreshing : COPY.refresh}
+        </Button>
+        <Button size="small" data-testid="plugins-permissions" onClick={onOpenPermissions}>
+          权限与数据
         </Button>
         {busy ? (
           <Button
+            size="small"
             data-testid="console-stop-all"
-            /* 不换成 disabled：等待期间这一颗还要保住焦点，重复点击由这里挡住。 */
             aria-disabled={stopping}
             aria-busy={stopping}
             onClick={() => {
-              if (!stopping) {
-                onRequestStopAll();
-              }
+              if (!stopping) onRequestStopAll();
             }}
           >
             {stopping ? '正在停止…' : '停止全部任务'}
           </Button>
         ) : null}
-      </div>
-    </Card>
+      </span>
+    </div>
   );
 }

@@ -304,7 +304,11 @@ export class RuntimeWorkerServer {
     this.#calls.set(callKey, { owner, signal });
     try {
       const output = await method(
-        { taskId: context.taskId, signal, deadline: performance.now() + context.budgetMs },
+        {
+          taskId: context.taskId,
+          signal,
+          ...(context.budgetMs === null ? {} : { deadline: performance.now() + context.budgetMs }),
+        },
         body['input']!,
       );
       if (signal.aborted || !item.ready || this.#instances.get(instanceKey(owner)) !== item)

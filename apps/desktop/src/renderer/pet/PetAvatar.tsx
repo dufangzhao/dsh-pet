@@ -28,6 +28,9 @@ export interface PetAvatarProps {
   onPointerDown?: (event: React.PointerEvent<SVGSVGElement>) => void;
   /** 系统抢走指针捕获时结束拖拽，避免卡在拖拽态。 */
   onLostPointerCapture?: (event: React.PointerEvent<SVGSVGElement>) => void;
+  onDoubleClick?: (event: React.MouseEvent<SVGSVGElement>) => void;
+  onContextMenu?: (event: React.MouseEvent<SVGSVGElement>) => void;
+  onKeyDown?: (event: React.KeyboardEvent<SVGSVGElement>) => void;
 }
 
 const LABEL_IDS: Record<PetState, string> = {
@@ -92,6 +95,9 @@ export function PetAvatar({
   svgRef,
   onPointerDown,
   onLostPointerCapture,
+  onDoubleClick,
+  onContextMenu,
+  onKeyDown,
 }: PetAvatarProps): React.JSX.Element {
   const shape = GEOMETRY[figure];
   const [leftBrow, rightBrow] = shape.brows;
@@ -102,7 +108,9 @@ export function PetAvatar({
       ref={svgRef}
       className={`pet-avatar pet-avatar--${state} pet-avatar--${figure}`}
       viewBox="0 0 160 160"
-      role="img"
+      role="button"
+      tabIndex={0}
+      aria-keyshortcuts="Enter Shift+F10"
       aria-label={name === null || name === '' ? '桌宠角色' : `桌宠 ${name}`}
       data-testid="pet-avatar"
       data-state={state}
@@ -111,6 +119,9 @@ export function PetAvatar({
       data-label-id={LABEL_IDS[state]}
       onPointerDown={onPointerDown}
       onLostPointerCapture={onLostPointerCapture}
+      onDoubleClick={onDoubleClick}
+      onContextMenu={onContextMenu}
+      onKeyDown={onKeyDown}
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>

@@ -65,6 +65,8 @@ export interface DemoState {
   recording: DemoRecording | null;
   /** 剩余秒数；到点自动结束，和手动点「结束并识别」同一条路。 */
   left: number | null;
+  /** Actual microphone RMS; null/absent means no live sample has arrived. */
+  level?: number | null;
   startRecording: () => Promise<void>;
   endRecording: () => Promise<void>;
   /** 用户主动作废这一次：只有这时候才发 cancel。 */
@@ -112,6 +114,7 @@ export function useDemo({ notify }: DemoOptions): DemoState {
   const [pending, setPending] = useState<ReadonlySet<DemoAction>>(new Set());
   const [recording, setRecording] = useState<DemoRecording | null>(null);
   const [left, setLeft] = useState<number | null>(null);
+  const [level, setLevel] = useState<number | null>(null);
   // 读取可能在窗口关闭之后才回来。
   const alive = useRef(true);
   const inFlight = useRef(new Set<DemoAction>());
@@ -128,6 +131,7 @@ export function useDemo({ notify }: DemoOptions): DemoState {
   const handleRef = useRef<DemoCaptureHandle | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const recordingRef = useRef<DemoRecording | null>(null);
+  const finishRequested = useRef<AbortController | null>(null);
 
   const read = useCallback(async (visible: boolean) => {
     const current = currentBridge();
@@ -319,8 +323,10 @@ export function useDemo({ notify }: DemoOptions): DemoState {
     recordingRef.current = null;
     handleRef.current = null;
     abortRef.current = null;
+    finishRequested.current = null;
     setRecording(null);
     setLeft(null);
+    setLevel(null);
   }, []);
 
   /** 只放本地资源：挂起的授权也中止、设备关掉；服务端状态由它自己的事件与提示说话。 */
@@ -331,11 +337,13 @@ export function useDemo({ notify }: DemoOptions): DemoState {
   }, [clearSession]);
 
   const startRecording = useCallback(async (): Promise<void> => {
-    if (recordingRef.current !== null || microphoneCapture === null) {
-      return;
-    }
+    if (abortRef.current !== null || inFlight.current.has('record')) return;
+    const controller = new AbortController();
+    abortRef.current = controller;
     const ticket = await beginRecording();
+    if (abortRef.current !== controller || controller.signal.aborted) return;
     if (ticket === null) {
+      clearSession();
       notifyRef.current('没有开始录音。', 'danger');
       return;
     }
@@ -345,8 +353,6 @@ export function useDemo({ notify }: DemoOptions): DemoState {
      * 读取序号只用于忽略开始前的快照（startedFrom），不参与句柄归属：ready 一定带一次
      * changed 事件，拿它当归属就等于每次都由自己把刚开好的设备关掉。
      */
-    const controller = new AbortController();
-    abortRef.current = controller;
     const next: DemoRecording = {
       token: ticket.token,
       // 能录多久以票据为准：那是服务端真正接受的上限。
@@ -386,6 +392,7 @@ export function useDemo({ notify }: DemoOptions): DemoState {
             return;
           }
           const outcome = await session.ended();
+          if (!current()) return;
           clearSession();
           notifyRef.current(
             outcome.ok ? '已开始识别。' : `结束录音失败：${outcome.error}`,
@@ -401,6 +408,9 @@ export function useDemo({ notify }: DemoOptions): DemoState {
           clearSession();
           notifyRef.current(`录音中断（${reason}），没有送去识别。`, 'danger');
         },
+        level: (rms) => {
+          if (current()) setLevel(rms);
+        },
         signal: controller.signal,
       });
     } catch {
@@ -413,10 +423,12 @@ export function useDemo({ notify }: DemoOptions): DemoState {
       return;
     }
     handleRef.current = device;
+    if (finishRequested.current === controller) await device.stop();
   }, [beginRecording, clearSession, openCapture]);
 
   /** 结束：只请求采集停止，提交识别交给 ended() 回调，不在两处各发一次。 */
   const endRecording = useCallback(async (): Promise<void> => {
+    finishRequested.current = abortRef.current;
     const handle = handleRef.current;
     if (handle !== null) {
       await handle.stop();
@@ -430,14 +442,32 @@ export function useDemo({ notify }: DemoOptions): DemoState {
   }, [closeLocal, run]);
 
   useEffect(() => {
-    if (recording === null) {
+    const current = currentBridge();
+    if (!current?.onRecordingRequested) return;
+    let lastId = '';
+    return current.onRecordingRequested((request) => {
+      if (request.id === lastId) return;
+      lastId = request.id;
+      if (request.action === 'cancel') void cancelRecording();
+      else if (
+        request.action === 'finish' ||
+        abortRef.current !== null ||
+        inFlight.current.has('record')
+      )
+        void endRecording();
+      else void startRecording();
+    });
+  }, [cancelRecording, endRecording, startRecording]);
+
+  useEffect(() => {
+    if (recording === null || snapshot?.phase !== 'recording') {
       return;
     }
     const timer = setInterval(() => {
       setLeft((value) => (value === null ? value : value - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [recording]);
+  }, [recording, snapshot?.phase]);
 
   /* 到点自动结束：与手动点「结束并识别」同一条路。 */
   useEffect(() => {
@@ -501,6 +531,7 @@ export function useDemo({ notify }: DemoOptions): DemoState {
       removeProviderKey,
       recording,
       left,
+      level,
       startRecording,
       endRecording,
       cancelRecording,
@@ -519,6 +550,7 @@ export function useDemo({ notify }: DemoOptions): DemoState {
       removeProviderKey,
       recording,
       left,
+      level,
       startRecording,
       endRecording,
       cancelRecording,

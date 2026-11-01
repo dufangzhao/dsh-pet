@@ -32,6 +32,27 @@ it('does not grant capture or key administration to pet views or untrusted frame
   expect(beginRecording).not.toHaveBeenCalled();
   expect(saveKey).not.toHaveBeenCalled();
 });
+it('allows a trusted pet to request the shared Console recording owner without granting capture', async () => {
+  const requestRecording = vi.fn(async () => ({
+      ok: true,
+      value: { id: 'request-1', action: 'toggle' },
+    })),
+    beginRecording = vi.fn();
+  const demo = { requestRecording, beginRecording } as unknown as DemoController;
+  expect(
+    await handleDemoRequest(
+      { ...source, role: 'pet' },
+      'requestRecording',
+      [{ action: 'toggle' }],
+      demo,
+    ),
+  ).toEqual({ ok: true, value: { id: 'request-1', action: 'toggle' } });
+  expect(requestRecording).toHaveBeenCalledWith({ action: 'toggle' });
+  expect(beginRecording).not.toHaveBeenCalled();
+  expect(
+    await handleDemoRequest(source, 'requestRecording', [{ action: 'start', senderId: 5 }], demo),
+  ).toMatchObject({ error: { code: 'invalid-input' } });
+});
 it('keeps PCM out of JSON and validates arity before dispatch', async () => {
   const pushAudio = vi.fn(() => ({ ok: true, value: null }));
   const demo = { pushAudio } as unknown as DemoController;

@@ -7,6 +7,7 @@ export interface DemoRequestSource extends PetRequestSource {
   readonly role: 'pet' | 'console';
 }
 export type DemoAction =
+  | 'requestRecording'
   | 'snapshot'
   | 'record'
   | 'ready'
@@ -30,7 +31,8 @@ export async function handleDemoRequest(
   });
   if (
     !isTrustedPetSource(source) ||
-    (source.role !== 'console' && !['snapshot', 'cancel', 'send'].includes(action))
+    (source.role !== 'console' &&
+      !['snapshot', 'cancel', 'send', 'requestRecording'].includes(action))
   )
     return fail('permission-denied');
   try {
@@ -46,6 +48,11 @@ export async function handleDemoRequest(
     const safe = jsonPreflight(args[0]),
       body = safe.ok ? record(safe.value) : null;
     if (!body) return fail('invalid-input');
+    if (action === 'requestRecording')
+      return exactKeys(body, ['action']) &&
+        ['toggle', 'finish', 'cancel'].includes(body['action'] as string)
+        ? await demo.requestRecording({ action: body['action'] as 'toggle' | 'finish' | 'cancel' })
+        : fail('invalid-input');
     if (action === 'send')
       return exactKeys(body, ['text']) && typeof body['text'] === 'string'
         ? await demo.sendText(body['text'], source.role === 'pet' ? 'bubble' : 'console')

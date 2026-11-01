@@ -19,6 +19,8 @@ export interface PetMenuProps {
   onGuide(): void;
   quitDisabled: boolean;
   onQuit(): void;
+  onClose?(): void;
+  onResumeDialog?(): void;
 }
 
 export function PetMenu({
@@ -31,6 +33,8 @@ export function PetMenu({
   onGuide,
   quitDisabled,
   onQuit,
+  onClose,
+  onResumeDialog,
 }: PetMenuProps): React.JSX.Element {
   const launcher = typeof window === 'undefined' ? undefined : window.petSettings;
   const [opening, setOpening] = useState(false);
@@ -58,7 +62,27 @@ export function PetMenu({
         </p>
       ) : null}
 
+      {onClose ? (
+        <button
+          type="button"
+          className="pet-icon-button pet-menu__close"
+          aria-label="收起菜单"
+          onClick={onClose}
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      ) : null}
       <div className="pet-menu__actions">
+        {onResumeDialog ? (
+          <button
+            type="button"
+            className="pet-menu__button"
+            data-testid="pet-resume-dialog"
+            onClick={onResumeDialog}
+          >
+            继续提示
+          </button>
+        ) : null}
         <button
           type="button"
           className="pet-menu__button"

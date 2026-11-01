@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.asr-cloud",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "OpenAI 语音识别"
+  },
+  "description": {
+    "zh-CN": "通过所选 OpenAI 转写模型识别录音；Key 只保存在系统凭据库"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "openai",
+      "capability": "speech.asr@1",
+      "features": {
+        "methodPermissions": {
+          "transcribe": [
+            {
+              "kind": "network",
+              "origins": [
+                "https://api.openai.com",
+                "https://api.groq.com",
+                "https://api.siliconflow.cn",
+                "https://api.siliconflow.com"
+              ]
+            },
+            {
+              "kind": "credentials",
+              "keys": ["api-key"]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "network",
+      "origins": [
+        "https://api.openai.com",
+        "https://api.groq.com",
+        "https://api.siliconflow.cn",
+        "https://api.siliconflow.com"
+      ]
+    },
+    {
+      "kind": "credentials",
+      "keys": ["api-key"]
+    }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    },
+    "apply": {}
+  }
+}

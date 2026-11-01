@@ -23,17 +23,17 @@ TSX_DISABLE_CACHE=1 selects the loader supported in-memory path so plugin runtim
 
 ## Validation & error matrix
 
-| Trigger | Required behavior |
-| --- | --- |
-| missing/wrong owner or no active task on own config.save | deny; no cross-owner argument accepted |
-| stale expectedRevision | conflict, preserve draft/data |
-| config schema explicit full prompt bound | up to16384 code points; default remains4096;48KiB value byte budget still applies |
-| source artifact changed | package-changed / review exact new fingerprint; never silently trust current discovery |
-| network/credential provider setup | ask policy; local denies network and cannot mean cloud-ready |
-| saved prefix candidate, Core session write fails | applied revision remains old, error reported, same candidate can retry; do not generate until acknowledgment succeeds |
-| agent deliberately stopped/removed/faulted at startup | start recovery UI; migrate/attach only active generation; marker changes only after successful import |
-| voiceEnabled=false | real canRecord=false; prevent new recording and cancel voice intent/capture, preserve text path |
-| stale guide/update/permission choice | reject; cannot approve newer task/state |
+| Trigger                                                  | Required behavior                                                                                                     |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| missing/wrong owner or no active task on own config.save | deny; no cross-owner argument accepted                                                                                |
+| stale expectedRevision                                   | conflict, preserve draft/data                                                                                         |
+| config schema explicit full prompt bound                 | up to16384 code points; default remains4096;48KiB value byte budget still applies                                     |
+| source artifact changed                                  | package-changed / review exact new fingerprint; never silently trust current discovery                                |
+| network/credential provider setup                        | ask policy; local denies network and cannot mean cloud-ready                                                          |
+| saved prefix candidate, Core session write fails         | applied revision remains old, error reported, same candidate can retry; do not generate until acknowledgment succeeds |
+| agent deliberately stopped/removed/faulted at startup    | start recovery UI; migrate/attach only active generation; marker changes only after successful import                 |
+| voiceEnabled=false                                       | real canRecord=false; prevent new recording and cancel voice intent/capture, preserve text path                       |
+| stale guide/update/permission choice                     | reject; cannot approve newer task/state                                                                               |
 
 ## Good / base / bad cases
 
@@ -92,17 +92,17 @@ CredentialBroker.registerManagedSecret({pluginId,instanceId},keyId,resolver) is 
 
 ### 4. Validation & error matrix
 
-| Condition | Outcome |
-| --- | --- |
-| unexpected frame, URL, arity or payload key | reject before management |
-| stale revision before save | conflict, no Key replacement |
-| config revision changes during approved probe | conflict; no activation/binding/mode/resume |
-| network/credential denied or task cancelled | failed test; saved data remains, no false activation |
-| browser login has no granted plan, bad state/identity or is cancelled | no new credential; failed/idle state |
-| plan grants no visible model | failed test, no invented default connection |
-| explicit deny during save/restore | preserve deny; do not prompt or use Key |
-| source changed or not reviewed during restore | restore notice; keep recovery UI |
-| provider omits usage | nullable/unknown meters, not zero-cost proof |
+| Condition                                                             | Outcome                                              |
+| --------------------------------------------------------------------- | ---------------------------------------------------- |
+| unexpected frame, URL, arity or payload key                           | reject before management                             |
+| stale revision before save                                            | conflict, no Key replacement                         |
+| config revision changes during approved probe                         | conflict; no activation/binding/mode/resume          |
+| network/credential denied or task cancelled                           | failed test; saved data remains, no false activation |
+| browser login has no granted plan, bad state/identity or is cancelled | no new credential; failed/idle state                 |
+| plan grants no visible model                                          | failed test, no invented default connection          |
+| explicit deny during save/restore                                     | preserve deny; do not prompt or use Key              |
+| source changed or not reviewed during restore                         | restore notice; keep recovery UI                     |
+| provider omits usage                                                  | nullable/unknown meters, not zero-cost proof         |
 
 ### 5. Good / base / bad cases
 
@@ -144,16 +144,16 @@ The reference theme editor changes persisted UI state from a mode string to a sc
 
 ### 4. Validation & error matrix
 
-| Condition | Behavior |
-| --- | --- |
-| invalid hex or unknown token | reject field/token; retain legal draft |
-| storage quota or readback mismatch | show failure; no saved success |
-| leave with preview | restore committed palette |
-| delete window elapsed | arm again, do not delete |
-| unavailable Core | run action disabled with truthful state |
+| Condition                           | Behavior                                    |
+| ----------------------------------- | ------------------------------------------- |
+| invalid hex or unknown token        | reject field/token; retain legal draft      |
+| storage quota or readback mismatch  | show failure; no saved success              |
+| leave with preview                  | restore committed palette                   |
+| delete window elapsed               | arm again, do not delete                    |
+| unavailable Core                    | run action disabled with truthful state     |
 | focus moves inside preview composer | keep composer mounted; Send must reach host |
-| hidden/disposed preview | no expression receipt |
-| rejected text submission | retain draft, no invented user/reply record |
+| hidden/disposed preview             | no expression receipt                       |
+| rejected text submission            | retain draft, no invented user/reply record |
 
 ### 5. Good / base / bad cases
 
@@ -188,3 +188,7 @@ Wrong: draw a local response or write a second chat history. Correct: submit to 
 5. Native details onOpenChange reports a value: set that value rather than blindly flipping on every toggle, including mount events. Menus, fields and switches must retain real label/focus/disabled behavior.
 6. Verify visible nonzero unclipped avatar and usable preview width in each actual container; viewport-only breakpoints do not protect narrow columns. Test saved-key/probe-denied truth, all36theme fields/CRUD/undo, migration, retained drafts/history, actual native visibility/pause/guide and restart.
 7. Originality needs actual whole-window and control closeup review against the rejected predecessor. Absence of old classes, a new palette or functional pass alone does not establish a coherent original component language. The state board is labelled as design samples, not fake backend receipts.
+
+## Plugin desktop-pet MVP
+
+The current module ownership, speech.output contract, hidden capture-owner lifetime, revision-bound editor drafts and owner-scoped runtime invocation rules are maintained in [the canonical MVP guide](../../../docs/plugin-pet-mvp.md). Follow that guide when extending these surfaces; keep active page contributions and config/permission/media authority in the existing kernel. Native evidence is [recorded here](../../../qa/plugin-pet-mvp/README.md).

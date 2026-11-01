@@ -22,6 +22,16 @@ describe('control messages: accepted shapes', () => {
       'request',
       { type: 'request', method: 'start', payload: { a: 1 }, taskId: 'task-1', budgetMs: 5000 },
     ],
+    [
+      'owner-scoped runtime invocation',
+      {
+        type: 'request',
+        method: 'runtime.invoke',
+        payload: {},
+        taskId: 'listener',
+        budgetMs: null,
+      },
+    ],
     ['request without optional fields', { type: 'request', method: 'ping', payload: {} }],
     ['request carrying an array payload', { type: 'request', method: 'ping', payload: [1, 'a'] }],
     ['request carrying a null payload', { type: 'request', method: 'ping', payload: null }],
@@ -69,6 +79,18 @@ describe('control messages: rejected shapes', () => {
     ['credits above the budget', { type: 'stream-credit', streamId: 's', taskId: 't', credits: 9 }],
     ['zero credits', { type: 'stream-credit', streamId: 's', taskId: 't', credits: 0 }],
     ['budget above the cap', { type: 'request', method: 'm', payload: {}, budgetMs: 86400001 }],
+    [
+      'owner-scoped host request',
+      { type: 'request', method: 'host.api', payload: {}, taskId: 'task', budgetMs: null },
+    ],
+    [
+      'owner-scoped command',
+      { type: 'request', method: 'runtime.command', payload: {}, taskId: 'task', budgetMs: null },
+    ],
+    [
+      'owner-scoped invocation without task',
+      { type: 'request', method: 'runtime.invoke', payload: {}, budgetMs: null },
+    ],
     ['zero budget', { type: 'request', method: 'm', payload: {}, budgetMs: 0 }],
     ['negative sequence', { type: 'event', topic: 't', sequence: -1, payload: {} }],
     ['payload is not JSON', { type: 'request', method: 'm', payload: { fn: () => 1 } }],

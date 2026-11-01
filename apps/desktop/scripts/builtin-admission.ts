@@ -1,11 +1,18 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { discoverPlugins } from '../../../packages/host-kernel/src/runtime/discovery.js';
-import { APPLICATION_PLUGIN_IDS, DEMO_PLUGIN_IDS } from '../../../packages/contracts/src/index.js';
+import {
+  APPLICATION_PLUGIN_IDS,
+  DEMO_PLUGIN_IDS,
+  SPEECH_OUTPUT_PLUGIN_IDS,
+  VOICE_INPUT_PLUGIN_IDS,
+} from '../../../packages/contracts/src/index.js';
 export async function generateAdmission(workspace: string): Promise<void> {
   const admitted = new Set<string>([
     ...Object.values(APPLICATION_PLUGIN_IDS),
     ...Object.values(DEMO_PLUGIN_IDS),
+    ...Object.values(SPEECH_OUTPUT_PLUGIN_IDS),
+    ...Object.values(VOICE_INPUT_PLUGIN_IDS),
   ]);
   const found = await discoverPlugins([
     { directory: path.join(workspace, 'plugins'), origin: 'builtin' },

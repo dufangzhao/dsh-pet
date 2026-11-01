@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "errors": [],
+  "application": {
+    "ok": true,
+    "error": null,
+    "profile": {
+      "revision": 35,
+      "fields": 56
+    },
+    "agent": "ready",
+    "pages": ["开始", "人设", "装扮", "对话", "语音输入"]
+  }
+}

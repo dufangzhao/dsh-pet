@@ -1,303 +1,477 @@
 import { useId, useState, type JSX } from 'react';
-
-import type { DemoSnapshot, DemoReplyMode } from '@pet/contracts';
-
-import { saveChoice } from '../app-views.js';
+import {
+  TALK_KEYS,
+  VOICE_INPUT_CLOUD_ORIGINS,
+  voiceInputModel,
+  type DemoSnapshot,
+  type VoiceInputSettings,
+} from '@pet/contracts';
 import { ConsoleStatus } from '../console-status.js';
 import { describeError } from '../copy.js';
 import { demoPhase } from '../labels.js';
-import { Button, Card, Status, Switch } from '../minimal-ui/controls.js';
+import {
+  Button,
+  Card,
+  Field,
+  Select as NativeSelect,
+  Status,
+  Switch,
+} from '../minimal-ui/controls.js';
 import type { ApplicationState } from '../use-application.js';
 import type { DemoState } from '../use-demo.js';
 import { useDemoSettings } from '../use-demo-settings.js';
+import { useVoiceInput } from '../use-voice-input.js';
 import { DemoRecorder } from './demo-console.js';
-
 export interface VoicePageProps {
   app: ApplicationState;
   demo: DemoState;
   notify: (message: string, tone: 'ok' | 'danger') => void;
-  /** 填 Key 在开始页；这里只把它作为出口，不复制一份表单。 */
   onGoToStart: () => void;
 }
-
-/**
- * 语音输入页：能不能用语音、用哪个模型识别、说完之后怎么处理。
- *
- * 控件的值一律来自宿主那一份快照（偏好或 Demo 设置），本机不存"将要生效的值"：
- * 写失败时这一行自然回到真实的值。录音会话只有 useDemo 那一份，切页不会关麦；
- * 最长时长与录音过程由那条会话自己说，这里不另写一遍。
- */
+/** The draft keeps its inspected revision while device and download snapshots update. */
 export function VoicePage({ app, demo, notify, onGoToStart }: VoicePageProps): JSX.Element {
-  const settings = useDemoSettings();
-  const [saving, setSaving] = useState<string | null>(null);
-
-  const snapshot = demo.snapshot;
-
+  const voice = useVoiceInput(),
+    legacy = useDemoSettings();
+  const [draft, setDraft] = useState<{ revision: number; data: VoiceInputSettings } | null>(null);
+  const [key, setKey] = useState(''),
+    [touched, setTouched] = useState({ url: false, model: false });
+  const stored = voice.snapshot,
+    values = draft?.data ?? stored?.settings ?? null;
+  const levelId = useId();
+  const urlIssue = values ? cloudUrlError(values.cloudBaseUrl) : null;
+  const modelIssue =
+    values && !/^[a-zA-Z0-9._:/-]{1,128}$/.test(values.cloudModel)
+      ? '请输入有效的转写模型名称'
+      : null;
+  const edit = <K extends keyof VoiceInputSettings>(
+    name: K,
+    value: VoiceInputSettings[K],
+  ): void => {
+    if (!stored) return;
+    setDraft((current) => ({
+      revision: current?.revision ?? stored.revision,
+      data: {
+        ...(current?.data ?? stored.settings),
+        [name]: value,
+        ...(name === 'talkKeyCode' ? { talkKeyLabel: TALK_KEYS[String(value)]?.label ?? '' } : {}),
+      },
+    }));
+  };
+  const save = async (): Promise<void> => {
+    if (!draft) return;
+    setTouched({ url: true, model: true });
+    if (urlIssue || modelIssue) return;
+    const result = await voice.saveSettings(draft.data, draft.revision);
+    if (result.ok) {
+      setDraft(null);
+      notify('语音设置已保存。', 'ok');
+      demo.refresh();
+    } else notify(result.error ?? '语音设置没有保存。', 'danger');
+  };
+  const setEnabled = async (enabled: boolean): Promise<void> => {
+    const result = await (enabled ? voice.start() : voice.stop());
+    demo.refresh();
+    if (!result.ok) notify(result.error ?? '语音输入没有切换。', 'danger');
+  };
+  const saveKey = async (value: string): Promise<void> => {
+    const result = await voice.saveApiKey(value);
+    if (result.ok) {
+      setKey('');
+      notify(value ? 'API Key 已保存。' : 'API Key 已移除。', 'ok');
+    } else notify(result.error ?? 'API Key 操作没有完成。', 'danger');
+  };
+  const microphoneOptions = [
+    { value: '', label: '跟随系统默认' },
+    ...voice.microphones.map((device) => ({ value: device.id, label: device.label })),
+  ];
+  if (
+    values?.microphoneId &&
+    !microphoneOptions.some((device) => device.value === values.microphoneId)
+  )
+    microphoneOptions.push({ value: values.microphoneId, label: '已选设备当前不可用' });
+  const selected = stored?.engines.find((engine) => engine.id === values?.engine);
+  const model = values
+    ? stored?.models.find((model) => model.id === voiceInputModel(values.engine))
+    : null;
+  const local = values?.engine === 'sensevoice' || values?.engine === 'whisper-small';
+  const download = stored?.download?.modelId === model?.id ? stored?.download : null;
+  const error = voice.error ?? (stored?.error ? describeError(stored.error) : null);
+  const changedElsewhere = draft !== null && stored !== null && draft.revision !== stored.revision;
   return (
-    <ConsoleStatus
-      loading={demo.loading}
-      error={demo.error}
-      available={demo.available}
-      onRetry={demo.refresh}
-    >
-      {snapshot === null ? null : (
-        <>
-          <Card title="语音输入">
-            {app.values === null ? null : (
-              <div className="rows">
+    <>
+      <ConsoleStatus
+        available={voice.available}
+        loading={voice.loading && stored === null}
+        error={stored === null ? voice.error : null}
+        onRetry={voice.refresh}
+      >
+        {stored && values ? (
+          <>
+            <Card
+              title="语音输入"
+              action={
+                <Status tone={stored.talkKeyActive ? 'ok' : 'muted'}>
+                  {stored.talkKeyActive ? '说话键已启用' : '说话键未启动'}
+                </Status>
+              }
+            >
+              {app.values ? (
                 <Switch
                   label="用语音说话"
                   checked={app.values.voiceEnabled}
-                  disabled={app.saving}
+                  disabled={app.saving || (!app.values.voiceEnabled && voice.busy)}
                   data-testid="pref-voice-enabled"
-                  onChange={(next) => void saveChoice(app, notify, { voiceEnabled: next })}
+                  onChange={(next) => void setEnabled(next)}
                 />
+              ) : null}
+              {app.values?.voiceEnabled && !stored.talkKeyActive ? (
+                <div className="card__foot">
+                  <Button
+                    busy={voice.busy}
+                    data-testid="voice-start"
+                    onClick={() => void setEnabled(true)}
+                  >
+                    启动语音输入
+                  </Button>
+                </div>
+              ) : null}
+              {error ? (
+                <p role="alert">
+                  <Status tone="danger">{error}</Status>
+                </p>
+              ) : null}
+              <div className="field-row">
+                <Field label="识别引擎" className="field--grow">
+                  {({ inputId }) => (
+                    <NativeSelect
+                      id={inputId}
+                      value={values.engine}
+                      disabled={voice.busy}
+                      data-testid="voice-engine"
+                      options={stored.engines.map((engine) => ({
+                        value: engine.id,
+                        label: engine.label,
+                      }))}
+                      onChange={(event) =>
+                        edit('engine', event.target.value as VoiceInputSettings['engine'])
+                      }
+                    />
+                  )}
+                </Field>
+                <Field label="说话键" className="field--grow">
+                  {({ inputId }) => (
+                    <NativeSelect
+                      id={inputId}
+                      value={values.talkKeyCode}
+                      disabled={voice.busy}
+                      data-testid="voice-talk-key"
+                      options={Object.entries(TALK_KEYS).map(([value, key]) => ({
+                        value,
+                        label: key.label,
+                      }))}
+                      onChange={(event) => edit('talkKeyCode', event.target.value)}
+                    />
+                  )}
+                </Field>
               </div>
-            )}
-
-            {snapshot.settings.readError === null ? null : (
-              <p role="alert">
-                <Status tone="danger">
-                  读不到当前配置：{describeError(snapshot.settings.readError)}。刷新后可重试。
-                </Status>
+              {selected?.reason ? (
+                <p className="row__value" role="status">
+                  {selected.reason}
+                </p>
+              ) : null}
+              <p className="row__value">
+                按下立即开始；按住 250 ms 后松开结束。轻按后继续录音，下一次按下结束。
               </p>
-            )}
-
-            <div className="field-row">
-              <ModelField
-                snapshot={snapshot}
-                demo={demo}
-                settings={settings}
-                saving={saving}
-                setSaving={setSaving}
-                notify={notify}
-              />
-              <ReplyField
-                snapshot={snapshot}
-                demo={demo}
-                settings={settings}
-                saving={saving}
-                setSaving={setSaving}
-                notify={notify}
-              />
-            </div>
-
-            <div className="rows">
-              <AutoSendSwitch
-                snapshot={snapshot}
-                demo={demo}
-                settings={settings}
-                saving={saving}
-                setSaving={setSaving}
-                notify={notify}
-              />
-            </div>
-
-            {snapshot.keyConfigured || snapshot.settings.replyMode !== 'deepseek' ? null : (
-              <div className="card__foot">
-                <Button data-testid="demo-go-start" onClick={onGoToStart}>
-                  去开始页填 Key
+              <div className="field-row">
+                <Field label="麦克风" className="field--grow">
+                  {({ inputId }) => (
+                    <NativeSelect
+                      id={inputId}
+                      value={values.microphoneId}
+                      disabled={voice.busy}
+                      data-testid="voice-microphone"
+                      options={microphoneOptions}
+                      onChange={(event) => edit('microphoneId', event.target.value)}
+                    />
+                  )}
+                </Field>
+                <Button
+                  disabled={voice.busy}
+                  data-testid="voice-refresh-microphones"
+                  onClick={() => void voice.refreshMicrophones()}
+                >
+                  刷新设备
                 </Button>
               </div>
-            )}
-          </Card>
-
-          <Card title="录音与识别" action={<Status>{demoPhase(snapshot.phase).text}</Status>}>
-            <DemoRecorder demo={demo} />
-            <LiveText snapshot={snapshot} />
-            {snapshot.error === null ? null : (
-              <p role="alert">
-                <Status tone="danger">这次没有完成：{describeError(snapshot.error)}</Status>
-              </p>
-            )}
-          </Card>
-        </>
-      )}
-    </ConsoleStatus>
-  );
-}
-
-interface RowProps {
-  snapshot: DemoSnapshot;
-  demo: DemoState;
-  settings: ReturnType<typeof useDemoSettings>;
-  saving: string | null;
-  setSaving: (value: string | null) => void;
-  notify: (message: string, tone: 'ok' | 'danger') => void;
-}
-
-function writeFailure(notify: RowProps['notify'], error: string | null): void {
-  notify(`这个选择没有写进去：${error ?? '未知原因'}`, 'danger');
-}
-
-/** 选中本身就是回执：成功不弹全局提示，连点选项不会堆一串"已保存"。 */
-async function chooseModel(rows: RowProps, id: string): Promise<void> {
-  const { asrOwner, asrRevision } = rows.snapshot.settings;
-  rows.setSaving(`model:${id}`);
-  const outcome = await rows.settings.saveAsrModel(asrOwner, asrRevision, id);
-  rows.demo.refresh();
-  rows.setSaving(null);
-  if (!outcome.ok) writeFailure(rows.notify, outcome.error);
-}
-
-/** 没下载、只能整段，都是选它之前要知道的事：合成一句附在名字后面。 */
-function noteOf(model: DemoSnapshot['models'][number]): string {
-  const notes = [...(model.cached ? [] : ['未下载']), ...(model.streaming ? [] : ['只整段'])];
-  return notes.length === 0 ? '' : `（${notes.join('，')}）`;
-}
-
-/** 回复来源与自动发送写的是同一个对象：一次写整个，不留半个状态。 */
-async function writeVoice(rows: RowProps, mode: DemoReplyMode, autoSend: boolean): Promise<void> {
-  const { voiceOwner, voiceRevision } = rows.snapshot.settings;
-  rows.setSaving('voice');
-  const outcome = await rows.settings.saveVoice(voiceOwner, voiceRevision, mode, autoSend);
-  rows.demo.refresh();
-  rows.setSaving(null);
-  if (!outcome.ok) writeFailure(rows.notify, outcome.error);
-}
-
-/** 识别方式：值与可选项都来自宿主，读不到配置时由卡片顶部那一句说明。 */
-function ModelField(rows: RowProps): JSX.Element {
-  const { asrOwner, modelId } = rows.snapshot.settings;
-  const busy = rows.settings.pending.has('asr');
-  const blocked = asrOwner === null || rows.snapshot.settings.readError !== null;
-  const chosen = rows.snapshot.models.find((model) => model.id === modelId) ?? null;
-  const labelId = useId();
-
-  const state =
-    asrOwner === null
-      ? '本机还没有可写入的识别插件。'
-      : rows.snapshot.models.length === 0
-        ? '还没有可用的识别模型。'
-        : modelId === null
-          ? '还没选模型：文字对话不需要它，录音前先选一个。'
-          : chosen === null
-            ? `已选 ${modelId}，但它不在当前列表里。`
-            : chosen.cached
-              ? `已选 ${chosen.name} · 已在本机`
-              : `已选 ${chosen.name} · 还没有下载`;
-
-  return (
-    <div className="field field--grow">
-      <span className="field__label" id={labelId}>
-        识别方式
-      </span>
-      <div className="choices" role="radiogroup" aria-labelledby={labelId}>
-        {rows.snapshot.models.map((model) => (
-          <label className="choice" key={model.id}>
-            <input
-              type="radio"
-              name="demo-asr-model"
-              value={model.id}
-              checked={modelId === model.id}
-              disabled={blocked || busy || rows.saving !== null}
-              data-testid={`asr-model-${model.id}`}
-              onChange={() => void chooseModel(rows, model.id)}
+              {voice.microphoneError ? (
+                <p role="alert">{voice.microphoneError}</p>
+              ) : voice.microphones.length === 0 ? (
+                <p className="row__value">
+                  尚未取得可选择的麦克风信息。开始一次录音授权后，可刷新设备列表。
+                </p>
+              ) : null}
+              {local && model ? (
+                <div className="rows">
+                  <div className="row">
+                    <span className="row__text">
+                      <span className="row__label">{model.label}</span>
+                      <span className="row__desc">
+                        {(model.bytes / 1000000).toFixed(1)} MB；
+                        {model.cached ? '文件已缓存，启动时校验' : '尚未下载'}
+                      </span>
+                    </span>
+                    {!model.cached ? (
+                      <Button
+                        disabled={voice.busy || download?.state === 'downloading'}
+                        data-testid="voice-install-model"
+                        onClick={() => void voice.installModel(model.id)}
+                      >
+                        {download?.state === 'downloading' ? '正在下载…' : '下载模型'}
+                      </Button>
+                    ) : (
+                      <Status tone="ok">已在本机</Status>
+                    )}
+                  </div>
+                  {download ? (
+                    <p className="row__value" role="status">
+                      {download.state === 'downloading' ? (
+                        <>
+                          <progress
+                            value={download.receivedBytes}
+                            max={download.totalBytes}
+                            aria-label="模型下载进度"
+                          />{' '}
+                          {(download.receivedBytes / 1000000).toFixed(1)} /{' '}
+                          {(download.totalBytes / 1000000).toFixed(1)} MB
+                        </>
+                      ) : download.state === 'error' ? (
+                        '下载没有完成：' +
+                        (download.error ? describeError(download.error) : '当前不可用')
+                      ) : (
+                        '模型已下载并校验。'
+                      )}
+                    </p>
+                  ) : null}
+                </div>
+              ) : values.engine === 'windows-sapi' ? (
+                <p className="row__value">
+                  使用 Windows 已安装的语音识别器，无需下载应用模型。与其他引擎共用上面的麦克风。
+                </p>
+              ) : null}
+              {values.engine === 'openai' ? (
+                <>
+                  <div className="field-row">
+                    <Field
+                      label="兼容 API 地址"
+                      className="field--grow"
+                      {...(touched.url && urlIssue ? { error: urlIssue } : {})}
+                    >
+                      {({ inputId, describedBy, invalid }) => (
+                        <input
+                          id={inputId}
+                          className="input"
+                          type="url"
+                          value={values.cloudBaseUrl}
+                          aria-describedby={describedBy}
+                          aria-invalid={invalid}
+                          maxLength={512}
+                          spellCheck={false}
+                          autoComplete="off"
+                          disabled={voice.busy}
+                          data-testid="voice-api-url"
+                          onBlur={() => setTouched((current) => ({ ...current, url: true }))}
+                          onChange={(event) => edit('cloudBaseUrl', event.target.value)}
+                        />
+                      )}
+                    </Field>
+                    <Field
+                      label="转写模型"
+                      className="field--grow"
+                      {...(touched.model && modelIssue ? { error: modelIssue } : {})}
+                    >
+                      {({ inputId, describedBy, invalid }) => (
+                        <input
+                          id={inputId}
+                          className="input"
+                          value={values.cloudModel}
+                          aria-describedby={describedBy}
+                          aria-invalid={invalid}
+                          maxLength={128}
+                          spellCheck={false}
+                          autoComplete="off"
+                          disabled={voice.busy}
+                          data-testid="voice-api-model"
+                          onBlur={() => setTouched((current) => ({ ...current, model: true }))}
+                          onChange={(event) => edit('cloudModel', event.target.value)}
+                        />
+                      )}
+                    </Field>
+                  </div>
+                  <p className="row__value">
+                    支持 OpenAI、Groq 和硅基流动的已声明 HTTPS 地址；录音完成后才会调用转写接口。
+                  </p>
+                  <Field label="API Key">
+                    {({ inputId }) => (
+                      <input
+                        id={inputId}
+                        className="input"
+                        type="password"
+                        value={key}
+                        autoComplete="off"
+                        spellCheck={false}
+                        maxLength={4096}
+                        disabled={voice.busy || !stored.credentialStorageAvailable}
+                        data-testid="voice-api-key"
+                        onChange={(event) => setKey(event.target.value)}
+                      />
+                    )}
+                  </Field>
+                  <div className="card__foot">
+                    <Button
+                      disabled={voice.busy || !key.trim() || !stored.credentialStorageAvailable}
+                      data-testid="voice-save-key"
+                      onClick={() => void saveKey(key)}
+                    >
+                      保存 Key
+                    </Button>
+                    {stored.keyConfigured ? (
+                      <Button disabled={voice.busy} onClick={() => void saveKey('')}>
+                        移除 Key
+                      </Button>
+                    ) : null}
+                    <span className="row__value">
+                      {!stored.credentialStorageAvailable
+                        ? '系统凭据存储不可用'
+                        : stored.keyConfigured
+                          ? '已保存 Key；尚未验证转写连接'
+                          : '尚未保存 Key'}
+                    </span>
+                  </div>
+                </>
+              ) : null}
+              {changedElsewhere ? (
+                <p role="alert">本机设置已被更新；你的草稿仍保留。重新读取后再保存。</p>
+              ) : null}
+              <div className="card__foot">
+                <Button
+                  variant="primary"
+                  disabled={!draft || voice.busy || !!urlIssue || !!modelIssue}
+                  busy={voice.busy && draft !== null}
+                  data-testid="voice-save-settings"
+                  onClick={() => void save()}
+                >
+                  保存语音设置
+                </Button>
+                <Button
+                  disabled={voice.busy}
+                  data-testid="voice-reload-settings"
+                  onClick={() => {
+                    setDraft(null);
+                    setTouched({ url: false, model: false });
+                    voice.refresh();
+                  }}
+                >
+                  重新读取
+                </Button>
+                {draft ? <span className="row__value">有未保存的修改</span> : null}
+              </div>
+            </Card>
+          </>
+        ) : null}
+      </ConsoleStatus>
+      <Card
+        title="录音与识别"
+        action={demo.snapshot ? <Status>{demoPhase(demo.snapshot.phase).text}</Status> : undefined}
+      >
+        <DemoRecorder demo={demo} />
+        <p className="row__value" role="status">
+          {demo.snapshot?.phase === 'recording'
+            ? '正在使用选定的麦克风'
+            : demo.recording
+              ? '正在准备麦克风'
+              : '点击开始录音，检查麦克风与识别结果。'}
+        </p>
+        {typeof demo.level === 'number' ? (
+          <div className="row">
+            <label htmlFor={levelId}>输入电平</label>
+            <meter
+              id={levelId}
+              min={0}
+              max={1}
+              value={demo.level}
+              data-testid="voice-input-level"
             />
-            <span className="choice__name">
-              {model.name}
-              {noteOf(model)}
-            </span>
-          </label>
-        ))}
-      </div>
-      {state === '' ? null : (
-        <span className="row__value" role="status">
-          {state}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** 回复来源：离线脚本演示与真实 DeepSeek 是两件不同的事，选哪个都要说清楚它现在能不能发。 */
-function ReplyField(rows: RowProps): JSX.Element {
-  const { voiceOwner, replyMode, readError } = rows.snapshot.settings;
-  const busy = rows.settings.pending.has('voice');
-  const blocked = voiceOwner === null || readError !== null;
-  const mode = replyMode ?? 'demo';
-  const labelId = useId();
-
-  const state =
-    voiceOwner === null
-      ? '本机还没有可写入的回复设置。'
-      : mode === 'deepseek'
-        ? rows.snapshot.keyConfigured
-          ? '真实 DeepSeek：已存有 Key（保存过不等于已验证）。'
-          : '选了真实 DeepSeek，但还没有 Key：选了也发不出去。'
-        : '';
-
-  return (
-    <div className="field field--grow">
-      <span className="field__label" id={labelId}>
-        回复来源
-      </span>
-      <div className="choices" role="radiogroup" aria-labelledby={labelId}>
-        <label className="choice">
-          <input
-            type="radio"
-            name="demo-reply-mode"
-            value="demo"
-            checked={mode === 'demo'}
-            disabled={blocked || busy || rows.saving !== null}
-            data-testid="reply-mode-demo"
-            onChange={() => void writeVoice(rows, 'demo', rows.snapshot.settings.autoSend)}
+          </div>
+        ) : demo.recording ? (
+          <p className="row__value">尚未收到麦克风电平。</p>
+        ) : null}
+        {demo.snapshot ? (
+          <>
+            <LiveText snapshot={demo.snapshot} />
+            {demo.snapshot.error ? (
+              <p role="alert">
+                <Status tone="danger">{describeError(demo.snapshot.error)}</Status>
+              </p>
+            ) : null}
+          </>
+        ) : null}
+      </Card>
+      {demo.snapshot ? (
+        <Card title="识别后">
+          <Switch
+            label="说完自动发送"
+            checked={demo.snapshot.settings.autoSend}
+            disabled={legacy.pending.has('voice') || demo.snapshot.settings.readError !== null}
+            data-testid="demo-auto-send"
+            onChange={(next) => {
+              const settings = demo.snapshot?.settings;
+              if (!settings) return;
+              void legacy
+                .saveVoice(
+                  settings.voiceOwner,
+                  settings.voiceRevision,
+                  settings.replyMode ?? 'demo',
+                  next,
+                )
+                .then((result) => {
+                  demo.refresh();
+                  if (!result.ok) notify(result.error ?? '设置没有保存。', 'danger');
+                });
+            }}
           />
-          <span className="choice__name">离线脚本演示，非 AI</span>
-        </label>
-        <label className="choice">
-          <input
-            type="radio"
-            name="demo-reply-mode"
-            value="deepseek"
-            checked={mode === 'deepseek'}
-            disabled={blocked || busy || rows.saving !== null}
-            data-testid="reply-mode-deepseek"
-            onChange={() => void writeVoice(rows, 'deepseek', rows.snapshot.settings.autoSend)}
-          />
-          <span className="choice__name">真实 DeepSeek</span>
-        </label>
-      </div>
-      {state === '' ? null : (
-        <span className="row__value" role="status">
-          {state}
-        </span>
-      )}
-    </div>
+          <p className="row__value">
+            {demo.snapshot.settings.replyMode === 'deepseek'
+              ? '回复使用开始页所选的模型服务。'
+              : '当前使用离线脚本演示回复。'}
+          </p>
+          <Button onClick={onGoToStart}>设置回复来源</Button>
+        </Card>
+      ) : null}
+    </>
   );
 }
-
-/** 不勾就停在识别结果上，等你确认后再发。 */
-function AutoSendSwitch(rows: RowProps): JSX.Element {
-  const { voiceOwner, replyMode, autoSend, readError } = rows.snapshot.settings;
-  const busy = rows.settings.pending.has('voice');
-  const blocked = voiceOwner === null || readError !== null;
-
-  return (
-    <Switch
-      label="说完自动发送"
-      checked={autoSend}
-      disabled={blocked || busy || rows.saving !== null}
-      data-testid="demo-auto-send"
-      onChange={(next) => void writeVoice(rows, replyMode ?? 'demo', next)}
-    />
-  );
-}
-
-/** 正在听、听到的那一句用 aria-live 播报，不弹提示，也不另存一份草稿。 */
-function LiveText({ snapshot }: { snapshot: DemoSnapshot }): JSX.Element | null {
-  const line =
-    snapshot.partialTranscript.length > 0
-      ? `正在听：${snapshot.partialTranscript}`
-      : snapshot.transcript.length > 0
-        ? `听到：${snapshot.transcript}`
-        : null;
-  if (line === null) {
-    return null;
+function cloudUrlError(value: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return '请输入完整的 HTTPS API 地址';
   }
-  return (
+  return url.protocol !== 'https:' ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !VOICE_INPUT_CLOUD_ORIGINS.some((origin) => origin === url.origin)
+    ? '此地址尚未获得转写插件的网络授权；可使用 OpenAI、Groq 或硅基流动地址。'
+    : null;
+}
+function LiveText({ snapshot }: { snapshot: DemoSnapshot }): JSX.Element | null {
+  const text = snapshot.partialTranscript || snapshot.transcript;
+  return text ? (
     <p className="row__value" role="status" aria-live="polite">
-      {line}
+      {snapshot.partialTranscript ? '正在识别：' : '听到：'}
+      {text}
     </p>
-  );
+  ) : null;
 }

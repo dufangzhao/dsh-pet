@@ -46,15 +46,14 @@ const VIEW_ICON: Readonly<Record<AppView, SettingsNavIcon>> = {
 
 /** 恢复类入口：日常五页之外仍然可达，但不占主视线。 */
 export const RECOVERY_ITEMS: readonly SettingsNavItem[] = [
-  { id: 'plugins', label: '扩展', icon: 'puzzle', quiet: true },
-  { id: 'permissions', label: '权限与数据', icon: 'shield', quiet: true },
+  { id: 'plugins', label: '插件', icon: 'puzzle', quiet: true },
   { id: 'about', label: '关于', icon: 'info', quiet: true },
 ];
 
 export const VIEW_SUMMARY: Readonly<Record<AppView, string>> = {
   // 开始页没有整页说明：要用户判断的那句话在「连接模型」那一节里，只写一次。
   start: '',
-  persona: '它怎么称呼你、按什么说话，以及它真正读到的那段提示词。',
+  persona: '称呼、聊天习惯和人格模板。',
   appearance: '桌面上的样子：形态、配色、大小和是否显示。',
   conversation: '和它说过的话、真实的触碰与应用提示，都记在同一条时间线里。',
   voice: '本机识别、录音，以及说完之后怎么处理。',

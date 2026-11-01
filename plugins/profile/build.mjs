@@ -18,8 +18,12 @@ const manifest = {
   platforms: ['win32-x64'],
   entries: { runtime: 'dist/index.mjs' },
   provides: [{ id: 'profile', capability: 'app.profile@1' }],
-  permissions: [{ kind: 'files', scope: 'plugin-data', access: 'read-write' }],
-  config: { version: 1, schema: APPLICATION_PROFILE_SCHEMA, apply: { personaPrompt: 'reload' } },
+  consumes: [{ capability: 'speech.output@1', optional: true }],
+  permissions: [
+    { kind: 'files', scope: 'plugin-data', access: 'read-write' },
+    { kind: 'capability-use', capability: 'speech.output@1' },
+  ],
+  config: { version: 2, schema: APPLICATION_PROFILE_SCHEMA, apply: { personaPrompt: 'reload' } },
 };
 await fs.writeFile(
   path.join(root, 'plugin.json'),

@@ -1,5 +1,7 @@
 # 设置前端与后端契约映射
 
+2026-11-02：用户已授权并进入真实MVP接入。当前实现、模块归属与验证状态统一维护在[插件化桌宠MVP](plugin-pet-mvp.md)。下文保留各控件的原始需求和设计差异；已落地接口以contracts类型与MVP指南为准。
+
 本文是设置预览与插件贡献页面的统一接入说明：现有调用以当前工作区源码为准，新增需求标为“待开发”。
 当前 [HTML 预览](../qa/minimal-settings-preview/index.html) 与 [本地交互](../qa/minimal-settings-preview/preview.js) 尚未连接真实桌宠；本文不实现后端。
 既有运行语义见 [应用契约指南](../.trellis/spec/shared/plugin-application-contracts.md)，具体请求类型以文内链接的 contracts 为准。

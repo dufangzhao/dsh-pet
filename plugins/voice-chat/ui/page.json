@@ -1,0 +1,14 @@
+{
+  "id": "world:pet.voice-chat",
+  "kind": "world",
+  "label": "语音输入",
+  "order": 50,
+  "availability": "active",
+  "panels": [
+    {
+      "id": "main",
+      "title": "语音输入",
+      "builtin": "pet.voice"
+    }
+  ]
+}

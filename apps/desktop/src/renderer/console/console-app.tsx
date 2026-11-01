@@ -38,6 +38,7 @@ import { useModelConnection } from './use-model-connection.js';
 import { actionLabel, usePluginActions } from './use-plugin-actions.js';
 import { useSecurity } from './use-security.js';
 import { useStopAll } from './use-stop-all.js';
+import { usePresentationTheme } from './use-presentation-theme.js';
 
 const STOP_ALL = {
   title: '停止全部任务',
@@ -73,7 +74,7 @@ const CONFIRM: Readonly<
     title: (name) => `卸载 ${name}？`,
     body: (plugin) =>
       plugin.origin === 'builtin'
-        ? `这是应用自带的功能。卸载结果会保存下来：它从当前和后续启动中移除，重启后也不会自己回来；应用代码仍在，之后可以在「权限与数据」里恢复。${KEPT_AFTER_UNINSTALL}`
+        ? `这是应用自带的功能。卸载结果会保存下来：它从当前和后续启动中移除，重启后也不会自己回来；应用代码仍在，之后可以在插件权限中恢复。${KEPT_AFTER_UNINSTALL}`
         : `这会删除它的代码包，不能撤销。${KEPT_AFTER_UNINSTALL}`,
     confirm: '确认卸载',
   },
@@ -83,8 +84,8 @@ const CANCEL = '取消';
 
 /** 恢复入口的标题与说明。这一页可以出现技术词，日常页不出现。 */
 const RECOVERY_TITLES: Readonly<Record<string, string>> = {
-  plugins: '扩展',
-  permissions: '权限与数据',
+  plugins: '插件',
+  permissions: '插件权限与来源',
   about: '关于',
 };
 
@@ -139,6 +140,7 @@ export function ConsoleApp(): JSX.Element {
 
   const demoState = useDemo({ notify });
   const models = useModelConnection();
+  const presentationError = usePresentationTheme();
 
   /*
    * 安全写操作返回两份真实快照：先都采用，再由调用方判断 operationError。
@@ -172,7 +174,8 @@ export function ConsoleApp(): JSX.Element {
 
   const pages = app.snapshot?.pages ?? [];
   const items = [...navItemsOf(pages), ...RECOVERY_ITEMS];
-  const current = resolveSelection(items, selection) ?? 'plugins';
+  const current =
+    selection === 'permissions' ? 'permissions' : (resolveSelection(items, selection) ?? 'plugins');
   const page = pages.find((candidate) => candidate.id === current) ?? null;
   const view = page === null ? null : appViewOf(page);
 
@@ -348,6 +351,14 @@ export function ConsoleApp(): JSX.Element {
           </>
         }
       >
+        {presentationError ? (
+          <p role="alert" className="minimal-error">
+            {presentationError}
+          </p>
+        ) : null}
+        {current === 'permissions' ? (
+          <Button onClick={() => select('plugins')}>返回插件</Button>
+        ) : null}
         {renderBody()}
       </SettingsShell>
 

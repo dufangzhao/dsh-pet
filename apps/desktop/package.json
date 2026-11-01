@@ -16,7 +16,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "build": "node build.mjs",
+    "build": "node --import tsx build.mjs",
     "start": "node start.mjs"
   },
   "devDependencies": {

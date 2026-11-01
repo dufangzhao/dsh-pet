@@ -30,7 +30,7 @@
  * 表情（脸红）只在它真的画到屏幕之后才回报一次：时间线见 expression.ts，
  * 隐藏窗口不回报，旧的计时也不能替新的一次记事件。
  */
-import type { PetBounds, PetSnapshot } from '@pet/contracts';
+import { PET_PREFERENCE_DEFAULTS, type PetBounds, type PetSnapshot } from '@pet/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { PetAvatar } from './PetAvatar.js';
@@ -38,6 +38,10 @@ import { PetBubble } from './PetBubble.js';
 import { PetComposer } from './PetComposer.js';
 import { PetDialog } from './PetDialog.js';
 import { PetMenu } from './PetMenu.js';
+import { PetTools } from './PetTools.js';
+import { SpeechOutputPlaybackOwner } from '../speech-output/playback-owner.js';
+import { bubbleLifetime } from './demo-status.js';
+import { petPresentationStyle, usePetSettings } from './use-pet-settings.js';
 import { PET_COPY } from './copy.js';
 import {
   PetDragController,
@@ -353,6 +357,19 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const { interact: recordReaction } = app;
   // 宿主 Demo 是录音与回复的真实来源；没读到快照时沿用窗口原型自己的状态。
   const demo = useDemoStatus();
+  const settings = usePetSettings();
+  const [chatOpen, setChatOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const hoverExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (hoverExitTimer.current !== null) clearTimeout(hoverExitTimer.current);
+    },
+    [],
+  );
+  const [focused, setFocused] = useState(false);
+  const [dismissedDialog, setDismissedDialog] = useState<string | null>(null);
   const state = demo.state ?? view.state;
 
   // 同一份 profile 描述的就是桌面上这一只；没读到就沿用窗口原型自带的形态。
@@ -363,8 +380,29 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const reducedMotion = profile?.reducedMotion ?? false;
   const draggable = profile?.draggable ?? true;
   const petName = profile?.petName ?? null;
-  const dialog = app.dialog;
+  const hostDialogKey = app.dialog === null ? null : `${app.dialog.id}:${app.dialog.step}`;
+  const dialog = hostDialogKey === dismissedDialog ? null : app.dialog;
+  const toolsVisible = hovered || focused || chatOpen || menuOpen || demo.recording;
+  const notice =
+    app.failure?.text ??
+    applicationSnapshotErrorText(app.snapshot) ??
+    view.notice ??
+    demo.notice ??
+    settings.notice;
+  const event = notice
+    ? { key: `notice:${notice}`, kind: 'error' as const, text: notice }
+    : demo.event;
+  const bubble =
+    event &&
+    ((event.kind === 'status' &&
+      !(profile?.statusBubble ?? PET_PREFERENCE_DEFAULTS.statusBubble)) ||
+      (event.kind === 'reply' && !(profile?.saidBubble ?? PET_PREFERENCE_DEFAULTS.saidBubble)))
+      ? null
+      : event;
 
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const toolsRef = useRef<HTMLDivElement | null>(null);
+  const composerRef = useRef<HTMLDivElement | null>(null);
   const avatarRef = useRef<SVGSVGElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -377,7 +415,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const expressionTimeline = useRef<ExpressionTimeline | null>(null);
 
   /** 收集当前窗口内真实可交互的形状：角色绘制面 + 提示矩形 + 面板矩形。 */
-  const composing = dialog === null && demo.available;
+  const composing = dialog === null && chatOpen;
   const collectHitShapes = useCallback((): HitShape[] => {
     const shapes: HitShape[] = [];
     const avatar = avatarRef.current;
@@ -387,15 +425,26 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     }
     const panel = rectToHitRect(panelRef.current);
     if (panel !== null) shapes.push({ kind: 'rect', ...panel });
-    // 气泡只有在装配了真实控件（发送框）时才是命中区；纯文字气泡保持穿透。
-    if (composing) {
-      const bubble = rectToHitRect(bubbleRef.current);
-      if (bubble !== null) shapes.push({ kind: 'rect', ...bubble });
-    }
+    const composer = rectToHitRect(composerRef.current);
+    if (composer !== null) shapes.push({ kind: 'rect', ...composer });
+    // Circular tools use their painted circles; their labels and transparent gaps stay click-through.
+    toolsRef.current?.querySelectorAll('[data-pet-circle]').forEach((button) => {
+      const rect = button.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0)
+        shapes.push({
+          kind: 'ellipse',
+          cx: rect.left + rect.width / 2,
+          cy: rect.top + rect.height / 2,
+          rx: rect.width / 2,
+          ry: rect.height / 2,
+        });
+    });
+    const bubble = rectToHitRect(bubbleRef.current);
+    if (bubble) shapes.push({ kind: 'rect', ...bubble });
     const dialogue = rectToHitRect(dialogRef.current);
     if (dialogue !== null) shapes.push({ kind: 'rect', ...dialogue });
     return shapes;
-  }, [figure, composing]);
+  }, [figure]);
 
   // 桥方法每帧都可能变化，用 ref 固定，避免拖拽控制器被反复重建。
   const bridgeMethods = useRef({ beginDrag, endDrag });
@@ -421,6 +470,11 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   );
 
   const sessionRef = useRef<PetInteractionSession | null>(null);
+
+  useEffect(() => {
+    if (menuOpen)
+      panelRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+  }, [menuOpen]);
 
   /**
    * 会话的创建/销毁与 effect 生命周期严格绑定。
@@ -526,11 +580,32 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
    * 命中几何变了就重述一次意图：提示出现/消失、换形态或换尺寸时，
    * 指针可能一动不动，但它的命中结果已经不一样了。
    */
-  const geometry = geometryKey(dialog?.id ?? null, figure, size) + (composing ? ':compose' : '');
+  const geometry =
+    geometryKey(dialog === null ? null : `${dialog.id}:${dialog.step}`, figure, size) +
+    `:${composing}:${toolsVisible}:${menuOpen}:${bubble?.key ?? ''}`;
   useEffect(() => {
     const session = sessionRef.current;
     if (session === null || session.isActive()) return;
     if (session.tracker.resync(collectHitShapes())) setInteraction(session.tracker.interactive);
+  }, [geometry, collectHitShapes, setInteraction]);
+
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') return;
+    const resync = (): void => {
+      const session = sessionRef.current;
+      if (session && !session.isActive() && session.tracker.resync(collectHitShapes()))
+        setInteraction(session.tracker.interactive);
+    };
+    const observer = new ResizeObserver(resync);
+    if (avatarRef.current) observer.observe(avatarRef.current);
+    window.addEventListener('scroll', resync, true);
+    rootRef.current
+      ?.querySelectorAll('[data-pet-surface]')
+      .forEach((element) => observer.observe(element));
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', resync, true);
+    };
   }, [geometry, collectHitShapes, setInteraction]);
 
   /** 指针在窗口内移动时上报命中状态；离开窗口一律恢复穿透。 */
@@ -549,12 +624,27 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
         tracker.track(point);
         return;
       }
-      if (tracker.move(point, collectHitShapes())) {
+      const shapes = collectHitShapes();
+      if (isPointInHitShapes(point, shapes)) {
+        if (hoverExitTimer.current !== null) clearTimeout(hoverExitTimer.current);
+        hoverExitTimer.current = null;
+        setHovered(true);
+      } else if (hoverExitTimer.current === null) {
+        // Keep side tools visible while crossing the transparent gap, without claiming a hit there.
+        hoverExitTimer.current = setTimeout(() => {
+          setHovered(false);
+          hoverExitTimer.current = null;
+        }, 180);
+      }
+      if (tracker.move(point, shapes)) {
         setInteraction(tracker.interactive);
       }
     };
 
     const handleLeave = (): void => {
+      if (hoverExitTimer.current !== null) clearTimeout(hoverExitTimer.current);
+      hoverExitTimer.current = null;
+      setHovered(false);
       const session = sessionRef.current;
       if (session === null) return;
       if (session.tracker.leave()) setInteraction(false);
@@ -602,6 +692,8 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       // 先清 hover 意图再结束拖拽：失焦时主进程已经释放交互，若反过来先
       // cancel（会按指针位置重述 true），窗口会被短暂重新锁回非穿透态。
       handleLeave();
+      setFocused(false);
+      setMenuOpen(false);
       // 窗口失焦必须同时结束渲染器侧拖拽状态，否则松手后仍在拖拽态。
       sessionRef.current?.cancel('blur');
       finishPress(false);
@@ -642,6 +734,11 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       if (dialogRef.current !== null && active !== null && dialogRef.current.contains(active)) {
         return;
       }
+      setChatOpen(false);
+      setMenuOpen(false);
+      setFocused(false);
+      setHovered(false);
+      (active as HTMLElement | null)?.blur?.();
       if (!session.tracker.interactive) return;
       session.tracker.forget();
       setInteraction(false);
@@ -691,6 +788,23 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     sessionRef.current?.cancel('lostpointercapture');
   }, []);
 
+  const openChat = (): void => {
+    if (!demo.available) return;
+    setMenuOpen(false);
+    setChatOpen(true);
+  };
+  const restoreAvatarFocus = (): void => {
+    avatarRef.current?.focus();
+  };
+  const closeChat = (): void => {
+    setChatOpen(false);
+    restoreAvatarFocus();
+  };
+  const hideDialog = (): void => {
+    setDismissedDialog(hostDialogKey);
+    restoreAvatarFocus();
+  };
+
   const handleQuit = useCallback((): void => {
     quit();
   }, [quit]);
@@ -705,15 +819,28 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
 
   // 一次只有一条提示在前台：有 ApplicationDialog 时它取代只读气泡，
   // 没有才显示宿主 Demo 的真实文本，不并排两块、也不留第二个聊天入口。
-  const notice =
-    app.failure !== null
-      ? app.failure.text
-      : (applicationSnapshotErrorText(app.snapshot) ?? view.notice ?? demo.notice);
   const canRetryRead = app.available && app.failure?.source === 'read';
 
   return (
     <div
+      ref={rootRef}
       className="pet-root"
+      style={petPresentationStyle(
+        settings.theme,
+        profile?.bubbleFontSize ?? PET_PREFERENCE_DEFAULTS.bubbleFontSize,
+        profile?.glow ?? PET_PREFERENCE_DEFAULTS.glow,
+      )}
+      data-appearance={settings.theme?.appearance ?? 'light'}
+      onPointerDownCapture={(event) => {
+        if (menuOpen && !panelRef.current?.contains(event.target as Node)) setMenuOpen(false);
+      }}
+      onFocusCapture={() => {
+        setFocused(true);
+        setInteraction(true);
+      }}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
+      }}
       data-testid="pet-stage"
       data-dragging={dragging ? 'true' : 'false'}
       data-state={state}
@@ -723,6 +850,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       data-reduced-motion={reducedMotion ? 'true' : 'false'}
       data-dialog={dialog === null ? 'false' : 'true'}
     >
+      <SpeechOutputPlaybackOwner />
       <div className="pet-root__avatar">
         <PetAvatar
           state={state}
@@ -732,64 +860,143 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
           svgRef={avatarRef}
           onPointerDown={handleAvatarPointerDown}
           onLostPointerCapture={handleLostPointerCapture}
-        />
-        {dialog === null ? (
-          <PetBubble
-            state={state}
-            text={demo.bubble}
-            register={(element) => {
-              bubbleRef.current = element;
-            }}
-            composer={
-              demo.available ? (
-                <PetComposer canSend={demo.canSend} sending={demo.sending} onSend={demo.send} />
-              ) : undefined
+          onDoubleClick={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            if (
+              (profile?.doubleClickTyping ?? PET_PREFERENCE_DEFAULTS.doubleClickTyping) &&
+              isPointInHitShapes(
+                { x: event.clientX, y: event.clientY },
+                avatarHitShapes(rect, figure),
+              )
+            )
+              openChat();
+          }}
+          onContextMenu={(event) => {
+            if (
+              !isPointInHitShapes(
+                { x: event.clientX, y: event.clientY },
+                avatarHitShapes(event.currentTarget.getBoundingClientRect(), figure),
+              )
+            )
+              return;
+            event.preventDefault();
+            setMenuOpen(true);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              openChat();
             }
+            if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
+              event.preventDefault();
+              setMenuOpen(true);
+            }
+          }}
+        />
+        {toolsVisible ? (
+          <PetTools
+            register={toolsRef}
+            hover={profile?.hover ?? PET_PREFERENCE_DEFAULTS.hover}
+            chatOpen={chatOpen}
+            canChat={demo.available}
+            canRecord={demo.canRecord && (profile?.voiceEnabled ?? true)}
+            recording={demo.recording}
+            pending={demo.recordingPending}
+            talkKeyLabel={
+              settings.voice?.talkKeyLabel ?? demo.snapshot?.settings.talkKeyLabel ?? null
+            }
+            onChat={() => {
+              if (chatOpen) closeChat();
+              else openChat();
+            }}
+            onVoice={() => void demo.requestRecording(demo.recording ? 'finish' : 'toggle')}
           />
-        ) : (
+        ) : null}
+      </div>
+      <div className="pet-root__content" id="pet-chat-surface">
+        {dialog !== null ? (
           <PetDialog
             dialog={dialog}
             state={state}
             pending={app.answerBusy}
             onAnswer={handleAnswer}
+            onDismiss={hideDialog}
             register={(element) => {
               dialogRef.current = element;
             }}
           />
-        )}
-      </div>
-
-      <div className="pet-root__panel" ref={panelRef}>
-        <PetMenu
-          name={petName}
-          canStop={demo.canStop}
-          stopping={demo.stopping}
-          onStop={demo.stop}
-          guideDisabled={!app.available}
-          guideBusy={app.guideBusy}
-          onGuide={app.startGuide}
-          quitDisabled={!view.available}
-          onQuit={handleQuit}
-        />
-
-        {notice !== null ? (
-          <p className="pet-root__notice" role="alert" data-testid="pet-notice">
-            {notice}
-          </p>
+        ) : bubble ? (
+          <PetBubble
+            key={bubble.kind === 'reply' ? 'reply' : bubble.key}
+            state={bubble.kind === 'error' ? 'error' : state}
+            text={bubble.text}
+            onDismiss={restoreAvatarFocus}
+            lifetimeMs={bubbleLifetime(
+              bubble.text,
+              profile?.bubbleSpeed ?? PET_PREFERENCE_DEFAULTS.bubbleSpeed,
+            )}
+            register={(element) => {
+              bubbleRef.current = element;
+            }}
+          />
         ) : null}
-        {canRetryRead ? (
-          <button
-            type="button"
-            className="pet-menu__button pet-root__retry"
-            data-testid="pet-reload"
-            onClick={app.reload}
-            disabled={app.readBusy}
-            title="再向宿主读一次当前状态"
+        {chatOpen ? (
+          <div
+            className="pet-root__compose"
+            ref={composerRef}
+            hidden={dialog !== null}
+            data-pet-surface
           >
-            {app.readBusy ? PET_COPY.app.reloading : PET_COPY.app.reload}
-          </button>
+            <PetComposer
+              canSend={demo.canSend}
+              sending={demo.sending}
+              onSend={demo.send}
+              onClose={closeChat}
+            />
+          </div>
         ) : null}
       </div>
+
+      {menuOpen ? (
+        <div className="pet-root__panel" ref={panelRef} data-pet-surface>
+          <PetMenu
+            name={petName}
+            canStop={demo.canStop}
+            stopping={demo.stopping}
+            onStop={demo.stop}
+            guideDisabled={!app.available}
+            guideBusy={app.guideBusy}
+            onGuide={app.startGuide}
+            quitDisabled={!view.available}
+            onQuit={handleQuit}
+            onClose={() => {
+              setMenuOpen(false);
+              restoreAvatarFocus();
+            }}
+            {...(app.dialog !== null && dialog === null
+              ? {
+                  onResumeDialog: () => {
+                    setDismissedDialog(null);
+                    setMenuOpen(false);
+                  },
+                }
+              : {})}
+          />
+
+          {canRetryRead ? (
+            <button
+              type="button"
+              className="pet-menu__button pet-root__retry"
+              data-testid="pet-reload"
+              onClick={app.reload}
+              disabled={app.readBusy}
+              title="再向宿主读一次当前状态"
+            >
+              {app.readBusy ? PET_COPY.app.reloading : PET_COPY.app.reload}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

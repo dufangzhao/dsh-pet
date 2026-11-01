@@ -2,6 +2,8 @@ import admission from './builtin-admission.json' with { type: 'json' };
 import {
   APPLICATION_PLUGIN_IDS as ID,
   DEMO_PLUGIN_IDS,
+  SPEECH_OUTPUT_PLUGIN_IDS,
+  VOICE_INPUT_PLUGIN_IDS,
   modelProviderId,
   modelService,
 } from '@pet/contracts';
@@ -53,7 +55,14 @@ export async function startApplicationPlugins(
         providerId: modelProviderId(active),
       },
     );
-  for (const id of [...Object.values(ID), DEMO_PLUGIN_IDS.avatar]) {
+  for (const id of [
+    ...new Set([
+      ...Object.values(ID),
+      DEMO_PLUGIN_IDS.avatar,
+      ...Object.values(SPEECH_OUTPUT_PLUGIN_IDS),
+      VOICE_INPUT_PLUGIN_IDS.talkKey,
+    ]),
+  ]) {
     if (!enabled(id)) continue;
     const entry = host.manager.get({ pluginId: id, instanceId: 'default' });
     const source = entry ? host.getPackage(entry.owner) : null;

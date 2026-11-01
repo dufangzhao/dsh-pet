@@ -46,7 +46,8 @@ export interface RequestMessage extends ControlMessageBase {
   method: LocalId;
   payload: JsonValue;
   taskId?: LocalId;
-  budgetMs?: number;
+  /** null is an owner-scoped runtime.invoke; finite/default RPCs retain a deadline. */
+  budgetMs?: number | null;
 }
 
 export interface ResponseMessage extends ControlMessageBase {
@@ -108,17 +109,20 @@ const message = (type: ControlMessageType, properties: Record<string, JsonSchema
 
 export const CONTROL_MESSAGE_SCHEMA: JsonSchema = {
   oneOf: [
-    message('request', {
-      method: LOCAL_ID_SCHEMA,
-      // Any JSON value; the 64 KiB control budget is enforced after the shape check.
-      payload: {},
-      taskId: LOCAL_ID_SCHEMA,
-      budgetMs: {
-        type: 'integer',
-        minimum: 1,
-        maximum: CONTROL_MAX_BUDGET_MS,
+    {
+      ...message('request', {
+        method: LOCAL_ID_SCHEMA,
+        // Any JSON value; the 64 KiB control budget is enforced after the shape check.
+        payload: {},
+        taskId: LOCAL_ID_SCHEMA,
+        budgetMs: { type: ['integer', 'null'], minimum: 1, maximum: CONTROL_MAX_BUDGET_MS },
+      }),
+      if: { required: ['budgetMs'], properties: { budgetMs: { type: 'null' } } },
+      then: {
+        required: ['method', 'taskId'],
+        properties: { method: { const: 'runtime.invoke' }, taskId: LOCAL_ID_SCHEMA },
       },
-    }),
+    },
     message('response', {
       replyTo: LOCAL_ID_SCHEMA,
       result: RESULT_SCHEMA,

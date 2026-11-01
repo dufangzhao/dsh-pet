@@ -3,7 +3,15 @@ import { randomUUID } from 'node:crypto';
 import {
   DEMO_PLUGIN_IDS as ID,
   modelService,
-  LOCAL_ASR_MODELS,
+  VOICE_INPUT_LOCAL_MODELS,
+  DEFAULT_VOICE_INPUT_SETTINGS,
+  VOICE_INPUT_ENGINES,
+  VOICE_INPUT_PLUGIN_IDS,
+  TALK_KEYS,
+  voiceInputModel,
+  type VoiceInputEngine,
+  type DemoRecordingReceipt,
+  type DemoRecordingAction,
   LOCAL_ASR_MAX_SECONDS,
   LOCAL_ASR_SAMPLE_RATE,
   makeError,
@@ -46,6 +54,7 @@ interface Intent {
   readonly reply: OwnerRef | null;
   readonly abort: AbortController;
   readonly tasks: Set<TaskHandle>;
+  readonly disposers: (() => void)[];
   audio: Uint8Array[];
 }
 interface Capture {
@@ -80,10 +89,16 @@ export class DemoController {
   #preparedModel: string | null = null;
   #models: DemoSnapshot['models'] = [];
   #closing = false;
+  #captureRequest = 0;
+  #recordingOwner: {
+    senderId: number;
+    dispatch: (request: DemoRecordingReceipt) => boolean;
+  } | null = null;
   private constructor(
     private readonly host: DesktopHost,
     private readonly legacy: readonly DemoMessage[],
     private readonly changed: () => void,
+    private readonly onReply?: (text: string, id: string) => void,
   ) {
     this.#messages = [];
   }
@@ -91,6 +106,7 @@ export class DemoController {
     host: DesktopHost,
     modelRoot: string,
     changed: () => void,
+    onReply?: (text: string, id: string) => void,
   ): Promise<DemoController> {
     const directory = await host.dataDirectories.get(identity(ID.voice));
     if (!directory.ok) throw new Error('Demo data unavailable');
@@ -98,12 +114,13 @@ export class DemoController {
       host,
       await readLegacyDemoHistory(directory.value),
       changed,
+      onReply,
     );
     instance.#models = await Promise.all(
-      LOCAL_ASR_MODELS.map(async (model) => ({
+      VOICE_INPUT_LOCAL_MODELS.map(async (model) => ({
         id: model.id,
         name: model.name,
-        source: 'ModelScope' as const,
+        source: model.source,
         streaming: model.streaming,
         cached: await modelPresent(modelRoot, model.id),
       })),
@@ -128,16 +145,36 @@ export class DemoController {
     this.emit();
   }
   private async settings(): Promise<DemoSettings> {
-    const asr = this.host.manager.get(identity(ID.asr)),
-      voice = this.host.manager.get(identity(ID.voice));
-    const a = asr ? await this.host.configs.inspect(identity(ID.asr)) : null,
-      v = voice ? await this.host.configs.inspect(identity(ID.voice)) : null;
-    const adata = a?.ok ? a.value.snapshot?.data : null,
-      vdata = v?.ok ? v.value.snapshot?.data : null;
+    const voice = this.host.manager.get(identity(ID.voice));
+    const v = voice ? await this.host.configs.inspect(identity(ID.voice)) : null;
+    const vdata = v?.ok ? v.value.snapshot?.data : null;
+    const engine = VOICE_INPUT_ENGINES.includes(vdata?.['engine'] as VoiceInputEngine)
+      ? (vdata?.['engine'] as VoiceInputEngine)
+      : DEFAULT_VOICE_INPUT_SETTINGS.engine;
+    const asrId = engine === 'openai' ? VOICE_INPUT_PLUGIN_IDS.cloud : ID.asr;
+    const selectedAsr = this.host.manager.get(identity(asrId));
+    const a = selectedAsr ? await this.host.configs.inspect(identity(asrId)) : null;
     return {
-      asrOwner: asr?.owner ?? null,
+      engine,
+      microphoneId: typeof vdata?.['microphoneId'] === 'string' ? vdata['microphoneId'] : '',
+      talkKeyCode:
+        typeof vdata?.['talkKeyCode'] === 'string'
+          ? vdata['talkKeyCode']
+          : DEFAULT_VOICE_INPUT_SETTINGS.talkKeyCode,
+      talkKeyLabel:
+        TALK_KEYS[String(vdata?.['talkKeyCode'] ?? DEFAULT_VOICE_INPUT_SETTINGS.talkKeyCode)]
+          ?.label ?? DEFAULT_VOICE_INPUT_SETTINGS.talkKeyLabel,
+      cloudModel:
+        typeof vdata?.['cloudModel'] === 'string'
+          ? vdata['cloudModel']
+          : DEFAULT_VOICE_INPUT_SETTINGS.cloudModel,
+      cloudBaseUrl:
+        typeof vdata?.['cloudBaseUrl'] === 'string'
+          ? vdata['cloudBaseUrl']
+          : DEFAULT_VOICE_INPUT_SETTINGS.cloudBaseUrl,
+      asrOwner: selectedAsr?.owner ?? null,
       asrRevision: a?.ok ? (a.value.snapshot?.revision ?? 0) : 0,
-      modelId: typeof adata?.['model'] === 'string' ? adata['model'] : null,
+      modelId: voiceInputModel(engine),
       voiceOwner: voice?.owner ?? null,
       voiceRevision: v?.ok ? (v.value.snapshot?.revision ?? 0) : 0,
       replyMode:
@@ -164,23 +201,25 @@ export class DemoController {
       } catch {
         keyAvailable = false;
       }
-    const plugins = Object.values(ID).map((pluginId) => {
-      const plugin = this.host.manager.get(identity(pluginId)),
-        source = plugin ? this.host.describeTrust(plugin.owner) : null,
-        policy = this.host.permissionControl.inspect(identity(pluginId));
-      return {
-        pluginId,
-        name: plugin?.manifest.displayName['zh-CN'] ?? pluginId,
-        version: plugin?.manifest.version ?? null,
-        origin: plugin?.origin ?? null,
-        owner: plugin?.owner ?? null,
-        digest: source?.digest ?? null,
-        state: plugin?.state ?? ('missing' as const),
-        trusted: source?.trusted === true,
-        preset: policy?.preset ?? null,
-        blocked: policy?.blocked ?? false,
-      };
-    });
+    const plugins = [...new Set([...Object.values(ID), VOICE_INPUT_PLUGIN_IDS.cloud])].map(
+      (pluginId) => {
+        const plugin = this.host.manager.get(identity(pluginId)),
+          source = plugin ? this.host.describeTrust(plugin.owner) : null,
+          policy = this.host.permissionControl.inspect(identity(pluginId));
+        return {
+          pluginId,
+          name: plugin?.manifest.displayName['zh-CN'] ?? pluginId,
+          version: plugin?.manifest.version ?? null,
+          origin: plugin?.origin ?? null,
+          owner: plugin?.owner ?? null,
+          digest: source?.digest ?? null,
+          state: plugin?.state ?? ('missing' as const),
+          trusted: source?.trusted === true,
+          preset: policy?.preset ?? null,
+          blocked: policy?.blocked ?? false,
+        };
+      },
+    );
     const reply = settings.replyMode === 'deepseek' ? ID.cloud : APP.agent;
     const ready = (id: string) => {
       const plugin = plugins.find((p) => p.pluginId === id);
@@ -211,15 +250,25 @@ export class DemoController {
       (settings.replyMode !== 'deepseek' || (keyAvailable && keyConfigured));
     const profile = await this.host.configs.get(identity(APP.profile));
     const voiceEnabled = profile.ok && profile.value.data['voiceEnabled'] === true;
+    const asrKeyConfigured =
+      settings.engine !== 'openai' ||
+      (await this.host.credentials?.hasSecret(
+        identity(VOICE_INPUT_PLUGIN_IDS.cloud),
+        'api-key',
+      )) === true;
     const canRecord =
       !!agentOwner &&
       !agentStateError &&
       !paused &&
       voiceEnabled &&
+      asrKeyConfigured &&
       configured &&
       ready(ID.voice) &&
-      ready(ID.asr) &&
-      settings.modelId !== null;
+      ready(settings.engine === 'openai' ? VOICE_INPUT_PLUGIN_IDS.cloud : ID.asr) &&
+      settings.modelId !== null &&
+      (settings.engine === 'windows-sapi' ||
+        settings.engine === 'openai' ||
+        this.#models.some((model) => model.id === settings.modelId && model.cached));
     return {
       version: 1,
       phase: this.#phase === 'setup' && (canSend || canRecord) ? 'idle' : this.#phase,
@@ -340,6 +389,7 @@ export class DemoController {
     })();
   }
   private cancelCurrent(): void {
+    this.#captureRequest++;
     const intent = this.#intent;
     this.#intent = undefined;
     if (this.#capture) {
@@ -348,6 +398,7 @@ export class DemoController {
       this.#capture = undefined;
     }
     if (intent) {
+      for (const dispose of intent.disposers) dispose();
       intent.abort.abort();
       for (const task of intent.tasks) task.cancel();
       intent.audio = [];
@@ -372,13 +423,32 @@ export class DemoController {
       id: randomUUID(),
       settings,
       owner,
-      asr: this.owner(ID.asr),
+      asr:
+        kind === 'voice'
+          ? this.owner(settings.engine === 'openai' ? VOICE_INPUT_PLUGIN_IDS.cloud : ID.asr)
+          : null,
       reply: this.owner(APP.agent),
       abort: new AbortController(),
       tasks: new Set(),
+      disposers: [],
       audio: [],
     };
     this.#intent = intent;
+    for (const owner of [intent.owner, intent.asr, intent.reply]) {
+      if (!owner) continue;
+      const signal = this.host.manager.signal(owner);
+      if (!signal) continue;
+      const stop = () => {
+        if (this.current(intent)) {
+          this.cancelCurrent();
+          this.#phase = 'idle';
+          this.emit();
+        }
+      };
+      signal.addEventListener('abort', stop, { once: true });
+      intent.disposers.push(() => signal.removeEventListener('abort', stop));
+      if (signal.aborted) stop();
+    }
     this.#error = null;
     this.#transcript = '';
     this.#partialTranscript = '';
@@ -392,7 +462,11 @@ export class DemoController {
       ? [['agent.conversation@1', APP.agent, 'conversation']]
       : [
           ['chat.session@1', ID.voice, 'voice'],
-          ['speech.asr@1', ID.asr, 'local'],
+          [
+            'speech.asr@1',
+            intent.settings.engine === 'openai' ? VOICE_INPUT_PLUGIN_IDS.cloud : ID.asr,
+            intent.settings.engine === 'openai' ? 'openai' : 'local',
+          ],
           ['agent.conversation@1', APP.agent, 'conversation'],
         ];
     for (const [capability, pluginId, providerId] of mappings) {
@@ -487,14 +561,19 @@ export class DemoController {
     await this.readMessages();
   }
   async beginRecording(frameId: number): Promise<Result<DemoCaptureTicket>> {
+    const request = ++this.#captureRequest;
     const state = await this.snapshot();
+    if (request !== this.#captureRequest || this.#closing) return fail('cancelled');
     if (!state.canRecord || !state.settings.modelId) return fail('not-ready');
     const intent = this.begin(state.settings);
     this.#phase = 'preparing';
     this.emit();
     try {
-      const prepared = await this.invoke(intent, 'prepare', { model: state.settings.modelId })
-        .result;
+      const prepared = await this.invoke(intent, 'prepare', {
+        model: state.settings.modelId,
+        cloudModel: state.settings.cloudModel ?? DEFAULT_VOICE_INPUT_SETTINGS.cloudModel,
+        cloudBaseUrl: state.settings.cloudBaseUrl ?? DEFAULT_VOICE_INPUT_SETTINGS.cloudBaseUrl,
+      }).result;
       if (!this.current(intent)) return fail('cancelled');
       if (!prepared.ok) throw new KernelFault(prepared.error.code);
       const data = object(prepared.value);
@@ -561,6 +640,7 @@ export class DemoController {
                     sampleRate: 16000,
                     maxSamples: LOCAL_ASR_SAMPLE_RATE * LOCAL_ASR_MAX_SECONDS,
                     chunkSamples: 1600,
+                    microphoneId: intent.settings.microphoneId ?? '',
                   },
                 });
                 try {
@@ -706,6 +786,7 @@ export class DemoController {
     via: 'console' | 'bubble' = 'console',
   ): Promise<void> {
     if (!this.current(intent)) return;
+    const previousReplyId = this.#messages.findLast((item) => item.role === 'assistant')?.id;
     const task = this.host.tasks.run(
       intent.owner,
       async (context) => {
@@ -713,6 +794,8 @@ export class DemoController {
           kind,
           via: kind === 'voice' ? 'voice' : via,
           model: intent.settings.modelId,
+          cloudModel: intent.settings.cloudModel ?? DEFAULT_VOICE_INPUT_SETTINGS.cloudModel,
+          cloudBaseUrl: intent.settings.cloudBaseUrl ?? DEFAULT_VOICE_INPUT_SETTINGS.cloudBaseUrl,
           mode: intent.settings.replyMode,
           autoSend: kind === 'text' || intent.settings.autoSend,
           text,
@@ -744,6 +827,9 @@ export class DemoController {
             this.#partialTranscript = '';
             this.#phase = 'idle';
             this.emit();
+            const message = this.#messages.findLast((item) => item.role === 'assistant');
+            if (message?.text && message.id !== previousReplyId)
+              this.onReply?.(message.text, message.id);
           }
           return null;
         } finally {
@@ -793,6 +879,42 @@ export class DemoController {
     await this.host.credentials.deleteSecret(identity(ID.cloud), 'api-key');
     this.emit();
     return this.snapshot();
+  }
+  setRecordingOwner(
+    senderId: number | null,
+    dispatch?: (request: DemoRecordingReceipt) => boolean,
+  ): void {
+    this.#recordingOwner = senderId !== null && dispatch ? { senderId, dispatch } : null;
+    if (!this.#recordingOwner) this.onConsoleClosed();
+  }
+  async requestRecording(request: {
+    action: DemoRecordingAction;
+  }): Promise<Result<DemoRecordingReceipt>> {
+    const owner = this.#recordingOwner;
+    if (!owner || this.#closing) return fail('not-ready');
+    if (
+      request.action === 'toggle' &&
+      !this.#capture &&
+      this.#phase !== 'preparing' &&
+      !(await this.snapshot()).canRecord
+    )
+      return fail('not-ready');
+    if (this.#recordingOwner !== owner) return fail('not-ready');
+    const receipt = { id: randomUUID(), action: request.action };
+    if (!owner.dispatch(receipt)) return fail('unavailable');
+    return { ok: true, value: receipt };
+  }
+  async refreshModels(modelRoot: string): Promise<void> {
+    this.#models = await Promise.all(
+      VOICE_INPUT_LOCAL_MODELS.map(async (model) => ({
+        id: model.id,
+        name: model.name,
+        source: model.source,
+        streaming: model.streaming,
+        cached: await modelPresent(modelRoot, model.id),
+      })),
+    );
+    this.emit();
   }
   onVoiceDisabled(): void {
     if (this.#intent?.owner.pluginId === ID.voice || this.#capture) {

@@ -57,6 +57,7 @@ export interface PetDialogProps {
   /** 本地在途（等宿主回执）；宿主自己的 dialog.busy 也一起禁用控件。 */
   pending: boolean;
   onAnswer(choice: string, text?: string): void;
+  onDismiss?(): void;
   /** 供 App 读取真实矩形算命中区；不参与视觉。 */
   register?: (element: HTMLDivElement | null) => void;
 }
@@ -66,6 +67,7 @@ export function PetDialog({
   state,
   pending,
   onAnswer,
+  onDismiss,
   register,
 }: PetDialogProps): React.JSX.Element {
   const titleId = useId();
@@ -121,7 +123,26 @@ export function PetDialog({
       role="group"
       aria-labelledby={titleId}
       aria-busy={disabled}
+      data-pet-surface
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && !disabled && onDismiss) {
+          event.stopPropagation();
+          onDismiss();
+        }
+      }}
     >
+      {onDismiss ? (
+        <button
+          type="button"
+          className="pet-icon-button pet-dialog__dismiss"
+          data-testid="pet-dialog-dismiss"
+          aria-label="收起提示"
+          disabled={disabled}
+          onClick={onDismiss}
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      ) : null}
       <p className="pet-dialog__title" id={titleId} data-testid="pet-dialog-title">
         {dialog.title}
       </p>

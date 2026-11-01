@@ -1,26 +1,27 @@
-/**
- * 桌宠侧接宿主 Demo：读快照、订阅变化、允许停止、允许发一句话，仅此四件事。
- *
- * 不 beginRecording、不 pushAudio、不 saveProviderKey——录音属于采集，Key 属于设置台。
- * Core 接管回复与持久记录之前，这条订阅仍是桌宠气泡里“真实文本”的来源。
- * 桥缺失或读取失败时保持窗口原型自己的待机，并说明原因，不伪造宿主状态。
- */
-import { errorMessage, type DemoBridge, type DemoSnapshot } from '@pet/contracts';
+import {
+  errorMessage,
+  type DemoBridge,
+  type DemoRecordingAction,
+  type DemoSnapshot,
+} from '@pet/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { PET_COPY } from './copy.js';
-import { describeDemo, type DemoStatus } from './demo-status.js';
+import {
+  demoBubbleEvent,
+  describeDemo,
+  type DemoStatus,
+  type PetBubbleEvent,
+} from './demo-status.js';
 
-/**
- * 只校验桌宠真正会用的三个方法：桥在但缺这些，等同没连上，
- * 不能让界面拿着半套接口显示「已连接」。sendText 的可用性另由快照的 canSend 决定。
- */
 export function isDemoBridge(value: unknown): value is DemoBridge {
   if (typeof value !== 'object' || value === null) return false;
   const candidate = value as Record<string, unknown>;
-  if (candidate['version'] !== 1) return false;
-  return (['getSnapshot', 'onChanged', 'cancel'] as const).every(
-    (name) => typeof candidate[name] === 'function',
+  return (
+    candidate['version'] === 1 &&
+    ['getSnapshot', 'onChanged', 'cancel', 'sendText', 'requestRecording'].every(
+      (name) => typeof candidate[name] === 'function',
+    )
   );
 }
 
@@ -31,96 +32,107 @@ export function readDemoBridge(target: unknown = globalThis): DemoBridge | null 
 }
 
 export interface PetDemoView extends DemoStatus {
-  /** 检测到宿主 Demo 桥；没有它就没有发送与停止入口。 */
   available: boolean;
-  /** 正在等宿主接受停止请求。 */
-  stopping: boolean;
-  /** 正在等宿主接受这次发送。 */
-  sending: boolean;
-  /** 停止或发送失败的提示；成功不提示，阶段变化本身就是回执。 */
+  snapshot: DemoSnapshot | null;
+  event: PetBubbleEvent | null;
   notice: string | null;
+  stopping: boolean;
+  sending: boolean;
+  recordingPending: boolean;
+  recording: boolean;
+  canRecord: boolean;
   stop(): void;
-  /**
-   * 日常文字输入：走宿主既有的 sendText 通道，不新建会话，也不本地回显。
-   * 返回值是宿主有没有接受这一句——界面据此决定清不清草稿。
-   */
+  requestRecording(action: DemoRecordingAction): Promise<void>;
   send(text: string): Promise<boolean>;
 }
 
+/** The pet requests capture from the existing console owner; it never opens a device. */
 export function useDemoStatus(): PetDemoView {
-  const bridgeRef = useRef<DemoBridge | null>(readDemoBridge());
+  const bridgeRef = useRef(readDemoBridge());
+  const latest = useRef<DemoSnapshot | null>(null);
   const [snapshot, setSnapshot] = useState<DemoSnapshot | null>(null);
+  const [event, setEvent] = useState<PetBubbleEvent | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [stopping, setStopping] = useState(false);
   const [sending, setSending] = useState(false);
-  const mounted = useRef(true);
-  // 按钮要等下一次提交才禁用，同一帧里的第二次点击只能靠这个标记挡住。
-  const stopBusy = useRef(false);
+  const [recordingPending, setRecordingPending] = useState(false);
+  const mounted = useRef(false);
+  const readSeq = useRef(0);
   const sendBusy = useRef(false);
+  const recordBusy = useRef(false);
+  const stopBusy = useRef(false);
+
+  const accept = useCallback((next: DemoSnapshot): void => {
+    const incoming = demoBubbleEvent(latest.current, next);
+    latest.current = next;
+    setSnapshot(next);
+    setEvent((current) => incoming ?? (current?.kind === 'reply' ? current : null));
+  }, []);
 
   useEffect(() => {
     mounted.current = true;
+    let active = true;
     const bridge = bridgeRef.current;
-    if (bridge === null) {
-      return () => {
-        mounted.current = false;
-      };
-    }
-
-    /** 重读一次快照：变化事件只通知「变了」，内容仍以 getSnapshot 为准。 */
     const read = (): void => {
-      void Promise.resolve()
-        .then(() => bridge.getSnapshot())
+      if (!bridge) return;
+      const seq = ++readSeq.current;
+      void bridge
+        .getSnapshot()
         .then((reply) => {
-          if (!mounted.current) return;
+          if (!active || seq !== readSeq.current) return;
           if (reply.ok) {
-            setSnapshot(reply.value);
+            accept(reply.value);
             setNotice(null);
-          } else {
-            setNotice(PET_COPY.readFailed);
-          }
+          } else setNotice(PET_COPY.readFailed + errorMessage(reply.error));
         })
         .catch(() => {
-          if (mounted.current) setNotice(PET_COPY.readFailed);
+          if (active && seq === readSeq.current) setNotice(PET_COPY.readFailed);
         });
     };
-
-    let unsubscribe: (() => void) | null = null;
-    try {
-      const result = bridge.onChanged(read);
-      unsubscribe = typeof result === 'function' ? result : null;
-    } catch {
-      if (mounted.current) setNotice(PET_COPY.readFailed);
-    }
+    const detach = bridge?.onChanged(read);
     read();
-
     return () => {
+      active = false;
       mounted.current = false;
-      if (unsubscribe !== null) {
-        try {
-          unsubscribe();
-        } catch {
-          // 解除订阅本身失败不应影响卸载。
-        }
-      }
+      detach?.();
     };
+  }, [accept]);
+
+  const requestRecording = useCallback(async (action: DemoRecordingAction): Promise<void> => {
+    const bridge = bridgeRef.current;
+    if (!bridge || recordBusy.current) return;
+    recordBusy.current = true;
+    setRecordingPending(true);
+    setNotice(null);
+    try {
+      const reply = await bridge.requestRecording({ action });
+      if (mounted.current && !reply.ok) setNotice('语音请求未完成：' + errorMessage(reply.error));
+    } catch {
+      if (mounted.current) setNotice('语音请求未完成，请重试。');
+    } finally {
+      recordBusy.current = false;
+      if (mounted.current) setRecordingPending(false);
+    }
   }, []);
 
   const stop = useCallback((): void => {
     const bridge = bridgeRef.current;
-    if (bridge === null || stopBusy.current) return;
+    if (!bridge || stopBusy.current) return;
+    if (latest.current?.phase === 'recording' || latest.current?.phase === 'arming') {
+      void requestRecording('cancel');
+      return;
+    }
     stopBusy.current = true;
     setStopping(true);
-    void Promise.resolve()
-      .then(() => bridge.cancel())
+    setNotice(null);
+    void bridge
+      .cancel()
       .then((reply) => {
         if (!mounted.current) return;
         if (reply.ok) {
-          setSnapshot(reply.value);
-          setNotice(null);
-        } else {
-          setNotice(PET_COPY.stopFailed);
-        }
+          ++readSeq.current;
+          accept(reply.value);
+        } else setNotice(PET_COPY.stopFailed + errorMessage(reply.error));
       })
       .catch(() => {
         if (mounted.current) setNotice(PET_COPY.stopFailed);
@@ -129,45 +141,41 @@ export function useDemoStatus(): PetDemoView {
         stopBusy.current = false;
         if (mounted.current) setStopping(false);
       });
-  }, []);
+  }, [accept, requestRecording]);
 
-  const send = useCallback((text: string): Promise<boolean> => {
+  const send = useCallback(async (text: string): Promise<boolean> => {
     const bridge = bridgeRef.current;
-    if (bridge === null || sendBusy.current) return Promise.resolve(false);
-    const value = text.trim();
-    if (value === '') return Promise.resolve(false);
+    if (!bridge || sendBusy.current || text.trim() === '') return false;
     sendBusy.current = true;
     setSending(true);
-    // sendText 只回执 null：这一句要等宿主推回来的快照才算进了记录，
-    // 本地不先插一条「已发送」；失败时提示说清是哪一句没出去。
-    return Promise.resolve()
-      .then(() => bridge.sendText({ text: value }))
-      .then((reply) => {
-        if (!mounted.current) return false;
-        if (reply.ok) {
-          setNotice(null);
-          return true;
-        }
-        setNotice(PET_COPY.sendFailed + errorMessage(reply.error));
-        return false;
-      })
-      .catch(() => {
-        if (mounted.current) setNotice(PET_COPY.sendFailed + PET_COPY.app.unknownFailure);
-        return false;
-      })
-      .finally(() => {
-        sendBusy.current = false;
-        if (mounted.current) setSending(false);
-      });
+    setNotice(null);
+    try {
+      const reply = await bridge.sendText({ text: text.trim() });
+      if (!mounted.current) return false;
+      if (!reply.ok) setNotice(PET_COPY.sendFailed + errorMessage(reply.error));
+      return reply.ok;
+    } catch {
+      if (mounted.current) setNotice(PET_COPY.sendFailed + PET_COPY.app.unknownFailure);
+      return false;
+    } finally {
+      sendBusy.current = false;
+      if (mounted.current) setSending(false);
+    }
   }, []);
 
   return {
     ...describeDemo(snapshot),
     available: bridgeRef.current !== null,
+    snapshot,
+    event,
+    notice,
     stopping,
     sending,
-    notice,
+    recordingPending,
+    recording: snapshot?.phase === 'recording' || snapshot?.phase === 'arming',
+    canRecord: snapshot?.canRecord ?? false,
     stop,
+    requestRecording,
     send,
   };
 }

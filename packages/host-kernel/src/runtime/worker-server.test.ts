@@ -147,3 +147,18 @@ it('rejects an unknown method and stale target owner without executing code', as
     } as unknown as JsonValue),
   ).toMatchObject({ ok: false, error: { code: 'stale-owner' } });
 });
+it('preserves an owner-scoped runtime invocation without manufacturing a task deadline', async () => {
+  const f = await setup(
+    'export default {activate(ctx){ctx.provide("main",{echo:async(task)=>({hasDeadline:task.deadline!==undefined})});}};',
+  );
+  const handlers = f.server.handlers();
+  expect((await handlers['runtime.activate']!(f.context, f.payload)).ok).toBe(true);
+  expect(
+    await handlers['runtime.invoke']!({ ...f.context, budgetMs: null }, {
+      owner,
+      providerId: 'main',
+      method: 'echo',
+      input: null,
+    } as unknown as JsonValue),
+  ).toEqual({ ok: true, value: { hasDeadline: false } });
+});

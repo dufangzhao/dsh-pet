@@ -1,3 +1,4 @@
+import { SPEECH_OUTPUT_PLUGIN_IDS, VOICE_INPUT_PLUGIN_IDS } from '@pet/contracts';
 import { ApplicationUpdateDialogs, type ApplicationUpdateAdapter } from './application-updates.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -171,7 +172,14 @@ export class ApplicationController {
     if (this.#closed) return;
     await this.attachIfActive();
     const disabled = new Set(this.record.data['disabled'] as string[]);
-    for (const id of [...Object.values(ID), DEMO_PLUGIN_IDS.cloud]) {
+    for (const id of [
+      ...new Set([
+        ...Object.values(ID),
+        DEMO_PLUGIN_IDS.cloud,
+        ...Object.values(SPEECH_OUTPUT_PLUGIN_IDS),
+        ...Object.values(VOICE_INPUT_PLUGIN_IDS),
+      ]),
+    ]) {
       const row = this.host.manager.get({ pluginId: id, instanceId: 'default' });
       if (row?.state === 'disabled') disabled.add(id);
       else if (row?.state === 'active') disabled.delete(id);

@@ -1,4 +1,5 @@
 import type { ApplicationPage, OwnerRef } from '@pet/contracts';
+import { APPLICATION_PLUGIN_IDS } from '@pet/contracts';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -33,7 +34,7 @@ describe('应用页面识别', () => {
 
   it('没有 panels 时按页面插件 id 认；两个都不认识就是通用配置页', () => {
     expect(appViewOf(page({ id: 'x', owner: owner('pet.page-appearance') }))).toBe('appearance');
-    expect(appViewOf(page({ id: 'pet.page-voice' }))).toBe('voice');
+    expect(appViewOf(page({ id: APPLICATION_PLUGIN_IDS.voice }))).toBe('voice');
     expect(
       appViewOf(
         page({
@@ -51,7 +52,7 @@ describe('应用页面识别', () => {
       page({ id: 'community', order: 20, owner: owner('community.translator') }),
     ]);
     expect(items.map((item) => item.icon)).toEqual(['bot', 'panel']);
-    expect(RECOVERY_ITEMS.map((item) => item.icon)).toEqual(['puzzle', 'shield', 'info']);
+    expect(RECOVERY_ITEMS.map((item) => item.icon)).toEqual(['puzzle', 'info']);
   });
 
   it('导航顺序跟着宿主的 order，不是本机数组顺序', () => {

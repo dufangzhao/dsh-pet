@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.builtin-speech",
+  "version": "0.1.0",
+  "displayName": {
+    "zh-CN": "桌宠音调",
+    "en": "Pet tones"
+  },
+  "description": {
+    "zh-CN": "可关闭的合成音调；不朗读文字",
+    "en": "Optional synthesized tones; does not read words"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64"],
+  "entries": {
+    "runtime": "dist/index.mjs"
+  },
+  "provides": [
+    {
+      "id": "tones",
+      "capability": "speech.output@1",
+      "features": {
+        "kind": "tones"
+      }
+    }
+  ]
+}

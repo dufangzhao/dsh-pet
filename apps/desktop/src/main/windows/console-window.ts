@@ -11,12 +11,14 @@ export class ConsoleWindow {
   get current(): BrowserWindow | undefined {
     return this.#window;
   }
-  async open(): Promise<void> {
+  async open(show = true): Promise<void> {
     const existing = this.#window;
     if (existing && !existing.isDestroyed()) {
-      if (existing.isMinimized()) existing.restore();
-      existing.show();
-      existing.focus();
+      if (show) {
+        if (existing.isMinimized()) existing.restore();
+        existing.show();
+        existing.focus();
+      }
       return;
     }
     const window = new BrowserWindow({
@@ -33,6 +35,7 @@ export class ConsoleWindow {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
+        backgroundThrottling: false,
         additionalArguments: this.startDesignLab ? [START_DESIGN_LAB_ARG] : [],
       },
     });
@@ -54,13 +57,19 @@ export class ConsoleWindow {
     window.webContents.on('will-navigate', (event) => event.preventDefault());
     window.webContents.on('will-redirect', (event) => event.preventDefault());
     window.webContents.on('will-attach-webview', (event) => event.preventDefault());
+    window.on('close', (event) => {
+      event.preventDefault();
+      window.hide();
+    });
     window.once('closed', () => {
       this.#window = undefined;
       this.onClosed();
     });
     window.once('ready-to-show', () => {
-      window.show();
-      window.focus();
+      if (show) {
+        window.show();
+        window.focus();
+      }
     });
     try {
       await window.loadFile(this.entry);

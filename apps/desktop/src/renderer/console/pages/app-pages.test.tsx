@@ -245,13 +245,13 @@ describe('人设页', () => {
 
   it('名字与存的一致时保存是空操作，改过才提示还没保存', () => {
     const same = renderToStaticMarkup(<PersonaPage app={appState()} notify={noop} />);
-    expect(same).not.toContain('名字还没保存');
-    expect(same).toMatch(/disabled[^>]*>\s*保存名字/);
+    expect(same).not.toContain('有未保存的改动');
+    expect(same).toMatch(/disabled[^>]*>\s*保存习惯/);
 
     const edited = appState({ edited: new Set(['petName']) });
     const html = renderToStaticMarkup(<PersonaPage app={edited} notify={noop} />);
-    expect(html).toContain('名字还没保存');
-    expect(html).not.toMatch(/disabled[^>]*>\s*保存名字/);
+    expect(html).toContain('有未保存的改动');
+    expect(html).not.toMatch(/disabled[^>]*>\s*保存习惯/);
   });
 
   it('新桥不在时只说没连上，不画一份能编辑的假表单', () => {

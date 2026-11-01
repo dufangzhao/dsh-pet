@@ -1,4 +1,10 @@
 import type { JsonObject, JsonValue } from './json.js';
+import {
+  PET_PREFERENCE_DEFAULTS,
+  PET_PREFERENCE_PROPERTIES,
+  type PetPreferences,
+} from './pet-preferences.js';
+import type { SpeechOutputProviderSelection } from './speech-output.js';
 import type { OwnerRef } from './ids.js';
 import type { KernelError, Result } from './errors.js';
 
@@ -9,10 +15,15 @@ export const APPLICATION_PLUGIN_IDS = {
   persona: 'pet.page-persona',
   appearance: 'pet.page-appearance',
   conversation: 'pet.page-conversation',
-  voice: 'pet.page-voice',
+  voice: 'pet.voice-chat',
 } as const;
 export const APPLICATION_PROFILE_MAX_PROMPT = 16384;
-export interface ApplicationPreferences extends JsonObject {
+export interface ApplicationPreferences extends PetPreferences {
+  speechEnabled: boolean;
+  speechProvider: SpeechOutputProviderSelection | null;
+  speechVoice: string | null;
+  speechRate: number;
+  speechVolume: number;
   petName: string;
   userName: string;
   replyLanguage: 'zh-CN' | 'en';
@@ -28,6 +39,12 @@ export interface ApplicationPreferences extends JsonObject {
   voiceEnabled: boolean;
 }
 export const APPLICATION_DEFAULTS: Readonly<ApplicationPreferences> = Object.freeze({
+  ...PET_PREFERENCE_DEFAULTS,
+  speechEnabled: true,
+  speechProvider: { pluginId: 'pet.system-tts', instanceId: 'default', providerId: 'system' },
+  speechVoice: null,
+  speechRate: 0,
+  speechVolume: 85,
   petName: '小蓝',
   userName: '你',
   replyLanguage: 'zh-CN',
@@ -48,6 +65,23 @@ export const APPLICATION_PROFILE_SCHEMA: JsonObject = {
   additionalProperties: false,
   required: Object.keys(APPLICATION_DEFAULTS),
   properties: {
+    ...PET_PREFERENCE_PROPERTIES,
+    speechEnabled: { type: 'boolean', default: true, title: '说话' },
+    speechProvider: {
+      type: ['object', 'null'],
+      title: '语音输出提供者',
+      additionalProperties: false,
+      required: ['pluginId', 'instanceId', 'providerId'],
+      properties: {
+        pluginId: { type: 'string', minLength: 1, maxLength: 128 },
+        instanceId: { type: 'string', minLength: 1, maxLength: 128 },
+        providerId: { type: 'string', minLength: 1, maxLength: 128 },
+      },
+      default: APPLICATION_DEFAULTS.speechProvider,
+    },
+    speechVoice: { type: ['string', 'null'], maxLength: 256, default: null, title: '声线' },
+    speechRate: { type: 'integer', minimum: -10, maximum: 10, default: 0, title: '语速' },
+    speechVolume: { type: 'integer', minimum: 0, maximum: 100, default: 85, title: '说话音量' },
     petName: {
       type: 'string',
       title: '桌宠名字',

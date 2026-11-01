@@ -23,7 +23,7 @@ export interface RpcContext {
   readonly requestId: string;
   readonly taskId: string | undefined;
   readonly signal: AbortSignal;
-  readonly budgetMs: number;
+  readonly budgetMs: number | null;
 }
 export type RpcHandler = (context: RpcContext, payload: JsonValue) => Promise<Result<JsonValue>>;
 export interface RpcOptions {
@@ -49,7 +49,7 @@ interface Outbound {
 interface Inbound {
   controller: AbortController;
   taskId: string | undefined;
-  timer: ReturnType<typeof setTimeout>;
+  timer: ReturnType<typeof setTimeout> | undefined;
   terminal: boolean;
   waitForWork: boolean;
   cancelled: KernelError | undefined;
@@ -165,7 +165,7 @@ export class ControlEndpoint {
     options: {
       taskId?: string;
       signal?: AbortSignal;
-      budgetMs?: number;
+      budgetMs?: number | null;
       waitForWork?: boolean;
     } = {},
   ): Promise<Result<JsonValue>> {
@@ -174,7 +174,15 @@ export class ControlEndpoint {
       return Promise.resolve({ ok: false, error: makeError('quota-exceeded', true) });
     if (options.signal?.aborted)
       return Promise.resolve({ ok: false, error: makeError('cancelled', false) });
-    const budget = options.budgetMs ?? 30000;
+    const budget = options.budgetMs === undefined ? 30000 : options.budgetMs;
+    if (
+      budget === null &&
+      (method !== 'runtime.invoke' ||
+        !options.taskId ||
+        !options.signal ||
+        options.waitForWork !== true)
+    )
+      return Promise.resolve({ ok: false, error: makeError('invalid-input', false) });
     const candidate = {
       ...this.base(),
       type: 'request' as const,
@@ -214,7 +222,10 @@ export class ControlEndpoint {
         resolve({ ok: false, error });
       };
       const abort = () => finish(makeError('cancelled', false), 'user');
-      const timer = setTimeout(() => finish(makeError('timeout', false), 'deadline'), budget);
+      const timer =
+        budget === null
+          ? undefined
+          : setTimeout(() => finish(makeError('timeout', false), 'deadline'), budget);
       this.#out.set(message.id, {
         resolve,
         waitForWork: options.waitForWork === true,
@@ -369,28 +380,43 @@ export class ControlEndpoint {
       });
       return;
     }
+    if (
+      message.budgetMs === null &&
+      !this.options.workCompletionMethods?.includes(message.method)
+    ) {
+      this.send({
+        ...this.base(),
+        type: 'response',
+        replyTo: message.id,
+        result: { ok: false, error: makeError('invalid-input', false) },
+      });
+      return;
+    }
     const controller = new AbortController();
-    const budget = message.budgetMs ?? 30000;
-    const deadline = performance.now() + budget;
+    const budget = message.budgetMs === undefined ? 30000 : message.budgetMs;
+    const deadline = budget === null ? undefined : performance.now() + budget;
     const pending: Inbound = {
       controller,
       taskId: message.taskId,
-      timer: setTimeout(() => {
-        if (pending.terminal || pending.cancelled) return;
-        pending.cancelled = makeError('timeout', false);
-        if (pending.waitForWork) {
-          controller.abort();
-          return;
-        }
-        pending.terminal = true;
-        controller.abort();
-        this.send({
-          ...this.base(),
-          type: 'response',
-          replyTo: message.id,
-          result: { ok: false, error: makeError('timeout', false) },
-        });
-      }, budget),
+      timer:
+        budget === null
+          ? undefined
+          : setTimeout(() => {
+              if (pending.terminal || pending.cancelled) return;
+              pending.cancelled = makeError('timeout', false);
+              if (pending.waitForWork) {
+                controller.abort();
+                return;
+              }
+              pending.terminal = true;
+              controller.abort();
+              this.send({
+                ...this.base(),
+                type: 'response',
+                replyTo: message.id,
+                result: { ok: false, error: makeError('timeout', false) },
+              });
+            }, budget),
       terminal: false,
       waitForWork: this.options.workCompletionMethods?.includes(message.method) === true,
       cancelled: undefined,
@@ -437,7 +463,7 @@ export class ControlEndpoint {
         if (pending.terminal || this.#closed) return;
         pending.terminal = true;
         if (pending.cancelled) result = { ok: false, error: pending.cancelled };
-        else if (performance.now() >= deadline)
+        else if (deadline !== undefined && performance.now() >= deadline)
           result = { ok: false, error: makeError('timeout', false) };
         else if (!this.live()) result = { ok: false, error: makeError('stale-owner', false) };
         const response = { ...this.base(), type: 'response' as const, replyTo: message.id, result };

@@ -1,0 +1,24 @@
+{
+  "name": "@pet/builtin-speech",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Optional synthesized pet tones speech output provider",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*"
+  }
+}

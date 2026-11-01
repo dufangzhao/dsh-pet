@@ -1,4 +1,5 @@
 import type { KernelError, Result } from './errors.js';
+import type { VoiceInputEngine } from './voice-input.js';
 import type { OwnerRef } from './ids.js';
 import type { PermissionPreset } from './security.js';
 import type { PluginLifecycleState } from './lifecycle.js';
@@ -22,6 +23,8 @@ export const DEMO_IPC = {
   clear: 'demo:v1:clear',
   key: 'demo:v1:key',
   removeKey: 'demo:v1:remove-key',
+  requestRecording: 'demo:v1:request-recording',
+  recordingRequested: 'demo:v1:recording-requested',
 } as const;
 export type DemoReplyMode = 'demo' | 'deepseek';
 export type DemoPhase =
@@ -58,7 +61,7 @@ export interface DemoPluginStatus {
 export interface DemoModelStatus {
   readonly id: string;
   readonly name: string;
-  readonly source: 'ModelScope';
+  readonly source: string;
   readonly cached: boolean;
   readonly streaming: boolean;
 }
@@ -71,6 +74,12 @@ export interface DemoSettings {
   readonly replyMode: DemoReplyMode | null;
   readonly autoSend: boolean;
   readonly readError: KernelError | null;
+  readonly engine?: VoiceInputEngine;
+  readonly microphoneId?: string;
+  readonly talkKeyCode?: string;
+  readonly talkKeyLabel?: string;
+  readonly cloudModel?: string;
+  readonly cloudBaseUrl?: string;
 }
 export interface DemoSnapshot {
   readonly version: 1;
@@ -99,6 +108,12 @@ export interface DemoCaptureTicket {
   readonly sampleRate: 16000;
   readonly maxSamples: number;
   readonly chunkSamples: 1600;
+  readonly microphoneId?: string;
+}
+export type DemoRecordingAction = 'toggle' | 'finish' | 'cancel';
+export interface DemoRecordingReceipt {
+  readonly id: string;
+  readonly action: DemoRecordingAction;
 }
 export type CaptureErrorReason = 'denied' | 'missing' | 'format' | 'failed';
 export interface DemoBridge {
@@ -106,6 +121,8 @@ export interface DemoBridge {
   getSnapshot(): Promise<Result<DemoSnapshot>>;
   onChanged(listener: () => void): () => void;
   beginRecording(): Promise<Result<DemoCaptureTicket>>;
+  requestRecording(request: { action: DemoRecordingAction }): Promise<Result<DemoRecordingReceipt>>;
+  onRecordingRequested(listener: (request: DemoRecordingReceipt) => void): () => void;
   captureReady(request: { token: string; sampleRate: number }): Promise<Result<null>>;
   pushAudio(
     header: { token: string; sequence: number },

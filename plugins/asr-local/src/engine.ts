@@ -1,7 +1,7 @@
 import { fork, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-export type AsrError = 'model-missing' | 'model-integrity' | 'asr-failed';
+export type AsrError = 'model-missing' | 'model-integrity' | 'asr-failed' | 'not-ready';
 export interface EngineResult {
   readonly ok: boolean;
   readonly modelId?: string;
@@ -32,8 +32,10 @@ export class LocalAsrEngine {
       'USERPROFILE',
       'APPDATA',
       'LOCALAPPDATA',
-    ])
-      if (process.env[key]) env[key] = process.env[key]!;
+    ]) {
+      const value = process.env[key];
+      if (value) env[key] = value;
+    }
     const child = fork(fileURLToPath(new URL('./asr-worker.cjs', import.meta.url)), [], {
       execPath: process.execPath,
       env,
@@ -90,7 +92,9 @@ export class LocalAsrEngine {
         });
       } else {
         this.error =
-          message.errorCode === 'model-missing' || message.errorCode === 'model-integrity'
+          message.errorCode === 'model-missing' ||
+          message.errorCode === 'model-integrity' ||
+          message.errorCode === 'not-ready'
             ? message.errorCode
             : 'asr-failed';
         work.finish({ ok: false, errorCode: this.error });
@@ -166,8 +170,13 @@ export class LocalAsrEngine {
     this.#closing = new Promise<void>((resolve) => {
       if (child.exitCode !== null || child.signalCode !== null) resolve();
       else {
-        child.once('exit', () => resolve());
-        child.kill();
+        const timer = setTimeout(() => child.kill(), 500);
+        child.once('exit', () => {
+          clearTimeout(timer);
+          resolve();
+        });
+        if (child.connected) child.send({ op: 'close' }, () => {});
+        else child.kill();
       }
     }).finally(() => {
       if (this.#child === child) this.#child = undefined;

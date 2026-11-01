@@ -3,6 +3,8 @@
 const path = require('node:path');
 const sherpa = require('sherpa-onnx-node');
 const { verifyLocalModel } = require('./model-store.ts');
+const { sapiRecognize } = require('./sapi.ts');
+const lifetime = new AbortController();
 const cache = path.resolve(__dirname, '../../../.cache/asr-models');
 let recognizer,
   modelId,
@@ -20,39 +22,67 @@ async function load(message) {
   if (loading || job) return fail(message.id, 'asr-failed');
   loading = true;
   try {
+    if (message.modelId === 'windows-sapi') {
+      await sapiRecognize(null, lifetime.signal);
+      recognizer = null;
+      modelId = message.modelId;
+      send({ kind: 'result', id: message.id, ok: true, modelId });
+      return;
+    }
     const files = await verifyLocalModel(cache, message.modelId);
-    const config = { tokens: files['tokens.txt'], numThreads: 2, provider: 'cpu', debug: 0 };
+    const config = {
+      tokens: files['tokens.txt'] ?? files['small-tokens.txt'],
+      numThreads: 2,
+      provider: 'cpu',
+      debug: 0,
+    };
     recognizer =
-      message.modelId === 'sensevoice-small-int8'
+      message.modelId === 'whisper-small-int8'
         ? new sherpa.OfflineRecognizer({
             featConfig: { sampleRate: 16000, featureDim: 80 },
             modelConfig: {
               ...config,
-              senseVoice: {
-                model: files['model.int8.onnx'],
-                language: 'auto',
-                useInverseTextNormalization: 1,
+              whisper: {
+                encoder: files['small-encoder.int8.onnx'],
+                decoder: files['small-decoder.int8.onnx'],
+                language: '',
+                task: 'transcribe',
+                tailPaddings: 1000,
               },
             },
           })
-        : new sherpa.OnlineRecognizer({
-            featConfig: { sampleRate: 16000, featureDim: 80 },
-            modelConfig: {
-              ...config,
-              paraformer: {
-                encoder: files['encoder.int8.onnx'],
-                decoder: files['decoder.int8.onnx'],
+        : message.modelId === 'sensevoice-small-int8'
+          ? new sherpa.OfflineRecognizer({
+              featConfig: { sampleRate: 16000, featureDim: 80 },
+              modelConfig: {
+                ...config,
+                senseVoice: {
+                  model: files['model.int8.onnx'],
+                  language: 'auto',
+                  useInverseTextNormalization: 1,
+                },
               },
-            },
-            decodingMethod: 'greedy_search',
-            enableEndpoint: false,
-          });
+            })
+          : new sherpa.OnlineRecognizer({
+              featConfig: { sampleRate: 16000, featureDim: 80 },
+              modelConfig: {
+                ...config,
+                paraformer: {
+                  encoder: files['encoder.int8.onnx'],
+                  decoder: files['decoder.int8.onnx'],
+                },
+              },
+              decodingMethod: 'greedy_search',
+              enableEndpoint: false,
+            });
     modelId = message.modelId;
     send({ kind: 'result', id: message.id, ok: true, modelId, verified: true });
   } catch (error) {
     fail(
       message.id,
-      ['model-missing', 'model-integrity'].includes(error?.message) ? error.message : 'asr-failed',
+      ['model-missing', 'model-integrity', 'not-ready'].includes(error?.message)
+        ? error.message
+        : 'asr-failed',
     );
   } finally {
     loading = false;
@@ -60,11 +90,17 @@ async function load(message) {
 }
 async function infer(current) {
   try {
+    if (modelId === 'windows-sapi') {
+      const text = await sapiRecognize(current.samples, lifetime.signal);
+      job = undefined;
+      send({ kind: 'result', id: current.id, ok: true, modelId, text });
+      return;
+    }
     const stream = recognizer.createStream();
     let steps = 0,
       last = '',
       partial = 0;
-    if (modelId === 'sensevoice-small-int8') {
+    if (modelId === 'sensevoice-small-int8' || modelId === 'whisper-small-int8') {
       stream.acceptWaveform({ sampleRate: 16000, samples: current.samples });
       recognizer.decode(stream);
     } else {
@@ -101,6 +137,11 @@ async function infer(current) {
   }
 }
 process.on('message', (message) => {
+  if (message?.op === 'close') {
+    lifetime.abort();
+    process.exit(0);
+    return;
+  }
   if (!message || typeof message.id !== 'string') return;
   if (message.op === 'ack') {
     if (partialAck?.id === message.id && partialAck.sequence === message.sequence) {
@@ -118,7 +159,7 @@ process.on('message', (message) => {
     if (
       loading ||
       job ||
-      !recognizer ||
+      (!recognizer && modelId !== 'windows-sapi') ||
       !Number.isSafeInteger(message.samples) ||
       message.samples < 1 ||
       message.samples > 320000
@@ -146,4 +187,7 @@ process.on('message', (message) => {
   }
   if (job.written === job.samples.length) void infer(job);
 });
-process.on('disconnect', () => process.exit(0));
+process.on('disconnect', () => {
+  lifetime.abort();
+  process.exit(0);
+});
