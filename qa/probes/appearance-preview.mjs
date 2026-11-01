@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const out = path.join(root, 'qa/minimal-settings-preview/screenshots');
 const report = {
-  scope: 'standalone appearance image preview; no app/backend writes',
+  scope: 'standalone outfit package preview; no app/backend writes',
   checks: [],
   errors: [],
   remoteRequests: [],
@@ -16,6 +16,37 @@ const browser = await chromium.launch({
   executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
   headless: true,
 });
+const art = (color) =>
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><circle cx="60" cy="60" r="40" fill="' +
+      color +
+      '"/></svg>',
+  );
+const packageFile = (name, data) => ({
+  name,
+  mimeType: 'application/json',
+  buffer: Buffer.from(JSON.stringify(data)),
+});
+const packageA = {
+  format: 'desktop-pet-outfit-preview',
+  version: 1,
+  name: '装扮甲',
+  image: art('#abd3ef'),
+  palettes: [
+    { id: 'sky', name: '天蓝', image: art('#abd3ef') },
+    { id: 'mint', name: '薄荷', image: art('#95ccba') },
+  ],
+  clothing: [{ id: 'scarf', name: '围巾', image: art('#dca2a2') }],
+};
+const packageB = {
+  format: 'desktop-pet-outfit-preview',
+  version: 1,
+  name: '装扮乙',
+  image: art('#c5c5df'),
+  palettes: [{ id: 'ink', name: '墨色', image: art('#a8a8bf') }],
+  clothing: [{ id: 'hat', name: '帽子', image: art('#bbb2d1') }],
+};
 try {
   const page = await browser.newPage({
     viewport: { width: 1200, height: 900 },
@@ -27,17 +58,19 @@ try {
   });
   await page.goto(pathToFileURL(path.join(root, 'qa/minimal-settings-preview/index.html')).href);
   await page.locator('[data-nav=appearance]').click();
+  await expect(page.getByRole('button', { name: '导入装扮包', exact: true })).toHaveCount(1);
+  await expect(page.locator('[data-asset-import]')).toHaveCount(0);
   await expect(page.locator('#appearance-figure-list label')).toHaveCount(2);
-  await expect(page.locator('#appearance-palette-list label')).toHaveCount(4);
   await expect(page.locator('#appearance-clothing-list img')).toHaveCount(0);
-  await expect(page.locator('#appearance-clothing-list label')).toHaveCount(0);
   for (const width of [1200, 1142, 880]) {
     await page.setViewportSize({ width, height: width === 880 ? 760 : width === 1142 ? 804 : 900 });
     const bounds = await page.locator('#appearance-stage').boundingBox();
     assert.ok(bounds && bounds.width > width * 0.6 && bounds.height >= 260);
     const escaped = await page.locator('#page-appearance').evaluate((el) => {
       const box = window.document.getElementById('settings-content').getBoundingClientRect();
-      return Array.from(el.querySelectorAll('.asset-tile,.asset-empty,.stage'))
+      return Array.from(
+        el.querySelectorAll('.asset-tile,.asset-empty,.stage,#import-outfit-button'),
+      )
         .filter((n) => {
           const r = n.getBoundingClientRect();
           return r.width > 0 && (r.left < box.left - 1 || r.right > box.right + 1);
@@ -48,75 +81,68 @@ try {
     await page.screenshot({ path: path.join(out, 'appearance-assets-' + width + '.png') });
   }
   report.checks.push(
-    'large stage and three compact asset rows fit three widths; clothing initially empty',
+    'one outfit importer; large stage and package-owned rows fit three widths; unmade clothing empty',
   );
-  await page.locator('#appearance-figure-list input[value=round]').check();
-  await expect(page.locator('#appearance-stage [data-pet-art]')).toHaveAttribute(
-    'src',
-    'assets/pet-round.svg',
-  );
-  await expect(page.locator('#appearance-palette-list [data-thumb-art]').first()).toHaveAttribute(
-    'src',
-    'assets/pet-round.svg',
-  );
-  await page.locator('#appearance-palette-list input[value=pine]').check();
-  await expect(page.locator('#appearance-stage [data-pet-art]')).toHaveAttribute(
-    'data-art-palette',
-    'pine',
-  );
-  await page.locator('[data-appearance-scene]').click();
-  await expect(page.locator('#appearance-stage')).toHaveAttribute('data-scene-dark', 'true');
-  await page.locator('[data-appearance-pose=listening]').click();
-  await expect(page.locator('#appearance-stage')).toHaveAttribute('data-preview-pose', 'listening');
-  const importImage = async (kind, file) => {
+  const importPack = async (file) => {
     const chooser = page.waitForEvent('filechooser');
-    await page.locator('[data-asset-import=' + kind + ']').click();
+    await page.locator('#import-outfit-button').click();
     await (await chooser).setFiles(file);
   };
-  await importImage('figure', []);
+  await importPack([]);
   await expect(page.locator('#appearance-figure-list label')).toHaveCount(2);
-  const image = (name) => ({
-    name,
-    mimeType: 'image/svg+xml',
-    buffer: Buffer.from(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><circle cx="60" cy="60" r="42" fill="#a8d3ef"/><circle cx="45" cy="53" r="4"/><circle cx="75" cy="53" r="4"/></svg>',
-    ),
-  });
-  await importImage('figure', image('本地形象.svg'));
+  await importPack(packageFile('装扮甲.outfit.json', packageA));
   await expect(page.locator('#appearance-figure-list label')).toHaveCount(3);
-  await expect(page.locator('#appearance-figure-list input[value=import-1]')).toBeChecked();
-  await expect(page.locator('#appearance-stage [data-pet-art]')).toHaveAttribute('src', /^blob:/);
-  await importImage('palette', image('本地配色.svg'));
-  await expect(page.locator('#appearance-palette-list label')).toHaveCount(5);
-  await expect(page.locator('#appearance-palette-list input[value=import-2]')).toBeChecked();
-  await page.locator('#appearance-figure-list input[value=minimal]').check();
-  await expect(page.locator('#appearance-palette-list input[value=morning]')).toBeChecked();
+  await expect(page.locator('#appearance-figure-list input[value=outfit-1]')).toBeChecked();
+  await expect(page.locator('#appearance-palette-list label')).toHaveCount(2);
+  await expect(page.locator('#appearance-clothing-list label')).toHaveCount(1);
+  await expect(page.locator('#appearance-palette-list input[value=sky]')).toBeChecked();
+  await expect(page.locator('#appearance-clothing-list input[value=scarf]')).toBeChecked();
+  await expect(page.locator('.appearance-clothing')).toHaveAttribute(
+    'src',
+    packageA.clothing[0].image,
+  );
+  await page.locator('#appearance-palette-list input[value=mint]').check();
   await expect(page.locator('#appearance-stage [data-pet-art]')).toHaveAttribute(
     'src',
-    'assets/pet-minimal.svg',
+    packageA.palettes[1].image,
   );
-  await importImage('clothing', image('本地服装.svg'));
-  await expect(page.locator('.appearance-clothing')).toHaveCount(1);
-  await expect(page.locator('#appearance-clothing-list [data-empty-slot]')).toHaveCount(0);
+  await importPack(packageFile('装扮乙.outfit.json', packageB));
+  await expect(page.locator('#appearance-figure-list label')).toHaveCount(4);
+  await expect(page.locator('#appearance-palette-list label')).toHaveCount(1);
+  await expect(page.locator('#appearance-clothing-list label')).toHaveCount(1);
+  await expect(page.locator('#appearance-palette-list input[value=ink]')).toBeChecked();
+  await expect(page.locator('#appearance-clothing-list input[value=hat]')).toBeChecked();
+  await expect(page.locator('#appearance-palette-list input[value=mint]')).toHaveCount(0);
+  await expect(page.locator('#appearance-clothing-list input[value=scarf]')).toHaveCount(0);
+  await page.locator('#appearance-figure-list input[value=outfit-1]').check();
+  await expect(page.locator('#appearance-palette-list input[value=sky]')).toBeChecked();
+  await expect(page.locator('#appearance-clothing-list input[value=scarf]')).toBeChecked();
   await page.locator('#clear-clothing').click();
   await expect(page.locator('.appearance-clothing')).toHaveCount(0);
-  await importImage('figure', {
-    name: '损坏图片.png',
-    mimeType: 'image/png',
-    buffer: Buffer.from('invalid image'),
-  });
-  await expect(page.locator('#appearance-import-status')).toHaveText('无法读取这张图片');
-  await expect(page.locator('#appearance-figure-list label')).toHaveCount(3);
-  await expect(page.locator('#appearance-stage [data-pet-art]')).toHaveAttribute(
-    'src',
-    'assets/pet-minimal.svg',
+  await page.locator('#appearance-figure-list input[value=minimal]').check();
+  await expect(page.locator('#appearance-palette-list label')).toHaveCount(4);
+  await expect(page.locator('#appearance-clothing-list img')).toHaveCount(0);
+  await expect(page.locator('#appearance-palette-list input[value=morning]')).toBeChecked();
+  report.checks.push(
+    'one file adds all three categories; package switching updates palette and clothing atomically without cross-package leftovers',
   );
+  await importPack(packageFile('缺少内容.json', { ...packageA, clothing: null }));
+  await expect(page.locator('#appearance-import-status')).toHaveText('装扮包信息不完整');
+  await expect(page.locator('#appearance-figure-list label')).toHaveCount(4);
+  await expect(page.locator('#appearance-figure-list input[value=minimal]')).toBeChecked();
+  await importPack(
+    packageFile('损坏图片.json', { ...packageA, image: 'data:image/png;base64,bm90YW5pbWFnZQ==' }),
+  );
+  await expect(page.locator('#appearance-import-status')).toHaveText('装扮包中有无法读取的图片');
+  await expect(page.locator('#appearance-figure-list label')).toHaveCount(4);
+  await importPack(
+    packageFile('空栏装扮.json', { ...packageA, name: '空栏装扮', palettes: [], clothing: [] }),
+  );
+  await expect(page.locator('#appearance-palette-list label')).toHaveCount(0);
+  await expect(page.locator('#appearance-clothing-list label')).toHaveCount(0);
   await page.locator('[data-nav=persona]').click();
   await page.locator('[data-nav=appearance]').click();
-  await expect(page.locator('#appearance-figure-list label')).toHaveCount(3);
-  report.checks.push(
-    'selection updates stage and thumbnails; local scene/pose controls; import cancel/success/error, clothing clear and draft navigation',
-  );
+  await expect(page.locator('#appearance-figure-list label')).toHaveCount(5);
   assert.deepEqual(
     await page.evaluate(() => [window.localStorage.length, window.sessionStorage.length]),
     [0, 0],
@@ -128,13 +154,13 @@ try {
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.remoteRequests, []);
   report.checks.push(
-    'imports remain in page memory and disappear on reload; no network/storage/backend access',
+    'cancel and invalid package keep selection; unmade content stays empty; imports remain local and disappear on reload',
   );
   report.status = 'passed';
-} catch (e) {
+} catch (error) {
   report.status = 'failed';
-  report.failure = String(e);
-  throw e;
+  report.failure = String(error);
+  throw error;
 } finally {
   await fs.writeFile(path.join(out, 'appearance-report.json'), JSON.stringify(report, null, 2));
   await browser.close();

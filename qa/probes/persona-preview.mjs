@@ -94,6 +94,12 @@ try {
   await expect(page.locator('#persona-templates #persona-voice')).toHaveCount(0);
   await expect(page.locator('[data-pref=speechEnabled]')).toHaveCount(0);
   await expect(page.locator('#persona-pitch-level')).toBeEnabled();
+  await page.locator('#persona-snore').fill('17');
+  await page.locator('[data-pref=soundSnore]').uncheck();
+  await expect(page.locator('#persona-snore-options')).toBeHidden();
+  await page.locator('[data-pref=soundSnore]').check();
+  await expect(page.locator('#persona-snore-options')).toBeVisible();
+  await expect(page.locator('#persona-snore')).toHaveValue('17');
   await page.locator('[data-pref=soundEnabled]').uncheck();
   await expect(page.locator('#persona-sound-options')).toBeHidden();
   await sound.screenshot({ path: path.join(out, 'persona-sound-off.png') });

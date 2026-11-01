@@ -6,11 +6,28 @@
 (function () {
   'use strict';
 
-  var FIGURE_LABEL = { minimal: '简约', round: '圆头' };
-  var PALETTE_LABEL = { morning: '晨蓝', lavender: '雪青', pine: '松墨', orange: '柿橙' };
   var SIZE_LABEL = { small: '小巧', normal: '适中', large: '放大' };
   var SIZE_PX = { small: 92, normal: 120, large: 152 };
-  var PET_ART = { minimal: 'assets/pet-minimal.svg', round: 'assets/pet-round.svg' };
+  var BUILTIN_PALETTES = [
+    { id: 'morning', name: '晨蓝', tone: 'morning' },
+    { id: 'lavender', name: '雪青', tone: 'lavender' },
+    { id: 'pine', name: '松墨', tone: 'pine' },
+    { id: 'orange', name: '柿橙', tone: 'orange' },
+  ];
+  var BUILTIN_OUTFITS = {
+    minimal: {
+      name: '简约',
+      image: 'assets/pet-minimal.svg',
+      palettes: BUILTIN_PALETTES,
+      clothing: [],
+    },
+    round: {
+      name: '圆头',
+      image: 'assets/pet-round.svg',
+      palettes: BUILTIN_PALETTES,
+      clothing: [],
+    },
+  };
   /* 模型名占位只是这一屏的示例文字，来源是各家公开列表里常见的写法。 */
   var MODEL_HINT = {
     deepseek: 'deepseek-chat',
@@ -49,7 +66,7 @@
     personaPane: 'habits',
     personaTemplate: 'default',
     personaTemplates: {},
-    importedAssets: { figure: {}, palette: {}, clothing: {} },
+    outfitPacks: Object.assign({}, BUILTIN_OUTFITS),
     clothing: '',
     importSerial: 0,
     petName: '小蓝',
@@ -85,7 +102,13 @@
     if (pref === 'personaPrompt') state.personaTemplates[state.personaTemplate].prompt = value;
     else if (pref === 'personaTemplateName')
       state.personaTemplates[state.personaTemplate].name = value;
-    else state[pref] = value;
+    else if (pref === 'figure') {
+      state.figure = value;
+      var outfit = state.outfitPacks[value];
+      state.palette = outfit.palettes.length ? outfit.palettes[0].id : '';
+      state.clothing = outfit.clothing.length ? outfit.clothing[0].id : '';
+      renderOutfitRows();
+    } else state[pref] = value;
   }
 
   document.querySelectorAll('[data-pref]').forEach(function (el) {
@@ -185,6 +208,9 @@
     var soundOptions = document.getElementById('persona-sound-options');
     soundOptions.hidden = !state.soundEnabled;
     setDisabled(soundOptions, !state.soundEnabled);
+    var snoreOptions = document.getElementById('persona-snore-options');
+    snoreOptions.hidden = !state.soundEnabled || !state.soundSnore;
+    setDisabled(snoreOptions, snoreOptions.hidden);
     var speakingOptions = document.getElementById('persona-speaking-options');
     speakingOptions.hidden = !state.soundEnabled || !state.soundTalk;
     setDisabled(speakingOptions, speakingOptions.hidden);
@@ -275,39 +301,39 @@
       else document.body.style.removeProperty(themeFields[key]);
     });
     var px = SIZE_PX[state.size];
-    var figureImport = state.importedAssets.figure[state.figure];
-    var paletteImport = state.importedAssets.palette[state.palette];
-    var figureSource = figureImport ? figureImport.url : PET_ART[state.figure];
-    var artSource = paletteImport ? paletteImport.url : figureSource;
-    var figureLabel = figureImport ? figureImport.name : FIGURE_LABEL[state.figure];
-    var paletteLabel = paletteImport ? paletteImport.name : PALETTE_LABEL[state.palette];
+    var outfit = state.outfitPacks[state.figure];
+    var palette = outfit.palettes.find(function (item) {
+      return item.id === state.palette;
+    });
+    var garment = outfit.clothing.find(function (item) {
+      return item.id === state.clothing;
+    });
+    var artSource = palette && palette.image ? palette.image : outfit.image;
+    var figureLabel = outfit.name;
+    var paletteLabel = palette ? palette.name : '';
     document.querySelectorAll('[data-stage]').forEach(function (stage) {
-      stage.dataset.palette = state.palette;
+      stage.dataset.palette = palette && palette.tone ? palette.tone : 'morning';
       stage.dataset.hidden = state.visible ? 'false' : 'true';
       stage.querySelectorAll('[data-pet-art]').forEach(function (art) {
         art.src = artSource;
-        art.dataset.artPalette = paletteImport ? 'morning' : state.palette;
+        art.dataset.artPalette = palette && palette.tone ? palette.tone : 'morning';
         art.width = px;
         art.height = px;
       });
     });
-
     document.getElementById('appearance-stage').style.setProperty('--pet-preview-size', px + 'px');
-    document.querySelectorAll('#appearance-palette-list [data-thumb-art]').forEach(function (art) {
-      art.src = figureSource;
-    });
     var avatar = document.querySelector('.appearance-avatar');
     var clothing = avatar.querySelector('.appearance-clothing');
-    if (state.clothing) {
+    if (garment) {
       if (!clothing) {
         clothing = document.createElement('img');
         clothing.className = 'appearance-clothing';
         clothing.alt = '服装预览';
         avatar.append(clothing);
       }
-      clothing.src = state.importedAssets.clothing[state.clothing].url;
+      clothing.src = garment.image;
     } else if (clothing) clothing.remove();
-    document.getElementById('clear-clothing').hidden = !state.clothing;
+    document.getElementById('clear-clothing').hidden = !garment;
     setText('figure', figureLabel);
     setText('palette', paletteLabel);
     setText('size', SIZE_LABEL[state.size]);
@@ -392,7 +418,6 @@
           ? Number(el.value)
           : el.value,
     );
-    if (pref === 'figure' && state.importedAssets.palette[state.palette]) state.palette = 'morning';
     if (pref === 'speechPitchLevel' && el.value !== 'custom')
       state.speechPitch = { low: 300, mid: 400, high: 500 }[el.value];
     if (pref === 'speechSpeedLevel' && el.value !== 'custom')
@@ -529,71 +554,136 @@
     });
   });
 
-  var importKind = 'figure';
-  var fileInput = document.getElementById('appearance-file-input');
-  var importStatus = document.getElementById('appearance-import-status');
-  document.querySelectorAll('[data-asset-import]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      importKind = button.dataset.assetImport;
-      fileInput.click();
-    });
-  });
-  fileInput.addEventListener('change', async function () {
-    var file = fileInput.files[0];
-    if (!file) return;
-    var kind = importKind;
-    fileInput.value = '';
-    if (
-      !['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'].includes(file.type)
-    ) {
-      importStatus.textContent = '请选择图片文件';
-      importStatus.setAttribute('role', 'alert');
-      return;
-    }
-    var url = window.URL.createObjectURL(file);
-    try {
-      await new Promise(function (resolve, reject) {
-        var image = new window.Image();
-        image.onload = resolve;
-        image.onerror = reject;
-        image.src = url;
-      });
-    } catch {
-      window.URL.revokeObjectURL(url);
-      importStatus.textContent = '无法读取这张图片';
-      importStatus.setAttribute('role', 'alert');
-      return;
-    }
-    state.importSerial += 1;
-    var id = 'import-' + state.importSerial;
-    var name = file.name.replace(/\.[^.]+$/, '');
-    state.importedAssets[kind][id] = { name: name, url: url };
-    state[kind] = id;
-    if (kind === 'figure') state.palette = 'morning';
-    var list = document.getElementById('appearance-' + kind + '-list');
-    list.querySelectorAll('[data-empty-slot]').forEach(function (slot) {
-      slot.remove();
-    });
+  function assetTile(kind, id, name, image, tone) {
     var label = document.createElement('label');
     label.className = 'asset-tile';
+    label.dataset.thumbPalette = tone || 'morning';
     var input = document.createElement('input');
     input.type = 'radio';
     input.name = kind;
     input.dataset.pref = kind;
     input.value = id;
-    var thumb = document.createElement('img');
-    thumb.src = url;
-    thumb.alt = '';
-    thumb.width = 64;
-    thumb.height = 64;
+    var art = document.createElement('img');
+    art.src = image;
+    art.alt = '';
+    art.width = 64;
+    art.height = 64;
+    art.dataset.thumbArt = '';
     var title = document.createElement('span');
     title.textContent = name;
-    label.append(input, thumb, title);
-    list.insertBefore(label, list.querySelector('[data-asset-import]'));
-    importStatus.textContent = '本次预览已导入：' + name;
-    importStatus.setAttribute('role', 'status');
+    label.append(input, art, title);
+    return label;
+  }
+  function renderOutfitRows() {
+    var outfit = state.outfitPacks[state.figure];
+    ['palette', 'clothing'].forEach(function (kind) {
+      var list = document.getElementById('appearance-' + kind + '-list');
+      var clear = kind === 'clothing' ? document.getElementById('clear-clothing') : null;
+      var options = kind === 'palette' ? outfit.palettes : outfit.clothing;
+      list.replaceChildren();
+      options.forEach(function (item) {
+        list.append(assetTile(kind, item.id, item.name, item.image || outfit.image, item.tone));
+      });
+      if (!options.length)
+        for (var i = 0; i < 2; i++) {
+          var slot = document.createElement('span');
+          slot.className = 'asset-empty';
+          slot.dataset.emptySlot = '';
+          slot.setAttribute('aria-hidden', 'true');
+          list.append(slot);
+        }
+      if (clear) list.append(clear);
+    });
+  }
+  async function previewImage(source) {
+    if (
+      typeof source !== 'string' ||
+      !/^data:image\/(png|jpeg|webp|gif|svg\+xml)(;base64)?,/.test(source)
+    )
+      throw new Error('装扮包图片需内嵌在同一份文件中');
+    return new Promise(function (resolve, reject) {
+      var image = new window.Image();
+      image.onload = resolve;
+      image.onerror = function () {
+        reject(new Error('装扮包中有无法读取的图片'));
+      };
+      image.src = source;
+    });
+  }
+  async function readOutfit(file) {
+    var pack;
+    try {
+      pack = JSON.parse(await file.text());
+    } catch {
+      throw new Error('无法读取这个装扮包');
+    }
+    if (
+      !pack ||
+      pack.format !== 'desktop-pet-outfit-preview' ||
+      pack.version !== 1 ||
+      typeof pack.name !== 'string' ||
+      !pack.name.trim() ||
+      !Array.isArray(pack.palettes) ||
+      !Array.isArray(pack.clothing)
+    )
+      throw new Error('装扮包信息不完整');
+    var pictures = [pack.image];
+    [pack.palettes, pack.clothing].forEach(function (items) {
+      var ids = new Set();
+      items.forEach(function (item) {
+        if (
+          !item ||
+          typeof item.id !== 'string' ||
+          !item.id ||
+          ids.has(item.id) ||
+          typeof item.name !== 'string' ||
+          !item.name.trim()
+        )
+          throw new Error('装扮包选项不完整或重复');
+        ids.add(item.id);
+        pictures.push(item.image);
+      });
+    });
+    await Promise.all(pictures.map(previewImage));
+    return {
+      name: pack.name.trim(),
+      image: pack.image,
+      palettes: pack.palettes.map(function (item) {
+        return { id: item.id, name: item.name, image: item.image };
+      }),
+      clothing: pack.clothing.map(function (item) {
+        return { id: item.id, name: item.name, image: item.image };
+      }),
+    };
+  }
+  var fileInput = document.getElementById('appearance-file-input');
+  var importStatus = document.getElementById('appearance-import-status');
+  document.getElementById('import-outfit-button').addEventListener('click', function () {
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', async function () {
+    var file = fileInput.files[0];
+    if (!file) return;
+    fileInput.value = '';
+    var outfit;
+    try {
+      outfit = await readOutfit(file);
+    } catch (error) {
+      importStatus.textContent = error.message;
+      importStatus.setAttribute('role', 'alert');
+      return;
+    }
+    state.importSerial += 1;
+    var id = 'outfit-' + state.importSerial;
+    state.outfitPacks[id] = outfit;
+    document
+      .getElementById('appearance-figure-list')
+      .append(assetTile('figure', id, outfit.name, outfit.image));
+    setPref('figure', id);
     syncControls();
     render();
+    importStatus.textContent = '本次预览已导入装扮包：' + outfit.name;
+    importStatus.setAttribute('role', 'status');
   });
   document.getElementById('clear-clothing').addEventListener('click', function () {
     state.clothing = '';
@@ -615,14 +705,8 @@
       });
     });
   });
-  window.addEventListener('pagehide', function () {
-    Object.values(state.importedAssets).forEach(function (group) {
-      Object.values(group).forEach(function (asset) {
-        window.URL.revokeObjectURL(asset.url);
-      });
-    });
-  });
 
+  renderOutfitRows();
   syncControls();
   render();
 })();

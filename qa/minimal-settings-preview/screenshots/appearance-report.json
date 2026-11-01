@@ -1,9 +1,9 @@
 {
-  "scope": "standalone appearance image preview; no app/backend writes",
+  "scope": "standalone outfit package preview; no app/backend writes",
   "checks": [
-    "large stage and three compact asset rows fit three widths; clothing initially empty",
-    "selection updates stage and thumbnails; local scene/pose controls; import cancel/success/error, clothing clear and draft navigation",
-    "imports remain in page memory and disappear on reload; no network/storage/backend access"
+    "one outfit importer; large stage and package-owned rows fit three widths; unmade clothing empty",
+    "one file adds all three categories; package switching updates palette and clothing atomically without cross-package leftovers",
+    "cancel and invalid package keep selection; unmade content stays empty; imports remain local and disappear on reload"
   ],
   "errors": [],
   "remoteRequests": [],

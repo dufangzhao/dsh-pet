@@ -1323,20 +1323,6 @@ dialog::backdrop {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
 }
-.asset-tile--import {
-  border-style: dashed;
-}
-.asset-import-mark {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  background: var(--surface-quiet);
-  color: var(--ink-quiet);
-  font-size: 30px;
-  font-weight: 300;
-}
 .asset-empty {
   width: 96px;
   height: 98px;
@@ -1387,6 +1373,9 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+#persona-snore-options[hidden] {
+  display: none;
 }
 .sound-options[hidden] {
   display: none;

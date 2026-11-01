@@ -648,7 +648,10 @@
 
           <!-- ------------------------------------------------------------ 装扮 -->
           <section class="page" data-page="appearance" id="page-appearance" hidden>
-            <div class="page__head"><h2 class="page__title">装扮</h2></div>
+            <div class="page__head">
+              <h2 class="page__title">装扮</h2>
+              <button type="button" class="btn" id="import-outfit-button">导入装扮包</button>
+            </div>
             <div class="appearance-dress" id="appearance-card">
               <div
                 class="stage stage--wide appearance-stage"
@@ -739,14 +742,7 @@
                       width="64"
                       height="64"
                     /><span>圆头</span></label
-                  ><button
-                    type="button"
-                    class="asset-tile asset-tile--import"
-                    data-asset-import="figure"
-                    aria-label="导入形象"
                   >
-                    <span class="asset-import-mark" aria-hidden="true">＋</span><span>导入</span>
-                  </button>
                 </div>
               </div>
               <div class="asset-row">
@@ -795,14 +791,7 @@
                       width="64"
                       height="64"
                     /><span>柿橙</span></label
-                  ><button
-                    type="button"
-                    class="asset-tile asset-tile--import"
-                    data-asset-import="palette"
-                    aria-label="导入配色"
                   >
-                    <span class="asset-import-mark" aria-hidden="true">＋</span><span>导入</span>
-                  </button>
                 </div>
               </div>
               <div class="asset-row">
@@ -814,16 +803,8 @@
                   aria-labelledby="label-clothing"
                 >
                   <span class="asset-empty" data-empty-slot aria-hidden="true"></span
-                  ><span class="asset-empty" data-empty-slot aria-hidden="true"></span
-                  ><button
-                    type="button"
-                    class="asset-tile asset-tile--import"
-                    data-asset-import="clothing"
-                    aria-label="导入服装"
-                  >
-                    <span class="asset-import-mark" aria-hidden="true">＋</span
-                    ><span>导入</span></button
-                  ><button type="button" class="btn btn--quiet" id="clear-clothing" hidden>
+                  ><span class="asset-empty" data-empty-slot aria-hidden="true"></span>
+                  <button type="button" class="btn btn--quiet" id="clear-clothing" hidden>
                     清除
                   </button>
                 </div>
@@ -831,7 +812,7 @@
               <input
                 type="file"
                 id="appearance-file-input"
-                accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                accept=".json,application/json"
                 hidden
               />
               <p class="asset-status" id="appearance-import-status" role="status"></p>
@@ -2014,7 +1995,7 @@
                       </div>
                     </div>
 
-                    <div class="persona-ranges">
+                    <div class="persona-ranges" id="persona-snore-options">
                       <div class="persona-range">
                         <label class="persona-range__label" for="persona-snore">呼噜时长</label>
                         <input
