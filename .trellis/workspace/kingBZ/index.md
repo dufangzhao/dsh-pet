@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 14
+- **Total Sessions**: 15
 - **Last Active**: 2026-11-01
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~475 | Active |
+| `journal-1.md` | ~508 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 15 | 2026-11-01 | Preview built-in voice input and fixed speech-key gestures | `1875b46` | `feat/minimal-settings-preview-only` |
 | 14 | 2026-11-01 | Bind outfit packs and map backend APIs | `132727e` | `feat/minimal-settings-preview-only` |
 | 13 | 2026-11-01 | Simplify sound disclosure and dress preview | `f5186fd` | `feat/minimal-settings-preview-only` |
 | 12 | 2026-11-01 | Expand persona preview with habits and template tabs | `f5a9693` | `feat/minimal-settings-preview-only` |

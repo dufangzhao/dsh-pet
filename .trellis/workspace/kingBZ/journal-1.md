@@ -473,3 +473,36 @@ Preview-only continuation: one import-outfit button now imports a single embedde
 ### Next Steps
 
 - None - task complete
+
+
+## Session 15: Preview built-in voice input and fixed speech-key gestures
+
+**Date**: 2026-11-01
+**Task**: Preview built-in voice input and fixed speech-key gestures
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Standalone preview iteration: removed silent speaking-sound choice, renamed visible extensions to plugins, rebuilt voice page as enable/settings, devices/key, recognition-result groups. Voice-input entry is a protected system-built-in product plan, sharing voiceEnabled with plugin page; current backend remains unchanged. Fixed hold-release and short-press/toggle gestures work simultaneously with internal250ms threshold, no capture-mode or hold-only-mic options shown. Native key-change dialog handles save/cancel/focus; repeat ignored; input fields excluded; disable cancels same local preview session. No microphone, fake transcript, network or persistence. Voice focused tests at1200/1142/880 plus full16scenes/persona/outfit regressions, lint/format pass. API map records later plugin/global-key/service contracts; goal remains preview-first and awaiting whole-UI approval.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1875b46` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
