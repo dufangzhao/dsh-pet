@@ -1231,6 +1231,21 @@ dialog::backdrop {
 
 /* -------------------------------------------------------------------- 人设 */
 /* 顶部两个子栏在同一页里切换：不是第二套侧栏，也不占侧栏的位置。 */
+.voice-engine-options {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+[data-voice-panel][hidden],
+#voice-model-progress[hidden],
+#voice-model-download[hidden] {
+  display: none;
+}
+#voice-model-progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--ink);
+}
 #page-voice .field-row > .field {
   flex: 1;
   min-width: 0;

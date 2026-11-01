@@ -59,6 +59,12 @@ try {
     assert.deepEqual(escaped, []);
     await page.screenshot({ path: path.join(out, 'voice-plugin-' + width + '.png') });
   }
+  await expect(page.locator('#voice-engine-select option')).toHaveCount(4);
+  await expect(page.locator('#voice-service-start')).toBeDisabled();
+  await page.locator('#voice-model-download').click();
+  await expect(page.locator('#voice-model-progress')).toBeVisible();
+  await page.clock.runFor(900);
+  await expect(page.locator('#voice-model-state')).toHaveText('已下载（预览）');
   await page.locator('#voice-service-start').click();
   await expect(page.locator('#voice-service-state')).toHaveText('运行预览');
   const recording = () => expect(voice).toHaveAttribute('data-recording', 'true');
@@ -146,6 +152,59 @@ try {
   assert.deepEqual(
     await page.evaluate(() => [window.localStorage.length, window.sessionStorage.length]),
     [0, 0],
+  );
+  await page.locator('#voice-engine-select').selectOption('whisper');
+  await expect(page.locator('#voice-model-name')).toHaveText('Whisper small INT8');
+  await expect(page.locator('#voice-model-size')).toHaveText('358 MB');
+  await expect(page.locator('#voice-model-state')).toHaveText('未下载');
+  await page.locator('#voice-model-download').click();
+  await page.clock.runFor(900);
+  await expect(page.locator('#voice-model-state')).toHaveText('已下载（预览）');
+  await page.screenshot({ path: path.join(out, 'voice-whisper.png') });
+  await page.locator('#voice-engine-select').selectOption('system');
+  await expect(page.locator('#voice-local-settings')).toBeHidden();
+  await expect(page.locator('#voice-system-settings')).toBeVisible();
+  await expect(page.locator('#voice-model-download')).toBeHidden();
+  await page.screenshot({ path: path.join(out, 'voice-system.png') });
+  await page.locator('#voice-engine-select').selectOption('api');
+  await expect(page.locator('#voice-api-settings')).toBeVisible();
+  await page.locator('#voice-service-start').click();
+  await expect(page.locator('#voice-api-status')).toHaveText('请填写有效的接口地址');
+  await page.locator('#voice-api-url').fill('https://asr.example.test/v1');
+  await page.locator('#voice-service-start').click();
+  await expect(page.locator('#voice-api-status')).toHaveText('请填写转写模型名称');
+  await page.locator('#voice-api-model').fill('demo-transcription');
+  await page.locator('#voice-api-key').fill('DEMO_ASR_KEY');
+  await page.locator('#voice-api-key-toggle').click();
+  await expect(page.locator('#voice-api-key')).toHaveAttribute('type', 'text');
+  await page.locator('#voice-api-key-toggle').click();
+  await expect(page.locator('#voice-api-key')).toHaveAttribute('type', 'password');
+  await page.locator('#voice-service-start').click();
+  await expect(page.locator('#voice-service-state')).toHaveText('接口配置预览');
+  await page.locator('#voice-api-key').fill('DEMO_CHANGED_KEY');
+  await expect(page.locator('#voice-service-state')).toHaveText('已停止');
+  await page.locator('#voice-microphone-select').selectOption('headset');
+  await expect(page.locator('#voice-microphone-select')).toHaveValue('headset');
+  await expect(page.locator('#voice-microphone-state')).toHaveText('未收音');
+  await page.screenshot({ path: path.join(out, 'voice-api.png') });
+  await page.locator('#voice-engine-select').selectOption('funasr');
+  await expect(page.locator('#voice-model-name')).toHaveText('SenseVoiceSmall INT8');
+  await expect(page.locator('#voice-model-state')).toHaveText('已下载（预览）');
+  await page.locator('#voice-engine-select').selectOption('api');
+  await expect(page.locator('#voice-api-url')).toHaveValue('https://asr.example.test/v1');
+  for (const width of [1200, 880]) {
+    await page.setViewportSize({ width, height: width === 880 ? 760 : 900 });
+    const overflow = await page
+      .locator('#settings-content')
+      .evaluate((el) => el.scrollWidth > el.clientWidth);
+    assert.equal(overflow, false);
+    await page.screenshot({ path: path.join(out, 'voice-api-' + width + '.png') });
+  }
+  assert.equal(await page.evaluate(() => window.__voiceMicRequests), 0);
+  assert.deepEqual(report.requests, []);
+  assert.deepEqual(report.errors, []);
+  report.checks.push(
+    'four ASR engines, two fixed local models, download-preview/cache separation, Windows no-download, API validation/key/draft retention, microphone choices, and no device/network access',
   );
   report.checks.push(
     'one built-in plugin shares the enable setting; disabling cancels preview; no microphone/network/storage access',

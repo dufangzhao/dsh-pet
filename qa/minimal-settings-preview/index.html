@@ -832,66 +832,151 @@
                 ></label>
               </div>
               <div class="card__body" id="voice-settings">
-                <div class="field-row">
-                  <div class="field">
-                    <label class="field__label" for="voice-engine-select">识别引擎</label>
-                    <div class="inputForm">
-                      <select class="select" id="voice-engine-select" data-pref="voiceEngine">
-                        <button type="button" class="select__trigger">
-                          <selectedcontent class="select__selected"></selectedcontent
-                          ><span class="select__arrow" aria-hidden="true"></span>
-                        </button>
-                        <option value="funasr">
-                          <span class="opt__name">FunASR（本机识别）</span>
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label class="field__label" for="voice-model-select">识别模型</label>
-                    <div class="inputForm">
-                      <select class="select" id="voice-model-select" data-pref="voiceModel">
-                        <button type="button" class="select__trigger">
-                          <selectedcontent class="select__selected"></selectedcontent
-                          ><span class="select__arrow" aria-hidden="true"></span>
-                        </button>
-                        <option value="sensevoice">
-                          <span class="opt__name">SenseVoice Small INT8</span>
-                        </option>
-                        <option value="paraformer">
-                          <span class="opt__name">Paraformer 中文流式 INT8</span>
-                        </option>
-                      </select>
-                    </div>
+                <div class="field">
+                  <label class="field__label" for="voice-engine-select">识别引擎</label>
+                  <div class="inputForm">
+                    <select class="select" id="voice-engine-select" data-pref="voiceEngine">
+                      <button type="button" class="select__trigger">
+                        <selectedcontent class="select__selected"></selectedcontent
+                        ><span class="select__arrow" aria-hidden="true"></span>
+                      </button>
+                      <option value="funasr">FunASR（本机识别）</option>
+                      <option value="whisper">Whisper（本机识别）</option>
+                      <option value="system">Windows 自带</option>
+                      <option value="api">转写接口（OpenAI 兼容）</option>
+                    </select>
                   </div>
                 </div>
-                <div class="rows rows--tight">
-                  <div class="row">
-                    <span class="row__label">识别服务</span>
-                    <div class="voice-inline">
-                      <span class="voice-service-state" id="voice-service-state" role="status"
-                        >已停止</span
-                      ><button
-                        type="button"
-                        class="btn btn--small"
-                        id="voice-service-start"
-                        data-voice-action="start-service"
+                <div
+                  class="voice-engine-options"
+                  data-voice-panel="local"
+                  id="voice-local-settings"
+                >
+                  <div class="rows rows--tight">
+                    <div class="row">
+                      <span class="row__label">识别模型</span
+                      ><span class="row__value" id="voice-model-name">SenseVoiceSmall INT8</span>
+                    </div>
+                    <div class="row">
+                      <span class="row__label">支持语言</span
+                      ><span class="row__value" id="voice-model-languages"
+                        >中文、英语、日语、韩语、粤语</span
                       >
-                        启动</button
-                      ><button
-                        type="button"
-                        class="btn btn--small"
-                        id="voice-service-stop"
-                        data-voice-action="stop-service"
-                        disabled
-                      >
-                        停止
-                      </button>
+                    </div>
+                    <div class="row">
+                      <span class="row__label">模型下载</span>
+                      <div class="voice-inline">
+                        <span class="row__value" id="voice-model-size">228 MB</span
+                        ><span class="row__value" id="voice-model-state">未下载</span
+                        ><button
+                          type="button"
+                          class="btn btn--small"
+                          id="voice-model-download"
+                          data-voice-action="download-model"
+                        >
+                          下载
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  <progress
+                    id="voice-model-progress"
+                    max="100"
+                    value="0"
+                    aria-label="模型下载进度"
+                    hidden
+                  ></progress>
+                </div>
+                <div
+                  id="voice-system-settings"
+                  class="voice-engine-options"
+                  data-voice-panel="system"
+                  hidden
+                >
                   <div class="row">
-                    <span class="row__label">模型状态</span
-                    ><span class="row__value" id="voice-model-state">未检查</span>
+                    <span class="row__label">识别模型</span
+                    ><span class="row__value">由 Windows 管理</span>
+                  </div>
+                  <div class="row">
+                    <span class="row__label">识别语言</span
+                    ><span class="row__value">系统识别语言</span>
+                  </div>
+                </div>
+                <div
+                  id="voice-api-settings"
+                  class="voice-engine-options"
+                  data-voice-panel="api"
+                  hidden
+                >
+                  <div class="field">
+                    <label class="field__label" for="voice-api-url">接口地址</label>
+                    <div class="inputForm">
+                      <input
+                        class="input"
+                        id="voice-api-url"
+                        data-pref="voiceApiUrl"
+                        type="text"
+                        inputmode="url"
+                        placeholder="https://api.example.com/v1"
+                      />
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field__label" for="voice-api-model">转写模型</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="voice-api-model"
+                          data-pref="voiceApiModel"
+                          placeholder="填写模型名称"
+                        />
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="voice-api-key">API Key</label>
+                      <div class="inputForm">
+                        <input
+                          class="input"
+                          id="voice-api-key"
+                          data-pref="voiceApiKey"
+                          type="password"
+                          autocomplete="off"
+                        /><button
+                          type="button"
+                          class="icon-btn"
+                          id="voice-api-key-toggle"
+                          aria-label="显示转写Key"
+                          aria-pressed="false"
+                        >
+                          ◉
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <p id="voice-api-status" class="asset-status" role="status"></p>
+                </div>
+                <div class="row">
+                  <span class="row__label">识别服务</span>
+                  <div class="voice-inline">
+                    <span class="voice-service-state" id="voice-service-state" role="status"
+                      >已停止</span
+                    ><button
+                      type="button"
+                      class="btn btn--small"
+                      id="voice-service-start"
+                      data-voice-action="start-service"
+                    >
+                      启动</button
+                    ><button
+                      type="button"
+                      class="btn btn--small"
+                      id="voice-service-stop"
+                      data-voice-action="stop-service"
+                      disabled
+                    >
+                      停止
+                    </button>
                   </div>
                 </div>
               </div>
@@ -912,7 +997,9 @@
                           <selectedcontent class="select__selected"></selectedcontent
                           ><span class="select__arrow" aria-hidden="true"></span>
                         </button>
-                        <option value="default"><span class="opt__name">系统默认</span></option>
+                        <option value="default">系统默认</option>
+                        <option value="built-in">内置麦克风（示例）</option>
+                        <option value="headset">耳机麦克风（示例）</option>
                       </select>
                     </div>
                   </div>
@@ -923,6 +1010,10 @@
                       ><button type="button" class="btn" id="voice-key-change">更改</button>
                     </div>
                   </div>
+                </div>
+                <div class="row">
+                  <span class="row__label">麦克风状态</span
+                  ><span class="row__value" id="voice-microphone-state" role="status">未收音</span>
                 </div>
                 <div class="voice-level">
                   <span id="voice-level-label">输入音量</span

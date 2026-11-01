@@ -555,13 +555,6 @@
           {
             "id": "voice-engine-select",
             "left": 299,
-            "right": 704,
-            "top": 250,
-            "bottom": 298
-          },
-          {
-            "id": "voice-model-select",
-            "left": 722,
             "right": 1127,
             "top": 250,
             "bottom": 298
@@ -570,8 +563,8 @@
             "id": "voice-microphone-select",
             "left": 299,
             "right": 704,
-            "top": 547,
-            "bottom": 595
+            "top": 678,
+            "bottom": 726
           }
         ],
         "images": [
@@ -1441,13 +1434,6 @@
           {
             "id": "voice-engine-select",
             "left": 131,
-            "right": 465,
-            "top": 246,
-            "bottom": 294
-          },
-          {
-            "id": "voice-model-select",
-            "left": 483,
             "right": 817,
             "top": 246,
             "bottom": 294
@@ -1456,8 +1442,8 @@
             "id": "voice-microphone-select",
             "left": 131,
             "right": 465,
-            "top": 543,
-            "bottom": 591
+            "top": 674,
+            "bottom": 722
           }
         ],
         "images": [

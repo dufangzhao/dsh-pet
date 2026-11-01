@@ -3,6 +3,7 @@
   "checks": [
     "both fixed key gestures work simultaneously; repeat keydown does not start or end twice",
     "key change/save/cancel focus; old key inactive; editable fields ignored; no fabricated transcript",
+    "four ASR engines, two fixed local models, download-preview/cache separation, Windows no-download, API validation/key/draft retention, microphone choices, and no device/network access",
     "one built-in plugin shares the enable setting; disabling cancels preview; no microphone/network/storage access"
   ],
   "errors": [],

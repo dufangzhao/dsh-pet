@@ -39,6 +39,22 @@
     gemini: 'gemini-2.5-flash',
   };
 
+  var VOICE_ENGINES = {
+    funasr: {
+      kind: 'local',
+      model: 'SenseVoiceSmall INT8',
+      languages: '中文、英语、日语、韩语、粤语',
+      size: '228 MB',
+    },
+    whisper: {
+      kind: 'local',
+      model: 'Whisper small INT8',
+      languages: '约100种语言',
+      size: '358 MB',
+    },
+    system: { kind: 'system' },
+    api: { kind: 'api' },
+  };
   var PERSONA_TEMPLATES = {
     default: {
       name: '默认伙伴',
@@ -84,7 +100,13 @@
     paused: false,
     voiceEnabled: true,
     voiceEngine: 'funasr',
-    voiceModel: 'sensevoice',
+    voiceDownloads: {
+      funasr: { phase: 'absent', progress: 0 },
+      whisper: { phase: 'absent', progress: 0 },
+    },
+    voiceApiUrl: '',
+    voiceApiModel: '',
+    voiceApiKey: '',
     voiceMicrophone: 'default',
     voiceHotkey: 'AltLeft',
     voiceServiceRunning: false,
@@ -291,6 +313,7 @@
 
   var VOICE_HOLD_MS = 250;
   var voiceTimer = null;
+  var voiceDownloadTimers = {};
   var pendingVoiceKey = null;
   function voiceKeyLabel(code) {
     var names = {
@@ -314,12 +337,41 @@
       Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
   }
   function renderVoice() {
-    var ready = state.voiceEnabled && state.voiceServiceRunning;
+    var engine = VOICE_ENGINES[state.voiceEngine];
+    document.querySelectorAll('[data-voice-panel]').forEach(function (panel) {
+      panel.hidden = panel.dataset.voicePanel !== engine.kind;
+    });
+    if (engine.kind === 'local') {
+      var model = state.voiceDownloads[state.voiceEngine];
+      document.getElementById('voice-model-name').textContent = engine.model;
+      document.getElementById('voice-model-languages').textContent = engine.languages;
+      document.getElementById('voice-model-size').textContent = engine.size;
+      document.getElementById('voice-model-state').textContent = {
+        absent: '未下载',
+        working: '下载预览 ' + model.progress + '%',
+        ready: '已下载（预览）',
+        error: '下载失败',
+      }[model.phase];
+      var download = document.getElementById('voice-model-download');
+      download.hidden = model.phase === 'ready';
+      download.disabled = model.phase === 'working';
+      download.textContent = model.phase === 'error' ? '重试' : '下载';
+      var progress = document.getElementById('voice-model-progress');
+      progress.hidden = model.phase !== 'working';
+      progress.value = model.progress;
+    }
+    var available =
+      engine.kind !== 'local' || state.voiceDownloads[state.voiceEngine].phase === 'ready';
+    var ready = state.voiceEnabled && state.voiceServiceRunning && available;
     document.getElementById('voice-service-state').textContent = state.voiceServiceRunning
-      ? '运行预览'
+      ? engine.kind === 'api'
+        ? '接口配置预览'
+        : engine.kind === 'system'
+          ? '系统识别预览'
+          : '运行预览'
       : '已停止';
     document.getElementById('voice-service-start').disabled =
-      !state.voiceEnabled || state.voiceServiceRunning;
+      !state.voiceEnabled || state.voiceServiceRunning || !available;
     document.getElementById('voice-service-stop').disabled = !state.voiceServiceRunning;
     document.getElementById('voice-record-button').disabled = !ready;
     document.getElementById('voice-record-button').textContent = state.voiceRecording
@@ -329,17 +381,58 @@
     document.getElementById('voice-recorder-state').textContent = state.voiceRecordMessage;
     document.getElementById('voice-hotkey-value').textContent = voiceKeyLabel(state.voiceHotkey);
     document.getElementById('voice-key-change').disabled = state.voiceRecording;
-    ['voice-engine-select', 'voice-model-select', 'voice-microphone-select'].forEach(function (id) {
+    [
+      'voice-engine-select',
+      'voice-microphone-select',
+      'voice-api-url',
+      'voice-api-model',
+      'voice-api-key',
+      'voice-api-key-toggle',
+    ].forEach(function (id) {
       document.getElementById(id).disabled = state.voiceRecording;
     });
+    document.getElementById('voice-microphone-state').textContent = state.voiceRecording
+      ? '收音状态预览'
+      : '未收音';
     document.getElementById('page-voice').dataset.recording = String(state.voiceRecording);
-    var pluginState = document.getElementById('voice-plugin-state');
-    pluginState.textContent = state.voiceEnabled ? '已启用' : '已关闭';
+    document.getElementById('voice-plugin-state').textContent = state.voiceEnabled
+      ? '已启用'
+      : '已关闭';
     document.getElementById('voice-plugin-toggle').textContent = state.voiceEnabled
       ? '关闭语音输入'
       : '开启语音输入';
     setText('plugins-active-count', state.voiceEnabled ? 3 : 2);
     setText('plugins-disabled-count', state.voiceEnabled ? 0 : 1);
+  }
+  function downloadVoiceModel() {
+    var id = state.voiceEngine;
+    var model = state.voiceDownloads[id];
+    model.phase = 'working';
+    model.progress = 0;
+    renderVoice();
+    voiceDownloadTimers[id] = window.setInterval(function () {
+      model.progress += 20;
+      if (model.progress >= 100) {
+        model.phase = 'ready';
+        window.clearInterval(voiceDownloadTimers[id]);
+        delete voiceDownloadTimers[id];
+      }
+      renderVoice();
+    }, 150);
+  }
+  function validateVoiceApi() {
+    var message = '';
+    try {
+      var address = new window.URL(state.voiceApiUrl);
+      if (!['http:', 'https:'].includes(address.protocol)) message = '请填写有效的接口地址';
+    } catch {
+      message = '请填写有效的接口地址';
+    }
+    if (!message && !state.voiceApiModel.trim()) message = '请填写转写模型名称';
+    var status = document.getElementById('voice-api-status');
+    status.textContent = message || '接口配置预览';
+    status.setAttribute('role', message ? 'alert' : 'status');
+    return !message;
   }
   function startVoicePreview() {
     if (!state.voiceEnabled || !state.voiceServiceRunning || state.voiceRecording) return;
@@ -496,7 +589,8 @@
       state.voiceServiceRunning = false;
       stopVoicePreview('未录音');
     }
-    if (pref === 'voiceModel') {
+    if (pref === 'voiceMicrophone') stopVoicePreview('未录音');
+    if (pref === 'voiceEngine') {
       state.voiceServiceRunning = false;
       stopVoicePreview('未录音');
     }
@@ -515,6 +609,11 @@
       ['text', 'password', 'search', 'number', 'range', 'textarea', 'color'].indexOf(el.type) !== -1
     ) {
       if (el.type === 'color') customTheme = true;
+      if (el.dataset.pref.indexOf('voiceApi') === 0) {
+        state.voiceServiceRunning = false;
+        stopVoicePreview('未录音');
+        document.getElementById('voice-api-status').textContent = '';
+      }
       if (el.dataset.pref === 'speechPitch') state.speechPitchLevel = 'custom';
       if (el.dataset.pref === 'speechSpeed') state.speechSpeedLevel = 'custom';
       setPref(
@@ -792,7 +891,10 @@
   document.querySelectorAll('[data-voice-action]').forEach(function (button) {
     button.addEventListener('click', function () {
       var action = button.dataset.voiceAction;
-      if (action === 'start-service') {
+      if (action === 'download-model') {
+        downloadVoiceModel();
+      } else if (action === 'start-service') {
+        if (state.voiceEngine === 'api' && !validateVoiceApi()) return;
         state.voiceServiceRunning = true;
         renderVoice();
       } else if (action === 'stop-service') {
@@ -812,6 +914,13 @@
         render();
       }
     });
+  });
+  document.getElementById('voice-api-key-toggle').addEventListener('click', function () {
+    var key = document.getElementById('voice-api-key');
+    var shown = key.type === 'password';
+    key.type = shown ? 'text' : 'password';
+    this.setAttribute('aria-pressed', String(shown));
+    this.setAttribute('aria-label', shown ? '隐藏转写Key' : '显示转写Key');
   });
   document.getElementById('voice-key-change').addEventListener('click', function () {
     pendingVoiceKey = null;
@@ -870,6 +979,9 @@
   });
   window.addEventListener('pagehide', function () {
     window.clearInterval(voiceTimer);
+    Object.values(voiceDownloadTimers).forEach(function (timer) {
+      window.clearInterval(timer);
+    });
   });
 
   renderOutfitRows();
