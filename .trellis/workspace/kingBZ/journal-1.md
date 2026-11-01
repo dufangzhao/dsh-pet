@@ -539,3 +539,36 @@ Completed omitted voice preview details after read-only source audit: FunASR/Sen
 ### Next Steps
 
 - None - task complete
+
+
+## Session 17: Plugin desktop pet voice MVP
+
+**Date**: 2026-11-02
+**Task**: Plugin desktop pet voice MVP
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Completed native plugin voice dialogue and spoken output, compact themed pet controls, lifetime-bound input, profile CAS and validated old-profile migration. Full workspace and native voice/restart checks pass; normal app is running. Advanced avatar behavior and complete outfit lifecycle remain documented extensions.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7924509` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

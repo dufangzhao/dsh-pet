@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 16
-- **Last Active**: 2026-11-01
+- **Total Sessions**: 17
+- **Last Active**: 2026-11-02
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~541 | Active |
+| `journal-1.md` | ~574 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 17 | 2026-11-02 | Plugin desktop pet voice MVP | `7924509` | `feat/minimal-settings-preview-only` |
 | 16 | 2026-11-01 | Complete ASR engine and microphone preview content | `d60a07d` | `feat/minimal-settings-preview-only` |
 | 15 | 2026-11-01 | Preview built-in voice input and fixed speech-key gestures | `1875b46` | `feat/minimal-settings-preview-only` |
 | 14 | 2026-11-01 | Bind outfit packs and map backend APIs | `132727e` | `feat/minimal-settings-preview-only` |
