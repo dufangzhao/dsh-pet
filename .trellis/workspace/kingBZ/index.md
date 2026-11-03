@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 18
+- **Total Sessions**: 19
 - **Last Active**: 2026-11-03
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~607 | Active |
+| `journal-1.md` | ~640 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 19 | 2026-11-03 | Live transcripts and compact context menu | `263d6c0` | `feat/minimal-settings-preview-only` |
 | 18 | 2026-11-03 | Pet bubble replica and default permissions | `8fd1e07` | `feat/minimal-settings-preview-only` |
 | 17 | 2026-11-02 | Plugin desktop pet voice MVP | `7924509` | `feat/minimal-settings-preview-only` |
 | 16 | 2026-11-01 | Complete ASR engine and microphone preview content | `d60a07d` | `feat/minimal-settings-preview-only` |

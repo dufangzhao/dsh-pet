@@ -605,3 +605,36 @@ Implemented default allow using the existing preset system, removed avatar focus
 ### Next Steps
 
 - None - task complete
+
+
+## Session 19: Live transcripts and compact context menu
+
+**Date**: 2026-11-03
+**Task**: Live transcripts and compact context menu
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Delivered real during-capture SenseVoice and Paraformer partials, immediate full-text transcript and retained final bubble, and216x165 dark/light context menu with real actions. Preserved single capture/Core/theme owners and exact task cancellation. Full quality passed; actual Electron captured7 distinct interim hypotheses while recording and verified all menu controls. Evidence inqa/live-transcript-menu anddocs/live-transcript-menu.md.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `263d6c0` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
