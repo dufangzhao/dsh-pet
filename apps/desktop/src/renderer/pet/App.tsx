@@ -40,7 +40,8 @@ import { PetDialog } from './PetDialog.js';
 import { PetMenu } from './PetMenu.js';
 import { PetTools } from './PetTools.js';
 import { SpeechOutputPlaybackOwner } from '../speech-output/playback-owner.js';
-import { bubbleLifetime } from './demo-status.js';
+import { bubbleLifetime, type PetBubbleEvent } from './demo-status.js';
+import { useBubblePresence, useReducedMotion } from './use-bubble-motion.js';
 import { petPresentationStyle, usePetSettings } from './use-pet-settings.js';
 import { PET_COPY } from './copy.js';
 import {
@@ -75,6 +76,21 @@ function rectToHitRect(element: Element | null) {
   const rect = element.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return null;
   return toHitRect(rect);
+}
+
+function popoverHitShape(element: HTMLElement | null): HitShape | null {
+  if (element === null || element.closest('[inert], [hidden]')) return null;
+  const rect = element.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return null;
+  const radius = Number.parseFloat(getComputedStyle(element).borderTopLeftRadius);
+  const scale = element.offsetWidth > 0 ? rect.width / element.offsetWidth : 1;
+  const viewport = element.closest('.pet-root__content')?.getBoundingClientRect();
+  return {
+    kind: 'roundedRect',
+    ...toHitRect(rect),
+    radius: radius * scale,
+    ...(viewport ? { clip: toHitRect(viewport) } : {}),
+  };
 }
 
 /**
@@ -377,7 +393,8 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const figure: PetFigure = profile?.figure ?? 'minimal';
   const palette = profile?.palette ?? 'morning';
   const size = profile?.size ?? 'normal';
-  const reducedMotion = profile?.reducedMotion ?? false;
+  const reducedMotion = useReducedMotion(profile?.reducedMotion ?? false);
+  const chatPresence = useBubblePresence(chatOpen, reducedMotion);
   const draggable = profile?.draggable ?? true;
   const petName = profile?.petName ?? null;
   const hostDialogKey = app.dialog === null ? null : `${app.dialog.id}:${app.dialog.step}`;
@@ -389,7 +406,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     view.notice ??
     demo.notice ??
     settings.notice;
-  const event = notice
+  const event: PetBubbleEvent | null = notice
     ? { key: `notice:${notice}`, kind: 'error' as const, text: notice }
     : demo.event;
   const bubble =
@@ -425,8 +442,10 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     }
     const panel = rectToHitRect(panelRef.current);
     if (panel !== null) shapes.push({ kind: 'rect', ...panel });
-    const composer = rectToHitRect(composerRef.current);
-    if (composer !== null) shapes.push({ kind: 'rect', ...composer });
+    const composer = popoverHitShape(
+      composerRef.current?.querySelector<HTMLElement>('.pet-composer') ?? null,
+    );
+    if (composer !== null) shapes.push(composer);
     // Circular tools use their painted circles; their labels and transparent gaps stay click-through.
     toolsRef.current?.querySelectorAll('[data-pet-circle]').forEach((button) => {
       const rect = button.getBoundingClientRect();
@@ -439,10 +458,10 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
           ry: rect.height / 2,
         });
     });
-    const bubble = rectToHitRect(bubbleRef.current);
-    if (bubble) shapes.push({ kind: 'rect', ...bubble });
-    const dialogue = rectToHitRect(dialogRef.current);
-    if (dialogue !== null) shapes.push({ kind: 'rect', ...dialogue });
+    const bubble = popoverHitShape(bubbleRef.current);
+    if (bubble) shapes.push(bubble);
+    const dialogue = popoverHitShape(dialogRef.current);
+    if (dialogue !== null) shapes.push(dialogue);
     return shapes;
   }, [figure]);
 
@@ -470,6 +489,11 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   );
 
   const sessionRef = useRef<PetInteractionSession | null>(null);
+  const resyncHitShapes = useCallback((): void => {
+    const session = sessionRef.current;
+    if (session && !session.isActive() && session.tracker.resync(collectHitShapes()))
+      setInteraction(session.tracker.interactive);
+  }, [collectHitShapes, setInteraction]);
 
   useEffect(() => {
     if (menuOpen)
@@ -582,31 +606,22 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
    */
   const geometry =
     geometryKey(dialog === null ? null : `${dialog.id}:${dialog.step}`, figure, size) +
-    `:${composing}:${toolsVisible}:${menuOpen}:${bubble?.key ?? ''}`;
-  useEffect(() => {
-    const session = sessionRef.current;
-    if (session === null || session.isActive()) return;
-    if (session.tracker.resync(collectHitShapes())) setInteraction(session.tracker.interactive);
-  }, [geometry, collectHitShapes, setInteraction]);
+    `:${composing}:${chatPresence.present}:${toolsVisible}:${menuOpen}:${bubble?.key ?? ''}`;
+  useEffect(resyncHitShapes, [geometry, resyncHitShapes]);
 
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') return;
-    const resync = (): void => {
-      const session = sessionRef.current;
-      if (session && !session.isActive() && session.tracker.resync(collectHitShapes()))
-        setInteraction(session.tracker.interactive);
-    };
-    const observer = new ResizeObserver(resync);
+    const observer = new ResizeObserver(resyncHitShapes);
     if (avatarRef.current) observer.observe(avatarRef.current);
-    window.addEventListener('scroll', resync, true);
+    window.addEventListener('scroll', resyncHitShapes, true);
     rootRef.current
       ?.querySelectorAll('[data-pet-surface]')
       .forEach((element) => observer.observe(element));
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', resync, true);
+      window.removeEventListener('scroll', resyncHitShapes, true);
     };
-  }, [geometry, collectHitShapes, setInteraction]);
+  }, [geometry, resyncHitShapes]);
 
   /** 指针在窗口内移动时上报命中状态；离开窗口一律恢复穿透。 */
   useEffect(() => {
@@ -841,6 +856,8 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
       }}
+      onAnimationEnd={resyncHitShapes}
+      onTransitionEnd={resyncHitShapes}
       data-testid="pet-stage"
       data-dragging={dragging ? 'true' : 'false'}
       data-state={state}
@@ -916,9 +933,13 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       <div className="pet-root__content" id="pet-chat-surface">
         {dialog !== null ? (
           <PetDialog
+            key={`${dialog.id}:${dialog.step}`}
             dialog={dialog}
             state={state}
             pending={app.answerBusy}
+            reducedMotion={reducedMotion}
+            speed={profile?.bubbleSpeed ?? PET_PREFERENCE_DEFAULTS.bubbleSpeed}
+            onGeometryChange={resyncHitShapes}
             onAnswer={handleAnswer}
             onDismiss={hideDialog}
             register={(element) => {
@@ -927,9 +948,14 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
           />
         ) : bubble ? (
           <PetBubble
-            key={bubble.kind === 'reply' ? 'reply' : bubble.key}
+            key={bubble.identity ?? bubble.key}
             state={bubble.kind === 'error' ? 'error' : state}
             text={bubble.text}
+            reveal={bubble.kind === 'reply'}
+            streaming={bubble.key.startsWith('partial:') && demo.snapshot?.phase === 'responding'}
+            speed={profile?.bubbleSpeed ?? PET_PREFERENCE_DEFAULTS.bubbleSpeed}
+            reducedMotion={reducedMotion}
+            onGeometryChange={resyncHitShapes}
             onDismiss={restoreAvatarFocus}
             lifetimeMs={bubbleLifetime(
               bubble.text,
@@ -940,10 +966,13 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
             }}
           />
         ) : null}
-        {chatOpen ? (
+        {chatPresence.present ? (
           <div
             className="pet-root__compose"
             ref={composerRef}
+            data-closing={chatPresence.closing}
+            inert={chatPresence.closing}
+            aria-hidden={chatPresence.closing}
             hidden={dialog !== null}
             data-pet-surface
           >

@@ -36,10 +36,12 @@ export interface HitPolygon {
   points: readonly PointLike[];
 }
 
-export type HitShape =
+export type HitShape = (
   | ({ kind: 'rect' } & HitRect)
+  | ({ kind: 'roundedRect'; radius: number } & HitRect)
   | ({ kind: 'ellipse' } & HitEllipse)
-  | ({ kind: 'polygon' } & HitPolygon);
+  | ({ kind: 'polygon' } & HitPolygon)
+) & { clip?: HitRect };
 
 /** 给命中区留一点余量，避免 1px 抖动导致穿透状态来回切换。 */
 export const HIT_PADDING_PX = 4;
@@ -145,9 +147,21 @@ export function isPointInHitShape(
   shape: HitShape,
   padding: number = HIT_PADDING_PX,
 ): boolean {
+  if (shape.clip && !isPointInHitRect(point, shape.clip)) return false;
   switch (shape.kind) {
     case 'rect':
       return isPointInHitRect(point, expandHitRect(shape, padding));
+    case 'roundedRect': {
+      const rect = expandHitRect(shape, padding);
+      const radius = Math.min(
+        shape.radius + padding,
+        (rect.right - rect.left) / 2,
+        (rect.bottom - rect.top) / 2,
+      );
+      const x = Math.max(rect.left + radius, Math.min(point.x, rect.right - radius));
+      const y = Math.max(rect.top + radius, Math.min(point.y, rect.bottom - radius));
+      return (point.x - x) ** 2 + (point.y - y) ** 2 <= radius ** 2;
+    }
     case 'ellipse':
       return isPointInHitEllipse(point, shape, padding);
     case 'polygon':

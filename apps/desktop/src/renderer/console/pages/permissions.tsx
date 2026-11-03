@@ -413,9 +413,7 @@ function TrustBody({ plugin }: { plugin: ConsoleSecurityPlugin }): JSX.Element {
         <Row label="来源">{pluginOrigin(plugin.origin)}</Row>
         <Row label="包指纹">{plugin.digest ?? '未知'}</Row>
       </div>
-      <p>
-        确认后，这个插件可以在本次运行中启动。它声明的敏感操作仍然逐个询问，不会因为确认信任就自动通过。
-      </p>
+      <p>确认后，这个插件可以在本次运行中启动。{PERMISSION_PRESET_DESCRIPTIONS[plugin.preset]}</p>
       {plugin.permissions.length === 0 ? (
         <p>没有声明额外权限。</p>
       ) : (

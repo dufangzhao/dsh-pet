@@ -1,0 +1,166 @@
+{
+  "status": "passed",
+  "checks": [
+    "selected pet has no rectangular focus outline",
+    "252x71 dark reference geometry and matching light composer",
+    "single textarea expansion, ShiftEnter and immediate inert closing",
+    "real host reply reveals progressively and closes",
+    "ordinary choices retain real actions; reduced motion presents full text"
+  ],
+  "errors": [],
+  "profile": "bubble-1793671731474",
+  "presets": [
+    {
+      "id": "pet.agent-cortico",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.asr-cloud",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.asr-local",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.avatar-default",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.builtin-speech",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.chat",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.llm-provider",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.page-appearance",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.page-conversation",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.page-persona",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.page-start",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.page-voice",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.profile",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.system-tts",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.talk-key",
+      "preset": "allow"
+    },
+    {
+      "id": "pet.voice-chat",
+      "preset": "allow"
+    }
+  ],
+  "avatarFocus": {
+    "outlineStyle": "none",
+    "outlineWidth": "3px",
+    "boxShadow": "none"
+  },
+  "popup": [
+    {
+      "transform": "matrix(0.926116, 0, 0, 0.926116, 0, 0)",
+      "animation": "pet-popover-in",
+      "duration": "0.24s"
+    },
+    {
+      "transform": "matrix(1.01698, 0, 0, 1.01698, 0, 0)",
+      "animation": "pet-popover-in",
+      "duration": "0.24s"
+    },
+    {
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "animation": "pet-popover-in",
+      "duration": "0.24s"
+    }
+  ],
+  "darkGeometry": {
+    "wrapper": {
+      "x": 64,
+      "y": 193,
+      "width": 252,
+      "height": 71
+    },
+    "frame": {
+      "x": 67,
+      "y": 195,
+      "width": 246,
+      "height": 60
+    },
+    "field": {
+      "x": 83,
+      "y": 207,
+      "width": 196,
+      "height": 36
+    },
+    "send": {
+      "x": 231,
+      "y": 211,
+      "width": 44,
+      "height": 28
+    }
+  },
+  "lightGeometry": {
+    "wrapper": {
+      "x": 64,
+      "y": 193,
+      "width": 252,
+      "height": 71
+    },
+    "frame": {
+      "x": 67,
+      "y": 195,
+      "width": 246,
+      "height": 60
+    },
+    "field": {
+      "x": 83,
+      "y": 207,
+      "width": 196,
+      "height": 36
+    },
+    "send": {
+      "x": 231,
+      "y": 211,
+      "width": 44,
+      "height": 28
+    }
+  },
+  "closing": {
+    "inert": true,
+    "hidden": "true",
+    "closing": "true"
+  },
+  "reveal": [
+    "脚本演示｜离线脚本演示：你，",
+    "脚本演示｜离线脚本演示：你，已收",
+    "脚本演示｜离线脚本演示：你，已收到你的消息"
+  ],
+  "reducedMotion": {
+    "text": "我已经在桌面上了。先取个名字，再选喜欢的样子。还没有模型 Key 也能完成这些设置。",
+    "label": "我已经在桌面上了。先取个名字，再选喜欢的样子。还没有模型 Key 也能完成这些设置。"
+  }
+}

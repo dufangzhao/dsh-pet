@@ -74,8 +74,6 @@ export async function startApplicationPlugins(
       review.digest,
       true,
     );
-    if (id === ID.agent)
-      host.permissionControl.setPreset({ pluginId: id, instanceId: 'default' }, 'local');
     const config = await host.configs.get({ pluginId: id, instanceId: 'default' });
     if (config.ok)
       await host.manager.enable({ pluginId: id, instanceId: 'default' }, config.value.data);

@@ -503,12 +503,6 @@ export class ApplicationController {
       )
     )
       throw new KernelFault('permission-denied');
-    const preset = source.manifest.permissions?.some(
-      (p) => p.kind === 'network' || p.kind === 'credentials',
-    )
-      ? 'ask'
-      : 'local';
-    this.host.permissionControl.setPreset({ pluginId, instanceId: 'default' }, preset);
     const cfg = await this.host.configs.get({ pluginId, instanceId: 'default' });
     if (!cfg.ok) throw new KernelFault(cfg.error.code);
     const enabled = await this.host.manager.enable(

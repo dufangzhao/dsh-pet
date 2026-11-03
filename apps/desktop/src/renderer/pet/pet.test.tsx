@@ -101,6 +101,39 @@ describe('矩形命中区（面板按钮等真实矩形）', () => {
   });
 });
 
+describe('圆角气泡命中跟随实际绘制面', () => {
+  const surface = {
+    kind: 'roundedRect' as const,
+    left: 10,
+    top: 20,
+    right: 256,
+    bottom: 80,
+    radius: 18,
+  };
+  it('正文与边线命中，四个透明角保持穿透', () => {
+    expect(isPointInHitShapes({ x: 100, y: 45 }, [surface], 0)).toBe(true);
+    expect(isPointInHitShapes({ x: 28, y: 20 }, [surface], 0)).toBe(true);
+    for (const point of [
+      { x: 11, y: 21 },
+      { x: 255, y: 21 },
+      { x: 11, y: 79 },
+      { x: 255, y: 79 },
+    ])
+      expect(isPointInHitShapes(point, [surface])).toBe(false);
+  });
+  it('滚出内容视口的部分不会继续挡住透明窗口', () => {
+    const clipped = { ...surface, clip: { left: 20, top: 30, right: 240, bottom: 70 } };
+    expect(isPointInHitShapes({ x: 100, y: 25 }, [surface], 0)).toBe(true);
+    expect(isPointInHitShapes({ x: 100, y: 25 }, [clipped], 0)).toBe(false);
+    expect(isPointInHitShapes({ x: 100, y: 45 }, [clipped], 0)).toBe(true);
+  });
+  it('缩回后的边界不再覆盖原来的可点位置', () => {
+    const point = { x: 245, y: 45 };
+    expect(isPointInHitShapes(point, [surface], 0)).toBe(true);
+    expect(isPointInHitShapes(point, [{ ...surface, right: 226, radius: 15 }], 0)).toBe(false);
+  });
+});
+
 describe('角色命中区使用真实绘制形状，而不是外接矩形', () => {
   /** 与 PetAvatar 的 CSS 尺寸一致：152×152 的 viewBox 正方形。 */
   const rect = { left: 20, top: 10, width: 152, height: 152 };

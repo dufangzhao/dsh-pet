@@ -207,6 +207,7 @@ export function permissionKind(kind: PermissionKind): string {
 }
 
 const PRESET_LABEL: Readonly<Record<PermissionPreset, string>> = {
+  allow: '自动允许',
   ask: '每次询问',
   deny: '全部拒绝',
   local: '本地放行',

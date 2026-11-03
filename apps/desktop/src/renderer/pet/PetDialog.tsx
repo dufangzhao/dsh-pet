@@ -15,6 +15,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 
 import { isSubmitEnter } from './compose-rules.js';
 import { PET_COPY } from './copy.js';
+import { BUBBLE_EXIT_MS, useBubblePresence, useRevealedText } from './use-bubble-motion.js';
 
 /** 提交计划：谁能带文本，谁只能提交选择。 */
 export interface DialogSubmitPlan {
@@ -58,6 +59,9 @@ export interface PetDialogProps {
   pending: boolean;
   onAnswer(choice: string, text?: string): void;
   onDismiss?(): void;
+  reducedMotion?: boolean;
+  speed?: number;
+  onGeometryChange?(): void;
   /** 供 App 读取真实矩形算命中区；不参与视觉。 */
   register?: (element: HTMLDivElement | null) => void;
 }
@@ -69,6 +73,9 @@ export function PetDialog({
   onAnswer,
   onDismiss,
   register,
+  reducedMotion = false,
+  speed = 100,
+  onGeometryChange,
 }: PetDialogProps): React.JSX.Element {
   const titleId = useId();
   const errorId = useId();
@@ -78,10 +85,22 @@ export function PetDialog({
   // 换一步（id 或 step 变了）就丢掉上一步的输入；同一步失败重试时保留草稿。
   const fieldKey = dialog.id + ':' + dialog.step;
   const [text, setText] = useState('');
+  const [closing, setClosing] = useState(false);
+  const dismiss = useRef(onDismiss);
+  dismiss.current = onDismiss;
+  const { present } = useBubblePresence(!closing, reducedMotion);
+  const shown = useRevealedText(dialog.text, !reducedMotion, speed, !closing);
+  useEffect(() => onGeometryChange?.(), [closing, present, onGeometryChange]);
+  useEffect(() => {
+    if (!closing) return;
+    const timer = setTimeout(() => dismiss.current?.(), reducedMotion ? 0 : BUBBLE_EXIT_MS);
+    return () => clearTimeout(timer);
+  }, [closing, reducedMotion]);
   const [lastKey, setLastKey] = useState(fieldKey);
   if (lastKey !== fieldKey) {
     setLastKey(fieldKey);
     setText('');
+    setClosing(false);
   }
 
   const attach = (element: HTMLDivElement | null): void => {
@@ -114,104 +133,130 @@ export function PetDialog({
     onAnswer(choice);
   };
 
+  if (!present) return <></>;
   return (
-    <div
-      ref={attach}
-      className={`pet-dialog pet-dialog--${state}`}
-      data-testid="pet-dialog"
-      data-busy={disabled ? 'true' : 'false'}
-      role="group"
-      aria-labelledby={titleId}
-      aria-busy={disabled}
-      data-pet-surface
-      onKeyDown={(event) => {
-        if (event.key === 'Escape' && !disabled && onDismiss) {
-          event.stopPropagation();
-          onDismiss();
-        }
-      }}
-    >
-      {onDismiss ? (
-        <button
-          type="button"
-          className="pet-icon-button pet-dialog__dismiss"
-          data-testid="pet-dialog-dismiss"
-          aria-label="收起提示"
-          disabled={disabled}
-          onClick={onDismiss}
-        >
-          <span aria-hidden="true">×</span>
-        </button>
-      ) : null}
-      <p className="pet-dialog__title" id={titleId} data-testid="pet-dialog-title">
-        {dialog.title}
-      </p>
-      <p className="pet-dialog__text" data-testid="pet-dialog-text">
-        {dialog.text}
-      </p>
-
-      {dialog.input !== undefined ? (
-        <label className="pet-dialog__field">
-          <span className="pet-dialog__label">{dialog.input.label}</span>
-          <input
-            className="pet-dialog__input"
-            type={dialog.input.kind === 'secret' ? 'password' : 'text'}
-            placeholder={dialog.input.placeholder ?? ''}
-            value={text}
-            disabled={!plan.inputUsable || disabled}
-            autoComplete="off"
-            spellCheck={false}
-            aria-invalid={dialog.error !== undefined}
-            aria-describedby={dialog.error !== undefined ? errorId : undefined}
-            data-testid={`pet-dialog-input-${dialog.input.kind}`}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={(event) => {
-              // 不用 form 提交：回车显式等价于点“承载文本的那个选项”；
-              // 输入法选词的回车不是提交，别把半句话或半个 Key 交出去。
-              if (!isSubmitEnter(event.nativeEvent) || plan.carrier === null) return;
-              event.preventDefault();
-              submit(plan.carrier.id);
-            }}
-          />
-          {dialog.input.kind === 'secret' ? (
-            <span className="pet-dialog__hint">{PET_COPY.dialog.secretHint}</span>
+    <div className="pet-dialog-wrap" data-closing={closing} inert={closing} aria-hidden={closing}>
+      <div
+        ref={attach}
+        className={`pet-dialog pet-dialog--${state} pet-popover`}
+        data-testid="pet-dialog"
+        data-busy={disabled ? 'true' : 'false'}
+        role="group"
+        aria-labelledby={titleId}
+        aria-busy={disabled}
+        data-pet-surface
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && !disabled && onDismiss) {
+            event.stopPropagation();
+            setClosing(true);
+          }
+        }}
+      >
+        <div className="pet-dialog__scroll">
+          {onDismiss ? (
+            <button
+              type="button"
+              className="pet-popover__close pet-dialog__dismiss"
+              data-testid="pet-dialog-dismiss"
+              aria-label="收起提示"
+              disabled={disabled}
+              onClick={() => setClosing(true)}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="m5 5 6 6m0-6-6 6" />
+              </svg>
+            </button>
           ) : null}
-        </label>
-      ) : null}
-
-      <div className="pet-dialog__choices" role="group" aria-label={PET_COPY.dialog.choicesLabel}>
-        {dialog.choices.map((choice) => (
-          <button
-            key={choice.id}
-            type="button"
-            className="pet-dialog__choice"
-            data-testid={`pet-dialog-choice-${choice.id}`}
-            data-primary={choice.primary === true ? 'true' : 'false'}
-            disabled={disabled}
-            onClick={() => submit(choice.id)}
+          <p className="pet-dialog__title" id={titleId} data-testid="pet-dialog-title">
+            {dialog.title}
+          </p>
+          <p
+            className="pet-dialog__text"
+            data-testid="pet-dialog-text"
+            role="status"
+            aria-live="polite"
+            aria-label={dialog.text}
+            aria-busy={shown !== dialog.text}
           >
-            {choice.label}
-          </button>
-        ))}
+            <span aria-hidden="true">{shown}</span>
+          </p>
+
+          {dialog.input !== undefined ? (
+            <label className="pet-dialog__field">
+              <span className="pet-dialog__label">{dialog.input.label}</span>
+              <input
+                className="pet-dialog__input"
+                type={dialog.input.kind === 'secret' ? 'password' : 'text'}
+                placeholder={dialog.input.placeholder ?? ''}
+                value={text}
+                disabled={!plan.inputUsable || disabled}
+                autoComplete="off"
+                spellCheck={false}
+                aria-invalid={dialog.error !== undefined}
+                aria-describedby={dialog.error !== undefined ? errorId : undefined}
+                data-testid={`pet-dialog-input-${dialog.input.kind}`}
+                onChange={(event) => setText(event.target.value)}
+                onKeyDown={(event) => {
+                  // 不用 form 提交：回车显式等价于点“承载文本的那个选项”；
+                  // 输入法选词的回车不是提交，别把半句话或半个 Key 交出去。
+                  if (!isSubmitEnter(event.nativeEvent) || plan.carrier === null) return;
+                  event.preventDefault();
+                  submit(plan.carrier.id);
+                }}
+              />
+              {dialog.input.kind === 'secret' ? (
+                <span className="pet-dialog__hint">{PET_COPY.dialog.secretHint}</span>
+              ) : null}
+            </label>
+          ) : null}
+
+          <div
+            className="pet-dialog__choices"
+            role="group"
+            aria-label={PET_COPY.dialog.choicesLabel}
+          >
+            {dialog.choices.map((choice, index) => (
+              <button
+                key={choice.id}
+                type="button"
+                className="pet-dialog__choice"
+                data-testid={`pet-dialog-choice-${choice.id}`}
+                data-primary={choice.primary === true ? 'true' : 'false'}
+                disabled={disabled}
+                onClick={() => submit(choice.id)}
+              >
+                <span className="pet-dialog__index" aria-hidden="true">
+                  {index + 1}
+                </span>
+                {choice.label}
+              </button>
+            ))}
+          </div>
+
+          {dialog.input !== undefined && !plan.inputUsable ? (
+            <p className="pet-dialog__hint" role="status" data-testid="pet-dialog-unusable">
+              {PET_COPY.dialog.noChoice}
+            </p>
+          ) : null}
+
+          {dialog.error !== undefined ? (
+            <p
+              className="pet-dialog__error"
+              role="alert"
+              id={errorId}
+              data-testid="pet-dialog-error"
+            >
+              {dialog.error}
+            </p>
+          ) : null}
+
+          {disabled ? (
+            <p className="pet-dialog__busy" role="status" data-testid="pet-dialog-busy">
+              {PET_COPY.dialog.busy}
+            </p>
+          ) : null}
+        </div>
       </div>
-
-      {dialog.input !== undefined && !plan.inputUsable ? (
-        <p className="pet-dialog__hint" role="status" data-testid="pet-dialog-unusable">
-          {PET_COPY.dialog.noChoice}
-        </p>
-      ) : null}
-
-      {dialog.error !== undefined ? (
-        <p className="pet-dialog__error" role="alert" id={errorId} data-testid="pet-dialog-error">
-          {dialog.error}
-        </p>
-      ) : null}
-
-      {disabled ? (
-        <p className="pet-dialog__busy" role="status" data-testid="pet-dialog-busy">
-          {PET_COPY.dialog.busy}
-        </p>
-      ) : null}
     </div>
   );
 }

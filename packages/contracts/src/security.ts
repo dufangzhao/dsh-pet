@@ -2,9 +2,10 @@ import type { ConsolePlugin, ConsoleSnapshot } from './console.js';
 import type { KernelError, KernelErrorCode } from './errors.js';
 import type { OwnerRef } from './ids.js';
 import type { PermissionDeclaration, PermissionKind } from './permission.js';
-export const PERMISSION_PRESETS = ['ask', 'deny', 'local'] as const;
+export const PERMISSION_PRESETS = ['allow', 'ask', 'deny', 'local'] as const;
 export type PermissionPreset = (typeof PERMISSION_PRESETS)[number];
 export const PERMISSION_PRESET_DESCRIPTIONS: Readonly<Record<PermissionPreset, string>> = {
+  allow: '自动允许插件已声明的操作，不再逐次询问。',
   ask: '每次敏感操作询问，只同意当前请求。',
   deny: '拒绝所有敏感操作。',
   local:

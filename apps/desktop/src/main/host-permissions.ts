@@ -52,7 +52,11 @@ export function createHostPermissions(
           }),
         )
         .digest('hex');
-      catalog.set(JSON.stringify([candidate.manifest.id, instanceId]), {
+      const identity = { pluginId: candidate.manifest.id, instanceId };
+      const key = JSON.stringify([identity.pluginId, identity.instanceId]);
+      if (!catalog.has(key) && !kernel.control.setPreset(identity, 'allow'))
+        throw new Error('Invalid default permission preset');
+      catalog.set(key, {
         manifest: candidate.manifest,
         digest,
         candidate,

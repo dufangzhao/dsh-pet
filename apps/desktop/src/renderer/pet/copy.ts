@@ -35,7 +35,10 @@ export const PET_COPY = {
   /** 日常文字输入走宿主既有 sendText：不新建会话，也不本地回显。 */
   send: '发送',
   sending: '发送中…',
-  sendPlaceholder: '对它说……',
+  sendPlaceholder: '输入想说的话…',
+  expandInput: '展开输入框',
+  collapseInput: '收起多行输入',
+  closeInput: '收起输入框',
   sendLabel: '要说的话',
   sendFailed: '这条消息没有发出去：',
   sendBlocked: '现在还不能发送，等它空下来再试。',

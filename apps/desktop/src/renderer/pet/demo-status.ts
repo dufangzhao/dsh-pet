@@ -49,6 +49,7 @@ export const BUBBLE_TEXT_LIMIT = 56;
 
 export interface PetBubbleEvent {
   readonly key: string;
+  readonly identity?: string;
   readonly kind: 'status' | 'reply' | 'error';
   readonly text: string;
 }
@@ -65,12 +66,22 @@ export function demoBubbleEvent(
   const partial = snapshot.partialReply.trim();
   if (snapshot.phase === 'responding' && partial !== '') {
     const text = snapshot.settings.replyMode === 'demo' ? PET_COPY.replyTag + partial : partial;
-    return { key: `partial:${snapshot.intentId}:${partial}`, kind: 'reply', text };
+    return {
+      key: `partial:${snapshot.intentId}:${partial}`,
+      identity: `reply:${snapshot.intentId}`,
+      kind: 'reply',
+      text,
+    };
   }
   const last = lastAssistantReply(snapshot);
   if (previous !== null && last !== null && last.id !== lastAssistantReply(previous)?.id) {
     const text = last.mode === 'demo' ? PET_COPY.replyTag + last.text : last.text;
-    return { key: `reply:${last.id}`, kind: 'reply', text };
+    return {
+      key: `reply:${last.id}`,
+      identity: `reply:${snapshot.intentId ?? previous.intentId ?? last.id}`,
+      kind: 'reply',
+      text,
+    };
   }
   if (snapshot.phase === 'idle' || snapshot.phase === 'setup') return null;
   const transcript = snapshot.partialTranscript.trim();

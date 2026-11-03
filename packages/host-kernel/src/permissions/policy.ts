@@ -120,6 +120,7 @@ export function presetDecision(
   preset: PermissionPreset,
   permission: PermissionDeclaration,
 ): 'allow' | 'ask' | 'deny' {
+  if (preset === 'allow') return 'allow';
   if (preset === 'deny') return 'deny';
   if (preset === 'ask') return 'ask';
   if (permission.kind === 'network') return 'deny';

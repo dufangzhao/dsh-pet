@@ -68,6 +68,13 @@ try {
   report.voice = await pet.evaluate(() => window.petVoiceInput.getSnapshot());
   report.speech = await pet.evaluate(() => window.petSpeechOutput.getSnapshot());
   report.presentation = await pet.evaluate(() => window.petPresentation.getSnapshot());
+  const initialSecurity = await settings.evaluate(() => window.petConsole.getSecurity());
+  assert.ok(initialSecurity.ok);
+  assert.equal(initialSecurity.value.pending.length, 0, 'Default startup must not ask');
+  assert.ok(
+    initialSecurity.value.plugins.every((p) => p.preset === 'allow'),
+    'Every registered plugin must default to allow',
+  );
   await pet.screenshot({ path: path.join(out, 'pet-start.png'), omitBackground: true });
   await pet.evaluate(() => window.petSettings.open());
   await settings.waitForTimeout(200);
@@ -76,6 +83,7 @@ try {
     const current = await pet.evaluate(() => window.petApplication.getSnapshot());
     if (!current.ok || !current.value.dialog) break;
     const d = current.value.dialog;
+    assert.ok(!d.choices.some((c) => c.id === 'allow'), 'Unexpected runtime approval dialog');
     const choice = d.choices.find((c) => c.id === 'deny' || c.id === 'later' || c.id === 'skip');
     if (!choice) break;
     await pet.evaluate((req) => window.petApplication.answer(req), {
@@ -108,10 +116,10 @@ try {
     while (Date.now() - start < timeout) {
       const state = await pet.evaluate(() => window.petApplication.getSnapshot());
       const d = state.ok ? state.value.dialog : null;
-      if (d && d.choices.some((c) => c.id === 'allow')) {
-        const button = pet.getByTestId('pet-dialog-choice-allow');
-        if (await button.isVisible()) await button.click();
-      }
+      assert.ok(!d?.choices.some((c) => c.id === 'allow'), 'Unexpected runtime approval dialog');
+      const security = await settings.evaluate(() => window.petConsole.getSecurity());
+      assert.ok(security.ok);
+      assert.equal(security.value.pending.length, 0, 'Permission queue must remain empty');
       if (await predicate()) return;
       await pet.waitForTimeout(150);
     }
@@ -210,6 +218,7 @@ try {
   report.history = await pet.evaluate(() => window.petApplication.getSnapshot());
   report.checks.push(
     'public WAV -> single hidden capture owner -> SenseVoice -> unified conversation -> actual system PCM/WebAudio receipt',
+    'default allow completes capture and synthesis without any permission prompt',
   );
   await pet.evaluate(() => window.petSettings.open());
   await settings.getByRole('button', { name: '开始', exact: true }).click();

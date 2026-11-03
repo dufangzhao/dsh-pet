@@ -106,6 +106,7 @@ async function setup() {
   return {
     dir,
     pkg,
+    candidate,
     manager,
     tasks,
     permission,
@@ -122,7 +123,7 @@ afterEach(async () => {
 it('binds trust to the displayed code fingerprint and exposes the actual preset', async () => {
   const f = await setup(),
     entry = f.requests.read().plugins[0]!;
-  expect(entry).toMatchObject({ trusted: false, preset: 'ask', blocked: false });
+  expect(entry).toMatchObject({ trusted: false, preset: 'allow', blocked: false });
   expect(entry.digest).toMatch(/^[a-f0-9]{64}$/);
   expect(JSON.stringify(entry)).not.toContain(f.dir);
   expect(
@@ -157,6 +158,7 @@ it('refuses changed code and revokes the old approval without evaluating the cha
 });
 it('allows only a current one-shot approval and records metadata without content', async () => {
   const f = await setup();
+  f.permission.control.setPreset(id, 'ask');
   await f.approve();
   await f.manager.enable(id, {});
   const owner = f.owner();
@@ -212,6 +214,7 @@ it('allows only a current one-shot approval and records metadata without content
 });
 it('revoking trust cancels pending approval and stops the actual owner', async () => {
   const f = await setup();
+  f.permission.control.setPreset(id, 'ask');
   await f.approve();
   await f.manager.enable(id, {});
   const owner = f.owner();
@@ -261,4 +264,37 @@ it('rejects other windows, subframes and malformed input without exposing state'
       error: { code: 'invalid-input' },
     });
   expect(f.snapshot).not.toHaveBeenCalled();
+});
+it('defaults a registered user plugin to allow and runs without an approval', async () => {
+  const f = await setup();
+  await f.approve();
+  await f.manager.enable(id, {});
+  const owner = f.owner();
+  const task = f.tasks.run(owner, async (ctx) => {
+    const result = await f.permission.service.run(
+      owner,
+      ctx.taskId,
+      { kind: 'microphone' },
+      async () => 42,
+    );
+    return result.ok ? result.value : result.error.code;
+  });
+  if (!task.ok) throw new Error('Task failed');
+  expect(await task.value.result).toEqual({ ok: true, value: 42 });
+  expect(f.approvals.snapshot()).toEqual([]);
+  expect(
+    f.permission.control
+      .snapshotAudit()
+      .entries.some((e) => e.event === 'approved' && e.source === 'preset'),
+  ).toBe(true);
+});
+it('keeps a manual policy on source re-registration and defaults a fresh registration', async () => {
+  const f = await setup();
+  expect(f.permission.control.inspect(id)?.preset).toBe('allow');
+  f.permission.control.setPreset(id, 'deny');
+  f.permission.register(f.candidate);
+  expect(f.permission.control.inspect(id)?.preset).toBe('deny');
+  f.permission.forget(id);
+  f.permission.register(f.candidate);
+  expect(f.permission.control.inspect(id)?.preset).toBe('allow');
 });

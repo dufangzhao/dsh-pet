@@ -1,0 +1,957 @@
+{
+  "status": "passed",
+  "checks": [
+    "native windows/frozen bridges",
+    "active Core/plugin pages",
+    "hover chat/mic and compact composer",
+    "typing through actual application history",
+    "public WAV -> single hidden capture owner -> SenseVoice -> unified conversation -> actual system PCM/WebAudio receipt",
+    "default allow completes capture and synthesis without any permission prompt",
+    "theme actual settings selection -> Pet projection",
+    "speech disable is responsive and bounded",
+    "voice plugin disable retracts its contributed page",
+    "restart retains voice module disable, speech preference, theme and history without replay"
+  ],
+  "errors": [],
+  "profile": "mvp-1793671329870",
+  "windows": [
+    {
+      "url": "file:///C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/%E6%A1%8C%E5%AE%A0/apps/desktop/dist/renderer/console/index.html",
+      "visible": false,
+      "id": 2
+    },
+    {
+      "url": "file:///C:/Users/ASUS/Documents/DeepSeek-WorkSpace/Projects/%E6%A1%8C%E5%AE%A0/apps/desktop/dist/renderer/pet/index.html",
+      "visible": true,
+      "id": 1
+    }
+  ],
+  "application": {
+    "ok": true,
+    "error": null,
+    "agent": {
+      "owner": {
+        "pluginId": "pet.agent-cortico",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "state": "ready",
+      "label": "日常互动已就绪"
+    },
+    "pages": [
+      {
+        "id": "pet.page-start/default/page",
+        "title": "开始"
+      },
+      {
+        "id": "pet.page-persona/default/page",
+        "title": "人设"
+      },
+      {
+        "id": "pet.page-appearance/default/page",
+        "title": "装扮"
+      },
+      {
+        "id": "pet.page-conversation/default/page",
+        "title": "对话"
+      },
+      {
+        "id": "pet.voice-chat/default/page",
+        "title": "语音输入"
+      }
+    ],
+    "profile": {
+      "revision": 1,
+      "name": "小蓝"
+    }
+  },
+  "voice": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "revision": 1,
+      "settings": {
+        "engine": "sensevoice",
+        "microphoneId": "",
+        "talkKeyCode": "AltRight",
+        "talkKeyLabel": "右 Alt",
+        "cloudModel": "whisper-1",
+        "cloudBaseUrl": "https://api.openai.com/v1"
+      },
+      "models": [
+        {
+          "id": "sensevoice-small-int8",
+          "label": "SenseVoice Small INT8",
+          "cached": true,
+          "bytes": 239549735
+        },
+        {
+          "id": "whisper-small-int8",
+          "label": "Whisper Small INT8",
+          "cached": false,
+          "bytes": 375485327
+        }
+      ],
+      "engines": [
+        {
+          "id": "sensevoice",
+          "label": "FunASR / SenseVoice",
+          "available": true,
+          "reason": null
+        },
+        {
+          "id": "whisper-small",
+          "label": "Whisper Small",
+          "available": false,
+          "reason": "需要下载固定 Small 模型"
+        },
+        {
+          "id": "windows-sapi",
+          "label": "Windows SAPI",
+          "available": false,
+          "reason": "启动时检测 Windows 已安装的语音识别器"
+        },
+        {
+          "id": "openai",
+          "label": "OpenAI 兼容转写",
+          "available": false,
+          "reason": "需要保存 API Key"
+        }
+      ],
+      "active": true,
+      "talkKeyActive": false,
+      "keyConfigured": false,
+      "credentialStorageAvailable": true,
+      "download": null,
+      "error": null
+    }
+  },
+  "speech": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "owner": {
+        "pluginId": "pet.profile",
+        "instanceId": "default",
+        "generation": 2
+      },
+      "revision": 1,
+      "settings": {
+        "enabled": true,
+        "provider": {
+          "pluginId": "pet.system-tts",
+          "instanceId": "default",
+          "providerId": "system"
+        },
+        "voice": null,
+        "rate": 0,
+        "volume": 85,
+        "language": "zh-CN"
+      },
+      "providers": [
+        {
+          "selection": {
+            "pluginId": "pet.builtin-speech",
+            "instanceId": "default",
+            "providerId": "tones"
+          },
+          "owner": {
+            "pluginId": "pet.builtin-speech",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "name": "桌宠音调",
+          "kind": "tones",
+          "active": true
+        },
+        {
+          "selection": {
+            "pluginId": "pet.system-tts",
+            "instanceId": "default",
+            "providerId": "system"
+          },
+          "owner": {
+            "pluginId": "pet.system-tts",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "name": "Windows系统朗读",
+          "kind": "voice",
+          "active": true
+        }
+      ],
+      "phase": "idle",
+      "queued": 0,
+      "current": null,
+      "lastUtterance": null,
+      "error": null,
+      "reason": null
+    }
+  },
+  "presentation": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "theme": {
+        "appearance": "light",
+        "colors": {
+          "surface": "#ffffff",
+          "surfaceQuiet": "#f7f8f9",
+          "ink": "#151717",
+          "inkQuiet": "#454b50",
+          "line": "#aeb4bb",
+          "field": "#f7f8f9",
+          "primary": "#2d79f3",
+          "onPrimary": "#ffffff"
+        }
+      }
+    }
+  },
+  "history": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "desktop": {
+        "available": true,
+        "shown": true
+      },
+      "historyBefore": 1,
+      "historyHasEarlier": false,
+      "profile": {
+        "owner": {
+          "pluginId": "pet.profile",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "revision": 1,
+        "data": {
+          "roam": "calm",
+          "wake": "poke",
+          "self": "default",
+          "hover": ["chat", "voice"],
+          "bubbleFontSize": 100,
+          "bubbleSpeed": 100,
+          "glow": 0,
+          "frameRate": "60",
+          "snoreSeconds": 0,
+          "personaTemplate": "default",
+          "personaTemplates": [
+            {
+              "id": "default",
+              "name": "默认",
+              "prompt": "你是一只温和、清楚表达的桌面伙伴。尊重用户的节奏，只描述已经发生的事情。",
+              "builtin": true
+            },
+            {
+              "id": "warm",
+              "name": "温柔",
+              "prompt": "你是一只安静、体贴的桌面伙伴。用简短自然的话倾听，不夸大承诺。",
+              "builtin": true
+            },
+            {
+              "id": "lively",
+              "name": "活泼",
+              "prompt": "你是一只轻快、有好奇心的桌面伙伴。回应自然，玩笑克制，尊重用户边界。",
+              "builtin": true
+            },
+            {
+              "id": "rational",
+              "name": "理性",
+              "prompt": "你是一只平和、务实的桌面伙伴。先讲结论，区分事实和推测，帮助用户专注。",
+              "builtin": true
+            }
+          ],
+          "wakePoke": true,
+          "wakePat": true,
+          "wakeThrow": false,
+          "wakeDrop": false,
+          "selfFigure": true,
+          "selfPalette": true,
+          "selfRoam": true,
+          "selfSnore": true,
+          "selfSize": false,
+          "selfBubble": false,
+          "selfFont": false,
+          "selfSound": false,
+          "selfTheme": false,
+          "selfHover": false,
+          "selfUser": false,
+          "doubleClickTyping": true,
+          "statusBubble": true,
+          "saidBubble": true,
+          "hideInFullscreen": false,
+          "rememberPosition": true,
+          "lockFps": false,
+          "soundEnabled": true,
+          "soundMove": true,
+          "soundTouch": true,
+          "soundFace": true,
+          "soundSnore": true,
+          "soundUi": true,
+          "speechEnabled": true,
+          "speechProvider": {
+            "pluginId": "pet.system-tts",
+            "instanceId": "default",
+            "providerId": "system"
+          },
+          "speechVoice": null,
+          "speechRate": 0,
+          "speechVolume": 85,
+          "petName": "小蓝",
+          "userName": "你",
+          "replyLanguage": "zh-CN",
+          "style": "natural",
+          "personaPrompt": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions.",
+          "figure": "minimal",
+          "palette": "morning",
+          "size": "normal",
+          "visible": true,
+          "alwaysOnTop": true,
+          "draggable": true,
+          "reducedMotion": false,
+          "voiceEnabled": true
+        }
+      },
+      "pages": [
+        {
+          "id": "pet.page-start/default/page",
+          "owner": {
+            "pluginId": "pet.page-start",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "title": "开始",
+          "order": 10,
+          "manifest": {
+            "id": "world:pet.page-start",
+            "kind": "world",
+            "label": "开始",
+            "availability": "active",
+            "panels": [
+              {
+                "id": "main",
+                "title": "开始",
+                "builtin": "pet.start"
+              }
+            ]
+          }
+        },
+        {
+          "id": "pet.page-persona/default/page",
+          "owner": {
+            "pluginId": "pet.page-persona",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "title": "人设",
+          "order": 20,
+          "manifest": {
+            "id": "persona:pet.page-persona",
+            "kind": "persona",
+            "label": "人设",
+            "availability": "active",
+            "panels": [
+              {
+                "id": "main",
+                "title": "人设",
+                "builtin": "pet.persona"
+              }
+            ]
+          }
+        },
+        {
+          "id": "pet.page-appearance/default/page",
+          "owner": {
+            "pluginId": "pet.page-appearance",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "title": "装扮",
+          "order": 30,
+          "manifest": {
+            "id": "world:pet.page-appearance",
+            "kind": "world",
+            "label": "装扮",
+            "availability": "active",
+            "panels": [
+              {
+                "id": "main",
+                "title": "装扮",
+                "builtin": "pet.appearance"
+              }
+            ]
+          }
+        },
+        {
+          "id": "pet.page-conversation/default/page",
+          "owner": {
+            "pluginId": "pet.page-conversation",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "title": "对话",
+          "order": 40,
+          "manifest": {
+            "id": "world:pet.page-conversation",
+            "kind": "world",
+            "label": "对话",
+            "availability": "active",
+            "panels": [
+              {
+                "id": "main",
+                "title": "对话",
+                "builtin": "pet.conversation"
+              }
+            ]
+          }
+        },
+        {
+          "id": "pet.voice-chat/default/page",
+          "owner": {
+            "pluginId": "pet.voice-chat",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "title": "语音输入",
+          "order": 50,
+          "manifest": {
+            "id": "world:pet.voice-chat",
+            "kind": "world",
+            "label": "语音输入",
+            "order": 50,
+            "availability": "active",
+            "panels": [
+              {
+                "id": "main",
+                "title": "语音输入",
+                "builtin": "pet.voice"
+              }
+            ]
+          }
+        }
+      ],
+      "history": [
+        {
+          "id": "event-1",
+          "cursor": 1,
+          "at": 1793671337003,
+          "kind": "application",
+          "text": "已完成桌宠引导中的选择"
+        },
+        {
+          "id": "event-2",
+          "cursor": 2,
+          "at": 1793671338446,
+          "kind": "user",
+          "text": "你好，桌宠",
+          "mode": "demo",
+          "via": "bubble"
+        },
+        {
+          "id": "event-3",
+          "cursor": 3,
+          "at": 1793671338470,
+          "kind": "pet",
+          "text": "离线脚本演示：你，已收到你的消息。",
+          "mode": "demo",
+          "via": "bubble"
+        },
+        {
+          "id": "event-4",
+          "cursor": 4,
+          "at": 1793671346191,
+          "kind": "application",
+          "text": "已更新桌宠设置"
+        },
+        {
+          "id": "event-5",
+          "cursor": 5,
+          "at": 1793671357149,
+          "kind": "user",
+          "text": "The tribal chieftain called for the boy and presented him with 50 pieces of code.",
+          "mode": "demo",
+          "via": "voice"
+        },
+        {
+          "id": "event-6",
+          "cursor": 6,
+          "at": 1793671357161,
+          "kind": "pet",
+          "text": "离线脚本演示：你，已收到你的消息。",
+          "mode": "demo",
+          "via": "voice"
+        }
+      ],
+      "cursor": 6,
+      "prompt": {
+        "state": "applied",
+        "appliedRevision": 1,
+        "segments": [
+          {
+            "id": "persona.identity",
+            "label": "名字与表达",
+            "text": "Your name is 小蓝. Address the user as 你. Reply language: zh-CN. Style: natural."
+          },
+          {
+            "id": "persona.body",
+            "label": "完整人设正文",
+            "text": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions."
+          },
+          {
+            "id": "world.desktop",
+            "label": "桌面交互说明",
+            "text": "Use pet_say for visible speech. Use configure_pet only for a requested permitted settings change. User interaction history and application guidance share this desktop World. Only report actions that succeeded."
+          }
+        ]
+      },
+      "dialog": null,
+      "agent": {
+        "owner": {
+          "pluginId": "pet.agent-cortico",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "state": "ready",
+        "label": "日常互动已就绪"
+      },
+      "error": null
+    }
+  },
+  "keyAfter30Seconds": true,
+  "audio": {
+    "bytes": 469392,
+    "starts": 2,
+    "ends": 2
+  },
+  "voiceAfter": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "revision": 1,
+      "settings": {
+        "engine": "sensevoice",
+        "microphoneId": "",
+        "talkKeyCode": "AltRight",
+        "talkKeyLabel": "右 Alt",
+        "cloudModel": "whisper-1",
+        "cloudBaseUrl": "https://api.openai.com/v1"
+      },
+      "models": [
+        {
+          "id": "sensevoice-small-int8",
+          "label": "SenseVoice Small INT8",
+          "cached": true,
+          "bytes": 239549735
+        },
+        {
+          "id": "whisper-small-int8",
+          "label": "Whisper Small INT8",
+          "cached": false,
+          "bytes": 375485327
+        }
+      ],
+      "engines": [
+        {
+          "id": "sensevoice",
+          "label": "FunASR / SenseVoice",
+          "available": true,
+          "reason": null
+        },
+        {
+          "id": "whisper-small",
+          "label": "Whisper Small",
+          "available": false,
+          "reason": "需要下载固定 Small 模型"
+        },
+        {
+          "id": "windows-sapi",
+          "label": "Windows SAPI",
+          "available": false,
+          "reason": "启动时检测 Windows 已安装的语音识别器"
+        },
+        {
+          "id": "openai",
+          "label": "OpenAI 兼容转写",
+          "available": false,
+          "reason": "需要保存 API Key"
+        }
+      ],
+      "active": true,
+      "talkKeyActive": true,
+      "keyConfigured": false,
+      "credentialStorageAvailable": true,
+      "download": null,
+      "error": null
+    }
+  },
+  "themeAfter": {
+    "ok": true,
+    "value": {
+      "version": 1,
+      "theme": {
+        "appearance": "dark",
+        "colors": {
+          "surface": "#1e2022",
+          "surfaceQuiet": "#25282b",
+          "ink": "#f2f3f5",
+          "inkQuiet": "#c7ccd2",
+          "line": "#647180",
+          "field": "#25282b",
+          "primary": "#82acff",
+          "onPrimary": "#151719"
+        }
+      }
+    }
+  },
+  "speechDisableChanges": 2,
+  "restart": {
+    "application": {
+      "ok": true,
+      "value": {
+        "version": 1,
+        "desktop": {
+          "available": true,
+          "shown": true
+        },
+        "historyBefore": 1,
+        "historyHasEarlier": false,
+        "profile": {
+          "owner": {
+            "pluginId": "pet.profile",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "revision": 2,
+          "data": {
+            "roam": "calm",
+            "wake": "poke",
+            "self": "default",
+            "hover": ["chat", "voice"],
+            "bubbleFontSize": 100,
+            "bubbleSpeed": 100,
+            "glow": 0,
+            "frameRate": "60",
+            "snoreSeconds": 0,
+            "personaTemplate": "default",
+            "personaTemplates": [
+              {
+                "id": "default",
+                "name": "默认",
+                "prompt": "你是一只温和、清楚表达的桌面伙伴。尊重用户的节奏，只描述已经发生的事情。",
+                "builtin": true
+              },
+              {
+                "id": "warm",
+                "name": "温柔",
+                "prompt": "你是一只安静、体贴的桌面伙伴。用简短自然的话倾听，不夸大承诺。",
+                "builtin": true
+              },
+              {
+                "id": "lively",
+                "name": "活泼",
+                "prompt": "你是一只轻快、有好奇心的桌面伙伴。回应自然，玩笑克制，尊重用户边界。",
+                "builtin": true
+              },
+              {
+                "id": "rational",
+                "name": "理性",
+                "prompt": "你是一只平和、务实的桌面伙伴。先讲结论，区分事实和推测，帮助用户专注。",
+                "builtin": true
+              }
+            ],
+            "wakePoke": true,
+            "wakePat": true,
+            "wakeThrow": false,
+            "wakeDrop": false,
+            "selfFigure": true,
+            "selfPalette": true,
+            "selfRoam": true,
+            "selfSnore": true,
+            "selfSize": false,
+            "selfBubble": false,
+            "selfFont": false,
+            "selfSound": false,
+            "selfTheme": false,
+            "selfHover": false,
+            "selfUser": false,
+            "doubleClickTyping": true,
+            "statusBubble": true,
+            "saidBubble": true,
+            "hideInFullscreen": false,
+            "rememberPosition": true,
+            "lockFps": false,
+            "soundEnabled": true,
+            "soundMove": true,
+            "soundTouch": true,
+            "soundFace": true,
+            "soundSnore": true,
+            "soundUi": true,
+            "speechEnabled": false,
+            "speechProvider": {
+              "pluginId": "pet.system-tts",
+              "instanceId": "default",
+              "providerId": "system"
+            },
+            "speechVoice": null,
+            "speechRate": 0,
+            "speechVolume": 85,
+            "petName": "小蓝",
+            "userName": "你",
+            "replyLanguage": "zh-CN",
+            "style": "natural",
+            "personaPrompt": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions.",
+            "figure": "minimal",
+            "palette": "morning",
+            "size": "normal",
+            "visible": true,
+            "alwaysOnTop": true,
+            "draggable": true,
+            "reducedMotion": false,
+            "voiceEnabled": true
+          }
+        },
+        "pages": [
+          {
+            "id": "pet.page-start/default/page",
+            "owner": {
+              "pluginId": "pet.page-start",
+              "instanceId": "default",
+              "generation": 2
+            },
+            "title": "开始",
+            "order": 10,
+            "manifest": {
+              "id": "world:pet.page-start",
+              "kind": "world",
+              "label": "开始",
+              "availability": "active",
+              "panels": [
+                {
+                  "id": "main",
+                  "title": "开始",
+                  "builtin": "pet.start"
+                }
+              ]
+            }
+          },
+          {
+            "id": "pet.page-persona/default/page",
+            "owner": {
+              "pluginId": "pet.page-persona",
+              "instanceId": "default",
+              "generation": 2
+            },
+            "title": "人设",
+            "order": 20,
+            "manifest": {
+              "id": "persona:pet.page-persona",
+              "kind": "persona",
+              "label": "人设",
+              "availability": "active",
+              "panels": [
+                {
+                  "id": "main",
+                  "title": "人设",
+                  "builtin": "pet.persona"
+                }
+              ]
+            }
+          },
+          {
+            "id": "pet.page-appearance/default/page",
+            "owner": {
+              "pluginId": "pet.page-appearance",
+              "instanceId": "default",
+              "generation": 2
+            },
+            "title": "装扮",
+            "order": 30,
+            "manifest": {
+              "id": "world:pet.page-appearance",
+              "kind": "world",
+              "label": "装扮",
+              "availability": "active",
+              "panels": [
+                {
+                  "id": "main",
+                  "title": "装扮",
+                  "builtin": "pet.appearance"
+                }
+              ]
+            }
+          },
+          {
+            "id": "pet.page-conversation/default/page",
+            "owner": {
+              "pluginId": "pet.page-conversation",
+              "instanceId": "default",
+              "generation": 2
+            },
+            "title": "对话",
+            "order": 40,
+            "manifest": {
+              "id": "world:pet.page-conversation",
+              "kind": "world",
+              "label": "对话",
+              "availability": "active",
+              "panels": [
+                {
+                  "id": "main",
+                  "title": "对话",
+                  "builtin": "pet.conversation"
+                }
+              ]
+            }
+          }
+        ],
+        "history": [
+          {
+            "id": "event-1",
+            "cursor": 1,
+            "at": 1793671337003,
+            "kind": "application",
+            "text": "已完成桌宠引导中的选择"
+          },
+          {
+            "id": "event-2",
+            "cursor": 2,
+            "at": 1793671338446,
+            "kind": "user",
+            "text": "你好，桌宠",
+            "mode": "demo",
+            "via": "bubble"
+          },
+          {
+            "id": "event-3",
+            "cursor": 3,
+            "at": 1793671338470,
+            "kind": "pet",
+            "text": "离线脚本演示：你，已收到你的消息。",
+            "mode": "demo",
+            "via": "bubble"
+          },
+          {
+            "id": "event-4",
+            "cursor": 4,
+            "at": 1793671346191,
+            "kind": "application",
+            "text": "已更新桌宠设置"
+          },
+          {
+            "id": "event-5",
+            "cursor": 5,
+            "at": 1793671357149,
+            "kind": "user",
+            "text": "The tribal chieftain called for the boy and presented him with 50 pieces of code.",
+            "mode": "demo",
+            "via": "voice"
+          },
+          {
+            "id": "event-6",
+            "cursor": 6,
+            "at": 1793671357161,
+            "kind": "pet",
+            "text": "离线脚本演示：你，已收到你的消息。",
+            "mode": "demo",
+            "via": "voice"
+          }
+        ],
+        "cursor": 6,
+        "prompt": {
+          "state": "applied",
+          "appliedRevision": 2,
+          "segments": [
+            {
+              "id": "persona.identity",
+              "label": "名字与表达",
+              "text": "Your name is 小蓝. Address the user as 你. Reply language: zh-CN. Style: natural."
+            },
+            {
+              "id": "persona.body",
+              "label": "完整人设正文",
+              "text": "You are a desktop companion. Be attentive, clear and useful. Respond through the available pet tools. Describe only actions that actually succeeded. Ask for missing information when necessary. Respect the human choices and permissions."
+            },
+            {
+              "id": "world.desktop",
+              "label": "桌面交互说明",
+              "text": "Use pet_say for visible speech. Use configure_pet only for a requested permitted settings change. User interaction history and application guidance share this desktop World. Only report actions that succeeded."
+            }
+          ]
+        },
+        "dialog": null,
+        "agent": {
+          "owner": {
+            "pluginId": "pet.agent-cortico",
+            "instanceId": "default",
+            "generation": 2
+          },
+          "state": "ready",
+          "label": "日常互动已就绪"
+        },
+        "error": null
+      }
+    },
+    "speech": {
+      "ok": true,
+      "value": {
+        "version": 1,
+        "owner": {
+          "pluginId": "pet.profile",
+          "instanceId": "default",
+          "generation": 2
+        },
+        "revision": 2,
+        "settings": {
+          "enabled": false,
+          "provider": {
+            "pluginId": "pet.system-tts",
+            "instanceId": "default",
+            "providerId": "system"
+          },
+          "voice": null,
+          "rate": 0,
+          "volume": 85,
+          "language": "zh-CN"
+        },
+        "providers": [
+          {
+            "selection": {
+              "pluginId": "pet.builtin-speech",
+              "instanceId": "default",
+              "providerId": "tones"
+            },
+            "owner": {
+              "pluginId": "pet.builtin-speech",
+              "instanceId": "default",
+              "generation": 2
+            },
+            "name": "桌宠音调",
+            "kind": "tones",
+            "active": true
+          },
+          {
+            "selection": {
+              "pluginId": "pet.system-tts",
+              "instanceId": "default",
+              "providerId": "system"
+            },
+            "owner": {
+              "pluginId": "pet.system-tts",
+              "instanceId": "default",
+              "generation": 2
+            },
+            "name": "Windows系统朗读",
+            "kind": "voice",
+            "active": true
+          }
+        ],
+        "phase": "idle",
+        "queued": 0,
+        "current": null,
+        "lastUtterance": null,
+        "error": null,
+        "reason": null
+      }
+    }
+  }
+}

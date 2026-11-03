@@ -425,19 +425,16 @@ describe('颜色方向与语义 token 约束', () => {
 });
 
 describe('可点区域与字号：读真实声明', () => {
-  it('每类真实控件的 min-height / min-width 实际达到 44px', () => {
-    for (const selector of [
-      '.pet-dialog__choice',
-      '.pet-menu__button',
-      '.pet-menu__quit',
-      '.pet-composer__send',
-      '.pet-root__retry',
-    ]) {
+  it('常规按钮保留44px，参考气泡使用明确的桌面紧凑尺寸', () => {
+    for (const selector of ['.pet-menu__button', '.pet-menu__quit', '.pet-root__retry']) {
       const minHeight = declarationPx(selector, 'min-height');
       const minWidth = declarationPx(selector, 'min-width');
       expect(minHeight, selector + ' 的 min-height').toBeGreaterThanOrEqual(44);
       expect(minWidth, selector + ' 的 min-width').toBeGreaterThanOrEqual(44);
     }
+    expect(declarationPx('.pet-composer__send', 'min-height')).toBe(28);
+    expect(declarationPx('.pet-composer__send', 'min-width')).toBe(44);
+    expect(rulesFor('.pet-dialog__choice').at(-1)?.declarations['min-height']).toBe('36px');
   });
 
   it('注释里不再出现与实现不符的 44 声明', () => {
@@ -714,10 +711,14 @@ describe('紧凑视口保留实际控件与可滚动内容', () => {
       ),
     ).toBe(true);
   });
-  it('一行输入按内容增高，六行后在输入框内滚动', () => {
+  it('默认保持单行参考高度，展开后多行在同一输入框内滚动', () => {
     const textarea = rulesFor('.pet-composer__input').at(-1);
-    expect(textarea?.declarations['field-sizing']).toBe('content');
-    expect(textarea?.declarations['max-height']).toBe('132px');
+    expect(textarea?.declarations['height']).toBe('34px');
+    expect(
+      rulesFor(".pet-composer[data-expanded='true'] .pet-composer__input").at(-1)?.declarations[
+        'height'
+      ],
+    ).toBe('90px');
     expect(textarea?.declarations['line-height']).toBe('20px');
     expect(textarea?.declarations['overflow-y']).toBe('auto');
   });

@@ -192,3 +192,7 @@ Wrong: draw a local response or write a second chat history. Correct: submit to 
 ## Plugin desktop-pet MVP
 
 The current module ownership, speech.output contract, hidden capture-owner lifetime, revision-bound editor drafts and owner-scoped runtime invocation rules are maintained in [the canonical MVP guide](../../../docs/plugin-pet-mvp.md). Follow that guide when extending these surfaces; keep active page contributions and config/permission/media authority in the existing kernel. Native evidence is [recorded here](../../../qa/plugin-pet-mvp/README.md).
+
+## User-selected desktop permission and bubble defaults
+
+The2026-11-03 user instruction selects allow for initial desktop source registrations, including user plugins, through the existing preset system. Do not overwrite it with application-specific ask/local values; explicit current-session policy edits remain effective. The reusable kernel still defaults to ask outside this desktop adapter. Bubble motion, exact dark/light geometry and verification are maintained in [the canonical bubble note](../../../docs/pet-bubble-design.md).

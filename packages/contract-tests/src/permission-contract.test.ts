@@ -563,6 +563,50 @@ describe('trust and declaration scope (SEC-01)', () => {
 });
 
 describe('presets (SEC-10, SEC-12)', () => {
+  it('allows all declared permission kinds without querying approvals under allow', async () => {
+    const permissions: PermissionDeclaration[] = [
+      { kind: 'capability-use', capability: 'demo.echo@1' },
+      microphone,
+      { kind: 'screen-capture' },
+      { kind: 'text-input' },
+      { kind: 'network', origins: ['https://a.example.com'] },
+      { kind: 'credentials', keys: ['api-key'] },
+      { kind: 'files', scope: 'user-selected', access: 'read-write' },
+      { kind: 'process', workers: ['worker-a'] },
+      { kind: 'clipboard', access: 'read-write' },
+    ];
+    const approval = recordingApproval();
+    const h = setup({ permissions, preset: 'allow', approval });
+    for (const permission of permissions)
+      expect(await h.kernel.service.run(h.owner, 'task-1', permission, async () => 1)).toEqual({
+        ok: true,
+        value: 1,
+      });
+    expect(approval.request).not.toHaveBeenCalled();
+    expect(
+      h.kernel.control
+        .snapshotAudit()
+        .entries.filter((e) => e.event === 'approved' && e.source === 'preset'),
+    ).toHaveLength(permissions.length);
+  });
+  it('retains declaration, trust and revocation checks under allow', async () => {
+    const h = setup({ permissions: [microphone], preset: 'allow' });
+    expect(
+      await h.kernel.service.authorize(h.owner, 'task-1', { kind: 'screen-capture' }),
+    ).toMatchObject({ ok: false, error: { code: 'permission-denied' } });
+    const lease = unwrap(await h.kernel.service.authorize(h.owner, 'task-1', microphone));
+    h.kernel.control.setPreset(h.identity, 'deny');
+    expect(lease.signal.aborted).toBe(true);
+    expect(await h.kernel.service.authorize(h.owner, 'task-1', microphone)).toMatchObject({
+      ok: false,
+      error: { code: 'permission-denied' },
+    });
+    const other = setup({ permissions: [microphone], preset: 'allow', trust: false });
+    expect(await other.kernel.service.authorize(other.owner, 'task-1', microphone)).toMatchObject({
+      ok: false,
+      error: { code: 'permission-denied' },
+    });
+  });
   it('asks on every request under the default preset and denies without a channel', async () => {
     const h = setup({ permissions: [microphone] });
     const operation = vi.fn(async () => 'recorded');

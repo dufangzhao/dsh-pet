@@ -251,10 +251,20 @@ describe('新事件气泡不重播历史', () => {
     const after = snapshot({ messages: [answer] });
     expect(demoBubbleEvent(before, after)).toEqual({
       key: 'reply:answer-1',
+      identity: 'reply:answer-1',
       kind: 'reply',
       text: answer.text,
     });
     expect(demoBubbleEvent(after, { ...after, canRecord: true })).toBeNull();
+  });
+  it('分块与最终回复保持同一身份，新一轮另起一条气泡', () => {
+    const first = snapshot({ phase: 'responding', intentId: 'turn-1', partialReply: '第一段' });
+    const next = { ...first, partialReply: '第一段继续' };
+    const final = snapshot({ messages: [answer] });
+    const identity = demoBubbleEvent(null, first)?.identity;
+    expect(demoBubbleEvent(first, next)?.identity).toBe(identity);
+    expect(demoBubbleEvent(next, final)?.identity).toBe(identity);
+    expect(demoBubbleEvent(final, { ...first, intentId: 'turn-2' })?.identity).not.toBe(identity);
   });
   it('真实流式回复与录音阶段可见，返回待机后不编一条文案', () => {
     expect(
