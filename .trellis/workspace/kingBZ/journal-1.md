@@ -572,3 +572,36 @@ Completed native plugin voice dialogue and spoken output, compact themed pet con
 ### Next Steps
 
 - None - task complete
+
+
+## Session 18: Pet bubble replica and default permissions
+
+**Date**: 2026-11-03
+**Task**: Pet bubble replica and default permissions
+**Branch**: `feat/minimal-settings-preview-only`
+
+### Summary
+
+Implemented default allow using the existing preset system, removed avatar focus rectangle, replicated the252x71 dark composer and matching light bubbles, applied DeepSeek CN motion parameters, and verified native typewriter, reduced motion and real voice/playback without any permission prompt. Full workspace checks passed; normal app opened.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8fd1e07` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
