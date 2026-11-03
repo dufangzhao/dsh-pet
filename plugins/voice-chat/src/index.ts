@@ -29,6 +29,7 @@ export default definePlugin({
         if (body['kind'] === 'voice') {
           if (typeof body['model'] !== 'string')
             return { transcript: '', reply: '', errorCode: 'invalid-input' };
+          // Live hypotheses use ASR media; only the completed utterance reaches Core.
           const heard = await ctx.host.capabilities.invoke(task, 'speech.asr@1', 'transcribe', {
             model: body['model'],
             cloudModel: body['cloudModel'] ?? 'whisper-1',

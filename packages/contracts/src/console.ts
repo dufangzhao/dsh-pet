@@ -41,6 +41,7 @@ export interface ConsoleContribution {
 export const CONSOLE_IPC = {
   snapshot: 'console:v1:snapshot',
   open: 'console:v1:open',
+  navigate: 'console:v1:navigate',
   stopAll: 'console:v1:stop-all',
   inspectConfig: 'console:v1:inspect-config',
   saveConfig: 'console:v1:save-config',
@@ -91,6 +92,22 @@ export interface ConsoleBridge {
   onSecurityChanged(listener: () => void): () => void;
   restoreBuiltin(request: ConsoleBuiltinRestoreRequest): Promise<Result<ConsoleSecurityChange>>;
 }
+export type SettingsDestination =
+  'start' | 'persona' | 'appearance' | 'conversation' | 'voice' | 'plugins' | 'about';
+export interface SettingsOpenRequest {
+  readonly view: SettingsDestination;
+}
 export interface SettingsLauncher {
-  open(): Promise<Result<null>>;
+  open(request?: SettingsOpenRequest): Promise<Result<null>>;
+  onNavigate(listener: (request: SettingsOpenRequest) => void): () => void;
+}
+export function isSettingsOpenRequest(value: unknown): value is SettingsOpenRequest {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return (
+    Object.keys(row).join(',') === 'view' &&
+    ['start', 'persona', 'appearance', 'conversation', 'voice', 'plugins', 'about'].includes(
+      row['view'] as string,
+    )
+  );
 }

@@ -229,6 +229,7 @@ export interface ApplicationBridge {
     readonly limit: number;
   }): Promise<Result<ApplicationHistoryPage>>;
   getSnapshot(): Promise<Result<ApplicationSnapshot>>;
+  setPaused(request: { readonly paused: boolean }): Promise<Result<ApplicationSnapshot>>;
   onChanged(listener: () => void): () => void;
   saveProfile(request: {
     readonly expectedRevision: number;
@@ -258,6 +259,7 @@ export const APPLICATION_IPC = {
   history: 'application:v1:history',
   changed: 'application:v1:changed',
   profile: 'application:v1:profile',
+  paused: 'application:v1:paused',
   interaction: 'application:v1:interaction',
   answer: 'application:v1:answer',
   guide: 'application:v1:guide',

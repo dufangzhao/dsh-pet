@@ -4,7 +4,6 @@ import {
   type ConsoleSnapshot,
   type HostStatus,
   type Result,
-  type SettingsLauncher,
 } from '@pet/contracts';
 import type { SecurityBridge } from './security-bridge.js';
 function parameterless<T>(invoke: () => Promise<Result<T>>) {
@@ -42,7 +41,4 @@ export function createConsoleBridge(
     runPluginAction: unary(config.runPluginAction),
     ...security,
   });
-}
-export function createSettingsLauncher(open: () => Promise<Result<null>>): SettingsLauncher {
-  return Object.freeze({ open: parameterless(open) });
 }

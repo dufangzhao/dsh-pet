@@ -29,6 +29,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { CONSOLE_IPC, HOST_IPC, PET_IPC, makeError, type PetSnapshot } from '@pet/contracts';
 import { ConsoleWindow } from './windows/console-window.js';
 import { consoleSnapshot } from './console-snapshot.js';
+import { handleSettingsOpenRequest } from './settings-open-request.js';
 import { handleConsoleRequest } from './console-request.js';
 import { handleConsoleConfigRequest } from './console-config-request.js';
 import { ConsolePluginRequests } from './console-plugin-request.js';
@@ -56,6 +57,7 @@ const settings = new ConsoleWindow(
   path.resolve(here, '../preload/index.cjs'),
   () => {
     demo?.onConsoleClosed();
+    presentation.ownerClosed();
   },
   startDesignLab,
 );
@@ -91,10 +93,17 @@ let application: ApplicationController | undefined;
 let models: ModelConnectionController | undefined;
 let speech: SpeechOutputController | undefined;
 let voice: VoiceInputController | undefined;
-const presentation = new PresentationController(() => {
-  for (const target of [window, settings.current])
-    if (target && !target.isDestroyed()) target.webContents.send(PRESENTATION_IPC.changed);
-});
+const presentation = new PresentationController(
+  () => {
+    for (const target of [window, settings.current])
+      if (target && !target.isDestroyed()) target.webContents.send(PRESENTATION_IPC.changed);
+  },
+  (request) => {
+    const target = settings.current;
+    if (!target || target.isDestroyed()) throw new Error('Settings owner unavailable');
+    target.webContents.send(PRESENTATION_IPC.appearanceRequested, request);
+  },
+);
 let preferences: Readonly<ApplicationPreferences> = APPLICATION_DEFAULTS;
 let tray: ReturnType<typeof createDemoTray> | undefined;
 let hostStarting: Promise<DesktopHost> | undefined;
@@ -126,6 +135,7 @@ function quitWithCode(code: number): void {
     ipcMain.removeHandler(channel);
   tray?.destroy();
   tray = undefined;
+  presentation.ownerClosed();
   speech?.close();
   voice?.close();
   for (const channel of [
@@ -299,11 +309,11 @@ const startup = app
       },
     );
     for (const [action, channel] of Object.entries(PRESENTATION_IPC))
-      if (action !== 'changed')
+      if (!['changed', 'appearanceRequested'].includes(action))
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
           handlePresentationRequest(
             requestSource(event),
-            action as 'snapshot' | 'publish',
+            action as 'snapshot' | 'publish' | 'setAppearance' | 'completeAppearance',
             args,
             presentation,
           ),
@@ -350,6 +360,7 @@ const startup = app
             args,
             application!,
           );
+          if (result.ok && action === 'paused') notifyDemo();
           if (result.ok && action === 'guide') {
             demo?.onConsoleClosed();
             settings.current?.hide();
@@ -429,8 +440,15 @@ const startup = app
       }
     });
     ipcMain.handle(CONSOLE_IPC.open, (event, ...args: unknown[]) =>
-      handleConsoleRequest(windowSource(event, window, expectedUrl), args, () =>
-        settings.open().then(() => null),
+      handleSettingsOpenRequest(
+        windowSource(event, window, expectedUrl),
+        args,
+        () => settings.open(),
+        (request) => {
+          const target = settings.current;
+          if (!target || target.isDestroyed()) throw new Error('Settings owner unavailable');
+          target.webContents.send(CONSOLE_IPC.navigate, request);
+        },
       ),
     );
     const snapshot = () =>

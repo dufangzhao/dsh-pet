@@ -12,6 +12,43 @@ const source: DemoRequestSource = {
   expectedUrl: 'file:///console/index.html',
   role: 'console',
 };
+it('lets the trusted pet toggle its voice feature without exposing settings or credentials', async () => {
+  const result = { ok: false as const, error: makeError('not-ready', false) };
+  const start = vi.fn(async () => result),
+    stop = vi.fn(async () => result);
+  const controller = { start, stop } as unknown as VoiceInputController;
+  for (const action of ['start', 'stop'] as const) {
+    expect(
+      await handleVoiceInputRequest({ ...source, role: 'pet' }, action, [], controller),
+    ).toEqual(result);
+    expect(
+      await handleVoiceInputRequest(
+        { ...source, role: 'pet' },
+        action,
+        [{ extra: true }],
+        controller,
+      ),
+    ).toMatchObject({ error: { code: 'invalid-input' } });
+    expect(
+      await handleVoiceInputRequest(
+        { ...source, role: 'pet', mainFrame: false },
+        action,
+        [],
+        controller,
+      ),
+    ).toMatchObject({ error: { code: 'permission-denied' } });
+  }
+  expect(start).toHaveBeenCalledOnce();
+  expect(stop).toHaveBeenCalledOnce();
+  expect(
+    await handleVoiceInputRequest(
+      { ...source, role: 'pet' },
+      'saveApiKey',
+      [{ value: 'x' }],
+      controller,
+    ),
+  ).toMatchObject({ error: { code: 'permission-denied' } });
+});
 it('validates exact trusted settings and rejects undeclared origins before configuration mutation', async () => {
   const saveSettings = vi.fn(async () => ({ ok: true, value: {} })),
     controller = { saveSettings } as unknown as VoiceInputController;

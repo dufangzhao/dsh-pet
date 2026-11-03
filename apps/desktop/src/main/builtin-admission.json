@@ -38,13 +38,13 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "47f59b506d7a387444d2f7e3aee78300ec219e83df2fe662f4e089112899ddbd",
-          "bytes": 49852
+          "sha256": "ee02f371eb0f9548ff86a345b6c1467e0ebd657a0de334928616db841c9e8a0a",
+          "bytes": 50745
         },
         {
           "relativePath": "dist/asr-worker.cjs",
-          "sha256": "7cbeba4574d33f54dd2031cbcb9aa8d37bc8a4d71af65d722961b98b721f378a",
-          "bytes": 66073
+          "sha256": "e7665157b15a1709a4eb0919d7b8ed37ad8294515bc7738f366637c8a3362a02",
+          "bytes": 69822
         }
       ]
     },

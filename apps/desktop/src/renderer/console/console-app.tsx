@@ -1,5 +1,5 @@
 import type { ConsolePlugin, ConsolePluginAction, ConsoleSecurityChange } from '@pet/contracts';
-import { useCallback, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 
 import { Dialog, Toast, useToastStore } from '@pet/ui-kit';
 
@@ -198,6 +198,14 @@ export function ConsoleApp(): JSX.Element {
     [pages, select],
   );
 
+  useEffect(
+    () =>
+      window.petSettings?.onNavigate((request) => {
+        if (request.view === 'plugins' || request.view === 'about') select(request.view);
+        else goToView(request.view);
+      }),
+    [goToView, select],
+  );
   const openConfig = useCallback(
     (plugin: ConsolePlugin) => {
       guard(() => setConfiguring(plugin));

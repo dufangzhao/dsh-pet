@@ -4,6 +4,7 @@ const path = require('node:path');
 const sherpa = require('sherpa-onnx-node');
 const { verifyLocalModel } = require('./model-store.ts');
 const { sapiRecognize } = require('./sapi.ts');
+const { StreamingAsrSession } = require('./stream-session.ts');
 const lifetime = new AbortController();
 const cache = path.resolve(__dirname, '../../../.cache/asr-models');
 let recognizer,
@@ -15,7 +16,15 @@ const send = (value) => {
   if (process.connected) process.send(value);
 };
 const fail = (id, errorCode) => {
-  job = undefined;
+  if (job?.id === id) {
+    job.abort.abort();
+    job = undefined;
+  }
+  if (partialAck?.id === id) {
+    const ack = partialAck;
+    partialAck = undefined;
+    ack.resolve();
+  }
   send({ kind: 'result', id, ok: false, errorCode });
 };
 async function load(message) {
@@ -88,52 +97,37 @@ async function load(message) {
     loading = false;
   }
 }
-async function infer(current) {
+async function accept(current, message) {
+  current.processing = true;
   try {
-    if (modelId === 'windows-sapi') {
-      const text = await sapiRecognize(current.samples, lifetime.signal);
+    if (message.op === 'finish') {
+      if (message.frames !== current.sequence || message.samples !== current.session.sampleCount)
+        throw new Error('asr-failed');
+      const text = await current.session.finish();
+      if (job !== current) return;
       job = undefined;
       send({ kind: 'result', id: current.id, ok: true, modelId, text });
       return;
     }
-    const stream = recognizer.createStream();
-    let steps = 0,
-      last = '',
-      partial = 0;
-    if (modelId === 'sensevoice-small-int8' || modelId === 'whisper-small-int8') {
-      stream.acceptWaveform({ sampleRate: 16000, samples: current.samples });
-      recognizer.decode(stream);
-    } else {
-      const drain = () => {
-        while (recognizer.isReady(stream)) {
-          if (++steps > 10000) throw new Error('decode-budget');
-          recognizer.decode(stream);
-        }
-      };
-      for (let i = 0; i < current.samples.length; i += 1600) {
-        const owned = new Float32Array(current.samples.subarray(i, i + 1600));
-        stream.acceptWaveform({ sampleRate: 16000, samples: owned });
-        drain();
-        const text = recognizer.getResult(stream).text;
-        if (text && text !== last) {
-          if (typeof text !== 'string' || text.length > 8192) throw new Error('text-budget');
-          last = text;
-          await new Promise((resolve) => {
-            partialAck = { id: current.id, sequence: partial, resolve };
-            send({ kind: 'partial', id: current.id, sequence: partial++, text });
-          });
-        }
-      }
-      stream.acceptWaveform({ sampleRate: 16000, samples: new Float32Array(8000) });
-      stream.inputFinished();
-      drain();
-    }
-    const text = recognizer.getResult(stream).text;
-    if (typeof text !== 'string' || text.length > 8192) throw new Error('text-budget');
-    job = undefined;
-    send({ kind: 'result', id: current.id, ok: true, modelId, text: text.trim() });
+    const bytes = message.payload;
+    if (
+      !(bytes instanceof Uint8Array) ||
+      bytes.byteLength < 4 ||
+      bytes.byteLength > 6400 ||
+      bytes.byteLength % 4 ||
+      message.sequence !== current.sequence
+    )
+      throw new Error('asr-failed');
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength),
+      samples = new Float32Array(bytes.byteLength / 4);
+    for (let i = 0; i < samples.length; i++) samples[i] = view.getFloat32(i * 4, true);
+    await current.session.push(samples);
+    if (job !== current) return;
+    send({ kind: 'pcm-ack', id: current.id, sequence: current.sequence++ });
   } catch {
     fail(current.id, 'asr-failed');
+  } finally {
+    current.processing = false;
   }
 }
 process.on('message', (message) => {
@@ -156,36 +150,33 @@ process.on('message', (message) => {
     return;
   }
   if (message.op === 'recognize') {
-    if (
-      loading ||
-      job ||
-      (!recognizer && modelId !== 'windows-sapi') ||
-      !Number.isSafeInteger(message.samples) ||
-      message.samples < 1 ||
-      message.samples > 320000
-    )
+    if (loading || job || (!recognizer && modelId !== 'windows-sapi'))
       return fail(message.id, 'asr-failed');
-    job = { id: message.id, samples: new Float32Array(message.samples), written: 0, sequence: 0 };
+    const current = {
+      id: message.id,
+      sequence: 0,
+      partial: 0,
+      processing: false,
+      abort: new AbortController(),
+      session: null,
+    };
+    current.session = new StreamingAsrSession(
+      modelId,
+      recognizer,
+      async (text) => {
+        await new Promise((resolve) => {
+          partialAck = { id: current.id, sequence: current.partial, resolve };
+          send({ kind: 'partial', id: current.id, sequence: current.partial++, text });
+        });
+      },
+      (samples) => sapiRecognize(samples, AbortSignal.any([lifetime.signal, current.abort.signal])),
+    );
+    job = current;
     return;
   }
-  if (message.op !== 'pcm' || !job || message.id !== job.id) return;
-  const bytes = message.payload;
-  if (
-    !(bytes instanceof Uint8Array) ||
-    bytes.byteLength < 4 ||
-    bytes.byteLength > 6400 ||
-    bytes.byteLength % 4 ||
-    message.sequence !== job.sequence++ ||
-    job.written + bytes.byteLength / 4 > job.samples.length
-  )
-    return fail(message.id, 'asr-failed');
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  for (let i = 0; i < bytes.byteLength / 4; i++) {
-    const value = view.getFloat32(i * 4, true);
-    if (!Number.isFinite(value) || Math.abs(value) > 1) return fail(message.id, 'asr-failed');
-    job.samples[job.written++] = value;
-  }
-  if (job.written === job.samples.length) void infer(job);
+  if (!job || message.id !== job.id || !['pcm', 'finish'].includes(message.op)) return;
+  if (job.processing) return fail(message.id, 'asr-failed');
+  void accept(job, message);
 });
 process.on('disconnect', () => {
   lifetime.abort();

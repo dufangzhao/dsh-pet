@@ -1,9 +1,7 @@
 import { expect, it, vi } from 'vitest';
-import {
-  createConsoleBridge as createFullConsoleBridge,
-  createSettingsLauncher,
-} from './console-bridge.js';
+import { createConsoleBridge as createFullConsoleBridge } from './console-bridge.js';
 import { createSecurityBridge } from './security-bridge.js';
+import { createSettingsLauncher } from './settings-launcher.js';
 const security = createSecurityBridge(
   async () => ({ ok: false, error: makeError('not-ready', false) }),
   () => () => {},
@@ -128,9 +126,9 @@ it('forwards one management request and its operation error without wrapping it 
 });
 it('exposes only a frozen settings launcher', async () => {
   const invoke = vi.fn(async () => ({ ok: true as const, value: null })),
-    bridge = createSettingsLauncher(invoke);
+    bridge = createSettingsLauncher(invoke, () => () => {});
   expect(Object.isFrozen(bridge)).toBe(true);
-  expect(Object.keys(bridge)).toEqual(['open']);
+  expect(Object.keys(bridge)).toEqual(['open', 'onNavigate']);
   expect(await bridge.open()).toEqual({ ok: true, value: null });
   const call = bridge.open as (...args: unknown[]) => Promise<Result<null>>;
   expect(await call({ path: 'x' })).toMatchObject({ ok: false, error: { code: 'invalid-input' } });
@@ -151,7 +149,7 @@ it('maps failed transport to one fixed error', async () => {
       saveConfig: fail,
       runPluginAction: fail,
     }).stopAll(),
-    await createSettingsLauncher(fail).open(),
+    await createSettingsLauncher(fail, () => () => {}).open(),
     await createConsoleBridge(fail, fail, {
       inspectConfig: fail,
       saveConfig: fail,

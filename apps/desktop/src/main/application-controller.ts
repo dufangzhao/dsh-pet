@@ -224,6 +224,13 @@ export class ApplicationController {
       task.value.release();
     }
   }
+  async setPaused(paused: boolean): Promise<Result<ApplicationSnapshot>> {
+    const result = await this.agent('run', { action: paused ? 'pause' : 'resume' });
+    if (!result.ok) return result;
+    if (object(result.value)?.['paused'] !== paused) return fail('not-ready');
+    this.changed();
+    return { ok: true, value: await this.snapshot() };
+  }
   private dialog(): ApplicationDialog | null {
     const permission = this.host.approvals.snapshot()[0];
     if (permission) {

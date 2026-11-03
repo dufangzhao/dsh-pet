@@ -22,7 +22,8 @@ import {
   type HostStatus,
   type Result,
 } from '@pet/contracts';
-import { createConsoleBridge, createSettingsLauncher } from './console-bridge.js';
+import { createConsoleBridge } from './console-bridge.js';
+import { createSettingsLauncher } from './settings-launcher.js';
 import { createSecurityBridge } from './security-bridge.js';
 import { createDemoBridge } from './demo-bridge.js';
 import { DEMO_IPC } from '@pet/contracts';
@@ -145,7 +146,10 @@ contextBridge.exposeInMainWorld(
 );
 contextBridge.exposeInMainWorld(
   'petSettings',
-  createSettingsLauncher(() => ipcRenderer.invoke(CONSOLE_IPC.open) as Promise<Result<null>>),
+  createSettingsLauncher(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => subscribeRequest(CONSOLE_IPC.navigate, listener),
+  ),
 );
 window.addEventListener(
   'unload',
@@ -184,6 +188,13 @@ contextBridge.exposeInMainWorld(
   ),
 );
 
+const subscribeRequest = (channel: string, listener: (request: unknown) => void) => {
+  const receive = (_event: Electron.IpcRendererEvent, request: unknown) => listener(request);
+  ipcRenderer.on(channel, receive);
+  return () => {
+    ipcRenderer.removeListener(channel, receive);
+  };
+};
 const subscribeChanged = (channel: string, listener: () => void) => {
   const receive = () => listener();
   ipcRenderer.on(channel, receive);
@@ -196,6 +207,7 @@ contextBridge.exposeInMainWorld(
   createPresentationBridge(
     (channel, ...args) => ipcRenderer.invoke(channel, ...args),
     (listener) => subscribeChanged(PRESENTATION_IPC.changed, listener),
+    (listener) => subscribeRequest(PRESENTATION_IPC.appearanceRequested, listener),
   ),
 );
 contextBridge.exposeInMainWorld(

@@ -71,13 +71,6 @@ import { useDemoStatus } from './use-demo-status.js';
 /** 拖拽兜底：与主进程看门狗一致，避免指针事件丢失后卡在拖拽态。 */
 export { RENDERER_DRAG_TIMEOUT_MS } from './drag-controller.js';
 
-function rectToHitRect(element: Element | null) {
-  if (element === null) return null;
-  const rect = element.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) return null;
-  return toHitRect(rect);
-}
-
 function popoverHitShape(element: HTMLElement | null): HitShape | null {
   if (element === null || element.closest('[inert], [hidden]')) return null;
   const rect = element.getBoundingClientRect();
@@ -376,6 +369,9 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const settings = usePetSettings();
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPending, setMenuPending] = useState<'voice' | 'theme' | null>(null);
+  const [menuNotice, setMenuNotice] = useState<string | null>(null);
+  const menuCommandBusy = useRef(false);
   const [hovered, setHovered] = useState(false);
   const hoverExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -401,6 +397,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const dialog = hostDialogKey === dismissedDialog ? null : app.dialog;
   const toolsVisible = hovered || focused || chatOpen || menuOpen || demo.recording;
   const notice =
+    menuNotice ??
     app.failure?.text ??
     applicationSnapshotErrorText(app.snapshot) ??
     view.notice ??
@@ -424,6 +421,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const panelRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
+  const transcriptRef = useRef<HTMLDivElement | null>(null);
   const pressRef = useRef<PressRecord | null>(null);
   const unmounting = useRef(false);
   const [dragging, setDragging] = useState(false);
@@ -440,8 +438,10 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       const rect = avatar.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) shapes.push(...avatarHitShapes(rect, figure));
     }
-    const panel = rectToHitRect(panelRef.current);
-    if (panel !== null) shapes.push({ kind: 'rect', ...panel });
+    const panel = popoverHitShape(
+      panelRef.current?.querySelector<HTMLElement>('.pet-menu') ?? null,
+    );
+    if (panel) shapes.push(panel);
     const composer = popoverHitShape(
       composerRef.current?.querySelector<HTMLElement>('.pet-composer') ?? null,
     );
@@ -458,6 +458,8 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
           ry: rect.height / 2,
         });
     });
+    const transcript = popoverHitShape(transcriptRef.current);
+    if (transcript) shapes.push(transcript);
     const bubble = popoverHitShape(bubbleRef.current);
     if (bubble) shapes.push(bubble);
     const dialogue = popoverHitShape(dialogRef.current);
@@ -606,7 +608,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
    */
   const geometry =
     geometryKey(dialog === null ? null : `${dialog.id}:${dialog.step}`, figure, size) +
-    `:${composing}:${chatPresence.present}:${toolsVisible}:${menuOpen}:${bubble?.key ?? ''}`;
+    `:${composing}:${chatPresence.present}:${toolsVisible}:${menuOpen}:${bubble?.key ?? ''}:${demo.transcriptEvent?.identity ?? ''}:${demo.transcriptEvent?.text ?? ''}:${demo.transcriptEvent?.live ?? false}`;
   useEffect(resyncHitShapes, [geometry, resyncHitShapes]);
 
   useEffect(() => {
@@ -803,6 +805,28 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     sessionRef.current?.cancel('lostpointercapture');
   }, []);
 
+  const runMenuCommand = (
+    kind: 'voice' | 'theme',
+    run: () => Promise<{ ok: boolean; error?: { code: string } }>,
+  ): void => {
+    if (menuCommandBusy.current) return;
+    menuCommandBusy.current = true;
+    setMenuPending(kind);
+    setMenuNotice(null);
+    void run()
+      .then(async (result) => {
+        if (result.ok && kind === 'voice') await app.refreshSnapshot();
+        if (!unmounting.current && !result.ok)
+          setMenuNotice('操作未完成：' + (result.error?.code ?? 'unavailable'));
+      })
+      .catch(() => {
+        if (!unmounting.current) setMenuNotice('操作未完成，请稍后重试。');
+      })
+      .finally(() => {
+        menuCommandBusy.current = false;
+        if (!unmounting.current) setMenuPending(null);
+      });
+  };
   const openChat = (): void => {
     if (!demo.available) return;
     setMenuOpen(false);
@@ -931,6 +955,23 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
         ) : null}
       </div>
       <div className="pet-root__content" id="pet-chat-surface">
+        {demo.transcriptEvent ? (
+          <PetBubble
+            key={demo.transcriptEvent.identity}
+            state="listening"
+            variant="transcript"
+            label={demo.transcriptEvent.live ? '实时识别' : '识别结果'}
+            text={demo.transcriptEvent.text}
+            streaming={demo.transcriptEvent.live}
+            reducedMotion={reducedMotion}
+            lifetimeMs={Math.max(8000, bubbleLifetime(demo.transcriptEvent.text, 100))}
+            onGeometryChange={resyncHitShapes}
+            register={(element) => {
+              transcriptRef.current = element;
+            }}
+            onDismiss={restoreAvatarFocus}
+          />
+        ) : null}
         {dialog !== null ? (
           <PetDialog
             key={`${dialog.id}:${dialog.step}`}
@@ -990,6 +1031,74 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
         <div className="pet-root__panel" ref={panelRef} data-pet-surface>
           <PetMenu
             name={petName}
+            {...(typeof demo.snapshot?.paused === 'boolean'
+              ? {
+                  paused: demo.snapshot.paused,
+                  onTogglePause: () => {
+                    void app.setPaused(!demo.snapshot!.paused);
+                  },
+                }
+              : {})}
+            pausePending={app.menuBusy}
+            chatOpen={chatOpen}
+            chatDisabled={!demo.available}
+            onChat={() => {
+              openChat();
+              setMenuOpen(false);
+            }}
+            {...(profile && window.petVoiceInput
+              ? {
+                  voiceEnabled: profile.voiceEnabled,
+                  onToggleVoice: () =>
+                    runMenuCommand('voice', () =>
+                      profile.voiceEnabled
+                        ? window.petVoiceInput!.stop()
+                        : window.petVoiceInput!.start(),
+                    ),
+                }
+              : {})}
+            voicePending={menuPending === 'voice'}
+            talkKeyLabel={
+              settings.voice?.talkKeyLabel ?? demo.snapshot?.settings.talkKeyLabel ?? null
+            }
+            {...(settings.theme && window.petPresentation
+              ? {
+                  appearance: settings.theme.appearance,
+                  onToggleTheme: () =>
+                    runMenuCommand('theme', () =>
+                      window.petPresentation!.setAppearance({
+                        appearance: settings.theme!.appearance === 'dark' ? 'light' : 'dark',
+                      }),
+                    ),
+                }
+              : {})}
+            themePending={menuPending === 'theme'}
+            {...(profile
+              ? {
+                  soundEnabled: profile.soundEnabled,
+                  onToggleSound: () => {
+                    void app.savePreferences({ soundEnabled: !profile.soundEnabled });
+                  },
+                  onHide: () => {
+                    void app.savePreferences({ visible: false }).then((ok) => {
+                      if (ok) setMenuOpen(false);
+                    });
+                  },
+                }
+              : {})}
+            soundPending={app.menuBusy}
+            {...(app.snapshot?.pages.some(
+              (page) => page.owner.pluginId === 'pet.page-appearance',
+            ) && window.petSettings
+              ? {
+                  onAppearance: () => {
+                    setMenuOpen(false);
+                    void window.petSettings!.open({ view: 'appearance' }).then((reply) => {
+                      if (!reply.ok && !unmounting.current) setMenuNotice('打开装扮设置失败。');
+                    });
+                  },
+                }
+              : {})}
             canStop={demo.canStop}
             stopping={demo.stopping}
             onStop={demo.stop}

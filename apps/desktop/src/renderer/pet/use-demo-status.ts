@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { PET_COPY } from './copy.js';
 import {
   demoBubbleEvent,
+  transcriptBubbleEvent,
+  type PetTranscriptEvent,
   describeDemo,
   type DemoStatus,
   type PetBubbleEvent,
@@ -35,6 +37,7 @@ export interface PetDemoView extends DemoStatus {
   available: boolean;
   snapshot: DemoSnapshot | null;
   event: PetBubbleEvent | null;
+  transcriptEvent: PetTranscriptEvent | null;
   notice: string | null;
   stopping: boolean;
   sending: boolean;
@@ -52,6 +55,7 @@ export function useDemoStatus(): PetDemoView {
   const latest = useRef<DemoSnapshot | null>(null);
   const [snapshot, setSnapshot] = useState<DemoSnapshot | null>(null);
   const [event, setEvent] = useState<PetBubbleEvent | null>(null);
+  const [transcriptEvent, setTranscriptEvent] = useState<PetTranscriptEvent | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [stopping, setStopping] = useState(false);
   const [sending, setSending] = useState(false);
@@ -64,6 +68,16 @@ export function useDemoStatus(): PetDemoView {
 
   const accept = useCallback((next: DemoSnapshot): void => {
     const incoming = demoBubbleEvent(latest.current, next);
+    const heard = transcriptBubbleEvent(latest.current, next);
+    setTranscriptEvent(
+      (current) =>
+        heard ??
+        (next.error ||
+        next.phase === 'stopping' ||
+        (!next.partialTranscript.trim() && !next.transcript.trim())
+          ? null
+          : current),
+    );
     latest.current = next;
     setSnapshot(next);
     setEvent((current) => incoming ?? (current?.kind === 'reply' ? current : null));
@@ -168,6 +182,7 @@ export function useDemoStatus(): PetDemoView {
     available: bridgeRef.current !== null,
     snapshot,
     event,
+    transcriptEvent,
     notice,
     stopping,
     sending,

@@ -56,6 +56,10 @@ interface Intent {
   readonly tasks: Set<TaskHandle>;
   readonly disposers: (() => void)[];
   audio: Uint8Array[];
+  audioEnded: boolean;
+  audioOpened: boolean;
+  audioWake: (() => void) | null;
+  asrComplete: boolean;
 }
 interface Capture {
   readonly token: string;
@@ -63,7 +67,6 @@ interface Capture {
   readonly frameId: number;
   readonly signal: AbortSignal;
   readonly ended: () => void;
-  readonly chunks: Uint8Array[];
   timer: ReturnType<typeof setTimeout>;
   sequence: number;
   samples: number;
@@ -314,8 +317,47 @@ export class DemoController {
       ['speech.asr@1', 'agent.conversation@1', 'llm.responses@1', 'chat.session@1'].includes(
         capability,
       )
-    )
+    ) {
       this.track(child, parent.intent, capability, method);
+      if (capability === 'speech.asr@1' && method === 'transcribe') {
+        void child.result.then((result) => {
+          if (!this.current(parent.intent)) return;
+          if (!result.ok) {
+            this.failIntent(parent.intent, result.error.code);
+            return;
+          }
+          const value = object(result.value);
+          if (
+            !parent.intent.audioEnded ||
+            !value ||
+            typeof value['text'] !== 'string' ||
+            [...value['text']].length > 4000 ||
+            value['errorCode']
+          ) {
+            this.failIntent(
+              parent.intent,
+              isKernelErrorCode(value?.['errorCode']) ? value['errorCode'] : 'asr-failed',
+            );
+            return;
+          }
+          parent.intent.asrComplete = true;
+          this.#transcript = value['text'].trim();
+          this.#partialTranscript = '';
+          if (this.#transcript && parent.intent.settings.autoSend) this.#phase = 'thinking';
+          this.emit();
+        });
+      }
+    }
+  }
+  private wakeAudio(intent: Intent): void {
+    const wake = intent.audioWake;
+    intent.audioWake = null;
+    wake?.();
+  }
+  private failIntent(intent: Intent, code: KernelError['code']): void {
+    if (!this.current(intent)) return;
+    this.cancelCurrent();
+    this.error(code);
   }
   input(reference: TaskMediaReference, writer: MediaWriteEndpoint): void {
     const route = this.#routes.get(reference.taskId);
@@ -325,19 +367,35 @@ export class DemoController {
       route.capability !== 'speech.asr@1' ||
       route.method !== 'transcribe' ||
       !route.intent.asr ||
-      !sameOwner(reference.owner, route.intent.asr)
+      !sameOwner(reference.owner, route.intent.asr) ||
+      route.intent.audioOpened
     ) {
       writer.cancel();
       return;
     }
+    route.intent.audioOpened = true;
     void (async () => {
       try {
-        for (const chunk of route.intent.audio) {
-          if (!this.current(route.intent)) break;
-          const sent = await writer.write(chunk);
-          if (!sent.ok) return;
+        while (this.current(route.intent)) {
+          const chunk = route.intent.audio.shift();
+          if (chunk) {
+            const sent = await writer.write(chunk);
+            if (!sent.ok) throw new KernelFault(sent.error.code);
+          } else if (route.intent.audioEnded) {
+            const ended = await writer.end();
+            if (!ended.ok) throw new KernelFault(ended.error.code);
+            return;
+          } else {
+            await new Promise<void>((resolve) => {
+              route.intent.audioWake = resolve;
+            });
+          }
         }
-        await writer.end();
+      } catch (error) {
+        this.failIntent(
+          route.intent,
+          error instanceof KernelFault ? error.error.code : 'unavailable',
+        );
       } finally {
         writer.cancel();
       }
@@ -367,8 +425,9 @@ export class DemoController {
           const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
           if (route.capability === 'speech.asr@1') {
             if ([...text].length > 4000) throw new Error('Text limit');
+            if (route.intent.asrComplete) continue;
             this.#partialTranscript = text;
-            this.#phase = 'recognizing';
+            if (this.#capture?.intent !== route.intent) this.#phase = 'recognizing';
           } else {
             const packet = object(JSON.parse(text) as JsonValue);
             const reply = typeof packet?.['text'] === 'string' ? packet['text'] : '';
@@ -380,8 +439,7 @@ export class DemoController {
         }
       } catch {
         if (this.current(route.intent)) {
-          route.task.cancel();
-          this.error('unavailable');
+          this.failIntent(route.intent, 'unavailable');
         }
       } finally {
         reader.cancel();
@@ -400,6 +458,7 @@ export class DemoController {
     if (intent) {
       for (const dispose of intent.disposers) dispose();
       intent.abort.abort();
+      this.wakeAudio(intent);
       for (const task of intent.tasks) task.cancel();
       intent.audio = [];
     }
@@ -432,6 +491,10 @@ export class DemoController {
       tasks: new Set(),
       disposers: [],
       audio: [],
+      audioEnded: false,
+      audioOpened: false,
+      audioWake: null,
+      asrComplete: false,
     };
     this.#intent = intent;
     for (const owner of [intent.owner, intent.asr, intent.reply]) {
@@ -609,7 +672,6 @@ export class DemoController {
                   frameId,
                   signal,
                   ended,
-                  chunks: [],
                   sequence: 0,
                   samples: 0,
                   ready: false,
@@ -622,14 +684,9 @@ export class DemoController {
                 this.emit();
                 const abort = () => {
                   if (this.#capture === capture) {
-                    this.#capture = undefined;
-                    clearTimeout(capture.timer);
-                    ended();
-                    this.#started = null;
-                    if (this.current(intent)) {
-                      this.#phase = 'idle';
-                      this.emit();
-                    }
+                    this.cancelCurrent();
+                    this.#phase = 'idle';
+                    this.emit();
                   }
                 };
                 signal.addEventListener('abort', abort, { once: true });
@@ -696,6 +753,12 @@ export class DemoController {
       this.current(capture.intent)
     );
   }
+  private liveTranscription(intent: Intent): boolean {
+    return (
+      intent.settings.modelId === 'sensevoice-small-int8' ||
+      intent.settings.modelId === 'streaming-paraformer-zh-en-int8'
+    );
+  }
   captureReady(token: string, frameId: number, sampleRate: number): Result<null> {
     const capture = this.#capture;
     if (!capture || capture.token !== token || !this.microphoneAllowed(frameId))
@@ -712,6 +775,7 @@ export class DemoController {
     this.#phase = 'recording';
     this.#started = Date.now();
     this.emit();
+    if (this.liveTranscription(capture.intent)) void this.runTurn(capture.intent, 'voice');
     return { ok: true, value: null };
   }
   pushAudio(token: string, frameId: number, sequence: number, bytes: Uint8Array): Result<null> {
@@ -735,7 +799,8 @@ export class DemoController {
       const sample = view.getFloat32(i, true);
       if (!Number.isFinite(sample) || Math.abs(sample) > 1) return fail('audio-format');
     }
-    capture.chunks.push(owned);
+    capture.intent.audio.push(owned);
+    this.wakeAudio(capture.intent);
     capture.samples += owned.byteLength / 4;
     capture.sequence++;
     return { ok: true, value: null };
@@ -747,12 +812,13 @@ export class DemoController {
     if (frames !== capture.sequence) return fail('invalid-input');
     this.#capture = undefined;
     clearTimeout(capture.timer);
-    capture.intent.audio = capture.chunks;
+    capture.intent.audioEnded = true;
+    this.wakeAudio(capture.intent);
     capture.ended();
     this.#started = null;
     this.#phase = 'recognizing';
     this.emit();
-    void this.runTurn(capture.intent, 'voice');
+    if (!this.liveTranscription(capture.intent)) void this.runTurn(capture.intent, 'voice');
     return { ok: true, value: null };
   }
   captureFailure(token: string, reason: 'denied' | 'missing' | 'format' | 'failed'): Result<null> {
@@ -840,7 +906,7 @@ export class DemoController {
       { signal: intent.abort.signal, timeoutMs: 180000 },
     );
     if (!task.ok) {
-      if (this.current(intent)) this.error(task.error.code);
+      this.failIntent(intent, task.error.code);
       return;
     }
     intent.tasks.add(task.value);
@@ -851,9 +917,10 @@ export class DemoController {
     const result = await task.value.result;
     if (!result.ok && this.current(intent)) {
       if (result.error.code === 'cancelled') {
+        this.cancelCurrent();
         this.#phase = 'idle';
         this.emit();
-      } else this.error(result.error.code);
+      } else this.failIntent(intent, result.error.code);
     }
   }
   async clearHistory(): Promise<DemoSnapshot> {

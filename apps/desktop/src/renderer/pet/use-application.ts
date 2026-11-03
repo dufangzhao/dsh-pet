@@ -56,7 +56,7 @@ export function applicationSnapshotErrorText(snapshot: ApplicationSnapshot | nul
   return applicationFailureText(PET_COPY.app.snapshotError, error);
 }
 
-export type ApplicationFailureSource = 'read' | 'answer' | 'guide' | 'interact';
+export type ApplicationFailureSource = 'read' | 'answer' | 'guide' | 'interact' | 'menu';
 
 /**
  * 会写进同一条记录的动作。
@@ -93,6 +93,10 @@ export interface ApplicationView {
   /** 物理动作直接记；表情只在真的画到屏幕上之后记（见 expression.ts）。 */
   interact(kind: ApplicationReaction): void;
   reload(): void;
+  menuBusy: boolean;
+  savePreferences(patch: Partial<ApplicationPreferences>): Promise<boolean>;
+  setPaused(paused: boolean): Promise<boolean>;
+  refreshSnapshot(): Promise<boolean>;
 }
 
 export function useApplication(options: UseApplicationOptions = {}): ApplicationView {
@@ -102,6 +106,8 @@ export function useApplication(options: UseApplicationOptions = {}): Application
   const [answerBusy, setAnswerBusy] = useState(false);
   const [guideBusy, setGuideBusy] = useState(false);
   const [readBusy, setReadBusy] = useState(false);
+  const [menuBusy, setMenuBusy] = useState(false);
+  const menuInFlight = useRef(false);
   const mounted = useRef(true);
   // 只有最新一次读取的回复能落地：onChanged、手动重读与首次读取可能交叠。
   const readSeq = useRef(0);
@@ -252,6 +258,49 @@ export function useApplication(options: UseApplicationOptions = {}): Application
     [fail],
   );
 
+  const menuOperation = useCallback(
+    async (
+      call: (bridge: ApplicationBridge) => Promise<Result<ApplicationSnapshot>>,
+    ): Promise<boolean> => {
+      const bridge = bridgeRef.current;
+      if (!bridge || menuInFlight.current) return false;
+      menuInFlight.current = true;
+      setMenuBusy(true);
+      try {
+        const reply = await call(bridge);
+        if (!mounted.current) return false;
+        ++readSeq.current;
+        settle('menu', '操作未完成：', reply);
+        return reply.ok;
+      } catch {
+        fail('menu', '操作未完成：');
+        return false;
+      } finally {
+        menuInFlight.current = false;
+        if (mounted.current) setMenuBusy(false);
+      }
+    },
+    [settle, fail],
+  );
+  const savePreferences = useCallback(
+    (patch: Partial<ApplicationPreferences>) =>
+      menuOperation((bridge) => {
+        if (!snapshot?.profile)
+          return Promise.resolve({
+            ok: false,
+            error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: false },
+          });
+        return bridge.saveProfile({
+          expectedRevision: snapshot.profile.revision,
+          data: Object.assign({}, snapshot.profile.data, patch),
+        });
+      }),
+    [snapshot, menuOperation],
+  );
+  const setPaused = useCallback(
+    (paused: boolean) => menuOperation((bridge) => bridge.setPaused({ paused })),
+    [menuOperation],
+  );
   return {
     available: bridgeRef.current !== null,
     snapshot,
@@ -265,5 +314,9 @@ export function useApplication(options: UseApplicationOptions = {}): Application
     startGuide,
     interact,
     reload: read,
+    menuBusy,
+    savePreferences,
+    setPaused,
+    refreshSnapshot: () => menuOperation((bridge) => bridge.getSnapshot()),
   };
 }

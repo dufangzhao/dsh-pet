@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "errors": [],
+  "checks": [
+    "216x165 dark/light compact menu with real theme, pause, sound, visibility, appearance, chat and voice actions",
+    "real SenseVoice interim text before capture stop with recording phase preserved",
+    "final transcript remains visible with both ordinary bubble switches off",
+    "one voice input and one Core reply"
+  ],
+  "profile": "live-menu-1793677501692",
+  "menuBox": {
+    "x": 152,
+    "y": 8,
+    "width": 216,
+    "height": 165
+  },
+  "partials": [
+    {
+      "at": 1221,
+      "text": "The."
+    },
+    {
+      "at": 2400,
+      "text": "The tribal chief him."
+    },
+    {
+      "at": 3357,
+      "text": "The tribal chieftain called for the boy."
+    },
+    {
+      "at": 4354,
+      "text": "The tribal chieftain called for the boy and present."
+    },
+    {
+      "at": 5515,
+      "text": "The tribal chieftain called for the boy and presented him with5."
+    },
+    {
+      "at": 6500,
+      "text": "The tribal chieftain called for the boy and presented him with 50 pieces of cool."
+    },
+    {
+      "at": 7509,
+      "text": "The tribal chieftain called for the boy and presented him with 50 pieces of code."
+    }
+  ],
+  "finalTranscript": "The tribal chieftain called for the boy and presented him with 50 pieces of code tribal chief."
+}

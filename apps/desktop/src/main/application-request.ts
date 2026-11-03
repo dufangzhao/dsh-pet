@@ -37,6 +37,10 @@ export async function handleApplicationRequest(
         return fail('invalid-input');
       return controller.getHistory(body['before'] as number | undefined, body['limit'] as number);
     }
+    if (action === 'paused')
+      return exactKeys(body, ['paused']) && typeof body['paused'] === 'boolean'
+        ? controller.setPaused(body['paused'])
+        : fail('invalid-input');
     if (action === 'profile')
       return exactKeys(body, ['data', 'expectedRevision']) &&
         record(body['data']!) &&

@@ -559,7 +559,10 @@ export async function handleVoiceInputRequest(
   args: readonly unknown[],
   controller: VoiceInputController,
 ): Promise<Result<VoiceInputSnapshot>> {
-  if (!isTrustedPetSource(source) || (source.role !== 'console' && action !== 'snapshot'))
+  if (
+    !isTrustedPetSource(source) ||
+    (source.role !== 'console' && !['snapshot', 'start', 'stop'].includes(action))
+  )
     return fail('permission-denied');
   try {
     if (['snapshot', 'start', 'stop'].includes(action)) {

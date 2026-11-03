@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react';
-import { isPetPresentationTheme, type PetPresentationTheme } from '@pet/contracts';
-import { committedPalette, readThemeState, resolveAppearance, subscribeTheme } from './theme.js';
+import { isPetPresentationTheme, type PetAppearanceRequest } from '@pet/contracts';
+import {
+  committedPalette,
+  readThemeState,
+  resolveAppearance,
+  subscribeTheme,
+  writeThemeState,
+} from './theme.js';
 /** Projects the existing theme owner into the pet window; no second persistent copy. */
 export function usePresentationTheme(): string | null {
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
+    let applying = false;
+    let publication = 0;
     const bridge = window.petPresentation;
     if (!bridge) {
       setError('桌宠配色同步暂不可用');
       return;
     }
-    const publish = () => {
+    const publish = async (): Promise<boolean> => {
+      const sequence = ++publication;
       const palette = committedPalette();
       const candidate = {
         appearance: resolveAppearance(readThemeState().mode),
@@ -27,21 +36,41 @@ export function usePresentationTheme(): string | null {
         },
       };
       if (!isPetPresentationTheme(candidate)) {
-        setError('当前配色不完整，无法同步到桌宠');
-        return;
+        if (active && sequence === publication) setError('当前配色不完整，无法同步到桌宠');
+        return false;
       }
-      void bridge.publishTheme(candidate as PetPresentationTheme).then((result) => {
-        if (active) setError(result.ok ? null : '配色已保存，桌宠同步失败');
-      });
+      const result = await bridge.publishTheme(candidate);
+      const applied = result.ok && result.value.theme?.appearance === candidate.appearance;
+      if (active && sequence === publication) setError(applied ? null : '配色已保存，桌宠同步失败');
+      return applied;
     };
-    publish();
-    const off = subscribeTheme(publish);
+    const applyAppearance = async (request: PetAppearanceRequest): Promise<void> => {
+      ++publication;
+      applying = true;
+      const saved = writeThemeState({ ...readThemeState(), mode: request.appearance });
+      applying = false;
+      let applied = false;
+      if (saved.ok) applied = await publish();
+      else if (active) setError('配色未能保存到本机');
+      if (!active) return;
+      const completed = await bridge.completeAppearance({ id: request.id, applied });
+      if (active && !completed.ok) setError('桌宠配色切换未完成');
+    };
+    const offRequest = bridge.onAppearanceRequested((request) => {
+      void applyAppearance(request);
+    });
+    const off = subscribeTheme(() => {
+      if (!applying) void publish();
+    });
+    void publish();
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    media.addEventListener('change', publish);
+    const onSystemAppearance = () => void publish();
+    media.addEventListener('change', onSystemAppearance);
     return () => {
       active = false;
+      offRequest();
       off();
-      media.removeEventListener('change', publish);
+      media.removeEventListener('change', onSystemAppearance);
     };
   }, []);
   return error;

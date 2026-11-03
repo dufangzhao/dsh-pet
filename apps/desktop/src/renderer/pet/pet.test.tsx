@@ -585,7 +585,7 @@ describe('气泡、提示与菜单', () => {
     }
     // 开发期的状态预览按钮不属于产品界面。
     expect(html).not.toContain('data-testid="state-idle"');
-    expect(html.match(/<button/g)?.length).toBe(4);
+    expect(html).toContain('data-testid="pet-menu-more"');
   });
 
   it('宿主说不能停时不画停止按钮，没读到名字就留空，不可用的入口禁用', () => {

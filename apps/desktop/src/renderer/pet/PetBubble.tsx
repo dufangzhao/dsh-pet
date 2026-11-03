@@ -1,10 +1,12 @@
 import type { PetState } from '@pet/contracts';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useBubblePresence, useRevealedText } from './use-bubble-motion.js';
 
 export interface PetBubbleProps {
   state: PetState;
+  variant?: 'message' | 'transcript';
+  label?: string;
   text?: string | null;
   composer?: React.ReactNode;
   lifetimeMs?: number;
@@ -20,6 +22,8 @@ export interface PetBubbleProps {
 /** Content only comes from a host event; an idle pet has no fallback sentence. */
 export function PetBubble({
   state,
+  variant = 'message',
+  label,
   text,
   composer,
   lifetimeMs = 7000,
@@ -32,6 +36,12 @@ export function PetBubble({
   onDismiss,
 }: PetBubbleProps): React.JSX.Element | null {
   const [dismissed, setDismissed] = useState(false);
+  const lineRef = useRef<HTMLParagraphElement | null>(null);
+  const followTail = useRef(true);
+  useLayoutEffect(() => {
+    if (variant === 'transcript' && followTail.current && lineRef.current)
+      lineRef.current.scrollTop = lineRef.current.scrollHeight;
+  }, [text, variant]);
   const [expired, setExpired] = useState(false);
   const shown = useRevealedText(
     text ?? '',
@@ -60,12 +70,19 @@ export function PetBubble({
         ref={register}
         className={`pet-bubble pet-bubble--${state} pet-popover`}
         data-compose={composer ? 'true' : 'false'}
-        data-testid="pet-bubble"
+        data-testid={variant === 'transcript' ? 'pet-transcript' : 'pet-bubble'}
+        data-variant={variant}
         data-pet-surface
       >
         {text ? (
           <div className="pet-bubble__header">
             <p
+              ref={lineRef}
+              onScroll={() => {
+                const line = lineRef.current;
+                if (line && variant === 'transcript')
+                  followTail.current = line.scrollHeight - line.scrollTop - line.clientHeight < 12;
+              }}
               className="pet-bubble__line"
               role="status"
               aria-live="polite"
@@ -75,6 +92,7 @@ export function PetBubble({
             >
               <span className="pet-bubble__dot" aria-hidden="true" />
               <span className="pet-bubble__text" aria-hidden="true">
+                {label ? <span className="pet-transcript__label">{label}</span> : null}
                 {shown}
                 {typing ? <span className="pet-bubble__caret" /> : null}
               </span>
@@ -84,7 +102,9 @@ export function PetBubble({
               className="pet-popover__close"
               data-pet-hit
               aria-label="收起气泡"
-              data-testid="pet-bubble-dismiss"
+              data-testid={
+                variant === 'transcript' ? 'pet-transcript-dismiss' : 'pet-bubble-dismiss'
+              }
               onClick={() => {
                 setDismissed(true);
                 onDismiss?.();

@@ -426,12 +426,16 @@ describe('颜色方向与语义 token 约束', () => {
 
 describe('可点区域与字号：读真实声明', () => {
   it('常规按钮保留44px，参考气泡使用明确的桌面紧凑尺寸', () => {
-    for (const selector of ['.pet-menu__button', '.pet-menu__quit', '.pet-root__retry']) {
+    for (const selector of ['.pet-menu__button', '.pet-root__retry']) {
       const minHeight = declarationPx(selector, 'min-height');
       const minWidth = declarationPx(selector, 'min-width');
       expect(minHeight, selector + ' 的 min-height').toBeGreaterThanOrEqual(44);
       expect(minWidth, selector + ' 的 min-width').toBeGreaterThanOrEqual(44);
     }
+    expect(declarationPx('.pet-menu__header-button', 'min-height')).toBe(30);
+    expect(declarationPx('.pet-menu__header-button.pet-menu__quit', 'min-height')).toBe(30);
+    expect(declarationPx('.pet-menu__tile', 'width')).toBe(46);
+    expect(declarationPx('.pet-menu__tile', 'height')).toBe(46);
     expect(declarationPx('.pet-composer__send', 'min-height')).toBe(28);
     expect(declarationPx('.pet-composer__send', 'min-width')).toBe(44);
     expect(rulesFor('.pet-dialog__choice').at(-1)?.declarations['min-height']).toBe('36px');

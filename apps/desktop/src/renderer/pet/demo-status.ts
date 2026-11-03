@@ -54,6 +54,34 @@ export interface PetBubbleEvent {
   readonly text: string;
 }
 
+export interface PetTranscriptEvent {
+  readonly identity: string;
+  readonly text: string;
+  readonly live: boolean;
+}
+/** A live hypothesis is replaceable text, not a reply or a second history record. */
+export function transcriptBubbleEvent(
+  previous: DemoSnapshot | null,
+  snapshot: DemoSnapshot,
+): PetTranscriptEvent | null {
+  if (snapshot.error || snapshot.phase === 'stopping') return null;
+  const partial = snapshot.partialTranscript.trim();
+  const final = snapshot.transcript.trim();
+  const recognizing = snapshot.phase === 'recording' || snapshot.phase === 'recognizing';
+  const identity = 'transcript:' + (snapshot.intentId ?? previous?.intentId ?? 'final');
+  if (recognizing && partial) return { identity, text: partial, live: true };
+  if (
+    final &&
+    ((previous !== null &&
+      (final !== previous.transcript.trim() ||
+        previous.phase === 'recording' ||
+        previous.phase === 'recognizing')) ||
+      (snapshot.intentId !== null && recognizing))
+  )
+    return { identity, text: final, live: false };
+  return null;
+}
+
 /** A saved history entry is not a new event when the pet window starts. */
 export function demoBubbleEvent(
   previous: DemoSnapshot | null,
@@ -85,20 +113,19 @@ export function demoBubbleEvent(
   }
   if (snapshot.phase === 'idle' || snapshot.phase === 'setup') return null;
   const transcript = snapshot.partialTranscript.trim();
-  const text =
-    transcript !== ''
-      ? clipBubbleText(transcript, 'tail')
-      : {
-          preparing: '正在准备语音输入…',
-          arming: '正在打开麦克风…',
-          recording: '正在听你说话…',
-          recognizing: '正在识别…',
-          thinking: '正在思考…',
-          responding: '正在回答…',
-          saving: '正在保存…',
-          stopping: '正在停止…',
-          error: PET_COPY.stateBubbles.error,
-        }[snapshot.phase];
+  if (transcript !== '' && (snapshot.phase === 'recording' || snapshot.phase === 'recognizing'))
+    return null;
+  const text = {
+    preparing: '正在准备语音输入…',
+    arming: '正在打开麦克风…',
+    recording: '正在听你说话…',
+    recognizing: '正在识别…',
+    thinking: '正在思考…',
+    responding: '正在回答…',
+    saving: '正在保存…',
+    stopping: '正在停止…',
+    error: PET_COPY.stateBubbles.error,
+  }[snapshot.phase];
   return {
     key: `status:${snapshot.intentId}:${snapshot.phase}:${transcript}`,
     kind: 'status',

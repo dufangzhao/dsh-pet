@@ -12,6 +12,7 @@ interface Work {
   readonly id: string;
   readonly child: ChildProcess;
   readonly partial: (text: string) => Promise<void>;
+  acknowledgement: { sequence: number; resolve(): void; reject(error: Error): void } | undefined;
   finish(result: EngineResult): void;
 }
 export class LocalAsrEngine {
@@ -70,6 +71,16 @@ export class LocalAsrEngine {
     };
     const work = this.#work;
     if (!work || work.child !== child || message.id !== work.id) return;
+    const acknowledgement = work.acknowledgement;
+    if (
+      message.kind === 'pcm-ack' &&
+      acknowledgement &&
+      acknowledgement.sequence === message.sequence
+    ) {
+      work.acknowledgement = undefined;
+      acknowledgement.resolve();
+      return;
+    }
     if (
       message.kind === 'partial' &&
       typeof message.text === 'string' &&
@@ -77,7 +88,8 @@ export class LocalAsrEngine {
     ) {
       try {
         await work.partial(message.text);
-        if (child.connected) child.send({ op: 'ack', id: work.id, sequence: message.sequence });
+        if (this.#work === work && child.connected)
+          child.send({ op: 'ack', id: work.id, sequence: message.sequence });
       } catch {
         await this.close();
       }
@@ -106,7 +118,7 @@ export class LocalAsrEngine {
     payload: Record<string, unknown>,
     signal: AbortSignal,
     partial: (text: string) => Promise<void>,
-    samples?: Float32Array,
+    samples?: AsyncIterable<Float32Array>,
   ): Promise<EngineResult> {
     if (this.#work || signal.aborted) return { ok: false, errorCode: 'asr-failed' };
     if (this.#closing) await this.#closing;
@@ -118,33 +130,46 @@ export class LocalAsrEngine {
         void this.close();
       };
       const finish = (result: EngineResult) => {
-        if (this.#work?.id !== id) return;
+        const work = this.#work;
+        if (!work || work.id !== id) return;
         this.#work = undefined;
+        work.acknowledgement?.reject(new Error('asr-work-ended'));
         signal.removeEventListener('abort', abort);
         resolve(result);
       };
-      this.#work = { id, child, partial, finish };
+      const work: Work = { id, child, partial, finish, acknowledgement: undefined };
+      this.#work = work;
       signal.addEventListener('abort', abort, { once: true });
-      const send = async () => {
-        await new Promise<void>((resolve, reject) =>
-          child.send({ op, id, ...payload }, (error) => (error ? reject(error) : resolve())),
+      const send = (value: Record<string, unknown>): Promise<void> =>
+        new Promise((resolve, reject) =>
+          child.send(value, (error) => (error ? reject(error) : resolve())),
         );
-        if (samples)
-          for (let offset = 0, sequence = 0; offset < samples.length; offset += 1600, sequence++) {
-            if (signal.aborted) break;
+      const produce = async () => {
+        await send({ op, id, ...payload });
+        if (!samples) return;
+        let sequence = 0,
+          count = 0;
+        for await (const frame of samples) {
+          for (let offset = 0; offset < frame.length; offset += 1600) {
+            if (this.#work !== work || signal.aborted) return;
             const owned = new Uint8Array(
-              new Float32Array(samples.subarray(offset, offset + 1600)).buffer,
+              new Float32Array(frame.subarray(offset, offset + 1600)).buffer,
             );
-            await new Promise<void>((resolve, reject) =>
-              child.send({ op: 'pcm', id, sequence, payload: owned }, (error) =>
-                error ? reject(error) : resolve(),
-              ),
-            );
+            await new Promise<void>((resolve, reject) => {
+              work.acknowledgement = { sequence, resolve, reject };
+              void send({ op: 'pcm', id, sequence, payload: owned }).catch(reject);
+            });
+            sequence++;
+            count += owned.byteLength / 4;
           }
+        }
+        if (this.#work === work && !signal.aborted)
+          await send({ op: 'finish', id, frames: sequence, samples: count });
       };
-      void send().catch(() => {
-        void this.close();
+      void produce().catch(() => {
+        if (this.#work === work) void this.close();
       });
+      if (signal.aborted) abort();
     });
   }
   async prepare(modelId: string, signal: AbortSignal): Promise<EngineResult> {
@@ -159,9 +184,20 @@ export class LocalAsrEngine {
     signal: AbortSignal,
     partial: (text: string) => Promise<void>,
   ): Promise<EngineResult> {
-    if (!samples.length)
-      return Promise.resolve({ ok: true, modelId: this.modelId ?? '', text: '' });
-    return this.request('recognize', { samples: samples.length }, signal, partial, samples);
+    return this.recognizeStream(
+      (async function* () {
+        yield samples;
+      })(),
+      signal,
+      partial,
+    );
+  }
+  recognizeStream(
+    samples: AsyncIterable<Float32Array>,
+    signal: AbortSignal,
+    partial: (text: string) => Promise<void>,
+  ): Promise<EngineResult> {
+    return this.request('recognize', {}, signal, partial, samples);
   }
   close(): Promise<void> {
     if (this.#closing) return this.#closing;

@@ -30,6 +30,7 @@ export function createApplicationBridge(
       return subscribe(args[0] as () => void);
     },
     saveProfile: fixed<ApplicationSnapshot>(IPC.profile, 1),
+    setPaused: fixed<ApplicationSnapshot>(IPC.paused, 1),
     interact: fixed<null>(IPC.interaction, 1),
     answer: fixed<ApplicationSnapshot>(IPC.answer, 1),
     startGuide: fixed<ApplicationSnapshot>(IPC.guide, 0),
