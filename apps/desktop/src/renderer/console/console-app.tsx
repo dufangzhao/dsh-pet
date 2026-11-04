@@ -208,9 +208,20 @@ export function ConsoleApp(): JSX.Element {
   );
   const openConfig = useCallback(
     (plugin: ConsolePlugin) => {
-      guard(() => setConfiguring(plugin));
+      guard(() => {
+        const ownPage = pages.find(
+          (page) =>
+            page.owner.pluginId === plugin.owner.pluginId &&
+            page.owner.instanceId === plugin.owner.instanceId &&
+            page.owner.generation === plugin.owner.generation,
+        );
+        if (ownPage) {
+          setConfiguring(null);
+          setSelection(ownPage.id);
+        } else setConfiguring(plugin);
+      });
     },
-    [guard],
+    [guard, pages],
   );
 
   const closeConfig = useCallback(() => {

@@ -27,6 +27,8 @@ export interface Installation {
   readonly origin: 'builtin' | 'user';
 }
 export interface PluginSnapshot {
+  /** Requested lifecycle target; availability is reported separately by state. */
+  readonly desiredActive: boolean;
   readonly owner: OwnerRef;
   readonly state: PluginLifecycleState;
   readonly manifest: PluginManifest;
@@ -560,6 +562,7 @@ export class PluginManager {
       structuredClone({
         owner: e.owner,
         state: e.state,
+        desiredActive: e.desired,
         manifest: e.manifest,
         origin: e.installation.origin,
         protected: e.protected,

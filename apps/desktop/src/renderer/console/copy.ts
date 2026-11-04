@@ -31,8 +31,7 @@ export const COPY = {
   refreshing: '读取中…',
   themeLabel: '主题',
   advanced: '高级',
-  /** 插件行里打开配置的入口；配置面板里回到列表用 backToPlugins。 */
-  config: '配置',
+  /** 配置面板里回到列表用 backToPlugins。 */
   backToPlugins: '返回插件列表',
   backToRecovery: '返回扩展列表',
   enable: '启用',

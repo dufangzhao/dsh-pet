@@ -1,0 +1,149 @@
+{
+  "status": "passed",
+  "checks": [
+    "All installed switches match authoritative desiredActive; removed copy/config buttons are absent.",
+    "Cancel keeps the real enabled target and restores focus; keyboard switch disable/enable reaches actual disabled/active host state without navigation.",
+    "Card whitespace and Space open the owned settings page; Tab order and Enter open the existing schema form without a separate config button.",
+    "Accessible icon-only uninstall reaches the actual host removal path and never opens configuration.",
+    "Light/dark palettes differ; an actual saved custom card-surface color survives navigation and reload through the existing theme store.",
+    "At the native 880x600 minimum window, cards and controls remain contained, keyboard navigation remains usable, and reduced-motion mode is respected."
+  ],
+  "screenshots": [
+    "plugins-light.png",
+    "plugins-dark.png",
+    "plugins-custom.png",
+    "plugins-compact.png"
+  ],
+  "errors": [],
+  "profile": "plugin-list-1793789161867",
+  "initialPlugins": [
+    {
+      "id": "pet.agent-cortico",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.asr-cloud",
+      "state": "disabled",
+      "desiredActive": false,
+      "protected": false
+    },
+    {
+      "id": "pet.asr-local",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.avatar-default",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.builtin-speech",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.chat",
+      "state": "disabled",
+      "desiredActive": false,
+      "protected": false
+    },
+    {
+      "id": "pet.llm-provider",
+      "state": "disabled",
+      "desiredActive": false,
+      "protected": false
+    },
+    {
+      "id": "pet.page-appearance",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.page-conversation",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.page-persona",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.page-start",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.page-voice",
+      "state": "disabled",
+      "desiredActive": false,
+      "protected": false
+    },
+    {
+      "id": "pet.profile",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.system-tts",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.talk-key",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    },
+    {
+      "id": "pet.voice-chat",
+      "state": "active",
+      "desiredActive": true,
+      "protected": false
+    }
+  ],
+  "lifecycleCoverage": {
+    "observedStates": ["active", "disabled"],
+    "protectedCount": 0
+  },
+  "light": {
+    "background": "rgb(255, 255, 255)",
+    "color": "rgb(21, 23, 23)"
+  },
+  "dark": {
+    "background": "rgb(30, 32, 34)",
+    "color": "rgb(242, 243, 245)"
+  },
+  "custom": {
+    "background": "rgb(40, 55, 71)",
+    "color": "rgb(242, 243, 245)"
+  },
+  "viewport": {
+    "width": 864,
+    "height": 561,
+    "scroll": 864,
+    "outside": []
+  },
+  "motion": {
+    "trackTransition": "0s",
+    "trackAnimation": "none",
+    "thumbTransition": "0s",
+    "thumbAnimation": "none"
+  },
+  "focus": {
+    "focused": true,
+    "outline": "solid"
+  }
+}

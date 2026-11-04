@@ -55,6 +55,7 @@ export const CONSOLE_IPC = {
   restoreBuiltin: 'console:v1:restore-builtin',
 } as const;
 export interface ConsolePlugin {
+  readonly desiredActive: boolean;
   readonly owner: OwnerRef;
   readonly name: string;
   readonly version: string;

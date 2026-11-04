@@ -23,6 +23,7 @@ const plugin = (over: Partial<ConsoleSecurityPlugin> = {}): ConsoleSecurityPlugi
   name: '示例插件',
   version: '1.0.0',
   state: 'unready',
+  desiredActive: true,
   origin: 'user',
   protected: false,
   permissions: [{ kind: 'microphone' }],

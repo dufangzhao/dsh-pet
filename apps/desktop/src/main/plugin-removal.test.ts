@@ -8,6 +8,7 @@ const dirs: string[] = [];
 const plugin: PluginSnapshot = {
   owner: { pluginId: 'test.remove', instanceId: 'default', generation: 1 },
   state: 'disabled',
+  desiredActive: false,
   origin: 'user',
   protected: false,
   manifest: {

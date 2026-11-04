@@ -21,6 +21,7 @@ export function consoleSnapshot(
       name: plugin.manifest.displayName['zh-CN'] ?? Object.values(plugin.manifest.displayName)[0]!,
       version: plugin.manifest.version,
       state: plugin.state,
+      desiredActive: plugin.desiredActive,
       origin: plugin.origin,
       protected: plugin.protected,
       permissions: plugin.manifest.permissions ?? [],

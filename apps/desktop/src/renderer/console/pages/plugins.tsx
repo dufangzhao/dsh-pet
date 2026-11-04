@@ -4,16 +4,8 @@ import { useEffect, useRef, useState, type JSX } from 'react';
 
 import { ConsoleStatus } from '../console-status.js';
 import { COPY } from '../copy.js';
-import {
-  describePermission,
-  hostRuntime,
-  ownerKey,
-  pluginOrigin,
-  pluginState,
-  taskSummary,
-} from '../labels.js';
+import { hostRuntime, ownerKey, pluginOrigin, pluginState, taskSummary } from '../labels.js';
 import { Button, Status, type StatusTone } from '../minimal-ui/controls.js';
-import { actionLabel } from '../use-plugin-actions.js';
 
 export interface PluginsPageProps {
   snapshot: ConsoleSnapshot | null;
@@ -152,6 +144,15 @@ interface PluginCardProps {
   onAction: (plugin: ConsolePlugin, action: ConsolePluginAction) => void;
 }
 
+/**
+ * 一张插件卡：整张卡就是它自己的设置入口，脚上只留一件生命周期开关和一颗卸载图标。
+ *
+ * 开关读宿主的 desiredActive（想不想让它跑），不读 state（此刻跑没跑起来）：
+ * 未就绪或失败的插件仍然可能是想启用的，那时必须还能停用。
+ * 卡面点击交给标题按钮，伪元素铺满整张卡；动作控件压在它上面，
+ * 于是既没有嵌套的可交互角色，点开关或垃圾桶也不会顺带跳页。
+ * 动作进行中标题按钮也停下：和开关一样，先等宿主的真实结果。
+ */
 function PluginCard({
   plugin,
   pending,
@@ -163,6 +164,17 @@ function PluginCard({
   const repair = repairHint(plugin);
   const actions = actionsFor(plugin);
   const busy = pending !== undefined;
+  const toggle = plugin.desiredActive ? 'disable' : 'enable';
+  const open = onOpenConfig;
+  /*
+   * 受保护的包停不掉，开关只能停在「想启用」。未就绪或失败时，
+   * actionsFor 里本来就允许的 enable 得有一颗自己的按钮，否则没有出路。
+   */
+  const retry =
+    plugin.protected &&
+    plugin.desiredActive &&
+    (plugin.state === 'unready' || plugin.state === 'failed') &&
+    actions.includes('enable');
   return (
     <article
       className="card plugin-card"
@@ -170,67 +182,123 @@ function PluginCard({
       data-plugin-id={plugin.owner.pluginId}
       data-plugin-state={plugin.state}
       data-plugin-builtin={plugin.origin === 'builtin'}
+      data-openable={open !== undefined}
     >
       <div className="card__body">
-        <div className="plugin-card__top">
+        <div className="plugin-card__head">
           <span className="plugin-icon" aria-hidden="true">
             {plugin.name.slice(0, 1)}
           </span>
           <div className="plugin-card__id">
-            <h2 className="card__title">{plugin.name}</h2>
-            <p className="plugin-card__desc">
-              {plugin.protected
-                ? '应用基础功能'
-                : plugin.origin === 'builtin'
-                  ? '随应用提供，可单独启用或停用'
-                  : '你安装的插件'}
-            </p>
+            <h2 className="card__title">
+              {open === undefined ? (
+                plugin.name
+              ) : (
+                <button
+                  type="button"
+                  className="plugin-card__open"
+                  data-testid={'plugin-open-' + plugin.owner.pluginId}
+                  disabled={busy}
+                  onClick={() => open(plugin)}
+                >
+                  {plugin.name}
+                </button>
+              )}
+            </h2>
+            <div className="plugin-card__meta">
+              <span className="plugin-tag">{pluginOrigin(plugin.origin)}</span>
+              <span>版本 {plugin.version}</span>
+              <Status tone={toneOf(state.tone)}>{state.text}</Status>
+              {plugin.protected ? <span className="plugin-tag">受保护</span> : null}
+            </div>
           </div>
-        </div>
-        <div className="plugin-card__meta">
-          <span className="plugin-tag">{pluginOrigin(plugin.origin)}</span>
-          <span>版本 {plugin.version}</span>
-          <Status tone={toneOf(state.tone)}>{state.text}</Status>
-          {plugin.protected ? <span className="plugin-tag">受保护</span> : null}
         </div>
         {plugin.reason ? (
           <p className="plugin-card__note" role="alert">
             {errorMessage(plugin.reason)}
           </p>
         ) : null}
-        {repair ? <p className="plugin-card__note">{repair.text}</p> : null}
-        <PluginPermissions permissions={plugin.permissions} />
-        <div className="card__foot">
-          {actions.map((action) => (
-            <Button
-              key={action}
-              variant={action === 'uninstall' && plugin.origin === 'user' ? 'danger' : 'secondary'}
+        {repair ? (
+          <div className="plugin-card__repair">
+            <p className="plugin-card__note">{repair.text}</p>
+            {retry || repair.permissions ? (
+              <div className="plugin-card__repair-actions">
+                {retry ? (
+                  <Button
+                    size="small"
+                    data-testid={'plugin-retry-' + plugin.owner.pluginId}
+                    aria-label={'重试启用 ' + plugin.name}
+                    disabled={busy}
+                    onClick={() => onAction(plugin, 'enable')}
+                  >
+                    重试
+                  </Button>
+                ) : null}
+                {repair.permissions ? (
+                  <Button size="small" variant="ghost" onClick={onOpenPermissions}>
+                    {COPY.goPermissions}
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {pending === undefined ? null : (
+          <p className="plugin-card__note" role="status">
+            {pendingLabel(pending)}
+          </p>
+        )}
+        <div className="plugin-card__foot">
+          <label className="plugin-toggle">
+            <span className="plugin-toggle__text">启用</span>
+            <span className="switch">
+              <input
+                type="checkbox"
+                role="switch"
+                aria-label={'启用 ' + plugin.name}
+                data-testid={'plugin-toggle-' + plugin.owner.pluginId}
+                checked={plugin.desiredActive}
+                disabled={busy || !actions.includes(toggle)}
+                onChange={() => onAction(plugin, toggle)}
+              />
+              <i aria-hidden="true" />
+            </span>
+          </label>
+          {actions.includes('uninstall') ? (
+            <button
+              type="button"
+              className="icon-btn plugin-card__remove"
+              aria-label={'卸载 ' + plugin.name}
+              data-testid={'plugin-uninstall-' + plugin.owner.pluginId}
               disabled={busy}
-              data-testid={'plugin-' + action + '-' + plugin.owner.pluginId}
-              onClick={() => onAction(plugin, action)}
+              onClick={() => onAction(plugin, 'uninstall')}
             >
-              {pending === action ? pendingLabel(action) : actionLabel(action)}
-            </Button>
-          ))}
-          {onOpenConfig ? (
-            <Button
-              variant="ghost"
-              disabled={busy}
-              data-testid={'plugin-config-' + plugin.owner.pluginId}
-              aria-label={'配置 ' + plugin.name}
-              onClick={() => onOpenConfig(plugin)}
-            >
-              {COPY.config}
-            </Button>
-          ) : null}
-          {repair?.permissions ? (
-            <Button variant="ghost" onClick={onOpenPermissions}>
-              {COPY.goPermissions}
-            </Button>
+              <RemoveIcon />
+            </button>
           ) : null}
         </div>
       </div>
     </article>
+  );
+}
+
+/** 卸载是破坏性动作，只留图标，名字由按钮的 aria-label 承担。 */
+function RemoveIcon(): JSX.Element {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16" />
+      <path d="M9.5 7V5.6c0-.9.7-1.6 1.6-1.6h1.8c.9 0 1.6.7 1.6 1.6V7" />
+      <path d="m6.6 7 .8 11.2c.1 1 .9 1.8 2 1.8h5.2c1.1 0 1.9-.8 2-1.8L17.4 7" />
+      <path d="M10.5 11v5.5M13.5 11v5.5" />
+    </svg>
   );
 }
 
@@ -278,7 +346,7 @@ function pendingLabel(action: ConsolePluginAction): string {
 
 /**
  * 失败后的下一步。只给真实存在的那几个：
- * 状态说明需要审批就去权限页，待重启就直说要重启；配置入口在脚上另有一颗。
+ * 状态说明需要审批就去权限页，待重启就直说要重启。
  */
 function repairHint(plugin: ConsolePlugin): { text: string; permissions: boolean } | null {
   if (plugin.state === 'pending_restart') {
@@ -301,43 +369,28 @@ function repairHint(plugin: ConsolePlugin): { text: string; permissions: boolean
    */
   if (plugin.reason?.code === 'permission-denied') {
     return {
-      text: '启用被拒绝：还没有确认这个插件包可信。确认后可以重试启用。',
+      text: '启用被拒绝：还没有确认这个插件包可信。确认后' + retryHint(plugin),
       permissions: true,
     };
   }
   return {
     text:
       plugin.state === 'unready'
-        ? '没有就绪，可能缺少依赖或配置；可以重试启用，或停用后重新配置。'
-        : '启用没有完成，可以重试。',
+        ? '没有就绪，可能缺少依赖或配置；' + retryHint(plugin)
+        : '启用没有完成；' + retryHint(plugin),
     permissions: false,
   };
 }
 
 /**
- * 声明权限：是请求，不是授权。
- * 这里只做展示，不改状态——审批在 M2-05，插件内容也不能触发它。
+ * 卡上只有一件开关，所以「重试启用」得说成开关上的动作；
+ * 受保护的包停不掉，只能说重试，不能让人先去停用。
  */
-function PluginPermissions({
-  permissions,
-}: {
-  permissions: ConsolePlugin['permissions'];
-}): JSX.Element {
-  if (permissions.length === 0) {
-    return <p className="row__desc">没有声明额外权限。</p>;
+function retryHint(plugin: ConsolePlugin): string {
+  if (plugin.protected && plugin.desiredActive) {
+    return '可以重试启用。';
   }
-  return (
-    <details>
-      <summary className="row__desc">
-        声明的权限（{permissions.length}）· 这是请求，不是授权
-      </summary>
-      <ul className="row__desc">
-        {permissions.map((permission, index) => (
-          <li key={permission.kind + '|' + index}>{describePermission(permission)}</li>
-        ))}
-      </ul>
-    </details>
-  );
+  return plugin.desiredActive ? '先停用，再重新启用。' : '重新启用。';
 }
 
 function RunSection({

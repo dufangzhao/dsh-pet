@@ -105,11 +105,13 @@ it('projects plugin metadata without entry paths or configuration', async () => 
     expect(result.plugins[0]).toMatchObject({
       name: '示例插件',
       state: 'disabled',
+      desiredActive: false,
       origin: 'user',
       protected: false,
       permissions: [{ kind: 'credentials', keys: ['key-reference'] }],
     });
     expect(Object.keys(result.plugins[0]!).sort()).toEqual([
+      'desiredActive',
       'name',
       'origin',
       'owner',
@@ -120,6 +122,14 @@ it('projects plugin metadata without entry paths or configuration', async () => 
     ]);
     expect(JSON.stringify(result)).not.toContain('PRIVATE_INSTALLATION');
     expect(JSON.stringify(result)).not.toContain('private-entry.mjs');
+    await manager.enable({ pluginId: 'test.console-view', instanceId: 'default' });
+    const enabled = consoleSnapshot(
+      { ...result.host, activePlugins: 1 },
+      manager.list(),
+      result.app,
+      manager.contributions(),
+    );
+    expect(enabled.plugins[0]).toMatchObject({ state: 'active', desiredActive: true });
   } finally {
     await manager.shutdown();
     await driver.dispose();

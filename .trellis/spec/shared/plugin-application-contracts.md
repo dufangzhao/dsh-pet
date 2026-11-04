@@ -193,6 +193,16 @@ Wrong: draw a local response or write a second chat history. Correct: submit to 
 
 The current module ownership, speech.output contract, hidden capture-owner lifetime, revision-bound editor drafts and owner-scoped runtime invocation rules are maintained in [the canonical MVP guide](../../../docs/plugin-pet-mvp.md). Follow that guide when extending these surfaces; keep active page contributions and config/permission/media authority in the existing kernel. Native evidence is [recorded here](../../../qa/plugin-pet-mvp/README.md).
 
+## Compact plugin management
+
+1. **Scope / trigger:** the plugin-list state control consumes the existing lifecycle target through the Kernel → Console snapshot → renderer projection.
+2. **Signatures:** PluginSnapshot.desiredActive:boolean and ConsolePlugin.desiredActive:boolean are required readonly projections. Existing onOpenConfig(plugin) and onAction(plugin,action) callbacks remain unchanged.
+3. **Contracts:** desiredActive is Entry.desired, not a new store. Enable sets the target true; disable sets it false. Availability remains state and may be unready or failed while the target is true. Card navigation matches all three owner fields (pluginId, instanceId, generation) against current contributed pages, otherwise opening the existing schema editor under the dirty-draft guard.
+4. **Validation / errors:** existing actionsFor, pending and host rules still gate actions. Protected plugins cannot be stopped or removed; protected unready/failed plugins whose target is already enabled retain an explicit repair retry through the existing enable action. Rejected plugins cannot be enabled; activating/deactivating/pending_restart cannot accept lifecycle actions. Operation errors retain their actual returned snapshot. Removing the config button never deletes saved config.
+5. **Cases:** base disabled/false enables; good unready/true still has an on switch that can request disable; bad active-only inference would falsely display an off switch after a failed activation. Nested switch, uninstall and permission actions must not navigate.
+6. **Tests:** [target regression](../../../packages/contract-tests/src/plugin-target.test.ts) covers disabled → unready → disabled → active → failed → disabled with target assertions. Plugin page tests cover controlled callbacks, pending/protected states and removed copy. [Serial native probe](../../../qa/probes/plugin-list-cleanup-native.mjs) checks actual receipts, card whitespace/keyboard navigation, icon uninstall, theme persistence and minimum-window containment.
+7. **Wrong vs correct:** do not use checked={state === 'active'} or an optimistic local enabled cache. Read checked={plugin.desiredActive}, request disable when true and enable when false, and render the next authoritative snapshot.
+
 ## User-selected desktop permission and bubble defaults
 
 The2026-11-03 user instruction selects allow for initial desktop source registrations, including user plugins, through the existing preset system. Do not overwrite it with application-specific ask/local values; explicit current-session policy edits remain effective. The reusable kernel still defaults to ask outside this desktop adapter. Bubble motion, exact dark/light geometry and verification are maintained in [the canonical bubble note](../../../docs/pet-bubble-design.md).
