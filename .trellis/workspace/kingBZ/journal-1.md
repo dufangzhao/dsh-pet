@@ -638,3 +638,41 @@ Delivered real during-capture SenseVoice and Paraformer partials, immediate full
 ### Next Steps
 
 - None - task complete
+
+
+## Session 20: Simplify plugin list controls and settings navigation
+
+**Date**: 2026-11-04
+**Task**: Simplify plugin list controls and settings navigation
+**Branch**: `feat/plugin-pet-mvp-20261101`
+
+### Summary
+
+Completed 11-04-plugin-list-cleanup with deepseek-pool frontend, full quality gate, serial native acceptance and saved screenshots.
+
+### Main Changes
+
+- Completed task 11-04-plugin-list-cleanup; preserved and finished the previous session's lifecycle projection and owner-specific settings navigation.
+- Frontend implementation used the verified `magpie/group/deepseek-pool` route with `max` effort. Removed verbose copy/config button, unified enable state, added accessible icon uninstall and card navigation; retained protected recovery, pending/error and theme behavior.
+- Final `pnpm check` passed. Renderer console: 372 tests, including 17 plugin-card regressions. Serial isolated Electron acceptance passed for actual enable/disable/uninstall, card/keyboard navigation, light/dark/custom palette persistence, 880x600 layout and reduced motion.
+- [Acceptance report and screenshots](../../../qa/plugin-list-cleanup/README.md); [archived task](../../tasks/archive/2026-11/11-04-plugin-list-cleanup/prd.md).
+- No plugin consolidation, saved-configuration deletion or push.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `aaab58d` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

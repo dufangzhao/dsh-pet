@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 19
-- **Last Active**: 2026-11-03
+- **Total Sessions**: 20
+- **Last Active**: 2026-11-04
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~640 | Active |
+| `journal-1.md` | ~678 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 20 | 2026-11-04 | Simplify plugin list controls and settings navigation | `aaab58d` | `feat/plugin-pet-mvp-20261101` |
 | 19 | 2026-11-03 | Live transcripts and compact context menu | `263d6c0` | `feat/minimal-settings-preview-only` |
 | 18 | 2026-11-03 | Pet bubble replica and default permissions | `8fd1e07` | `feat/minimal-settings-preview-only` |
 | 17 | 2026-11-02 | Plugin desktop pet voice MVP | `7924509` | `feat/minimal-settings-preview-only` |
