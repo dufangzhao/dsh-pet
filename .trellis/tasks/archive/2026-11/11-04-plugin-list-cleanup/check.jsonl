@@ -1,0 +1,4 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Actual lifecycle authority, existing storage and serial isolated native verification"}
+{"file":".trellis/spec/frontend/project-patterns.md","reason":"Native controls, theme tokens, state ownership and accessible interactions"}
+{"file":".trellis/tasks/archive/2026-11/11-04-plugin-list-cleanup/prd.md","reason":"Explicit scoped cleanup requirements; overrides stale session fallback"}
+{"file":".trellis/tasks/archive/2026-11/11-04-plugin-list-cleanup/handoff.md","reason":"Preserved state projection and exact-owner settings navigation"}
