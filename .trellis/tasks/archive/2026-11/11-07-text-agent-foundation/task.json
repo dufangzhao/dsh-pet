@@ -1,0 +1,32 @@
+{
+  "id": "text-agent-foundation",
+  "name": "text-agent-foundation",
+  "title": "Text-first continuous Agent foundation",
+  "description": "Implement the approved text-first foundation: independent service, plugin contracts, persistent Agent/work state, asynchronous Workers, real cloud execution and a replaceable text client. Voice input follows later.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-11-07",
+  "completedAt": "2026-11-08",
+  "branch": "feat/text-agent-foundation",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "8fc76f7",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "11-06-unified-companion-architecture",
+  "relatedFiles": [
+    ".trellis/tasks/archive/2026-11/11-07-text-agent-foundation/prd.md",
+    ".trellis/tasks/archive/2026-11/11-07-text-agent-foundation/design.md",
+    ".trellis/tasks/archive/2026-11/11-07-text-agent-foundation/implement.md",
+    "docs/adr/0015-independent-continuous-agent-runtime.md",
+    "docs/adr/0016-cloud-service-and-pluggable-features.md"
+  ],
+  "notes": "Implementation and PRD A1–A9 verification complete: pnpm check exit0,18 service/lifecycle scenarios,15 Docker cases,22 delivered-version human-readable browser checks and source/model/SQLite/client regressions. Final guides, specs and evidence are ready; all previews stopped and collected. User approved the Phase3.4 three local commit batches and child archive/session bookkeeping on2026-11-08. Work commits: 1a7b082,8fc76f7,9d86962. Child completed and archived to .trellis/tasks/archive/2026-11/11-07-text-agent-foundation; approved archive/session bookkeeping follows the work commits. No push or paid calls. Existing desktop data preserved. Parent remains planning.",
+  "meta": {}
+}

@@ -1,6 +1,6 @@
 # text-client 实现记录
 
-`plugins/text-client` 是可替换的文字入口：一个普通插件，runtime 注册 `panel` 贡献 `text-client`，页面是构建产物里的静态资产。协议按 [implementation-contract.md](../../../.trellis/tasks/11-07-text-agent-foundation/implementation-contract.md) 实现，服务端由主实现方提供。
+`plugins/text-client` 是可替换的文字入口：一个普通插件，runtime 注册 `panel` 贡献 `text-client`，页面是构建产物里的静态资产。协议按 [implementation-contract.md](../../../.trellis/tasks/archive/2026-11/11-07-text-agent-foundation/implementation-contract.md) 实现，服务端由主实现方提供。
 
 ## 结构
 

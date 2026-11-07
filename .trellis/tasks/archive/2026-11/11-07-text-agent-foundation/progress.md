@@ -1,6 +1,6 @@
 # Text foundation — implementation and acceptance complete
 
-The user approved implementation on2026-11-07. Branch: `feat/text-agent-foundation`, base `500aeba`. Engineering work and PRD A1–A9 verification are complete. The user approved the exact three local work commits plus child archive/journal on2026-11-08. The task remains `in_progress` while that handoff executes. No push, public deployment or paid model calls are authorized or performed.
+The user approved implementation on2026-11-07. Branch: `feat/text-agent-foundation`, base `500aeba`. Engineering work and PRD A1–A9 verification are complete. The user approved the exact three local work commits plus child archive/journal on2026-11-08. The approved work commits are `1a7b082`, `8fc76f7` and `9d86962`. The child is `completed` and archived under `.trellis/tasks/archive/2026-11/11-07-text-agent-foundation`; the parent remains `planning`. No push, public deployment or paid model calls are authorized or performed.
 
 ## Delivered
 
@@ -31,13 +31,11 @@ Every parent-managed test/download job has been collected. Every preview was sto
 
 Browser executable: `/tmp/dsh-pet-playwright-browsers/verified-headless-1248/chrome-headless-shell-linux64/chrome-headless-shell`. Browser test environment: `LD_LIBRARY_PATH=/tmp/dsh-pet-browser-libs/usr/lib/x86_64-linux-gnu`, `FONTCONFIG_FILE=/tmp/dsh-pet-browser-fonts.conf`. Official ZIP verified/extracted; libraries/fonts downloaded and unpacked into /tmp without system installation. Browser no-sandbox is not OS isolation evidence.
 
-## Last administrative step
+## Administrative handoff
 
-The exact160-path inventory and proposed3 local work commits are in `commit-plan.md`. No unrecognized files were found;2 pre-existing workspace journal paths are reserved for later session bookkeeping. Generated desktop admission update is only the ASR worker hash/bytes (+173 from additive empty contracts init module).
+The historical160-path inventory and approved3-commit plan are in `commit-plan.md`. The actual local work commits are `1a7b082` (architecture), `8fc76f7` (text foundation) and `9d86962` (portable fixtures). No unrecognized files were found; the two pre-existing workspace journal paths belong to session bookkeeping. Generated desktop admission update is only the ASR worker hash/bytes (+173 from additive empty contracts init module).
 
-`.trellis/workflow.md:615–631` explicitly requires a concrete batched plan and **one-shot user confirmation** before Git commits. `.agents/skills/trellis-finish-work/SKILL.md` requires code commits before archive/journal. Do not silently commit or archive. Present the completed implementation/evidence and the plan once; then commit only if approved. No push or amend.
-
-After approved work commits: verify the resolved archive destination, archive only this child, preserve the architecture parent's planning status, repair moved-task links as needed, then record the implementation journal with actual work commit hashes. Do not archive unrelated active tasks. Goal `goal-0636d3f2-45bd-469d-b537-c702d7b810d2` (last revision5) remains active pending this final handoff decision.
+The user supplied the required one-shot confirmation on2026-11-08. All3 work commits are complete. The parent verified the exact archive paths and ran `task.py archive --no-commit`; this child is now completed and archived under `.trellis/tasks/archive/2026-11/11-07-text-agent-foundation`. Archive link/metadata maintenance precedes the parent's single archive bookkeeping commit, then the implementation journal with the3 actual work hashes. The architecture parent remains `planning`, with its child basename relationship preserved. No unrelated task is archived; no push or amend.
 
 ## Limits
 

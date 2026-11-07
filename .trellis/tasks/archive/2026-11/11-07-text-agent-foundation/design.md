@@ -1,6 +1,6 @@
 # Text foundation design
 
-Status: approved design, now implemented for the scoped [PRD](prd.md). The parent [architecture](../11-06-unified-companion-architecture/design.md) owns long-term boundaries. Exact delivered signatures and behavior are maintained in the [executable service spec](../../spec/backend/companion-service.md); actual verification is in [progress](progress.md) and the acceptance evidence.
+Status: approved design, now implemented for the scoped [PRD](prd.md). The parent [architecture](../../../11-06-unified-companion-architecture/design.md) owns long-term boundaries. Exact delivered signatures and behavior are maintained in the [executable service spec](../../../../spec/backend/companion-service.md); actual verification is in [progress](progress.md) and the acceptance evidence.
 
 ## Composition and reuse
 

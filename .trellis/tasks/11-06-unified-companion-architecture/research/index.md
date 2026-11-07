@@ -43,7 +43,7 @@ The focused review retained kernel ownership/commit/lifecycle contracts, replace
 
 ## Current scoped work: text-first foundation
 
-R19 selects text interaction first, with voice input developed later as a plugin. The first deliverable now has [a child PRD](../../11-07-text-agent-foundation/prd.md); the parent retains the long-term requirements and source evidence. Focus the child on the service/plugin/state/async-work/cloud-execution/text-client path. Do not reopen text versus voice priority, require a full task board or Live2D, or expand this first proof into all named external platforms. The user approved implementation on 2026-11-07. The child now has a working service and executable acceptance evidence; see its progress/acceptance records.
+R19 selects text interaction first, with voice input developed later as a plugin. The first deliverable now has [a child PRD](../../archive/2026-11/11-07-text-agent-foundation/prd.md); the parent retains the long-term requirements and source evidence. Focus the child on the service/plugin/state/async-work/cloud-execution/text-client path. Do not reopen text versus voice priority, require a full task board or Live2D, or expand this first proof into all named external platforms. The user approved implementation on 2026-11-07. The child now has a working service and executable acceptance evidence; see its progress/acceptance records.
 
 ## Resume instructions
 

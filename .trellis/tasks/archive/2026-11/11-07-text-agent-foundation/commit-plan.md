@@ -6,7 +6,7 @@ Prepared for the parent implementation agent. This is a reviewable plan only: no
 
 ## Approval and evidence boundary
 
-[Workflow Phase 3.4](../../workflow.md#34-commit-changes-required--once) requires the AI to draft a concrete batched plan and then **“Present the plan once, ask for one-shot confirmation.”** The same phase says **“On confirmation: run `git add <files>` + `git commit -m "<msg>"` for each batch in order. Do not amend. Do not push.”** Implementation authorization does not replace this explicit Git confirmation. The parent will request approval once the final evidence is ready; this delegated handoff neither asks the user nor executes the batch.
+[Workflow Phase 3.4](../../../../workflow.md#34-commit-changes-required--once) requires the AI to draft a concrete batched plan and then **“Present the plan once, ask for one-shot confirmation.”** The same phase says **“On confirmation: run `git add <files>` + `git commit -m "<msg>"` for each batch in order. Do not amend. Do not push.”** Implementation authorization does not replace this explicit Git confirmation. The parent will request approval once the final evidence is ready; this delegated handoff neither asks the user nor executes the batch.
 
 Implementation and final `pnpm check` are PASS (exit0). The delivered human-readable scripted-copy version passed all22 actual browser checks; final screenshots/report have been collected and reviewed. Acceptance, progress, task notes and stale pre-implementation handoff wording are synchronized. The architecture parent remains `planning`; its long-term deferred scope is not being completed or archived.
 
@@ -62,7 +62,7 @@ docs/adr/0016-cloud-service-and-pluggable-features.md
 
 Purpose: add browser-safe contracts, a headless service/runtime composed with the existing kernel and SDK, source authority/scopes, SQLite state, Docker execution/recovery, real Cortico plus the deterministic adapter, and the replaceable text-client plugin. Include package/build integration, executable specs, deployment/usage docs, tests, QA probes and final browser evidence as one coherent implemented foundation.
 
-The root [README](../../../README.md) and [docs index](../../../docs/README.md) now describe the implemented service, so both belong here. There are no dirty existing host-kernel/plugin-sdk implementation paths: this commit composes their existing APIs rather than claiming unrelated SDK/kernel changes.
+The root [README](../../../../../README.md) and [docs index](../../../../../docs/README.md) now describe the implemented service, so both belong here. There are no dirty existing host-kernel/plugin-sdk implementation paths: this commit composes their existing APIs rather than claiming unrelated SDK/kernel changes.
 
 All **16 child task files**, including this plan, are recognized work and included here while still at their active paths: requirements/design/execution documents, implementation contract, curated JSONL context, progress, task metadata, and all seven research/evidence reports. The portability report belongs to this task evidence package; the four actual existing fixture edits remain isolated in commit 3. Archiving these task documents is a later bookkeeping commit, not grounds to omit their content now. The text-client's own research and verification reports are also included as scoped implementation evidence; their historical results should remain clearly distinguishable from final integrated acceptance.
 
@@ -223,7 +223,7 @@ qa/probes/asr-download.test.mjs
 
 ## Subsequent bookkeeping — after the approved work commits
 
-Follow workflow ordering: **all work commits first → child archive commit → journal/session commit**. Do not interleave or silently fold workspace journals and archive lifecycle changes into the feature or architecture commits. The [finish-work instructions](../../../.agents/skills/trellis-finish-work/SKILL.md) place task archive and journal work after Phase 3.4. This handoff performs none of those actions.
+Follow workflow ordering: **all work commits first → child archive commit → journal/session commit**. Do not interleave or silently fold workspace journals and archive lifecycle changes into the feature or architecture commits. The [finish-work instructions](../../../../../.agents/skills/trellis-finish-work/SKILL.md) place task archive and journal work after Phase 3.4. This handoff performs none of those actions.
 
 ### Later archive: `chore(task): archive 11-07-text-agent-foundation`
 

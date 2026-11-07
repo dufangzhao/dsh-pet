@@ -1,6 +1,6 @@
 # Text-first continuous Agent foundation
 
-Status: **Implementation in progress.** The user explicitly approved this scope and said “开始实现” on 2026-11-07. This document scopes the first delivery, not the complete future product. Actual verification and remaining work are tracked in [progress](progress.md).
+Status: **Implemented, verified and archived on 2026-11-08.** The user explicitly approved this scope and said “开始实现” on 2026-11-07. This document scopes the first delivery, not the complete future product. Actual verification and remaining work are tracked in [progress](progress.md).
 
 ## Goal
 
@@ -8,9 +8,9 @@ Prove that one continuing Agent can serve a replaceable text client while superv
 
 ## Basis and evidence
 
-- The parent [requirements](../11-06-unified-companion-architecture/prd.md), especially R11–R19, own the long-term vision. [ADR-0015](../../../docs/adr/0015-independent-continuous-agent-runtime.md) selects independent ownership and internal Sessions; [ADR-0016](../../../docs/adr/0016-cloud-service-and-pluggable-features.md) selects service deployment, feature plugins and first-version cloud execution.
-- Existing strengths and coupling are source-backed in [the runtime report](../11-06-unified-companion-architecture/research/current-runtime.md). Reuse the plugin/kernel/task/configuration mechanisms; do not infer that the current Electron composition already runs headlessly.
-- The actual stack and authority conventions are in [the project baseline](../../spec/shared/project-baseline.md). Existing generic database templates do not establish a current database implementation.
+- The parent [requirements](../../../11-06-unified-companion-architecture/prd.md), especially R11–R19, own the long-term vision. [ADR-0015](../../../../../docs/adr/0015-independent-continuous-agent-runtime.md) selects independent ownership and internal Sessions; [ADR-0016](../../../../../docs/adr/0016-cloud-service-and-pluggable-features.md) selects service deployment, feature plugins and first-version cloud execution.
+- Existing strengths and coupling are source-backed in [the runtime report](../../../11-06-unified-companion-architecture/research/current-runtime.md). Reuse the plugin/kernel/task/configuration mechanisms; do not infer that the current Electron composition already runs headlessly.
+- The actual stack and authority conventions are in [the project baseline](../../../../spec/shared/project-baseline.md). Existing generic database templates do not establish a current database implementation.
 
 ## First-delivery requirements
 

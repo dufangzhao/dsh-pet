@@ -12,7 +12,7 @@ Status: **Planning only.** Independent product ownership and the continuous Agen
 - [x] Record the user's 2026-11-07 decision: independent engine, modular Harnesses, one continuous Agent, concurrent Workers and Sessions managed internally. ADR-0015 is accepted.
 - [x] Record the user's cloud-service and independently pluggable feature decisions, continuity acceptance, asynchronous long-work/event requirement and compute/state/execution-environment separation question.
 - [x] Include a basic cloud execution environment in the first usable version (R18), with actual file/code work and artifacts rather than cloud-only inference/coordination.
-- [x] Select text interaction for the first foundation and defer voice input to a later plugin (R19); create [the implementation-planning child](../11-07-text-agent-foundation/prd.md).
+- [x] Select text interaction for the first foundation and defer voice input to a later plugin (R19); create [the implementation-planning child](../archive/2026-11/11-07-text-agent-foundation/prd.md).
 - [ ] Resolve only the product decisions needed for each later slice: external-platform/memory visibility, autonomous behavior, unavailable-device policies and actual realtime criteria. Do not block the private text foundation on unrelated voice/public-platform decisions.
 - [ ] Rewrite the final PRD losslessly, update design/plan, present the final implementation summary and obtain a subsequent explicit implementation decision.
 
