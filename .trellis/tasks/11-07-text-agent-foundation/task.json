@@ -1,0 +1,32 @@
+{
+  "id": "text-agent-foundation",
+  "name": "text-agent-foundation",
+  "title": "Text-first continuous Agent foundation",
+  "description": "Implement the approved text-first foundation: independent service, plugin contracts, persistent Agent/work state, asynchronous Workers, real cloud execution and a replaceable text client. Voice input follows later.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-11-07",
+  "completedAt": null,
+  "branch": "feat/text-agent-foundation",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "11-06-unified-companion-architecture",
+  "relatedFiles": [
+    ".trellis/tasks/11-07-text-agent-foundation/prd.md",
+    ".trellis/tasks/11-07-text-agent-foundation/design.md",
+    ".trellis/tasks/11-07-text-agent-foundation/implement.md",
+    "docs/adr/0015-independent-continuous-agent-runtime.md",
+    "docs/adr/0016-cloud-service-and-pluggable-features.md"
+  ],
+  "notes": "Implementation and PRD A1–A9 verification complete: pnpm check exit0,18 service/lifecycle scenarios,15 Docker cases,22 real browser checks and source/model/SQLite/client regressions. Final guides, specs and evidence are ready. User approved the Phase3.4 three local commit batches and child archive/session bookkeeping on2026-11-08; handoff is executing, no push. Existing desktop data preserved. Parent remains planning.",
+  "meta": {}
+}

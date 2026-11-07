@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.text-client",
+  "version": "0.1.0",
+  "displayName": { "zh-CN": "文字客户端", "en": "Text client" },
+  "description": {
+    "zh-CN": "同一服务提供的可替换文字入口：连续对话、任务状态、停止与产物下载",
+    "en": "Replaceable text entry served by the same service: conversation, task status, stop and artifact download"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64"],
+  "entries": {
+    "runtime": "dist/index.mjs",
+    "ui": "dist/client.js"
+  },
+  "contributes": [
+    {
+      "id": "text-client",
+      "kind": "panel",
+      "title": { "zh-CN": "文字" },
+      "entry": "dist/index.html"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.cloud-exec",
+  "version": "0.1.0",
+  "displayName": { "en": "Cloud JavaScript execution", "zh-CN": "云端 JavaScript 执行" },
+  "description": {
+    "en": "Run bounded JavaScript in a configured Docker image and retain declared artifacts",
+    "zh-CN": "在固定 Docker 镜像中执行有界 JavaScript 并保留声明的输出文件"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64"],
+  "entries": { "runtime": "dist/index.mjs", "workers": { "docker": "dist/index.mjs" } },
+  "provides": [
+    {
+      "id": "docker",
+      "capability": "execution.javascript@1",
+      "features": {
+        "methodPermissions": {
+          "execute": [
+            { "kind": "process", "workers": ["docker"] },
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ],
+          "reconcile": [
+            { "kind": "process", "workers": ["docker"] },
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "process", "workers": ["docker"] },
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image"],
+      "properties": {
+        "image": { "type": "string", "minLength": 1, "maxLength": 255, "title": "Docker image" },
+        "workspaceDirectory": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "default": "jobs"
+        },
+        "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 300000, "default": 30000 },
+        "maxLogBytes": { "type": "integer", "minimum": 256, "maximum": 4096, "default": 4096 },
+        "maxArtifactBytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 8388608,
+          "default": 1048576
+        },
+        "memoryMb": { "type": "integer", "minimum": 64, "maximum": 512, "default": 128 },
+        "cpus": { "type": "number", "minimum": 0.1, "maximum": 2, "default": 0.5 },
+        "pidsLimit": { "type": "integer", "minimum": 16, "maximum": 64, "default": 32 }
+      }
+    },
+    "apply": {
+      "image": "reload",
+      "workspaceDirectory": "reload",
+      "timeoutMs": "reload",
+      "maxLogBytes": "reload",
+      "maxArtifactBytes": "reload",
+      "memoryMb": "reload",
+      "cpus": "reload",
+      "pidsLimit": "reload"
+    }
+  }
+}

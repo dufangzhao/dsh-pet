@@ -2,13 +2,13 @@
 
 This source-backed guide describes the existing repository at `b9a803e`. Use it when a generic Trellis template assumes a different stack or directory layout. It does not authorize future architecture changes.
 
-Current additive application contracts are in [plugin-application-contracts.md](plugin-application-contracts.md); the following baseline remains the source for unchanged native services.
+Current additive application contracts are in [plugin-application-contracts.md](plugin-application-contracts.md). The new headless text service has its own [executable contracts](../backend/companion-service.md), including the actual `node:sqlite` plugin. The following historical baseline remains the source for unchanged desktop/native services.
 
 ## Actual boundaries
 
 - This is a pnpm workspace. `apps/desktop` is Electron45/React19/Vite; `packages/contracts` holds browser-safe shared contracts, `packages/host-kernel` owns lifecycle/tasks/config/permissions, and `packages/plugin-sdk` exposes owner-bound plugin services. See the root and package manifests.
 - Console UI lives in `apps/desktop/src/renderer/console`; pet UI is the sibling `pet` directory. Existing console styles are plain CSS/custom properties with `@pet/ui-kit`. Tailwind is installed, but its presence is not a reason to replace the console styling system.
-- Runtime storage is `ConfigService` with `FileConfigStore`, scoped plugin-data directories, and `FileCiphertextStore` through `CredentialBroker` (`apps/desktop/src/main/desktop-host.ts`). There is no application SQLite/Drizzle database and no Zod schema stack. Contracts use JSON Schema and AJV (`packages/contracts/package.json`).
+- Runtime storage is `ConfigService` with `FileConfigStore`, scoped plugin-data directories, and `FileCiphertextStore` through `CredentialBroker` (`apps/desktop/src/main/desktop-host.ts`). This desktop baseline has no SQLite/Drizzle database or Zod stack; the new standalone service adds SQLite through its state-provider plugin. Contracts use JSON Schema and AJV (`packages/contracts/package.json`).
 - Main/preload/renderer are separate authority boundaries. Renderer imports contract types and fixed frozen bridges; do not import host-kernel, filesystem, validation runtime, Electron, or plaintext credentials into UI components. See `apps/desktop/src/preload/console-bridge.ts` and `demo-bridge.ts`.
 
 ## Reuse before extending

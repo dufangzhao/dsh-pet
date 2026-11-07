@@ -41,6 +41,7 @@ samples/private/
 
 # 本地用户数据
 userdata/
+.companion-data/
 
 # 编辑器与系统
 .idea/

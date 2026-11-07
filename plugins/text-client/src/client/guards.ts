@@ -1,0 +1,343 @@
+/**
+ * 协议响应校验。
+ *
+ * 只信任界面真正读取的字段，并按契约重建对象：未知附加字段被忽略，
+ * 缺失或类型不对就让整条响应作废——界面不会拿着半个对象去渲染。
+ * 浏览器安全：不引 Node、Ajv 或 host-kernel，也没有运行时 Schema 依赖。
+ */
+import {
+  COMPANION_PROTOCOL_VERSION,
+  isKernelErrorCode,
+  makeError,
+  type CompanionAgentView,
+  type CompanionArtifact,
+  type CompanionCommandReceipt,
+  type CompanionEvent,
+  type CompanionFact,
+  type CompanionMessage,
+  type CompanionPluginView,
+  type CompanionSnapshot,
+  type CompanionTask,
+  type CompanionTaskStatus,
+  type JsonObject,
+  type JsonValue,
+  type KernelError,
+} from '@pet/contracts';
+
+interface ProtocolFailure {
+  readonly error: KernelError;
+  /** 服务端协议版本不被支持时是收到的数字；其它失败为 null。 */
+  readonly version: number | null;
+}
+
+type ParseResult<T> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly failure: ProtocolFailure };
+
+function protocolFailure(
+  error: KernelError,
+  version: number | null = null,
+): { readonly ok: false; readonly failure: ProtocolFailure } {
+  return { ok: false, failure: { error, version } };
+}
+
+const malformed = () => protocolFailure(makeError('unavailable', false));
+
+type Fields = Readonly<Record<string, unknown>>;
+
+const isRecord = (value: unknown): value is Fields =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+const isText = (value: unknown): value is string => typeof value === 'string';
+const isFlag = (value: unknown): value is boolean => typeof value === 'boolean';
+/**
+ * 时间戳必须在 Date 能表示的范围内：超出 ±8.64e15 的有限数字会让
+ * `Intl.DateTimeFormat` 与 `toISOString()` 抛 RangeError，直接打断渲染。
+ */
+const MAX_TIME = 8.64e15;
+const isTime = (value: unknown): value is number =>
+  typeof value === 'number' && Math.abs(value) <= MAX_TIME;
+const isInteger = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isSafeInteger(value);
+/** 游标与事件序号：安全非负整数。 */
+const isCount = (value: unknown): value is number => isInteger(value) && value >= 0;
+
+/** 只用于事件 data：它从不参与渲染，但仍须是有限深度的 JSON 对象。 */
+function isJson(value: unknown, depth = 0): value is JsonValue {
+  if (depth > 8) return false;
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every((item) => isJson(item, depth + 1));
+  if (isRecord(value)) return Object.values(value).every((item) => isJson(item, depth + 1));
+  return false;
+}
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return isRecord(value) && Object.values(value).every((item) => isJson(item));
+}
+
+function parseList<T>(value: unknown, parse: (item: unknown) => T | null): T[] | null {
+  if (!Array.isArray(value)) return null;
+  const items: T[] = [];
+  for (const item of value) {
+    const parsed = parse(item);
+    if (parsed === null) return null;
+    items.push(parsed);
+  }
+  return items;
+}
+
+/**
+ * 按固定错误码重建，丢弃服务端给的 messageKey：显示文案只来自本地表，
+ * 未知码收敛为 internal（makeError 自己就做这件事）。
+ */
+export function parseKernelError(value: unknown): KernelError | null {
+  if (!isRecord(value)) return null;
+  const code = value['code'];
+  if (!isText(code)) return null;
+  const retryable = value['retryable'];
+  return makeError(
+    isKernelErrorCode(code) ? code : 'internal',
+    isFlag(retryable) ? retryable : undefined,
+  );
+}
+
+/**
+ * 错误字段在契约里必填：`null` 表示没有错误，缺失或读不懂都算整条作废
+ * （JSON 里不会有 undefined，因此 undefined 就是缺字段）。
+ */
+function parseNullableError(value: unknown): KernelError | null | undefined {
+  if (value === null) return null;
+  return parseKernelError(value) ?? undefined;
+}
+
+function isTaskStatus(value: unknown): value is CompanionTaskStatus {
+  switch (value) {
+    case 'accepted':
+    case 'running':
+    case 'cancel-requested':
+    case 'completed':
+    case 'cancelled':
+    case 'failed':
+    case 'interrupted':
+    case 'unknown':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isEventKind(value: unknown): value is CompanionEvent['kind'] {
+  switch (value) {
+    case 'message':
+    case 'task':
+    case 'fact':
+    case 'profile':
+    case 'runtime':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function parseArtifact(value: unknown): CompanionArtifact | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const taskId = value['taskId'];
+  const name = value['name'];
+  const mediaType = value['mediaType'];
+  const sizeBytes = value['sizeBytes'];
+  if (!isText(id) || !isText(taskId) || !isText(name) || !isText(mediaType)) return null;
+  if (!isCount(sizeBytes)) return null;
+  return { id, taskId, name, mediaType, sizeBytes };
+}
+
+function parseMessage(value: unknown): CompanionMessage | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const role = value['role'];
+  const text = value['text'];
+  const createdAt = value['createdAt'];
+  const inputId = value['inputId'];
+  const taskId = value['taskId'];
+  if (!isText(id) || !isText(text) || !isTime(createdAt)) return null;
+  if (role !== 'user' && role !== 'assistant' && role !== 'notice') return null;
+  if (inputId !== null && !isText(inputId)) return null;
+  if (taskId !== null && !isText(taskId)) return null;
+  return { id, role, text, createdAt, inputId, taskId };
+}
+
+function parseFact(value: unknown): CompanionFact | null {
+  if (!isRecord(value)) return null;
+  const key = value['key'];
+  const text = value['value'];
+  const revision = value['revision'];
+  const updatedAt = value['updatedAt'];
+  if (!isText(key) || !isText(text) || !isCount(revision) || !isTime(updatedAt)) return null;
+  return { key, value: text, revision, updatedAt };
+}
+
+function parsePlugin(value: unknown): CompanionPluginView | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const name = value['name'];
+  const state = value['state'];
+  const desiredActive = value['desiredActive'];
+  const guarded = value['protected'];
+  if (!isText(id) || !isText(name) || !isText(state)) return null;
+  if (!isFlag(desiredActive) || !isFlag(guarded)) return null;
+  return { id, name, state, desiredActive, protected: guarded };
+}
+
+function parseTask(value: unknown): CompanionTask | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const executionId = value['executionId'];
+  const title = value['title'];
+  const status = value['status'];
+  const createdAt = value['createdAt'];
+  const updatedAt = value['updatedAt'];
+  const exitCode = value['exitCode'];
+  const stdout = value['stdout'];
+  const stderr = value['stderr'];
+  const logsTruncated = value['logsTruncated'];
+  if (!isText(id) || !isText(executionId) || !isText(title)) return null;
+  if (!isTaskStatus(status) || !isTime(createdAt) || !isTime(updatedAt)) return null;
+  if (exitCode !== null && !isInteger(exitCode)) return null;
+  if (!isText(stdout) || !isText(stderr) || !isFlag(logsTruncated)) return null;
+  const artifacts = parseList(value['artifacts'], parseArtifact);
+  const error = parseNullableError(value['error']);
+  if (artifacts === null || error === undefined) return null;
+  return {
+    id,
+    executionId,
+    title,
+    status,
+    createdAt,
+    updatedAt,
+    exitCode,
+    stdout,
+    stderr,
+    logsTruncated,
+    artifacts,
+    error,
+  };
+}
+
+function parseAgent(value: unknown): CompanionAgentView | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const name = value['name'];
+  // harness 是普通字符串：不假设只有两个取值。
+  const harness = value['harness'];
+  const mode = value['mode'];
+  const status = value['status'];
+  const profileRevision = value['profileRevision'];
+  if (!isText(id) || !isText(name) || !isText(harness) || !isCount(profileRevision)) return null;
+  if (mode !== 'scripted' && mode !== 'model') return null;
+  if (status !== 'ready' && status !== 'busy' && status !== 'unavailable') return null;
+  const error = parseNullableError(value['error']);
+  if (error === undefined) return null;
+  return { id, name, harness, mode, status, profileRevision, error };
+}
+
+/**
+ * 投影标记只影响「是否还有更早记录」的提示；读不懂就不提示，
+ * 因为不提示本身不构成对完整性的声明。
+ */
+function parseProjection(value: unknown): NonNullable<CompanionSnapshot['projection']> | undefined {
+  if (!isRecord(value)) return undefined;
+  const hasMoreMessages = value['hasMoreMessages'];
+  const hasMoreTasks = value['hasMoreTasks'];
+  const taskDetailsTruncated = value['taskDetailsTruncated'];
+  if (!isFlag(hasMoreMessages) || !isFlag(hasMoreTasks) || !isFlag(taskDetailsTruncated)) {
+    return undefined;
+  }
+  return { hasMoreMessages, hasMoreTasks, taskDetailsTruncated };
+}
+
+/** `{ok:true,value}` / `{ok:false,error}`；其它形状一律视为服务端不可用。 */
+export function parseEnvelope(value: unknown): ParseResult<unknown> {
+  if (!isRecord(value)) return malformed();
+  if (value['ok'] === true) {
+    return Object.hasOwn(value, 'value') ? { ok: true, value: value['value'] } : malformed();
+  }
+  if (value['ok'] === false) {
+    const error = parseKernelError(value['error']);
+    return error === null ? malformed() : { ok: false, failure: { error, version: null } };
+  }
+  return malformed();
+}
+
+export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
+  if (!isRecord(value)) return malformed();
+  const received = value['protocolVersion'];
+  if (received !== COMPANION_PROTOCOL_VERSION) {
+    return protocolFailure(makeError('unavailable', false), isCount(received) ? received : null);
+  }
+  const epoch = value['epoch'];
+  const cursor = value['cursor'];
+  const now = value['now'];
+  if (!isText(epoch) || !isCount(cursor) || !isTime(now)) return malformed();
+
+  // 契约里这些字段都必填：缺省不能当成空数组，否则等于替服务端声明「没有事实」。
+  const agent = parseAgent(value['agent']);
+  const messages = parseList(value['messages'], parseMessage);
+  const tasks = parseList(value['tasks'], parseTask);
+  const facts = parseList(value['facts'], parseFact);
+  const plugins = parseList(value['plugins'], parsePlugin);
+  if (agent === null || messages === null || tasks === null) return malformed();
+  if (facts === null || plugins === null) return malformed();
+
+  const projection = parseProjection(value['projection']);
+  return {
+    ok: true,
+    value: {
+      protocolVersion: COMPANION_PROTOCOL_VERSION,
+      epoch,
+      cursor,
+      now,
+      agent,
+      messages,
+      tasks,
+      facts,
+      plugins,
+      ...(projection === undefined ? {} : { projection }),
+    },
+  };
+}
+
+/**
+ * 回执必须回答「我们发出的那一次提交」：commandId 对不上时，
+ * 受理的是别的意图，不能拿来清掉本地待确认行。
+ */
+export function parseReceipt(
+  value: unknown,
+  expectedCommandId: string,
+): CompanionCommandReceipt | null {
+  if (!isRecord(value)) return null;
+  const commandId = value['commandId'];
+  const status = value['status'];
+  const messageId = value['messageId'];
+  const taskId = value['taskId'];
+  if (commandId !== expectedCommandId) return null;
+  if (status !== 'accepted' && status !== 'duplicate') return null;
+  if (messageId !== null && !isText(messageId)) return null;
+  if (taskId !== null && !isText(taskId)) return null;
+  return { commandId, status, messageId, taskId };
+}
+
+/**
+ * 事件只用来提示「有变化」，游标始终取自 snapshot，所以丢弃坏帧不会让游标错位。
+ */
+export function parseEvent(value: unknown): CompanionEvent | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const epoch = value['epoch'];
+  const sequence = value['sequence'];
+  const time = value['time'];
+  const kind = value['kind'];
+  const data = value['data'];
+  if (!isText(id) || !isText(epoch) || !isCount(sequence) || !isTime(time)) return null;
+  if (!isEventKind(kind) || !isJsonObject(data)) return null;
+  return { id, epoch, sequence, time, kind, data };
+}

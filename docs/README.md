@@ -1,6 +1,8 @@
 # 开发文档导航
 
-状态：M1宿主内核与SDK已通过限定验收，见[验收矩阵](../qa/M1-acceptance-matrix.md)。M0保留项不变，下一阶段为M2界面骨架。
+新文字基础服务见[独立文字 Agent 指南](35-text-agent-foundation.md)和[验收记录](../qa/companion-acceptance.md)；既有桌面仍以[插件桌宠指南](34-plugin-pet-guide.md)、[桌宠MVP说明](plugin-pet-mvp.md)及源码为准。本轮文字优先范围已在2026-11-07明确批准实施，落实[独立持续 Agent](adr/0015-independent-continuous-agent-runtime.md)及[可部署云端的可插拔服务](adr/0016-cloud-service-and-pluggable-features.md)。长期路线保留在 [Trellis 父任务](../.trellis/tasks/11-06-unified-companion-architecture/prd.md)，不等于所有后续语音、平台与界面均已实现。
+
+下表保留各阶段文档及历史决定；其中“可开工”“下一阶段”等标记应按原任务日期理解，不能代替当前任务状态。
 
 ## 开发约定
 
@@ -16,7 +18,10 @@
 | [Coopanion架构核验](04-coopanion-architecture-review.md) | 实际链路、插件开发、许可、成熟度与复用差距 | 固定提交静态核验 |
 | [扩展产品规格](03-extension-product-spec.md) | 受控UI贡献点、使用闭环与候选验收 | 开放模式已确认；实现待选 |
 | [ADR-0001](adr/0001-controlled-ui-contributions.md) | 为什么选择能力 + 受控UI扩展 | 已采纳 |
-| [ADR-0002](adr/0002-standalone-with-optional-dsh.md) | 独立应用与DSH可选集成 | 已采纳 |
+| [ADR-0002](adr/0002-standalone-with-optional-dsh.md) | 早期独立桌面应用决定 | 由ADR-0015扩展并取代 |
+| [ADR-0015](adr/0015-independent-continuous-agent-runtime.md) | 独立持续Agent、多Harness、内部Session | 已采纳；文字基础服务已实现 |
+| [ADR-0016](adr/0016-cloud-service-and-pluggable-features.md) | 可部署云端的服务、最小内核、可插拔功能与本地交互 | 已采纳；本轮为文字与真实代码执行 |
+| [独立文字 Agent 指南](35-text-agent-foundation.md) | 服务启动、模型/执行配置、状态恢复、插件与部署模板 | 当前使用入口，验收见关联记录 |
 | [ADR-0003](adr/0003-mit-license.md) | 本项目MIT与第三方材料边界 | 已采纳 |
 | [总体架构草案](05-architecture-overview.md) | 职责分层、能力工作流与验证项 | 方向已定，技术未冻结 |
 | [ADR-0004](adr/0004-capability-centered-host.md) | 能力/插件中心，而非固定Agent中心 | 已采纳 |

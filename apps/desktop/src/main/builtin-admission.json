@@ -43,8 +43,8 @@
         },
         {
           "relativePath": "dist/asr-worker.cjs",
-          "sha256": "e7665157b15a1709a4eb0919d7b8ed37ad8294515bc7738f366637c8a3362a02",
-          "bytes": 69822
+          "sha256": "742cd695f6d77626ad681a718b780f6384f20443195ae0911518a22c5f7156c2",
+          "bytes": 69995
         }
       ]
     },

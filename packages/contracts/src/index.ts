@@ -39,3 +39,4 @@ export * from './voice-input.js';
 export * from './model-connection.js';
 export * from './model-services.js';
 export * from './design-lab.js';
+export * from './companion.js';

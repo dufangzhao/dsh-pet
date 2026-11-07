@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.harness-cortico",
+  "version": "0.1.0",
+  "displayName": { "en": "Cortico service Harness", "zh-CN": "Cortico 服务运行时" },
+  "description": {
+    "en": "Continuous text inference with product state and background work owned by the service",
+    "zh-CN": "支持逐步接收文本输入，由服务管理事实与独立后台任务"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64", "win32-x64", "darwin-arm64", "darwin-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "cortico",
+      "capability": "companion.harness@1",
+      "features": {
+        "methodPermissions": {
+          "status": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "accept": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "stopForeground": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }]
+        }
+      }
+    }
+  ],
+  "consumes": [
+    { "capability": "companion.state@1", "optional": true },
+    { "capability": "execution.javascript@1", "optional": true }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "capability-use", "capability": "companion.state@1" },
+    { "kind": "capability-use", "capability": "execution.javascript@1" },
+    { "kind": "credentials", "keys": ["model-api-key"] }
+  ]
+}

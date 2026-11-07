@@ -1,0 +1,8 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Actual repository stack and single-owner services; new service storage is an explicit design addition, not an existing template dependency."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Preserve or deliberately adapt current plugin/config/authority/cancellation contracts and desktop regressions."}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend ownership and truthfulness conventions; the reference web client has its own authenticated transport, not the Electron preload."}
+{"file":"docs/adr/0015-independent-continuous-agent-runtime.md","reason":"Accepted independent Agent ownership and internal Worker/Session boundaries."}
+{"file":"docs/adr/0016-cloud-service-and-pluggable-features.md","reason":"Accepted minimal kernel, cloud execution and feature/plugin lifetimes, including text-first scope."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/current-runtime.md","reason":"Exact current coupling, nested invoke limits, streaming and single-writer migration evidence."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/upstream-runtimes.md","reason":"Fixed Cortico pin, real event/interrupt/fork behavior and limits of framework portability."}
+{"file": ".trellis/spec/backend/companion-service.md", "reason": "Implemented executable service, state, source authority and recovery contracts"}

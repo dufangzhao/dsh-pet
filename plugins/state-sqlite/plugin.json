@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.state-sqlite",
+  "version": "0.1.0",
+  "displayName": { "en": "Companion state", "zh-CN": "伙伴持久状态" },
+  "description": { "en": "Durable product identity, explicit facts and supervised work records" },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": [
+    "linux-x64",
+    "linux-arm64",
+    "darwin-x64",
+    "darwin-arm64",
+    "win32-x64",
+    "win32-arm64"
+  ],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "sqlite",
+      "capability": "companion.state@1",
+      "features": {
+        "methodPermissions": {
+          "snapshot": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "events": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "acceptMessage": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "createTask": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "updateTask": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "appendMessage": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "rememberFact": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "getTask": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "getTaskByExecution": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "getArtifact": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "recover": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "recordCommand": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "getCommand": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }]
+}

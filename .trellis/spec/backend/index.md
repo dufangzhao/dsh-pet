@@ -1,6 +1,6 @@
 # Backend Development Guidelines Index
 
-> **Actual stack**: Electron main process, host-kernel services, revisioned JSON FileConfigStore, and encrypted credential storage. Read [Project baseline](../shared/project-baseline.md) first. The database/Zod examples in the initial templates do not describe this repository.
+> **Actual stack**: The existing desktop uses Electron, host-kernel, FileConfigStore and encrypted credentials. The additive [companion service](companion-service.md) uses the same kernel/SDK plus a `node:sqlite` state plugin, Docker execution and HTTP/SSE. Read [Project baseline](../shared/project-baseline.md) first. Generic Drizzle/Zod templates are not the implemented stack.
 
 ## Related Guidelines
 
@@ -14,6 +14,7 @@
 
 | File                                               | Description                                       | When to Read                       |
 | -------------------------------------------------- | ------------------------------------------------- | ---------------------------------- |
+| [companion-service.md](./companion-service.md) | Executable service/state/worker/Harness contracts | Headless service and feature plugins |
 | [directory-structure.md](./directory-structure.md) | Project structure and domain organization         | Starting a new feature             |
 | [api-module.md](./api-module.md)                   | API module pattern (types, procedures, lib)       | Creating/modifying service modules |
 | [api-patterns.md](./api-patterns.md)               | Common patterns for API calls and data operations | Implementing CRUD, pagination      |

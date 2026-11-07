@@ -1,0 +1,32 @@
+{
+  "name": "@pet/companion-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/host-kernel": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*",
+    "@pet/state-sqlite": "workspace:*",
+    "@pet/cloud-exec": "workspace:*",
+    "@pet/harness-cortico": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
