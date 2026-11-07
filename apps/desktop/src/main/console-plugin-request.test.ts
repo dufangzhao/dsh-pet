@@ -1,4 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
+import path from 'node:path';
 import type { PluginManifest } from '@pet/contracts';
 import {
   ConfigService,
@@ -48,7 +49,7 @@ async function setup(
       },
     },
   };
-  const directory = 'C:/actions-fixture';
+  const directory = path.resolve('actions-fixture');
   const manager = new PluginManager({
     driver: new CordisRuntimeDriver(async (activation) => {
       received = activation.config;

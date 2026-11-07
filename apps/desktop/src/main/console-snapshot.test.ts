@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import path from 'node:path';
 import { CordisRuntimeDriver, PluginManager, type RegisteredContribution } from '@pet/host-kernel';
 import { consoleSnapshot } from './console-snapshot.js';
 it('projects contribution labels without executable or file details', () => {
@@ -84,7 +85,7 @@ it('projects plugin metadata without entry paths or configuration', async () => 
         entries: { runtime: 'private-entry.mjs' },
         permissions: [{ kind: 'credentials', keys: ['key-reference'] }],
       },
-      { origin: 'user', directory: 'C:/PRIVATE_INSTALLATION' },
+      { origin: 'user', directory: path.resolve('PRIVATE_INSTALLATION') },
     );
     expect(installed.ok).toBe(true);
     const result = consoleSnapshot(

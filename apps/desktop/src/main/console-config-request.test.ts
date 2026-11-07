@@ -1,4 +1,5 @@
 import { expect, it, vi } from 'vitest';
+import path from 'node:path';
 import {
   ConfigService,
   MemoryConfigStore,
@@ -45,9 +46,9 @@ function setup() {
     hostApiVersion: '1.0.0',
     platform: 'win32-x64',
   });
-  expect(manager.install(manifest, { origin: 'user', directory: 'C:/settings-fixture' }).ok).toBe(
-    true,
-  );
+  expect(
+    manager.install(manifest, { origin: 'user', directory: path.resolve('settings-fixture') }).ok,
+  ).toBe(true);
   const store = new MemoryConfigStore(),
     configs = new ConfigService(store);
   configs.register(id, manifest);
