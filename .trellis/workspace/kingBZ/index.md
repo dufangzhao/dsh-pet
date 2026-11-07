@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 20
-- **Last Active**: 2026-11-04
+- **Total Sessions**: 22
+- **Last Active**: 2026-11-08
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~678 | Active |
+| `journal-1.md` | ~776 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 22 | 2026-11-08 | Text-first continuous Agent foundation | `1a7b082`, `8fc76f7`, `9d86962` | `feat/text-agent-foundation` |
+| 21 | 2026-11-06 | Cross-platform companion architecture discovery | - | `main` |
 | 20 | 2026-11-04 | Simplify plugin list controls and settings navigation | `aaab58d` | `feat/plugin-pet-mvp-20261101` |
 | 19 | 2026-11-03 | Live transcripts and compact context menu | `263d6c0` | `feat/minimal-settings-preview-only` |
 | 18 | 2026-11-03 | Pet bubble replica and default permissions | `8fd1e07` | `feat/minimal-settings-preview-only` |

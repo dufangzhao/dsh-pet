@@ -677,3 +677,100 @@ Completed 11-04-plugin-list-cleanup with deepseek-pool frontend, full quality ga
 ### Next Steps
 
 - None - task complete
+
+
+## Session 21: Cross-platform companion architecture discovery
+
+**Date**: 2026-11-06
+**Task**: Cross-platform companion architecture discovery
+**Branch**: `main`
+
+### Summary
+
+Research-only round covering DSH versus standalone hosting, Cortico/Superagent, realtime interaction and Magpie routing. Product architecture remains in planning.
+
+### Main Changes
+
+- Created the [architecture discovery task](../../tasks/11-06-unified-companion-architecture/prd.md), [candidate design](../../tasks/11-06-unified-companion-architecture/design.md), [staged plan](../../tasks/11-06-unified-companion-architecture/implement.md), and [research handoff](../../tasks/11-06-unified-companion-architecture/research/index.md).
+- Three GPT research roles covered current runtime, upstream frameworks and Magpie; DeepSeek max covered interaction/design. The main coordinator checked important source claims and reconciled host, streaming and model-routing boundaries.
+- Incorporated the user's additional Magpie/multi-model requirement and explicit reopening of the old standalone/Cortico decisions. Existing README/navigation/ADRs now identify the historical baseline and link to this planning task.
+- No product code, dependency, running application, external account or DSH profile was changed. No commit or push was made.
+
+### Testing
+
+- Documentation whitespace and Trellis context-manifest validation were run; JSON/JSONL and local reference checks cover the research artifacts.
+- No product tests, rendered UI/device checks, paid model calls or latency benchmarks were performed. Proposed experiments remain unexecuted.
+
+
+### Git Commits
+
+(No commits - planning session)
+
+### Status
+
+Research round recorded. Architecture task remains **Planning**; no product implementation is approved.
+
+### Next Steps
+
+- Discuss whether DSH may be the required canonical runtime or independent operation is a product requirement. Then resolve the initial acceptance slice and update the task artifacts.
+
+
+## Session 22: Text-first continuous Agent foundation
+
+**Date**: 2026-11-08
+**Task**: Text-first continuous Agent foundation
+**Branch**: `feat/text-agent-foundation`
+
+### Summary
+
+Implemented and verified the standalone text Agent, durable state, scoped model transport, supervised Docker work and replaceable client; full quality gate and real browser acceptance passed.
+
+### Main Changes
+
+### Delivered foundation
+
+- Implemented the approved independent, text-first continuous Agent service with existing PluginManager, TaskSupervisor, PermissionKernel, ConfigService and owner-bound SDK contracts. The desktop boot path and data remain separate.
+- Added SQLite product state, Docker JavaScript execution with durable owner/container reconciliation, real pinned Cortico integration and a capability-different deterministic test adapter, plus the DeepSeek-built web text client.
+- Preserved source permissions, actual physical settlement, command/effect deduplication, canonical facts and stable task/artifact identities through disconnects and supported reconstruction/restarts. No second generic scheduler or shadow persona store was added.
+- Added operation/deployment guide, versioned code-spec, meaningful fault probes and real browser evidence. The reference client labels scripted mode and hides transport receipts/model-only instructions from ordinary chat.
+
+### Verification and fixes
+
+- Final `pnpm check` exited0: workspace typechecks/tests, QA, ESLint, formatting, service and desktop builds.
+- 18 service/lifecycle scenarios passed, including actual HTTP/Core input-B ordering with independent live Docker work, stop/admission races, persistence failures, idempotent control retry, refusing unsafe replacement, real service SIGKILL plus exact-owner recovery and no repeated effects.
+- 15 Docker checks,15 state checks,10 source-authority checks,9 native model transport checks,8 Harness checks,4 Core gate checks and68 client checks passed.
+- 22 final real-browser checks passed: keyboard/token entry, actual file generation and authenticated bytes, target cancellation, actual proxy-blackhole disconnection and offline backend completion, reconnect and390px clickable input. Final3 PNGs were reviewed by both frontend worker and coordinator. `setOffline` alone was not used as evidence of a severed SSE stream.
+- Fixed unknown-to-unknown recovery evidence loss, missing provider/source permission checks, early logical-cancel versus physical-work observation, lifecycle receipt-versus-applied confusion, dead-stream/request hangs and narrow-grid input obstruction. Portable virtual path fixtures restored existing desktop/ASR tests on Linux without weakening Windows/security assertions.
+
+### Evidence and handoff
+
+- [Service guide](../../../docs/35-text-agent-foundation.md)
+- [Acceptance report](../../../qa/companion-acceptance.md)
+- [Archived implementation task](../../tasks/archive/2026-11/11-07-text-agent-foundation/prd.md)
+- [Executable service spec](../../spec/backend/companion-service.md)
+- User approved three local work commits and child archive/journal in one final confirmation. No push, paid model calls, real platform login/posting, cloud purchase or public deployment occurred. All preview jobs were stopped; test containers were cleaned by exact identity.
+
+### Remaining roadmap
+
+The architecture parent remains planning. Voice/duplex, Live2D, full management/history retrieval, real QQ/Bilibili and a second real Harness remain later work. This first slice is private single-operator/single-writer with bounded recent projections and a JavaScript execution backend. Durable records support explicit restart reconciliation, not independent expiry while service stays down, automatic retention, aggregate workspace quota, HA or arbitrary live-state migration.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1a7b082` | (see git log) |
+| `8fc76f7` | (see git log) |
+| `9d86962` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
