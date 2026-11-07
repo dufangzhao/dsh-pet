@@ -765,7 +765,7 @@ The architecture parent remains planning. Voice/duplex, Live2D, full management/
 
 ### Testing
 
-- Validation was not recorded for this session.
+- Final `pnpm check` exited0. Actual HTTP/Core/SQLite/Docker and22 browser checks passed; detailed evidence and limits are maintained in the [acceptance report](../../../qa/companion-acceptance.md).
 
 ### Status
 
