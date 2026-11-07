@@ -1,0 +1,7 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Separate current behavior from proposed architecture and generic template assumptions."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Existing data, owner-generation, media and configuration regressions remain real constraints until deliberately migrated."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/current-runtime.md","reason":"Verify one-writer migration, task cancellation independence and actual streaming gaps."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/ecosystem-and-duplex.md","reason":"Review primary-source claim boundaries and avoid equating asynchronous tools, speech streaming and native duplex."}
+{"file": ".trellis/tasks/11-06-unified-companion-architecture/research/magpie-routing.md", "reason": "Verified gateway modalities, classification, private replay state and cancellation distinctions"}
+{"file": "docs/adr/0015-independent-continuous-agent-runtime.md", "reason": "Reject Session-centered product identity or a mandatory DSH host; verify meaningful task control"}
+{"file": "docs/adr/0016-cloud-service-and-pluggable-features.md", "reason": "Verify plugin withdrawal preserves state, truthful async receipts and cloud/client execution boundaries"}

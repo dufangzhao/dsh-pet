@@ -1,10 +1,12 @@
 ---
-status: accepted
+status: superseded by ADR-0015
 date: 2026-10-28
 source: 用户提出复用Cortico智能体底层，并以桌宠作为日常与应用交互主入口
 ---
 
 # 复用Cortico智能体底层，桌面层承接原生能力和用户交互
+
+> 2026-11-07 决定：长期所有权以 [ADR-0015](0015-independent-continuous-agent-runtime.md)为准：自有运行时承接持续角色和跨会话工作，Cortico 作为现有实现及候选 Harness 适配。下文记录当前代码与历史选择；不再要求产品身份永久等同于单个 Core/Session，也不禁止多个受监督 Worker 并行。现有历史单写者在受控迁移前保持不变，本次未批准直接升级或改动产品代码。
 
 建议采用Cortico 0.2.7固定提交 `cb9ddbd685bcccba1f29905098648f46a79b3862` 的Core、Persona/World/Provider接口及公开页面/面板契约，负责唯一智能体循环、会话、事件流、上下文与工具派发。该提交的[许可证](https://github.com/Pal-AI-Lab/Cortico/blob/cb9ddbd685bcccba1f29905098648f46a79b3862/LICENSE)与[包声明](https://github.com/Pal-AI-Lab/Cortico/blob/cb9ddbd685bcccba1f29905098648f46a79b3862/package.json)均为MIT；保留相应版权与许可声明。Coopanion产品实现及角色资产继续只作参考。
 

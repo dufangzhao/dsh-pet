@@ -1,10 +1,12 @@
 ---
-status: accepted
+status: superseded by ADR-0015
 date: 2026-10-24
 source: 用户在Q2选择A，并再次回复A确认
 ---
 
 # 作为独立桌面应用运行，DSH为可选集成
+
+> 2026-11-07 决定：用户已选择独立维护持续 Agent 运行时，通过适配器接入多种 Agent Harness，Session 由系统内部管理。新的产品边界见 [ADR-0015](0015-independent-continuous-agent-runtime.md)。本文保留为早期独立桌面应用决定的历史记录；独立运行仍成立，运行主体不再被限定为桌面应用。
 
 本项目是独立桌面应用。普通用户不需要安装或启动DSH即可使用已实现的产品能力；DSH可作为以后通过适配器/插件接入的可选后端或工具来源，而不是必需运行时。
 
