@@ -829,3 +829,59 @@ Completed model configuration and real Magpie-backed preference/chat/file work; 
 ### Next Steps
 
 - Continue the separately scoped shared desktop-pet/web entry stage under the approved roadmap; preserve canonical Agent/data ownership and stopped trial. No other existing task was completed or archived.
+
+
+## Session 24: Shared desktop pet and console Agent entry
+
+**Date**: 2026-11-08
+**Task**: Shared desktop pet and console Agent entry
+**Branch**: `feat/shared-desktop-agent-entry`
+
+### Summary
+
+Completed the selected Linux shared-text stage with one source-owned Main connection, preserved data and process-lived auth; independent root/Core/Docker and scoped production Electron evidence passed. Archived only this child, retaining parent planning and explicit Windows limits.
+
+### Main Changes
+
+#### Delivered shared entry
+
+- One ordinary source-owned Main connection now supplies the production desktop pet and console; the independent service remains the owner of Agent identity/persona, messages/facts, work/artifacts and model settings. Shared startup does not construct or restore the old local Core, model/OAuth or voice pipeline. The canonical persona is read-only in this stage; local presentation keeps its own bounded authority.
+- GPT implemented contracts/Main/preload/native client/profile API and the narrow protocol/ModelDialog exports; DeepSeek connected renderer inputs/actions while preserving the existing shells and restored historical design materials. Nine concrete source/lifetime/receipt defects were corrected with deterministic regressions, including escaped-token echo refusal and truthful already-entered native file commit outcomes.
+- Authorized local work commits: ec441f8 feature (86 exact files), then 8321cfa QA/docs (54 exact files). The QA batch removed only an excess EOF blank line before committing. No product commit was repeated, amended or pushed. Archive40e422f and reference-fixd14f160 follow both work commits.
+- The narrow sidebar repair changed only console markup and its existing CSS: at880px the rail now measures67/67 without horizontal overflow, with36px refresh control, real pointer/keyboard activation, accessible label/title and a preserved wide layout. The five temporary hardcoded CSS/constant-arithmetic tests were removed, not baseline user tests; actual native geometry/keyboard coverage remains. A pre-removal focused603 count is historical, not a final new unit count.
+
+#### Layered acceptance and provenance
+
+- Parent collected BUILD0 full pnpm check exit0, job bash-6d64f6380f1342a8: desktop931, service34 and text-client162, plus workspace type/tests/rootQA/lint/format/build. BUILD1 targeted desktop build bash-33119f738b214cdc and actual native visual bash-d16c673107ea4eb1 passed. Main/preload/worker/admission SHA values remained identical to BUILD0; only console renderer assets changed. Earlier business/source/chooser runs keep their original BUILD0 identity.
+- Final independent Core4 and actual Docker/service18 passed with0 skips in bash-82388c723f0f4a25, including foreground-versus-independent-work and recovery behavior; no real model call. Final lint/format/diff/context8+8 passed in bash-cee997e85db74fa0. These were parent-collected results, not tests rerun by this archival assistant.
+- Separate real Linux Electron45 subsets establish baseline/two production file windows and fixed bridges, connection/CAS/target-switch DOM, actual browser wire ID correlation, three-surface send-once behavior, selected Docker stop, work surviving desktop exit and fresh-token recovery, source disable/revoke SSE drain, and actual GTK save plus Escape cancel. They are combined scoped evidence, not a single --full execution. The business recovered artifact and the chooser artifact were from separate runs; missing earlier runner hashes were not reconstructed.
+- BUILD1 also verified model-dialog footer/focus and pet computed styles/bitmap alpha. Private QA Electron needed only the RPATH library-resolution patch and private GTK/GSettings resources; the production worker environment remained restricted. Electron --no-sandbox/Xvfb proves neither Windows native devices/compositing nor OS sandbox behavior. Windows profile/page/avatar/audio admission, pointer/topmost/DPI and device integration remain unverified.
+- Real isolated startup preserved synthetic old-format history/persona/sealed-vault files byte-for-byte with no import or legacy-role activation. The vault bytes are not claimed decryptable. The generated-token raw/URL/base64/JSON scan found no token in62 regular files of that isolated desktop profile; auth is Main process-lived, with fresh supply after restart.
+
+#### Evidence, preservation and continuation
+
+- [Stage acceptance](../../../qa/companion-desktop-acceptance.md), [archived D1–D7 matrix](../../tasks/archive/2026-11/11-08-shared-desktop-agent-entry/research/native-coverage.md), [archived PRD](../../tasks/archive/2026-11/11-08-shared-desktop-agent-entry/prd.md), and [operator guide](../../../docs/36-shared-desktop-agent.md) retain selected Linux scope, exact safe evidence and limitations. Archive metadata records final work8321cfa; parent architecture remains planning with all three child relationships retained.
+- All17 owned QA jobs/instances were closed and exact owned resources cleaned; unrelated pre-existing Xvfb/container were left untouched. Original4120 remains stopped and original profile/token/data plus retained29c4ade runtime remain intact. This bookkeeping started no service/model/build/test and changed no product files.
+- HOME-risk images, raw diagnostics, private tools, .companion-data and temporary profiles were not read or committed. Next is separately scoped controlled persona/memory research under the approved ordered roadmap. Its parent research remains untracked and excluded; no new child is created by this closure.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ec441f8` | (see git log) |
+| `8321cfa` | (see git log) |
+
+### Testing
+
+- BUILD0 full `pnpm check` passed (desktop 931/service 34/text-client 162); BUILD1 targeted build and actual visual/geometry/keyboard checks passed. Final independent Core 4 plus real Docker/service 18 passed with 0 skips; final lint/format/diff/context 8+8 passed. Parent collected the job results named above.
+- Real production Electron evidence combines separate Linux subsets, with exact build identities and Windows/OS-sandbox limitations in the [stage summary](../../../qa/companion-desktop-acceptance.md). No one-shot full run or new model call is claimed.
+- Archival validation passed: 187 local Markdown destinations, 41 exact safe evidence references, JSONL 8+8, zero stale tracked Markdown backlinks, completed child metadata, preserved parent planning/children and `git diff --check`. No source tests/builds/services were rerun during bookkeeping.
+
+### Status
+
+[OK] **Selected Linux stage completed and archived**. Parent architecture remains **planning**; Windows-specific native/device verification remains separate and original 4120 stays stopped.
+
+### Next Steps
+
+- Continue controlled persona/memory research as the next separately scoped stage. Keep its untracked parent research excluded from this closure; parent creates the next child after this handoff.
