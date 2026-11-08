@@ -1,6 +1,6 @@
 # Useful model-backed text companion
 
-Status: engineering and final delivered-build browser verification complete; operator-supplied real Magpie/upstream acceptance remains pending. The task stays in_progress until that acceptance is settled. The user authorized ordered implementation and Trellis records for each stage on2026-11-08. This stage follows the completed [text foundation](../archive/2026-11/11-07-text-agent-foundation/prd.md); it does not reopen independent ownership or text-first decisions.
+Status: implementation and acceptance complete, including the owner's actual host Magpie/model useful-task scenario. Final integration and phase bookkeeping are recorded in the QA summary and progress; the task is ready for archival. The user authorized ordered implementation and Trellis records for each stage on2026-11-08. This stage follows the completed [text foundation](../archive/2026-11/11-07-text-agent-foundation/prd.md); it does not reopen independent ownership or text-first decisions.
 
 ## Goal
 
@@ -26,11 +26,11 @@ Let the owner configure and verify a real model connection, then use the continu
 ## Acceptance
 
 - [x] A1 Owner can distinguish unconfigured, configured, validating, verified and failed model states through actual outcomes; secrets never appear in reads.
-- [ ] A2 Configured real model performs a short conversation and a useful file-producing task using the existing isolated executor, with correct receipts and downloads.
+- [x] A2 Actual host Magpie0.1.3225 / codex/gpt-6.1-sol completed preference/chat and a real Docker file task with receipts, exit0,52/34-byte downloads and total25; B was answered while the task still ran. See [live evidence](../../../qa/companion-live-magpie-result.json).
 - [x] A3 New input during work remains responsive at the existing step boundary; stop/reconnect/model replacement retain authoritative task outcomes and data.
 - [x] A4 Wrong key, unsupported endpoint/model, transport hang and revoked source produce truthful fixed errors, not fake readiness or hidden fallback.
 - [x] A5 Server restarts retain nonsecret configuration and canonical identity/facts/results; credential availability and required operator setup remain explicit.
-- [x] A6 Browser and cross-layer tests plus applicable full quality gate pass. Actual live-provider evidence remains explicitly pending under A2; software gates and controlled protocol checks do not fill that acceptance.
+- [x] A6 Browser and cross-layer tests plus final patched-dependency full quality gate pass. Live A2, controlled protocol checks and browser evidence remain separately recorded with their actual bounds.
 
 ## Outside this stage
 
@@ -40,4 +40,4 @@ Full multi-provider routing/billing, marketplace, full task board, bulk filesyst
 
 The user selected Magpie as the builtin default on2026-11-08, with user-authored connection plugins able to replace it. This selects the application adapter boundary; Magpie's separate Go gateway process is not copied into the core. The first implementation connects to an explicitly configured Magpie endpoint. Bundling/managing an additional gateway process is not required for this stage.
 
-Actual gateway URL, chosen model and independently supplied credential are still external operator inputs. The answer did not authorize copying DSH credentials or arbitrary paid calls. Build the explicit configuration/probe path first; live acceptance requires the operator-supplied connection and an explicit test action. No synthetic result may be reported as live verification.
+The owner subsequently identified the actual host gateway at127.0.0.1:3425 and asked us to inspect it. Its public local client identity was used without copying DSH credentials. A bounded short diagnostic and a separately bounded8-generation/180-second useful-task acceptance passed after the documented Magpie stream compatibility repair. The main live scenario took39.038s; a second optional live cancellation task was skipped within that budget, retaining the separate existing Docker/controlled-service evidence. No account configuration or gateway process was changed.

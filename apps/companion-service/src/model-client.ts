@@ -5,7 +5,11 @@ import {
   KernelFault,
   MemoryCiphertextStore,
 } from '@pet/host-kernel';
-import { withSourceAuthority, type CompanionPluginHost } from '@pet/companion-runtime';
+import {
+  withSourceAuthority,
+  type CompanionPluginHost,
+  type NativeResponseProviderFactory,
+} from '@pet/companion-runtime';
 import type { ResponseClient } from '@pet/harness-cortico';
 import { createNativeProvider } from './native-provider.mjs';
 
@@ -17,6 +21,7 @@ export function createAuthorizedModelClient(
   options: {
     baseUrl: string;
     apiKey: string;
+    providerFactory?: NativeResponseProviderFactory;
   },
 ): { client: ResponseClient; close(): Promise<void> } {
   const endpoint = new URL(options.baseUrl);
@@ -76,9 +81,12 @@ export function createAuthorizedModelClient(
                 'model-api-key',
                 { taskId: context.taskId, signal: sourceSignal },
                 async (secret, signal) => {
-                  const native = createNativeProvider(options.baseUrl, secret);
                   actualWork = (async () => {
                     try {
+                      const native = (options.providerFactory ?? createNativeProvider)(
+                        options.baseUrl,
+                        secret,
+                      );
                       generation = await native.respond(request, {
                         ...generateOptions,
                         signal,

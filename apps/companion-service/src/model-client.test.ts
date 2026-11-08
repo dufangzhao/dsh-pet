@@ -50,6 +50,7 @@ afterEach(async () => {
 async function fixture(
   handle: (response: ServerResponse, body: JsonObject) => void,
   declareCredentials = true,
+  providerFactory?: (baseUrl: string, apiKey: string) => ResponseClient,
 ) {
   const directory = await mkdtemp(path.join(tmpdir(), 'companion-model-authority-'));
   const sourceManifest = JSON.parse(
@@ -111,6 +112,7 @@ async function fixture(
   const model = createAuthorizedModelClient(host, sourceId, {
     baseUrl: `http://127.0.0.1:${address.port}/v1`,
     apiKey: secret,
+    ...(providerFactory ? { providerFactory } : {}),
   });
   cleanups.push(async () => {
     await model.close();
@@ -131,6 +133,37 @@ async function assertNoSecretFiles(directory: string): Promise<void> {
       expect((await readFile(file)).includes(Buffer.from(secret))).toBe(false);
   }
 }
+
+it.each([true, false])(
+  'invokes a custom native factory only inside the source grant and preserves its private exception (%s)',
+  async (allowed) => {
+    const failure = Object.assign(new Error('native factory fixture failure'), {
+      partial: Symbol('private factory value'),
+    });
+    const factory = vi.fn(() => {
+      throw failure;
+    });
+    const f = await fixture(
+      () => {
+        throw new Error('factory failure must not call HTTP');
+      },
+      true,
+      factory,
+    );
+    if (!allowed) f.host.permissionControl.setPreset(sourceIdentity, 'deny');
+    const caught = await f.model.client.respond(request).catch((error: unknown) => error);
+    if (allowed) {
+      expect(caught).toBe(failure);
+      expect(factory).toHaveBeenCalledOnce();
+    } else {
+      expect(caught).toMatchObject({ code: 'permission-denied' });
+      expect(factory).not.toHaveBeenCalled();
+    }
+    expect(f.requests).toHaveLength(0);
+    expect(f.host.permissions.diagnostics().leases).toBe(0);
+    await assertNoSecretFiles(f.directory);
+  },
+);
 
 it('borrows for the source and preserves native/private generation options without persisting a key', async () => {
   const f = await fixture((outgoing) => {

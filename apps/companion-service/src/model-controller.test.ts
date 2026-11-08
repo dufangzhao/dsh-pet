@@ -42,6 +42,7 @@ async function setup(publicOrigin?: string) {
   }> = [];
   let status = 200;
   let responseText = 'Gateway fixture OK';
+  let protocolSettings: { eventType?: string; instructions?: string } = {};
   let hanging = false;
   let closedStreams = 0;
   const native = createFixtureModelClient();
@@ -69,6 +70,9 @@ async function setup(publicOrigin?: string) {
       if (!item || item.type !== 'message') throw new Error('missing fixture output');
       const completed = {
         ...generation.response,
+        ...(protocolSettings.instructions !== undefined
+          ? { instructions: protocolSettings.instructions }
+          : {}),
         output: [
           {
             ...item,
@@ -97,8 +101,11 @@ async function setup(publicOrigin?: string) {
           },
           { type: 'response.completed', sequence_number: 3, response: completed },
         ];
+        const prefix = protocolSettings.eventType ? [{ type: protocolSettings.eventType }] : [];
         outgoing.writeHead(200, { 'Content-Type': 'text/event-stream' });
-        outgoing.end(events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(''));
+        outgoing.end(
+          [...prefix, ...events].map((event) => `data: ${JSON.stringify(event)}\n\n`).join(''),
+        );
       } else {
         outgoing.writeHead(200, { 'Content-Type': 'application/json' });
         outgoing.end(JSON.stringify(completed));
@@ -178,6 +185,9 @@ async function setup(publicOrigin?: string) {
     },
     setHanging() {
       hanging = true;
+    },
+    setProtocol(value: { eventType?: string; instructions?: string }) {
+      protocolSettings = value;
     },
     closedStreams: () => closedStreams,
     async restart() {
@@ -348,6 +358,42 @@ it('keeps independent gateway keys out of storage and binds availability to full
   };
   await scan(f.directory);
 });
+
+it.each([false, true])(
+  'uses the Magpie provider seam and classifies actual protocol errors separately from network; unknown=%s',
+  async (unknown) => {
+    const f = await setup();
+    f.setProtocol({
+      eventType: unknown ? 'vendor.unobserved' : 'codex.rate_limits',
+      instructions: 'synthetic instruction '.repeat(1100),
+    });
+    const saved = value(
+      (
+        await f.save(await f.view(), {
+          baseUrl: f.baseUrl,
+          model: 'provider/fixture',
+          authMode: 'local-client-id',
+        })
+      ).result,
+    ).view;
+    const command = {
+      commandId: crypto.randomUUID(),
+      connectorId: MAGPIE_CONNECTION,
+      expectedConfigRevision: saved.applied?.configRevision,
+      expectedCredentialVersion: saved.applied?.credentialVersion,
+    };
+    expect((await f.request('/api/model/test', command)).status).toBe(202);
+    await vi.waitFor(async () =>
+      expect((await f.view()).check.state).toBe(unknown ? 'failed' : 'verified'),
+    );
+    const result = await f.view();
+    expect(result.check.error?.code ?? null).toBe(unknown ? 'unavailable' : null);
+    if (unknown) expect(result.check.error?.retryable).toBe(false);
+    expect(f.calls).toHaveLength(1);
+    expect(f.calls[0]?.body['max_output_tokens']).toBe(256);
+    expect(f.calls[0]?.body['stream']).toBe(true);
+  },
+);
 
 it('records wrong gateway-key failure without changing into scripted success or echoing provider text', async () => {
   const f = await setup();

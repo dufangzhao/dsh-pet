@@ -28,10 +28,14 @@ export interface ModelConnectionDescription {
   readonly credentialRequired: boolean;
   readonly credentialWritable: boolean;
 }
+export type NativeResponseProviderFactory = (baseUrl: string, apiKey: string) => ResponseClient;
+
 export interface ModelConnectionRegistration extends ServicePluginRegistration {
   readonly connection: {
     readonly providerId: string;
     describeConfig(config: JsonObject): ModelConnectionDescription;
+    /** Invoked inside this connector's authorized credential borrow; never a browser hook. */
+    readonly nativeProvider?: NativeResponseProviderFactory;
   };
 }
 export type ModelConnectionFactory = (portsFor: ModelConnectionPortsFor) => PluginDefinition;

@@ -9,7 +9,11 @@ import stateDefinition from '@pet/state-sqlite';
 import cloudDefinition, { parseConfig as parseExecutionConfig } from '@pet/cloud-exec';
 import textDefinition from '@pet/text-client';
 import { createCorticoPlugin, type ResponseClient } from '@pet/harness-cortico';
-import { createMagpieConnectionPlugin, describeMagpieConfig } from '@pet/model-connection-magpie';
+import {
+  createMagpieConnectionPlugin,
+  createMagpieNativeProvider,
+  describeMagpieConfig,
+} from '@pet/model-connection-magpie';
 import {
   CompanionPluginHost,
   CompanionRuntime,
@@ -163,7 +167,11 @@ export async function createCompanionService(
       enabled: false,
       hostCredentials: ['model-api-key'],
       definition: createMagpieConnectionPlugin(portsFor),
-      connection: { providerId: 'magpie', describeConfig: describeMagpieConfig },
+      connection: {
+        providerId: 'magpie',
+        describeConfig: describeMagpieConfig,
+        nativeProvider: createMagpieNativeProvider,
+      },
       ...(Object.keys(magpieOverrides).length ? { config: magpieOverrides } : {}),
     },
     {

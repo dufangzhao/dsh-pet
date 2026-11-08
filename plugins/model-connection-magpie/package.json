@@ -22,7 +22,9 @@
     "@pet/contracts": "workspace:*",
     "@pet/plugin-sdk": "workspace:*",
     "@pet/companion-runtime": "workspace:*",
-    "@pet/host-kernel": "workspace:*"
+    "@pet/host-kernel": "workspace:*",
+    "cortico": "0.2.7",
+    "tsx": "4.23.15"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -7,6 +7,7 @@ import {
 } from '@pet/companion-runtime';
 import { KernelFault } from '@pet/host-kernel';
 
+export { createMagpieNativeProvider } from './native-provider.mjs';
 export const parseMagpieConfig = parseResponsesConnectionSettings;
 
 export function describeMagpieConfig(config: JsonObject): ModelConnectionDescription {

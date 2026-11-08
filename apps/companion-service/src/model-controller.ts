@@ -28,6 +28,7 @@ import {
   type ResponseClient,
 } from '@pet/companion-runtime';
 import { createAuthorizedModelClient } from './model-client.js';
+import { isNativeProtocolError } from './native-provider.mjs';
 
 const identity = (pluginId: string) => ({ pluginId, instanceId: 'default' });
 const id = (value: unknown): value is string =>
@@ -59,6 +60,7 @@ function body(
 function problem(error: unknown): KernelError {
   if (error instanceof KernelFault) return error.error;
   if (error instanceof CredentialError) return makeError(error.code, false);
+  if (isNativeProtocolError(error)) return makeError('unavailable', false);
   const status = error && typeof error === 'object' && 'status' in error ? error.status : undefined;
   return makeError(
     status === 401 || status === 403
@@ -106,7 +108,12 @@ export class ModelConnectionController {
       if (auth[1] !== baseUrl) throw new KernelFault('permission-denied');
       const apiKey = auth[2] === 'local-client-id' ? 'magpie-dsh-pet' : slot.value;
       if (!apiKey) throw new KernelFault('not-ready');
-      return createAuthorizedModelClient(host, owner.pluginId, { baseUrl, apiKey });
+      const providerFactory = this.connections.registration(key).connection.nativeProvider;
+      return createAuthorizedModelClient(host, owner.pluginId, {
+        baseUrl,
+        apiKey,
+        ...(providerFactory ? { providerFactory } : {}),
+      });
     });
   }
 

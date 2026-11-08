@@ -22,6 +22,9 @@ catalogs:
 overrides:
   sherpa-onnx-node>sherpa-onnx-win-x64: 1.13.8
 
+patchedDependencies:
+  cortico@0.2.7: 7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995
+
 importers:
 
   .:
@@ -46,7 +49,7 @@ importers:
         version: 19.3.0(@types/react@19.3.0)
       cortico:
         specifier: 0.2.7
-        version: 0.2.7
+        version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
       electron:
         specifier: 45.0.0
         version: 45.0.0
@@ -121,7 +124,7 @@ importers:
         version: link:../../plugins/text-client
       cortico:
         specifier: 0.2.7
-        version: 0.2.7
+        version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -344,7 +347,7 @@ importers:
         version: link:../../packages/plugin-sdk
       cortico:
         specifier: 0.2.7
-        version: 0.2.7
+        version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -519,7 +522,7 @@ importers:
         version: 8.20.0
       cortico:
         specifier: 0.2.7
-        version: 0.2.7
+        version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -544,7 +547,7 @@ importers:
         version: link:../../packages/plugin-sdk
       cortico:
         specifier: 0.2.7
-        version: 0.2.7
+        version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -576,6 +579,12 @@ importers:
       '@pet/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
+      cortico:
+        specifier: 0.2.7
+        version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3320,7 +3329,7 @@ snapshots:
 
   cookie@0.7.2: {}
 
-  cortico@0.2.7:
+  cortico@0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995):
     dependencies:
       '@types/express': 4.17.25
       '@types/react': 19.3.0

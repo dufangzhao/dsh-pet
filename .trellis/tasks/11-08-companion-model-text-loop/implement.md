@@ -26,7 +26,7 @@ Existing host-kernel/plugin-sdk behavior is reused. If a necessary lower-level c
 - [x] Backend and parent read the current PRD/design/contract/research and actual specs. Parent validated six real entries in each context manifest and started the task under the user's approved continuation and default-Magpie decision.
 - [x] Backend landed companion-model DTO/commands/exports, optional snapshot.model, model-connection-types, native diagnostic/opaque options and initial model-view with serialized fixture. Four affected typechecks and runtime11 tests passed; no API or live connection success is implied.
 - [x] Parent reviewed the frozen shapes, accepted the narrow server-ingress refinement of credential.writable, and dispatched DeepSeek frontend against the actual shared types. Breaking changes must be coordinated; no parallel DTO copies.
-- [ ] Parent records Stage 0 actual files/checks in the task progress/journal. Do not call stub data a real connection.
+- [x] Parent records Stage 0 actual files/checks in the task progress/journal. Do not call stub data a real connection.
 
 ### Stage 1 — native connector and authority (GPT)
 
@@ -65,8 +65,8 @@ Existing host-kernel/plugin-sdk behavior is reused. If a necessary lower-level c
 - [x] Exercise real HTTP/SQLite/Core/Docker work with the new connector selection. Chat B must be handled at the next inference step while independent work runs. Stop only selected task; swap connection fixture ↔ Magpie loopback adapter at idle foreground and retain identity/facts/work/receipt/artifact bytes.
 - [x] Verify key-only/endpoint-path/connector/auth changes, restart with old form version, source trust/revoke, failed disposer, old callbacks and completion-during-switch all retain authoritative outcomes.
 - [x] Run applicable full root gate after integration; fix actual regressions within ownership. Collect all jobs/evidence. No broad repeated test runs once gates pass unless changes/failures justify them.
-- [ ] When owner supplies real Magpie endpoint/model/auth and explicitly requests a bounded test/use, execute the practical live scenario below. Otherwise record it **pending**, with no placeholder pass or additional secret-discovery step.
-- [ ] Parent updates service guide/QA/spec/task records after the verified stage. Any commit, archive, public exposure or trial restart follows actual existing authorization; this plan does not itself request/start them.
+- [x] When owner supplies real Magpie endpoint/model/auth and explicitly requests a bounded test/use, execute the practical live scenario below. Otherwise record it **pending**, with no placeholder pass or additional secret-discovery step.
+- [x] Parent updates service guide/QA/spec/task records after the verified stage. Any commit, archive, public exposure or trial restart follows actual existing authorization; this plan does not itself request/start them.
 
 ## Validation and acceptance
 
