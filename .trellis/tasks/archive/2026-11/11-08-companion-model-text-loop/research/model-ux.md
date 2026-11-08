@@ -7,32 +7,32 @@
 1. **配置属于 Magpie 连接插件**，界面只呈现"当前选中的连接 + 它的固定三项（地址/模型/鉴权方式）+ 它自己的密钥状态"。不做模型目录、不做插件市场、不做通用插件配置渲染。
 2. **两个动作，语义不合并**：「保存并应用」只写配置并切换绑定，**不发一次推理**；「测试连接」只测**已保存并已应用的那一份**，不改草稿、不改模式（[design.md:9](../design.md#L9)、[contract:208](../implementation-contract.md#L208)）。
 3. **四个词各自有落点**：已填写（本地表单）／已保存（Config 已写）／正在测试（check 已受理未结算）／测试结果（结算后的 verified/failed + 证据类型）。任何一个都不能顶替另一个。
-4. **失败必须显形**：模式停在 `model`、连接显示不可用，绝不回落脚本；聊天里一次普通失败的文案是泛化的（[harness.mjs:222](../../../../plugins/harness-cortico/src/harness.mjs#L222-L224) 把所有非取消异常折成 `network`），所以**只有显式测试的结果才配得上"密钥错/模型不存在"这种具体结论**。
+4. **失败必须显形**：模式停在 `model`、连接显示不可用，绝不回落脚本；聊天里一次普通失败的文案是泛化的（[harness.mjs:222](../../../../../../plugins/harness-cortico/src/harness.mjs#L222-L224) 把所有非取消异常折成 `network`），所以**只有显式测试的结果才配得上"密钥错/模型不存在"这种具体结论**。
 
 ## 已有协议能给什么，什么必须等新契约
 
 | 事实 | 现在就有 | 出处 |
 | --- | --- | --- |
-| 前台是脚本还是模型 | 有（`agent.mode`） | [companion.ts:59-67](../../../../packages/contracts/src/companion.ts#L59-L67) |
-| 助手可用/忙/不可用 | 有（`agent.status`） | 同上；[runtime.ts:248-255](../../../../packages/companion-runtime/src/runtime.ts#L248-L255) |
+| 前台是脚本还是模型 | 有（`agent.mode`） | [companion.ts:59-67](../../../../../../packages/contracts/src/companion.ts#L59-L67) |
+| 助手可用/忙/不可用 | 有（`agent.status`） | 同上；[runtime.ts:248-255](../../../../../../packages/companion-runtime/src/runtime.ts#L248-L255) |
 | 当前 Harness | 有（`agent.harness`） | 同上 |
-| 插件挂载与期望启用 | 有（`plugins[]`），但**不含**该插件的配置内容 | [companion.ts:69-75](../../../../packages/contracts/src/companion.ts#L69-L75) |
+| 插件挂载与期望启用 | 有（`plugins[]`），但**不含**该插件的配置内容 | [companion.ts:69-75](../../../../../../packages/contracts/src/companion.ts#L69-L75) |
 | 连接地址/模型/鉴权方式、Config revision | **没有** | 需 `CompanionModelConnectorView`（[contract:127-135](../implementation-contract.md#L127-L135)） |
 | 密钥是否必需/是否可用/来源/版本/可否写入 | **没有**，且绝不能靠猜 | 需 `CompanionModelCredentialView`（[contract:120-126](../implementation-contract.md#L120-L126)） |
 | 实际生效的绑定、是否已启用 | **没有** | 需 `applied` / `enabled`（[contract:151-159](../implementation-contract.md#L151-L159)） |
 | 显式测试的状态/时间/耗时/证据/固定错误 | **没有** | 需 `CompanionModelCheckView`（[contract:141-150](../implementation-contract.md#L141-L150)） |
 
-`snapshot.model` 是**可选成员**：缺了就是"这个服务没有模型设置能力"，界面直接不给入口；在但读不懂就整条快照作废（[contract:112](../implementation-contract.md#L112)），和现有守卫的严格程度一致（[guards.ts:271-307](../../../../plugins/text-client/src/client/guards.ts#L271-L307)）。不要为旧服务造一个空表单。
+`snapshot.model` 是**可选成员**：缺了就是"这个服务没有模型设置能力"，界面直接不给入口；在但读不懂就整条快照作废（[contract:112](../implementation-contract.md#L112)），和现有守卫的严格程度一致（[guards.ts:271-307](../../../../../../plugins/text-client/src/client/guards.ts#L271-L307)）。不要为旧服务造一个空表单。
 
 ## 入口与版式
 
-现有一屏只有：令牌门 → 头部（身份+模式+断开+连接行）→ 对话+任务（[app.tsx:30-63](../../../../plugins/text-client/src/client/app.tsx#L30-L63)）。**不新开页面、不加侧栏**。
+现有一屏只有：令牌门 → 头部（身份+模式+断开+连接行）→ 对话+任务（[app.tsx:30-63](../../../../../../plugins/text-client/src/client/app.tsx#L30-L63)）。**不新开页面、不加侧栏**。
 
-- 头部右侧在「断开」左边加一个「模型」文字按钮，点开 `@pet/ui-kit` 的 `Dialog`（原生 `<dialog>`，自带焦点圈定、Escape、关闭后焦点归还，[dialog.tsx:26-66](../../../../packages/ui-kit/src/dialog.tsx#L26-L66)）。
+- 头部右侧在「断开」左边加一个「模型」文字按钮，点开 `@pet/ui-kit` 的 `Dialog`（原生 `<dialog>`，自带焦点圈定、Escape、关闭后焦点归还，[dialog.tsx:26-66](../../../../../../packages/ui-kit/src/dialog.tsx#L26-L66)）。
 - 对话框里只有一段：当前连接一行摘要 → 连接选择（≤8 个注册项的下拉，[contract:162](../implementation-contract.md#L162)）→ 三项固定字段 → 密钥区 → 底部两颗按钮 + 一行结果。没有标签页、没有第二层弹窗。
-- 头部身份行改成三段事实：名字 · 模式（"脚本演示，未调用模型" / "模型回复"）· 连接名。模式文字沿用现有 [chat.tsx:138-150](../../../../plugins/text-client/src/client/chat.tsx#L138-L150) 的写法，不新造词。
+- 头部身份行改成三段事实：名字 · 模式（"脚本演示，未调用模型" / "模型回复"）· 连接名。模式文字沿用现有 [chat.tsx:138-150](../../../../../../plugins/text-client/src/client/chat.tsx#L138-L150) 的写法，不新造词。
 
-**390px 的硬问题**：`pk-dialog` 只有 `width: min(440px, 100vw-48px)`，没有 `max-height`/内部滚动（[components.css:354-393](../../../../packages/ui-kit/src/components.css#L354-L393)），而模态打开时 `body` 被锁死滚动（同文件 L396）。手机键盘弹出后可视高度常剩 ~450px，四项字段+密钥+状态+按钮必然溢出，底部按钮会顶到键盘后面。text-client 必须自己给内容区一个可滚动容器（`max-height: min(72vh, 100%)` 之类）并让底部按钮常驻，不能改共享 ui-kit。
+**390px 的硬问题**：`pk-dialog` 只有 `width: min(440px, 100vw-48px)`，没有 `max-height`/内部滚动（[components.css:354-393](../../../../../../packages/ui-kit/src/components.css#L354-L393)），而模态打开时 `body` 被锁死滚动（同文件 L396）。手机键盘弹出后可视高度常剩 ~450px，四项字段+密钥+状态+按钮必然溢出，底部按钮会顶到键盘后面。text-client 必须自己给内容区一个可滚动容器（`max-height: min(72vh, 100%)` 之类）并让底部按钮常驻，不能改共享 ui-kit。
 
 ## 四个状态词各自长在哪
 
@@ -54,7 +54,7 @@
 4. **保存并应用**：发 `POST /api/model`，带 `expectedProfileRevision`、`expectedConfigRevision`、`mode`、完整 `config`（[contract:173-180](../implementation-contract.md#L173-L180)）。HTTP 200 **不等于**"已应用"：契约允许 200 + `enabled=false` + `view.error=not-ready`（缺模型/缺密钥时的正常中间态，[contract:206](../implementation-contract.md#L206)）。若本次还填了远程密钥，紧随其后发 `POST /api/model/credential`，用返回的 revision/version 做 CAS；**两步都成功且最终 view 显示 applied/enabled 才说"已保存并应用"**，只有非secret那步成功就说"配置已保存，密钥没有写入"（[contract:210](../implementation-contract.md#L210)）。
 5. **测试连接**：只在**选中的连接就是 `applied.connectorId`**、`dirty === false`、`applied !== null`、鉴权要求已满足、`check.state !== 'validating'`、`phase === 'live'` 时可点。切到另一个连接但还没保存时，测试必须禁用——测试的对象永远是"已应用的那一份"，不是下拉里选中的那一项。发 `POST /api/model/test` 带三份期望版本；202 只表示受理，界面进入"正在测试…"，最终状态靠快照刷新（[contract:204](../implementation-contract.md#L204)）。**503 表示根本没受理**（没有可用绑定或鉴权，[contract:206](../implementation-contract.md#L206)），要显示成"这次没有开始测试"，不能显示成一次失败的测试结果。
 6. **读结果**：结果行只写一句，句子里必须同时含"这一份绑定 + 结论 + 时间"。失败给固定码文案（`auth-failed` 身份验证失败 / `rate-limited` 请求过于频繁 / `unavailable` 当前不可用 / `timeout` 操作超时 / `network` 网络不可用），不给原生错误体、不给状态码原文。
-7. **正常用**：对话框关掉，回到对话。`agent.mode === 'model'` 且 `status === 'unavailable'` 时，输入框仍可写，但发送会被服务端以 `not-ready` 拒绝（[runtime.ts:289-297](../../../../packages/companion-runtime/src/runtime.ts#L289-L297) → [server.ts:371-379](../../../../apps/companion-service/src/server.ts#L371-L379) 映射 503）。注意客户端的实际路径：错误码从 JSON envelope 里取出（[protocol.ts:120-122](../../../../plugins/text-client/src/client/protocol.ts#L120-L122)），所以最终文案是固定表里的"插件尚未就绪"（[errors.ts:42](../../../../packages/contracts/src/errors.ts#L42)），经 [state.ts:129-134](../../../../plugins/text-client/src/client/state.ts#L129-L134) 显示成"没有发送成功：插件尚未就绪"。对主人来说这句是错的——插件好好的，是模型连不上。前端应在 `agent.mode === 'model' && agent.status === 'unavailable'` 时把这条 notice 换成"模型当前不可用，检查连接后再发"，其余错误码照旧。这不需要新 API，也不需要改共享错误表。
+7. **正常用**：对话框关掉，回到对话。`agent.mode === 'model'` 且 `status === 'unavailable'` 时，输入框仍可写，但发送会被服务端以 `not-ready` 拒绝（[runtime.ts:289-297](../../../../../../packages/companion-runtime/src/runtime.ts#L289-L297) → [server.ts:371-379](../../../../../../apps/companion-service/src/server.ts#L371-L379) 映射 503）。注意客户端的实际路径：错误码从 JSON envelope 里取出（[protocol.ts:120-122](../../../../../../plugins/text-client/src/client/protocol.ts#L120-L122)），所以最终文案是固定表里的"插件尚未就绪"（[errors.ts:42](../../../../../../packages/contracts/src/errors.ts#L42)），经 [state.ts:129-134](../../../../../../plugins/text-client/src/client/state.ts#L129-L134) 显示成"没有发送成功：插件尚未就绪"。对主人来说这句是错的——插件好好的，是模型连不上。前端应在 `agent.mode === 'model' && agent.status === 'unavailable'` 时把这条 notice 换成"模型当前不可用，检查连接后再发"，其余错误码照旧。这不需要新 API，也不需要改共享错误表。
 
 ## 文案表（够用即止）
 
@@ -80,7 +80,7 @@
 
 ## 密钥规则（硬约束）
 
-- 密钥只存在对话框组件的 `useState` 里，和令牌门同一套做法（[connect.tsx:12-15](../../../../plugins/text-client/src/client/connect.tsx#L12-L15)）：不进 reducer、不进 `outbox`/待确认历史、不进 URL、不进 localStorage/sessionStorage、不回显。
+- 密钥只存在对话框组件的 `useState` 里，和令牌门同一套做法（[connect.tsx:12-15](../../../../../../plugins/text-client/src/client/connect.tsx#L12-L15)）：不进 reducer、不进 `outbox`/待确认历史、不进 URL、不进 localStorage/sessionStorage、不回显。
 - 浏览器能写密钥的入口，本阶段只有 loopback 和受控 SSH 转发；远程/反代部署由宿主注入，界面不提供写入（见上一条 `writable`）。
 - 提交后立刻清空输入（包括结果不明时）；结果不明不自动重发，改为重新读快照（[contract:210](../implementation-contract.md#L210)）。
 - "清除密钥"是显式动作，发 `apiKey: null`；空字符串不等于删除。
@@ -92,12 +92,12 @@
 
 - 任一项变化（连接、地址、模型、鉴权方式、密钥、服务重启）后，旧 `verified` 一律作废，界面回到"未测试"，**不能**留着上一次的绿字（[contract:166](../implementation-contract.md#L166)）。
 - 规则落在渲染上：结果行只在 `check.binding` 与当前 `applied` 完全一致（connectorId + configRevision + credentialVersion）时才显示为结论；不一致就显示"配置已改变，之前的测试不再适用"。
-- 断线时：保留最后确认的摘要，结果行改为"当前状态未知"，测试按钮禁用（沿用 [status.tsx:14-41](../../../../plugins/text-client/src/client/status.tsx#L14-L41) 的读法）。
+- 断线时：保留最后确认的摘要，结果行改为"当前状态未知"，测试按钮禁用（沿用 [status.tsx:14-41](../../../../../../plugins/text-client/src/client/status.tsx#L14-L41) 的读法）。
 
 ## 正在回复/有任务时切换
 
-- 服务端在 `agentStatus === 'busy'`、有未处理输入、控制忙或测试进行中时直接 `conflict`（[runtime.ts:649-651](../../../../packages/companion-runtime/src/runtime.ts#L649-L651)）。界面在 `agent.status === 'busy'` 或 `check.state === 'validating'` 时禁用「保存并应用」，理由写"等这次回复结束"。
-- **独立任务在跑不阻止切换**：只有对话前台忙才拦。任务区照常显示，切换后任务 ID、产物、停止按钮都不变（[runtime.ts:533-548](../../../../packages/companion-runtime/src/runtime.ts#L533-L548) 的任务身份不随连接变）。
+- 服务端在 `agentStatus === 'busy'`、有未处理输入、控制忙或测试进行中时直接 `conflict`（[runtime.ts:649-651](../../../../../../packages/companion-runtime/src/runtime.ts#L649-L651)）。界面在 `agent.status === 'busy'` 或 `check.state === 'validating'` 时禁用「保存并应用」，理由写"等这次回复结束"。
+- **独立任务在跑不阻止切换**：只有对话前台忙才拦。任务区照常显示，切换后任务 ID、产物、停止按钮都不变（[runtime.ts:533-548](../../../../../../packages/companion-runtime/src/runtime.ts#L533-L548) 的任务身份不随连接变）。
 - 保存/应用期间会出现短暂 `agent.status === 'unavailable'`（前台被重建）。界面这几十秒只显示"正在应用…"（本地 in-flight 标记），不要把它渲染成"模型失败"。
 - 服务端在边界上仍可能返回 409（`pendingInputs` 前端看不到）：按冲突处理——重读快照、保留草稿、给一次明确提示，不自动重试。
 
@@ -120,7 +120,7 @@
 8. 回复进行中点保存：按钮禁用并说明原因；任务在跑时保存：按钮可用，任务区身份/产物/停止不变。
 9. 断线（代理黑洞，沿用既有探针做法）后打开对话框：状态未知、测试禁用；重连后回到真实状态。
 10. 390×844：对话框内容可滚动、两颗按钮始终可点、`elementFromPoint` 命中按钮而不是遮罩；键盘 Tab 顺序为字段→密钥→保存→测试→关闭，Escape 关闭并把焦点还给头部「模型」按钮。
-11. 对话区回归：模式行、发送、停止、下载、离线/重连文案与现状一致（[browser-acceptance.md:11](../../archive/2026-11/11-07-text-agent-foundation/research/browser-acceptance.md#L11)、窄屏修复见同文 L69-L71）。
+11. 对话区回归：模式行、发送、停止、下载、离线/重连文案与现状一致（[browser-acceptance.md:11](../../11-07-text-agent-foundation/research/browser-acceptance.md#L11)、窄屏修复见同文 L69-L71）。
 
 ## 明确不做
 
@@ -172,4 +172,4 @@
 
 **同时核对了其余文案分支**（当前应用 / 草稿目标 / required·available·writable / pending auth / saved 未 applied / synthetic / conflict·rebase），未发现同类问题；`failed` 结论同样要求绑定归因，已由 `checkText` 保证。
 
-交互契约以 [model settings spec](../../../spec/frontend/model-settings.md) 为准，此处只记录该缺陷的根因与修法。
+交互契约以 [model settings spec](../../../../../spec/frontend/model-settings.md) 为准，此处只记录该缺陷的根因与修法。

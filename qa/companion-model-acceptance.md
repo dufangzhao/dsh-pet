@@ -1,6 +1,6 @@
 # Magpie 模型连接阶段验收
 
-对应[阶段PRD](../.trellis/tasks/11-08-companion-model-text-loop/prd.md)。默认内置普通 Magpie 连接插件，可替换为其他连接插件；身份、资料和任务仍归原服务。操作说明统一维护在[服务指南](../docs/35-text-agent-foundation.md)。
+对应[阶段PRD](../.trellis/tasks/archive/2026-11/11-08-companion-model-text-loop/prd.md)。默认内置普通 Magpie 连接插件，可替换为其他连接插件；身份、资料和任务仍归原服务。操作说明统一维护在[服务指南](../docs/35-text-agent-foundation.md)。
 
 状态：阶段验收完成。最终构建的真实API浏览器25项通过，10张截图已审阅；随后使用宿主机实际 Magpie0.1.3225 和 `codex/gpt-6.1-sol` 完成真实偏好、文件任务及运行中交互验收。下文分别记录受控协议与真实模型证据。
 
@@ -19,7 +19,7 @@
 
 ## 浏览器证据
 
-最终真实服务检查由[浏览器探针](probes/companion-model-browser-acceptance.mjs)和[隔离启动器](fixtures/companion-service/model-preview.mjs)复现，详细过程与当前产物路径见[真实API验收](../.trellis/tasks/11-08-companion-model-text-loop/research/real-api-acceptance.md)。
+最终真实服务检查由[浏览器探针](probes/companion-model-browser-acceptance.mjs)和[隔离启动器](fixtures/companion-service/model-preview.mjs)复现，详细过程与当前产物路径见[真实API验收](../.trellis/tasks/archive/2026-11/11-08-companion-model-text-loop/research/real-api-acceptance.md)。
 
 最终构建A–K主探针21项、L切换探针4项全部通过：保存零请求、Key-only、显式SSE检查和去重、错误/15s超时、模拟标签、只读入口403、聊天、原生工具生成真实Docker文件、下载合计25、切换保留身份与任务/产物、关闭弹窗和390px命中/焦点，以及不同revision目标的正确保存与无Key提示。10张最终截图与[主探针JSON报告](screenshots/companion-model/report.json)已保留；L段的详细证据维护在上面的真实API验收记录。截图审阅发现的问题均已修复并在此最终构建重跑。
 
@@ -27,7 +27,7 @@
 
 宿主机 `http://127.0.0.1:3425/v1`、Magpie0.1.3225、`codex/gpt-6.1-sol` 和公开本机客户端标识。实用场景在39.038s内完成：真实 `remember` 保存回答简短偏好；真实 `start_work` 受理并由Docker执行成功；下载52-byte Markdown和34-byte CSV，三项12/8/5总计25。任务仍运行时收到新输入并回复，早于完成约5.5s。
 
-新的A2预算为8次原生生成、180s：7次HTTP200/completed，最后一次自动结果通知轮在正常关闭中aborted/statusnull。第二个实时取消任务因预算不足未运行，定向取消依据已有真实Docker/服务回归，不写成此场景已执行。服务和所属容器均已清理。安全事实、字节与哈希保存在[结构化报告](companion-live-magpie-result.json)，诊断和兼容修复原因见[实际网关记录](../.trellis/tasks/11-08-companion-model-text-loop/research/live-magpie.md)。
+新的A2预算为8次原生生成、180s：7次HTTP200/completed，最后一次自动结果通知轮在正常关闭中aborted/statusnull。第二个实时取消任务因预算不足未运行，定向取消依据已有真实Docker/服务回归，不写成此场景已执行。服务和所属容器均已清理。安全事实、字节与哈希保存在[结构化报告](companion-live-magpie-result.json)，诊断和兼容修复原因见[实际网关记录](../.trellis/tasks/archive/2026-11/11-08-companion-model-text-loop/research/live-magpie.md)。
 
 [真实验收探针](probes/companion-model-live.mjs)是显式opt-in、非默认测试入口；无 `PET_COMPANION_LIVE_MAGPIE=1` 时不发请求。此前短诊断的2次额外请求另行计数，不与A2预算混用。
 

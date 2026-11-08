@@ -7,14 +7,14 @@
 
 | 事实 | 出处 | 对前端的影响 |
 | --- | --- | --- |
-| 路由：`GET /api/snapshot`、`GET /api/model`、`POST /api/model`、`POST /api/model/credential`、`POST /api/model/test`、`GET /api/events` | [server.ts:308-390](../../../../apps/companion-service/src/server.ts#L308-L390) | 与 [protocol.ts](../../../../plugins/text-client/src/client/protocol.ts) 完全一致，无改名 |
+| 路由：`GET /api/snapshot`、`GET /api/model`、`POST /api/model`、`POST /api/model/credential`、`POST /api/model/test`、`GET /api/events` | [server.ts:308-390](../../../../../../apps/companion-service/src/server.ts#L308-L390) | 与 [protocol.ts](../../../../../../plugins/text-client/src/client/protocol.ts) 完全一致，无改名 |
 | 保存 200、测试 202、凭据 200，均为 `Result<…>` 信封 | 同上 | 与 `modelCommand()` / `writeModelCredential()` 期望一致 |
-| 状态码：401/403/400/409/413/503(not-ready, unavailable)/500 | [server.ts:448-456](../../../../apps/companion-service/src/server.ts#L448-L456) | 信封里的 `error.code` 先被解析，所以 `not-ready`、`permission-denied` 不会被状态码覆盖成 `unavailable` |
-| `writable` = 服务端判定的回环入口 **且** 连接自己声明可写 | [server.ts:64-100](../../../../apps/companion-service/src/server.ts#L64-L100) | 127.0.0.1 访问时 Magpie 可写；任何非回环入口一律只读 |
-| 默认 mode 来自 `COMPANION_MODE`，缺省 `scripted` | [main.ts:13](../../../../apps/companion-service/src/main.ts#L13) | 初始应是「脚本 + 未配置」，不是模型模式 |
-| `view.error` 在 `desired.mode==='model' && !applied` 时为 `not-ready` | [model-controller.ts:355](../../../../apps/companion-service/src/model-controller.ts#L355) | 界面不能把它当硬错误弹（已按此实现） |
-| `commandId` 需匹配 `^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$` | [server.ts:23](../../../../apps/companion-service/src/server.ts#L23) | `crypto.randomUUID()` 与兜底格式都合法 |
-| 凭据写入要求「已选中的已保存连接」+ 精确 config/凭据版本 | [model-controller.ts:463-500](../../../../apps/companion-service/src/model-controller.ts#L463-L500) | key-only 路径必须先有一次保存把连接变成 selected+applied |
+| 状态码：401/403/400/409/413/503(not-ready, unavailable)/500 | [server.ts:448-456](../../../../../../apps/companion-service/src/server.ts#L448-L456) | 信封里的 `error.code` 先被解析，所以 `not-ready`、`permission-denied` 不会被状态码覆盖成 `unavailable` |
+| `writable` = 服务端判定的回环入口 **且** 连接自己声明可写 | [server.ts:64-100](../../../../../../apps/companion-service/src/server.ts#L64-L100) | 127.0.0.1 访问时 Magpie 可写；任何非回环入口一律只读 |
+| 默认 mode 来自 `COMPANION_MODE`，缺省 `scripted` | [main.ts:13](../../../../../../apps/companion-service/src/main.ts#L13) | 初始应是「脚本 + 未配置」，不是模型模式 |
+| `view.error` 在 `desired.mode==='model' && !applied` 时为 `not-ready` | [model-controller.ts:355](../../../../../../apps/companion-service/src/model-controller.ts#L355) | 界面不能把它当硬错误弹（已按此实现） |
+| `commandId` 需匹配 `^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$` | [server.ts:23](../../../../../../apps/companion-service/src/server.ts#L23) | `crypto.randomUUID()` 与兜底格式都合法 |
+| 凭据写入要求「已选中的已保存连接」+ 精确 config/凭据版本 | [model-controller.ts:463-500](../../../../../../apps/companion-service/src/model-controller.ts#L463-L500) | key-only 路径必须先有一次保存把连接变成 selected+applied |
 
 ## 1. 联调前的一次性检查（不产生任何模型调用）
 

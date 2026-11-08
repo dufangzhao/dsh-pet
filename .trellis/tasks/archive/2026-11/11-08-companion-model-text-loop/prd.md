@@ -1,6 +1,6 @@
 # Useful model-backed text companion
 
-Status: implementation and acceptance complete, including the owner's actual host Magpie/model useful-task scenario. Final integration and phase bookkeeping are recorded in the QA summary and progress; the task is ready for archival. The user authorized ordered implementation and Trellis records for each stage on2026-11-08. This stage follows the completed [text foundation](../archive/2026-11/11-07-text-agent-foundation/prd.md); it does not reopen independent ownership or text-first decisions.
+Status: implementation and acceptance complete, including the owner's actual host Magpie/model useful-task scenario. Final integration and phase bookkeeping are recorded in the QA summary and progress; the task is ready for archival. The user authorized ordered implementation and Trellis records for each stage on2026-11-08. This stage follows the completed [text foundation](../11-07-text-agent-foundation/prd.md); it does not reopen independent ownership or text-first decisions.
 
 ## Goal
 
@@ -26,7 +26,7 @@ Let the owner configure and verify a real model connection, then use the continu
 ## Acceptance
 
 - [x] A1 Owner can distinguish unconfigured, configured, validating, verified and failed model states through actual outcomes; secrets never appear in reads.
-- [x] A2 Actual host Magpie0.1.3225 / codex/gpt-6.1-sol completed preference/chat and a real Docker file task with receipts, exit0,52/34-byte downloads and total25; B was answered while the task still ran. See [live evidence](../../../qa/companion-live-magpie-result.json).
+- [x] A2 Actual host Magpie0.1.3225 / codex/gpt-6.1-sol completed preference/chat and a real Docker file task with receipts, exit0,52/34-byte downloads and total25; B was answered while the task still ran. See [live evidence](../../../../../qa/companion-live-magpie-result.json).
 - [x] A3 New input during work remains responsive at the existing step boundary; stop/reconnect/model replacement retain authoritative task outcomes and data.
 - [x] A4 Wrong key, unsupported endpoint/model, transport hang and revoked source produce truthful fixed errors, not fake readiness or hidden fallback.
 - [x] A5 Server restarts retain nonsecret configuration and canonical identity/facts/results; credential availability and required operator setup remain explicit.
