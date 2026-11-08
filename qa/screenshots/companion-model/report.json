@@ -1,0 +1,179 @@
+{
+  "startedAt": "2026-11-08T01:28:39.560Z",
+  "runId": "625f990f",
+  "serviceUrl": "http://127.0.0.1:44037",
+  "checks": [
+    {
+      "name": "初始 view 是 scripted + 未应用 + 未测试",
+      "mode": "scripted",
+      "applied": null,
+      "check": "unconfigured"
+    },
+    {
+      "name": "对话框摘要说明脚本模式，连接列表含多个连接",
+      "summary": "现在用脚本回复。要接真实模型，先选连接并填好地址和模型。",
+      "options": [
+        "Magpie",
+        "模拟连接（无真实模型）（模拟）"
+      ]
+    },
+    {
+      "name": "保存只写配置：网关 0 调用，配置已生效、密钥必填且可写",
+      "callsDelta": 0,
+      "baseUrl": "http://127.0.0.1:34835/v1"
+    },
+    {
+      "name": "key-only 只写密钥、输入立即清空、网关 0 调用",
+      "source": "memory",
+      "cleared": true
+    },
+    {
+      "name": "测试真实走 HTTP/SSE，恰好 1 次 peer 请求，evidence=network",
+      "callsDelta": 1,
+      "call": {
+        "model": "loopback-ok",
+        "stream": true,
+        "at": 1794101323261
+      },
+      "elapsedMs": 147
+    },
+    {
+      "name": "同一 commandId 的第二次测试是 duplicate，网关仍只有 1 次",
+      "receipt": "duplicate",
+      "callsDelta": 1
+    },
+    {
+      "name": "错误模型得到 failed + 固定错误码，不谎报通过",
+      "code": "unavailable"
+    },
+    {
+      "name": "挂起模型按服务端 15s 期限超时，未被无限等待",
+      "code": "timeout",
+      "elapsedMs": 15008,
+      "wallClockMs": 15122
+    },
+    {
+      "name": "synthetic 结论明确标注未连接真实模型",
+      "line": "09:29 模拟检查通过，未连接真实模型。"
+    },
+    {
+      "name": "只读入口可读、凭据不可写、写入 403",
+      "writable": false,
+      "status": 403
+    },
+    {
+      "name": "只读入口界面不出现密钥输入框，只给宿主注入说明",
+      "matched": "不允许在这里写密钥"
+    },
+    {
+      "name": "模型模式聊天拿到 peer 回复，文本明确标注回环未真实模型",
+      "calls": 1,
+      "reply": "回环协议联调回复：OK（未调用真实模型）。"
+    },
+    {
+      "name": "peer 按 ingress envelope 创建了任务",
+      "id": "ea36ab8a-3a14-4d4e-96b5-057c6dc36ef1",
+      "title": "回环模型协议报表（非真实模型）"
+    },
+    {
+      "name": "任务成功，产物恰为 summary.md 与 items.csv",
+      "names": [
+        "items.csv",
+        "summary.md"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "下载产物字节正确：summary.md 含总计 25，items.csv 合计 25",
+      "summarySha": "99de59b9b48e",
+      "csvSha": "f1b8c3dfd97d",
+      "total": 25
+    },
+    {
+      "name": "模式来回切换后 agent identity、任务与产物都保留",
+      "agentId": "faaba0e8-962c-4c81-81fd-7aad319b4a8b",
+      "taskStatus": "completed"
+    },
+    {
+      "name": "关闭态 1440px：display:none、无盒子、输入与模型按钮可真实点击",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "closed": {
+        "open": false,
+        "display": "none",
+        "pointerEvents": "auto",
+        "width": 0,
+        "height": 0
+      },
+      "reachable": {
+        "模型按钮": "reachable",
+        "输入框": "reachable",
+        "任务条": "reachable"
+      }
+    },
+    {
+      "name": "关闭态 390px：display:none、无盒子、输入与模型按钮可真实点击",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "closed": {
+        "open": false,
+        "display": "none",
+        "pointerEvents": "auto",
+        "width": 0,
+        "height": 0
+      },
+      "reachable": {
+        "模型按钮": "reachable",
+        "输入框": "reachable",
+        "任务条": "reachable"
+      }
+    },
+    {
+      "name": "390px 下对话框按钮在视口内且可命中",
+      "hit": "保存并应用"
+    },
+    {
+      "name": "键盘 Tab 顺序下每个焦点都有可见焦点环",
+      "count": 8
+    },
+    {
+      "name": "无未捕获页面错误",
+      "pageErrors": 0
+    }
+  ],
+  "screenshots": [
+    "qa/screenshots/companion-model/a-initial-dialog.png",
+    "qa/screenshots/companion-model/b-saved-scripted.png",
+    "qa/screenshots/companion-model/d-verified-network.png",
+    "qa/screenshots/companion-model/g-synthetic.png",
+    "qa/screenshots/companion-model/h-readonly-ingress.png",
+    "qa/screenshots/companion-model/i-model-chat.png",
+    "qa/screenshots/companion-model/i-task-artifacts.png",
+    "qa/screenshots/companion-model/k-closed-state.png",
+    "qa/screenshots/companion-model/j-390-keyboard.png"
+  ],
+  "cjkFonts": [
+    "Noto Serif CJK JP",
+    "Noto Serif CJK KR",
+    "Noto Serif CJK HK"
+  ],
+  "statsBaseline": 0,
+  "task": {
+    "id": "ea36ab8a-3a14-4d4e-96b5-057c6dc36ef1",
+    "title": "回环模型协议报表（非真实模型）"
+  },
+  "artifacts": {
+    "summary.md": "99de59b9b48e134ac754a62c9926aa76f5797b7f81d48d1f72fc9a280085d246",
+    "items.csv": "f1b8c3dfd97d5e33ba13ebd674afeeac8e2ea76055ddb9cd827121b3e2e566e6"
+  },
+  "diagnostics": {
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedRequests": []
+  },
+  "finishedAt": "2026-11-08T01:29:14.651Z"
+}
