@@ -57,7 +57,7 @@ Both report completed files, focused command outcomes and remaining constraints 
 - [x] Start a temporary service with isolated durable data, loopback ephemeral port and controlled model/scripted text. Open its real browser client and actual Linux Electron pet+console; drive actual DOM actions. Supply token through the console, never argv/report. Download through native chooser; if an automated destination seam is needed for byte transport checks, label it and retain separate actual chooser evidence.
 - [ ] Repeat only affected existing serial Windows tests on a real Windows runner when available: shared startup, real profile/page/avatar/audio admission, old data preservation, denied legacy reenable and supported local behavior. Existing legacy-Core probes remain historical/controlled legacy regressions; do not force them to assert a Core in shared default startup. Windows device/OS behavior absent from the runner remains explicitly pending, never inferred from Linux screenshots.
 
-Actual commands and private Linux tooling requirements are maintained in the [QA entry](../../../qa/companion-desktop-acceptance.md); the following was the original planned runner shape, not a claim of a one-shot full pass:
+Actual commands and private Linux tooling requirements are maintained in the [QA entry](../../../../../qa/companion-desktop-acceptance.md); the following was the original planned runner shape, not a claim of a one-shot full pass:
 
 ```sh
 COMPANION_ELECTRON=/absolute/provisioned/electron \

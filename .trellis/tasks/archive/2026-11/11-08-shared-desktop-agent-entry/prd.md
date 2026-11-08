@@ -1,6 +1,6 @@
 # Shared desktop Agent entry
 
-Status: implementation and scoped acceptance complete; ready for local commit and Trellis archival. The [model-backed text stage](../archive/2026-11/11-08-companion-model-text-loop/prd.md) is completed/archived with real host Magpie and Docker acceptance. This child implements the already selected independent-service ownership, not another host decision. GPT owns backend/integration; DeepSeek owns frontend.
+Status: implementation and scoped acceptance complete; ready for local commit and Trellis archival. The [model-backed text stage](../11-08-companion-model-text-loop/prd.md) is completed/archived with real host Magpie and Docker acceptance. This child implements the already selected independent-service ownership, not another host decision. GPT owns backend/integration; DeepSeek owns frontend.
 
 ## Goal
 
@@ -29,11 +29,11 @@ The existing desktop pet, desktop console and web text entry converse with the s
 
 ## Confirmed constraints / evidence
 
-- [Source-backed research](../11-06-unified-companion-architecture/research/shared-desktop-entry.md) identifies current unconditional local controllers, mixed persona/presentation preferences, fixed preload/CSP, available service APIs and the minimal profile-read gap.
+- [Source-backed research](../../../11-06-unified-companion-architecture/research/shared-desktop-entry.md) identifies current unconditional local controllers, mixed persona/presentation preferences, fixed preload/CSP, available service APIs and the minimal profile-read gap.
 - This Linux host originally lacked an Electron binary/display server; private verified tooling was provisioned and actual native runs completed. Existing native QA targets Windows; hardcoded win32 platform or fake renderer bridges cannot establish Linux acceptance. Provisioning bounded local QA tools is implementation/verification work; do not reinterpret platform incompatibility as permission to load Windows-only plugins.
 - Native platform support is scoped to the actual shared text/client composition. No broad Windows-feature port, new audio capture integration, Live2D overhaul, public deployment, multiuser pairing, legacy data migration or voice/platform automation belongs here.
 - Original4120 service remains stopped at the user's request. Use isolated profiles and controlled model/HTTP fixtures for ordinary gates. Real model calls are not needed for this client integration by default.
 
 ## Completion evidence
 
-The [stage QA summary](../../../qa/companion-desktop-acceptance.md) and [D1–D7 matrix](research/native-coverage.md) distinguish actual Linux native, real HTTP/file/kernel and renderer regression evidence. BUILD0 root gate passed; targeted BUILD1 sidebar rebuild/visual checks passed with identical Main/preload/worker/admission. Final independent Core4 and actual Docker/service18 passed with no skips and no real-model call. Windows-specific native/device behavior remains unverified, as allowed by this child’s explicit platform scope. Endpoint/token remain operator input; original4120/data stay preserved.
+The [stage QA summary](../../../../../qa/companion-desktop-acceptance.md) and [D1–D7 matrix](research/native-coverage.md) distinguish actual Linux native, real HTTP/file/kernel and renderer regression evidence. BUILD0 root gate passed; targeted BUILD1 sidebar rebuild/visual checks passed with identical Main/preload/worker/admission. Final independent Core4 and actual Docker/service18 passed with no skips and no real-model call. Windows-specific native/device behavior remains unverified, as allowed by this child’s explicit platform scope. Endpoint/token remain operator input; original4120/data stay preserved.
