@@ -4,46 +4,31 @@ import { PET_COPY } from './copy.js';
 
 export interface PetMenuProps {
   name: string | null;
-  canStop: boolean;
-  stopping: boolean;
-  onStop(): void;
-  guideDisabled: boolean;
-  guideBusy: boolean;
-  onGuide(): void;
-  quitDisabled: boolean;
-  onQuit(): void;
-  onClose?(): void;
-  onResumeDialog?(): void;
-  avatar?: React.ReactNode;
-  paused?: boolean;
-  pausePending?: boolean;
-  onTogglePause?(): void;
+  /** 服务连接的一句话事实；没有连接时说明为什么。 */
+  connectionLabel?: string | null;
   chatOpen?: boolean;
   chatDisabled?: boolean;
   onChat?(): void;
-  voiceEnabled?: boolean;
-  voicePending?: boolean;
-  voiceDisabled?: boolean;
-  talkKeyLabel?: string | null;
-  onToggleVoice?(): void;
+  /** 本机呈现的明暗；undefined 表示这条通道不可用。 */
   appearance?: 'light' | 'dark';
-  themePending?: boolean;
-  onToggleTheme?(): void;
+  onToggleAppearance?(): void;
   soundEnabled?: boolean;
   soundPending?: boolean;
   onToggleSound?(): void;
-  onHide?(): void;
-  onAppearance?(): void;
+  /** 停止这次回应：只打断当前前台生成，不取消任何已受理的后台任务。 */
+  canStop?: boolean;
+  stopping?: boolean;
+  onStop?(): void;
+  quitDisabled: boolean;
+  onQuit(): void;
+  onClose?(): void;
 }
 
 type MenuIconName =
-  | 'pause'
   | 'play'
   | 'settings'
   | 'power'
   | 'chat'
-  | 'mic'
-  | 'mic-off'
   | 'sun'
   | 'moon'
   | 'sound'
@@ -55,7 +40,6 @@ type MenuIconName =
 /** Independently drawn menu glyphs share one stroke and viewBox. */
 function MenuIcon({ name }: { name: MenuIconName }): React.JSX.Element {
   const glyphs: Record<MenuIconName, React.ReactNode> = {
-    pause: <path d="M9 6v12m6-12v12" />,
     play: <path d="m9 5 10 7-10 7Z" />,
     settings: (
       <>
@@ -70,17 +54,6 @@ function MenuIcon({ name }: { name: MenuIconName }): React.JSX.Element {
     ),
     chat: (
       <path d="M6 4h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-7l-5 4v-4H5a2 2 0 0 1-2-2V7a3 3 0 0 1 3-3Z" />
-    ),
-    mic: (
-      <>
-        <rect x="9" y="3" width="6" height="12" rx="3" />
-        <path d="M6 11v1a6 6 0 0 0 12 0v-1m-6 7v3m-3 0h6" />
-      </>
-    ),
-    'mic-off': (
-      <>
-        <path d="M9 8V6a3 3 0 0 1 6 0v5m-9 0v1a6 6 0 0 0 10 4m-4 2v3m-3 0h6M3 3l18 18" />
-      </>
     ),
     sun: (
       <>
@@ -138,36 +111,21 @@ function MenuPortrait(): React.JSX.Element {
 /** All toggle state is projected by the parent; this menu never saves its own preferences. */
 export function PetMenu({
   name,
-  canStop,
-  stopping,
+  connectionLabel = null,
+  canStop = false,
+  stopping = false,
   onStop,
-  guideDisabled,
-  guideBusy,
-  onGuide,
   quitDisabled,
   onQuit,
   onClose,
-  onResumeDialog,
-  avatar,
-  paused,
-  pausePending = false,
-  onTogglePause,
   chatOpen,
   chatDisabled = false,
   onChat,
-  voiceEnabled,
-  voicePending = false,
-  voiceDisabled = false,
-  talkKeyLabel,
-  onToggleVoice,
   appearance,
-  themePending = false,
-  onToggleTheme,
+  onToggleAppearance,
   soundEnabled,
   soundPending = false,
   onToggleSound,
-  onHide,
-  onAppearance,
 }: PetMenuProps): React.JSX.Element {
   const launcher = typeof window === 'undefined' ? undefined : window.petSettings;
   const [opening, setOpening] = useState(false);
@@ -189,11 +147,8 @@ export function PetMenu({
     }
   }
 
-  const pauseUnavailable = !onTogglePause || paused === undefined;
-  const voiceUnavailable = !onToggleVoice || voiceEnabled === undefined || voiceDisabled;
-  const themeUnavailable = !onToggleTheme || appearance === undefined;
+  const themeUnavailable = !onToggleAppearance || appearance === undefined;
   const soundUnavailable = !onToggleSound || soundEnabled === undefined;
-  const voiceLabel = voiceEnabled ? '关闭语音输入' : '开启语音输入';
   const themeLabel = appearance === 'dark' ? '切换为浅色' : '切换为深色';
   const soundLabel = soundEnabled ? '关闭音效' : '开启音效';
 
@@ -221,34 +176,27 @@ export function PetMenu({
           onClick={() => setMoreOpen((open) => !open)}
         >
           <span aria-hidden="true" inert>
-            {avatar ?? <MenuPortrait />}
+            <MenuPortrait />
           </span>
           <span className="pet-menu__more-mark" aria-hidden="true">
             ⌄
           </span>
         </button>
-        {name !== null && name !== '' ? (
-          <p className="pet-menu__name" data-testid="pet-name" title={name}>
-            {name}
-          </p>
-        ) : (
-          <span className="pet-menu__name" />
-        )}
+        <span className="pet-menu__title">
+          {name !== null && name !== '' ? (
+            <p className="pet-menu__name" data-testid="pet-name" title={name}>
+              {name}
+            </p>
+          ) : (
+            <span className="pet-menu__name" />
+          )}
+          {connectionLabel === null ? null : (
+            <span className="pet-menu__connection" data-testid="pet-menu-connection">
+              {connectionLabel}
+            </span>
+          )}
+        </span>
         <div className="pet-menu__header-actions">
-          <button
-            type="button"
-            className="pet-menu__header-button pet-menu__pause"
-            data-testid="pet-menu-pause"
-            aria-label={paused ? '继续运行' : '暂停运行'}
-            aria-pressed={paused}
-            aria-busy={pausePending}
-            disabled={pauseUnavailable || pausePending}
-            data-active={paused === false}
-            title={pauseUnavailable ? '暂停与继续暂不可用' : paused ? '继续运行' : '暂停运行'}
-            onClick={onTogglePause}
-          >
-            <MenuIcon name={paused ? 'play' : 'pause'} />
-          </button>
           <button
             type="button"
             className="pet-menu__header-button"
@@ -290,36 +238,12 @@ export function PetMenu({
         <button
           type="button"
           className="pet-menu__tile"
-          data-testid="pet-menu-voice"
-          aria-label={voiceLabel}
-          aria-pressed={voiceEnabled}
-          aria-busy={voicePending}
-          disabled={voiceUnavailable || voicePending}
-          data-off={voiceEnabled === false}
-          title={
-            voiceUnavailable
-              ? '语音输入暂不可用'
-              : `${voiceLabel}${talkKeyLabel ? `（${talkKeyLabel}）` : ''}`
-          }
-          onClick={onToggleVoice}
-        >
-          <MenuIcon name={voiceEnabled === false ? 'mic-off' : 'mic'} />
-          {voiceEnabled && talkKeyLabel ? (
-            <span className="pet-menu__key" aria-hidden="true" title={talkKeyLabel}>
-              {talkKeyLabel}
-            </span>
-          ) : null}
-        </button>
-        <button
-          type="button"
-          className="pet-menu__tile"
           data-testid="pet-menu-theme"
           aria-label={themeLabel}
           aria-pressed={appearance === undefined ? undefined : appearance === 'dark'}
-          aria-busy={themePending}
-          disabled={themeUnavailable || themePending}
+          disabled={themeUnavailable}
           title={themeUnavailable ? '主题切换暂不可用' : themeLabel}
-          onClick={onToggleTheme}
+          onClick={onToggleAppearance}
         >
           <MenuIcon name={appearance === 'light' ? 'sun' : 'moon'} />
         </button>
@@ -337,41 +261,9 @@ export function PetMenu({
         >
           <MenuIcon name={soundEnabled === false ? 'sound-off' : 'sound'} />
         </button>
-        <button
-          type="button"
-          className="pet-menu__tile"
-          data-testid="pet-menu-hide"
-          aria-label="隐藏桌宠"
-          disabled={!onHide}
-          title={onHide ? '隐藏桌宠' : '隐藏桌宠暂不可用'}
-          onClick={onHide}
-        >
-          <MenuIcon name="hide" />
-        </button>
-        <button
-          type="button"
-          className="pet-menu__tile"
-          data-testid="pet-menu-appearance"
-          aria-label="更换装扮"
-          disabled={!onAppearance}
-          title={onAppearance ? '更换装扮' : '装扮入口暂不可用'}
-          onClick={onAppearance}
-        >
-          <MenuIcon name="shirt" />
-        </button>
       </div>
       <div className="pet-menu__more" id={moreId} hidden={!moreOpen}>
-        {onResumeDialog ? (
-          <button
-            type="button"
-            className="pet-menu__button"
-            data-testid="pet-resume-dialog"
-            onClick={onResumeDialog}
-          >
-            继续提示
-          </button>
-        ) : null}
-        {canStop ? (
+        {canStop && onStop !== undefined ? (
           <button
             type="button"
             className="pet-menu__button"
@@ -383,16 +275,6 @@ export function PetMenu({
             {stopping ? PET_COPY.stopping : PET_COPY.stop}
           </button>
         ) : null}
-        <button
-          type="button"
-          className="pet-menu__button"
-          data-testid="pet-guide"
-          onClick={onGuide}
-          disabled={guideDisabled || guideBusy}
-          title={guideDisabled ? PET_COPY.guideUnavailable : PET_COPY.guideTitle}
-        >
-          {guideBusy ? PET_COPY.guideBusy : PET_COPY.guide}
-        </button>
         {onClose ? (
           <button
             type="button"

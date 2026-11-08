@@ -249,6 +249,10 @@ html[data-console-style='minimal'] .pk-dialog__body {
   flex-direction: column;
   gap: 8px;
 }
+/* 折叠轨里只放得下状态与一枚图标按钮；宽窗口的完整文字保持原样。 */
+.pb-run__icon {
+  display: none;
+}
 .pb-run__state {
   color: var(--ink-quiet);
   font-size: 13px;
@@ -1208,6 +1212,45 @@ dialog::backdrop {
   }
   .rail__meta {
     display: none;
+  }
+  /* 轨道内宽只有 48px：footer 不再留 14px 内边距，否则按钮必然越界。 */
+  .rail__foot {
+    padding: 8px 0;
+  }
+  .pb-run {
+    width: 100%;
+    align-items: center;
+    gap: 6px;
+  }
+  .pb-run__state,
+  .pb-run .row__value {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pb-run__icon {
+    display: inline-flex;
+  }
+  /* 文字仍留在无障碍树里，只是不再参与排版。 */
+  .pb-run__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .pb-run__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
   }
   .card__body--split {
     grid-template-columns: 1fr;

@@ -1,5 +1,7 @@
 import type {
   ApplicationBridge,
+  DesktopCompanionBridge,
+  DesktopPresentationBridge,
   ConsoleBridge,
   DemoBridge,
   ModelConnectionBridge,
@@ -9,6 +11,8 @@ import type {
 
 declare global {
   interface Window {
+    readonly petCompanion?: DesktopCompanionBridge;
+    readonly petLocalPresentation?: DesktopPresentationBridge;
     readonly petDesignLab?: StartDesignLabPresentation;
     readonly petConsole?: ConsoleBridge;
     readonly petDemo?: DemoBridge;

@@ -7,6 +7,8 @@ export interface PetComposerProps {
   canSend: boolean;
   sending: boolean;
   onSend(text: string): Promise<boolean>;
+  /** 现在不能发的原因；有值时写在输入框下面，而不是只靠 tooltip。 */
+  blockedReason?: string | null;
   onClose?(): void;
 }
 
@@ -14,6 +16,7 @@ export function PetComposer({
   canSend,
   sending,
   onSend,
+  blockedReason = null,
   onClose,
 }: PetComposerProps): React.JSX.Element {
   const [text, setText] = useState('');
@@ -106,12 +109,17 @@ export function PetComposer({
           data-testid="pet-composer-send"
           disabled={!canSubmit}
           aria-busy={sending}
-          title={canSend ? PET_COPY.send : PET_COPY.sendBlocked}
+          title={canSend ? PET_COPY.send : (blockedReason ?? PET_COPY.sendBlocked)}
           onClick={() => void submit()}
         >
           {sending ? PET_COPY.sending : PET_COPY.send}
         </button>
       </div>
+      {blockedReason === null || canSend ? null : (
+        <p className="pet-composer__reason" role="status" data-testid="pet-composer-reason">
+          {blockedReason}
+        </p>
+      )}
       {onClose ? (
         <button
           type="button"

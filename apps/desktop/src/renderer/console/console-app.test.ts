@@ -1,33 +1,46 @@
 import { describe, expect, it } from 'vitest';
 
-import { runState } from './console-app.js';
+import { connectionView } from '../shared/companion-state.js';
+import { initialDesktopCompanionState } from './test-state.js';
 
 /**
- * 侧栏那枚回应开关常年可见，说的话只有三种：桌宠没启动、正在回应、已暂停。
- * 这里守的是"能不能按"与"按下去是什么"不互相冒充——
- * 没启动时不能按，就不许写成可以继续。
+ * 侧栏底部那一行说的是连接事实，不是本地运行状态：
+ * 源停用、断线、连接中各有各的说法，谁也不能冒充「已连接」。
  */
-describe('侧栏回应开关的状态', () => {
-  it('桌宠未启动：状态说未启动，按钮按不动', () => {
-    expect(runState(false, false)).toEqual({
-      status: '桌宠未启动',
-      action: '暂停回应',
-      hint: '桌宠未启动，现在没有可暂停的回应',
-      enabled: false,
+describe('连接状态行', () => {
+  it('未配置时是未连接，语气中性', () => {
+    const state = { ...initialDesktopCompanionState(), source: 'ready' as const };
+    expect(connectionView(state)).toEqual({ tone: 'muted', label: '未连接', detail: null });
+  });
+
+  it('断线要说当前状态未知，不能把上次的运行当成现在', () => {
+    const view = connectionView({
+      ...initialDesktopCompanionState(),
+      source: 'ready',
+      phase: 'offline',
     });
+    expect(view.tone).toBe('danger');
+    expect(view.detail).toContain('当前状态未知');
   });
 
-  it('在跑：按下去是暂停', () => {
-    const state = runState(true, false);
-    expect(state.status).toBe('运行中');
-    expect(state.action).toBe('暂停回应');
-    expect(state.enabled).toBe(true);
+  it('源被停用与连接状态正交：即便 phase 仍是 offline 也只说停用', () => {
+    const view = connectionView({
+      ...initialDesktopCompanionState(),
+      source: 'disabled',
+      phase: 'offline',
+    });
+    expect(view.label).toBe('连接组件已停用');
+    expect(view.detail).toContain('插件页恢复');
   });
 
-  it('已暂停：按下去是继续，不写回暂停', () => {
-    const state = runState(true, true);
-    expect(state.status).toBe('已暂停');
-    expect(state.action).toBe('继续回应');
-    expect(state.enabled).toBe(true);
+  it('连接中带上是哪一台主机，不写成已连接', () => {
+    const view = connectionView({
+      ...initialDesktopCompanionState(),
+      source: 'ready',
+      phase: 'connecting',
+      baseUrl: 'http://127.0.0.1:4120',
+    });
+    expect(view.tone).toBe('warn');
+    expect(view.detail).toContain('127.0.0.1:4120');
   });
 });

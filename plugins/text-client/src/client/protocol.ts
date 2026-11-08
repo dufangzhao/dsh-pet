@@ -16,6 +16,8 @@ import {
   type CompanionModelTestCommand,
   type CompanionModelView,
   type CompanionSnapshot,
+  type CompanionProfileView,
+  type CompanionTask,
   type CompanionStopCommand,
   type KernelError,
   type Result,
@@ -27,6 +29,8 @@ import {
   parseModelView,
   parseReceipt,
   parseSnapshot,
+  parseProfile,
+  parseTask,
 } from './guards.js';
 import { SseDecoder, type SseMessage } from './sse.js';
 
@@ -88,6 +92,32 @@ function statusError(status: number): KernelError {
   return makeError('invalid-input', false);
 }
 
+async function responseJson(response: Response): Promise<unknown> {
+  if (!response.body) throw new Error('Missing JSON body');
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const next = await reader.read();
+      if (next.done) break;
+      size += next.value.byteLength;
+      if (size > 64 * 1024) throw new Error('Wire budget exceeded');
+      chunks.push(next.value);
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+}
+
 async function request(
   transport: ClientTransport,
   path: string,
@@ -112,6 +142,7 @@ async function request(
       },
       // 同源部署没有跨站 cookie 需求；显式关闭以免携带无关凭据。
       credentials: 'omit',
+      redirect: 'error',
       cache: 'no-store',
     });
   } catch {
@@ -119,7 +150,7 @@ async function request(
   }
   let body: unknown;
   try {
-    body = await response.json();
+    body = await responseJson(response);
   } catch {
     if (timeout.aborted) return { ok: false, error: makeError('timeout') };
     // 200 却不是 JSON，说明中间有代理或服务本身坏了，不能当成正常拒绝。
@@ -154,9 +185,11 @@ async function command(
   transport: ClientTransport,
   path: string,
   body: { readonly commandId: string },
+  signal?: AbortSignal,
 ): Promise<Result<CompanionCommandReceipt>> {
   const result = await request(transport, path, {
     method: 'POST',
+    ...(signal ? { signal } : {}),
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
@@ -169,16 +202,26 @@ async function command(
 export function sendMessage(
   transport: ClientTransport,
   command_: CompanionMessageCommand,
+  signal?: AbortSignal,
 ): Promise<Result<CompanionCommandReceipt>> {
-  return command(transport, '/api/messages', command_);
+  return command(transport, '/api/messages', command_, signal);
 }
 
-export function stopTask(
+export async function stopTask(
   transport: ClientTransport,
   taskId: string,
   stop: CompanionStopCommand,
+  signal?: AbortSignal,
 ): Promise<Result<CompanionCommandReceipt>> {
-  return command(transport, `/api/tasks/${encodeURIComponent(taskId)}/stop`, stop);
+  const result = await command(
+    transport,
+    `/api/tasks/${encodeURIComponent(taskId)}/stop`,
+    stop,
+    signal,
+  );
+  return result.ok && result.value.taskId !== taskId
+    ? { ok: false, error: makeError('unavailable', false) }
+    : result;
 }
 
 /**
@@ -189,9 +232,11 @@ async function modelCommand(
   transport: ClientTransport,
   path: string,
   command: CompanionModelSaveCommand | CompanionModelTestCommand,
+  signal?: AbortSignal,
 ): Promise<Result<CompanionModelView>> {
   const result = await request(transport, path, {
     method: 'POST',
+    ...(signal ? { signal } : {}),
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(command),
   });
@@ -213,24 +258,28 @@ async function modelCommand(
 export function saveModel(
   transport: ClientTransport,
   command: CompanionModelSaveCommand,
+  signal?: AbortSignal,
 ): Promise<Result<CompanionModelView>> {
-  return modelCommand(transport, '/api/model', command);
+  return modelCommand(transport, '/api/model', command, signal);
 }
 
 export function testModel(
   transport: ClientTransport,
   command: CompanionModelTestCommand,
+  signal?: AbortSignal,
 ): Promise<Result<CompanionModelView>> {
-  return modelCommand(transport, '/api/model/test', command);
+  return modelCommand(transport, '/api/model/test', command, signal);
 }
 
 /** 密钥只随这一次请求体离开页面；返回的是非secret视图。 */
 export async function writeModelCredential(
   transport: ClientTransport,
   command: CompanionModelCredentialCommand,
+  signal?: AbortSignal,
 ): Promise<Result<CompanionModelView>> {
   const result = await request(transport, '/api/model/credential', {
     method: 'POST',
+    ...(signal ? { signal } : {}),
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(command),
   });
@@ -241,28 +290,91 @@ export async function writeModelCredential(
     : { ok: true, value: view };
 }
 
-/** 产物字节：失败时返回固定错误，不把响应体当文件。 */
+/** Authenticated bytes; caller owns bounded streaming and actual body cleanup. */
+export async function fetchArtifact(
+  transport: ClientTransport,
+  artifactId: string,
+  signal?: AbortSignal,
+): Promise<Result<Response>> {
+  const deadline = AbortSignal.timeout(120_000);
+  try {
+    const response = await fetch(
+      `${transport.baseUrl}/api/artifacts/${encodeURIComponent(artifactId)}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${transport.token}` },
+        credentials: 'omit',
+        cache: 'no-store',
+        redirect: 'error',
+        signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
+      },
+    );
+    if (!response.ok) {
+      await response.body?.cancel();
+      return { ok: false, error: statusError(response.status) };
+    }
+    return { ok: true, value: response };
+  } catch {
+    return { ok: false, error: deadline.aborted ? makeError('timeout') : networkError() };
+  }
+}
+
 export async function getArtifact(
   transport: ClientTransport,
   artifactId: string,
+  signal?: AbortSignal,
 ): Promise<Result<Blob>> {
-  let response: Response;
+  const result = await fetchArtifact(transport, artifactId, signal);
+  if (!result.ok) return result;
   try {
-    response = await fetch(`${transport.baseUrl}/api/artifacts/${encodeURIComponent(artifactId)}`, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${transport.token}` },
-      credentials: 'omit',
-      cache: 'no-store',
-    });
+    return { ok: true, value: await result.value.blob() };
   } catch {
     return { ok: false, error: networkError() };
   }
-  if (!response.ok) return { ok: false, error: statusError(response.status) };
-  try {
-    return { ok: true, value: await response.blob() };
-  } catch {
-    return { ok: false, error: networkError() };
-  }
+}
+
+export async function getProfile(
+  transport: ClientTransport,
+  signal?: AbortSignal,
+): Promise<Result<CompanionProfileView>> {
+  const result = await request(transport, '/api/profile', {
+    method: 'GET',
+    ...(signal ? { signal } : {}),
+  });
+  if (!result.ok) return result;
+  const value = parseProfile(result.value);
+  return value ? { ok: true, value } : { ok: false, error: makeError('unavailable', false) };
+}
+export async function getTask(
+  transport: ClientTransport,
+  id: string,
+  signal?: AbortSignal,
+): Promise<Result<CompanionTask>> {
+  const result = await request(transport, `/api/tasks/${encodeURIComponent(id)}`, {
+    method: 'GET',
+    ...(signal ? { signal } : {}),
+  });
+  if (!result.ok) return result;
+  const value = parseTask(result.value);
+  return value && value.id === id
+    ? { ok: true, value }
+    : { ok: false, error: makeError('unavailable', false) };
+}
+export async function stopForeground(
+  transport: ClientTransport,
+  commandId: string,
+  signal?: AbortSignal,
+): Promise<Result<null>> {
+  const result = await request(transport, '/api/foreground/stop', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ commandId }),
+    ...(signal ? { signal } : {}),
+  });
+  if (!result.ok) return result;
+  return result.value === null
+    ? { ok: true, value: null }
+    : { ok: false, error: makeError('unavailable', false) };
 }
 
 /**
@@ -291,6 +403,7 @@ export async function streamEvents(
       method: 'GET',
       headers: { Authorization: `Bearer ${transport.token}`, Accept: 'text/event-stream' },
       credentials: 'omit',
+      redirect: 'error',
       cache: 'no-store',
       signal,
     });
@@ -352,6 +465,8 @@ export async function streamEvents(
   } finally {
     idle.stop();
     detach();
+    controller.abort();
+    await reader.cancel().catch(() => {});
     reader.releaseLock();
   }
 }

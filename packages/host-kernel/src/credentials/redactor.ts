@@ -34,6 +34,34 @@ export class SecretRedactor {
     for (const value of this.#values) if (text.includes(value)) return true;
     return false;
   }
+  /** Inspect decoded own strings/keys without serializing or changing native values/errors. */
+  containsValue(input: unknown): boolean {
+    const pending: unknown[] = [input];
+    const seen = new WeakSet<object>();
+    try {
+      while (pending.length) {
+        const value = pending.pop();
+        if (typeof value === 'string') {
+          if (this.contains(value)) return true;
+          continue;
+        }
+        if (value === null || (typeof value !== 'object' && typeof value !== 'function')) continue;
+        if (types.isProxy(value)) return true;
+        if (seen.has(value)) continue;
+        seen.add(value);
+        for (const key of Reflect.ownKeys(value)) {
+          if (typeof key === 'string' && this.contains(key)) return true;
+          const descriptor = Object.getOwnPropertyDescriptor(value, key);
+          if (!descriptor) continue;
+          if ('value' in descriptor) pending.push(descriptor.value);
+          else if (!(types.isNativeError(value) && key === 'stack')) return true;
+        }
+      }
+      return false;
+    } catch {
+      return true;
+    }
+  }
   containsBytes(bytes: Uint8Array): boolean {
     const value = Buffer.from(bytes);
     for (const pattern of this.#values)

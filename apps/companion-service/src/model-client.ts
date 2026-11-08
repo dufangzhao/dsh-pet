@@ -51,17 +51,7 @@ export function createAuthorizedModelClient(
     authorize: credentialPermissionAuthorizer(host.permissions),
   });
   broker.redactor.add(options.apiKey);
-  const safe = (value: unknown): boolean => {
-    try {
-      const text =
-        value instanceof Error
-          ? JSON.stringify({ ...value, message: value.message })
-          : JSON.stringify(value);
-      return !text || !broker.redactor.contains(text);
-    } catch {
-      return false;
-    }
-  };
+  const safe = (value: unknown): boolean => !broker.redactor.containsValue(value);
   return {
     client: {
       async respond(request, generateOptions = {}) {

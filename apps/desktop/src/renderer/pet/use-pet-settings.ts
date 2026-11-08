@@ -1,4 +1,4 @@
-import type { PetPresentationTheme, Result, VoiceInputSettings } from '@pet/contracts';
+import type { PetPresentationTheme, Result } from '@pet/contracts';
 import { useEffect, useState, type CSSProperties } from 'react';
 
 interface SnapshotReader<T> {
@@ -6,59 +6,47 @@ interface SnapshotReader<T> {
   onChanged(listener: () => void): () => void;
 }
 
+/**
+ * 桌宠窗口的明暗与配色来自设置台那一个主题所有者（window.petPresentation）。
+ *
+ * 语音输入不属于这个组合：它读的是本机设备与模型，共享阶段不再挂这条通道。
+ * 读不到就说读不到，不拿默认配色冒充已同步。
+ */
 export function usePetSettings() {
   const [theme, setTheme] = useState<PetPresentationTheme | null>(null);
-  const [voice, setVoice] = useState<VoiceInputSettings | null>(null);
   const [themeError, setThemeError] = useState<string | null>(null);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
-    const watch = <T>(
-      bridge: SnapshotReader<T> | undefined,
-      apply: (snapshot: T) => void,
-      failure: (text: string | null) => void,
-      message: string,
-    ): (() => void) | undefined => {
-      if (!bridge) return undefined;
-      let sequence = 0;
-      const read = (): void => {
-        const current = ++sequence;
-        void Promise.resolve()
-          .then(() => bridge.getSnapshot())
-          .then((reply) => {
-            if (!active || current !== sequence) return;
-            if (reply.ok) {
-              apply(reply.value);
-              failure(null);
-            } else failure(message);
-          })
-          .catch(() => {
-            if (active && current === sequence) failure(message);
-          });
-      };
-      const detach = bridge.onChanged(read);
-      read();
-      return detach;
+    const bridge: SnapshotReader<{ theme: PetPresentationTheme | null }> | undefined =
+      typeof window === 'undefined' ? undefined : window.petPresentation;
+    if (!bridge) {
+      setThemeError('桌宠配色同步暂不可用');
+      return;
+    }
+    let sequence = 0;
+    const read = (): void => {
+      const current = ++sequence;
+      void Promise.resolve()
+        .then(() => bridge.getSnapshot())
+        .then((reply) => {
+          if (!active || current !== sequence) return;
+          if (reply.ok) {
+            setTheme(reply.value.theme);
+            setThemeError(null);
+          } else setThemeError('读取外观设置失败。');
+        })
+        .catch(() => {
+          if (active && current === sequence) setThemeError('读取外观设置失败。');
+        });
     };
-    const presentation = watch(
-      window.petPresentation,
-      (snapshot) => setTheme(snapshot.theme),
-      setThemeError,
-      '读取外观设置失败。',
-    );
-    const input = watch(
-      window.petVoiceInput,
-      (snapshot) => setVoice(snapshot.settings),
-      setVoiceError,
-      '读取语音输入设置失败。',
-    );
+    const detach = bridge.onChanged(read);
+    read();
     return () => {
       active = false;
-      presentation?.();
-      input?.();
+      detach();
     };
   }, []);
-  return { theme, voice, notice: themeError ?? voiceError };
+  return { theme, notice: themeError };
 }
 
 export function petPresentationStyle(

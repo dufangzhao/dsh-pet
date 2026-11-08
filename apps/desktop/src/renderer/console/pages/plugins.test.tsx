@@ -63,8 +63,6 @@ function page(
       onOpenPermissions={noop}
       pending={over.pending ?? new Map()}
       onAction={noop}
-      stopping={false}
-      onRequestStopAll={noop}
     />,
   );
 }

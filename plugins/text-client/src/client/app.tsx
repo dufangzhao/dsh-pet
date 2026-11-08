@@ -50,8 +50,10 @@ export function App(): JSX.Element {
       />
       <ModelDialog
         open={modelOpen}
-        state={state}
-        client={client}
+        view={state.snapshot?.model ?? null}
+        live={state.phase === 'live'}
+        agentStatus={state.snapshot?.agent.status ?? null}
+        transport={client}
         onClose={() => setModelOpen(false)}
       />
       {state.error === null ? null : (

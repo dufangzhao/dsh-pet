@@ -18,6 +18,7 @@ export class ConsolePluginRequests {
   constructor(
     private readonly host: Pick<DesktopHost, 'manager' | 'configs'>,
     private readonly snapshot: () => ConsoleSnapshot,
+    private readonly adopted?: (pluginId: string, enabled: boolean) => Promise<void>,
   ) {}
   async handle(
     source: PetRequestSource,
@@ -59,6 +60,24 @@ export class ConsolePluginRequests {
         else outcome = await this.host.manager.uninstall(identity);
         let error = outcome.ok ? null : outcome.error;
         const after = this.host.manager.get(identity);
+        // Failure can follow adopted desired state (e.g. pending_restart during stop).
+        // Conversely an outer reply or an unchanged default false is not an adopted intent.
+        const changed =
+          after &&
+          (after.owner.generation !== current.owner.generation ||
+            after.state !== current.state ||
+            after.desiredActive !== current.desiredActive);
+        const desired = action === 'enable';
+        // Kernel remove reports unavailable only after its adopted stop and failed removal.
+        const removalFailedAfterStop =
+          action === 'uninstall' &&
+          !outcome.ok &&
+          outcome.error.code === 'unavailable' &&
+          after?.state === 'disabled';
+        const adopted = after
+          ? after.desiredActive === desired && (outcome.ok || changed || removalFailedAfterStop)
+          : action === 'uninstall' && outcome.ok;
+        if (adopted) await this.adopted?.(identity.pluginId, desired);
         if (
           outcome.ok &&
           action !== 'uninstall' &&

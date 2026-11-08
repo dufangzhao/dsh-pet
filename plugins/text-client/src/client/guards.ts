@@ -10,6 +10,7 @@ import {
   isKernelErrorCode,
   makeError,
   type CompanionAgentView,
+  type CompanionProfileView,
   type CompanionArtifact,
   type CompanionCommandReceipt,
   type CompanionEvent,
@@ -194,7 +195,7 @@ function parsePlugin(value: unknown): CompanionPluginView | null {
   return { id, name, state, desiredActive, protected: guarded };
 }
 
-function parseTask(value: unknown): CompanionTask | null {
+export function parseTask(value: unknown): CompanionTask | null {
   if (!isRecord(value)) return null;
   const id = value['id'];
   const executionId = value['executionId'];
@@ -212,7 +213,12 @@ function parseTask(value: unknown): CompanionTask | null {
   if (!isText(stdout) || !isText(stderr) || !isFlag(logsTruncated)) return null;
   const artifacts = parseList(value['artifacts'], parseArtifact);
   const error = parseNullableError(value['error']);
-  if (artifacts === null || error === undefined) return null;
+  if (
+    artifacts === null ||
+    error === undefined ||
+    artifacts.some((artifact) => artifact.taskId !== id)
+  )
+    return null;
   return {
     id,
     executionId,
@@ -482,4 +488,24 @@ export function parseEvent(value: unknown): CompanionEvent | null {
   if (!isText(id) || !isText(epoch) || !isCount(sequence) || !isTime(time)) return null;
   if (!isEventKind(kind) || !isJsonObject(data)) return null;
   return { id, epoch, sequence, time, kind, data };
+}
+
+/** Config strings count code points; wire payloads retain their independent UTF-8 budget. */
+export function parseProfile(value: unknown): CompanionProfileView | null {
+  if (!isRecord(value)) return null;
+  const { agentId, name, persona, revision } = value;
+  if (
+    typeof agentId !== 'string' ||
+    !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(agentId) ||
+    typeof name !== 'string' ||
+    [...name].length < 1 ||
+    [...name].length > 80 ||
+    typeof persona !== 'string' ||
+    [...persona].length < 1 ||
+    [...persona].length > 16384 ||
+    !isCount(revision) ||
+    revision < 1
+  )
+    return null;
+  return { agentId, name, persona, revision };
 }

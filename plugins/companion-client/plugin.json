@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.companion-client",
+  "version": "0.1.0",
+  "displayName": { "en": "Shared companion client", "zh-CN": "共享同伴连接" },
+  "description": { "en": "One source-owned desktop connection to the independent service" },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["win32-x64", "linux-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "client",
+      "capability": "companion.client@1",
+      "features": {
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["service-token"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrl"],
+      "properties": { "baseUrl": { "type": "string", "maxLength": 2048, "default": "" } }
+    },
+    "apply": { "baseUrl": "immediate" }
+  }
+}

@@ -5,6 +5,7 @@ export function createDemoTray(actions: {
   showSettings(): void;
   stop(): void;
   quit(): void;
+  stopLabel?: string;
 }): Tray {
   const pixels = Buffer.alloc(16 * 16 * 4);
   for (let y = 0; y < 16; y++)
@@ -25,7 +26,7 @@ export function createDemoTray(actions: {
     Menu.buildFromTemplate([
       { id: 'show-pet', label: '显示桌宠', click: actions.showPet },
       { id: 'settings', label: '打开设置', click: actions.showSettings },
-      { id: 'stop', label: '停止当前操作', click: actions.stop },
+      { id: 'stop', label: actions.stopLabel ?? '停止当前操作', click: actions.stop },
       { type: 'separator' },
       { id: 'quit', label: '退出桌宠', click: actions.quit },
     ]),

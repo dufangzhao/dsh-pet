@@ -24,6 +24,7 @@ async function setup(
     remove?: () => Promise<boolean>;
     protected?: boolean;
     cleanupFails?: boolean;
+    adopted?: (pluginId: string, enabled: boolean) => Promise<void>;
   } = {},
 ) {
   let received: unknown;
@@ -99,7 +100,7 @@ async function setup(
   return {
     host,
     snapshot,
-    requests: new ConsolePluginRequests(host, snapshot),
+    requests: new ConsolePluginRequests(host, snapshot, options.adopted),
     owner: () => manager.get(id)!.owner,
     received: () => received,
   };
@@ -110,6 +111,62 @@ afterEach(async () => {
     await host.manager.shutdown();
   }
 });
+it('reports adopted intent only for the acted-on role, not unrelated installed defaults or rejected actions', async () => {
+  const adopted = vi.fn(async (_pluginId: string, _enabled: boolean) => {});
+  const f = await setup({ adopted });
+  const base = f.host.manager.get(id)?.manifest;
+  if (!base) throw new Error('missing manifest');
+  f.host.manager.install(
+    { ...base, id: 'test.skipped' },
+    { directory: path.resolve('skipped-fixture'), origin: 'user' },
+  );
+  const old = f.owner();
+  await f.requests.handle(source, [{ owner: old, action: 'enable' }]);
+  expect(adopted.mock.calls).toEqual([[id.pluginId, true]]);
+  await f.requests.handle(source, [{ owner: old, action: 'disable' }]); // stale owner: no intent adopted
+  expect(adopted.mock.calls).toEqual([[id.pluginId, true]]);
+  expect(
+    f.host.manager.get({ pluginId: 'test.skipped', instanceId: 'default' })?.desiredActive,
+  ).toBe(false);
+});
+it('records adopted stop when uninstall fails after stopping an already-disabled role', async () => {
+  const adopted = vi.fn(async (_pluginId: string, _enabled: boolean) => {});
+  const f = await setup({ adopted, remove: async () => false });
+  expect(
+    await f.requests.handle(source, [{ owner: f.owner(), action: 'uninstall' }]),
+  ).toMatchObject({
+    ok: true,
+    value: {
+      operationError: { code: 'unavailable' },
+      snapshot: { plugins: [{ state: 'disabled', desiredActive: false }] },
+    },
+  });
+  expect(adopted.mock.calls).toEqual([[id.pluginId, false]]);
+});
+
+it('retains an adopted disable despite pending_restart but not a pre-admission protected failure', async () => {
+  const adopted = vi.fn(async (_pluginId: string, _enabled: boolean) => {});
+  const f = await setup({ adopted, cleanupFails: true });
+  await f.requests.handle(source, [{ owner: f.owner(), action: 'enable' }]);
+  const stopped = await f.requests.handle(source, [{ owner: f.owner(), action: 'disable' }]);
+  expect(stopped).toMatchObject({
+    ok: true,
+    value: {
+      operationError: expect.any(Object),
+      snapshot: { plugins: [{ state: 'pending_restart', desiredActive: false }] },
+    },
+  });
+  expect(adopted.mock.calls).toEqual([
+    [id.pluginId, true],
+    [id.pluginId, false],
+  ]);
+  await f.requests.handle(source, [{ owner: f.owner(), action: 'enable' }]); // pending_restart rejects before adopting
+  expect(adopted).toHaveBeenCalledTimes(2);
+  const protected_ = await setup({ adopted, protected: true });
+  await protected_.requests.handle(source, [{ owner: protected_.owner(), action: 'disable' }]);
+  expect(adopted).toHaveBeenCalledTimes(2);
+});
+
 it('enables with the persisted candidate and returns the new owner and real contributions without a followup read', async () => {
   const f = await setup();
   await f.host.configs.save(id, { count: 9 }, 1);

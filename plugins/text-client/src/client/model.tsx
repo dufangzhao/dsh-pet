@@ -1,8 +1,11 @@
 import { useEffect, useId, useRef, useState, type JSX } from 'react';
 import { Button, Dialog, Field } from '@pet/ui-kit';
-import type { CompanionModelConnectorView } from '@pet/contracts';
+import type {
+  CompanionAgentView,
+  CompanionModelConnectorView,
+  CompanionModelView,
+} from '@pet/contracts';
 
-import type { CompanionClient } from './client.js';
 import {
   followable,
   availability,
@@ -24,13 +27,15 @@ import {
   setSettings,
   summaryText,
   type ModelFormState,
+  type ModelTransport,
 } from './model-form.js';
-import type { ClientState } from './state.js';
 
-interface ModelDialogProps {
+export interface ModelDialogProps {
   readonly open: boolean;
-  readonly state: ClientState;
-  readonly client: CompanionClient;
+  readonly view: CompanionModelView | null;
+  readonly live: boolean;
+  readonly agentStatus: CompanionAgentView['status'] | null;
+  readonly transport: ModelTransport;
   readonly onClose: () => void;
 }
 
@@ -41,8 +46,14 @@ interface ModelDialogProps {
  * 判断全在 model-form.ts 里（纯函数，可逐条回归）；这里只负责把它接到 DOM。
  * 三条不变量：CAS 用草稿读到时的版本、密钥发起即清空、视图是唯一真相。
  */
-export function ModelDialog({ open, state, client, onClose }: ModelDialogProps): JSX.Element {
-  const view = state.snapshot?.model ?? null;
+export function ModelDialog({
+  open,
+  view,
+  live,
+  agentStatus,
+  transport,
+  onClose,
+}: ModelDialogProps): JSX.Element {
   const [form, setForm] = useState<ModelFormState>(emptyModelForm);
   // 每次打开/关闭都换代：关掉之后才回来的响应不能改到下一份表单上。
   const generation = useRef(0);
@@ -71,9 +82,11 @@ export function ModelDialog({ open, state, client, onClose }: ModelDialogProps):
 
   if (view === null) {
     return (
-      <Dialog open={open} title="模型连接" onClose={onClose}>
-        <p className="tc-model__note">这个服务没有提供模型设置。</p>
-      </Dialog>
+      <div className="tc-model-dialog">
+        <Dialog open={open} title="模型连接" onClose={onClose}>
+          <p className="tc-model__note">这个服务没有提供模型设置。</p>
+        </Dialog>
+      </div>
     );
   }
 
@@ -82,8 +95,8 @@ export function ModelDialog({ open, state, client, onClose }: ModelDialogProps):
   const selected = view.connectors.find((item) => item.id === draft.connectorId) ?? null;
   const dirty = dirtyOf(draft, view, form.key);
   const rules = availability(current, view, {
-    live: state.phase === 'live',
-    agentBusy: state.snapshot?.agent.status === 'busy',
+    live,
+    agentBusy: agentStatus === 'busy',
   });
   const moved = changedUnderneath(draft, view);
 
@@ -100,195 +113,199 @@ export function ModelDialog({ open, state, client, onClose }: ModelDialogProps):
     const key = form.key;
     const pending = beginOperation(current, 'saving');
     setForm(pending);
-    settle(started, await runSave(pending, view, client, key));
+    settle(started, await runSave(pending, view, transport, key));
   };
 
   const test = async (): Promise<void> => {
     const started = generation.current;
     const pending = beginOperation(current, 'testing');
     setForm(pending);
-    settle(started, await runTest(pending, view, client));
+    settle(started, await runTest(pending, view, transport));
   };
 
   const removeKey = async (): Promise<void> => {
     const started = generation.current;
     const pending = beginOperation(current, 'credential');
     setForm(pending);
-    settle(started, await runRemoveKey(pending, view, client));
+    settle(started, await runRemoveKey(pending, view, transport));
   };
 
   return (
-    <Dialog
-      open={open}
-      title="模型连接"
-      onClose={onClose}
-      footer={
-        <>
-          <Button onClick={onClose}>关闭</Button>
-          <Button
-            variant="secondary"
-            aria-busy={form.busy === 'testing'}
-            disabled={!rules.canTest}
-            title={rules.testReason ?? undefined}
-            onClick={() => void test()}
-          >
-            {form.busy === 'testing' ? '正在测试…' : '测试连接'}
-          </Button>
-          <Button
-            variant="primary"
-            aria-busy={form.busy === 'saving' || form.busy === 'credential'}
-            disabled={!rules.canSave}
-            title={rules.saveReason ?? undefined}
-            onClick={() => void save()}
-          >
-            {form.busy === 'saving' || form.busy === 'credential' ? '正在应用…' : '保存并应用'}
-          </Button>
-        </>
-      }
-    >
-      <div className="tc-model">
-        <p className="tc-model__summary">{summaryText(view, state.snapshot?.agent.status ?? '')}</p>
-
-        {moved ? (
-          <p className="tc-model__note" role="status">
-            服务端配置在别处改过。你的修改还在这里，保存时会以你读到的那一版为准。
-          </p>
-        ) : null}
-
-        <Field label="连接">
-          {(control) => (
-            <select
-              id={control.inputId}
-              className="tc-model__control"
-              value={draft.connectorId}
-              disabled={form.busy !== null}
-              onChange={(event) =>
-                setForm((state_) => selectConnector(state_, view, event.target.value))
-              }
-            >
-              {view.connectors.map((connector) => (
-                <option key={connector.id} value={connector.id}>
-                  {connector.label}
-                  {connector.synthetic ? '（模拟）' : ''}
-                </option>
-              ))}
-            </select>
-          )}
-        </Field>
-
-        <Field label="服务模式" hint="保存时生效">
-          {(control) => (
-            <select
-              id={control.inputId}
-              className="tc-model__control"
-              value={draft.mode}
-              disabled={form.busy !== null}
-              onChange={(event) =>
-                setForm((state_) =>
-                  setMode(state_, event.target.value === 'model' ? 'model' : 'scripted'),
-                )
-              }
-            >
-              <option value="scripted">脚本演示，不调用模型</option>
-              <option value="model">模型回复</option>
-            </select>
-          )}
-        </Field>
-
-        {draft.settings === null ? (
-          <p className="tc-model__note">
-            这个连接由程序配置，这里只负责选用和测试。
-            {selected?.model === null ? '' : ` 模型：${selected?.model}`}
-          </p>
-        ) : (
+    <div className="tc-model-dialog">
+      <Dialog
+        open={open}
+        title="模型连接"
+        onClose={onClose}
+        footer={
           <>
-            <Field label="接口地址" hint="含 /v1">
-              {(control) => (
-                <input
-                  id={control.inputId}
-                  className="tc-model__control"
-                  value={draft.settings?.baseUrl ?? ''}
-                  spellCheck={false}
-                  autoComplete="off"
-                  disabled={form.busy !== null}
-                  onChange={(event) =>
-                    setForm((state_) => setSettings(state_, { baseUrl: event.target.value }))
-                  }
-                />
-              )}
-            </Field>
-            <Field label="模型">
-              {(control) => (
-                <input
-                  id={control.inputId}
-                  className="tc-model__control"
-                  value={draft.settings?.model ?? ''}
-                  spellCheck={false}
-                  autoComplete="off"
-                  disabled={form.busy !== null}
-                  onChange={(event) =>
-                    setForm((state_) => setSettings(state_, { model: event.target.value }))
-                  }
-                />
-              )}
-            </Field>
-            <Field
-              label="鉴权方式"
-              description="本机回环用公开客户端标识；远程网关用它自己的密钥。"
+            <Button onClick={onClose}>关闭</Button>
+            <Button
+              variant="secondary"
+              aria-busy={form.busy === 'testing'}
+              disabled={!rules.canTest}
+              title={rules.testReason ?? undefined}
+              onClick={() => void test()}
             >
-              {(control) => (
-                <select
-                  id={control.inputId}
-                  className="tc-model__control"
-                  value={draft.settings?.authMode ?? 'local-client-id'}
-                  disabled={form.busy !== null}
-                  onChange={(event) =>
-                    setForm((state_) =>
-                      setSettings(state_, {
-                        authMode:
-                          event.target.value === 'gateway-key' ? 'gateway-key' : 'local-client-id',
-                      }),
-                    )
-                  }
-                >
-                  <option value="local-client-id">本机回环，不需要密钥</option>
-                  <option value="gateway-key">网关密钥</option>
-                </select>
-              )}
-            </Field>
+              {form.busy === 'testing' ? '正在测试…' : '测试连接'}
+            </Button>
+            <Button
+              variant="primary"
+              aria-busy={form.busy === 'saving' || form.busy === 'credential'}
+              disabled={!rules.canSave}
+              title={rules.saveReason ?? undefined}
+              onClick={() => void save()}
+            >
+              {form.busy === 'saving' || form.busy === 'credential' ? '正在应用…' : '保存并应用'}
+            </Button>
           </>
-        )}
+        }
+      >
+        <div className="tc-model">
+          <p className="tc-model__summary">{summaryText(view, agentStatus ?? '')}</p>
 
-        <CredentialField
-          credential={selected?.credential ?? null}
-          value={form.key}
-          busy={form.busy !== null}
-          pendingAuth={pendingAuthChange(draft, view)}
-          onChange={(value) => setForm((state_) => setKey(state_, value))}
-          onRemove={() => void removeKey()}
-        />
+          {moved ? (
+            <p className="tc-model__note" role="status">
+              服务端配置在别处改过。你的修改还在这里，保存时会以你读到的那一版为准。
+            </p>
+          ) : null}
 
-        <p className={`tc-model__check tc-model__check--${view.check.state}`} role="status">
-          {checkText(view.check, view, dirty.nonsecret, state.phase === 'live')}
-        </p>
+          <Field label="连接">
+            {(control) => (
+              <select
+                id={control.inputId}
+                className="tc-model__control"
+                value={draft.connectorId}
+                disabled={form.busy !== null}
+                onChange={(event) =>
+                  setForm((state_) => selectConnector(state_, view, event.target.value))
+                }
+              >
+                {view.connectors.map((connector) => (
+                  <option key={connector.id} value={connector.id}>
+                    {connector.label}
+                    {connector.synthetic ? '（模拟）' : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
 
-        {form.notice === null ? null : (
-          <p
-            className={form.notice.kind === 'error' ? 'tc-model__error' : 'tc-model__note'}
-            role={form.notice.kind === 'error' ? 'alert' : 'status'}
-          >
-            {form.notice.text}
+          <Field label="服务模式" hint="保存时生效">
+            {(control) => (
+              <select
+                id={control.inputId}
+                className="tc-model__control"
+                value={draft.mode}
+                disabled={form.busy !== null}
+                onChange={(event) =>
+                  setForm((state_) =>
+                    setMode(state_, event.target.value === 'model' ? 'model' : 'scripted'),
+                  )
+                }
+              >
+                <option value="scripted">脚本演示，不调用模型</option>
+                <option value="model">模型回复</option>
+              </select>
+            )}
+          </Field>
+
+          {draft.settings === null ? (
+            <p className="tc-model__note">
+              这个连接由程序配置，这里只负责选用和测试。
+              {selected?.model === null ? '' : ` 模型：${selected?.model}`}
+            </p>
+          ) : (
+            <>
+              <Field label="接口地址" hint="含 /v1">
+                {(control) => (
+                  <input
+                    id={control.inputId}
+                    className="tc-model__control"
+                    value={draft.settings?.baseUrl ?? ''}
+                    spellCheck={false}
+                    autoComplete="off"
+                    disabled={form.busy !== null}
+                    onChange={(event) =>
+                      setForm((state_) => setSettings(state_, { baseUrl: event.target.value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field label="模型">
+                {(control) => (
+                  <input
+                    id={control.inputId}
+                    className="tc-model__control"
+                    value={draft.settings?.model ?? ''}
+                    spellCheck={false}
+                    autoComplete="off"
+                    disabled={form.busy !== null}
+                    onChange={(event) =>
+                      setForm((state_) => setSettings(state_, { model: event.target.value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field
+                label="鉴权方式"
+                description="本机回环用公开客户端标识；远程网关用它自己的密钥。"
+              >
+                {(control) => (
+                  <select
+                    id={control.inputId}
+                    className="tc-model__control"
+                    value={draft.settings?.authMode ?? 'local-client-id'}
+                    disabled={form.busy !== null}
+                    onChange={(event) =>
+                      setForm((state_) =>
+                        setSettings(state_, {
+                          authMode:
+                            event.target.value === 'gateway-key'
+                              ? 'gateway-key'
+                              : 'local-client-id',
+                        }),
+                      )
+                    }
+                  >
+                    <option value="local-client-id">本机回环，不需要密钥</option>
+                    <option value="gateway-key">网关密钥</option>
+                  </select>
+                )}
+              </Field>
+            </>
+          )}
+
+          <CredentialField
+            credential={selected?.credential ?? null}
+            value={form.key}
+            busy={form.busy !== null}
+            pendingAuth={pendingAuthChange(draft, view)}
+            onChange={(value) => setForm((state_) => setKey(state_, value))}
+            onRemove={() => void removeKey()}
+          />
+
+          <p className={`tc-model__check tc-model__check--${view.check.state}`} role="status">
+            {checkText(view.check, view, dirty.nonsecret, live)}
           </p>
-        )}
 
-        {/* 冲突的唯一出路：读回最新版本，保留自己填的值，再由用户决定是否保存。 */}
-        {form.notice?.kind === 'error' && form.notice.error?.code === 'conflict' ? (
-          <Button size="small" onClick={() => setForm((state_) => rebaseOnLatest(state_, view))}>
-            读取最新版本，保留我的修改
-          </Button>
-        ) : null}
-      </div>
-    </Dialog>
+          {form.notice === null ? null : (
+            <p
+              className={form.notice.kind === 'error' ? 'tc-model__error' : 'tc-model__note'}
+              role={form.notice.kind === 'error' ? 'alert' : 'status'}
+            >
+              {form.notice.text}
+            </p>
+          )}
+
+          {/* 冲突的唯一出路：读回最新版本，保留自己填的值，再由用户决定是否保存。 */}
+          {form.notice?.kind === 'error' && form.notice.error?.code === 'conflict' ? (
+            <Button size="small" onClick={() => setForm((state_) => rebaseOnLatest(state_, view))}>
+              读取最新版本，保留我的修改
+            </Button>
+          ) : null}
+        </div>
+      </Dialog>
+    </div>
   );
 }
 

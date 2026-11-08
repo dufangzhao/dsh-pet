@@ -35,6 +35,7 @@
     "@pet/contracts": "workspace:*",
     "@pet/host-kernel": "workspace:*",
     "@pet/ui-kit": "workspace:*",
+    "@pet/text-client": "workspace:*",
     "morphicons": "2.0.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"

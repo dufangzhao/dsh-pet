@@ -1,4 +1,8 @@
 import { mkdir } from 'node:fs/promises';
+import {
+  SHARED_FORBIDDEN_PLUGIN_IDS,
+  presentationOnlyChange,
+} from './shared-composition-policy.js';
 import path from 'node:path';
 import { createHostPermissions } from './host-permissions.js';
 import { checkHostReadiness, type HostAdapterAvailability } from './host-readiness.js';
@@ -23,9 +27,15 @@ import {
   SecretRedactor,
   credentialPermissionAuthorizer,
   type SecretCipher,
+  type RuntimeDriver,
 } from '@pet/host-kernel';
 import {
   makeError,
+  PLATFORM_TARGETS,
+  DESKTOP_COMPANION_PLUGIN_ID,
+  type OwnerRef,
+  type PlatformTarget,
+  type JsonObject,
   type HostStatus,
   type ConsoleBuiltinPackage,
   type Result,
@@ -45,6 +55,9 @@ export class DesktopHost {
   readonly getPackage: ReturnType<typeof createHostPermissions>['getPackage'];
   readonly verifyTrust: ReturnType<typeof createHostPermissions>['verifyTrust'];
   readonly credentials: CredentialBroker | undefined;
+  readonly #configurationObservers = new Map<string, Set<(revision: number) => void>>();
+  #configurationObserverFaults = 0;
+  #sharedCompanion = false;
   #closing: Promise<{ exitConfirmed: boolean; forced: boolean }> | undefined;
   private constructor(
     driver: RemoteRuntimeDriver,
@@ -76,6 +89,11 @@ export class DesktopHost {
   }
   static async create(options: {
     executable: string;
+    sharedCompanion?: boolean;
+    companionLifecycle?: {
+      readonly sourcePluginId: string;
+      stopFor(owner: OwnerRef): Promise<void>;
+    };
     onChanged?: () => void;
     workerEntry: string;
     builtinDirectory: string;
@@ -102,6 +120,7 @@ export class DesktopHost {
       manager?: PluginManager;
       tasks?: TaskSupervisor;
       hostPort?: RuntimeHostPort;
+      configurationCommit?: (pluginId: string, revision: number) => void;
     } = {};
     const builtins = await BuiltinRegistry.create(path.dirname(options.userDirectory));
     const approval = new ApprovalInbox(options.approvalTimeoutMs ?? 30000);
@@ -166,16 +185,65 @@ export class DesktopHost {
           void reference.manager.reportFault(owner).then(() => options.onChanged?.());
       },
     });
-    const configs = new ConfigService(
-      new FileConfigStore(configRoot),
-      (owner) => reference.manager?.isLive(owner) === true,
-    );
+    const configs = new (class extends ConfigService {
+      override async save(
+        ...args: Parameters<ConfigService['save']>
+      ): ReturnType<ConfigService['save']> {
+        if (options.sharedCompanion && args[0].pluginId === 'pet.profile') {
+          const current = await this.get(args[0]);
+          if (!current.ok) return current;
+          const candidate = args[1];
+          if (
+            !candidate ||
+            typeof candidate !== 'object' ||
+            Array.isArray(candidate) ||
+            !presentationOnlyChange(current.value.data, candidate as JsonObject)
+          )
+            return { ok: false, error: makeError('permission-denied', false) };
+        }
+        const result = await super.save(...args);
+        if (result.ok) {
+          try {
+            reference.configurationCommit?.(args[0].pluginId, result.value.snapshot.revision);
+          } catch {
+            /* A committed Config cannot be reported as uncommitted. Observer records its own fault. */
+          }
+        }
+        return result;
+      }
+    })(new FileConfigStore(configRoot), (owner) => reference.manager?.isLive(owner) === true);
+    const lifecycle = options.companionLifecycle;
+    const managedDriver: RuntimeDriver = lifecycle
+      ? {
+          start(activation, registrar) {
+            const session = driver.start(activation, registrar);
+            if (activation.owner.pluginId !== lifecycle.sourcePluginId) return session;
+            return {
+              ready: session.ready,
+              async stop() {
+                const outcomes = await Promise.allSettled([
+                  Promise.resolve().then(() => lifecycle.stopFor(activation.owner)),
+                  Promise.resolve().then(() => session.stop()),
+                ]);
+                if (outcomes.some((outcome) => outcome.status === 'rejected'))
+                  throw new Error('Client cleanup incomplete');
+              },
+            };
+          },
+        }
+      : driver;
+    const actualPlatform = `${process.platform}-${process.arch}`;
+    if (
+      options.sharedCompanion &&
+      !(PLATFORM_TARGETS as readonly string[]).includes(actualPlatform)
+    )
+      throw new Error('Unsupported shared desktop platform');
     const manager = new PluginManager({
-      driver,
+      driver: managedDriver,
       ...(options.protectedPackages ? { protectedPackages: options.protectedPackages } : {}),
       trust: async (snapshot) => permission.isTrusted(snapshot.owner),
       hostApiVersion: '1.0.0',
-      platform: 'win32-x64',
+      platform: options.sharedCompanion ? (actualPlatform as PlatformTarget) : 'win32-x64',
       removeInstallation: async (snapshot, installation) => {
         const removed =
           installation.origin === 'builtin'
@@ -188,15 +256,21 @@ export class DesktopHost {
         });
         return true;
       },
-      readiness: (snapshot, candidate) =>
-        checkHostReadiness(
+      readiness: (snapshot, candidate) => {
+        if (options.sharedCompanion && SHARED_FORBIDDEN_PLUGIN_IDS.has(snapshot.owner.pluginId))
+          return Promise.resolve(makeError('not-ready', false));
+        const clientSource =
+          options.sharedCompanion === true &&
+          snapshot.owner.pluginId === DESKTOP_COMPANION_PLUGIN_ID;
+        return checkHostReadiness(
           snapshot.owner,
           snapshot.manifest,
           candidate,
           configs,
-          credentials !== undefined,
+          credentials !== undefined || clientSource,
           options.adapters,
-        ),
+        );
+      },
     });
     reference.manager = manager;
     const tasks = new TaskSupervisor(manager);
@@ -223,6 +297,16 @@ export class DesktopHost {
       permission,
       credentials,
     );
+    host.#sharedCompanion = options.sharedCompanion === true;
+    reference.configurationCommit = (pluginId, revision) => {
+      for (const observer of host.#configurationObservers.get(pluginId) ?? []) {
+        try {
+          observer(revision);
+        } catch {
+          host.#configurationObserverFaults++;
+        }
+      }
+    };
     try {
       const discovered = await discoverPlugins(roots);
       for (const candidate of discovered.plugins) {
@@ -248,12 +332,26 @@ export class DesktopHost {
       throw new Error('Host initialization failed');
     }
   }
+  get configurationObserverFailures(): number {
+    return this.#configurationObserverFaults;
+  }
+  onConfigurationCommit(pluginId: string, observer: (revision: number) => void): () => void {
+    const observers =
+      this.#configurationObservers.get(pluginId) ?? new Set<(revision: number) => void>();
+    this.#configurationObservers.set(pluginId, observers);
+    observers.add(observer);
+    return () => {
+      observers.delete(observer);
+    };
+  }
   availableBuiltins(): readonly ConsoleBuiltinPackage[] {
     return this.builtins
       .available()
       .filter((pkg) => !this.manager.get({ pluginId: pkg.pluginId, instanceId: 'default' }));
   }
   async restoreBuiltin(pluginId: string, expectedDigest: string): Promise<Result<null>> {
+    if (this.#sharedCompanion && SHARED_FORBIDDEN_PLUGIN_IDS.has(pluginId))
+      return { ok: false, error: makeError('not-ready', false) };
     const identity = { pluginId, instanceId: 'default' };
     if (this.manager.get(identity)) return { ok: false, error: makeError('conflict', false) };
     const candidate = await this.builtins.verified(pluginId, expectedDigest);

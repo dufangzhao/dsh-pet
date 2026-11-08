@@ -1,5 +1,5 @@
 import { createServer, type ServerResponse } from 'node:http';
-import { mkdtemp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -51,6 +51,7 @@ async function fixture(
   handle: (response: ServerResponse, body: JsonObject) => void,
   declareCredentials = true,
   providerFactory?: (baseUrl: string, apiKey: string) => ResponseClient,
+  apiKey = secret,
 ) {
   const directory = await mkdtemp(path.join(tmpdir(), 'companion-model-authority-'));
   const sourceManifest = JSON.parse(
@@ -111,7 +112,7 @@ async function fixture(
   if (!address || typeof address === 'string') throw new Error('Missing fixture address');
   const model = createAuthorizedModelClient(host, sourceId, {
     baseUrl: `http://127.0.0.1:${address.port}/v1`,
-    apiKey: secret,
+    apiKey,
     ...(providerFactory ? { providerFactory } : {}),
   });
   cleanups.push(async () => {
@@ -121,6 +122,12 @@ async function fixture(
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
     );
+    if (
+      path.dirname(directory) !== tmpdir() ||
+      !path.basename(directory).startsWith('companion-model-authority-')
+    )
+      throw new Error('Unexpected fixture directory');
+    await rm(directory, { recursive: true });
   });
   return { host, model, requests, directory };
 }
@@ -133,6 +140,24 @@ async function assertNoSecretFiles(directory: string): Promise<void> {
       expect((await readFile(file)).includes(Buffer.from(secret))).toBe(false);
   }
 }
+
+it('rejects decoded quoted/backslash gateway-key echo without changing native results or exceptions', async () => {
+  const key = 'gateway-quoted-"key\\\\-canary-123456';
+  expect(JSON.stringify(response(key)).includes(key)).toBe(false);
+  const f = await fixture(
+    (outgoing) => {
+      outgoing.writeHead(200, { 'Content-Type': 'application/json' });
+      outgoing.end(JSON.stringify(response(key)));
+    },
+    true,
+    undefined,
+    key,
+  );
+  await expect(f.model.client.respond(request)).rejects.toMatchObject({
+    error: { code: 'permission-denied' },
+  });
+  expect(f.requests).toHaveLength(1);
+});
 
 it.each([true, false])(
   'invokes a custom native factory only inside the source grant and preserves its private exception (%s)',

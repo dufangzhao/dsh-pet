@@ -1,482 +1,255 @@
-import { useId, useState, type JSX } from 'react';
+/**
+ * 人格页：服务里那个助手的只读身份 + 这台机器上的呈现细节。
+ *
+ * 人格正文属于服务，这一版只读：修订号或 agentId 与当前快照不符时只报冲突，
+ * 不自动重读、不写回本地偏好。气泡字号、速度、发光、双击与状态气泡这些是本地呈现，
+ * 走 presentation.save，与服务人格无关。
+ */
+import { errorMessage } from '@pet/contracts';
+import { useCallback, useEffect, useId, useRef, useState, type JSX } from 'react';
 
-import type { ApplicationPreferences, PersonaTemplate } from '@pet/contracts';
-import { APPLICATION_PROFILE_MAX_PROMPT } from '@pet/contracts';
-
-import { ConsoleStatus } from '../console-status.js';
-import { PROFILE_CONFLICT, describeError } from '../copy.js';
-import { replyLanguage, styleLabel } from '../labels.js';
-import { Button, Card, Field, Select, Status, Switch } from '../minimal-ui/controls.js';
+import { Button, Card, Status } from '../minimal-ui/controls.js';
 import { SpeechSettingsPanel } from '../minimal-ui/speech-settings.js';
-import { PersonaPromptEditor } from '../persona-prompt-editor.js';
-import type { ApplicationState } from '../use-application.js';
+import type { CompanionView } from '../../shared/use-companion.js';
+import type { LocalPresentationView } from '../../shared/use-local-presentation.js';
+import { agentModeLabel, clockTime, connectionView } from '../../shared/companion-state.js';
 
 export interface PersonaPageProps {
-  app: ApplicationState;
+  companion: CompanionView;
+  presentation: LocalPresentationView;
   notify: (message: string, tone: 'ok' | 'danger') => void;
 }
 
-const HABIT_FIELDS = [
-  'petName',
-  'userName',
-  'replyLanguage',
-  'style',
-  'doubleClickTyping',
-  'statusBubble',
-  'saidBubble',
-  'bubbleFontSize',
-  'bubbleSpeed',
-  'glow',
-  'hover',
-] as const;
-const BUBBLE_SWITCHES = [
-  ['doubleClickTyping', '双击桌宠打开聊天'],
-  ['statusBubble', '显示处理状态气泡'],
-  ['saidBubble', '显示回复气泡'],
-] as const;
 const RANGES = [
   { field: 'bubbleFontSize', label: '气泡字号', min: 80, max: 160, unit: '%' },
   { field: 'bubbleSpeed', label: '气泡消失速度', min: 50, max: 200, unit: '%' },
   { field: 'glow', label: '角色外发光', min: 0, max: 16, unit: '' },
 ] as const;
 
-/** All edits stay in the shared profile draft until an explicit CAS save succeeds. */
-export function PersonaPage({ app, notify }: PersonaPageProps): JSX.Element {
-  const [tab, setTab] = useState<'habits' | 'templates'>('habits');
-  const base = useId();
-  const values = app.values;
-  const stored = app.snapshot?.profile ?? null;
-  const prompt = app.snapshot?.prompt ?? null;
-  const selected =
-    values?.personaTemplates.find((item) => item.id === values.personaTemplate) ?? null;
-  const habitEdited = HABIT_FIELDS.some((field) => app.edited.has(field));
-  const templateEdited =
-    app.edited.has('personaTemplate') ||
-    app.edited.has('personaTemplates') ||
-    app.edited.has('personaPrompt');
-  const templateValid =
-    values !== null &&
-    values.personaPrompt.trim() !== '' &&
-    values.personaPrompt.length <= APPLICATION_PROFILE_MAX_PROMPT &&
-    values.personaTemplates.every(
-      (item) =>
-        item.name.trim() !== '' &&
-        item.prompt.trim() !== '' &&
-        item.prompt.length <= APPLICATION_PROFILE_MAX_PROMPT,
-    );
+const SWITCHES = [
+  ['doubleClickTyping', '双击桌宠打开聊天'],
+  ['statusBubble', '显示处理状态气泡'],
+  ['saidBubble', '显示回复气泡'],
+] as const;
 
-  const save = async (patch: Partial<ApplicationPreferences>, label: string): Promise<void> => {
-    const outcome = await app.save(patch);
-    notify(
-      outcome.ok ? `${label}已保存。` : `${label}没有保存：${outcome.error ?? '未知原因'}`,
-      outcome.ok ? 'ok' : 'danger',
-    );
+export function PersonaPage({ companion, presentation, notify }: PersonaPageProps): JSX.Element {
+  const state = companion.state;
+  const snapshot = state?.snapshot ?? null;
+  const preferences = presentation.snapshot?.preferences ?? null;
+  const [profile, setProfile] = useState<{
+    agentId: string;
+    name: string;
+    persona: string;
+    revision: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+  const generation = useRef(0);
+
+  const load = useCallback(async (): Promise<void> => {
+    if (state === null || state.connectionId === null) return;
+    const started = ++generation.current;
+    setLoading(true);
+    setFailure(null);
+    const result = await companion.readProfile();
+    if (generation.current !== started) return;
+    setLoading(false);
+    if (result.ok) setProfile(result.value);
+    else if (result.error.code === 'conflict')
+      setFailure('人格在别处刚改过，这一版对不上；等下一次刷新后再看。');
+    else setFailure(`人格没有读出来：${errorMessage(result.error)}`);
+  }, [companion, state]);
+
+  // 目标换了就丢掉旧正文：不拿上一个服务的人格冒充现在这一个。
+  useEffect(() => {
+    setProfile(null);
+    setFailure(null);
+    generation.current += 1;
+  }, [state?.connectionId]);
+
+  const save = async (patch: Parameters<LocalPresentationView['save']>[0], label: string) => {
+    const ok = await presentation.save(patch);
+    if (!ok) notify(`${label}没有保存。`, 'danger');
   };
-  const saveHabits = (): void => {
-    if (!values) return;
-    void save(
-      {
-        petName: values.petName.trim(),
-        userName: values.userName.trim(),
-        replyLanguage: values.replyLanguage,
-        style: values.style,
-        doubleClickTyping: values.doubleClickTyping,
-        statusBubble: values.statusBubble,
-        saidBubble: values.saidBubble,
-        bubbleFontSize: values.bubbleFontSize,
-        bubbleSpeed: values.bubbleSpeed,
-        glow: values.glow,
-        hover: values.hover,
-      },
-      '习惯',
-    );
-  };
-  const saveTemplates = (): void => {
-    if (!values) return;
-    if (!templateValid) {
-      notify('请填写模板名称和正文，并检查正文长度。草稿已保留。', 'danger');
-      return;
-    }
-    void save(
-      {
-        personaTemplate: values.personaTemplate,
-        personaPrompt: values.personaPrompt,
-        personaTemplates: values.personaTemplates.map((item) => ({
-          ...item,
-          name: item.name.trim(),
-        })),
-      },
-      '人格模板',
-    );
-  };
-  const chooseTemplate = (id: string): void => {
-    const item = values?.personaTemplates.find((entry) => entry.id === id);
-    if (!item) return;
-    app.edit('personaTemplate', item.id);
-    app.edit('personaPrompt', item.prompt);
-  };
-  const editTemplate = (patch: Partial<Pick<PersonaTemplate, 'name' | 'prompt'>>): void => {
-    if (!values || !selected || selected.builtin) return;
-    app.edit(
-      'personaTemplates',
-      values.personaTemplates.map((item) =>
-        item.id === selected.id ? { ...item, ...patch } : item,
-      ),
-    );
-  };
-  const editPrompt = (text: string): void => {
-    app.edit('personaPrompt', text);
-    editTemplate({ prompt: text });
-  };
-  const createTemplate = (copy: boolean): void => {
-    if (!values || values.personaTemplates.length >= 16) return;
-    const item: PersonaTemplate = {
-      id: `custom-${crypto.randomUUID()}`,
-      name: copy ? `${selected?.name ?? '当前人格'}副本`.slice(0, 40) : '新模板',
-      prompt: copy ? values.personaPrompt : '',
-      builtin: false,
-    };
-    app.edit('personaTemplates', [...values.personaTemplates, item]);
-    app.edit('personaTemplate', item.id);
-    app.edit('personaPrompt', item.prompt);
-  };
-  const resetTemplate = (): void => {
-    if (!selected || !values) return;
-    const original = stored?.data.personaTemplates.find((item) => item.id === selected.id);
-    if (!original) return;
-    app.edit(
-      'personaTemplates',
-      values.personaTemplates.map((item) => (item.id === original.id ? { ...original } : item)),
-    );
-    app.edit('personaPrompt', original.prompt);
-  };
+
+  const connection = state === null ? null : connectionView(state);
+  const canRead = state !== null && state.connectionId !== null && state.phase === 'live';
 
   return (
-    <ConsoleStatus
-      loading={app.loading}
-      error={app.error}
-      available={app.available}
-      onRetry={app.refresh}
-    >
-      {values === null || prompt === null ? null : (
-        <>
-          <div className="persona-tabs" role="tablist" aria-label="人设设置">
-            {(['habits', 'templates'] as const).map((name) => (
-              <button
-                key={name}
-                type="button"
-                className="persona-tab"
-                role="tab"
-                id={`${base}-tab-${name}`}
-                aria-controls={`${base}-panel-${name}`}
-                aria-selected={tab === name}
-                tabIndex={tab === name ? 0 : -1}
-                data-testid={`persona-tab-${name}`}
-                onClick={() => setTab(name)}
-                onKeyDown={(event) => {
-                  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-                  event.preventDefault();
-                  const next =
-                    event.key === 'Home'
-                      ? 'habits'
-                      : event.key === 'End'
-                        ? 'templates'
-                        : tab === 'habits'
-                          ? 'templates'
-                          : 'habits';
-                  setTab(next);
-                  document.getElementById(`${base}-tab-${next}`)?.focus();
-                }}
-              >
-                {name === 'habits' ? '习惯' : '人格模板'}
-              </button>
-            ))}
-          </div>
-          {app.conflict ? (
-            <p role="alert" className="field__error">
-              {PROFILE_CONFLICT} 草稿仍保留。
-              <Button size="small" onClick={app.refresh}>
-                读取最新版本
-              </Button>
-            </p>
-          ) : null}
-          <div
-            className="persona-panel"
-            role="tabpanel"
-            id={`${base}-panel-habits`}
-            aria-labelledby={`${base}-tab-habits`}
-            hidden={tab !== 'habits'}
+    <>
+      <Card
+        title="服务里的助手"
+        action={
+          <Button
+            size="small"
+            busy={loading}
+            disabled={!canRead}
+            data-testid="persona-read"
+            onClick={() => void load()}
           >
-            <Card
-              title="基本设定"
-              action={<Status>{habitEdited ? '有未保存的改动' : '与已保存设置一致'}</Status>}
-            >
-              <div className="field-row">
-                <Field label="它的名字" className="field--grow">
-                  {({ inputId }) => (
-                    <div className="inputForm">
-                      <input
-                        id={inputId}
-                        className="input"
-                        value={values.petName}
-                        maxLength={40}
-                        autoComplete="off"
-                        disabled={app.saving}
-                        data-testid="pref-pet-name"
-                        onChange={(event) => app.edit('petName', event.target.value)}
-                      />
-                    </div>
-                  )}
-                </Field>
-                <Field label="称呼你" className="field--grow">
-                  {({ inputId }) => (
-                    <div className="inputForm">
-                      <input
-                        id={inputId}
-                        className="input"
-                        value={values.userName}
-                        maxLength={40}
-                        autoComplete="off"
-                        disabled={app.saving}
-                        data-testid="pref-user-name"
-                        onChange={(event) => app.edit('userName', event.target.value)}
-                      />
-                    </div>
-                  )}
-                </Field>
-              </div>
-              <div className="field-row">
-                <Field label="回复语言" className="field--grow">
-                  {({ inputId }) => (
-                    <Select
-                      id={inputId}
-                      value={values.replyLanguage}
-                      data-testid="pref-reply-language"
-                      disabled={app.saving}
-                      options={(['zh-CN', 'en'] as const).map((value) => ({
-                        value,
-                        label: replyLanguage(value),
-                      }))}
-                      onChange={(event) => {
-                        const next = event.target.value;
-                        if (next === 'zh-CN' || next === 'en') app.edit('replyLanguage', next);
-                      }}
-                    />
-                  )}
-                </Field>
-                <Field label="说话风格" className="field--grow">
-                  {({ inputId }) => (
-                    <Select
-                      id={inputId}
-                      value={values.style}
-                      data-testid="pref-style-select"
-                      disabled={app.saving}
-                      options={(['quiet', 'natural', 'lively'] as const).map((value) => ({
-                        value,
-                        label: styleLabel(value),
-                      }))}
-                      onChange={(event) => {
-                        const next = event.target.value;
-                        if (next === 'quiet' || next === 'natural' || next === 'lively')
-                          app.edit('style', next);
-                      }}
-                    />
-                  )}
-                </Field>
-              </div>
-            </Card>
-            <Card title="聊天与气泡">
-              <div className="rows rows--tight">
-                {BUBBLE_SWITCHES.map(([field, label]) => (
-                  <Switch
-                    key={field}
-                    label={label}
-                    checked={values[field]}
-                    disabled={app.saving}
-                    data-testid={`pref-${field}`}
-                    onChange={(checked) => app.edit(field, checked)}
-                  />
-                ))}
-              </div>
-              <div className="field">
-                <span className="field__label">悬停时显示</span>
-                <div className="persona-switches">
-                  {(['chat', 'voice'] as const).map((kind) => (
-                    <Switch
-                      key={kind}
-                      label={kind === 'chat' ? '文字聊天' : '语音输入'}
-                      checked={values.hover.includes(kind)}
-                      disabled={app.saving}
-                      onChange={(checked) =>
-                        app.edit(
-                          'hover',
-                          checked
-                            ? [...values.hover, kind]
-                            : values.hover.filter((item) => item !== kind),
-                        )
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="persona-ranges">
-                {RANGES.map(({ field, label, min, max, unit }) => (
-                  <div className="persona-range" key={field}>
-                    <label className="persona-range__label" htmlFor={`${base}-${field}`}>
-                      {label}
-                    </label>
-                    <input
-                      id={`${base}-${field}`}
-                      type="range"
-                      className="slider"
-                      min={min}
-                      max={max}
-                      step={1}
-                      value={values[field]}
-                      disabled={app.saving}
-                      data-testid={`pref-${field}`}
-                      onChange={(event) => app.edit(field, Number(event.target.value))}
-                    />
-                    <output className="persona-range__value" htmlFor={`${base}-${field}`}>
-                      {values[field]}
-                      {unit}
-                    </output>
-                  </div>
-                ))}
-              </div>
-              <p className="row__desc">气泡速度越高，停留时间越短。待机时不显示常驻气泡。</p>
-              <div className="card__foot">
-                <Button
-                  variant="primary"
-                  data-testid="pref-names-save"
-                  busy={app.saving}
-                  disabled={!habitEdited || !values.petName.trim() || !values.userName.trim()}
-                  onClick={saveHabits}
-                >
-                  保存习惯
-                </Button>
-              </div>
-            </Card>
-            <SpeechSettingsPanel />
-            <Card title="角色能力">
-              <p className="row__desc">
-                当前极简角色支持拖动、触碰、表情和聊天。自由漫游、自动唤醒、睡眠与帧率控制尚未接入；相关已保存设置会保留，当前角色不会执行这些动作。
-              </p>
-            </Card>
-          </div>
-          <div
-            className="persona-panel"
-            role="tabpanel"
-            id={`${base}-panel-templates`}
-            aria-labelledby={`${base}-tab-templates`}
-            hidden={tab !== 'templates'}
-          >
-            <Card
-              title="人格模板"
-              action={<Status>{templateEdited ? '有未保存的改动' : '与已保存模板一致'}</Status>}
-            >
-              <div className="field-row">
-                <Field label="模板" className="field--grow">
-                  {({ inputId }) => (
-                    <Select
-                      id={inputId}
-                      value={values.personaTemplate}
-                      disabled={app.saving}
-                      data-testid="persona-template-select"
-                      options={[
-                        ...(selected
-                          ? []
-                          : [{ value: values.personaTemplate, label: '当前模板不在库中' }]),
-                        ...values.personaTemplates.map((item) => ({
-                          value: item.id,
-                          label: item.name + (item.builtin ? '（内置）' : ''),
-                        })),
-                      ]}
-                      onChange={(event) => chooseTemplate(event.target.value)}
-                    />
-                  )}
-                </Field>
-                <Field label="模板名" className="field--grow">
-                  {({ inputId }) => (
-                    <div className="inputForm">
-                      <input
-                        id={inputId}
-                        className="input"
-                        value={selected?.name ?? ''}
-                        maxLength={40}
-                        disabled={app.saving || !selected || selected.builtin}
-                        data-testid="persona-template-name"
-                        onChange={(event) => editTemplate({ name: event.target.value })}
-                      />
-                    </div>
-                  )}
-                </Field>
-              </div>
-              <p className="row__desc">
-                {selected?.builtin
-                  ? '内置模板可以复制后改名。修改下方正文只改变当前人格，不会覆盖内置模板。'
-                  : '模板库、当前选择与正文会在同一次保存中写入。'}
-              </p>
-              <div className="card__foot">
-                <Button
-                  disabled={app.saving || values.personaTemplates.length >= 16}
-                  onClick={() => createTemplate(false)}
-                >
-                  新建
-                </Button>
-                <Button
-                  disabled={app.saving || values.personaTemplates.length >= 16}
-                  onClick={() => createTemplate(true)}
-                >
-                  复制
-                </Button>
-                <Button
-                  disabled={
-                    app.saving ||
-                    !stored?.data.personaTemplates.some((item) => item.id === selected?.id)
-                  }
-                  onClick={resetTemplate}
-                >
-                  重置本模板
-                </Button>
-                <Button
-                  variant="primary"
-                  data-testid="persona-template-save"
-                  busy={app.saving}
-                  disabled={!templateEdited || !templateValid}
-                  onClick={saveTemplates}
-                >
-                  保存模板
-                </Button>
-                <span className="row__value">{values.personaTemplates.length} / 16 个模板</span>
-              </div>
-            </Card>
-            <PersonaPromptEditor
-              draft={values.personaPrompt}
-              saved={stored?.data.personaPrompt}
-              onChangeDraft={editPrompt}
-              onSave={saveTemplates}
-              state={prompt.state}
-              error={promptError(app.snapshot, app.conflict)}
-              maxLength={APPLICATION_PROFILE_MAX_PROMPT}
-              saving={app.saving}
-              disabled={app.loading || app.saving}
-              onReload={app.refresh}
+            {profile === null ? '读取人格' : '重新读取'}
+          </Button>
+        }
+      >
+        {snapshot === null ? (
+          <p className="row__value" role="status">
+            {connection === null ? '正在读取连接状态…' : '还没有连上服务。'}
+          </p>
+        ) : (
+          <div className="rows rows--tight">
+            <Row label="名字" value={snapshot.agent.name} />
+            <Row label="模式" value={agentModeLabel(snapshot.agent)} />
+            <Row label="人格修订" value={String(snapshot.agent.profileRevision)} />
+            <Row
+              label="最后确认"
+              value={state?.confirmedAt == null ? '尚未确认' : clockTime(state.confirmedAt)}
             />
           </div>
-        </>
-      )}
-    </ConsoleStatus>
+        )}
+
+        {failure === null ? null : (
+          <p className="field__error" role="alert" data-testid="persona-error">
+            {failure}
+          </p>
+        )}
+
+        {profile === null ? (
+          <p className="row__value">人格正文按需读取：它可能很长，所以不放进每次刷新的快照里。</p>
+        ) : (
+          <>
+            <div className="rows rows--tight">
+              <Row label="正文修订" value={String(profile.revision)} />
+              <Row label="服务身份" value={profile.agentId} />
+            </div>
+            <pre className="persona-prompt" data-testid="persona-body">
+              {profile.persona}
+            </pre>
+          </>
+        )}
+        <p className="row__value">
+          人格由服务保存。这一版不能在这里修改；本地只改下面这些呈现细节。
+        </p>
+      </Card>
+
+      <Card
+        title="聊天与气泡"
+        action={<Status>{presentation.saving ? '正在保存…' : '本机呈现'}</Status>}
+      >
+        {preferences === null ? (
+          <p className="row__value" role="status">
+            还没有读到本机的外观记录。
+          </p>
+        ) : (
+          <>
+            <div className="rows">
+              {SWITCHES.map(([field, label]) => (
+                <label className="row" key={field}>
+                  <span className="row__text">
+                    <span className="row__label">{label}</span>
+                  </span>
+                  <span className="switch">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      data-testid={'pref-' + field}
+                      checked={Boolean(preferences[field])}
+                      disabled={presentation.saving}
+                      onChange={(event) => void save({ [field]: event.target.checked }, label)}
+                    />
+                    <i aria-hidden="true" />
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="rows">
+              {RANGES.map((range) => (
+                <RangeRow
+                  key={range.field}
+                  label={range.label}
+                  min={range.min}
+                  max={range.max}
+                  unit={range.unit}
+                  value={Number(preferences[range.field] ?? 0)}
+                  disabled={presentation.saving}
+                  testId={'pref-' + range.field}
+                  onCommit={(next) => void save({ [range.field]: next }, range.label)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        {presentation.error === null ? null : (
+          <p className="field__error" role="alert">
+            {presentation.error}
+          </p>
+        )}
+      </Card>
+
+      <Card title="声音">
+        <SpeechSettingsPanel />
+      </Card>
+    </>
   );
 }
 
-function promptError(
-  snapshot: ApplicationState['snapshot'],
-  conflict: boolean,
-): string | undefined {
-  if (conflict) return PROFILE_CONFLICT;
-  if (snapshot?.prompt.state !== 'error') return undefined;
-  return snapshot.error === null
-    ? '提示词尚未生效。请检查设置后重试。'
-    : describeError(snapshot.error);
+/** 拖动时只改本地显示，松手才写；写的是这一份记录的 revision。 */
+function RangeRow({
+  label,
+  min,
+  max,
+  unit,
+  value,
+  disabled,
+  testId,
+  onCommit,
+}: {
+  label: string;
+  min: number;
+  max: number;
+  unit: string;
+  value: number;
+  disabled: boolean;
+  testId: string;
+  onCommit: (next: number) => void;
+}): JSX.Element {
+  const id = useId();
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  return (
+    <div className="row">
+      <span className="row__text">
+        <label className="row__label" htmlFor={id}>
+          {label}
+        </label>
+      </span>
+      <span className="row__value">
+        <input
+          id={id}
+          type="range"
+          min={min}
+          max={max}
+          step={1}
+          value={draft}
+          disabled={disabled}
+          data-testid={testId}
+          onChange={(event) => setDraft(Number(event.target.value))}
+          onPointerUp={() => onCommit(draft)}
+          onKeyUp={() => onCommit(draft)}
+        />
+        {draft}
+        {unit}
+      </span>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }): JSX.Element {
+  return (
+    <div className="row">
+      <span className="row__text">
+        <span className="row__label">{label}</span>
+      </span>
+      <span className="row__value">{value}</span>
+    </div>
+  );
 }

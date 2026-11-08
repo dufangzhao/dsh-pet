@@ -15,6 +15,23 @@ await build({
   target: 'node22',
 });
 
+// Reusable entries keep the host's React instance and existing kit dependency.
+await build({
+  absWorkingDir: root,
+  entryPoints: ['src/protocol.ts', 'src/model-ui.ts'],
+  outdir: 'dist',
+  bundle: true,
+  platform: 'browser',
+  format: 'esm',
+  target: 'es2022',
+  jsx: 'automatic',
+  external: ['react', 'react/*', 'react-dom', 'react-dom/*', '@pet/contracts', '@pet/ui-kit'],
+});
+await copyFile(
+  new URL('src/client/model.css', import.meta.url),
+  new URL('dist/model.css', import.meta.url),
+);
+
 // 浏览器端：client.js 自带 React，页面只引这一个脚本和一份 CSS。
 await build({
   absWorkingDir: root,

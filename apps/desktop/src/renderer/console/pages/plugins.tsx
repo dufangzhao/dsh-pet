@@ -17,8 +17,6 @@ export interface PluginsPageProps {
   onOpenPermissions: () => void;
   pending: ReadonlyMap<string, ConsolePluginAction>;
   onAction: (plugin: ConsolePlugin, action: ConsolePluginAction) => void;
-  onRequestStopAll: () => void;
-  stopping: boolean;
 }
 
 type PluginFilter = 'all' | 'active' | 'disabled' | 'builtin';
@@ -57,8 +55,6 @@ export function PluginsPage(props: PluginsPageProps): JSX.Element {
           <RunSection
             snapshot={props.snapshot}
             loading={props.loading}
-            stopping={props.stopping}
-            onRequestStopAll={props.onRequestStopAll}
             onRetry={props.onRetry}
             onOpenPermissions={props.onOpenPermissions}
           />
@@ -396,15 +392,11 @@ function retryHint(plugin: ConsolePlugin): string {
 function RunSection({
   snapshot,
   loading,
-  stopping,
-  onRequestStopAll,
   onRetry,
   onOpenPermissions,
 }: {
   snapshot: ConsoleSnapshot;
   loading: boolean;
-  stopping: boolean;
-  onRequestStopAll: () => void;
   onRetry: () => void;
   onOpenPermissions: () => void;
 }): JSX.Element {
@@ -451,19 +443,6 @@ function RunSection({
         <Button size="small" data-testid="plugins-permissions" onClick={onOpenPermissions}>
           权限与数据
         </Button>
-        {busy ? (
-          <Button
-            size="small"
-            data-testid="console-stop-all"
-            aria-disabled={stopping}
-            aria-busy={stopping}
-            onClick={() => {
-              if (!stopping) onRequestStopAll();
-            }}
-          >
-            {stopping ? '正在停止…' : '停止全部任务'}
-          </Button>
-        ) : null}
       </span>
     </div>
   );

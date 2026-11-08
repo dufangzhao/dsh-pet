@@ -2,7 +2,7 @@
 
 This source-backed guide describes the existing repository at `b9a803e`. Use it when a generic Trellis template assumes a different stack or directory layout. It does not authorize future architecture changes.
 
-Current additive application contracts are in [plugin-application-contracts.md](plugin-application-contracts.md). The headless text service has its own [executable contracts](../backend/companion-service.md), including the actual `node:sqlite` plugin, plus [replaceable model connection contracts](../backend/model-connections.md). The following historical baseline remains the source for unchanged desktop/native services.
+Current additive application contracts are in [plugin-application-contracts.md](plugin-application-contracts.md). The headless text service has its own [executable contracts](../backend/companion-service.md), including the actual `node:sqlite` plugin, plus [replaceable model connection contracts](../backend/model-connections.md). For the current shared Main/preload entry, use [desktop client contracts](../backend/desktop-companion.md). The following historical baseline remains the source for unchanged desktop/native services.
 
 ## Actual boundaries
 

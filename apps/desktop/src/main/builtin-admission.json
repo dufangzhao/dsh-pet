@@ -10,8 +10,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "45a80e4300c1669e0c9e27c83fde45c13ec53fa96ec03ecc0de89a2c8f337da0",
-          "bytes": 59628
+          "sha256": "f1f4f764810b00b3927302b964ee110bc8a52673c2e7c7f42570b4cd0dfd9be9",
+          "bytes": 59733
         }
       ]
     },
@@ -24,8 +24,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "d45f191bcc4b04ee7bcb031c9abcc3ef05ad870733487285a6c72cbdfbed656a",
-          "bytes": 47351
+          "sha256": "155bedc42ff616cabea6dc5a422e74521fc23095abd918138240ede19c95f16d",
+          "bytes": 47456
         }
       ]
     },
@@ -38,13 +38,13 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "ee02f371eb0f9548ff86a345b6c1467e0ebd657a0de334928616db841c9e8a0a",
-          "bytes": 50745
+          "sha256": "9112ada8f1dcfe97110af6a9d80e1638b2b1b510932ddf850461e37a7710dd1e",
+          "bytes": 50850
         },
         {
           "relativePath": "dist/asr-worker.cjs",
-          "sha256": "742cd695f6d77626ad681a718b780f6384f20443195ae0911518a22c5f7156c2",
-          "bytes": 69995
+          "sha256": "38f5c3f47b1324d080a2dbd005d3e8fb7d4986bbca5abe079d99c8f7b0a8b2ec",
+          "bytes": 70495
         }
       ]
     },
@@ -71,8 +71,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "a0d6fb55f5810bbf178a0925e54e035b6790c31bce61b1a09e9243c84b53e3b9",
-          "bytes": 44088
+          "sha256": "71df0d0353254e9f8361e7825e01ae5e1c5d2975b73944934ccd2365c1022565",
+          "bytes": 44193
         }
       ]
     },
@@ -90,6 +90,20 @@
         }
       ]
     },
+    "pet.companion-client": {
+      "files": [
+        {
+          "relativePath": "plugin.json",
+          "sha256": "2f08f83ef6f45552ce3fa4f1d46ab57eb6b0211264d63dd830ea6cb985b5ba31",
+          "bytes": 1074
+        },
+        {
+          "relativePath": "dist/index.mjs",
+          "sha256": "592d8ca0f43545f0e64fe9d82b100f7169ce62c05cd67ffae113aa80c8234830",
+          "bytes": 1800
+        }
+      ]
+    },
     "pet.llm-provider": {
       "files": [
         {
@@ -99,8 +113,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "f2394ea32fe5ab88455a5c892cc52cabd8214ab6ec69a41d3e4906880bd4a640",
-          "bytes": 69551
+          "sha256": "cdbcc3748d07a162f3b8ba67c5aa7b6c45e57a3a16ca23ce4ac8bdfd6ae85386",
+          "bytes": 69656
         }
       ]
     },
@@ -189,8 +203,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "dfdaa2a62e7554f0de2ebd93650164e92c1f2c806417318853ca5b0cbe8bb6f1",
-          "bytes": 42682
+          "sha256": "987a9a211974608eb16f92b735e7e825310385e6ce2c2733661845b26bc501ab",
+          "bytes": 42787
         }
       ]
     },
@@ -203,8 +217,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "bdcc2d5a8985b78fccfd514fb7be104756bac9bc43ee82205a9fab9015c6a3e8",
-          "bytes": 47111
+          "sha256": "4efd7815a5b608393a1dd422b3857fd12557c4d4edd0759cad837f1d6922d972",
+          "bytes": 47216
         },
         {
           "relativePath": "dist/system-speech.ps1",
@@ -222,8 +236,8 @@
         },
         {
           "relativePath": "dist/index.mjs",
-          "sha256": "0c6aeeacfd1871fbf7353481fd9dc1bc2573de652b1288d551c0965f0a8834bc",
-          "bytes": 43640
+          "sha256": "3daf76443a81da46bdb22e689a86772226c962b32c299b6f122a7dd3724b530d",
+          "bytes": 43745
         }
       ]
     },

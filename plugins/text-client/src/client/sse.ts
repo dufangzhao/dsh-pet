@@ -17,6 +17,7 @@ export class SseDecoder {
   #event: string | null = null;
   #id: string | null = null;
   #data: string[] = [];
+  #size = 0;
 
   push(chunk: string): SseMessage[] {
     this.#buffer += chunk;
@@ -32,11 +33,14 @@ export class SseDecoder {
       const message = this.#line(line);
       if (message !== null) messages.push(message);
     }
+    if (this.#buffer.length > 64 * 1024) throw new Error('SSE line budget exceeded');
     return messages;
   }
 
   #line(line: string): SseMessage | null {
+    if (line.length > 64 * 1024) throw new Error('SSE line budget exceeded');
     if (line === '') {
+      this.#size = 0;
       if (this.#data.length === 0) {
         this.#event = null;
         this.#id = null;
@@ -53,6 +57,8 @@ export class SseDecoder {
       return message;
     }
     if (line.startsWith(':')) return null;
+    this.#size += line.length + 1;
+    if (this.#size > 64 * 1024) throw new Error('SSE event budget exceeded');
     const colon = line.indexOf(':');
     const field = colon === -1 ? line : line.slice(0, colon);
     const raw = colon === -1 ? '' : line.slice(colon + 1);

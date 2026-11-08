@@ -315,6 +315,21 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       });
       return;
     }
+    if (method === 'GET' && pathname === '/api/profile') {
+      const profile = await options.runtime.profile();
+      const snapshot = await options.runtime.snapshot();
+      if (profile.revision !== snapshot.agent.profileRevision) throw new KernelFault('conflict');
+      const value = {
+        agentId: snapshot.agent.id,
+        name: profile.name,
+        persona: profile.persona,
+        revision: profile.revision,
+      };
+      if (Buffer.byteLength(JSON.stringify({ ok: true, value })) > MAX_BODY)
+        throw new KernelFault('quota-exceeded');
+      send(response, 200, { ok: true, value });
+      return;
+    }
     if (method === 'GET' && pathname === '/api/model') {
       if (!options.models) throw new KernelFault('not-ready');
       send(response, 200, { ok: true, value: modelIngress(await options.models.view(), writable) });

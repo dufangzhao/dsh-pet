@@ -14,6 +14,12 @@ import { TaskStrip } from '../src/client/tasks.tsx';
 import { modelView, snapshot, task } from './fixtures.mjs';
 
 const noop = () => {};
+const dialogFacts = (state) => ({
+  view: state.snapshot?.model ?? null,
+  live: state.phase === 'live',
+  agentStatus: state.snapshot?.agent.status ?? null,
+  transport: fakeClient,
+});
 
 /** 只做静态渲染：断言真实文案与语义，不声称浏览器里的视觉效果已验证。 */
 test('the connect gate asks for a token and says it stays in memory', () => {
@@ -161,7 +167,7 @@ test('a service without a model view offers no entry and no invented form', () =
   assert.doesNotMatch(header, />模型</);
 
   const dialog = renderToStaticMarkup(
-    createElement(ModelDialog, { open: true, state, client: fakeClient, onClose: noop }),
+    createElement(ModelDialog, { open: true, ...dialogFacts(state), onClose: noop }),
   );
   assert.match(dialog, /这个服务没有提供模型设置/);
   assert.doesNotMatch(dialog, /接口地址/);
@@ -174,7 +180,7 @@ test('the model dialog shows the saved settings, the mode and both actions', () 
     at: 1,
   });
   const html = renderToStaticMarkup(
-    createElement(ModelDialog, { open: true, state, client: fakeClient, onClose: noop }),
+    createElement(ModelDialog, { open: true, ...dialogFacts(state), onClose: noop }),
   );
   assert.match(html, /模型连接/);
   assert.match(html, /接口地址/);
@@ -251,7 +257,7 @@ test('a synthetic verified check is labelled as not a real model connection', ()
     at: 1,
   });
   const html = renderToStaticMarkup(
-    createElement(ModelDialog, { open: true, state, client: fakeClient, onClose: noop }),
+    createElement(ModelDialog, { open: true, ...dialogFacts(state), onClose: noop }),
   );
   assert.match(html, /模拟检查通过，未连接真实模型/);
   assert.doesNotMatch(html, /返回了真实回复/);
@@ -281,7 +287,7 @@ test('a non-writable credential explains host injection instead of offering a do
     at: 1,
   });
   const html = renderToStaticMarkup(
-    createElement(ModelDialog, { open: true, state, client: fakeClient, onClose: noop }),
+    createElement(ModelDialog, { open: true, ...dialogFacts(state), onClose: noop }),
   );
   assert.match(html, /这个入口不允许在这里写密钥/);
   assert.doesNotMatch(html, /type="password"/);
@@ -376,8 +382,7 @@ test('testing is only offered for the applied binding, not the selected one', ()
   const same = renderToStaticMarkup(
     createElement(ModelDialog, {
       open: true,
-      state: state(applied.connectorId),
-      client: fakeClient,
+      ...dialogFacts(state(applied.connectorId)),
       onClose: noop,
     }),
   );
@@ -388,8 +393,7 @@ test('testing is only offered for the applied binding, not the selected one', ()
   const other = renderToStaticMarkup(
     createElement(ModelDialog, {
       open: true,
-      state: state(fixture.id),
-      client: fakeClient,
+      ...dialogFacts(state(fixture.id)),
       onClose: noop,
     }),
   );
@@ -452,7 +456,7 @@ test('a non-writable remote entry never offers a key input, whatever the URL loo
     at: 1,
   });
   const html = renderToStaticMarkup(
-    createElement(ModelDialog, { open: true, state, client: fakeClient, onClose: noop }),
+    createElement(ModelDialog, { open: true, ...dialogFacts(state), onClose: noop }),
   );
   assert.match(html, /这个入口不允许在这里写密钥/);
   assert.match(html, /当前没有可用密钥/);

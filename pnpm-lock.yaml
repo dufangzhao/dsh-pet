@@ -150,6 +150,9 @@ importers:
       '@pet/host-kernel':
         specifier: workspace:*
         version: link:../../packages/host-kernel
+      '@pet/text-client':
+        specifier: workspace:*
+        version: link:../../plugins/text-client
       '@pet/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
@@ -508,6 +511,19 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+
+  plugins/companion-client:
+    dependencies:
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vite:
+        specifier: 'catalog:'
+        version: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
 
   plugins/harness-cortico:
     dependencies:

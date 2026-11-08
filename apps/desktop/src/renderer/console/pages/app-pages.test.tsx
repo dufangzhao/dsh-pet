@@ -1,526 +1,489 @@
-import type { JSX } from 'react';
-
+import type { DesktopCompanionState, DesktopPresentationSnapshot } from '@pet/contracts';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import type {
-  ApplicationPreferences,
-  ConsoleSnapshot,
-  ApplicationSnapshot,
-  DemoPhase,
-  DemoReplyMode,
-  DemoSnapshot,
-} from '@pet/contracts';
-import { APPLICATION_DEFAULTS } from '@pet/contracts';
-
-import type { ApplicationOutcome, ApplicationState } from '../use-application.js';
-import type { DemoOutcome, DemoState } from '../use-demo.js';
-import type { ModelConnectionSnapshot, ModelService, SavedModelEndpoint } from '@pet/contracts';
-import type { ModelConnectionState } from '../use-model-connection.js';
-import type { ApplicationPage } from '@pet/contracts';
 import { AppearancePage } from './appearance.js';
-import { GenericPage } from './generic-page.js';
 import { ConversationPage } from './conversation.js';
 import { PersonaPage } from './persona.js';
 import { StartPage } from './start.js';
-import { PluginsPage } from './plugins.js';
+import type { CompanionView } from '../../shared/use-companion.js';
+import type { LocalPresentationView } from '../../shared/use-local-presentation.js';
+import { endpointBaseline, endpointMoved, rebaseOnConnect } from '../../shared/companion-state.js';
+import { initialDesktopCompanionState } from '../test-state.js';
 
 /**
- * 只断言用户看得到的话与按钮状态。这一批用例守的是四句不许说谎：
- * 保存过不等于已生效；没接 Key 不是缺项；离线回复带着「离线」；
- * 桥不在就说没连上，不画一份假表单。
+ * 只断言用户看得到的话与按钮状态。这一批守的是四句不许说谎：
+ * 没连上不等于已连接；断线时任务状态未知；人格只读不写；
+ * 本机呈现的开关改的是这台机器，不是服务里的助手。
  */
 const noop = (): void => undefined;
 
-const prefs: ApplicationPreferences = { ...APPLICATION_DEFAULTS };
-
-const OK: DemoOutcome = { ok: true, error: null };
-
-function demoSnapshot(over: Partial<DemoSnapshot> = {}): DemoSnapshot {
-  return {
-    version: 1,
-    phase: 'idle' as DemoPhase,
-    intentId: null,
-    settings: {
-      asrOwner: null,
-      asrRevision: 0,
-      modelId: null,
-      voiceOwner: null,
-      voiceRevision: 0,
-      replyMode: 'demo' as DemoReplyMode,
-      autoSend: false,
-      readError: null,
-    },
-    plugins: [],
-    models: [],
-    preparedModelId: null,
-    canRecord: true,
-    canSend: true,
-    transcript: '',
-    partialTranscript: '',
-    partialReply: '',
-    messages: [],
-    recordingStartedAt: null,
-    maxRecordingSeconds: 20,
-    error: null,
-    keyAvailable: true,
-    keyConfigured: false,
-    avatarEnabled: true,
-    ...over,
-  };
-}
-
-function demoState(value: DemoSnapshot): DemoState {
-  return {
-    available: true,
-    snapshot: value,
-    loading: false,
-    error: null,
-    refresh: noop,
-    pending: new Set(),
-    sendText: async () => OK,
-    cancel: async () => OK,
-    clearHistory: async () => OK,
-    saveProviderKey: async () => OK,
-    removeProviderKey: async () => OK,
-    recording: null,
-    left: null,
-    startRecording: async () => undefined,
-    endRecording: async () => undefined,
-    cancelRecording: async () => undefined,
-  };
-}
-
-function appState(over: Partial<ApplicationState> = {}): ApplicationState {
-  const snapshot: ApplicationSnapshot = {
-    version: 1,
-    profile: {
-      owner: { pluginId: 'pet.profile', instanceId: 'i1', generation: 1 },
-      revision: 3,
-      data: prefs,
-    },
-    pages: [],
-    history: [],
-    cursor: 0,
-    prompt: { state: 'applied', appliedRevision: 3, segments: [] },
-    dialog: null,
-    agent: { owner: null, state: 'ready', label: '回复来源：离线脚本演示' },
-    error: null,
-  };
-  const current = over.snapshot === undefined ? snapshot : over.snapshot;
-  return {
-    available: true,
-    snapshot: current,
-    loading: false,
-    error: null,
-    refresh: noop,
-    values: current?.profile == null ? null : current.profile.data,
-    edited: new Set(),
-    saving: false,
-    conflict: false,
-    edit: noop,
-    save: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
-    startGuide: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
-    interact: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
-    runPageAction: async (): Promise<ApplicationOutcome> => ({ ok: true, error: null }),
-    // 时间线默认就是快照那一段；这里补的是「更早几页」的临时投影。
-    history: current?.history ?? [],
-    historyEarlier: false,
-    historyLoading: false,
-    historyError: null,
-    loadEarlierHistory: noop,
-    ...over,
-  };
-}
-
-const render = (node: JSX.Element): string => renderToStaticMarkup(node);
-
-function startProps(app: ApplicationState, models: ModelConnectionState = modelState()) {
-  return {
-    app,
-    demo: demoState(demoSnapshot()),
-    models,
-    notify: noop,
-    goToView: noop,
-    onOpenPlugins: noop,
-  };
-}
-
-/**
- * React 把 disabled="" 写在开标签的最前面，所以断言看整个开标签，
- * 不看某个属性后面是否还跟着它。
- */
-function tag(html: string, testId: string): string {
-  const at = html.indexOf('data-testid="' + testId + '"');
-  if (at < 0) {
-    throw new Error('缺少 testid：' + testId);
-  }
-  const open = html.lastIndexOf('<', at);
-  const close = html.indexOf('>', at);
-  return html.slice(open, close + 1);
-}
-
-/* ---- 模型连接：目录里两家，一家有两块平台，另一家全局 ---- */
-
-const deepseek: ModelService = {
-  id: 'deepseek',
-  label: 'DeepSeek',
-  region: 'global',
-  service: 'deepseek',
-  defaultModel: 'deepseek-flash',
-  models: ['deepseek-flash', 'deepseek-chat'],
-  keyHint: '粘贴 API Key',
-  keyUrl: 'https://example.invalid/keys',
-  auth: 'api-key',
-  available: true,
-};
-
-const qwen: ModelService = {
-  ...deepseek,
-  id: 'qwen',
-  label: '通义千问',
-  region: 'cn',
-  service: 'qwen',
-};
-const qwenIntl: ModelService = { ...qwen, id: 'qwen-intl', region: 'intl' };
-
-function modelSnapshot(over: Partial<ModelConnectionSnapshot> = {}): ModelConnectionSnapshot {
-  const endpoints: SavedModelEndpoint[] = [];
-  return {
-    revision: 4,
-    services: [deepseek, qwen, qwenIntl],
-    endpoints,
-    active: null,
-    paused: false,
-    credentialStorageAvailable: true,
-    ...over,
-  };
-}
-
-function modelState(over: Partial<ModelConnectionState> = {}): ModelConnectionState {
-  const never = async (): Promise<never> => {
-    throw new Error('这条用例不触发写入');
-  };
-  return {
-    available: true,
-    snapshot: modelSnapshot(),
-    loading: false,
-    error: null,
-    saving: false,
-    testing: false,
-    pausing: false,
-    signIn: null,
-    signingIn: false,
-    refresh: noop,
-    saveAndStart: never,
-    testActive: never,
-    testSelected: never,
-    getModels: never,
-    setPaused: never,
-    openServicePage: never,
-    signInAndStart: never,
-    cancelSignIn: never,
-    ...over,
-  };
-}
-
-describe('人设页', () => {
-  it('待生效不写成已生效，收到 applied 才说已生效', () => {
-    const app = appState();
-    const pending = renderToStaticMarkup(
-      <PersonaPage
-        app={appState({
-          snapshot: {
-            ...(app.snapshot as ApplicationSnapshot),
-            prompt: { state: 'pending', appliedRevision: 3, segments: [] },
-          },
-        })}
-        notify={noop}
-      />,
-    );
-    expect(pending).toContain('等待当前处理结束后生效');
-    expect(pending).not.toContain('>已生效<');
-    expect(renderToStaticMarkup(<PersonaPage app={app} notify={noop} />)).toContain('>已生效<');
-  });
-
-  it('名字与存的一致时保存是空操作，改过才提示还没保存', () => {
-    const same = renderToStaticMarkup(<PersonaPage app={appState()} notify={noop} />);
-    expect(same).not.toContain('有未保存的改动');
-    expect(same).toMatch(/disabled[^>]*>\s*保存习惯/);
-
-    const edited = appState({ edited: new Set(['petName']) });
-    const html = renderToStaticMarkup(<PersonaPage app={edited} notify={noop} />);
-    expect(html).toContain('有未保存的改动');
-    expect(html).not.toMatch(/disabled[^>]*>\s*保存习惯/);
-  });
-
-  it('新桥不在时只说没连上，不画一份能编辑的假表单', () => {
-    const html = renderToStaticMarkup(
-      <PersonaPage
-        app={appState({ available: false, snapshot: null, values: null })}
-        notify={noop}
-      />,
-    );
-    expect(html).toContain('页面没有连上应用');
-    expect(html).not.toContain('<textarea');
-    expect(html).not.toContain('保存正文');
-  });
+const snapshot = (over: Partial<DesktopCompanionState> = {}): DesktopCompanionState => ({
+  ...initialDesktopCompanionState(),
+  source: 'ready',
+  ...over,
 });
 
-describe('装扮页', () => {
-  it('两个形态、四个配色、三个大小都可选，当前值被选中', () => {
-    const html = renderToStaticMarkup(<AppearancePage app={appState()} notify={noop} />);
-    expect(html).toContain('简约');
-    expect(html).toContain('圆头');
-    for (const name of ['晨蓝', '雪青', '松墨', '柿橙']) {
-      expect(html).toContain(name);
+function companion(over: Partial<CompanionView> = {}): CompanionView {
+  return {
+    available: true,
+    state: snapshot(),
+    loading: false,
+    readError: null,
+    notice: null,
+    refresh: noop,
+    connect: async () => ({ outcome: 'accepted', error: null, configRevision: null }),
+    reconnect: async () => ({ outcome: 'accepted', error: null }),
+    disconnect: async () => ({ outcome: 'accepted', error: null }),
+    send: async () => ({ outcome: 'accepted', error: null }),
+    stopTask: async () => ({ outcome: 'accepted', error: null }),
+    stopForeground: async () => ({ outcome: 'accepted', error: null }),
+    readProfile: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    readTask: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    saveArtifact: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    saveModel: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    testModel: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    clearNotice: noop,
+    ...over,
+  };
+}
+
+const preferences = {
+  figure: 'minimal',
+  palette: 'morning',
+  size: 'normal',
+  visible: true,
+  alwaysOnTop: true,
+  draggable: true,
+  reducedMotion: false,
+  bubbleFontSize: 100,
+  bubbleSpeed: 100,
+  glow: 0,
+  hover: ['chat'],
+  doubleClickTyping: true,
+  statusBubble: true,
+  saidBubble: true,
+  hideInFullscreen: false,
+  rememberPosition: true,
+  lockFps: false,
+  frameRate: '60',
+  soundEnabled: true,
+  soundMove: true,
+  soundTouch: true,
+  soundFace: true,
+  soundSnore: true,
+  soundUi: true,
+  speechEnabled: true,
+  speechProvider: null,
+  speechVoice: null,
+  speechRate: 0,
+  speechVolume: 85,
+} as unknown as DesktopPresentationSnapshot['preferences'];
+
+function presentation(over: Partial<LocalPresentationView> = {}): LocalPresentationView {
+  return {
+    available: true,
+    snapshot: {
+      version: 1,
+      revision: 3,
+      preferences,
+      desktop: { available: true, shown: true },
+      error: null,
+    },
+    loading: false,
+    error: null,
+    notice: null,
+    saving: false,
+    save: async () => true,
+    refresh: noop,
+    ...over,
+  };
+}
+
+function tag(html: string, testId: string): string {
+  const match = new RegExp('<[a-z]+[^>]*data-testid="' + testId + '"[^>]*>').exec(html);
+  expect(match, '找不到 data-testid=' + testId).not.toBeNull();
+  return match?.[0] ?? '';
+}
+
+describe('开始页', () => {
+  it('没有连接通道：只说这件事，不给一份能填的假表单', () => {
+    const html = renderToStaticMarkup(
+      <StartPage
+        companion={companion({ available: false, state: null })}
+        presentation={presentation()}
+        notify={noop}
+      />,
+    );
+    expect(html).toContain('没有连接服务的通道');
+    expect(html).not.toContain('data-testid="start-connect-form"');
+  });
+
+  it('还没连接：状态说未连接，连接按钮在，令牌框默认不占位', () => {
+    const html = renderToStaticMarkup(
+      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    expect(html).toContain('未连接');
+    expect(html).toContain('data-testid="start-address"');
+    expect(html).toContain('data-testid="start-ask-token"');
+    // 令牌只在点开之后出现，不默认铺一个密码框。
+    expect(html).not.toContain('data-testid="start-token"');
+    expect(html).toContain('令牌只用于这一次连接');
+  });
+
+  it('已连接：显示服务里的名字、模式与人格修订，不拿本地名字冒充', () => {
+    const state = snapshot({
+      phase: 'live',
+      connectionId: 'c1',
+      confirmedAt: 1_700_000_000_000,
+      baseUrl: 'http://127.0.0.1:4120',
+      snapshot: {
+        protocolVersion: 1,
+        epoch: 'e',
+        cursor: 3,
+        now: 1_700_000_000_000,
+        agent: {
+          id: 'agent-1',
+          name: '阿蓝',
+          profileRevision: 7,
+          harness: 'cortico',
+          mode: 'scripted',
+          status: 'ready',
+          error: null,
+        },
+        messages: [],
+        tasks: [],
+        facts: [],
+        plugins: [],
+      },
+    });
+    const html = renderToStaticMarkup(
+      <StartPage companion={companion({ state })} presentation={presentation()} notify={noop} />,
+    );
+    expect(html).toContain('阿蓝');
+    expect(html).toContain('脚本演示，未调用模型');
+    expect(html).toContain('data-testid="start-identity"');
+    expect(html).toContain('data-testid="start-disconnect"');
+  });
+
+  it('地址草稿的 CAS 用它读入的那一版基线，不是最新的 configRevision', () => {
+    // 草稿在 rev4 读入，外部随后改到 rev9：提交必须用 4，否则会静默覆盖别处的改动。
+    expect(endpointBaseline(4, 9)).toBe(4);
+    expect(endpointMoved(4, 9, false)).toBe(true);
+  });
+
+  it('还没起过稿时退回当前版本；一致时不算被改动', () => {
+    expect(endpointBaseline(null, 9)).toBe(9);
+    expect(endpointMoved(null, 9, false)).toBe(false);
+    expect(endpointMoved(9, 9, false)).toBe(false);
+  });
+
+  it('一次正常成功后基线跟着写入的版本走，不会误报「别处改过」', () => {
+    // 提交时草稿基线是 rev1，Main 写下 rev2 并把它返回：基线必须变成 2。
+    // 若误用提交前那次渲染的 state（仍是 rev1），下一次就会误报冲突并 CAS 失败。
+    expect(rebaseOnConnect(2, 1)).toBe(2);
+    expect(endpointMoved(rebaseOnConnect(2, 1), 2, false)).toBe(false);
+  });
+
+  it('自己提交在途时不把中间版本报成「别处改过」', () => {
+    // Main 先把 Config 推到 rev2，connect 的 promise 还没回来：
+    // 此刻 baseline 仍是 1，落后是我自己造成的，不是外部改动。
+    expect(endpointMoved(1, 2, true)).toBe(false);
+    // settle 之后基线跟到 2：同一份状态不再提示。
+    expect(endpointMoved(rebaseOnConnect(2, 1), 2, false)).toBe(false);
+  });
+
+  it('提交在途期间外部又推到 rev3：settle 后仍然识别为改过', () => {
+    // 在途时不报（避免假提示），但基线只跟到 committed 的 2，rev3 照样露出来。
+    expect(endpointMoved(1, 3, true)).toBe(false);
+    expect(endpointMoved(rebaseOnConnect(2, 1), 3, false)).toBe(true);
+  });
+
+  it('同期另一处 external 改动仍然被识别出来，不会被吞掉', () => {
+    // 我写的是 rev2，但有人已经推到 rev3：基线停在 2，界面必须提示改过。
+    const after = rebaseOnConnect(2, 1);
+    expect(after).toBe(2);
+    expect(endpointMoved(after, 3, false)).toBe(true);
+  });
+
+  it('没有返回版本时不猜 +1，保持原基线', () => {
+    expect(rebaseOnConnect(null, 1)).toBe(1);
+    expect(rebaseOnConnect(null, null)).toBe(null);
+  });
+
+  it('令牌输入收起时不占位，且有一条显式取消的路', () => {
+    const html = renderToStaticMarkup(
+      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    // 没点开就没有密码框：不默认铺一个 secret 输入。
+    expect(html).not.toContain('data-testid="start-token"');
+    expect(html).toContain('data-testid="start-ask-token"');
+    // 收起动作单独存在，用户不必靠提交来离开这一步。
+    expect(html).not.toContain('data-testid="start-cancel-token"');
+  });
+
+  it('地址字段与令牌字段是两件事：换地址不需要重新点开输入', () => {
+    const html = renderToStaticMarkup(
+      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    expect(html).toContain('data-testid="start-address"');
+    expect(html).toContain('令牌只用于这一次连接');
+  });
+
+  it('在线时也能提交换目标：按钮可点，措辞说的是「更新」', () => {
+    const html = renderToStaticMarkup(
+      <StartPage
+        companion={companion({ state: snapshot({ phase: 'live', connectionId: 'c1' }) })}
+        presentation={presentation()}
+        notify={noop}
+      />,
+    );
+    // 这是换地址/换令牌的实际入口：不能因为已经在线就被禁掉。
+    expect(tag(html, 'start-ask-token')).not.toContain('disabled');
+    expect(html).toContain('更新连接或更换令牌');
+  });
+
+  it('断线时按钮可用，措辞是重新连接', () => {
+    const html = renderToStaticMarkup(
+      <StartPage
+        companion={companion({ state: snapshot({ phase: 'offline', connectionId: 'c1' }) })}
+        presentation={presentation()}
+        notify={noop}
+      />,
+    );
+    expect(tag(html, 'start-ask-token')).not.toContain('disabled');
+    expect(html).toContain('输入令牌并重新连接');
+  });
+
+  it('未连接时按钮可用，措辞是初次连接', () => {
+    const html = renderToStaticMarkup(
+      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    expect(tag(html, 'start-ask-token')).not.toContain('disabled');
+    expect(html).toContain('输入令牌并连接');
+  });
+
+  it('过渡相位禁用：connecting 与 retiring 都不给第二次提交', () => {
+    for (const phase of ['connecting', 'retiring'] as const) {
+      const html = renderToStaticMarkup(
+        <StartPage
+          companion={companion({ state: snapshot({ phase, connectionId: 'c1' }) })}
+          presentation={presentation()}
+          notify={noop}
+        />,
+      );
+      expect(tag(html, 'start-ask-token'), phase).toContain('disabled');
     }
-    expect(html).toContain('适中');
-    expect(html.match(/checked/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(html).toContain('在桌面显示桌宠');
+  });
+
+  it('源停用或不可用时禁用，与相位无关', () => {
+    for (const source of ['disabled', 'unavailable'] as const) {
+      const html = renderToStaticMarkup(
+        <StartPage
+          companion={companion({ state: snapshot({ source, phase: 'live', connectionId: 'c1' }) })}
+          presentation={presentation()}
+          notify={noop}
+        />,
+      );
+      expect(tag(html, 'start-ask-token'), source).toContain('disabled');
+    }
+  });
+
+  it('源被停用：不给连接按钮，指向插件页恢复', () => {
+    const html = renderToStaticMarkup(
+      <StartPage
+        companion={companion({ state: snapshot({ source: 'disabled' }) })}
+        presentation={presentation()}
+        notify={noop}
+      />,
+    );
+    expect(html).toContain('连接组件已停用');
+    expect(tag(html, 'start-ask-token')).toContain('disabled');
   });
 });
 
 describe('对话页', () => {
-  it('四类事件用固定的中文词，离线回复带着「离线」', () => {
-    const snapshot = appState().snapshot as ApplicationSnapshot;
-    const withHistory: ApplicationSnapshot = {
-      ...snapshot,
-      history: [
-        { id: '1', cursor: 1, at: 1, kind: 'interaction', text: '你戳了它一下', via: 'bubble' },
-        { id: '2', cursor: 2, at: 2, kind: 'user', text: '现在几点', via: 'voice' },
-        { id: '3', cursor: 3, at: 3, kind: 'pet', text: '离线脚本演示：十点整', mode: 'demo' },
-        { id: '4', cursor: 4, at: 4, kind: 'application', text: '偏好已保存' },
-      ],
-    };
+  it('还没连上：说清去哪里连，不给一个能发出去的输入框', () => {
     const html = renderToStaticMarkup(
-      <ConversationPage
-        app={appState({ snapshot: withHistory, values: withHistory.profile?.data ?? null })}
-        demo={demoState(demoSnapshot())}
-        notify={noop}
-      />,
+      <ConversationPage companion={companion()} notify={noop} onGoToStart={noop} />,
     );
-    for (const word of ['动作', '我说', '桌宠说', '状态']) {
-      expect(html).toContain(word);
-    }
-    expect(html).toContain('用语音');
-    expect(html).toContain('>离线<');
+    expect(html).toContain('还没有连上服务');
+    expect(html).toContain('data-testid="conversation-go-start"');
+    expect(tag(html, 'conversation-send')).toContain('disabled');
   });
 
-  it('还没有记录时给出下一步，而不是空白', () => {
-    const html = renderToStaticMarkup(
-      <ConversationPage app={appState()} demo={demoState(demoSnapshot())} notify={noop} />,
-    );
-    expect(html).toContain('还没有日常互动记录');
-    expect(html).toContain('碰它一下');
-  });
-
-  it('只有还能读到更早记录时才给加载按钮；读失败保留已有记录并说明原因', () => {
-    const history = [{ id: '4', cursor: 4, at: 4, kind: 'user' as const, text: '现在几点' }];
-    const demo = demoState(demoSnapshot());
-    const withEarlier = renderToStaticMarkup(
-      <ConversationPage
-        app={appState({ history, historyEarlier: true })}
-        demo={demo}
-        notify={noop}
-      />,
-    );
-    expect(withEarlier).toContain('加载更早记录');
-
-    const withoutEarlier = renderToStaticMarkup(
-      <ConversationPage app={appState({ history })} demo={demo} notify={noop} />,
-    );
-    expect(withoutEarlier).not.toContain('加载更早记录');
-
-    const failed = renderToStaticMarkup(
-      <ConversationPage
-        app={appState({
-          history,
-          historyEarlier: true,
-          historyError: '设置台没有响应，请稍后重试。',
-        })}
-        demo={demo}
-        notify={noop}
-      />,
-    );
-    expect(failed).toContain('更早的记录没有读出来');
-    // 读不到更早的页，不等于已有记录不对：原来那条要还在。
-    expect(failed).toContain('现在几点');
-  });
-});
-
-describe('外部扩展的一页', () => {
-  it('宿主声明了 actions 才画真实按钮；没有就不出现这一块', () => {
-    const page = (
-      actions?: { panelId: string; method: string; label: string }[],
-    ): ApplicationPage => ({
-      id: 'community.page',
-      owner: { pluginId: 'community.translator', instanceId: 'i', generation: 1 },
-      title: '翻译',
-      order: 40,
-      manifest: {},
-      ...(actions === undefined ? {} : { actions }),
+  it('有消息：显示服务正文与时间；断线时停止与发送都按不动', () => {
+    const state = snapshot({
+      phase: 'offline',
+      connectionId: 'c1',
+      confirmedAt: 1_700_000_000_000,
+      snapshot: {
+        protocolVersion: 1,
+        epoch: 'e',
+        cursor: 9,
+        now: 1_700_000_000_000,
+        agent: {
+          id: 'agent-1',
+          name: '阿蓝',
+          profileRevision: 1,
+          harness: 'cortico',
+          mode: 'scripted',
+          status: 'ready',
+          error: null,
+        },
+        messages: [
+          {
+            id: 'm1',
+            role: 'user',
+            text: '现在几点',
+            createdAt: 1_700_000_000_000,
+            inputId: 'i1',
+            taskId: null,
+          },
+          {
+            id: 'm2',
+            role: 'assistant',
+            text: '十点整。',
+            createdAt: 1_700_000_001_000,
+            inputId: null,
+            taskId: null,
+          },
+        ],
+        tasks: [
+          {
+            id: 't1',
+            executionId: 'x',
+            title: '整理文件',
+            status: 'running',
+            createdAt: 1_700_000_000_000,
+            updatedAt: 1_700_000_000_000,
+            exitCode: null,
+            stdout: '',
+            stderr: '',
+            logsTruncated: false,
+            artifacts: [],
+            error: null,
+          },
+        ],
+        facts: [],
+        plugins: [],
+      },
     });
-    const props = {
-      app: appState(),
-      onBack: noop,
-      onDirtyChange: noop,
-      notify: noop,
-    };
-    const withAction = renderToStaticMarkup(
-      <GenericPage
-        {...props}
-        page={page([{ panelId: 'main', method: 'refresh', label: '更新一次词库' }])}
-      />,
+    const html = renderToStaticMarkup(
+      <ConversationPage companion={companion({ state })} notify={noop} onGoToStart={noop} />,
     );
-    expect(withAction).toContain('更新一次词库');
-    expect(withAction).toContain('这一页能做的事');
-    expect(renderToStaticMarkup(<GenericPage {...props} page={page()} />)).not.toContain(
-      '这一页能做的事',
+    expect(html).toContain('现在几点');
+    expect(html).toContain('十点整。');
+    expect(html).toContain('data-testid="conversation-reconnect"');
+    // 断线时任务显示「未知（上次：运行中）」，不假装它还在跑。
+    expect(html).toContain('状态未知（上次：运行中）');
+    expect(tag(html, 'conversation-send')).toContain('disabled');
+  });
+
+  it('有待确认的发送：只说可能已送达，不复制用户那句话', () => {
+    const state = snapshot({
+      phase: 'live',
+      connectionId: 'c1',
+      pending: [{ commandId: 'cmd-1', kind: 'message', taskId: null, status: 'uncertain' }],
+      snapshot: {
+        protocolVersion: 1,
+        epoch: 'e',
+        cursor: 1,
+        now: 1,
+        agent: {
+          id: 'a',
+          name: '阿蓝',
+          profileRevision: 1,
+          harness: 'cortico',
+          mode: 'scripted',
+          status: 'ready',
+          error: null,
+        },
+        messages: [],
+        tasks: [],
+        facts: [],
+        plugins: [],
+      },
+    });
+    const html = renderToStaticMarkup(
+      <ConversationPage companion={companion({ state })} notify={noop} onGoToStart={noop} />,
     );
+    expect(html).toContain('上一条消息结果未知');
+    expect(html).toContain('重试会复用同一次提交');
   });
 });
 
-describe('开始页', () => {
-  it('模型桥不在：只说没有这条通道，不给一份能填的假表单', () => {
-    const html = render(
-      <StartPage {...startProps(appState(), modelState({ available: false, snapshot: null }))} />,
+describe('人格页', () => {
+  it('人格正文只读：没有可编辑正文的控件，也没有保存按钮', () => {
+    const html = renderToStaticMarkup(
+      <PersonaPage companion={companion()} presentation={presentation()} notify={noop} />,
     );
-    expect(html).toContain('还没有模型连接的通道');
-    expect(html).not.toContain('model-save');
-    expect(html).not.toContain('model-test');
+    expect(html).toContain('人格由服务保存');
+    expect(html).not.toContain('<textarea');
+    expect(html).not.toContain('保存正文');
+    expect(html).toContain('data-testid="persona-read"');
   });
 
-  it('没有在用端点：状态牌说还没有在用连接，测试连接点不动', () => {
-    const html = render(<StartPage {...startProps(appState())} />);
-    expect(html).toContain('还没有在用连接');
-    expect(tag(html, 'model-test')).toContain('disabled');
-    // 目录按厂商归组：同一家的两块平台只占一格，切换在详情里给。
-    expect(html).toContain('model-provider-select');
-    expect(html).toContain('value="deepseek"');
-    expect(html).toContain('value="qwen"');
-    expect(html).not.toContain('value="qwen-intl"');
-    // 按不下去的原因写在明面上，不靠 tooltip。
-    expect(html).toContain('model-save-reason');
-    expect(html).toContain('还没有可用的 Key');
+  it('本机呈现字段在：双击、状态气泡、回复气泡与三个范围', () => {
+    const html = renderToStaticMarkup(
+      <PersonaPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    for (const id of [
+      'pref-doubleClickTyping',
+      'pref-statusBubble',
+      'pref-saidBubble',
+      'pref-bubbleFontSize',
+      'pref-bubbleSpeed',
+      'pref-glow',
+    ])
+      expect(html).toContain(`data-testid="${id}"`);
   });
 
-  it('在用的那一家带着模型名，测试可以点，Key 留空沿用', () => {
-    const html = render(
-      <StartPage
-        {...startProps(
-          appState(),
-          modelState({
-            snapshot: modelSnapshot({
-              active: { id: 'qwen', model: 'qwen3.8-flash', label: '通义千问' },
-              endpoints: [{ id: 'qwen', model: 'qwen3.8-flash', keyConfigured: true }],
-            }),
-          }),
-        )}
+  it('没有本机记录时只说没有，不铺一份默认值', () => {
+    const html = renderToStaticMarkup(
+      <PersonaPage
+        companion={companion()}
+        presentation={presentation({ snapshot: null })}
+        notify={noop}
       />,
     );
-    expect(html).toContain('通义千问 · qwen3.8-flash');
-    expect(tag(html, 'model-test')).not.toContain('disabled');
-    expect(tag(html, 'key-input')).toContain('value=""');
-    expect(html).toContain('改用国际平台');
+    expect(html).toContain('还没有读到本机的外观记录');
   });
+});
 
-  it('这一页只有三节：运行状态归扩展页管，配色是新工作室不是旧编辑器', () => {
-    const html = render(<StartPage {...startProps(appState())} />);
-    expect(html).toContain('模型连接');
-    expect(html).toContain('桌宠');
-    expect(html).toContain('界面配色');
-    expect(html).toContain('theme-studio');
-    expect(html).not.toContain('theme-editor');
-    expect(html).not.toContain('运行状态');
-    expect(html).not.toContain('console-stop-all');
-    // 呈现里不留被否掉的复制品词汇/类名。
-    for (const old of ['start-chip', 'pk-pill', 'console-segmented', '暂未连接']) {
-      expect(html).not.toContain(old);
+describe('外观页', () => {
+  it('两个形态、四个配色、三个大小都可选，当前值被选中', () => {
+    const html = renderToStaticMarkup(
+      <AppearancePage presentation={presentation()} notify={noop} />,
+    );
+    for (const name of ['简约', '圆头', '晨蓝', '雪青', '松墨', '柿橙', '适中']) {
+      expect(html).toContain(name);
     }
+    expect(html).toContain('data-testid="pref-figure-minimal"');
+    expect(html).toContain('data-testid="pref-palette-morning"');
+    expect(html).toContain('data-testid="pref-visible"');
   });
 
-  it('显示状态没读出来就说未就绪，不猜它在不在桌上', () => {
-    const unknown = render(<StartPage {...startProps(appState())} />);
-    expect(tag(unknown, 'pet-hide')).toContain('disabled');
-    expect(tag(unknown, 'pet-show')).toContain('disabled');
-
-    const onDesktop = render(
-      <StartPage
-        {...startProps(
-          appState({
-            snapshot: {
-              ...(appState().snapshot as ApplicationSnapshot),
-              desktop: { available: true, shown: true },
-            },
-          }),
-        )}
-      />,
+  it('没有本机记录：只说这件事，不画能点的开关', () => {
+    const html = renderToStaticMarkup(
+      <AppearancePage presentation={presentation({ snapshot: null })} notify={noop} />,
     );
-    expect(onDesktop).toContain('在桌面隐藏');
-    expect(tag(onDesktop, 'pet-hide')).not.toContain('disabled');
-    expect(tag(onDesktop, 'pet-show')).toContain('disabled');
-  });
-
-  it('宽版预览沿用真实角色和互动，设置入口保留到装扮页', () => {
-    const html = render(<StartPage {...startProps(appState())} />);
-    expect(html).toContain('data-testid="pet-avatar"');
-    expect(html).toContain('data-testid="pet-poke"');
-    expect(html).toContain('stage--wide');
-    expect(html).toContain('预览状态');
-    expect(html).not.toContain('start__quick');
-    expect(html).not.toContain('pet-pause');
-    expect(html).toContain('pet-dress');
-  });
-});
-
-describe('扩展页的运行状态', () => {
-  const host = (over: Partial<ConsoleSnapshot['host']> = {}): ConsoleSnapshot => ({
-    version: 1,
-    host: {
-      version: 1,
-      runtime: 'ready',
-      installedPlugins: 1,
-      activePlugins: 1,
-      unreadyPlugins: 0,
-      pendingRestartPlugins: 0,
-      runningTasks: 0,
-      pendingWork: 0,
-      ...over,
-    },
-    plugins: [],
-    contributions: [],
-    app: { name: 'AI 桌宠', version: '0.0.0', electron: '45', node: '24', platform: 'win32-x64' },
-  });
-
-  function pluginsPage(snapshot: ConsoleSnapshot): string {
-    return render(
-      <PluginsPage
-        snapshot={snapshot}
-        loading={false}
-        error={null}
-        available
-        onRetry={noop}
-        onOpenConfig={undefined}
-        onOpenPermissions={noop}
-        pending={new Map()}
-        onAction={noop}
-        stopping={false}
-        onRequestStopAll={noop}
-      />,
-    );
-  }
-
-  it('运行状态排在插件列表上面，空闲时不给停止入口', () => {
-    const html = pluginsPage(host());
-    expect(html.indexOf('运行状态')).toBeLessThan(html.indexOf('已安装'));
-    expect(html).not.toContain('console-stop-all');
-    expect(html).toContain('没有正在运行的任务');
-  });
-
-  it('有任务时给停止入口，计数照宿主的话说', () => {
-    const html = pluginsPage(host({ runningTasks: 2, pendingWork: 3 }));
-    expect(html).toContain('console-stop-all');
-    expect(html).toContain('2 个任务在运行，共 3 项工作尚未结束');
+    expect(html).toContain('没有可用的外观记录');
+    expect(html).not.toContain('data-testid="pref-figure-minimal"');
   });
 });

@@ -1,0 +1,116 @@
+/* ---- 模型连接（对话框内） ---- */
+
+/*
+ * 共享对话框只有宽度约束，没有高度约束；而模态打开时 body 已锁死滚动。
+ * 390px 上键盘一弹，整块会超出视口、底部按钮被顶到键盘后面。
+ * 这里把对话框变成三行（标题/可滚内容/常驻按钮），只约束本页里的这一个。
+ *
+ * 必须挂在 [open] 上：浏览器用 dialog:not([open]) { display: none } 隐藏关闭
+ * 状态的对话框，无条件写 display 会把它变成一个盖住整页的透明盒子。
+ */
+.tc-model-dialog .pk-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+}
+
+.tc-model-dialog .pk-dialog[open] .pk-dialog__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 按钮区不参与收缩：内容再长也留在视口里，390px 上不会被键盘顶走。 */
+.tc-model-dialog .pk-dialog[open] .pk-dialog__footer {
+  flex: none;
+}
+
+.tc-model-dialog .tc-model {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.tc-model-dialog .tc-model__summary {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 13px;
+}
+
+.tc-model-dialog .tc-model__control {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  font-size: 14px;
+}
+
+.tc-model-dialog .tc-model__control:disabled {
+  background: var(--pk-surface);
+  color: var(--pk-muted);
+}
+
+.tc-model-dialog .tc-model__key {
+  display: grid;
+  gap: 6px;
+}
+
+.tc-model-dialog .tc-model__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tc-model-dialog .tc-model__keyrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tc-model-dialog .tc-model__note {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 12.5px;
+}
+
+.tc-model-dialog .tc-model__error {
+  margin: 0;
+  color: var(--pk-danger);
+  font-size: 13px;
+}
+
+.tc-model-dialog .tc-model__check {
+  margin: 0;
+  font-size: 13px;
+}
+
+.tc-model-dialog .tc-model__check--verified {
+  color: var(--pk-text);
+}
+
+.tc-model-dialog .tc-model__check--failed {
+  color: var(--pk-danger);
+}
+
+@media (max-width: 760px) {
+  /* 窄屏上对话框几乎占满宽度，按钮允许换行但始终留在内容下面。 */
+  .tc-model-dialog .pk-dialog[open] {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .tc-model-dialog .pk-dialog[open] .pk-dialog__footer {
+    flex-wrap: wrap;
+  }
+
+  .tc-model-dialog .tc-model {
+    gap: 10px;
+  }
+}
