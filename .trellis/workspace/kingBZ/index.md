@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 22
+- **Total Sessions**: 23
 - **Last Active**: 2026-11-08
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~776 | Active |
+| `journal-1.md` | ~831 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 23 | 2026-11-08 | Replaceable Magpie connection and useful text stage | `6778eec`, `0be35b1`, `6c49a21` | `feat/companion-model-text-loop` |
 | 22 | 2026-11-08 | Text-first continuous Agent foundation | `1a7b082`, `8fc76f7`, `9d86962` | `feat/text-agent-foundation` |
 | 21 | 2026-11-06 | Cross-platform companion architecture discovery | - | `main` |
 | 20 | 2026-11-04 | Simplify plugin list controls and settings navigation | `aaab58d` | `feat/plugin-pet-mvp-20261101` |

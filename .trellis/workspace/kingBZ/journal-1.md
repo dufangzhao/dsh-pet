@@ -774,3 +774,58 @@ The architecture parent remains planning. Voice/duplex, Live2D, full management/
 ### Next Steps
 
 - None - task complete
+
+
+## Session 23: Replaceable Magpie connection and useful text stage
+
+**Date**: 2026-11-08
+**Task**: Replaceable Magpie connection and useful text stage
+**Branch**: `feat/companion-model-text-loop`
+
+### Summary
+
+Completed model configuration and real Magpie-backed preference/chat/file work; final patched root gate, browser and layered regressions passed. Archived the accepted child while retaining parent planning and the stopped original trial.
+
+### Main Changes
+
+#### Delivered stage
+
+- Shipped the ordinary replaceable builtin Magpie model-connection plugin, native source-owned transport, exact configuration/key CAS, safe same-Agent replacement and explicit connection checks; GPT implemented backend/integration and DeepSeek implemented the model-settings client. Saving never triggers inference; synthetic and network checks stay distinct.
+- Repaired actual Magpie 0.1.3225 Responses compatibility using the managed Cortico 0.2.7 patch. The default native provider retains framing floor0; only the Magpie provider opts into65536 UTF-16 code units and bypasses the three observed nonstandard metadata sidebands. Standard resources, native errors/partials, output limits, authority and actual drain remain strict. Frozen ignore-scripts installation passed with policy enabled.
+- Local work commits are 6778eec (feature), 0be35b1 (browser/QA), and 6c49a21 (live compatibility repair). No push/amend. [Archived task](../../tasks/archive/2026-11/11-08-companion-model-text-loop/prd.md), [stage QA](../../../qa/companion-model-acceptance.md) and [service guide](../../../docs/35-text-agent-foundation.md) retain requirements and actual evidence. Archive bookkeeping471b205 and link repairae0a2ba followed all product commits.
+
+#### Verified evidence and limits
+
+- Parent independently collected final patched full `pnpm check`, job `bash-a75026919f104b32`, exit0: workspace types/tests, root QA, lint/format, companion service and desktop builds. Latest focused evidence: runtime26, service32 (transport11/controller19/CLI2), Magpie24, Cortico8, state16, Core4, existing real-Docker service/recovery/lifecycle18 and direct unbound-transport regression1. No tests or builds were rerun for archival.
+- Final frontend155 package tests and25 fixture DOM checks passed. Actual product API plus controlled HTTP/SSE peer browser25 checks passed with10 reviewed screenshots; those protocol/browser results remain distinct from real-provider inference.
+- Short diagnosis used its separately authorized2/2 additional bounded requests; repaired explicit connection check retained256-output-token diagnostic semantics. Useful A2 then had a fresh8-native-generation/180-second allowance; these are separate budgets, not permission for later inference.
+- [Safe real Magpie report](../../../qa/companion-live-magpie-result.json): actual host Magpie0.1.3225 / codex/gpt-6.1-sol, public local-client identity,39.038s. Seven HTTP200/completed generations plus one result-notification generation aborted on intentional cleanup; no ninth request. Real remember/start_work receipts, canonical answer-style preference, actual Docker exit0 and authenticated52/34-byte Markdown/CSV downloads totaling25 passed. Input B was answered while work ran, about5.5s before completion. Optional second live cancellation task was not attempted within budget; existing real Docker cancellation evidence is separate. Local abort does not establish remote billing/compute cancellation.
+
+#### Preservation and continuation
+
+- Only the completed model-text child was archived at `.trellis/tasks/archive/2026-11/11-08-companion-model-text-loop`; its metadata records final work commit6c49a21. Migrated Markdown/backlinks and both6-entry JSONL manifests were validated. Parent architecture remains planning with its existing child list; no other task was archived.
+- Every owned preview/service/container is closed; public4120 remains stopped. Original profile/token and retained29c4ade runtime remain intact. No secrets/private response bodies, .companion-data or temporary profiles were committed; no account/gateway configuration was changed.
+- Next is the separately scoped shared desktop-pet/web entry stage. The parent-owned next-stage research file remains untracked and outside this stage's commits. Voice, platform accounts, public deployment and further live calls are not implied by this stage completion.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6778eec` | (see git log) |
+| `0be35b1` | (see git log) |
+| `6c49a21` | (see git log) |
+
+### Testing
+
+- Final patched `pnpm check` exited 0; parent collected job `bash-a75026919f104b32`. Focused package, native/HTTP/source and existing Docker/recovery gates passed; frontend 155, fixture DOM 25 and actual-API browser 25 checks passed.
+- Real Magpie A2 passed in 39.038s within its separate 8-generation/180s budget; the optional second live cancellation task was not run. Exact receipts, downloads, outcomes and cleanup are retained in the [safe report](../../../qa/companion-live-magpie-result.json).
+- Archival-only checks passed: local Markdown destinations, unchanged non-link text, JSONL 6+6 entries, completed child metadata/parent planning relation and `git diff --check`. No source tests, builds, services or model calls were rerun during bookkeeping.
+
+### Status
+
+[OK] **Stage completed and archived**. Parent architecture remains **planning**; public 4120 remains stopped.
+
+### Next Steps
+
+- Continue the separately scoped shared desktop-pet/web entry stage under the approved roadmap; preserve canonical Agent/data ownership and stopped trial. No other existing task was completed or archived.
