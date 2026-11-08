@@ -1,0 +1,50 @@
+{
+  "scope": "cross-surface-work-and-restart-only",
+  "status": "passed",
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-work.mjs",
+  "exitCode": 0,
+  "checks": [
+    "real-three-surfaces-share-agent-identity",
+    "real-pet-console-web-send-once-with-canonical-ids",
+    "actual-selected-stop-leaves-other-task-running",
+    "task-completes-after-desktop-exit",
+    "fresh-process-requires-token-and-recovers-same-artifact"
+  ],
+  "messageIds": [
+    "033a94b3-65d2-4578-ba95-80d9afed0ccf",
+    "f5e63b23-dd0d-43fd-9b15-b0f666a89a0e",
+    "104fdcc5-5c8c-4311-8aed-71ff1cab2046"
+  ],
+  "artifact": {
+    "taskId": "c1579ecc-c90c-4adf-8ba9-618da2b60fa8",
+    "id": "artifact-dad7e3e02641e98c287a18ec6215f397ec830d596172a1e3",
+    "size": 19,
+    "sha256": "f5e6f701596d0ce93c767295349f0222309ec99d103553afdb901c80ff29c36b"
+  },
+  "runnerHash": "Not captured for this passing run; the QA runner was subsequently extended for chooser diagnostics, so its current hash is not evidence of the earlier script.",
+  "productionHashes": {
+    "main": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+    "preload": "946293e69aca1db17b65b0c1e8b55b3a9c53a14926c1a67db8e63d5a576baed7",
+    "worker": "b1300cbe4c1780829301695996a527e2386906c8852ae5b2d46d4e9296cc8551",
+    "admission": "f216f50344bb5b4412588fffac4c55901c9173fa0abce933976c3b4d48c7bcbb"
+  },
+  "tooling": {
+    "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+    "platform": "linux-x64",
+    "electron": "45.0.0",
+    "noSandboxFlag": true,
+    "model": "scripted; no real model call"
+  },
+  "screenshots": [
+    "qa/fixtures/companion-desktop/evidence/b371ae95-shared-conversation.png",
+    "qa/fixtures/companion-desktop/evidence/b371ae95-shared-pet.png",
+    "qa/fixtures/companion-desktop/evidence/b371ae95-recovered-task.png"
+  ],
+  "limitations": [
+    "The recovered-task screenshot shows the upper conversation area; task evidence comes from DOM and service assertions.",
+    "The image viewer's black pet background does not establish actual transparency; bitmap and computed-style checks remain pending.",
+    "Native chooser, lifecycle, security, offline, full usability and Windows gates are not covered by this subset."
+  ],
+  "cleanup": "The probe returned after finally closed its web browser, desktop, loopback proxy, isolated service and owned Xvfb; no cleanup failure was reported.",
+  "history": "The initial work-probe attempt failed because the QA locator counted scripted assistant text as well as the user row. After cleanup the locator was corrected and the passing attempt above was run. Later chooser extensions failed on window discovery and are not included in this pass."
+}

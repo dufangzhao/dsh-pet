@@ -1,0 +1,8 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Actual Electron/Main/preload/kernel boundaries, existing sources and native QA limits"}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Ordinary plugin, Config CAS, source authority and application admission conventions"}
+{"file":".trellis/spec/backend/companion-service.md","reason":"Canonical service state/work and HTTP contract; no duplicate desktop Agent"}
+{"file":".trellis/spec/backend/model-connections.md","reason":"Existing source-owned native transport, credentials and real-drain precedent"}
+{"file":".trellis/spec/frontend/project-patterns.md","reason":"Existing pet/console layout, components, exact trusted URLs and native geometry"}
+{"file":".trellis/spec/frontend/model-settings.md","reason":"Snapshot ownership, target CAS, immediate secret clearing and truthful model UI reuse"}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/shared-desktop-entry.md","reason":"Read actual integration paths and lawful Linux/Windows verification boundaries"}
+{"file":".trellis/tasks/11-08-shared-desktop-agent-entry/research/desktop-ux.md","reason":"DeepSeek source-backed connection/task/identity UX aligned with the exact shared contract"}

@@ -1,0 +1,20 @@
+{
+  "scope": "native-model-layout-and-transparency-only",
+  "status": "passed",
+  "exitCode": 0,
+  "jobId": "bash-938bceecdb754183",
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-visual.mjs",
+  "checks": ["880x600 model footer visible", "no desktop model password field", "Escape closes dialog and restores focus", "pet computed styles unchanged before/during/after model dialog"],
+  "petComputedStyles": {"html": {"backgroundColor": "rgba(0, 0, 0, 0)", "backgroundImage": "none", "opacity": "1"}, "body": {"backgroundColor": "rgba(0, 0, 0, 0)", "backgroundImage": "none", "opacity": "1"}, "root": {"backgroundColor": "rgba(0, 0, 0, 0)", "backgroundImage": "none", "opacity": "1"}},
+  "electronCapturePageBitmap": {"size": "380x420", "topLeftAlpha": 0, "minAlpha": 0, "maxAlpha": 255, "transparentPixelsBefore": 139614, "transparentPixelsDuring": 139609, "transparentPixelsAfter": 139622, "backgroundColorGetter": "#000000"},
+  "minimumViewport": {"width": 880, "height": 600, "footerLeft": 243, "footerRight": 637, "footerTop": 487, "footerBottom": 561},
+  "browserWindowConstruction": "Production pet-window.ts passes transparent:true and backgroundColor:#00000000; getBackgroundColor() actually returned #000000 in this environment.",
+  "screenshot": "qa/fixtures/companion-desktop/evidence/2e1bdea1-model-minimum-window.png",
+  "screenshotReviewed": true,
+  "runnerSha256": "df5994b799663ad94f9bf75f9b69242a242b45281599768fc4da6ff192956b92",
+  "visualFixtureSha256": "ea2414697eccf5dc466b5a664034387f6ba56b25d710fb97c6e49a350b06c68f",
+  "productionMainSha256": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+  "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+  "limit": "Xvfb without a compositor cannot establish Windows desktop compositing or click-through behavior. The screenshot's model endpoint is prefilled text only; no model/3425 request was made.",
+  "cleanup": "Runner returned after finally closed production Electron, isolated service and owned Xvfb, without a cleanup failure."
+}

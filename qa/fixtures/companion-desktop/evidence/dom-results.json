@@ -1,0 +1,16 @@
+{
+  "scope": "connection-and-target-dom-only",
+  "status": "passed",
+  "exitCode": 0,
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-native.mjs --dom",
+  "checks": ["real-linux-windows-security-and-active-source", "connection-form-revision-and-real-external-cas", "token-cleared-in-flight-close-and-retarget", "actual-dom-inflight-target-switch-and-current-target-send"],
+  "runtime": {"platform": "linux", "arch": "x64", "electron": "45.0.0", "windowCount": 2, "noSandboxFlag": true},
+  "productionMainSha256": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+  "productionPreloadSha256": "946293e69aca1db17b65b0c1e8b55b3a9c53a14926c1a67db8e63d5a576baed7",
+  "productionWorkerSha256": "b1300cbe4c1780829301695996a527e2386906c8852ae5b2d46d4e9296cc8551",
+  "admissionSha256": "f216f50344bb5b4412588fffac4c55901c9173fa0abce933976c3b4d48c7bcbb",
+  "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+  "runnerHash": "Not captured at run; current files are not substituted for that missing evidence.",
+  "cleanup": "Run returned after finally closed Electron, both proxies and services, and owned Xvfb without reporting cleanup failure.",
+  "limit": "The in-flight switch does not force an old React callback to settle after B is adopted. Local getState failure and stored old-handler cases are covered separately by controlled hook regressions, not this native result."
+}

@@ -1,0 +1,23 @@
+{
+  "scope": "native-chooser-save-and-cancel-only",
+  "status": "passed",
+  "exitCode": 0,
+  "jobId": "bash-841abfe23f184b95",
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-chooser.mjs",
+  "display": ":0 allocated by this run's Xvfb -displayfd",
+  "electron": {"pid": 436949, "ozonePlatform": "x11", "headless": false, "consoleXid": "0x20000a", "petXid": "0x200003"},
+  "chooser": {"title": "Save File", "xid": "0x40000a", "pid": 436949, "class": "electron/Electron", "transientFor": "0x20000a", "clientLeader": "0x400001"},
+  "save": "Real GTK chooser: verified same PID, exact title and console transient before input. In a dedicated isolated HOME, selected basename with Ctrl+A and clicked the actual Save button at the measured dialog geometry. UI reported saved and exact bytes matched the authenticated service artifact.",
+  "cancel": "A second real GTK chooser was verified and dismissed with Escape. UI reported cancelled and the saved file remained unchanged.",
+  "artifact": {"taskId": "478cfd8e-6764-4890-926e-294f33c18b37", "id": "artifact-186c1bf65d6f2fab2be52c0f59f6677e86e6893932a1e9b2", "size": 13, "sha256": "2ea339fc5c85e28977487e83235700b9181c5b8c7c3d2ef4951da263568f9767"},
+  "screenshots": ["qa/fixtures/companion-desktop/evidence/b937ea94-chooser-before-input.png", "qa/fixtures/companion-desktop/evidence/b937ea94-chooser-path-entered.png", "qa/fixtures/companion-desktop/evidence/b937ea94-chooser-after-save-click.png"],
+  "screenshotsReviewed": true,
+  "runnerSha256": "ba015fd3c3793b0b6c2afa5c382e4de89f82c82196cd05b23549dd6a9ae36bc5",
+  "chooserFixtureSha256": "3d44aeabcc52ab0a4b169411a457e0c18db5b4aa5b88cf4b4fcce1cf77da62db",
+  "displayFixtureSha256": "2c36c515ece4139b28d0ce0f36ecb2bfb834d376de141ca57bd06ab3419ade43",
+  "productionMainSha256": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+  "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+  "environment": "Private patched Electron and GTK/GSettings resources, memory GSettings backend, no OS-sandbox or Windows claim. Electron child HOME/XDG directories were under a newly created separate isolated home, not the service SQLite root.",
+  "cleanup": "Runner returned after finally closed production Electron, isolated service and owned Xvfb; no cleanup failure was reported. Subsequent ps and docker checks showed only previously existing unrelated processes/containers.",
+  "history": "An earlier tool-only diagnostic required an owned process-group stop because its native dialog was left open. An earlier save attempt required a manually verified native Escape during cleanup. A later failed attempt used a path in the GTK Name field; corrected automation enters only a basename under the isolated chooser home and activates the visible Save button."
+}
