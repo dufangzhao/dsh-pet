@@ -9,6 +9,10 @@ import {
   errorMessage,
   makeError,
   type CompanionArtifact,
+  type CompanionModelCredentialCommand,
+  type CompanionModelSaveCommand,
+  type CompanionModelTestCommand,
+  type CompanionModelView,
   type KernelError,
   type Result,
 } from '@pet/contracts';
@@ -16,9 +20,12 @@ import {
 import {
   getArtifact,
   getSnapshot,
+  saveModel,
   sendMessage,
   stopTask,
   streamEvents,
+  testModel,
+  writeModelCredential,
   STREAM_IDLE_TIMEOUT_MS,
   type ClientTransport,
 } from './protocol.js';
@@ -64,7 +71,7 @@ export class CompanionClient {
 
   constructor(options: CompanionClientOptions = {}) {
     this.#baseUrl = options.baseUrl ?? '';
-    this.#newCommandId = options.newCommandId ?? defaultCommandId;
+    this.#newCommandId = options.newCommandId ?? newCommandId;
     this.#refreshDelayMs = options.refreshDelayMs ?? REFRESH_COALESCE_MS;
     this.#streamIdleTimeoutMs = options.streamIdleTimeoutMs ?? STREAM_IDLE_TIMEOUT_MS;
   }
@@ -109,6 +116,11 @@ export class CompanionClient {
   disconnect(): void {
     this.#teardown();
     this.#dispatch({ type: 'disconnect' });
+  }
+
+  /** 读一次快照：用于冲突后重新对齐，不重建事件流、不清掉本地草稿。 */
+  async refresh(): Promise<void> {
+    await this.#refresh();
   }
 
   async reconnect(): Promise<void> {
@@ -170,6 +182,35 @@ export class CompanionClient {
     }
     saveBlob(result.value, artifact.name);
     return { ok: true, value: null };
+  }
+
+  /**
+   * 模型设置：保存并应用、显式测试、写入/清除密钥。
+   *
+   * 返回的视图只交给调用方（用来判定两段 CAS 和这次操作的文案），**不写进
+   * 全局快照**。快照只有一个所有者：`/api/snapshot` 与 SSE。否则一个迟到的
+   * 命令响应会盖掉更新的快照——命令响应没有顺序信息，谁也判不出谁新。
+   * 成功后触发一次权威刷新，让视图回到服务端当下的事实。
+   * 失败时原样把固定错误交给调用方，不改快照。
+   */
+  async saveModel(command: CompanionModelSaveCommand): Promise<Result<CompanionModelView>> {
+    const result = await saveModel(this.#transport, command);
+    if (result.ok) this.#scheduleRefresh();
+    return result;
+  }
+
+  async testModel(command: CompanionModelTestCommand): Promise<Result<CompanionModelView>> {
+    const result = await testModel(this.#transport, command);
+    if (result.ok) this.#scheduleRefresh();
+    return result;
+  }
+
+  async writeModelCredential(
+    command: CompanionModelCredentialCommand,
+  ): Promise<Result<CompanionModelView>> {
+    const result = await writeModelCredential(this.#transport, command);
+    if (result.ok) this.#scheduleRefresh();
+    return result;
   }
 
   dispose(): void {
@@ -284,7 +325,8 @@ export function isUnknownOutcome(error: KernelError): boolean {
   );
 }
 
-function defaultCommandId(): string {
+/** 一次意图一个 ID；设置表单提交时也用同一个来源。 */
+export function newCommandId(): string {
   const cryptoApi = globalThis.crypto;
   if (typeof cryptoApi?.randomUUID === 'function') return cryptoApi.randomUUID();
   return `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;

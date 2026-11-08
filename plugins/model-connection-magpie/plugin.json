@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.model-connection-magpie",
+  "version": "0.1.0",
+  "displayName": { "en": "Magpie model connection", "zh-CN": "Magpie 模型连接" },
+  "description": {
+    "en": "Native Responses connection to an independently operated Magpie gateway",
+    "zh-CN": "连接独立运行的 Magpie 网关，不托管网关进程"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "magpie",
+      "capability": "companion.model.connection@1",
+      "features": {
+        "nativeResponses": 1,
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["model-api-key"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrl", "model", "authMode"],
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "default": "http://127.0.0.1:3425/v1"
+        },
+        "model": { "type": "string", "minLength": 0, "maxLength": 128, "default": "" },
+        "authMode": {
+          "type": "string",
+          "enum": ["local-client-id", "gateway-key"],
+          "default": "local-client-id"
+        }
+      }
+    },
+    "apply": { "baseUrl": "reload", "model": "reload", "authMode": "reload" }
+  }
+}

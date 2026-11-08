@@ -85,6 +85,14 @@ export function createAuthorizedModelClient(
                         ...(generateOptions.onEvent
                           ? {
                               onEvent: (event) => {
+                                if (
+                                  signal.aborted ||
+                                  sourceSignal.aborted ||
+                                  !host.manager.isActive(context.owner)
+                                )
+                                  return;
+                                if (!host.verifySource(sourcePluginId))
+                                  throw new KernelFault('package-changed');
                                 if (!safe(event)) throw new KernelFault('permission-denied');
                                 generateOptions.onEvent?.(event);
                               },

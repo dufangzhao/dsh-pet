@@ -2,11 +2,11 @@
 
 ## 1. Scope / trigger
 
-Use this spec for `packages/companion-runtime`, `apps/companion-service`, and the state/execution/Harness/text-client plugins. It records the implemented text foundation; the existing desktop profile remains independent. Read [project baseline](../shared/project-baseline.md) for unchanged kernel/SDK behavior and [the service guide](../../../docs/35-text-agent-foundation.md) for operation.
+Use this spec for `packages/companion-runtime`, `apps/companion-service`, and the state/execution/Harness/text-client plugins. Read [model connection contracts](model-connections.md) for replaceable model plugins, native authority and owner configuration/checks. The existing desktop profile remains independent; [project baseline](../shared/project-baseline.md) records unchanged kernel/SDK behavior and [the service guide](../../../docs/35-text-agent-foundation.md) covers operation.
 
 ## 2. Signatures
 
-- `createCompanionService(options): Promise<{url,runtime,host,close()}>` composes the reference service with an explicit data root and operator token.
+- `createCompanionService(options): Promise<CompanionService>` returns `{url,runtime,host,models,close()}` with an explicit data root/operator token; `models` follows the [model connection contract](model-connections.md).
 - `CompanionPluginHost.create({dataDirectory,plugins})` mounts ordinary `PluginDefinition`s under existing `PluginManager`, `TaskSupervisor`, `PermissionKernel` and `ConfigService`.
 - `runtime.message(command)`, `startTask(command, signal?)`, `stopTask(taskId,commandId)`, `remember(command)` return `CompanionCommandReceipt`.
 - `runtime.state<M>(method: M, input: StateMethodInputs[M], signal?)` unwraps a **provider payload Result** separately from the host transport Result.
@@ -43,7 +43,7 @@ A recovered `unknown` task may receive a verified exit code/logs/artifact **with
 
 ### Authority and lifetime
 
-Provider `features.methodPermissions` covers every exposed state/execution/Harness method. Omitting it checks only the consumer and bypasses provider file/process policy. Source Harness ports use source leases rather than unrestricted core authority. Model borrowing uses the actual source owner/generation and the existing credential broker; secrets are supplied by the operator, not persisted through an invented plaintext cipher.
+Provider `features.methodPermissions` covers every exposed state/execution/Harness method. Omitting it checks only the consumer and bypasses provider file/process policy. Source Harness ports use source leases rather than unrestricted core authority. Cortico consumes the selected model capability; the connection plugin owns its source/config-read and credential leases under its actual generation. Explicit owner checks use the companion-host consumer. Native private dispatch acquires both sides directly, preserving opaque values/errors and actual drain; a JSON describe lease is insufficient. Provisioning, callback/config fences and credential retirement are maintained once in [model connection contracts](model-connections.md).
 
 An activating Harness can receive a read-only initial context only through the host's checked bootstrap grant (trusted source, declared capability, allowed policy epoch, same owner). Normal work requires an active source task. Old owner callbacks cannot update a replacement.
 
@@ -58,14 +58,14 @@ An activating Harness can receive a read-only initial context only through the h
 | Reused command with changed payload | `conflict`, no repeated effect |
 | Unsupported protocol/broken response DTO | Client rejects fixed error; no partial snapshot or fabricated empty facts |
 | Wrong command ID in a receipt | Keep the local intent uncertain; do not confirm another submission |
-| Provider/source deny, revoke, changed fingerprint | Reject the operation; revoke live model I/O through leases |
+| Provider/source deny, revoke, changed fingerprint | Explicit revoke aborts live leases; source fingerprints reject/fence at observed admission/event/return boundaries, without a filesystem watcher |
 | Missing image/backend | `unavailable`; no pull and no host execution fallback |
 | Invalid path/symlink/hardlink or artifact containment failure | Reject; no read/export outside assigned namespace |
 | Unconfirmed cleanup | `unknown` / `pending_restart`; not clean cancellation |
 | Service crash without terminal evidence | Recover uncertainty and verified evidence; never rerun old code |
 | Projection/Harness unavailable after completed work | Keep committed work result; report projection failure separately |
 
-Inputs and provider results respect the existing 64KiB JSON boundary. State results reserve 60KiB; declared artifact names accept the execution provider's 240-character path budget. Times are Unix milliseconds; monotonic supervisor deadlines are not persisted across processes.
+Inputs and provider results respect the existing 64KiB JSON boundary. State defaults to 60KiB; final snapshot aggregation reserves its actual model/agent/plugin/Result envelope before passing optional `snapshot.byteBudget` to the same state projector (see [single-budget rules](model-connections.md)). Facts and omission markers remain authoritative. Declared artifact names accept the execution provider's 240-character path budget. Times are Unix milliseconds; monotonic supervisor deadlines are not persisted across processes.
 
 ## 5. Good / base / bad cases
 

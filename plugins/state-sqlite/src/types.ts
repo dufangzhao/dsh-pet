@@ -62,7 +62,11 @@ export interface RecordCommandInput extends CommandLookup {
 }
 
 export interface StateMethodInputs {
-  snapshot: { readonly messageLimit?: number; readonly taskLimit?: number };
+  snapshot: {
+    readonly messageLimit?: number;
+    readonly taskLimit?: number;
+    readonly byteBudget?: number;
+  };
   events: { readonly after: number; readonly epoch: string; readonly limit?: number };
   acceptMessage: CompanionMessageCommand;
   createTask: CompanionTaskCommand & { readonly executionId?: string };

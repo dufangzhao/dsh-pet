@@ -284,6 +284,21 @@ export class SqliteState {
       .all()
       .map((row) => decode<CompanionFact>(row));
     const tasks: CompanionTask[] = [];
+    const messages: CompanionMessage[] = [];
+    const budget = (input.byteBudget ?? STATE_MAX_RESULT_BYTES) - 1024;
+    const base = {
+      assistantId: this.#assistantId,
+      epoch: this.#epoch,
+      cursor: this.#cursor(),
+      hasMoreMessages: false,
+      hasMoreTasks: false,
+      taskDetailsTruncated: false,
+      messages,
+      tasks,
+      facts,
+    };
+    // Facts are authoritative and never omitted to make a projection fit.
+    if (jsonBytes(base) > budget) throw new StateFailure('quota-exceeded');
     const taskLimit = input.taskLimit ?? 20;
     const taskRows = this.#db
       .prepare('SELECT body FROM tasks ORDER BY sequence DESC LIMIT ?')
@@ -300,31 +315,24 @@ export class SqliteState {
         artifacts: task.artifacts.slice(0, 4),
         logsTruncated: task.logsTruncated || stdout !== task.stdout || stderr !== task.stderr,
       };
-      if (jsonBytes([...tasks, summary]) > 16 * 1024) break;
+      if (
+        jsonBytes([...tasks, summary]) > 16 * 1024 ||
+        jsonBytes({ ...base, tasks: [...tasks, summary] }) > budget
+      )
+        break;
       tasks.push(summary);
       taskDetailsTruncated ||=
         stdout !== task.stdout || stderr !== task.stderr || task.artifacts.length > 4;
     }
-    const messages: CompanionMessage[] = [];
     const messageLimit = input.messageLimit ?? 50;
     const messageRows = this.#db
       .prepare('SELECT body FROM messages ORDER BY sequence DESC LIMIT ?')
       .all(messageLimit + 1);
-    const base = {
-      assistantId: this.#assistantId,
-      epoch: this.#epoch,
-      cursor: this.#cursor(),
-      hasMoreMessages: false,
-      hasMoreTasks: taskRows.length > tasks.length,
-      taskDetailsTruncated,
-      messages,
-      tasks,
-      facts,
-    };
+    base.hasMoreTasks = taskRows.length > tasks.length;
+    base.taskDetailsTruncated = taskDetailsTruncated;
     for (const row of messageRows.slice(0, messageLimit)) {
       const message = decode<CompanionMessage>(row);
-      if (jsonBytes({ ...base, messages: [...messages, message] }) > STATE_MAX_RESULT_BYTES - 1024)
-        break;
+      if (jsonBytes({ ...base, messages: [...messages, message] }) > budget) break;
       messages.push(message);
     }
     return {

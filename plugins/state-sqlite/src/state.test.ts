@@ -492,4 +492,31 @@ describe('SqliteState', () => {
     ).toBe(false);
     expect(state.invoke('snapshot', { messageLimit: Number.NaN }).ok).toBe(false);
   });
+
+  it('uses one caller-supplied snapshot byte budget without dropping facts or falsifying omission flags', () => {
+    const { state } = open();
+    value(
+      state.rememberFact({ commandId: 'budget-fact', key: 'preference', value: 'authoritative' }),
+    );
+    for (let index = 0; index < 30; index++) {
+      const work = task(state, `budget-task-${index}`);
+      value(state.updateTask({ taskId: work.id, status: 'running', stdout: 'log'.repeat(4000) }));
+      value(state.acceptMessage({ commandId: `budget-message-${index}`, text: '字'.repeat(8000) }));
+    }
+    const original = value(state.snapshot());
+    expect(value(state.snapshot({ byteBudget: STATE_MAX_RESULT_BYTES }))).toEqual(original);
+    const smaller = value(state.snapshot({ byteBudget: 6000 }));
+    expect(Buffer.byteLength(JSON.stringify(smaller))).toBeLessThan(6000);
+    expect(smaller.facts).toEqual(original.facts);
+    expect(smaller.hasMoreMessages).toBe(true);
+    expect(smaller.hasMoreTasks).toBe(true);
+    expect(smaller.taskDetailsTruncated).toBe(true);
+    expect(state.snapshot({ byteBudget: 100 })).toEqual({
+      ok: false,
+      error: makeError('quota-exceeded'),
+    });
+    expect(state.snapshot({ byteBudget: 0 }).ok).toBe(false);
+    expect(state.snapshot({ byteBudget: STATE_MAX_RESULT_BYTES + 1 }).ok).toBe(false);
+    expect(value(state.snapshot()).facts).toEqual(original.facts);
+  });
 });

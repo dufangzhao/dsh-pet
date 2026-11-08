@@ -1,5 +1,6 @@
 /** Versioned, browser-safe text-service contract. Execution Sessions stay internal. */
 import type { KernelError } from './errors.js';
+import type { CompanionModelView } from './companion-model.js';
 import type { JsonObject } from './json.js';
 
 export const COMPANION_PROTOCOL_VERSION = 1 as const;
@@ -84,6 +85,8 @@ export interface CompanionSnapshot {
   readonly tasks: readonly CompanionTask[];
   readonly facts: readonly CompanionFact[];
   readonly plugins: readonly CompanionPluginView[];
+  /** Absent only for a service predating explicit model connection management. */
+  readonly model?: CompanionModelView;
   readonly projection?: {
     readonly hasMoreMessages: boolean;
     readonly hasMoreTasks: boolean;

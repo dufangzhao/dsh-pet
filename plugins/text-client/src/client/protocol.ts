@@ -10,13 +10,24 @@ import {
   type CompanionCommandReceipt,
   type CompanionEvent,
   type CompanionMessageCommand,
+  type CompanionModelCommandResult,
+  type CompanionModelCredentialCommand,
+  type CompanionModelSaveCommand,
+  type CompanionModelTestCommand,
+  type CompanionModelView,
   type CompanionSnapshot,
   type CompanionStopCommand,
   type KernelError,
   type Result,
 } from '@pet/contracts';
 
-import { parseEnvelope, parseEvent, parseReceipt, parseSnapshot } from './guards.js';
+import {
+  parseEnvelope,
+  parseEvent,
+  parseModelView,
+  parseReceipt,
+  parseSnapshot,
+} from './guards.js';
 import { SseDecoder, type SseMessage } from './sse.js';
 
 export interface ClientTransport {
@@ -168,6 +179,66 @@ export function stopTask(
   stop: CompanionStopCommand,
 ): Promise<Result<CompanionCommandReceipt>> {
   return command(transport, `/api/tasks/${encodeURIComponent(taskId)}/stop`, stop);
+}
+
+/**
+ * 模型设置的三个动作。保存与测试都返回「回执 + 视图」：回执必须对应本次
+ * commandId，视图必须整份读得懂，否则按结果未知处理，不拿半个视图去改界面。
+ */
+async function modelCommand(
+  transport: ClientTransport,
+  path: string,
+  command: CompanionModelSaveCommand | CompanionModelTestCommand,
+): Promise<Result<CompanionModelView>> {
+  const result = await request(transport, path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(command),
+  });
+  if (!result.ok) return result;
+  const envelope = result.value;
+  if (typeof envelope !== 'object' || envelope === null) {
+    return { ok: false, error: makeError('unavailable', false) };
+  }
+  const value = envelope as Partial<CompanionModelCommandResult>;
+  if (parseReceipt(value.receipt, command.commandId) === null) {
+    return { ok: false, error: makeError('unavailable', false) };
+  }
+  const view = parseModelView(value.view);
+  return view === null
+    ? { ok: false, error: makeError('unavailable', false) }
+    : { ok: true, value: view };
+}
+
+export function saveModel(
+  transport: ClientTransport,
+  command: CompanionModelSaveCommand,
+): Promise<Result<CompanionModelView>> {
+  return modelCommand(transport, '/api/model', command);
+}
+
+export function testModel(
+  transport: ClientTransport,
+  command: CompanionModelTestCommand,
+): Promise<Result<CompanionModelView>> {
+  return modelCommand(transport, '/api/model/test', command);
+}
+
+/** 密钥只随这一次请求体离开页面；返回的是非secret视图。 */
+export async function writeModelCredential(
+  transport: ClientTransport,
+  command: CompanionModelCredentialCommand,
+): Promise<Result<CompanionModelView>> {
+  const result = await request(transport, '/api/model/credential', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(command),
+  });
+  if (!result.ok) return result;
+  const view = parseModelView(result.value);
+  return view === null
+    ? { ok: false, error: makeError('unavailable', false) }
+    : { ok: true, value: view };
 }
 
 /** 产物字节：失败时返回固定错误，不把响应体当文件。 */

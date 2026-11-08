@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type JSX } from 'react';
 import { errorMessage } from '@pet/contracts';
 
 import { AgentLine, Conversation } from './chat.js';
+import { ModelDialog } from './model.js';
 import { CompanionClient } from './client.js';
 import { ConnectForm } from './connect.js';
 import { useClientState } from './hooks.js';
@@ -13,6 +14,7 @@ export function App(): JSX.Element {
   const client = useMemo(() => new CompanionClient(), []);
   const state = useClientState(client);
   const [draft, setDraft] = useState('');
+  const [modelOpen, setModelOpen] = useState(false);
 
   useEffect(() => () => client.dispose(), [client]);
 
@@ -44,6 +46,13 @@ export function App(): JSX.Element {
         state={state}
         onReconnect={() => void client.reconnect()}
         onDisconnect={() => client.disconnect()}
+        onOpenModel={() => setModelOpen(true)}
+      />
+      <ModelDialog
+        open={modelOpen}
+        state={state}
+        client={client}
+        onClose={() => setModelOpen(false)}
       />
       {state.error === null ? null : (
         <p className="tc-banner" role="status">
@@ -63,22 +72,32 @@ export function App(): JSX.Element {
   );
 }
 
-function Header({
+export function Header({
   state,
   onReconnect,
   onDisconnect,
+  onOpenModel,
 }: {
   state: ClientState;
   onReconnect: () => void;
   onDisconnect: () => void;
+  onOpenModel: () => void;
 }): JSX.Element {
   return (
     <header className="tc-head">
       <div className="tc-head__top">
         <AgentLine state={state} />
-        <button type="button" className="tc-link tc-head__exit" onClick={onDisconnect}>
-          断开
-        </button>
+        <div className="tc-head__actions">
+          {/* 只有服务真的提供了模型视图，才给这个入口；旧服务上不摆一个点了会空的按钮。 */}
+          {state.snapshot?.model === undefined ? null : (
+            <button type="button" className="tc-link" onClick={onOpenModel}>
+              模型
+            </button>
+          )}
+          <button type="button" className="tc-link tc-head__exit" onClick={onDisconnect}>
+            断开
+          </button>
+        </div>
       </div>
       <ConnectionLine state={state} onReconnect={onReconnect} />
     </header>

@@ -12,7 +12,8 @@
 | `src/client/sse.ts`      | SSE 分帧（CRLF、注释、多行 `data`）                                               |
 | `src/client/state.ts`    | 纯 reducer：连接阶段、待确认消息/停止意图、状态文案                               |
 | `src/client/client.ts`   | 连接生命周期、事件合并刷新、命令去重、产物下载                                    |
-| `src/client/*.tsx`       | 令牌入口、对话、任务条、连接行                                                    |
+| `src/client/*.tsx`       | 令牌入口、对话、任务条、连接行、模型连接设置对话框                                |
+| `src/client/model-form.ts` | 模型设置的状态机：草稿基线/CAS、key-only、可用性、测试结论归因（纯函数）        |
 | `build.mjs`              | esbuild：`dist/index.mjs`、`dist/client.js`、`dist/client.css`、`dist/index.html` |
 
 ## 协议对应
@@ -24,6 +25,9 @@
 | `POST /api/messages`          | `CompanionMessageCommand`，commandId 去重                        |
 | `POST /api/tasks/<id>/stop`   | `CompanionStopCommand`；受理 ≠ 退出                              |
 | `GET /api/artifacts/<id>`     | 带认证取 Blob，再生成下载链接                                    |
+| `POST /api/model`             | `CompanionModelSaveCommand`；保存并应用，不发起推理              |
+| `POST /api/model/credential`  | `CompanionModelCredentialCommand`；密钥只在这一个请求体里出现    |
+| `POST /api/model/test`        | `CompanionModelTestCommand`；202 受理 ≠ 结算，结果回到视图        |
 
 token 只在内存与请求头里，不出现在任何 URL、localStorage 或 DOM 属性中。
 
@@ -35,7 +39,8 @@ token 只在内存与请求头里，不出现在任何 URL、localStorage 或 DO
 - **合并刷新**：事件只当「有变化」信号，120ms 窗口合并成一次 snapshot 读取；空闲不轮询。
 - **世代**：流结束或 `epoch` 变化时按新快照重新对账；世代没变才算真断线。
 - **投影有界**：`snapshot.projection.hasMoreMessages/hasMoreTasks` 为真时显示「较早的…未显示」，不假装全量。
-- **模式**：`agent.mode === 'scripted'` 显示「离线脚本回复，未调用模型」。
+- **模式**：`agent.mode === 'scripted'` 显示「离线脚本回复，未调用模型」；已应用连接时在同一行补连接名。
+- **模型设置**：`snapshot.model` 可选；缺省就不给入口。保存只写配置并在安全边界切换绑定，测试只针对已应用的那一份绑定，`synthetic` 结论明说未连接真实模型。
 
 ## 响应校验
 

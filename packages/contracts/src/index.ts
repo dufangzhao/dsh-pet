@@ -40,3 +40,15 @@ export * from './model-connection.js';
 export * from './model-services.js';
 export * from './design-lab.js';
 export * from './companion.js';
+export type {
+  ResponsesConnectionSettings,
+  CompanionModelCredentialView,
+  CompanionModelConnectorView,
+  CompanionModelBindingView,
+  CompanionModelCheckView,
+  CompanionModelView,
+  CompanionModelSaveCommand,
+  CompanionModelCredentialCommand,
+  CompanionModelTestCommand,
+  CompanionModelCommandResult,
+} from './companion-model.js';

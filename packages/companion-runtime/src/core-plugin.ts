@@ -5,6 +5,7 @@ import { COMPANION_HOST_ID } from './plugin-host.js';
 export const STATE_CAPABILITY = 'companion.state@1';
 export const EXECUTION_CAPABILITY = 'execution.javascript@1';
 export const HARNESS_CAPABILITY = 'companion.harness@1';
+import { MODEL_CONNECTION_CAPABILITY } from './model-connection-types.js';
 
 /** Protected bootstrap only; persona content remains revisioned configuration. */
 export const companionHostManifest: PluginManifest = {
@@ -20,12 +21,22 @@ export const companionHostManifest: PluginManifest = {
   host: '^1.0.0',
   platforms: ['linux-x64', 'linux-arm64', 'darwin-x64', 'darwin-arm64', 'win32-x64'],
   entries: { runtime: 'src/core-plugin.ts' },
-  consumes: [STATE_CAPABILITY, EXECUTION_CAPABILITY, HARNESS_CAPABILITY].map((capability) => ({
+  consumes: [
+    STATE_CAPABILITY,
+    EXECUTION_CAPABILITY,
+    HARNESS_CAPABILITY,
+    MODEL_CONNECTION_CAPABILITY,
+  ].map((capability) => ({
     capability,
     optional: true,
   })),
   permissions: [
-    ...[STATE_CAPABILITY, EXECUTION_CAPABILITY, HARNESS_CAPABILITY].map((capability) => ({
+    ...[
+      STATE_CAPABILITY,
+      EXECUTION_CAPABILITY,
+      HARNESS_CAPABILITY,
+      MODEL_CONNECTION_CAPABILITY,
+    ].map((capability) => ({
       kind: 'capability-use' as const,
       capability,
     })),
@@ -52,6 +63,13 @@ export const companionHostManifest: PluginManifest = {
           maxLength: 255,
           default: 'pet.harness-cortico/cortico',
         },
+        modelConnection: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 255,
+          default: 'pet.model-connection-magpie/magpie',
+        },
+        modelMode: { type: 'string', enum: ['scripted', 'model'], default: 'scripted' },
         disabledPlugins: {
           type: 'array',
           maxItems: 32,

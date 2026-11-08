@@ -18,7 +18,7 @@ if (!token || Buffer.byteLength(token) < 24) {
       token,
       port,
       hostname: process.env['COMPANION_HOST'] ?? '127.0.0.1',
-      mode,
+      ...(process.env['COMPANION_MODE'] !== undefined ? { mode } : {}),
       ...(process.env['COMPANION_ORIGIN'] ? { publicOrigin: process.env['COMPANION_ORIGIN'] } : {}),
       ...(process.env['COMPANION_EXEC_IMAGE']
         ? { image: process.env['COMPANION_EXEC_IMAGE'] }
@@ -37,9 +37,10 @@ if (!token || Buffer.byteLength(token) < 24) {
           console.error('Companion request failed; inspect the retained task outcome.');
       },
     });
+    const modelState = await service.models.view();
     console.log(`Companion text service: ${service.url}`);
     console.log(
-      `Mode: ${mode === 'scripted' ? 'labeled offline script (no model call)' : 'configured model'}`,
+      `Mode: ${modelState.desired.mode}; model connection: ${modelState.applied ? 'applied' : 'not applied'}; model foreground: ${modelState.enabled ? 'enabled' : 'disabled'}`,
     );
     let stopping = false;
     const stop = (): void => {

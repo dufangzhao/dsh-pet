@@ -26,12 +26,13 @@
   ],
   "consumes": [
     { "capability": "companion.state@1", "optional": true },
-    { "capability": "execution.javascript@1", "optional": true }
+    { "capability": "execution.javascript@1", "optional": true },
+    { "capability": "companion.model.connection@1", "optional": true }
   ],
   "permissions": [
     { "kind": "files", "scope": "plugin-data", "access": "read-write" },
     { "kind": "capability-use", "capability": "companion.state@1" },
     { "kind": "capability-use", "capability": "execution.javascript@1" },
-    { "kind": "credentials", "keys": ["model-api-key"] }
+    { "kind": "capability-use", "capability": "companion.model.connection@1" }
   ]
 }

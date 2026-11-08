@@ -85,3 +85,46 @@ export function sseText(messages, { crlf = false } = {}) {
     })
     .join('');
 }
+
+/** 与 packages/contracts/src/companion-model.ts 同形的模型视图样本。 */
+export function modelView(overrides = {}) {
+  return {
+    profileRevision: 1,
+    desired: { mode: 'scripted', connectorId: 'pet.model-connection-magpie/magpie' },
+    applied: null,
+    enabled: false,
+    connectors: [
+      {
+        id: 'pet.model-connection-magpie/magpie',
+        label: 'Magpie',
+        synthetic: false,
+        configRevision: 1,
+        settings: {
+          baseUrl: 'http://127.0.0.1:3425/v1',
+          model: '',
+          authMode: 'local-client-id',
+        },
+        model: null,
+        credential: {
+          required: false,
+          available: true,
+          source: 'local-client-id',
+          version: 'process:1',
+          writable: false,
+        },
+      },
+    ],
+    check: {
+      state: 'unconfigured',
+      commandId: null,
+      binding: null,
+      startedAt: null,
+      checkedAt: null,
+      elapsedMs: null,
+      evidence: null,
+      error: null,
+    },
+    error: null,
+    ...overrides,
+  };
+}

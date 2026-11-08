@@ -15,6 +15,11 @@ import {
   type CompanionEvent,
   type CompanionFact,
   type CompanionMessage,
+  type CompanionModelBindingView,
+  type CompanionModelCheckView,
+  type CompanionModelConnectorView,
+  type CompanionModelCredentialView,
+  type CompanionModelView,
   type CompanionPluginView,
   type CompanionSnapshot,
   type CompanionTask,
@@ -22,6 +27,7 @@ import {
   type JsonObject,
   type JsonValue,
   type KernelError,
+  type ResponsesConnectionSettings,
 } from '@pet/contracts';
 
 interface ProtocolFailure {
@@ -255,6 +261,138 @@ function parseProjection(value: unknown): NonNullable<CompanionSnapshot['project
   return { hasMoreMessages, hasMoreTasks, taskDetailsTruncated };
 }
 
+const AUTH_MODES = ['local-client-id', 'gateway-key'] as const;
+const CHECK_STATES = ['unconfigured', 'configured', 'validating', 'verified', 'failed'] as const;
+const EVIDENCE = ['network', 'synthetic'] as const;
+const CREDENTIAL_SOURCES = [
+  'none',
+  'local-client-id',
+  'not-required',
+  'environment',
+  'memory',
+] as const;
+
+function isOneOf<T extends string>(values: readonly T[], value: unknown): value is T {
+  return typeof value === 'string' && (values as readonly string[]).includes(value);
+}
+
+/** 可选字符串字段：契约用 `null` 表示没有，缺失同样算读不懂。 */
+function parseNullableText(value: unknown): string | null | undefined {
+  if (value === null) return null;
+  return isText(value) ? value : undefined;
+}
+
+function parseNullableTime(value: unknown): number | null | undefined {
+  if (value === null) return null;
+  return isTime(value) ? value : undefined;
+}
+
+function parseSettings(value: unknown): ResponsesConnectionSettings | null | undefined {
+  if (value === null) return null;
+  if (!isRecord(value)) return undefined;
+  const baseUrl = value['baseUrl'];
+  const model = value['model'];
+  const authMode = value['authMode'];
+  if (!isText(baseUrl) || !isText(model) || !isOneOf(AUTH_MODES, authMode)) return undefined;
+  return { baseUrl, model, authMode };
+}
+
+function parseCredential(value: unknown): CompanionModelCredentialView | null {
+  if (!isRecord(value)) return null;
+  const required = value['required'];
+  const available = value['available'];
+  const source = value['source'];
+  const version = value['version'];
+  const writable = value['writable'];
+  if (!isFlag(required) || !isFlag(available) || !isOneOf(CREDENTIAL_SOURCES, source)) return null;
+  if (!isText(version) || !isFlag(writable)) return null;
+  return { required, available, source, version, writable };
+}
+
+function parseConnector(value: unknown): CompanionModelConnectorView | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  const label = value['label'];
+  const synthetic = value['synthetic'];
+  const configRevision = value['configRevision'];
+  const model = value['model'];
+  if (!isText(id) || !isText(label) || !isFlag(synthetic) || !isCount(configRevision)) return null;
+  if (model !== null && !isText(model)) return null;
+  const settings = parseSettings(value['settings']);
+  const credential = parseCredential(value['credential']);
+  if (settings === undefined || credential === null) return null;
+  return { id, label, synthetic, configRevision, settings, model, credential };
+}
+
+function parseBinding(value: unknown): CompanionModelBindingView | null {
+  if (!isRecord(value)) return null;
+  const connectorId = value['connectorId'];
+  const configRevision = value['configRevision'];
+  const credentialVersion = value['credentialVersion'];
+  if (!isText(connectorId) || !isCount(configRevision) || !isText(credentialVersion)) return null;
+  return { connectorId, configRevision, credentialVersion };
+}
+
+function parseCheck(value: unknown): CompanionModelCheckView | null {
+  if (!isRecord(value)) return null;
+  const state = value['state'];
+  if (!isOneOf(CHECK_STATES, state)) return null;
+  const commandId = parseNullableText(value['commandId']);
+  const startedAt = parseNullableTime(value['startedAt']);
+  const checkedAt = parseNullableTime(value['checkedAt']);
+  if (commandId === undefined || startedAt === undefined || checkedAt === undefined) return null;
+  const elapsedMs = value['elapsedMs'];
+  if (elapsedMs !== null && !isCount(elapsedMs)) return null;
+  const evidence = value['evidence'];
+  if (evidence !== null && !isOneOf(EVIDENCE, evidence)) return null;
+  const binding = value['binding'] === null ? null : parseBinding(value['binding']);
+  const error = parseNullableError(value['error']);
+  if (binding === null && value['binding'] !== null) return null;
+  if (error === undefined) return null;
+  return {
+    state,
+    commandId,
+    binding,
+    startedAt,
+    checkedAt,
+    elapsedMs,
+    evidence,
+    error,
+  };
+}
+
+/**
+ * 模型连接视图是可选的：缺省表示这个服务没有该能力，界面就不给入口；
+ * 给了但读不懂必须整条作废，否则界面会拿着半个连接去显示「已保存」。
+ */
+export function parseModelView(value: unknown): CompanionModelView | null {
+  if (!isRecord(value)) return null;
+  const profileRevision = value['profileRevision'];
+  const enabled = value['enabled'];
+  if (!isCount(profileRevision) || !isFlag(enabled)) return null;
+  const desired = value['desired'];
+  if (!isRecord(desired)) return null;
+  const mode = desired['mode'];
+  const connectorId = desired['connectorId'];
+  if (mode !== 'scripted' && mode !== 'model') return null;
+  if (!isText(connectorId)) return null;
+  const applied = value['applied'] === null ? null : parseBinding(value['applied']);
+  if (applied === null && value['applied'] !== null) return null;
+  const connectors = parseList(value['connectors'], parseConnector);
+  const check = parseCheck(value['check']);
+  const error = parseNullableError(value['error']);
+  if (connectors === null || check === null || error === undefined) return null;
+  return {
+    profileRevision,
+    desired: { mode, connectorId },
+    applied,
+    enabled,
+    connectors,
+    check,
+    error,
+  };
+}
+
 /** `{ok:true,value}` / `{ok:false,error}`；其它形状一律视为服务端不可用。 */
 export function parseEnvelope(value: unknown): ParseResult<unknown> {
   if (!isRecord(value)) return malformed();
@@ -289,6 +427,9 @@ export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
   if (facts === null || plugins === null) return malformed();
 
   const projection = parseProjection(value['projection']);
+  // `model` 是可选成员：缺省是「旧服务」，出现了就必须整份读得懂。
+  const model = value['model'] === undefined ? undefined : parseModelView(value['model']);
+  if (model === null) return malformed();
   return {
     ok: true,
     value: {
@@ -302,6 +443,7 @@ export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
       facts,
       plugins,
       ...(projection === undefined ? {} : { projection }),
+      ...(model === undefined ? {} : { model }),
     },
   };
 }

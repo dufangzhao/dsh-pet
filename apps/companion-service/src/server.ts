@@ -9,6 +9,7 @@ import {
   isKernelErrorCode,
   makeError,
   type CompanionFactCommand,
+  type CompanionModelView,
   type CompanionMessageCommand,
   type CompanionTaskCommand,
   type KernelError,
@@ -16,6 +17,7 @@ import {
 } from '@pet/contracts';
 import { KernelFault } from '@pet/host-kernel';
 import type { CompanionRuntime, CompanionPluginHost } from '@pet/companion-runtime';
+import type { ModelConnectionController } from './model-controller.js';
 
 const MAX_BODY = 64 * 1024;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
@@ -59,6 +61,41 @@ function send<T>(response: ServerResponse, status: number, result: Result<T>): v
   response.end(JSON.stringify(result));
 }
 
+/** Forwarded TLS headers alone are not proof: this composition accepts only a local ingress. */
+export function credentialIngressAllowed(ingress: {
+  readonly remoteAddress: string | undefined;
+  readonly host: string | undefined;
+  readonly origin: string | undefined;
+}): boolean {
+  const remote = ingress.remoteAddress?.replace(/^::ffff:/, '');
+  if (remote !== '127.0.0.1' && remote !== '::1') return false;
+  let target: URL;
+  try {
+    target = new URL(`http://${ingress.host ?? ''}`);
+  } catch {
+    return false;
+  }
+  if (['localhost', '127.0.0.1', '[::1]'].includes(target.hostname)) {
+    if (!ingress.origin) return true;
+    try {
+      return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(ingress.origin).hostname);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+function modelIngress(view: CompanionModelView, writable: boolean): CompanionModelView {
+  return {
+    ...view,
+    connectors: view.connectors.map((connector) => ({
+      ...connector,
+      credential: { ...connector.credential, writable: connector.credential.writable && writable },
+    })),
+  };
+}
+
 function checkedRelative(root: string, relative: string): string {
   if (
     !relative ||
@@ -100,6 +137,7 @@ async function openOwnedFile(
 export interface TextServiceOptions {
   readonly runtime: CompanionRuntime;
   readonly host: CompanionPluginHost;
+  readonly models?: ModelConnectionController;
   readonly token: string;
   readonly hostname?: string;
   readonly port?: number;
@@ -262,8 +300,24 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     const origin = request.headers.origin;
     if (typeof origin === 'string' && !allowedOrigins.has(origin))
       throw new KernelFault('permission-denied');
+    const writable = credentialIngressAllowed({
+      remoteAddress: request.socket.remoteAddress,
+      host: request.headers.host,
+      origin: typeof origin === 'string' ? origin : undefined,
+    });
     if (method === 'GET' && pathname === '/api/snapshot') {
-      send(response, 200, { ok: true, value: await options.runtime.snapshot() });
+      const snapshot = await options.runtime.snapshot();
+      send(response, 200, {
+        ok: true,
+        value: snapshot.model
+          ? { ...snapshot, model: modelIngress(snapshot.model, writable) }
+          : snapshot,
+      });
+      return;
+    }
+    if (method === 'GET' && pathname === '/api/model') {
+      if (!options.models) throw new KernelFault('not-ready');
+      send(response, 200, { ok: true, value: modelIngress(await options.models.view(), writable) });
       return;
     }
     if (method === 'GET' && pathname === '/api/plugins') {
@@ -313,7 +367,28 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     }
     const input = object(await body(request));
     if (!input) throw new KernelFault('invalid-input');
+    if (pathname === '/api/model/credential') {
+      if (!options.models) throw new KernelFault('not-ready');
+      if (!writable) throw new KernelFault('permission-denied');
+      send(response, 200, {
+        ok: true,
+        value: modelIngress(await options.models.credential(input), writable),
+      });
+      return;
+    }
     const id = commandId(input);
+    if (pathname === '/api/model' || pathname === '/api/model/test') {
+      if (!options.models) throw new KernelFault('not-ready');
+      const result =
+        pathname === '/api/model'
+          ? await options.models.save(input)
+          : await options.models.test(input);
+      send(response, pathname === '/api/model' ? 200 : 202, {
+        ok: true,
+        value: { ...result, view: modelIngress(result.view, writable) },
+      });
+      return;
+    }
     if (pathname === '/api/messages') {
       const value = await options.runtime.message(input as unknown as CompanionMessageCommand);
       send(response, 202, { ok: true, value });

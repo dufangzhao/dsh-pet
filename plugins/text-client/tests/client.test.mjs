@@ -3,7 +3,7 @@ import { afterEach, test } from 'node:test';
 
 import { CompanionClient } from '../src/client/client.ts';
 import { setRequestTimeoutMs, streamEvents } from '../src/client/protocol.ts';
-import { event, snapshot, sseText, task } from './fixtures.mjs';
+import { event, modelView, snapshot, sseText, task } from './fixtures.mjs';
 
 const realFetch = globalThis.fetch;
 
@@ -729,5 +729,193 @@ test('a corrupt event frame is ignored and the stream keeps working', async () =
   stream.push(`id: 3\nevent: companion\ndata: ${JSON.stringify(event(3))}\n\n`);
   await tick(60);
   assert.equal(reads, 2);
+  client.dispose();
+});
+
+/* ---- 模型设置 ---- */
+
+/** 让快照带模型视图，其余请求交给 handler。 */
+function withModel(handler) {
+  const stream = openStream();
+  const calls = recordFetch((url, init) => {
+    if (url === '/api/snapshot') {
+      return jsonResponse({ ok: true, value: snapshot({ model: modelView() }) });
+    }
+    if (url.startsWith('/api/model')) return handler(url, init);
+    return stream.response;
+  });
+  return { stream, calls };
+}
+
+const MODEL_APPLIED = {
+  connectorId: 'pet.model-connection-magpie/magpie',
+  configRevision: 2,
+  credentialVersion: 'process:1',
+};
+
+test('saving posts one command, returns the view and never sends the key', async () => {
+  const next = modelView({
+    desired: { mode: 'model', connectorId: 'pet.model-connection-magpie/magpie' },
+    applied: MODEL_APPLIED,
+    enabled: true,
+  });
+  const { stream, calls } = withModel((url, init) => {
+    const body = JSON.parse(init.body);
+    assert.equal(url, '/api/model');
+    assert.equal(body.config.model, 'gpt-4.1-mini');
+    assert.equal(body.expectedConfigRevision, 1);
+    return jsonResponse({
+      ok: true,
+      value: {
+        receipt: { commandId: body.commandId, status: 'accepted', messageId: null, taskId: null },
+        view: next,
+      },
+    });
+  });
+  const client = new CompanionClient({ refreshDelayMs: 5, newCommandId: () => 'cmd-model' });
+  await connectLive(client, stream);
+  const result = await client.saveModel({
+    commandId: 'cmd-model',
+    expectedProfileRevision: 1,
+    connectorId: 'pet.model-connection-magpie/magpie',
+    expectedConfigRevision: 1,
+    mode: 'model',
+    config: {
+      baseUrl: 'http://127.0.0.1:3425/v1',
+      model: 'gpt-4.1-mini',
+      authMode: 'local-client-id',
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(calls.filter((call) => call.url === '/api/model').length, 1);
+  // 命令响应只交给调用方，不直接写全局快照。
+  assert.equal(result.value.enabled, true);
+  // 快照仍然由权威读取决定：这里是连接时那一份，没有被命令响应改写。
+  assert.equal(client.getState().snapshot.model.applied, null);
+  client.dispose();
+});
+
+test('a receipt for another command leaves the model view untouched', async () => {
+  const { stream } = withModel(() => {
+    return jsonResponse({
+      ok: true,
+      value: {
+        receipt: { commandId: 'someone-else', status: 'accepted', messageId: null, taskId: null },
+        view: modelView({ enabled: true }),
+      },
+    });
+  });
+  const client = new CompanionClient({ refreshDelayMs: 5 });
+  await connectLive(client, stream);
+  const result = await client.saveModel({
+    commandId: 'cmd-model',
+    expectedProfileRevision: 1,
+    connectorId: 'pet.model-connection-magpie/magpie',
+    expectedConfigRevision: 1,
+    mode: 'model',
+  });
+  assert.equal(result.ok, false);
+  assert.equal(client.getState().snapshot.model.enabled, false);
+  client.dispose();
+});
+
+test('a malformed model view in the command result is rejected, not half-applied', async () => {
+  const { stream } = withModel((url, init) => {
+    const body = JSON.parse(init.body);
+    return jsonResponse({
+      ok: true,
+      value: {
+        receipt: { commandId: body.commandId, status: 'accepted', messageId: null, taskId: null },
+        view: { ...modelView(), desired: { mode: 'auto', connectorId: 'x' } },
+      },
+    });
+  });
+  const client = new CompanionClient({ refreshDelayMs: 5 });
+  await connectLive(client, stream);
+  const result = await client.saveModel({
+    commandId: 'cmd-model',
+    expectedProfileRevision: 1,
+    connectorId: 'pet.model-connection-magpie/magpie',
+    expectedConfigRevision: 1,
+    mode: 'model',
+  });
+  assert.equal(result.ok, false);
+  assert.equal(client.getState().snapshot.model.desired.mode, 'scripted');
+  client.dispose();
+});
+
+test('the key travels only in its own request body and is never kept in state', async () => {
+  const next = modelView({
+    connectors: [
+      {
+        ...modelView().connectors[0],
+        credential: {
+          required: true,
+          available: true,
+          source: 'memory',
+          version: 'process:9',
+          writable: true,
+        },
+      },
+    ],
+  });
+  const bodies = [];
+  const { stream } = withModel((url, init) => {
+    bodies.push({ url, body: JSON.parse(init.body) });
+    return jsonResponse({ ok: true, value: next });
+  });
+  const client = new CompanionClient({ refreshDelayMs: 5 });
+  await connectLive(client, stream);
+  const result = await client.writeModelCredential({
+    connectorId: 'pet.model-connection-magpie/magpie',
+    expectedConfigRevision: 1,
+    expectedCredentialVersion: 'process:1',
+    apiKey: 'canary-key-value',
+  });
+  assert.equal(result.ok, true);
+  assert.equal(bodies.length, 1);
+  assert.equal(bodies[0].url, '/api/model/credential');
+  assert.equal(bodies[0].body.apiKey, 'canary-key-value');
+  assert.doesNotMatch(JSON.stringify(client.getState()), /canary-key-value/);
+  client.dispose();
+});
+
+test('an explicit key removal sends null instead of an empty string', async () => {
+  const bodies = [];
+  const { stream } = withModel((url, init) => {
+    bodies.push(JSON.parse(init.body));
+    return jsonResponse({ ok: true, value: modelView() });
+  });
+  const client = new CompanionClient({ refreshDelayMs: 5 });
+  await connectLive(client, stream);
+  await client.writeModelCredential({
+    connectorId: 'pet.model-connection-magpie/magpie',
+    expectedConfigRevision: 1,
+    expectedCredentialVersion: 'process:1',
+    apiKey: null,
+  });
+  assert.equal(bodies[0].apiKey, null);
+  client.dispose();
+});
+
+test('a test admission is one request and its 503 is a refusal, not a result', async () => {
+  const { stream, calls } = withModel(() =>
+    jsonResponse(
+      { ok: false, error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true } },
+      503,
+    ),
+  );
+  const client = new CompanionClient({ refreshDelayMs: 5 });
+  await connectLive(client, stream);
+  const result = await client.testModel({
+    commandId: 'cmd-test',
+    connectorId: 'pet.model-connection-magpie/magpie',
+    expectedConfigRevision: 1,
+    expectedCredentialVersion: 'process:1',
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.error.code, 'not-ready');
+  assert.equal(calls.filter((call) => call.url === '/api/model/test').length, 1);
+  assert.equal(client.getState().snapshot.model.check.state, 'unconfigured');
   client.dispose();
 });

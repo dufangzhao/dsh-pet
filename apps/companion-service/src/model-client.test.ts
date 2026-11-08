@@ -21,7 +21,7 @@ function deferred() {
   return { promise, resolve };
 }
 
-const sourceId = 'pet.harness-cortico';
+const sourceId = 'pet.model-connection-magpie';
 const sourceIdentity = { pluginId: sourceId, instanceId: 'default' };
 const secret = 'operator-provisioned-model-canary-671d6b3e';
 const request: Parameters<ResponseClient['respond']>[0] = {
@@ -54,7 +54,7 @@ async function fixture(
   const directory = await mkdtemp(path.join(tmpdir(), 'companion-model-authority-'));
   const sourceManifest = JSON.parse(
     await readFile(
-      new URL('../../../plugins/harness-cortico/plugin.json', import.meta.url),
+      new URL('../../../plugins/model-connection-magpie/plugin.json', import.meta.url),
       'utf8',
     ),
   ) as PluginManifest;
@@ -83,10 +83,8 @@ async function fixture(
             ? companionHostDefinition
             : definePlugin({
                 activate(context) {
-                  context.provide('cortico', {
-                    status: async () => null,
-                    accept: async () => null,
-                    stopForeground: async () => null,
+                  context.provide('magpie', {
+                    describe: async () => null,
                   });
                 },
               }),

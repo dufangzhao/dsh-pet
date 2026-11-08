@@ -2,7 +2,13 @@ import { build } from 'esbuild';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-for (const name of ['state-sqlite', 'cloud-exec', 'harness-cortico', 'text-client']) {
+for (const name of [
+  'state-sqlite',
+  'cloud-exec',
+  'harness-cortico',
+  'model-connection-magpie',
+  'text-client',
+]) {
   execFileSync(process.execPath, ['build.mjs'], {
     cwd: fileURLToPath(new URL(`../../plugins/${name}/`, import.meta.url)),
     stdio: 'inherit',

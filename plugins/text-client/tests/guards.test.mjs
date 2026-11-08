@@ -8,7 +8,7 @@ import {
   parseReceipt,
   parseSnapshot,
 } from '../src/client/guards.ts';
-import { event, snapshot, task } from './fixtures.mjs';
+import { event, modelView, snapshot, task } from './fixtures.mjs';
 
 const failure = (result) => {
   assert.equal(result.ok, false);
@@ -222,4 +222,77 @@ test('an event needs a known kind and a JSON object payload', () => {
   assert.equal(parseEvent(event(1, { data: 'text' })), null);
   assert.equal(parseEvent(event(1, { data: [1] })), null);
   assert.equal(parseEvent(event(1, { data: { nested: [1, { ok: true }] } })).data.nested.length, 2);
+});
+
+/* ---- 模型连接视图 ---- */
+
+test('a snapshot without a model member stays valid: the feature is simply absent', () => {
+  const parsed = parseSnapshot(snapshot());
+  assert.equal(parsed.ok, true);
+  assert.equal(Object.hasOwn(parsed.value, 'model'), false);
+});
+
+test('a well-formed model view is rebuilt field by field', () => {
+  const parsed = parseSnapshot(snapshot({ model: modelView() }));
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.value.model.desired.connectorId, 'pet.model-connection-magpie/magpie');
+  assert.equal(parsed.value.model.connectors[0].credential.source, 'local-client-id');
+  assert.equal(parsed.value.model.check.state, 'unconfigured');
+  assert.deepEqual(parsed.value.model.applied, null);
+});
+
+test('a malformed model member voids the whole snapshot instead of inventing a connection', () => {
+  const base = modelView();
+  for (const broken of [
+    null,
+    {},
+    { ...base, desired: { mode: 'auto', connectorId: 'x' } },
+    { ...base, desired: { mode: 'model', connectorId: 7 } },
+    { ...base, enabled: 'yes' },
+    { ...base, connectors: [{ ...base.connectors[0], credential: { required: 'no' } }] },
+    { ...base, connectors: [{ ...base.connectors[0], settings: { baseUrl: 1 } }] },
+    { ...base, connectors: [{ ...base.connectors[0], configRevision: -1 }] },
+    { ...base, connectors: [{ ...base.connectors[0], label: 5 }] },
+    { ...base, check: { ...base.check, state: 'ready' } },
+    { ...base, check: { ...base.check, evidence: 'magic' } },
+    { ...base, check: { ...base.check, startedAt: 'now' } },
+    { ...base, applied: { connectorId: 'x' } },
+    { ...base, error: 'boom' },
+  ]) {
+    assert.equal(parseSnapshot(snapshot({ model: broken })).ok, false);
+  }
+});
+
+test('a synthetic connector and a verified check keep their distinct facts', () => {
+  const parsed = parseSnapshot(
+    snapshot({
+      model: modelView({
+        connectors: [
+          {
+            ...modelView().connectors[0],
+            id: 'pet.model-connection-fixture/fixture',
+            label: '模拟连接',
+            synthetic: true,
+            credential: {
+              required: false,
+              available: true,
+              source: 'not-required',
+              version: 'process:2',
+              writable: false,
+            },
+          },
+        ],
+        check: {
+          ...modelView().check,
+          state: 'verified',
+          evidence: 'synthetic',
+          checkedAt: 1_700_000_000_000,
+          elapsedMs: 12,
+        },
+      }),
+    }),
+  );
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.value.model.connectors[0].synthetic, true);
+  assert.equal(parsed.value.model.check.evidence, 'synthetic');
 });

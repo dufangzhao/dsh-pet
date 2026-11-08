@@ -1,7 +1,7 @@
 import { COMPANION_MAX_CODE, COMPANION_MAX_TEXT, isKernelErrorCode } from '@pet/contracts';
 import type { JsonValue, KernelErrorCode } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
-import { STATE_MAX_ARTIFACTS } from './types.js';
+import { STATE_MAX_ARTIFACTS, STATE_MAX_RESULT_BYTES } from './types.js';
 import type { StateMethodInputs } from './types.js';
 
 export class StateFailure extends Error {
@@ -82,7 +82,8 @@ export function validateInput<K extends keyof StateMethodInputs>(
   const body = object(checked.value);
   switch (method) {
     case 'snapshot':
-      keys(body, [], ['messageLimit', 'taskLimit']);
+      keys(body, [], ['messageLimit', 'taskLimit', 'byteBudget']);
+      optional(body, 'byteBudget', (value) => integer(value, 1, STATE_MAX_RESULT_BYTES));
       optional(body, 'messageLimit', (value) => integer(value, 1, 100));
       optional(body, 'taskLimit', (value) => integer(value, 1, 100));
       break;

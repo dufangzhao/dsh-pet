@@ -16,6 +16,8 @@ export interface ResponseClient {
       onEvent?: (event: StreamEvent) => void;
       role?: string;
       sessionId?: string;
+      diagnostic?: boolean;
+      [key: string]: unknown;
     },
   ): Promise<{
     response: Response;

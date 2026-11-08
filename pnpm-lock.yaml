@@ -107,6 +107,9 @@ importers:
       '@pet/host-kernel':
         specifier: workspace:*
         version: link:../../packages/host-kernel
+      '@pet/model-connection-magpie':
+        specifier: workspace:*
+        version: link:../../plugins/model-connection-magpie
       '@pet/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
@@ -555,6 +558,34 @@ importers:
       vite:
         specifier: 'catalog:'
         version: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/model-connection-magpie:
+    dependencies:
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))

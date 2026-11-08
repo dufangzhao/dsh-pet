@@ -33,6 +33,10 @@ export function Conversation({
   }, [messages.length]);
 
   const busy = state.phase !== 'live';
+  // 模型模式但前台不可用：发送会被服务端拒绝，先把原因写在输入框里，
+  // 而不是让一条消息发出去后只收到一句泛化的「插件尚未就绪」。
+  const modelDown =
+    state.snapshot?.agent.mode === 'model' && state.snapshot?.agent.status === 'unavailable';
   const taskById = new Map((state.snapshot?.tasks ?? []).map((task) => [task.id, task]));
 
   return (
@@ -91,7 +95,11 @@ export function Conversation({
           rows={3}
           maxLength={8000}
           placeholder={
-            busy ? '连接后才能发送，可以先把话写在这里' : 'Enter 发送，Shift + Enter 换行'
+            busy
+              ? '连接后才能发送，可以先把话写在这里'
+              : modelDown
+                ? '模型当前不可用，检查连接后再发'
+                : 'Enter 发送，Shift + Enter 换行'
           }
           onChange={(event) => onDraftChange(event.target.value)}
           onKeyDown={(event) => {
@@ -139,11 +147,17 @@ function MessageRow({
 export function AgentLine({ state }: { state: ClientState }): JSX.Element | null {
   const agent = state.snapshot?.agent;
   if (agent === undefined) return null;
+  const applied = state.snapshot?.model?.applied ?? null;
+  const connector =
+    applied === null
+      ? null
+      : (state.snapshot?.model?.connectors.find((item) => item.id === applied.connectorId) ?? null);
   return (
     <div className="tc-agent">
       <span className="tc-agent__name">{agent.name}</span>
       <span className="tc-agent__mode">
         {agent.mode === 'scripted' ? '离线脚本回复，未调用模型' : '模型回复'}
+        {connector === null ? '' : ` · ${connector.label}`}
       </span>
       {agent.status === 'unavailable' ? <StatusBadge tone="danger">不可用</StatusBadge> : null}
     </div>

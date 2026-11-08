@@ -3,3 +3,8 @@ export * from './core-plugin.js';
 export * from './runtime.js';
 export * from './fixture-harness.js';
 export * from './source-authority.js';
+export * from './model-connection-types.js';
+export * from './model-view.js';
+export * from './model-description.js';
+export * from './model-connections.js';
+export * from './fixture-model.js';

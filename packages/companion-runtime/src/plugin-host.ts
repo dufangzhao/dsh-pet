@@ -85,6 +85,13 @@ interface Source {
   readonly fingerprint: string;
 }
 
+export interface ConfigurationCommit {
+  readonly pluginId: string;
+  readonly instanceId: string;
+  readonly revision: number;
+}
+type ConfigurationObserver = (commit: ConfigurationCommit) => void;
+
 export class CompanionPluginHost {
   private readonly handles = new Set<TaskHandle>();
   private closed = false;
@@ -100,6 +107,8 @@ export class CompanionPluginHost {
     private readonly authorize: CapabilityAuthorizer,
     private readonly changed: () => void,
     private readonly observedResults: Map<string, (value: JsonValue) => void>,
+    private readonly configurationObservers: Set<ConfigurationObserver>,
+    private readonly configurationFaults: { observers: number },
   ) {}
 
   static async create(options: {
@@ -138,10 +147,35 @@ export class CompanionPluginHost {
     };
     const configurationRoot = path.join(dataRoot, 'configuration');
     await mkdir(configurationRoot, { recursive: true, mode: 0o700 });
-    const configs = new ConfigService(
-      new FileConfigStore(configurationRoot),
-      (owner) => ref.manager?.isLive(owner) === true,
-    );
+    const configurationObservers = new Set<ConfigurationObserver>();
+    const configurationFaults = { observers: 0 };
+    const configs = new (class extends ConfigService {
+      override async save(
+        ...args: Parameters<ConfigService['save']>
+      ): ReturnType<ConfigService['save']> {
+        const saved = await super.save(...args);
+        if (saved.ok) {
+          const { pluginId, instanceId, revision } = saved.value.snapshot;
+          for (const observer of configurationObservers) {
+            try {
+              observer({ pluginId, instanceId, revision });
+            } catch {
+              configurationFaults.observers++;
+            }
+          }
+          if (saved.value.changeMode !== null && options.changed) {
+            try {
+              options.changed();
+            } catch {
+              configurationFaults.observers++;
+            }
+          }
+        }
+        // Observation cannot turn an already committed CAS into a reported write failure.
+        // Observers fence only; asynchronous physical drain stays in the owning disposer/task.
+        return saved;
+      }
+    })(new FileConfigStore(configurationRoot), (owner) => ref.manager?.isLive(owner) === true);
     const permission = createPermissionKernel({
       host: {
         fingerprint: (id) => fingerprint(id.pluginId),
@@ -297,6 +331,8 @@ export class CompanionPluginHost {
       capabilityPermissionAuthorizer(permission.service, manager),
       options.changed ?? (() => {}),
       observedResults,
+      configurationObservers,
+      configurationFaults,
     );
     try {
       for (const { registration, fingerprint: digest } of sources.values()) {
@@ -346,6 +382,17 @@ export class CompanionPluginHost {
       await host.close();
       throw error;
     }
+  }
+
+  onConfigurationCommit(observer: ConfigurationObserver): () => void {
+    this.configurationObservers.add(observer);
+    return () => {
+      this.configurationObservers.delete(observer);
+    };
+  }
+
+  configurationDiagnostics(): { observerFailures: number } {
+    return { observerFailures: this.configurationFaults.observers };
   }
 
   owner(pluginId = COMPANION_HOST_ID): OwnerRef {
@@ -501,6 +548,7 @@ export class CompanionPluginHost {
     await this.manager.shutdown();
     await this.driver.dispose();
     this.permissions.close();
+    this.configurationObservers.clear();
     this.configs.close();
   }
 }

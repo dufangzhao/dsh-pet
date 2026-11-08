@@ -7,6 +7,8 @@ node_modules/
 
 # 构建与打包产物
 dist/
+# 浏览器探针的本地截图证据，不入库
+plugins/text-client/tests/browser/screenshots/
 out/
 build/
 release/

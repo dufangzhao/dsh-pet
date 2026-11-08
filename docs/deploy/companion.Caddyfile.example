@@ -1,5 +1,9 @@
 # Replace this example name with the operator-controlled TLS domain.
 companion.example.com {
+    # Remote deployments supply gateway keys on the host; never proxy private key writes.
+    @privateModelKey path /api/model/credential
+    respond @privateModelKey "Configure the gateway key on the service host." 403
+
     reverse_proxy 127.0.0.1:4120 {
         # Forward committed events promptly; the service sends SSE heartbeats.
         flush_interval -1

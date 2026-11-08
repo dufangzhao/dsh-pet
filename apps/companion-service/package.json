@@ -22,6 +22,7 @@
     "@pet/cloud-exec": "workspace:*",
     "@pet/harness-cortico": "workspace:*",
     "@pet/text-client": "workspace:*",
+    "@pet/model-connection-magpie": "workspace:*",
     "cortico": "0.2.7",
     "tsx": "4.23.15"
   },

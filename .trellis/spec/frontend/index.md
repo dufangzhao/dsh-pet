@@ -6,7 +6,8 @@ The actual baseline uses Electron45, React19, Vite, strict TypeScript, existing 
 
 1. [Shared project baseline](../shared/project-baseline.md) — actual packages, storage, authority and checks.
 2. [Source-backed frontend patterns](project-patterns.md) — current component, draft, hook, recording, bridge and verification behavior.
-3. The active task PRD/design/implementation plan and curated implement.jsonl/check.jsonl — target behavior and approved scope.
+3. [Model settings interaction](model-settings.md) — snapshot ownership, draft/credential CAS, late responses and native Dialog reachability for the companion client.
+4. The active task PRD/design/implementation plan and curated implement.jsonl/check.jsonl — target behavior and approved scope.
 
 ## Pre-development checklist
 

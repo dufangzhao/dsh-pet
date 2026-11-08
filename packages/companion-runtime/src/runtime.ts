@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import {
   COMPANION_PROTOCOL_VERSION,
+  JSON_MAX_BYTES,
+  type CompanionModelView,
   errorMessage,
   makeError,
   type CompanionAgentView,
@@ -18,7 +20,12 @@ import {
 import { KernelFault, type TaskHandle } from '@pet/host-kernel';
 import type { CloudExecutionResult, CloudReconcileResult } from '@pet/cloud-exec';
 import type { CorticoHarnessPorts } from '@pet/harness-cortico';
-import type { StateMethodInputs, StateMethodOutputs, StoredArtifact } from '@pet/state-sqlite';
+import {
+  STATE_MAX_RESULT_BYTES,
+  type StateMethodInputs,
+  type StateMethodOutputs,
+  type StoredArtifact,
+} from '@pet/state-sqlite';
 import { COMPANION_HOST_ID, type CompanionPluginHost } from './plugin-host.js';
 import { withSourceAuthority } from './source-authority.js';
 import { EXECUTION_CAPABILITY, HARNESS_CAPABILITY, STATE_CAPABILITY } from './core-plugin.js';
@@ -73,7 +80,14 @@ function admission(): ActiveWork {
 const executionIdentity = (commandId: string): string =>
   `exec-${createHash('sha256').update(commandId).digest('hex').slice(0, 48)}`;
 
+export interface RuntimeModelControls {
+  view(): Promise<CompanionModelView>;
+  isChecking(): boolean;
+  close(): Promise<void>;
+}
+
 export class CompanionRuntime {
+  private modelControls: RuntimeModelControls | undefined;
   private readonly listeners = new Set<() => void>();
   private readonly work = new Map<string, ActiveWork>();
   private readonly failures: KernelError[] = [];
@@ -93,6 +107,53 @@ export class CompanionRuntime {
     readonly options: RuntimeOptions,
   ) {
     this.mode = options.mode;
+  }
+
+  setModelControls(controls: RuntimeModelControls): void {
+    this.modelControls = controls;
+  }
+
+  isModelEnabled(): boolean {
+    return (
+      this.mode === 'model' &&
+      this.agentStatus !== 'unavailable' &&
+      Boolean(this.selectedHarness && this.host.isEnabled(this.harness().pluginId))
+    );
+  }
+
+  async withModelControl<T>(operation: () => Promise<T>): Promise<T> {
+    if (
+      this.closing ||
+      this.controlBusy ||
+      this.pendingInputs ||
+      this.agentStatus === 'busy' ||
+      this.modelControls?.isChecking()
+    )
+      throw new KernelFault('conflict');
+    this.controlBusy = true;
+    this.quiescing = 'harness';
+    try {
+      return await operation();
+    } finally {
+      this.controlBusy = false;
+      this.quiescing = null;
+      this.notify();
+    }
+  }
+
+  async retireForeground(): Promise<void> {
+    this.agentStatus = 'unavailable';
+    this.agentError = makeError('not-ready');
+    if (this.selectedHarness) await this.host.setEnabled(this.harness().pluginId, false);
+    this.notify();
+  }
+
+  async activateForeground(): Promise<void> {
+    const selected = this.harness();
+    await this.host.setEnabled(selected.pluginId, true);
+    this.host.bind(HARNESS_CAPABILITY, selected.pluginId, selected.providerId);
+    await this.refreshHarnessStatus();
+    this.notify();
   }
 
   onChanged(listener: () => void): () => void {
@@ -255,31 +316,57 @@ export class CompanionRuntime {
   }
 
   async snapshot(): Promise<CompanionSnapshot> {
-    const [state, profile] = await Promise.all([this.state('snapshot', {}), this.profile()]);
-    return {
+    const [profile, model] = await Promise.all([this.profile(), this.modelControls?.view()]);
+    const plugins = this.host.views();
+    const now = Date.now();
+    const agent = {
+      id: 'x'.repeat(128),
+      name: profile.name,
+      profileRevision: profile.revision,
+      harness: this.selectedHarness,
+      mode: this.mode,
+      status: this.agentStatus,
+      error: this.agentError,
+    };
+    // Reserve the actual aggregate envelope, including Result, before the single state projection.
+    const envelope = {
+      protocolVersion: COMPANION_PROTOCOL_VERSION,
+      epoch: 'x'.repeat(128),
+      cursor: Number.MAX_SAFE_INTEGER,
+      now,
+      agent,
+      messages: [],
+      tasks: [],
+      facts: [],
+      plugins,
+      ...(model ? { model } : {}),
+      projection: { hasMoreMessages: false, hasMoreTasks: false, taskDetailsTruncated: false },
+    };
+    const remaining =
+      JSON_MAX_BYTES - Buffer.byteLength(JSON.stringify({ ok: true, value: envelope }));
+    if (remaining < 1) throw new KernelFault('quota-exceeded');
+    const state = await this.state('snapshot', {
+      byteBudget: Math.min(STATE_MAX_RESULT_BYTES, remaining),
+    });
+    const snapshot: CompanionSnapshot = {
       protocolVersion: COMPANION_PROTOCOL_VERSION,
       epoch: state.epoch,
       cursor: state.cursor,
-      now: Date.now(),
-      agent: {
-        id: state.assistantId,
-        name: profile.name,
-        profileRevision: profile.revision,
-        harness: this.selectedHarness,
-        mode: this.mode,
-        status: this.agentStatus,
-        error: this.agentError,
-      },
+      now,
+      agent: { ...agent, id: state.assistantId },
       messages: state.messages,
       tasks: state.tasks,
       facts: state.facts,
-      plugins: this.host.views(),
+      plugins,
+      ...(model ? { model } : {}),
       projection: {
         hasMoreMessages: state.hasMoreMessages,
         hasMoreTasks: state.hasMoreTasks,
         taskDetailsTruncated: state.taskDetailsTruncated,
       },
     };
+    json({ ok: true, value: snapshot });
+    return snapshot;
   }
 
   events(after: number, epoch: string): Promise<CompanionEventPage> {
@@ -487,6 +574,7 @@ export class CompanionRuntime {
     });
     if (
       !this.closing &&
+      this.quiescing === null &&
       this.agentStatus !== 'unavailable' &&
       this.host.isEnabled(this.harness().pluginId)
     ) {
@@ -647,7 +735,13 @@ export class CompanionRuntime {
   }
 
   async selectHarness(key: string, commandId: string): Promise<CompanionCommandReceipt> {
-    if (this.closing || this.controlBusy || this.pendingInputs || this.agentStatus === 'busy')
+    if (
+      this.closing ||
+      this.controlBusy ||
+      this.pendingInputs ||
+      this.agentStatus === 'busy' ||
+      this.modelControls?.isChecking()
+    )
       throw new KernelFault('conflict');
     const next = this.harness(key);
     this.controlBusy = true;
@@ -684,7 +778,8 @@ export class CompanionRuntime {
     enabled: boolean,
     commandId: string,
   ): Promise<CompanionCommandReceipt> {
-    if (this.closing || this.controlBusy) throw new KernelFault('conflict');
+    if (this.closing || this.controlBusy || this.modelControls?.isChecking())
+      throw new KernelFault('conflict');
     const entry = this.host.manager.get({ pluginId: id, instanceId: 'default' });
     if (!entry) throw new KernelFault('invalid-input');
     if (entry.protected) throw new KernelFault('permission-denied');
@@ -763,6 +858,7 @@ export class CompanionRuntime {
 
   private async shutdown(): Promise<void> {
     this.closing = true;
+    await this.modelControls?.close();
     if (this.selectedHarness && this.host.isEnabled(this.harness().pluginId))
       await this.host.setEnabled(this.harness().pluginId, false);
     for (const item of this.work.values()) {

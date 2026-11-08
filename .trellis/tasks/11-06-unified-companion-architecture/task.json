@@ -19,7 +19,8 @@
   "pr_url": null,
   "subtasks": [],
   "children": [
-    "11-07-text-agent-foundation"
+    "11-07-text-agent-foundation",
+    "11-08-companion-model-text-loop"
   ],
   "parent": null,
   "relatedFiles": [],
