@@ -4,10 +4,10 @@ Planning evidence only. Exact methods/DTOs come from the forthcoming implementat
 
 ## Existing facts to preserve
 
-- [SQLite construction](../../../../plugins/state-sqlite/src/state.ts#L81) retains a DELETE-journal/EXCLUSIVE OS lock across commits. Migration tests must reuse that real writer boundary; no PID/lease-file substitute or parallel second writer.
-- [Current remember](../../../../plugins/state-sqlite/src/state.ts#L518) fingerprints its payload, checks a prior command, and then requires a current fact row. Forget/version migration must not turn a known command into a new write or an internal error solely because its old fact disappeared.
-- [Owner control](../../../../packages/companion-runtime/src/runtime.ts#L124) conflicts while input is queued, foreground is busy or a model check is active. Current-turn remember cannot acquire a control path that stops/waits for itself.
-- [M1 actual natural input](../../../../qa/probes/companion-model-live.mjs#L164) was accepted with a stated preference and a natural key/value suggestion. Preserve it with a controlled model fixture; do not repeat paid inference to prove parsing or state ownership.
+- [SQLite construction](../../../../../../plugins/state-sqlite/src/state.ts#L81) retains a DELETE-journal/EXCLUSIVE OS lock across commits. Migration tests must reuse that real writer boundary; no PID/lease-file substitute or parallel second writer.
+- [Current remember](../../../../../../plugins/state-sqlite/src/state.ts#L518) fingerprints its payload, checks a prior command, and then requires a current fact row. Forget/version migration must not turn a known command into a new write or an internal error solely because its old fact disappeared.
+- [Owner control](../../../../../../packages/companion-runtime/src/runtime.ts#L124) conflicts while input is queued, foreground is busy or a model check is active. Current-turn remember cannot acquire a control path that stops/waits for itself.
+- [M1 actual natural input](../../../../../../qa/probes/companion-model-live.mjs#L164) was accepted with a stated preference and a natural key/value suggestion. Preserve it with a controlled model fixture; do not repeat paid inference to prove parsing or state ownership.
 - M2 already verified production Main/preload, fixed service targets, native windows, source retirement and artifact publication. Extend the existing fixtures rather than build a fake bridge, alternate authority or new browser framework.
 
 ## Eight bounded acceptance cases

@@ -39,6 +39,6 @@ console.log(await migrateCompanionData({ dataDirectory, backupDirectory }));
 
 ## 技术与验证入口
 
-- [本阶段要求](../.trellis/tasks/11-08-controlled-persona-memory/prd.md)与[集中验收计划](../.trellis/tasks/11-08-controlled-persona-memory/research/acceptance-plan.md)区分存储、真实 Core、网页和原生桌面证据。
+- [本阶段要求](../.trellis/tasks/archive/2026-11/11-08-controlled-persona-memory/prd.md)与[集中验收计划](../.trellis/tasks/archive/2026-11/11-08-controlled-persona-memory/research/acceptance-plan.md)区分存储、真实 Core、网页和原生桌面证据。
 - 工作区类型与包测试、根 QA、静态检查和生产构建已经分段完成；独立 Core／实际 Docker 门禁也已运行。完整迁移、实际双端交互、工作持续性和 HTTP 丢回执重试均已验收；具体运行与构建归属见上方阶段 QA 记录。
 - Windows 专属设备、快捷键与桌面合成仍沿用共享桌宠阶段的验证范围，不能由 Linux 图像或组件测试替代。

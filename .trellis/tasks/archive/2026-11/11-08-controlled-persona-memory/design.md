@@ -1,6 +1,6 @@
 # Controlled persona and memory: design
 
-Planning design, 2026-11-09; product code and task activation remain with the parent. [PRD](prd.md) owns requirements, [implementation-contract](implementation-contract.md) is the sole exact type/API/port/limit definition, and [implement](implement.md) owns execution/file boundaries. Source research is [backend](../11-06-unified-companion-architecture/research/controlled-persona-memory.md) and [actual UI consumers](research/persona-memory-ux.md); [QA plan](research/acceptance-plan.md) owns the eight acceptance scenarios.
+Planning design, 2026-11-09; product code and task activation remain with the parent. [PRD](prd.md) owns requirements, [implementation-contract](implementation-contract.md) is the sole exact type/API/port/limit definition, and [implement](implement.md) owns execution/file boundaries. Source research is [backend](../../../11-06-unified-companion-architecture/research/controlled-persona-memory.md) and [actual UI consumers](research/persona-memory-ux.md); [QA plan](research/acceptance-plan.md) owns the eight acceptance scenarios.
 
 ## Decision
 
@@ -10,9 +10,9 @@ Use the existing core Config for name/persona and the existing SQLite provider f
 
 ## Persona path
 
-[Config already contains both fields](../../../packages/companion-runtime/src/core-plugin.ts#L45), and [profile reads](../../../apps/companion-service/src/server.ts#L318) already expose its revision. Add a fixed owner CAS write and an application view. Reuse ConfigService read/save/readback; do not add commandId or copy profile intent into SQLite merely to simulate atomicity across stores.
+[Config already contains both fields](../../../../../packages/companion-runtime/src/core-plugin.ts#L45), and [profile reads](../../../../../apps/companion-service/src/server.ts#L318) already expose its revision. Add a fixed owner CAS write and an application view. Reuse ConfigService read/save/readback; do not add commandId or copy profile intent into SQLite merely to simulate atomicity across stores.
 
-The [current service factory](../../../apps/companion-service/src/service.ts#L224) reads persona only when activating the Harness; the adapter captures options. Therefore a prefix-only/internal stopForeground reset cannot apply newly saved persona options. Owner-form edits enter the existing [idle control](../../../packages/companion-runtime/src/runtime.ts#L124), really retire/drain the selected foreground, save through the canonical CAS owner, then activate from fresh canonical Config.
+The [current service factory](../../../../../apps/companion-service/src/service.ts#L224) reads persona only when activating the Harness; the adapter captures options. Therefore a prefix-only/internal stopForeground reset cannot apply newly saved persona options. Owner-form edits enter the existing [idle control](../../../../../packages/companion-runtime/src/runtime.ts#L124), really retire/drain the selected foreground, save through the canonical CAS owner, then activate from fresh canonical Config.
 
 Busy/queued/checking returns conflict with the draft intact; no automatic cancellation or hidden pending queue. Preserve model connector and healthy credentials, execution/state providers, task handles and worker effects. A known save followed by activation/readback failure stays saved and is shown not applied/unavailable. A network-uncertain save is resolved by current readback and captured CAS, not by inventing a historical receipt or restoring an older revision.
 
@@ -30,7 +30,7 @@ Legacy receipts cannot be rehashed with newly added fields and treated as unknow
 
 ## Natural request authority and its limits
 
-The previous research's rigid grammar was provisional and is superseded. [M1 accepted a natural request](../../../qa/probes/companion-model-live.mjs#L164) with a preference and optional label suggestion, rather than a whole-message key command. Preserve that exact case and ordinary direct requests without a key, using the parent's bounded top-level cue approach.
+The previous research's rigid grammar was provisional and is superseded. [M1 accepted a natural request](../../../../../qa/probes/companion-model-live.mjs#L164) with a preference and optional label suggestion, rather than a whole-message key command. Preserve that exact case and ordinary direct requests without a key, using the parent's bounded top-level cue approach.
 
 Comparison: current adapter checks a current kind=user input but permits arbitrary key/value; a strict command parser would break accepted conversation behavior. The selected middle boundary binds a canonical accepted user message, direct unquoted cue, captured baseline and actual source generation, then locates the tool value verbatim in that message. The model supplies no owner/explicit flag or Unicode offsets.
 
@@ -42,9 +42,9 @@ Central runtime admissions are temporary permission metadata for existing curren
 
 ## Context and ongoing work
 
-[The existing adapter](../../../plugins/harness-cortico/src/harness.mjs#L343) fences generations and uses fresh private projection directories. Keep that mechanism. Canonical facts remain authoritative; history is labeled historical and cannot authorize tool effects. Owner correction/forget reconstructs the private foreground tail, while current-turn remember refreshes it at a safe tool return boundary.
+[The existing adapter](../../../../../plugins/harness-cortico/src/harness.mjs#L343) fences generations and uses fresh private projection directories. Keep that mechanism. Canonical facts remain authoritative; history is labeled historical and cannot authorize tool effects. Owner correction/forget reconstructs the private foreground tail, while current-turn remember refreshes it at a safe tool return boundary.
 
-Independent work is not a foreground Session. [Runtime result handling](../../../packages/companion-runtime/src/runtime.ts#L567) still commits outcome/notice while Harness delivery is quiesced; new context/clients can observe those facts. Do not rerun code or duplicate an announcement to recover a UI. Actual reply delivery versus durable task completion remains distinct in evidence.
+Independent work is not a foreground Session. [Runtime result handling](../../../../../packages/companion-runtime/src/runtime.ts#L567) still commits outcome/notice while Harness delivery is quiesced; new context/clients can observe those facts. Do not rerun code or duplicate an announcement to recover a UI. Actual reply delivery versus durable task completion remains distinct in evidence.
 
 ## Data-format rollout and rollback
 

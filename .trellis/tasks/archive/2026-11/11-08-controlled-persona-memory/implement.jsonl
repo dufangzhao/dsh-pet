@@ -6,5 +6,5 @@
 {"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Rendered target versus latest-ref fencing, form baselines, pending/saved/apply distinctions and actual DOM validation"}
 {"file":".trellis/spec/frontend/model-settings.md","reason":"Reuse existing form interaction principles without duplicating a reducer/framework"}
 {"file":".trellis/tasks/11-06-unified-companion-architecture/research/controlled-persona-memory.md","reason":"Source-backed storage/lifecycle/migration findings; exact task contract supersedes provisional strict grammar proposal"}
-{"file":".trellis/tasks/11-08-controlled-persona-memory/research/persona-memory-ux.md","reason":"Actual web/desktop consumers, compact surfaces and required real interaction evidence"}
-{"file":".trellis/tasks/11-08-controlled-persona-memory/research/acceptance-plan.md","reason":"Bounded real regressions for profile application, memory ABA/replay, exclusive migration and actual two-client forms; no duplicate authority or synthetic native claims"}
+{"file":".trellis/tasks/archive/2026-11/11-08-controlled-persona-memory/research/persona-memory-ux.md","reason":"Actual web/desktop consumers, compact surfaces and required real interaction evidence"}
+{"file":".trellis/tasks/archive/2026-11/11-08-controlled-persona-memory/research/acceptance-plan.md","reason":"Bounded real regressions for profile application, memory ABA/replay, exclusive migration and actual two-client forms; no duplicate authority or synthetic native claims"}
