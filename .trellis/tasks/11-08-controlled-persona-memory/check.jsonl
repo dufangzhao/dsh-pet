@@ -1,0 +1,10 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Check existing mechanisms are reused and no second Agent/state owner appears"}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Validate ownership, CAS, permission/lifecycle and admitted desired state"}
+{"file":".trellis/spec/backend/companion-service.md","reason":"Check real transactional fact/receipt/event mutations, recovery and independent worker continuity"}
+{"file":".trellis/spec/backend/model-connections.md","reason":"Verify healthy connector/key lifetime and original native values are preserved"}
+{"file":".trellis/spec/backend/desktop-companion.md","reason":"Verify fixed API/IPC targets, decoded secret boundaries and real drain/application outcomes"}
+{"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Check old-target results, stale draft baselines, pending self changes, minimum layout and real DOM behavior"}
+{"file":".trellis/spec/frontend/model-settings.md","reason":"Check owner mutation results do not overwrite global snapshot and conflicts never silently rebase"}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/controlled-persona-memory.md","reason":"Verify ABA/nonresurrection, data-version fence, current-turn deadlock and retained-history implications"}
+{"file":".trellis/tasks/11-08-controlled-persona-memory/research/persona-memory-ux.md","reason":"Check both actual clients expose only real capabilities, truthful applied status and clear active-forget semantics"}
+{"file":".trellis/tasks/11-08-controlled-persona-memory/research/acceptance-plan.md","reason":"Bounded real regressions for profile application, memory ABA/replay, exclusive migration and actual two-client forms; no duplicate authority or synthetic native claims"}

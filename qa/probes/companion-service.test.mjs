@@ -81,8 +81,18 @@ test('committed SSE events reconnect by cursor and stale epochs are rejected', a
       }
       return text;
     })();
-    const remembered = await f.post('/api/facts', { commandId: randomUUID(), key: 'drink', value: 'tea' });
+    const memoryRead = await f.get('/api/memory');
+    assert.equal(memoryRead.status, 200);
+    assert.equal(memoryRead.body.ok, true);
+    const memory = memoryRead.body.value;
+    assert.ok(Number.isSafeInteger(memory.revision));
+    assert.equal(memory.facts.find((fact) => fact.key === 'drink'), undefined);
+    const remembered = await f.post('/api/facts', {
+      commandId: randomUUID(), expectedMemoryRevision: memory.revision, expectedFactRevision: 0,
+      key: 'drink', value: 'tea',
+    });
     assert.equal(remembered.body.ok, true);
+    assert.equal(remembered.body.value.receipt.status, 'accepted');
     const frames = await observing;
     assert.match(frames, /event: companion/);
     assert(!frames.includes(f.token));
@@ -96,7 +106,18 @@ test('state survives restart and an actual alternative harness without a Session
   const f = await fixture();
   const first = (await f.get('/api/snapshot')).body.value;
   try {
-    await f.post('/api/facts', { commandId: randomUUID(), key: 'preference', value: 'clear explanations' });
+    const memoryRead = await f.get('/api/memory');
+    assert.equal(memoryRead.status, 200);
+    assert.equal(memoryRead.body.ok, true);
+    const memory = memoryRead.body.value;
+    assert.ok(Number.isSafeInteger(memory.revision));
+    assert.equal(memory.facts.find((fact) => fact.key === 'preference'), undefined);
+    const remembered = await f.post('/api/facts', {
+      commandId: randomUUID(), expectedMemoryRevision: memory.revision, expectedFactRevision: 0,
+      key: 'preference', value: 'clear explanations',
+    });
+    assert.equal(remembered.body.ok, true);
+    assert.equal(remembered.body.value.receipt.status, 'accepted');
     const selected = await f.post('/api/harness', { commandId: randomUUID(), harness: 'pet.harness-fixture/fixture' });
     assert.equal(selected.body.ok, true);
     const replied = await f.post('/api/messages', { commandId: randomUUID(), text: '记得我的偏好吗' });

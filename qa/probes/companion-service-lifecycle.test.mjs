@@ -184,13 +184,19 @@ test(
     let observation;
     try {
       const initial = await snapshot(f);
-      value(
+      const memory = value(await f.get('/api/memory'));
+      assert.ok(Number.isSafeInteger(memory.revision));
+      assert.equal(memory.facts.find((fact) => fact.key === 'lifecycle'), undefined);
+      const remembered = value(
         await f.post('/api/facts', {
           commandId: randomUUID(),
+          expectedMemoryRevision: memory.revision,
+          expectedFactRevision: 0,
           key: 'lifecycle',
           value: 'Keep my identity and fact',
         }),
       );
+      assert.equal(remembered.receipt.status, 'accepted');
       await setPlugin(f, TEXT, false);
       const disableId = randomUUID();
       await setPlugin(f, STATE, false, disableId);
@@ -278,8 +284,8 @@ test(
     const reached = deferred();
     const release = deferred();
     let admission;
-    const restore = patch(f.service.runtime, 'harnessPorts', (original) => (key) => {
-      const ports = original(key);
+    const restore = patch(f.service.runtime, 'harnessPorts', (original) => (key, profile) => {
+      const ports = original(key, profile);
       if (key !== ALTERNATIVE) return ports;
       return {
         ...ports,
@@ -292,13 +298,19 @@ test(
     });
     try {
       const initial = await snapshot(f);
-      value(
+      const memory = value(await f.get('/api/memory'));
+      assert.ok(Number.isSafeInteger(memory.revision));
+      assert.equal(memory.facts.find((fact) => fact.key === 'answer-style'), undefined);
+      const remembered = value(
         await f.post('/api/facts', {
           commandId: randomUUID(),
+          expectedMemoryRevision: memory.revision,
+          expectedFactRevision: 0,
           key: 'answer-style',
           value: 'brief and concrete',
         }),
       );
+      assert.equal(remembered.receipt.status, 'accepted');
       value(await f.post('/api/harness', { commandId: randomUUID(), harness: ALTERNATIVE }));
       const input = { commandId: randomUUID(), text: 'FIXTURE_LIFECYCLE_INPUT' };
       admission = f.post('/api/messages', input);

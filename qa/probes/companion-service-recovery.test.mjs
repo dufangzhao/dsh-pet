@@ -351,13 +351,19 @@ for (const recoveredState of ['exited', 'running']) {
       try {
         first = await subprocess(t, root, image);
         const identity = (await snapshot(first)).agent.id;
-        value(
+        const memory = value(await first.get('/api/memory'));
+        assert.ok(Number.isSafeInteger(memory.revision));
+        assert.equal(memory.facts.find((fact) => fact.key === 'recovery'), undefined);
+        const remembered = value(
           await first.post('/api/facts', {
             commandId: randomUUID(),
+            expectedMemoryRevision: memory.revision,
+            expectedFactRevision: 0,
             key: 'recovery',
             value: 'same durable root',
           }),
         );
+        assert.equal(remembered.receipt.status, 'accepted');
         const start = {
           ...command(`Crash recovery ${recoveredState}`),
           code: boundedWork,

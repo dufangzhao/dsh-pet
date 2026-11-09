@@ -31,7 +31,13 @@ export function assistantMessage(text) {
   };
 }
 
-export function controlledClient() {
+export function controlledClient(options = {}) {
+  if (!options || typeof options !== 'object' || Array.isArray(options) ||
+      Reflect.ownKeys(options).some((key) => key !== 'holdResponses'))
+    throw new TypeError('Invalid controlled Responses options');
+  const holdResponses = options.holdResponses ?? 2;
+  if (!Number.isSafeInteger(holdResponses) || holdResponses < 0 || holdResponses > 12)
+    throw new TypeError('holdResponses must be an integer between 0 and 12');
   const requests = [];
   const slots = [];
   const client = {
@@ -87,8 +93,8 @@ export function controlledClient() {
       (slots[index] ??= deferred()).resolve(flight);
       options.signal?.addEventListener('abort', abort, { once: true });
       if (options.signal?.aborted) abort();
-      // Only A and its immediate next inference are fenced. Result notifications may drain normally.
-      if (index >= 2) flight.complete();
+      // By default only the first two inferences are held; later results drain normally.
+      if (index >= holdResponses) flight.complete();
       return pending.promise;
     },
   };
