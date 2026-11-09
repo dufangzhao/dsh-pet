@@ -203,7 +203,14 @@ export function ConsoleApp(): JSX.Element {
               {connection === null ? '连接状态未读取' : connection.label}
             </span>
             {companion.state?.snapshot == null ? null : (
-              <span className="row__value">{companion.state.snapshot.agent.name}</span>
+              // 完整名字留在 title 与可访问文本里；排版只负责省略。
+              <span
+                className="row__value pb-run__name"
+                title={companion.state.snapshot.agent.name}
+                data-testid="connection-name"
+              >
+                {companion.state.snapshot.agent.name}
+              </span>
             )}
             <MinimalButton
               size="small"

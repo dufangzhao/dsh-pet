@@ -102,7 +102,7 @@ function controlledClient() {
 }
 function product() {
   const events = new EventEmitter();
-  const snapshot = { messages: [], facts: [], tasks: [] };
+  const snapshot = { messages: [], facts: [], tasks: [], memoryRevision: 0 };
   const outputs = [];
   const starts = [];
   const writes = [];
@@ -111,6 +111,9 @@ function product() {
   let status;
   const changed = () => events.emit('change');
   const ports = {
+    projectionApplied() {},
+    projectionFailed() {},
+    finishInputs() {},
     async context() {
       return structuredClone(snapshot);
     },
@@ -151,9 +154,14 @@ function product() {
     async rememberFact(key, value, provenance) {
       writes.push({ key, value, provenance });
       snapshot.facts = snapshot.facts.filter((fact) => fact.key !== key);
-      snapshot.facts.push({ key, value, revision: 1, updatedAt: 0 });
+      snapshot.memoryRevision++;
+      snapshot.facts.push({ key, value, revision: snapshot.memoryRevision, updatedAt: 0 });
       changed();
-      return { commandId: provenance.id, status: 'accepted', messageId: null, taskId: null };
+      return {
+        receipt: { commandId: provenance.id, status: 'accepted', messageId: null, taskId: null },
+        committedRevision: snapshot.memoryRevision,
+        view: { revision: snapshot.memoryRevision },
+      };
     },
     status(value, error) {
       status = { value, error };

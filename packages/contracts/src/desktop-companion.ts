@@ -12,7 +12,13 @@ import type {
   CompanionModelTestCommand,
   CompanionModelView,
 } from './companion-model.js';
-import type { CompanionProfileView } from './companion-profile.js';
+import type { CompanionProfileSaveCommand, CompanionProfileView } from './companion-profile.js';
+import type {
+  CompanionMemoryView,
+  CompanionMemoryUpsertCommand,
+  CompanionMemoryForgetCommand,
+  CompanionMemoryMutationResult,
+} from './companion-memory.js';
 import type { KernelError, Result } from './errors.js';
 
 export const DESKTOP_COMPANION_PLUGIN_ID = 'pet.companion-client';
@@ -65,6 +71,16 @@ export interface DesktopCompanionBridge {
   ): Promise<Result<CompanionCommandReceipt>>;
   stopForeground(input: DesktopCompanionTarget): Promise<Result<null>>;
   readProfile(input: DesktopCompanionTarget): Promise<Result<CompanionProfileView>>;
+  readMemory(input: DesktopCompanionTarget): Promise<Result<CompanionMemoryView>>;
+  saveProfile(
+    input: DesktopCompanionTarget & { readonly command: CompanionProfileSaveCommand },
+  ): Promise<Result<CompanionProfileView>>;
+  upsertFact(
+    input: DesktopCompanionTarget & { readonly command: CompanionMemoryUpsertCommand },
+  ): Promise<Result<CompanionMemoryMutationResult>>;
+  forgetFact(
+    input: DesktopCompanionTarget & { readonly command: CompanionMemoryForgetCommand },
+  ): Promise<Result<CompanionMemoryMutationResult>>;
   readTask(
     input: DesktopCompanionTarget & { readonly taskId: string },
   ): Promise<Result<CompanionTask>>;
@@ -89,6 +105,10 @@ export const DESKTOP_COMPANION_IPC = {
   stopTask: 'companion:desktop:v1:stopTask',
   stopForeground: 'companion:desktop:v1:stopForeground',
   readProfile: 'companion:desktop:v1:readProfile',
+  readMemory: 'companion:desktop:v1:readMemory',
+  saveProfile: 'companion:desktop:v1:saveProfile',
+  upsertFact: 'companion:desktop:v1:upsertFact',
+  forgetFact: 'companion:desktop:v1:forgetFact',
   readTask: 'companion:desktop:v1:readTask',
   saveArtifact: 'companion:desktop:v1:saveArtifact',
   saveModel: 'companion:desktop:v1:saveModel',

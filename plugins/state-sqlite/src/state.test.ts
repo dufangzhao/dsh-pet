@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 import { afterEach, describe, expect, it } from 'vitest';
 import { JSON_MAX_BYTES, makeError } from '@pet/contracts';
-import type { Result } from '@pet/contracts';
+import type { Result, CompanionMemoryUpsertCommand } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { SqliteState } from './state.js';
 import { STATE_MAX_FACTS, STATE_MAX_RESULT_BYTES } from './types.js';
@@ -26,6 +26,22 @@ function value<T>(result: Result<T>): T {
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error.code);
   return result.value;
+}
+
+function factInput(
+  state: SqliteState,
+  input: { commandId: string; key: string; value: string; expectedFactRevision?: number },
+): CompanionMemoryUpsertCommand & { origin: { kind: 'owner-form' } } {
+  const memory = value(state.memorySnapshot());
+  return {
+    ...input,
+    expectedMemoryRevision: memory.memoryRevision,
+    expectedFactRevision:
+      input.expectedFactRevision ??
+      memory.facts.find((fact) => fact.key === input.key)?.revision ??
+      0,
+    origin: { kind: 'owner-form' },
+  };
 }
 
 function task(state: SqliteState, commandId = 'work') {
@@ -58,6 +74,39 @@ afterEach(() => {
 });
 
 describe('SqliteState', () => {
+  it('cannot resurrect a forgotten fact through replay or delete/recreate ABA', () => {
+    const { state } = open();
+    const create = factInput(state, { commandId: 'create-memory', key: 'language', value: '中文' });
+    const first = value(state.rememberFact(create));
+    const forget = {
+      commandId: 'forget-memory',
+      key: 'language',
+      expectedMemoryRevision: first.memory.memoryRevision,
+      expectedFactRevision: first.fact?.revision ?? 0,
+      origin: { kind: 'owner-form' as const },
+    };
+    value(state.forgetFact(forget));
+    const afterForget = value(state.snapshot());
+    const duplicate = value(state.rememberFact(create));
+    expect(duplicate.receipt.status).toBe('duplicate');
+    expect(duplicate.committedRevision).toBe(first.committedRevision);
+    expect(duplicate.fact).toBeNull();
+    expect(value(state.snapshot())).toEqual(afterForget);
+    const added = value(
+      state.rememberFact(
+        factInput(state, { commandId: 'recreate-memory', key: 'language', value: 'English' }),
+      ),
+    );
+    expect(added.fact?.revision).toBeGreaterThan(first.fact?.revision ?? 0);
+    expect(
+      state.rememberFact({ ...create, commandId: 'stale-memory', value: 'old' }),
+    ).toMatchObject({ ok: false, error: { code: 'conflict' } });
+    expect(value(state.forgetFact(forget)).fact?.value).toBe('English');
+    expect(state.rememberFact({ ...create, value: 'changed' })).toMatchObject({
+      ok: false,
+      error: { code: 'conflict' },
+    });
+  });
   it('atomically deduplicates messages and tasks and rejects changed command payloads', () => {
     const { state } = open();
     const message = { commandId: 'message-1', text: 'Please work' };
@@ -166,8 +215,13 @@ describe('SqliteState', () => {
 
   it('applies fact revisions and quotas atomically and preserves command conflicts', () => {
     const { state } = open();
-    const command = { commandId: 'fact-1', key: 'language', value: 'English', expectedRevision: 0 };
-    expect(value(state.rememberFact(command)).fact.revision).toBe(1);
+    const command = factInput(state, {
+      commandId: 'fact-1',
+      key: 'language',
+      value: 'English',
+      expectedFactRevision: 0,
+    });
+    expect(value(state.rememberFact(command)).fact?.revision).toBe(1);
     expect(value(state.rememberFact(command)).receipt.status).toBe('duplicate');
     expect(state.rememberFact({ ...command, value: '中文' }).ok).toBe(false);
     expect(state.rememberFact({ ...command, commandId: 'fact-stale' })).toEqual({
@@ -176,32 +230,54 @@ describe('SqliteState', () => {
     });
     expect(
       value(
-        state.rememberFact({ ...command, commandId: 'fact-2', value: '中文', expectedRevision: 1 }),
-      ).fact.revision,
+        state.rememberFact({
+          ...command,
+          commandId: 'fact-2',
+          value: '中文',
+          expectedFactRevision: 1,
+          expectedMemoryRevision: 1,
+        }),
+      ).fact?.revision,
     ).toBe(2);
     for (let index = 1; index < STATE_MAX_FACTS; index++)
       value(
-        state.rememberFact({ commandId: `fact-extra-${index}`, key: `key-${index}`, value: 'x' }),
+        state.rememberFact(
+          factInput(state, { commandId: `fact-extra-${index}`, key: `key-${index}`, value: 'x' }),
+        ),
       );
     const before = value(state.snapshot());
-    expect(state.rememberFact({ commandId: 'too-many', key: 'overflow', value: 'x' })).toEqual({
+    expect(
+      state.rememberFact(factInput(state, { commandId: 'too-many', key: 'overflow', value: 'x' })),
+    ).toEqual({
       ok: false,
       error: makeError('quota-exceeded'),
     });
     expect(value(state.snapshot())).toEqual(before);
-    value(state.rememberFact({ commandId: 'too-many', key: 'language', value: 'Updated' }));
+    value(
+      state.rememberFact(
+        factInput(state, { commandId: 'too-many', key: 'language', value: 'Updated' }),
+      ),
+    );
   });
 
   it('enforces encoded aggregate fact bytes without committing the rejected fact or event', () => {
     const { state } = open();
-    value(state.rememberFact({ commandId: 'one', key: 'one', value: '字'.repeat(2000) }));
+    value(
+      state.rememberFact(
+        factInput(state, { commandId: 'one', key: 'one', value: '字'.repeat(2000) }),
+      ),
+    );
     const before = value(state.snapshot());
-    expect(state.rememberFact({ commandId: 'two', key: 'two', value: '字'.repeat(1000) })).toEqual({
+    expect(
+      state.rememberFact(
+        factInput(state, { commandId: 'two', key: 'two', value: '字'.repeat(1000) }),
+      ),
+    ).toEqual({
       ok: false,
       error: makeError('quota-exceeded'),
     });
     expect(value(state.snapshot())).toEqual(before);
-    value(state.rememberFact({ commandId: 'two', key: 'two', value: 'short' }));
+    value(state.rememberFact(factInput(state, { commandId: 'two', key: 'two', value: 'short' })));
   });
 
   it('preserves actual completion across late stop and resolves a cancelled record with completion evidence', () => {
@@ -303,7 +379,9 @@ describe('SqliteState', () => {
       }),
     );
     value(
-      initial.state.rememberFact({ commandId: 'preference', key: 'language', value: 'English' }),
+      initial.state.rememberFact(
+        factInput(initial.state, { commandId: 'preference', key: 'language', value: 'English' }),
+      ),
     );
     const before = value(initial.state.snapshot());
     initial.state.close();
@@ -496,7 +574,9 @@ describe('SqliteState', () => {
   it('uses one caller-supplied snapshot byte budget without dropping facts or falsifying omission flags', () => {
     const { state } = open();
     value(
-      state.rememberFact({ commandId: 'budget-fact', key: 'preference', value: 'authoritative' }),
+      state.rememberFact(
+        factInput(state, { commandId: 'budget-fact', key: 'preference', value: 'authoritative' }),
+      ),
     );
     for (let index = 0; index < 30; index++) {
       const work = task(state, `budget-task-${index}`);

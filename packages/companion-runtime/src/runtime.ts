@@ -1,6 +1,15 @@
 import { createHash } from 'node:crypto';
 import {
   COMPANION_PROTOCOL_VERSION,
+  COMPANION_MEMORY_MAX_INPUTS,
+  type OwnerRef,
+  type CompanionApplication,
+  type CompanionMemoryStatus,
+  type CompanionMemoryUpsertCommand,
+  type CompanionMemoryForgetCommand,
+  type CompanionProfileView,
+  type CompanionMemoryView,
+  type CompanionMemoryMutationResult,
   JSON_MAX_BYTES,
   type CompanionModelView,
   errorMessage,
@@ -19,20 +28,28 @@ import {
 } from '@pet/contracts';
 import { KernelFault, type TaskHandle } from '@pet/host-kernel';
 import type { CloudExecutionResult, CloudReconcileResult } from '@pet/cloud-exec';
-import type { CorticoHarnessPorts } from '@pet/harness-cortico';
+import type {
+  CorticoHarnessPorts,
+  HarnessProfileBinding as ProfileBinding,
+} from '@pet/harness-cortico';
 import {
   STATE_MAX_RESULT_BYTES,
+  memoryUsage,
+  type StateMemoryView,
+  type StateMemoryMutation,
   type StateMethodInputs,
   type StateMethodOutputs,
   type StoredArtifact,
 } from '@pet/state-sqlite';
 import { COMPANION_HOST_ID, type CompanionPluginHost } from './plugin-host.js';
+import { profileCommand, memoryCommand, legacyMemoryCommand, memoryCue } from './persona-memory.js';
 import { withSourceAuthority } from './source-authority.js';
 import { EXECUTION_CAPABILITY, HARNESS_CAPABILITY, STATE_CAPABILITY } from './core-plugin.js';
 import { json, object, payload } from './json.js';
 
 const READ_METHODS = new Set([
   'snapshot',
+  'memorySnapshot',
   'events',
   'getTask',
   'getTaskByExecution',
@@ -50,6 +67,22 @@ export interface RuntimeOptions {
   readonly executionPluginId: string;
   readonly executionProviderId: string;
   readonly executionTimeoutMs: number;
+  readonly profileOverrides?: { readonly name: boolean; readonly persona: boolean };
+}
+
+interface MemoryAdmission {
+  readonly text: string;
+  readonly cueEnd: number;
+  readonly baseline: StateMemoryView;
+  readonly source: string;
+  readonly owner: OwnerRef;
+}
+interface Projection {
+  readonly source: string;
+  readonly owner: OwnerRef;
+  readonly profile: ProfileBinding;
+  readonly profileRevision: number | null;
+  readonly memoryRevision: number;
 }
 
 interface ActiveWork {
@@ -87,6 +120,12 @@ export interface RuntimeModelControls {
 }
 
 export class CompanionRuntime {
+  private latestMemoryRevision: number | undefined;
+  private memoryApplicationError: KernelError | null = makeError('not-ready');
+  private profileApplicationError: KernelError | null = makeError('not-ready');
+  private projection: Projection | undefined;
+  private readonly memoryAdmissions = new Map<string, MemoryAdmission>();
+  private memoryReservations = 0;
   private modelControls: RuntimeModelControls | undefined;
   private readonly listeners = new Set<() => void>();
   private readonly work = new Map<string, ActiveWork>();
@@ -142,6 +181,7 @@ export class CompanionRuntime {
   }
 
   async retireForeground(): Promise<void> {
+    this.clearProjection();
     this.agentStatus = 'unavailable';
     this.agentError = makeError('not-ready');
     if (this.selectedHarness) await this.host.setEnabled(this.harness().pluginId, false);
@@ -201,6 +241,13 @@ export class CompanionRuntime {
     const value = payload<StateMethodOutputs[M]>(
       await this.host.call(STATE_CAPABILITY, method, json(input), signal),
     );
+    const candidate = value as unknown as {
+      memoryRevision?: number;
+      memory?: { memoryRevision: number };
+    };
+    const revision = candidate?.memoryRevision ?? candidate?.memory?.memoryRevision;
+    if (typeof revision === 'number' && Number.isSafeInteger(revision))
+      this.latestMemoryRevision = Math.max(this.latestMemoryRevision ?? revision, revision);
     if (!READ_METHODS.has(method)) this.notify();
     return value;
   }
@@ -231,6 +278,205 @@ export class CompanionRuntime {
       revision: value.value.revision,
       data,
     };
+  }
+
+  private clearProjection(): void {
+    this.memoryAdmissions.clear();
+    this.projection = undefined;
+    this.memoryApplicationError = makeError('not-ready');
+    this.profileApplicationError = makeError('not-ready');
+  }
+  private activeProjection(): Projection | undefined {
+    const value = this.projection;
+    return value && value.source === this.selectedHarness && this.host.manager.isActive(value.owner)
+      ? value
+      : undefined;
+  }
+  private profileApplication(profile: ProfileBinding): CompanionApplication {
+    const applied = this.activeProjection();
+    const matches =
+      applied &&
+      applied.profileRevision !== null &&
+      applied.profile.name === profile.name &&
+      applied.profile.persona === profile.persona;
+    return {
+      appliedRevision: matches ? profile.revision : null,
+      error: matches
+        ? this.profileApplicationError
+        : (this.profileApplicationError ?? makeError('not-ready')),
+    };
+  }
+  private memoryStatus(memory: StateMemoryView): CompanionMemoryStatus {
+    const candidate = this.activeProjection();
+    const applied =
+      candidate && candidate.memoryRevision <= memory.memoryRevision ? candidate : undefined;
+    return {
+      revision: memory.memoryRevision,
+      usage: memory.usage,
+      application: {
+        appliedRevision: applied?.memoryRevision ?? null,
+        error:
+          applied?.memoryRevision === memory.memoryRevision
+            ? this.memoryApplicationError
+            : (this.memoryApplicationError ?? makeError('not-ready')),
+      },
+    };
+  }
+  private publicMemory(memory: StateMemoryView): CompanionMemoryView {
+    return { ...this.memoryStatus(memory), agentId: memory.assistantId, facts: memory.facts };
+  }
+  async profileView(): Promise<CompanionProfileView> {
+    const profile = await this.profile();
+    const state = await this.state('snapshot', {});
+    return {
+      agentId: state.assistantId,
+      name: profile.name,
+      persona: profile.persona,
+      revision: profile.revision,
+      management: {
+        application: this.profileApplication(profile),
+        launchOverrides: this.options.profileOverrides ?? { name: false, persona: false },
+      },
+    };
+  }
+  async memoryView(): Promise<CompanionMemoryView> {
+    return this.publicMemory(await this.state('memorySnapshot', {}));
+  }
+  private async ownerForeground(): Promise<boolean> {
+    const profile = await this.profile();
+    const selected = this.harness();
+    const entry = this.host.manager.get({ pluginId: selected.pluginId, instanceId: 'default' });
+    return Boolean(
+      entry?.desiredActive &&
+      this.host.isEnabled(selected.pluginId) &&
+      !(
+        Array.isArray(profile.data['disabledPlugins']) &&
+        profile.data['disabledPlugins'].includes(selected.pluginId)
+      ),
+    );
+  }
+  private async restoreAfterOwnerEdit(wasActive: boolean): Promise<void> {
+    if (!wasActive) return;
+    try {
+      await this.activateForeground();
+    } catch (error) {
+      this.agentStatus = 'unavailable';
+      this.agentError = fault(error);
+      this.profileApplicationError = fault(error);
+      this.memoryApplicationError = fault(error);
+    }
+  }
+  async savePersona(input: unknown): Promise<CompanionProfileView> {
+    const command = profileCommand(input);
+    return this.withModelControl(async () => {
+      const profile = await this.profile();
+      if (profile.revision !== command.expectedProfileRevision) throw new KernelFault('conflict');
+      const data = { ...profile.data, name: command.name, persona: command.persona };
+      const definition = this.host.configs.definition({
+        pluginId: COMPANION_HOST_ID,
+        instanceId: 'default',
+      });
+      if (!definition?.validate(data).ok) throw new KernelFault('invalid-input');
+      const previousView = await this.profileView();
+      const active = await this.ownerForeground();
+      if (active) await this.retireForeground();
+      const saved = await this.host.configs.save(
+        { pluginId: COMPANION_HOST_ID, instanceId: 'default' },
+        data,
+        command.expectedProfileRevision,
+      );
+      if (!saved.ok) {
+        await this.restoreAfterOwnerEdit(active);
+        throw new KernelFault(saved.error.code);
+      }
+      const committed: CompanionProfileView = {
+        agentId: previousView.agentId,
+        name: saved.value.snapshot.data['name'] as string,
+        persona: saved.value.snapshot.data['persona'] as string,
+        revision: saved.value.snapshot.revision,
+        management: {
+          application: { appliedRevision: null, error: makeError('not-ready') },
+          launchOverrides: previousView.management?.launchOverrides ?? {
+            name: false,
+            persona: false,
+          },
+        },
+      };
+      await this.restoreAfterOwnerEdit(active);
+      try {
+        return await this.profileView();
+      } catch (error) {
+        return {
+          ...committed,
+          management: {
+            launchOverrides: previousView.management?.launchOverrides ?? {
+              name: false,
+              persona: false,
+            },
+            application: { appliedRevision: null, error: fault(error) },
+          },
+        };
+      }
+    });
+  }
+  async upsertFact(input: unknown): Promise<CompanionMemoryMutationResult> {
+    const legacy = legacyMemoryCommand(input);
+    if (legacy) {
+      const result = await this.state('rememberFact', legacy);
+      return {
+        receipt: result.receipt,
+        committedRevision: null,
+        view: this.publicMemory(result.memory),
+      };
+    }
+    const command = memoryCommand(input, false);
+    return this.ownerMemory(command, false);
+  }
+  async forgetFact(input: unknown): Promise<CompanionMemoryMutationResult> {
+    return this.ownerMemory(memoryCommand(input, true), true);
+  }
+  private async ownerMemory(
+    command: CompanionMemoryUpsertCommand | CompanionMemoryForgetCommand,
+    forget: boolean,
+  ): Promise<CompanionMemoryMutationResult> {
+    return this.withModelControl(async () => {
+      const memory = await this.state('memorySnapshot', {});
+      // Let the transactional writer recognize a duplicate before rejecting its old CAS baseline.
+      const kind = forget ? 'memory.forget' : 'memory.upsert';
+      const payload = { ...command, origin: { kind: 'owner-form' as const } };
+      const known = await this.state('getCommand', {
+        commandId: command.commandId,
+        kind,
+        payload: json(payload) as JsonObject,
+      });
+      if (
+        !known &&
+        (memory.memoryRevision !== command.expectedMemoryRevision ||
+          (memory.facts.find((f) => f.key === command.key)?.revision ?? 0) !==
+            command.expectedFactRevision)
+      )
+        throw new KernelFault('conflict');
+      const active = !known && (await this.ownerForeground());
+      if (active) await this.retireForeground();
+      let result: StateMemoryMutation;
+      try {
+        result = forget
+          ? await this.state('forgetFact', payload)
+          : await this.state('rememberFact', payload as StateMethodInputs['rememberFact']);
+      } catch (error) {
+        await this.restoreAfterOwnerEdit(active);
+        throw error;
+      }
+      const committed = this.publicMemory(result.memory);
+      await this.restoreAfterOwnerEdit(active);
+      let view: CompanionMemoryView;
+      try {
+        view = await this.memoryView();
+      } catch (error) {
+        view = { ...committed, application: { appliedRevision: null, error: fault(error) } };
+      }
+      return { receipt: result.receipt, committedRevision: result.committedRevision, view };
+    });
   }
 
   private harness(key = this.selectedHarness): { pluginId: string; providerId: string } {
@@ -323,6 +569,7 @@ export class CompanionRuntime {
       id: 'x'.repeat(128),
       name: profile.name,
       profileRevision: profile.revision,
+      profileApplication: this.profileApplication(profile),
       harness: this.selectedHarness,
       mode: this.mode,
       status: this.agentStatus,
@@ -338,6 +585,14 @@ export class CompanionRuntime {
       messages: [],
       tasks: [],
       facts: [],
+      memory: {
+        revision: Number.MAX_SAFE_INTEGER,
+        application: {
+          appliedRevision: Number.MAX_SAFE_INTEGER,
+          error: makeError('permission-denied', false),
+        },
+        usage: { count: 32, dataBytes: 8192, originBytes: 8192 },
+      },
       plugins,
       ...(model ? { model } : {}),
       projection: { hasMoreMessages: false, hasMoreTasks: false, taskDetailsTruncated: false },
@@ -357,6 +612,16 @@ export class CompanionRuntime {
       messages: state.messages,
       tasks: state.tasks,
       facts: state.facts,
+      ...(Number.isSafeInteger(state.memoryRevision)
+        ? {
+            memory: this.memoryStatus({
+              assistantId: state.assistantId,
+              memoryRevision: state.memoryRevision,
+              facts: state.facts,
+              usage: memoryUsage(state.facts),
+            }),
+          }
+        : {}),
       plugins,
       ...(model ? { model } : {}),
       projection: {
@@ -386,24 +651,61 @@ export class CompanionRuntime {
   async message(command: CompanionMessageCommand): Promise<CompanionCommandReceipt> {
     this.requireInteraction();
     this.pendingInputs++;
+    let reserved = false;
     try {
+      // Exact acceptMessage fingerprint: known intents need no new admission capacity or delivery.
+      const known = await this.state('getCommand', {
+        commandId: command.commandId,
+        kind: 'message',
+        payload: json(command) as JsonObject,
+      });
+      this.requireInteraction();
+      if (known) return known;
+      const cueEnd = memoryCue(command.text);
+      reserved = cueEnd !== null;
+      if (
+        reserved &&
+        this.memoryAdmissions.size + this.memoryReservations >= COMPANION_MEMORY_MAX_INPUTS
+      ) {
+        reserved = false;
+        throw new KernelFault('quota-exceeded');
+      }
+      if (reserved) this.memoryReservations++;
+      const source = this.selectedHarness;
+      const selected = this.harness();
+      const owner = this.host.manager.get({
+        pluginId: selected.pluginId,
+        instanceId: 'default',
+      })?.owner;
+      const baseline = reserved ? await this.state('memorySnapshot', {}) : undefined;
       const accepted = await this.state('acceptMessage', command);
       if (accepted.receipt.status === 'duplicate') return accepted.receipt;
-      this.agentStatus = 'busy';
-      this.notify();
       try {
+        if (!owner || source !== this.selectedHarness || !this.host.manager.isActive(owner))
+          throw new KernelFault('stale-owner');
+        const canonicalCue = memoryCue(accepted.message.text);
+        if (baseline && canonicalCue !== null) {
+          this.memoryAdmissions.set(accepted.message.id, {
+            text: accepted.message.text,
+            cueEnd: canonicalCue,
+            baseline,
+            source,
+            owner,
+          });
+          this.memoryReservations--;
+          reserved = false;
+        }
+        this.agentStatus = 'busy';
+        this.notify();
         payload<null>(
           await this.host.call(
             HARNESS_CAPABILITY,
             'accept',
-            json({
-              id: accepted.message.id,
-              text: accepted.message.text,
-              kind: 'user',
-            }),
+            json({ id: accepted.message.id, text: accepted.message.text, kind: 'user' }),
           ),
         );
       } catch (error) {
+        this.memoryAdmissions.delete(accepted.message.id);
         this.agentStatus = 'unavailable';
         this.agentError = fault(error);
         await this.state('appendMessage', {
@@ -417,6 +719,7 @@ export class CompanionRuntime {
       return accepted.receipt;
     } finally {
       this.pendingInputs--;
+      if (reserved) this.memoryReservations--;
     }
   }
 
@@ -639,7 +942,7 @@ export class CompanionRuntime {
     return (await this.state('rememberFact', command)).receipt;
   }
 
-  harnessPorts(source: string): CorticoHarnessPorts {
+  harnessPorts(source: string, profile: ProfileBinding): CorticoHarnessPorts {
     const selected = this.harness(source);
     const identity = { pluginId: selected.pluginId, instanceId: 'default' };
     const owner = this.host.manager.get(identity)?.owner;
@@ -667,7 +970,48 @@ export class CompanionRuntime {
         },
       );
     };
+    let issuedMemoryRevision: number | undefined;
     return {
+      finishInputs: (ids) => {
+        for (const id of ids) {
+          const admission = this.memoryAdmissions.get(id);
+          if (admission?.source === source && admission.owner.generation === owner.generation)
+            this.memoryAdmissions.delete(id);
+        }
+      },
+      projectionApplied: (value) => {
+        current();
+        if (
+          value.memoryRevision !== issuedMemoryRevision ||
+          value.memoryRevision !== this.latestMemoryRevision ||
+          (value.profileRevision !== null && value.profileRevision !== profile.revision)
+        )
+          throw new KernelFault('conflict');
+        this.projection = {
+          source,
+          owner,
+          profile,
+          profileRevision: value.profileRevision,
+          memoryRevision: value.memoryRevision,
+        };
+        this.memoryApplicationError = null;
+        this.profileApplicationError =
+          value.profileRevision === null ? makeError('not-ready') : null;
+        this.notify();
+      },
+      projectionFailed: (value) => {
+        if (
+          this.closing ||
+          this.selectedHarness !== source ||
+          this.host.manager.get(identity)?.owner.generation !== owner.generation ||
+          value.memoryRevision !== this.latestMemoryRevision
+        )
+          return;
+        this.memoryApplicationError = value.error;
+        this.agentError = value.error;
+        this.agentStatus = 'unavailable';
+        this.notify();
+      },
       context: async () => {
         current();
         let value: StateMethodOutputs['snapshot'];
@@ -680,7 +1024,17 @@ export class CompanionRuntime {
             throw new KernelFault('permission-denied');
         } else
           value = await scoped(STATE_CAPABILITY, (signal) => this.state('snapshot', {}, signal));
-        return { messages: value.messages, facts: value.facts, tasks: value.tasks };
+        if (!Number.isSafeInteger(value.memoryRevision)) throw new KernelFault('not-ready');
+        issuedMemoryRevision = Math.max(
+          issuedMemoryRevision ?? value.memoryRevision,
+          value.memoryRevision,
+        );
+        return {
+          messages: value.messages,
+          facts: value.facts,
+          tasks: value.tasks,
+          memoryRevision: value.memoryRevision,
+        };
       },
       publish: (output) =>
         scoped(STATE_CAPABILITY, async (signal) => {
@@ -702,12 +1056,49 @@ export class CompanionRuntime {
         ),
       stopWork: (id) => scoped(EXECUTION_CAPABILITY, () => this.stopTask(id, `model-stop-${id}`)),
       rememberFact: (key, value, origin) =>
-        scoped(
-          STATE_CAPABILITY,
-          async (signal) =>
-            (await this.state('rememberFact', { commandId: origin.id, key, value }, signal))
-              .receipt,
-        ),
+        scoped(STATE_CAPABILITY, async (signal) => {
+          const inputId = origin.inputIds.length === 1 ? origin.inputIds[0] : undefined;
+          const admission = inputId ? this.memoryAdmissions.get(inputId) : undefined;
+          if (
+            !admission ||
+            admission.source !== source ||
+            admission.owner.generation !== owner.generation ||
+            !inputId
+          )
+            throw new KernelFault('permission-denied');
+          const start = admission.text.indexOf(value, admission.cueEnd);
+          if (start < admission.cueEnd || !value.trim()) throw new KernelFault('permission-denied');
+          const command = memoryCommand(
+            {
+              commandId: `memory-${createHash('sha256')
+                .update(JSON.stringify([inputId, key.trim(), value]))
+                .digest('hex')}`,
+              key,
+              value,
+              expectedMemoryRevision: admission.baseline.memoryRevision,
+              expectedFactRevision:
+                admission.baseline.facts.find((f) => f.key === key.trim())?.revision ?? 0,
+            },
+            false,
+          );
+          const result = await this.state(
+            'rememberFact',
+            {
+              ...command,
+              origin: {
+                kind: 'user-input',
+                inputId,
+                evidence: { start, end: start + value.length },
+              },
+            },
+            signal,
+          );
+          return {
+            receipt: result.receipt,
+            committedRevision: result.committedRevision,
+            view: this.publicMemory(result.memory),
+          };
+        }),
       status: (status, error) => {
         if (this.selectedHarness !== source || this.closing || !this.host.manager.isActive(owner))
           return;
@@ -754,6 +1145,7 @@ export class CompanionRuntime {
         ? profile.data['disabledPlugins'].filter((id) => id !== next.pluginId)
         : [];
       await this.saveProfile({ harness: key, disabledPlugins: disabled });
+      if (this.selectedHarness && key !== this.selectedHarness) this.clearProjection();
       if (this.selectedHarness && key !== this.selectedHarness)
         await this.host.setEnabled(this.harness().pluginId, false);
       this.selectedHarness = key;
@@ -822,6 +1214,8 @@ export class CompanionRuntime {
       else disabled.add(id);
       await this.saveProfile({ disabledPlugins: [...disabled].sort() });
       temporaryStateOpen = false;
+      if (!enabled && this.selectedHarness && id === this.harness().pluginId)
+        this.clearProjection();
       await this.host.setEnabled(id, enabled);
       if (id === this.options.executionPluginId && enabled) await this.reconcileExecution();
       if (id === this.options.statePluginId && enabled) await this.initialize();
@@ -844,6 +1238,7 @@ export class CompanionRuntime {
   }
 
   async stopForeground(): Promise<void> {
+    this.memoryAdmissions.clear();
     payload<null>(await this.host.call(HARNESS_CAPABILITY, 'stopForeground', null));
   }
 
@@ -858,6 +1253,7 @@ export class CompanionRuntime {
 
   private async shutdown(): Promise<void> {
     this.closing = true;
+    this.clearProjection();
     await this.modelControls?.close();
     if (this.selectedHarness && this.host.isEnabled(this.harness().pluginId))
       await this.host.setEnabled(this.harness().pluginId, false);

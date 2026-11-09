@@ -8,7 +8,6 @@ import { pipeline } from 'node:stream/promises';
 import {
   isKernelErrorCode,
   makeError,
-  type CompanionFactCommand,
   type CompanionModelView,
   type CompanionMessageCommand,
   type CompanionTaskCommand,
@@ -316,18 +315,17 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       return;
     }
     if (method === 'GET' && pathname === '/api/profile') {
-      const profile = await options.runtime.profile();
+      const value = await options.runtime.profileView();
       const snapshot = await options.runtime.snapshot();
-      if (profile.revision !== snapshot.agent.profileRevision) throw new KernelFault('conflict');
-      const value = {
-        agentId: snapshot.agent.id,
-        name: profile.name,
-        persona: profile.persona,
-        revision: profile.revision,
-      };
+      if (value.revision !== snapshot.agent.profileRevision || value.agentId !== snapshot.agent.id)
+        throw new KernelFault('conflict');
       if (Buffer.byteLength(JSON.stringify({ ok: true, value })) > MAX_BODY)
         throw new KernelFault('quota-exceeded');
       send(response, 200, { ok: true, value });
+      return;
+    }
+    if (method === 'GET' && pathname === '/api/memory') {
+      send(response, 200, { ok: true, value: await options.runtime.memoryView() });
       return;
     }
     if (method === 'GET' && pathname === '/api/model') {
@@ -382,6 +380,10 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     }
     const input = object(await body(request));
     if (!input) throw new KernelFault('invalid-input');
+    if (pathname === '/api/profile') {
+      send(response, 200, { ok: true, value: await options.runtime.savePersona(input) });
+      return;
+    }
     if (pathname === '/api/model/credential') {
       if (!options.models) throw new KernelFault('not-ready');
       if (!writable) throw new KernelFault('permission-denied');
@@ -415,8 +417,12 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       return;
     }
     if (pathname === '/api/facts') {
-      const value = await options.runtime.remember(input as unknown as CompanionFactCommand);
+      const value = await options.runtime.upsertFact(input);
       send(response, 200, { ok: true, value });
+      return;
+    }
+    if (pathname === '/api/facts/forget') {
+      send(response, 200, { ok: true, value: await options.runtime.forgetFact(input) });
       return;
     }
     const stopMatch = /^\/api\/tasks\/([A-Za-z0-9._-]+)\/stop$/.exec(pathname);

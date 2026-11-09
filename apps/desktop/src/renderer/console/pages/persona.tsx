@@ -5,8 +5,19 @@
  * 不自动重读、不写回本地偏好。气泡字号、速度、发光、双击与状态气泡这些是本地呈现，
  * 走 presentation.save，与服务人格无关。
  */
-import { errorMessage } from '@pet/contracts';
-import { useCallback, useEffect, useId, useRef, useState, type JSX } from 'react';
+import {
+  errorMessage,
+  type CompanionMemoryForgetCommand,
+  type CompanionMemoryUpsertCommand,
+  type CompanionMemoryView,
+  type CompanionProfileSaveCommand,
+  type CompanionProfileView,
+  type Result,
+} from '@pet/contracts';
+import { PersonaMemory } from '@pet/text-client/persona-memory-ui';
+import '@pet/text-client/persona-memory.css';
+
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type JSX } from 'react';
 
 import { Button, Card, Status } from '../minimal-ui/controls.js';
 import { SpeechSettingsPanel } from '../minimal-ui/speech-settings.js';
@@ -36,36 +47,94 @@ export function PersonaPage({ companion, presentation, notify }: PersonaPageProp
   const state = companion.state;
   const snapshot = state?.snapshot ?? null;
   const preferences = presentation.snapshot?.preferences ?? null;
-  const [profile, setProfile] = useState<{
-    agentId: string;
-    name: string;
-    persona: string;
-    revision: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState<CompanionProfileView | null>(null);
+  const [memory, setMemory] = useState<CompanionMemoryView | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const generation = useRef(0);
+  /** 这份正文是按哪一个 profileRevision 读的：服务端一升版就作废，等显式重读。 */
+  const profileReadAt = useRef<number | null>(null);
+
+  /**
+   * 共享组件要的五件事，全部转到这个窗口已有的 bridge 上。
+   * 结构式声明：组件不认识 CompanionView，只认识这五个方法。
+   */
+  const transport = useMemo(
+    () => ({
+      readProfile: (): Promise<Result<CompanionProfileView>> => companion.readProfile(),
+      saveProfile: (command: CompanionProfileSaveCommand) => companion.saveProfile(command),
+      readMemory: (): Promise<Result<CompanionMemoryView>> => companion.readMemory(),
+      upsertFact: (command: CompanionMemoryUpsertCommand) => companion.upsertFact(command),
+      forgetFact: (command: CompanionMemoryForgetCommand) => companion.forgetFact(command),
+    }),
+    [companion],
+  );
+
+  /**
+   * 记忆视图由**快照**派生：它是唯一 owner，SSE 新到的 facts/application 必须能显示。
+   * 显式读取只用于表单的 read/rebase，不能变成一层永远压住快照的缓存。
+   * 只有当快照还没有 memory metadata、而显式读取拿到了完整视图时才用它。
+   */
+  const memoryView = useMemo<CompanionMemoryView | null>(() => {
+    if (snapshot !== null && snapshot.memory !== undefined)
+      return { ...snapshot.memory, agentId: snapshot.agent.id, facts: snapshot.facts };
+    return memory;
+  }, [memory, snapshot]);
 
   const load = useCallback(async (): Promise<void> => {
     if (state === null || state.connectionId === null) return;
     const started = ++generation.current;
-    setLoading(true);
     setFailure(null);
-    const result = await companion.readProfile();
+    const [profileResult, memoryResult] = await Promise.all([
+      companion.readProfile(),
+      companion.readMemory(),
+    ]);
     if (generation.current !== started) return;
-    setLoading(false);
-    if (result.ok) setProfile(result.value);
-    else if (result.error.code === 'conflict')
+    if (profileResult.ok) {
+      setProfile(profileResult.value);
+      profileReadAt.current = profileResult.value.revision;
+    } else if (profileResult.error.code === 'conflict')
       setFailure('人格在别处刚改过，这一版对不上；等下一次刷新后再看。');
-    else setFailure(`人格没有读出来：${errorMessage(result.error)}`);
+    else setFailure(`人格没有读出来：${errorMessage(profileResult.error)}`);
+    // 记忆读不出来不算致命：快照里那份 metadata 仍然可以渲染。
+    if (memoryResult.ok) setMemory(memoryResult.value);
   }, [companion, state]);
 
   // 目标换了就丢掉旧正文：不拿上一个服务的人格冒充现在这一个。
   useEffect(() => {
     setProfile(null);
+    setMemory(null);
     setFailure(null);
+    profileReadAt.current = null;
     generation.current += 1;
   }, [state?.connectionId]);
+
+  /**
+   * 服务端 profileRevision 变了：这份正文不再是当前值。
+   *
+   * 但**不能置空**——置空会让组件以为这个 feature 不支持（只读/不可编辑），
+   * 外部改动提示也一起消失。保留已读到的正文并标成 stale，同时自动重读一次；
+   * 重读失败也留着旧正文，由用户决定。
+   */
+  const canonicalProfileRevision = snapshot?.agent.profileRevision ?? null;
+  const profileStale =
+    canonicalProfileRevision !== null &&
+    profileReadAt.current !== null &&
+    profileReadAt.current !== canonicalProfileRevision;
+
+  useEffect(() => {
+    if (canonicalProfileRevision === null) return;
+    if (profileReadAt.current === null) return;
+    if (profileReadAt.current === canonicalProfileRevision) return;
+    // 合并成一次重读，不因为一次 save 就永远要求手动点。
+    const started = ++generation.current;
+    void companion.readProfile().then((result) => {
+      if (generation.current !== started) return;
+      if (result.ok) {
+        setProfile(result.value);
+        profileReadAt.current = result.value.revision;
+      }
+    });
+  }, [canonicalProfileRevision, companion]);
 
   const save = async (patch: Parameters<LocalPresentationView['save']>[0], label: string) => {
     const ok = await presentation.save(patch);
@@ -82,7 +151,6 @@ export function PersonaPage({ companion, presentation, notify }: PersonaPageProp
         action={
           <Button
             size="small"
-            busy={loading}
             disabled={!canRead}
             data-testid="persona-read"
             onClick={() => void load()}
@@ -97,9 +165,8 @@ export function PersonaPage({ companion, presentation, notify }: PersonaPageProp
           </p>
         ) : (
           <div className="rows rows--tight">
-            <Row label="名字" value={snapshot.agent.name} />
+            <Row label="服务身份" value={snapshot.agent.id} />
             <Row label="模式" value={agentModeLabel(snapshot.agent)} />
-            <Row label="人格修订" value={String(snapshot.agent.profileRevision)} />
             <Row
               label="最后确认"
               value={state?.confirmedAt == null ? '尚未确认' : clockTime(state.confirmedAt)}
@@ -113,22 +180,18 @@ export function PersonaPage({ companion, presentation, notify }: PersonaPageProp
           </p>
         )}
 
-        {profile === null ? (
-          <p className="row__value">人格正文按需读取：它可能很长，所以不放进每次刷新的快照里。</p>
-        ) : (
-          <>
-            <div className="rows rows--tight">
-              <Row label="正文修订" value={String(profile.revision)} />
-              <Row label="服务身份" value={profile.agentId} />
-            </div>
-            <pre className="persona-prompt" data-testid="persona-body">
-              {profile.persona}
-            </pre>
-          </>
-        )}
-        <p className="row__value">
-          人格由服务保存。这一版不能在这里修改；本地只改下面这些呈现细节。
-        </p>
+        {/* 人格与记忆：编辑规则全在共享的 memory-form 里，这里只做 bridge 适配。 */}
+        <PersonaMemory
+          transport={transport}
+          live={state !== null && state.phase === 'live'}
+          agentStatus={snapshot?.agent.status ?? null}
+          profile={profile}
+          profileStale={profileStale}
+          profileApplication={snapshot?.agent.profileApplication}
+          memory={memoryView}
+          targetKey={state?.connectionId ?? 'none'}
+          onNotice={(message: string) => notify(message, 'ok')}
+        />
       </Card>
 
       <Card

@@ -493,6 +493,16 @@ describe('shared desktop contract seam', () => {
         controller,
       ),
     ).toMatchObject({ ok: false, error: { code: 'permission-denied' } });
+    for (const action of ['saveProfile', 'upsertFact', 'forgetFact'] as const) {
+      expect(
+        await handleDesktopCompanionRequest(
+          source,
+          action,
+          [{ connectionId: 'old', command: {} }],
+          controller,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'permission-denied' } });
+    }
     expect(
       await handleDesktopCompanionRequest(
         { ...source, frameUrl: 'file:///other.html' },

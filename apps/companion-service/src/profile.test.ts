@@ -28,7 +28,13 @@ it('profile read is authenticated, bounded, canonical and exposes no raw Config'
     const result = (await response.json()) as Result<CompanionProfileView>;
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('profile missing');
-    expect(Object.keys(result.value).sort()).toEqual(['agentId', 'name', 'persona', 'revision']);
+    expect(Object.keys(result.value).sort()).toEqual([
+      'agentId',
+      'management',
+      'name',
+      'persona',
+      'revision',
+    ]);
     expect(result.value).toMatchObject({
       agentId: (await service.runtime.snapshot()).agent.id,
       name: '🙂'.repeat(40),

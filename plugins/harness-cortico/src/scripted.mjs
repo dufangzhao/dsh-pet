@@ -22,11 +22,17 @@ function receiptText(name, output, tasks) {
   } catch {
     return '本次操作未能确认，请查看任务状态。';
   }
-  if (!receipt || !['accepted', 'duplicate'].includes(receipt.status))
+  const actual = receipt?.receipt ?? receipt;
+  if (!actual || !['accepted', 'duplicate'].includes(actual.status))
     return '本次操作未能确认，请查看任务状态。';
   if (name === 'start_work') return '任务已受理。可以继续交谈，也可以在任务区查看进度或停止它。';
   if (name === 'stop_work') return '已发送停止请求，最终状态以任务区为准。';
-  if (name === 'remember') return '偏好已保存。';
+  if (name === 'remember')
+    return receipt.applicationError
+      ? '偏好已保存，但当前上下文未应用。'
+      : actual.status === 'duplicate'
+        ? '这次记住请求此前已受理，当前内容以记忆区为准。'
+        : '偏好已保存。';
   return '操作已受理。';
 }
 

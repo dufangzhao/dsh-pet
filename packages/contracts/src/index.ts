@@ -41,6 +41,7 @@ export * from './model-services.js';
 export * from './design-lab.js';
 export * from './companion.js';
 export * from './companion-profile.js';
+export * from './companion-memory.js';
 export * from './desktop-companion.js';
 export type {
   ResponsesConnectionSettings,

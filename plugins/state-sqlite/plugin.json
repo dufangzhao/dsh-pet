@@ -27,6 +27,8 @@
           "createTask": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "updateTask": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "appendMessage": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "memorySnapshot": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "forgetFact": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "rememberFact": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "getTask": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "getTaskByExecution": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],

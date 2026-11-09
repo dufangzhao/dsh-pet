@@ -5,6 +5,8 @@ import { makeError } from '@pet/contracts';
 import { SqliteState } from './state.js';
 import { STATE_METHODS } from './types.js';
 
+export { openStateDatabase } from './database.js';
+export { memoryUsage } from './memory.js';
 export { SqliteState } from './state.js';
 export * from './types.js';
 

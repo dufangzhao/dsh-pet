@@ -20,7 +20,12 @@
       "types": "./src/model-ui.ts",
       "default": "./src/model-ui.ts"
     },
-    "./model.css": "./src/client/model.css"
+    "./model.css": "./src/client/model.css",
+    "./persona-memory-ui": {
+      "types": "./src/persona-memory-ui.ts",
+      "default": "./src/persona-memory-ui.ts"
+    },
+    "./persona-memory.css": "./src/client/persona-memory.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

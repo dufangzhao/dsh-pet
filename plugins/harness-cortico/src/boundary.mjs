@@ -1,5 +1,10 @@
 import Ajv from 'ajv';
-import { COMPANION_MAX_CODE, COMPANION_MAX_TEXT } from '@pet/contracts';
+import {
+  COMPANION_MEMORY_MAX_KEY_UNITS,
+  COMPANION_MEMORY_MAX_VALUE_UNITS,
+  COMPANION_MAX_CODE,
+  COMPANION_MAX_TEXT,
+} from '@pet/contracts';
 
 const id = {
   type: 'string',
@@ -47,7 +52,18 @@ export const toolSchemas = {
     ['inputId', 'title', 'code'],
   ),
   stop_work: object({ inputId: id, taskId: id }),
-  remember: object({ inputId: id, key: text(80), value: text(1000) }),
+  remember: object({
+    inputId: id,
+    key: {
+      ...text(COMPANION_MEMORY_MAX_KEY_UNITS),
+      description: 'Short label, up to128 UTF-16 code units.',
+    },
+    value: {
+      ...text(COMPANION_MEMORY_MAX_VALUE_UNITS),
+      description:
+        'Exact user-supplied text, up to2048 UTF-16 code units; do not paraphrase or remove qualifications.',
+    },
+  }),
   list_work: object({}),
 };
 
@@ -72,6 +88,7 @@ const validateOptions = ajv.compile(
       dataDirectory: text(4096),
       name: text(120),
       persona: text(16384),
+      profileRevision: { type: 'integer', minimum: 1 },
       mode: { enum: ['scripted', 'model'] },
       model: text(128),
       baseUrl: text(2048),

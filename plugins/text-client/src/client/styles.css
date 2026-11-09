@@ -364,9 +364,19 @@ textarea {
 /* ---- 任务 ---- */
 
 .tc-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   overflow-y: auto;
   min-height: 0;
   padding: 18px 20px;
+}
+
+/* 人格与记忆在侧栏里排在任务之后，与任务之间留出同一档间距。 */
+.tc-side__persona {
+  min-width: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--pk-border);
 }
 
 .tc-tasks__head {

@@ -23,7 +23,16 @@ export async function handleDesktopCompanionRequest(
 ): Promise<Result<unknown>> {
   if (!isTrustedPetSource(source)) return denied('permission-denied');
   if (
-    ['connect', 'reconnect', 'disconnect', 'saveModel', 'testModel'].includes(action) &&
+    [
+      'connect',
+      'reconnect',
+      'disconnect',
+      'saveModel',
+      'testModel',
+      'saveProfile',
+      'upsertFact',
+      'forgetFact',
+    ].includes(action) &&
     source.role !== 'console'
   )
     return denied('permission-denied');
@@ -49,7 +58,11 @@ export async function handleDesktopCompanionRequest(
   }
   if (!id(body['connectionId'])) return denied('invalid-input');
   const target = { connectionId: body['connectionId'] };
-  if (['reconnect', 'disconnect', 'refresh', 'stopForeground', 'readProfile'].includes(action)) {
+  if (
+    ['reconnect', 'disconnect', 'refresh', 'stopForeground', 'readProfile', 'readMemory'].includes(
+      action,
+    )
+  ) {
     if (!exactKeys(body, ['connectionId'])) return denied('invalid-input');
     switch (action) {
       case 'reconnect':
@@ -60,9 +73,55 @@ export async function handleDesktopCompanionRequest(
         return controller.refresh(target);
       case 'stopForeground':
         return controller.stopForeground(target);
+      case 'readMemory':
+        return controller.readMemory(target);
       case 'readProfile':
         return controller.readProfile(target);
     }
+  }
+  if (action === 'saveProfile' || action === 'upsertFact' || action === 'forgetFact') {
+    const command = record(body['command'] ?? null);
+    if (!exactKeys(body, ['connectionId', 'command']) || !command) return denied('invalid-input');
+    if (action === 'saveProfile') {
+      if (
+        !exactKeys(command, ['expectedProfileRevision', 'name', 'persona']) ||
+        !revision(command['expectedProfileRevision']) ||
+        typeof command['name'] !== 'string' ||
+        typeof command['persona'] !== 'string'
+      )
+        return denied('invalid-input');
+      return controller.saveProfile({
+        ...target,
+        command: {
+          expectedProfileRevision: command['expectedProfileRevision'],
+          name: command['name'],
+          persona: command['persona'],
+        },
+      });
+    }
+    if (
+      !exactKeys(command, [
+        'commandId',
+        'expectedMemoryRevision',
+        'expectedFactRevision',
+        'key',
+        ...(action === 'upsertFact' ? ['value'] : []),
+      ]) ||
+      !id(command['commandId']) ||
+      !revision(command['expectedMemoryRevision']) ||
+      !revision(command['expectedFactRevision']) ||
+      typeof command['key'] !== 'string'
+    )
+      return denied('invalid-input');
+    const base = {
+      commandId: command['commandId'],
+      expectedMemoryRevision: command['expectedMemoryRevision'],
+      expectedFactRevision: command['expectedFactRevision'],
+      key: command['key'],
+    };
+    if (action === 'forgetFact') return controller.forgetFact({ ...target, command: base });
+    if (typeof command['value'] !== 'string') return denied('invalid-input');
+    return controller.upsertFact({ ...target, command: { ...base, value: command['value'] } });
   }
   if (action === 'sendMessage') {
     if (

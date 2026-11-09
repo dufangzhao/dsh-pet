@@ -63,6 +63,7 @@ export function createFixturePlugin(ports: CorticoHarnessPorts): PluginDefinitio
           return { ok: false, error: { ...makeError('cancelled') } };
         const current = generation;
         const context = await ports.context();
+        ports.projectionApplied({ profileRevision: null, memoryRevision: context.memoryRevision });
         if (closed || generation !== current || task.signal.aborted)
           return { ok: false, error: { ...makeError('cancelled') } };
         if (body['kind'] === 'user') {
@@ -78,6 +79,7 @@ export function createFixturePlugin(ports: CorticoHarnessPorts): PluginDefinitio
                 : `${text.slice(0, COMPANION_MAX_TEXT - 40)}\n[验证适配器已省略超长内容]`,
           });
         }
+        ports.finishInputs([String(body['id'])]);
         return { ok: true, value: null };
       };
       ctx.provide('fixture', {

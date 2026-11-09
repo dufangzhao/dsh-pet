@@ -1,4 +1,10 @@
-import { COMPANION_MAX_CODE, COMPANION_MAX_TEXT, isKernelErrorCode } from '@pet/contracts';
+import {
+  COMPANION_MEMORY_MAX_KEY_UNITS,
+  COMPANION_MEMORY_MAX_VALUE_UNITS,
+  COMPANION_MAX_CODE,
+  COMPANION_MAX_TEXT,
+  isKernelErrorCode,
+} from '@pet/contracts';
 import type { JsonValue, KernelErrorCode } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { STATE_MAX_ARTIFACTS, STATE_MAX_RESULT_BYTES } from './types.js';
@@ -169,11 +175,35 @@ export function validateInput<K extends keyof StateMethodInputs>(
       optional(body, 'inputId', (value) => value === null || id(value));
       optional(body, 'taskId', (value) => value === null || id(value));
       break;
-    case 'rememberFact':
-      keys(body, ['commandId', 'key', 'value'], ['expectedRevision']);
-      requireValue(id(body['commandId']) && text(body['key'], 128) && text(body['value'], 2_048));
-      optional(body, 'expectedRevision', (value) => integer(value, 0));
+    case 'memorySnapshot':
+      keys(body, []);
       break;
+    case 'rememberFact':
+    case 'forgetFact': {
+      const current = 'expectedMemoryRevision' in body;
+      if (method === 'rememberFact' && !current) {
+        keys(body, ['commandId', 'key', 'value'], ['expectedRevision']);
+        optional(body, 'expectedRevision', (v) => integer(v, 0));
+      } else {
+        keys(body, [
+          'commandId',
+          'key',
+          'expectedMemoryRevision',
+          'expectedFactRevision',
+          'origin',
+          ...(method === 'rememberFact' ? ['value'] : []),
+        ]);
+        requireValue(
+          integer(body['expectedMemoryRevision'], 0) &&
+            integer(body['expectedFactRevision'], method === 'forgetFact' ? 1 : 0),
+        );
+        validateOrigin(body['origin']);
+      }
+      requireValue(id(body['commandId']) && text(body['key'], COMPANION_MEMORY_MAX_KEY_UNITS));
+      if (method === 'rememberFact')
+        requireValue(text(body['value'], COMPANION_MEMORY_MAX_VALUE_UNITS));
+      break;
+    }
     case 'getTaskByExecution':
       keys(body, ['executionId']);
       requireValue(id(body['executionId']));
@@ -231,4 +261,21 @@ export function boundedText(value: string, bytes: number): string {
   }
   const end = low > 0 && /[\uD800-\uDBFF]/.test(value.charAt(low - 1)) ? low - 1 : low;
   return value.slice(0, end);
+}
+
+export function validateOrigin(value: unknown): void {
+  const origin = object(value);
+  if (origin['kind'] === 'owner-form' || origin['kind'] === 'legacy-unknown') {
+    keys(origin, ['kind']);
+    return;
+  }
+  keys(origin, ['kind', 'inputId', 'evidence']);
+  requireValue(origin['kind'] === 'user-input' && id(origin['inputId']));
+  const evidence = object(origin['evidence']);
+  keys(evidence, ['start', 'end']);
+  requireValue(
+    integer(evidence['start'], 0) &&
+      integer(evidence['end'], 1, 8000) &&
+      Number(evidence['end']) > Number(evidence['start']),
+  );
 }

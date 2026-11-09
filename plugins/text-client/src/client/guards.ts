@@ -7,6 +7,16 @@
  */
 import {
   COMPANION_PROTOCOL_VERSION,
+  COMPANION_MEMORY_MAX_FACTS,
+  COMPANION_MEMORY_MAX_KEY_UNITS,
+  COMPANION_MEMORY_MAX_VALUE_UNITS,
+  COMPANION_MEMORY_MAX_DATA_BYTES,
+  COMPANION_MEMORY_MAX_ORIGIN_BYTES,
+  type CompanionApplication,
+  type CompanionFactOrigin,
+  type CompanionMemoryStatus,
+  type CompanionMemoryView,
+  type CompanionMemoryMutationResult,
   isKernelErrorCode,
   makeError,
   type CompanionAgentView,
@@ -55,6 +65,8 @@ type Fields = Readonly<Record<string, unknown>>;
 const isRecord = (value: unknown): value is Fields =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 const isText = (value: unknown): value is string => typeof value === 'string';
+const isId = (value: unknown): value is string =>
+  isText(value) && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(value);
 const isFlag = (value: unknown): value is boolean => typeof value === 'boolean';
 /**
  * 时间戳必须在 Date 能表示的范围内：超出 ±8.64e15 的有限数字会让
@@ -179,8 +191,21 @@ function parseFact(value: unknown): CompanionFact | null {
   const text = value['value'];
   const revision = value['revision'];
   const updatedAt = value['updatedAt'];
-  if (!isText(key) || !isText(text) || !isCount(revision) || !isTime(updatedAt)) return null;
-  return { key, value: text, revision, updatedAt };
+  if (
+    !isText(key) ||
+    !key ||
+    key.length > COMPANION_MEMORY_MAX_KEY_UNITS ||
+    !isText(text) ||
+    !text ||
+    text.length > COMPANION_MEMORY_MAX_VALUE_UNITS ||
+    !isCount(revision) ||
+    revision < 1 ||
+    !isTime(updatedAt)
+  )
+    return null;
+  const origin = value['origin'] === undefined ? undefined : parseOrigin(value['origin']);
+  if (origin === null) return null;
+  return { key, value: text, revision, updatedAt, ...(origin === undefined ? {} : { origin }) };
 }
 
 function parsePlugin(value: unknown): CompanionPluginView | null {
@@ -244,12 +269,33 @@ function parseAgent(value: unknown): CompanionAgentView | null {
   const mode = value['mode'];
   const status = value['status'];
   const profileRevision = value['profileRevision'];
-  if (!isText(id) || !isText(name) || !isText(harness) || !isCount(profileRevision)) return null;
+  if (!isId(id) || !isText(name) || !isText(harness) || !isCount(profileRevision)) return null;
   if (mode !== 'scripted' && mode !== 'model') return null;
   if (status !== 'ready' && status !== 'busy' && status !== 'unavailable') return null;
   const error = parseNullableError(value['error']);
   if (error === undefined) return null;
-  return { id, name, harness, mode, status, profileRevision, error };
+  const profileApplication =
+    value['profileApplication'] === undefined
+      ? undefined
+      : parseApplication(value['profileApplication']);
+  if (
+    profileApplication === null ||
+    (profileApplication?.appliedRevision !== undefined &&
+      profileApplication.appliedRevision !== null &&
+      (profileApplication.appliedRevision < 1 ||
+        profileApplication.appliedRevision > profileRevision))
+  )
+    return null;
+  return {
+    id,
+    name,
+    harness,
+    mode,
+    status,
+    profileRevision,
+    error,
+    ...(profileApplication === undefined ? {} : { profileApplication }),
+  };
 }
 
 /**
@@ -436,6 +482,8 @@ export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
   // `model` 是可选成员：缺省是「旧服务」，出现了就必须整份读得懂。
   const model = value['model'] === undefined ? undefined : parseModelView(value['model']);
   if (model === null) return malformed();
+  const memory = value['memory'] === undefined ? undefined : parseMemoryStatus(value['memory']);
+  if (memory === null || (memory && !memoryFactsMatch(memory, facts))) return malformed();
   return {
     ok: true,
     value: {
@@ -450,6 +498,7 @@ export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
       plugins,
       ...(projection === undefined ? {} : { projection }),
       ...(model === undefined ? {} : { model }),
+      ...(memory === undefined ? {} : { memory }),
     },
   };
 }
@@ -495,8 +544,7 @@ export function parseProfile(value: unknown): CompanionProfileView | null {
   if (!isRecord(value)) return null;
   const { agentId, name, persona, revision } = value;
   if (
-    typeof agentId !== 'string' ||
-    !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(agentId) ||
+    !isId(agentId) ||
     typeof name !== 'string' ||
     [...name].length < 1 ||
     [...name].length > 80 ||
@@ -507,5 +555,124 @@ export function parseProfile(value: unknown): CompanionProfileView | null {
     revision < 1
   )
     return null;
-  return { agentId, name, persona, revision };
+  if (value['management'] === undefined) return { agentId, name, persona, revision };
+  const management = value['management'];
+  if (!isRecord(management)) return null;
+  const application = parseApplication(management['application']);
+  const overrides = management['launchOverrides'];
+  if (
+    !application ||
+    (application.appliedRevision !== null &&
+      (application.appliedRevision < 1 || application.appliedRevision > revision)) ||
+    !isRecord(overrides) ||
+    !isFlag(overrides['name']) ||
+    !isFlag(overrides['persona'])
+  )
+    return null;
+  return {
+    agentId,
+    name,
+    persona,
+    revision,
+    management: {
+      application,
+      launchOverrides: { name: overrides['name'], persona: overrides['persona'] },
+    },
+  };
+}
+
+export function parseApplication(value: unknown): CompanionApplication | null {
+  if (!isRecord(value)) return null;
+  const revision = value['appliedRevision'];
+  const error = parseNullableError(value['error']);
+  if ((revision !== null && !isCount(revision)) || error === undefined) return null;
+  return { appliedRevision: revision, error };
+}
+export function parseOrigin(value: unknown): CompanionFactOrigin | null {
+  if (!isRecord(value)) return null;
+  if (value['kind'] === 'legacy-unknown' || value['kind'] === 'owner-form')
+    return { kind: value['kind'] };
+  const evidence = value['evidence'];
+  if (
+    value['kind'] !== 'user-input' ||
+    !isId(value['inputId']) ||
+    !isRecord(evidence) ||
+    !isCount(evidence['start']) ||
+    !isCount(evidence['end']) ||
+    evidence['end'] <= evidence['start'] ||
+    evidence['end'] > 8000
+  )
+    return null;
+  return {
+    kind: 'user-input',
+    inputId: value['inputId'],
+    evidence: { start: evidence['start'], end: evidence['end'] },
+  };
+}
+export function parseMemoryStatus(value: unknown): CompanionMemoryStatus | null {
+  if (!isRecord(value) || !isCount(value['revision'])) return null;
+  const application = parseApplication(value['application']);
+  const usage = value['usage'];
+  if (
+    !application ||
+    !isRecord(usage) ||
+    !isCount(usage['count']) ||
+    !isCount(usage['dataBytes']) ||
+    !isCount(usage['originBytes']) ||
+    usage['count'] > COMPANION_MEMORY_MAX_FACTS ||
+    usage['dataBytes'] > COMPANION_MEMORY_MAX_DATA_BYTES ||
+    usage['originBytes'] > COMPANION_MEMORY_MAX_ORIGIN_BYTES ||
+    (application.appliedRevision !== null && application.appliedRevision > value['revision'])
+  )
+    return null;
+  return {
+    revision: value['revision'],
+    application,
+    usage: {
+      count: usage['count'],
+      dataBytes: usage['dataBytes'],
+      originBytes: usage['originBytes'],
+    },
+  };
+}
+export function parseMemory(value: unknown): CompanionMemoryView | null {
+  if (!isRecord(value) || !isId(value['agentId'])) return null;
+  const status = parseMemoryStatus(value);
+  const facts = parseList(value['facts'], parseFact);
+  if (!status || !facts || !memoryFactsMatch(status, facts)) return null;
+  return { ...status, agentId: value['agentId'], facts };
+}
+export function parseMemoryMutation(
+  value: unknown,
+  commandId: string,
+): CompanionMemoryMutationResult | null {
+  if (!isRecord(value)) return null;
+  const receipt = parseReceipt(value['receipt'], commandId);
+  const view = parseMemory(value['view']);
+  const revision = value['committedRevision'];
+  if (revision !== null && !isCount(revision)) return null;
+  if (
+    !receipt ||
+    receipt.messageId !== null ||
+    receipt.taskId !== null ||
+    !view ||
+    (revision === null ? receipt.status !== 'duplicate' : revision < 1 || revision > view.revision)
+  )
+    return null;
+  return { receipt, committedRevision: revision, view };
+}
+
+function memoryFactsMatch(status: CompanionMemoryStatus, facts: readonly CompanionFact[]): boolean {
+  const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).byteLength;
+  return (
+    status.usage.count === facts.length &&
+    new Set(facts.map((fact) => fact.key)).size === facts.length &&
+    facts.every((fact) => fact.revision <= status.revision) &&
+    status.usage.dataBytes ===
+      bytes(
+        facts.map(({ key, value, revision, updatedAt }) => ({ key, value, revision, updatedAt })),
+      ) &&
+    status.usage.originBytes ===
+      bytes(facts.map((fact) => fact.origin ?? { kind: 'legacy-unknown' }))
+  );
 }

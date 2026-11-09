@@ -9,6 +9,8 @@ import {
 
 export { createCorticoHarness } from './harness.mjs';
 export type {
+  HarnessProductContext,
+  HarnessProfileBinding,
   CorticoHarness,
   CorticoHarnessOptions,
   CorticoHarnessPorts,

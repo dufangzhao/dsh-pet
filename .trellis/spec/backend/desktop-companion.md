@@ -16,17 +16,17 @@ Canonical declarations live in source; extend them there instead of copying DTOs
 | Boundary | Canonical source / operation |
 | --- | --- |
 | Browser-safe client state, pending intents, fixed methods/channels | [desktop-companion.ts](../../../packages/contracts/src/desktop-companion.ts): `DesktopCompanionBridge`, `DesktopCompanionState`, `DESKTOP_COMPANION_IPC` |
-| Local presentation patch/snapshot | [same declarations](../../../packages/contracts/src/desktop-companion.ts#L97): `DESKTOP_PRESENTATION_KEYS`, `DesktopPresentationBridge` |
+| Local presentation patch/snapshot | [same declarations](../../../packages/contracts/src/desktop-companion.ts#L117): `DESKTOP_PRESENTATION_KEYS`, `DesktopPresentationBridge` |
 | Main connection implementation | [DesktopCompanionController](../../../apps/desktop/src/main/companion-client-controller.ts): connect/reconnect/disconnect, snapshot/SSE, commands, reads and artifact save |
 | Native source/config/credential port | [companion-client-types.ts](../../../apps/desktop/src/main/companion-client-types.ts): `DesktopCompanionHostPort`, `DesktopCompanionSource`, `DesktopCompanionEndpointSave` |
-| Read-only service persona | [profile DTO](../../../packages/contracts/src/companion-profile.ts) and [HTTP handler](../../../apps/companion-service/src/server.ts#L318): `GET /api/profile → Result<CompanionProfileView>` |
+| Service persona/memory | [canonical DTOs](../../../packages/contracts/src/companion-profile.ts) and [persona-memory contracts](persona-memory.md): bounded reads and fixed console owner writes |
 | Shared wire readers/guards | [protocol export](../../../plugins/text-client/src/protocol.ts), [HTTP/SSE helpers](../../../plugins/text-client/src/client/protocol.ts), [guards](../../../plugins/text-client/src/client/guards.ts) |
 | Physical local publication | [companion-artifact.ts](../../../apps/desktop/src/main/companion-artifact.ts): `saveCompanionArtifact`, private `ArtifactSaveCommit` provenance |
 
 `saveEndpoint(baseUrl, expectedRevision)` returns `Result<DesktopCompanionEndpointSave>`: outer success retains canonical saved baseUrl/configRevision plus a nested source Result.
 `withToken<T>(source,token,signal,operation,commit?)` is host-only; its optional commit metadata is never a renderer/SDK credential bypass.
 Preload exposes frozen named [facades](../../../apps/desktop/src/preload/companion-bridge.ts); Main's [closed request table](../../../apps/desktop/src/main/companion-client-request.ts) checks roles, arity, exact keys and the current trusted file frame.
-Only console manages auth/model writes. There is no arbitrary HTTP/path method or Main `/api/model/credential` relay.
+Only console manages auth/model and owner-form writes. The fixed bridge adds `readMemory`, `saveProfile`, `upsertFact`, `forgetFact`; exact types, saved/applied facts and counters live once in [persona-memory.md](persona-memory.md). There is no arbitrary HTTP/path method or Main `/api/model/credential` relay.
 
 ## 3. Contracts
 

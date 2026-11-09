@@ -31,7 +31,7 @@ Import DTOs from `@pet/contracts`; never restate their shape.
 
 **Online update is reachable.** `canConnect` is `source === 'ready' && phase !== 'connecting' && phase !== 'retiring'`. Live is allowed: the service supports online retire→newbind, and disabling it would leave no in-place way to change target. Only the two transitional phases are blocked, plus any non-ready source. Wording follows `updatesConnection`: "更新连接或更换令牌" when connected, otherwise connect/reconnect copy.
 
-**Service identity is read-only.** Persona text is read via `readProfile()`; the desktop never writes it. The model form reuses the existing [model-ui](../../../plugins/text-client/src/model-ui.ts) dialog through `createReadOnlyModelTransport`, so `writable=false` stays true and no credential input is offered.
+**Service identity and memory have one owner form.** Persona and active facts are edited through the shared component and rules in [persona and active memory](persona-memory.md); the desktop only adapts its fixed bridge into that transport. Persona text still comes from a detail read, and the model form reuses the existing [model-ui](../../../plugins/text-client/src/model-ui.ts) dialog through `createReadOnlyModelTransport`, so `writable=false` stays true and no credential input is offered.
 
 ### Pet window specifics
 

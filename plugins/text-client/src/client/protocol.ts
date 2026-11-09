@@ -7,6 +7,11 @@
  */
 import {
   makeError,
+  type CompanionProfileSaveCommand,
+  type CompanionMemoryView,
+  type CompanionMemoryUpsertCommand,
+  type CompanionMemoryForgetCommand,
+  type CompanionMemoryMutationResult,
   type CompanionCommandReceipt,
   type CompanionEvent,
   type CompanionMessageCommand,
@@ -25,6 +30,8 @@ import {
 
 import {
   parseEnvelope,
+  parseMemory,
+  parseMemoryMutation,
   parseEvent,
   parseModelView,
   parseReceipt,
@@ -517,3 +524,61 @@ function parseStreamMessage(message: SseMessage): EventMessage | null {
   const event = parseEvent(data);
   return event === null ? null : { kind: 'companion', event };
 }
+
+export async function saveProfile(
+  transport: ClientTransport,
+  command: CompanionProfileSaveCommand,
+  signal?: AbortSignal,
+): Promise<Result<CompanionProfileView>> {
+  const result = await request(transport, '/api/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(command),
+    ...(signal ? { signal } : {}),
+  });
+  if (!result.ok) return result;
+  const value = parseProfile(result.value);
+  return value?.management
+    ? { ok: true, value }
+    : { ok: false, error: makeError('unavailable', false) };
+}
+export async function getMemory(
+  transport: ClientTransport,
+  signal?: AbortSignal,
+): Promise<Result<CompanionMemoryView>> {
+  const result = await request(transport, '/api/memory', {
+    method: 'GET',
+    ...(signal ? { signal } : {}),
+  });
+  if (!result.ok) return result;
+  const value = parseMemory(result.value);
+  return value ? { ok: true, value } : { ok: false, error: makeError('unavailable', false) };
+}
+async function memoryMutation(
+  transport: ClientTransport,
+  path: string,
+  command: CompanionMemoryUpsertCommand | CompanionMemoryForgetCommand,
+  signal?: AbortSignal,
+): Promise<Result<CompanionMemoryMutationResult>> {
+  const result = await request(transport, path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(command),
+    ...(signal ? { signal } : {}),
+  });
+  if (!result.ok) return result;
+  const value = parseMemoryMutation(result.value, command.commandId);
+  return value ? { ok: true, value } : { ok: false, error: makeError('unavailable', false) };
+}
+export const upsertFact = (
+  transport: ClientTransport,
+  command: CompanionMemoryUpsertCommand,
+  signal?: AbortSignal,
+): Promise<Result<CompanionMemoryMutationResult>> =>
+  memoryMutation(transport, '/api/facts', command, signal);
+export const forgetFact = (
+  transport: ClientTransport,
+  command: CompanionMemoryForgetCommand,
+  signal?: AbortSignal,
+): Promise<Result<CompanionMemoryMutationResult>> =>
+  memoryMutation(transport, '/api/facts/forget', command, signal);

@@ -15,8 +15,11 @@ for (const name of [
   });
 }
 await build({
-  entryPoints: [fileURLToPath(new URL('./src/main.ts', import.meta.url))],
-  outfile: fileURLToPath(new URL('./dist/main.mjs', import.meta.url)),
+  entryPoints: ['main', 'migrate'].map((name) =>
+    fileURLToPath(new URL(`./src/${name}.ts`, import.meta.url)),
+  ),
+  outdir: fileURLToPath(new URL('./dist/', import.meta.url)),
+  outExtension: { '.js': '.mjs' },
   bundle: true,
   platform: 'node',
   target: 'node26',

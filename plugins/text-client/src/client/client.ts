@@ -7,6 +7,12 @@
  */
 import {
   errorMessage,
+  type CompanionProfileView,
+  type CompanionProfileSaveCommand,
+  type CompanionMemoryView,
+  type CompanionMemoryUpsertCommand,
+  type CompanionMemoryForgetCommand,
+  type CompanionMemoryMutationResult,
   makeError,
   type CompanionArtifact,
   type CompanionModelCredentialCommand,
@@ -19,6 +25,11 @@ import {
 
 import {
   getArtifact,
+  getProfile,
+  getMemory,
+  saveProfile,
+  upsertFact,
+  forgetFact,
   getSnapshot,
   saveModel,
   sendMessage,
@@ -210,6 +221,55 @@ export class CompanionClient {
   ): Promise<Result<CompanionModelView>> {
     const result = await writeModelCredential(this.#transport, command);
     if (result.ok) this.#scheduleRefresh();
+    return result;
+  }
+
+  readProfile(): Promise<Result<CompanionProfileView>> {
+    return this.#managed(getProfile, (view) => view.agentId, false);
+  }
+  readMemory(): Promise<Result<CompanionMemoryView>> {
+    return this.#managed(getMemory, (view) => view.agentId, false);
+  }
+  saveProfile(command: CompanionProfileSaveCommand): Promise<Result<CompanionProfileView>> {
+    return this.#managed(
+      (t, s) => saveProfile(t, command, s),
+      (view) => view.agentId,
+      true,
+    );
+  }
+  upsertFact(
+    command: CompanionMemoryUpsertCommand,
+  ): Promise<Result<CompanionMemoryMutationResult>> {
+    return this.#managed(
+      (t, s) => upsertFact(t, command, s),
+      (result) => result.view.agentId,
+      true,
+    );
+  }
+  forgetFact(
+    command: CompanionMemoryForgetCommand,
+  ): Promise<Result<CompanionMemoryMutationResult>> {
+    return this.#managed(
+      (t, s) => forgetFact(t, command, s),
+      (result) => result.view.agentId,
+      true,
+    );
+  }
+  async #managed<T>(
+    operation: (transport: ClientTransport, signal: AbortSignal) => Promise<Result<T>>,
+    identity: (value: T) => string,
+    mutation: boolean,
+  ): Promise<Result<T>> {
+    const controller = this.#controller;
+    const agentId = this.#state.snapshot?.agent.id;
+    if (!controller || this.#state.phase !== 'live' || !agentId)
+      return { ok: false, error: makeError('not-ready', false) };
+    const result = await operation(this.#transport, controller.signal);
+    if (this.#controller !== controller || controller.signal.aborted)
+      return { ok: false, error: makeError('stale-owner', false) };
+    if (mutation) this.#scheduleRefresh();
+    if (result.ok && identity(result.value) !== agentId)
+      return { ok: false, error: makeError('unavailable', false) };
     return result;
   }
 

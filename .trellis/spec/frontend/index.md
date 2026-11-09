@@ -8,7 +8,8 @@ The actual baseline uses Electron45, React19, Vite, strict TypeScript, existing 
 2. [Source-backed frontend patterns](project-patterns.md) — current component, draft, hook, recording, bridge and verification behavior.
 3. [Model settings interaction](model-settings.md) — snapshot ownership, draft/credential CAS, late responses and native Dialog reachability for the companion client.
 4. [Shared desktop entry](shared-desktop-entry.md) — the pet window and console reading one service connection: single snapshot owner, fence-not-dispatcher targeting, projection vs Config revisions, endpoint draft CAS, token lifetime and pet presentation/hit-shape rules.
-5. The active task PRD/design/implementation plan and curated implement.jsonl/check.jsonl — target behavior and approved scope.
+5. [Persona and active memory](persona-memory.md) — the shared owner form both clients render: nullable CAS baselines, render-captured target with an operation-identity lock, frozen forget intent, per-feature rebase and saved-versus-applied labels.
+6. The active task PRD/design/implementation plan and curated implement.jsonl/check.jsonl — target behavior and approved scope.
 
 ## Pre-development checklist
 

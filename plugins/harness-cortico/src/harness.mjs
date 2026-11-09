@@ -38,9 +38,12 @@ function projectedContext(context) {
       inputId,
       taskId,
     })),
-    facts: context.facts
-      .slice(-64)
-      .map(({ key, value, revision }) => ({ key, value: value.slice(0, 512), revision })),
+    facts: context.facts.map(({ key, value, revision, origin }) => ({
+      key,
+      value,
+      revision,
+      origin,
+    })),
     tasks: context.tasks.slice(-24).map(({ id, executionId, title, status, artifacts }) => ({
       id,
       executionId,
@@ -113,7 +116,9 @@ export async function createCorticoHarness(rawOptions, ports) {
   }
 
   async function buildGeneration() {
-    let context = projectedContext(await ports.context());
+    const initialContext = await ports.context();
+    let context = projectedContext(initialContext);
+    let contextRevision = initialContext.memoryRevision;
     const generation = {
       id: randomUUID(),
       active: true,
@@ -139,12 +144,23 @@ export async function createCorticoHarness(rawOptions, ports) {
       },
       activeProvider: 'companion',
     });
+    const refreshContext = async () => {
+      const fresh = await ports.context();
+      guard(generation);
+      context = projectedContext(fresh);
+      contextRevision = fresh.memoryRevision;
+      ports.projectionApplied({
+        profileRevision: options.profileRevision ?? null,
+        memoryRevision: contextRevision,
+      });
+    };
     const descriptions = {
       say: 'Present an answer attributed to one input ID.',
       start_work:
         'Start a requested Node.js ES-module job (import and top-level await), using relative file paths and declared output artifacts. Return its acceptance receipt before completion; the final result arrives separately.',
       stop_work: 'Request cancellation of a known task; the receipt does not confirm process exit.',
-      remember: 'Save a fact or preference explicitly supplied by this user input.',
+      remember:
+        'Remember a verbatim fact explicitly requested by this current user input; keep negation and uncertainty. The key is a short label, not a new personal inference.',
       list_work:
         'Read the latest bounded task status, including task IDs for inspection or cancellation.',
     };
@@ -184,6 +200,26 @@ export async function createCorticoHarness(rawOptions, ports) {
             result = await ports.stopWork(args.taskId);
           } else {
             result = await ports.rememberFact(args.key, args.value, origin);
+            let applicationError = null;
+            try {
+              guard(generation, ctx.signal);
+              await refreshContext();
+            } catch {
+              applicationError = makeError('unavailable', false);
+              ports.projectionFailed({
+                memoryRevision: result.view.revision,
+                error: applicationError,
+              });
+              unavailable(generation);
+              fence(generation);
+            }
+            return {
+              text: JSON.stringify({
+                receipt: result.receipt,
+                committedRevision: result.committedRevision,
+                applicationError,
+              }),
+            };
           }
           // An accepted effect remains canonical even if this foreground was stopped while awaiting admission.
           return { text: JSON.stringify(result) };
@@ -260,7 +296,13 @@ export async function createCorticoHarness(rawOptions, ports) {
         { title: 'Service contract', text: INSTRUCTIONS },
       ],
       async onDelivery() {
-        context = projectedContext(await ports.context());
+        try {
+          await refreshContext();
+        } catch (error) {
+          unavailable(generation);
+          fence(generation);
+          throw error;
+        }
       },
       sessionHead: () => [
         {
@@ -306,6 +348,7 @@ export async function createCorticoHarness(rawOptions, ports) {
         },
       ],
       onTurnEnded() {
+        ports.finishInputs([...generation.eligible.keys()]);
         generation.eligible.clear();
         scripted.reset();
       },
@@ -328,6 +371,10 @@ export async function createCorticoHarness(rawOptions, ports) {
     );
     try {
       await generation.core.start();
+      ports.projectionApplied({
+        profileRevision: options.profileRevision ?? null,
+        memoryRevision: contextRevision,
+      });
       return generation;
     } catch (error) {
       fence(generation);

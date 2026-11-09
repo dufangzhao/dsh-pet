@@ -1,5 +1,8 @@
 import type {
   CompanionArtifact,
+  CompanionFactOrigin,
+  CompanionMemoryUpsertCommand,
+  CompanionMemoryForgetCommand,
   CompanionCommandReceipt,
   CompanionEventPage,
   CompanionFact,
@@ -14,6 +17,7 @@ import type {
 } from '@pet/contracts';
 
 export interface StateSnapshot {
+  readonly memoryRevision: number;
   readonly assistantId: string;
   readonly epoch: string;
   readonly cursor: number;
@@ -24,6 +28,26 @@ export interface StateSnapshot {
   readonly tasks: readonly CompanionTask[];
   readonly facts: readonly CompanionFact[];
 }
+
+export interface StateMemoryView {
+  readonly assistantId: string;
+  readonly memoryRevision: number;
+  readonly facts: readonly CompanionFact[];
+  readonly usage: {
+    readonly count: number;
+    readonly dataBytes: number;
+    readonly originBytes: number;
+  };
+}
+export interface StateMemoryMutation {
+  readonly receipt: CompanionCommandReceipt;
+  readonly committedRevision: number | null;
+  readonly memory: StateMemoryView;
+  readonly fact: CompanionFact | null;
+}
+export type StateRememberInput =
+  | (CompanionMemoryUpsertCommand & { readonly origin: CompanionFactOrigin })
+  | (CompanionFactCommand & { readonly expectedRevision?: number });
 
 /** Location is relative to this provider's artifact root, never the state directory. */
 export interface StoredArtifact extends CompanionArtifact {
@@ -72,7 +96,9 @@ export interface StateMethodInputs {
   createTask: CompanionTaskCommand & { readonly executionId?: string };
   updateTask: UpdateTaskInput;
   appendMessage: AppendMessageInput;
-  rememberFact: CompanionFactCommand & { readonly expectedRevision?: number };
+  memorySnapshot: Record<string, never>;
+  rememberFact: StateRememberInput;
+  forgetFact: CompanionMemoryForgetCommand & { readonly origin: CompanionFactOrigin };
   getTask: { readonly id: string };
   getTaskByExecution: { readonly executionId: string };
   getArtifact: { readonly id: string };
@@ -88,7 +114,9 @@ export interface StateMethodOutputs {
   createTask: { readonly receipt: CompanionCommandReceipt; readonly task: CompanionTask };
   updateTask: CompanionTask;
   appendMessage: CompanionMessage;
-  rememberFact: { readonly receipt: CompanionCommandReceipt; readonly fact: CompanionFact };
+  memorySnapshot: StateMemoryView;
+  rememberFact: StateMemoryMutation;
+  forgetFact: StateMemoryMutation;
   getTask: CompanionTask;
   getTaskByExecution: CompanionTask;
   getArtifact: StoredArtifact;
@@ -104,7 +132,9 @@ export const STATE_METHODS = [
   'createTask',
   'updateTask',
   'appendMessage',
+  'memorySnapshot',
   'rememberFact',
+  'forgetFact',
   'getTask',
   'getTaskByExecution',
   'getArtifact',
@@ -115,7 +145,9 @@ export const STATE_METHODS = [
 
 /** Reserve headroom for both the capability payload Result and its transport Result. */
 export const STATE_MAX_RESULT_BYTES = 60 * 1024;
-export const STATE_MAX_FACT_BYTES = 8 * 1024;
-export const STATE_MAX_FACTS = 32;
+export {
+  COMPANION_MEMORY_MAX_DATA_BYTES as STATE_MAX_FACT_BYTES,
+  COMPANION_MEMORY_MAX_FACTS as STATE_MAX_FACTS,
+} from '@pet/contracts';
 export const STATE_MAX_ARTIFACTS = 16;
 export const STATE_LOG_BYTES = 12 * 1024;

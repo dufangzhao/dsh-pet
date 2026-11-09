@@ -1,8 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdirSync } from 'node:fs';
-import { join, isAbsolute } from 'node:path';
-import { DatabaseSync } from 'node:sqlite';
-import type { SQLOutputValue } from 'node:sqlite';
+import type { DatabaseSync, SQLOutputValue } from 'node:sqlite';
 import { makeError } from '@pet/contracts';
 import type {
   CompanionArtifact,
@@ -15,14 +12,10 @@ import type {
   JsonValue,
   Result,
 } from '@pet/contracts';
-import {
-  STATE_LOG_BYTES,
-  STATE_MAX_ARTIFACTS,
-  STATE_MAX_FACT_BYTES,
-  STATE_MAX_FACTS,
-  STATE_MAX_RESULT_BYTES,
-} from './types.js';
+import { STATE_LOG_BYTES, STATE_MAX_ARTIFACTS, STATE_MAX_RESULT_BYTES } from './types.js';
 import type { StateMethodInputs, StateMethodOutputs, StoredArtifact } from './types.js';
+import { openStateDatabase } from './database.js';
+import { memoryUsage } from './memory.js';
 import { boundedText, canonical, jsonBytes, StateFailure, validateInput } from './validation.js';
 
 type Row = Record<string, SQLOutputValue>;
@@ -79,17 +72,12 @@ export class SqliteState {
   #closed = false;
 
   constructor({ dataDirectory }: { readonly dataDirectory: string }) {
-    if (!isAbsolute(dataDirectory)) throw new StateFailure('invalid-input');
-    mkdirSync(dataDirectory, { recursive: true, mode: 0o700 });
-    const db = new DatabaseSync(join(dataDirectory, 'state.sqlite'));
+    const db = openStateDatabase(dataDirectory);
     this.#db = db;
     try {
-      // DELETE + EXCLUSIVE retains the SQLite OS lock between commits. No lease file or PID guessing.
-      db.exec(
-        'PRAGMA busy_timeout=0; PRAGMA journal_mode=DELETE; PRAGMA locking_mode=EXCLUSIVE; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; BEGIN EXCLUSIVE;',
-      );
       const version = scalar(db.prepare('PRAGMA user_version').get(), 'user_version');
-      if (version !== 0 && version !== 1) throw new StateFailure('conflict');
+      if (version === 1) throw new StateFailure('not-ready');
+      if (version !== 0 && version !== 2) throw new StateFailure('conflict');
       if (version === 0) {
         db.exec(`
           CREATE TABLE identity (singleton INTEGER PRIMARY KEY CHECK(singleton=1), body TEXT NOT NULL);
@@ -100,10 +88,10 @@ export class SqliteState {
           CREATE TABLE artifacts (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id), body TEXT NOT NULL);
           CREATE TABLE commands (id TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, body TEXT NOT NULL);
           CREATE TABLE events (sequence INTEGER PRIMARY KEY AUTOINCREMENT, body TEXT NOT NULL);
-          PRAGMA user_version=1;
+          PRAGMA user_version=2;
         `);
         db.prepare('INSERT INTO identity(singleton,body) VALUES(1,?)').run(
-          JSON.stringify({ assistantId: randomUUID(), epoch: randomUUID() }),
+          JSON.stringify({ assistantId: randomUUID(), epoch: randomUUID(), memoryRevision: 0 }),
         );
       }
       const identity = decode<{ assistantId: string; epoch: string }>(
@@ -132,11 +120,17 @@ export class SqliteState {
     return this.#run(() => {
       const value = validateInput(method, input);
       return this.#execute(method, value);
-    }, !['snapshot', 'events', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand'].includes(method));
+    }, !['snapshot', 'memorySnapshot', 'events', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand'].includes(method));
   }
 
   snapshot(input: StateMethodInputs['snapshot'] = {}): Result<StateMethodOutputs['snapshot']> {
     return this.invoke('snapshot', input);
+  }
+  memorySnapshot(): Result<StateMethodOutputs['memorySnapshot']> {
+    return this.invoke('memorySnapshot', {});
+  }
+  forgetFact(input: StateMethodInputs['forgetFact']): Result<StateMethodOutputs['forgetFact']> {
+    return this.invoke('forgetFact', input);
   }
   events(input: StateMethodInputs['events']): Result<StateMethodOutputs['events']> {
     return this.invoke('events', input);
@@ -221,7 +215,9 @@ export class SqliteState {
       createTask: (value) => this.#createTask(value),
       updateTask: (value) => this.#updateTask(value),
       appendMessage: (value) => this.#appendMessage(value),
+      memorySnapshot: () => this.#memory(),
       rememberFact: (value) => this.#rememberFact(value),
+      forgetFact: (value) => this.#mutateMemory(value, true),
       getTask: (value) => this.#task(value.id),
       getTaskByExecution: (value) =>
         decode<CompanionTask>(
@@ -269,7 +265,8 @@ export class SqliteState {
     const row = this.#db.prepare('SELECT fingerprint,body FROM commands WHERE id=?').get(commandId);
     if (!row) return null;
     if (row['fingerprint'] !== digest) throw new StateFailure('conflict');
-    return { ...decode<CompanionCommandReceipt>(row), status: 'duplicate' };
+    const stored = decode<CompanionCommandReceipt | { receipt: CompanionCommandReceipt }>(row);
+    return { ...('receipt' in stored ? stored.receipt : stored), status: 'duplicate' };
   }
 
   #saveCommand(digest: string, value: CompanionCommandReceipt): void {
@@ -279,14 +276,13 @@ export class SqliteState {
   }
 
   #snapshot(input: StateMethodInputs['snapshot']): StateMethodOutputs['snapshot'] {
-    const facts = this.#db
-      .prepare('SELECT body FROM facts ORDER BY key')
-      .all()
-      .map((row) => decode<CompanionFact>(row));
+    const memory = this.#memory();
+    const facts = memory.facts;
     const tasks: CompanionTask[] = [];
     const messages: CompanionMessage[] = [];
     const budget = (input.byteBudget ?? STATE_MAX_RESULT_BYTES) - 1024;
     const base = {
+      memoryRevision: memory.memoryRevision,
       assistantId: this.#assistantId,
       epoch: this.#epoch,
       cursor: this.#cursor(),
@@ -515,41 +511,115 @@ export class SqliteState {
     return next;
   }
 
+  #memory(): StateMethodOutputs['memorySnapshot'] {
+    const identity = decode<{ memoryRevision: number }>(
+      this.#db.prepare('SELECT body FROM identity WHERE singleton=1').get(),
+    );
+    if (!Number.isSafeInteger(identity.memoryRevision) || identity.memoryRevision < 0)
+      throw new StateFailure('conflict');
+    const facts = this.#db
+      .prepare('SELECT body FROM facts ORDER BY key')
+      .all()
+      .map((row) => {
+        const fact = decode<CompanionFact>(row);
+        return { ...fact, origin: fact.origin ?? { kind: 'legacy-unknown' as const } };
+      });
+    return {
+      assistantId: this.#assistantId,
+      memoryRevision: identity.memoryRevision,
+      facts,
+      usage: memoryUsage(facts),
+    };
+  }
   #rememberFact(input: StateMethodInputs['rememberFact']): StateMethodOutputs['rememberFact'] {
-    const digest = fingerprint({ kind: 'fact', payload: input });
+    if ('expectedMemoryRevision' in input) return this.#mutateMemory(input, false);
+    // A v1 body is only a fingerprint lookup: never a new blind upsert.
+    const known = this.#command(input.commandId, fingerprint({ kind: 'fact', payload: input }));
+    if (!known) throw new StateFailure('invalid-input');
+    const memory = this.#memory();
+    return {
+      receipt: known,
+      committedRevision: null,
+      memory,
+      fact: memory.facts.find((f) => f.key === input.key) ?? null,
+    };
+  }
+  #mutateMemory(
+    input:
+      | Extract<StateMethodInputs['rememberFact'], { expectedMemoryRevision: number }>
+      | StateMethodInputs['forgetFact'],
+    forget: boolean,
+  ): StateMethodOutputs['rememberFact'] {
+    const kind = forget ? 'memory.forget' : 'memory.upsert';
+    const digest = fingerprint({ kind, payload: input });
     const known = this.#command(input.commandId, digest);
-    const row = this.#db.prepare('SELECT body FROM facts WHERE key=?').get(input.key);
-    const previous = row ? decode<CompanionFact>(row) : null;
+    const memory = this.#memory();
     if (known) {
-      if (!previous) throw new StateFailure('internal');
-      return { receipt: known, fact: previous };
+      const stored = decode<{ committedRevision: number }>(
+        this.#db.prepare('SELECT body FROM commands WHERE id=?').get(input.commandId),
+      );
+      return {
+        receipt: known,
+        committedRevision: stored.committedRevision,
+        memory,
+        fact: memory.facts.find((f) => f.key === input.key) ?? null,
+      };
     }
+    const previous = memory.facts.find((fact) => fact.key === input.key);
     if (
-      input.expectedRevision !== undefined &&
-      input.expectedRevision !== (previous?.revision ?? 0)
+      input.expectedMemoryRevision !== memory.memoryRevision ||
+      input.expectedFactRevision !== (previous?.revision ?? 0) ||
+      (forget && !previous)
     )
       throw new StateFailure('conflict');
-    const fact: CompanionFact = {
-      key: input.key,
-      value: input.value,
-      revision: (previous?.revision ?? 0) + 1,
-      updatedAt: Date.now(),
-    };
-    this.#db
-      .prepare(
-        'INSERT INTO facts(key,body) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET body=excluded.body',
+    const revision = memory.memoryRevision + 1;
+    if (!Number.isSafeInteger(revision)) throw new StateFailure('quota-exceeded');
+    let fact: CompanionFact | null = null;
+    if (forget) this.#db.prepare('DELETE FROM facts WHERE key=?').run(input.key);
+    else {
+      if (
+        !('value' in input) ||
+        typeof input.value !== 'string' ||
+        !input.value.trim() ||
+        input.key !== input.key.trim() ||
+        !input.key
       )
-      .run(fact.key, JSON.stringify(fact));
-    const allFacts = this.#db.prepare('SELECT body FROM facts').all();
-    if (
-      allFacts.length > STATE_MAX_FACTS ||
-      jsonBytes(allFacts.map((item) => decode<CompanionFact>(item))) > STATE_MAX_FACT_BYTES
-    )
-      throw new StateFailure('quota-exceeded');
+        throw new StateFailure('invalid-input');
+      fact = {
+        key: input.key,
+        value: input.value,
+        revision,
+        updatedAt: Date.now(),
+        origin: input.origin,
+      };
+      this.#db
+        .prepare(
+          'INSERT INTO facts(key,body) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET body=excluded.body',
+        )
+        .run(fact.key, JSON.stringify(fact));
+    }
+    const identity = decode<Record<string, unknown>>(
+      this.#db.prepare('SELECT body FROM identity WHERE singleton=1').get(),
+    );
+    this.#db
+      .prepare('UPDATE identity SET body=? WHERE singleton=1')
+      .run(JSON.stringify({ ...identity, memoryRevision: revision }));
+    const next = this.#memory(); // Quotas fail inside the same transaction, rolling back all effects.
     const accepted = receipt(input.commandId, null, null);
-    this.#saveCommand(digest, accepted);
-    this.#event('fact', { key: fact.key, revision: fact.revision }, fact.updatedAt);
-    return { receipt: accepted, fact };
+    this.#db
+      .prepare('INSERT INTO commands(id,fingerprint,body) VALUES(?,?,?)')
+      .run(
+        accepted.commandId,
+        digest,
+        JSON.stringify({ receipt: accepted, committedRevision: revision }),
+      );
+    this.#event('fact', {
+      key: input.key,
+      operation: forget ? 'forget' : 'upsert',
+      memoryRevision: revision,
+      revision: fact?.revision ?? previous?.revision ?? 0,
+    });
+    return { receipt: accepted, committedRevision: revision, memory: next, fact };
   }
 
   #recover(input: StateMethodInputs['recover']): StateMethodOutputs['recover'] {
@@ -594,7 +664,8 @@ export class SqliteState {
         throw new StateFailure('conflict');
       return known;
     }
-    if (['message', 'task', 'fact'].includes(input.kind)) throw new StateFailure('invalid-input');
+    if (['message', 'task', 'fact', 'memory.upsert', 'memory.forget'].includes(input.kind))
+      throw new StateFailure('invalid-input');
     if (input.taskId) this.#task(input.taskId);
     if (
       input.messageId &&

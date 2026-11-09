@@ -1,5 +1,6 @@
 import type {
   CompanionAgentView,
+  CompanionMemoryMutationResult,
   CompanionCommandReceipt,
   CompanionSnapshot,
   CompanionTaskCommand,
@@ -31,6 +32,7 @@ export interface CorticoHarnessOptions {
   readonly dataDirectory: string;
   readonly name: string;
   readonly persona: string;
+  readonly profileRevision?: number;
   readonly mode: 'scripted' | 'model';
   readonly model?: string;
   readonly baseUrl?: string;
@@ -60,15 +62,33 @@ export interface HarnessOutput {
   readonly taskId?: string;
 }
 
+export interface HarnessProductContext extends Pick<
+  CompanionSnapshot,
+  'messages' | 'facts' | 'tasks'
+> {
+  readonly memoryRevision: number;
+}
+export interface HarnessProfileBinding {
+  readonly name: string;
+  readonly persona: string;
+  readonly revision: number;
+}
 export interface CorticoHarnessPorts {
-  context(): Promise<Pick<CompanionSnapshot, 'messages' | 'facts' | 'tasks'>>;
+  context(): Promise<HarnessProductContext>;
+  projectionApplied(value: { profileRevision: number | null; memoryRevision: number }): void;
+  projectionFailed(value: { memoryRevision: number; error: KernelError }): void;
+  finishInputs(inputIds: readonly string[]): void;
   publish(output: HarnessOutput): Promise<void>;
   startWork(
     request: Omit<CompanionTaskCommand, 'commandId'>,
     origin: HarnessOrigin,
   ): Promise<CompanionCommandReceipt>;
   stopWork(id: string): Promise<CompanionCommandReceipt>;
-  rememberFact(key: string, value: string, origin: HarnessOrigin): Promise<CompanionCommandReceipt>;
+  rememberFact(
+    key: string,
+    value: string,
+    origin: HarnessOrigin,
+  ): Promise<CompanionMemoryMutationResult>;
   status(status: CompanionAgentView['status'], error?: KernelError): void;
 }
 

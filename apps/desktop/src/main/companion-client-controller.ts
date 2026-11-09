@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import {
   DESKTOP_COMPANION_MAX_PENDING,
+  type CompanionProfileSaveCommand,
+  type CompanionMemoryView,
+  type CompanionMemoryUpsertCommand,
+  type CompanionMemoryForgetCommand,
+  type CompanionMemoryMutationResult,
   DESKTOP_COMPANION_MAX_STATE_BYTES,
   makeError,
   type DesktopCompanionState,
@@ -23,6 +28,10 @@ import {
 import { KernelFault } from '@pet/host-kernel';
 import {
   getSnapshot,
+  getMemory,
+  saveProfile,
+  upsertFact,
+  forgetFact,
   getProfile,
   getTask,
   sendMessage,
@@ -641,6 +650,55 @@ export class DesktopCompanionController {
         return fail('conflict');
       }
       return result;
+    } catch (error) {
+      return { ok: false, error: problem(error) };
+    }
+  }
+  readMemory(input: DesktopCompanionTarget): Promise<Result<CompanionMemoryView>> {
+    return this.#managed(input, getMemory, (view) => view.agentId, false);
+  }
+  saveProfile(
+    input: DesktopCompanionTarget & { command: CompanionProfileSaveCommand },
+  ): Promise<Result<CompanionProfileView>> {
+    return this.#managed(
+      input,
+      (t, s) => saveProfile(t, input.command, s),
+      (view) => view.agentId,
+      true,
+    );
+  }
+  upsertFact(
+    input: DesktopCompanionTarget & { command: CompanionMemoryUpsertCommand },
+  ): Promise<Result<CompanionMemoryMutationResult>> {
+    return this.#managed(
+      input,
+      (t, s) => upsertFact(t, input.command, s),
+      (value) => value.view.agentId,
+      true,
+    );
+  }
+  forgetFact(
+    input: DesktopCompanionTarget & { command: CompanionMemoryForgetCommand },
+  ): Promise<Result<CompanionMemoryMutationResult>> {
+    return this.#managed(
+      input,
+      (t, s) => forgetFact(t, input.command, s),
+      (value) => value.view.agentId,
+      true,
+    );
+  }
+  async #managed<T>(
+    input: DesktopCompanionTarget,
+    operation: (t: ClientTransport, s: AbortSignal) => Promise<Result<T>>,
+    identity: (value: T) => string,
+    mutation: boolean,
+  ): Promise<Result<T>> {
+    try {
+      const connection = this.#binding(input);
+      const agentId = this.#state.snapshot?.agent.id;
+      const result = await this.#run(connection, operation);
+      if (mutation) this.#schedule(connection);
+      return result.ok && identity(result.value) !== agentId ? fail('unavailable') : result;
     } catch (error) {
       return { ok: false, error: problem(error) };
     }

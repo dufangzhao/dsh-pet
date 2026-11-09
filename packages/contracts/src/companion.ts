@@ -2,6 +2,11 @@
 import type { KernelError } from './errors.js';
 import type { CompanionModelView } from './companion-model.js';
 import type { JsonObject } from './json.js';
+import type {
+  CompanionApplication,
+  CompanionFactOrigin,
+  CompanionMemoryStatus,
+} from './companion-memory.js';
 
 export const COMPANION_PROTOCOL_VERSION = 1 as const;
 export const COMPANION_MAX_TEXT = 8_000;
@@ -51,6 +56,7 @@ export interface CompanionMessage {
 }
 
 export interface CompanionFact {
+  readonly origin?: CompanionFactOrigin;
   readonly key: string;
   readonly value: string;
   readonly revision: number;
@@ -61,6 +67,7 @@ export interface CompanionAgentView {
   readonly id: string;
   readonly name: string;
   readonly profileRevision: number;
+  readonly profileApplication?: CompanionApplication;
   readonly harness: string;
   readonly mode: 'scripted' | 'model';
   readonly status: 'ready' | 'busy' | 'unavailable';
@@ -84,6 +91,7 @@ export interface CompanionSnapshot {
   readonly messages: readonly CompanionMessage[];
   readonly tasks: readonly CompanionTask[];
   readonly facts: readonly CompanionFact[];
+  readonly memory?: CompanionMemoryStatus;
   readonly plugins: readonly CompanionPluginView[];
   /** Absent only for a service predating explicit model connection management. */
   readonly model?: CompanionModelView;

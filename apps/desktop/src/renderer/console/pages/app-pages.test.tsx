@@ -42,6 +42,22 @@ function companion(over: Partial<CompanionView> = {}): CompanionView {
       ok: false,
       error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
     }),
+    readMemory: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    saveProfile: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    upsertFact: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    forgetFact: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
     readTask: async () => ({
       ok: false,
       error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
@@ -429,14 +445,38 @@ describe('对话页', () => {
 });
 
 describe('人格页', () => {
-  it('人格正文只读：没有可编辑正文的控件，也没有保存按钮', () => {
+  it('人格可编辑：有名字与正文输入、有保存按钮', () => {
     const html = renderToStaticMarkup(
       <PersonaPage companion={companion()} presentation={presentation()} notify={noop} />,
     );
-    expect(html).toContain('人格由服务保存');
-    expect(html).not.toContain('<textarea');
-    expect(html).not.toContain('保存正文');
-    expect(html).toContain('data-testid="persona-read"');
+    expect(html).toContain('data-testid="profile-name"');
+    expect(html).toContain('data-testid="profile-persona"');
+    expect(html).toContain('data-testid="profile-save"');
+  });
+
+  it('metadata 缺失时只说这一项暂不可编辑，不声称服务版本过旧', () => {
+    // 快照里没有 memory、profile 也还没读到：两块各自报自己的事实。
+    const html = renderToStaticMarkup(
+      <PersonaPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    expect(html).toContain('data-testid="profile-unsupported"');
+    expect(html).toContain('data-testid="memory-unsupported"');
+    expect(html).toContain('服务暂未提供可编辑的人格');
+    // 不把缺失说成「版本过旧」——新服务来源不可用也会缺字段。
+    expect(html).not.toContain('版本过旧');
+    expect(html).not.toContain('旧版本');
+  });
+
+  it('未连接时整块只读并说明原因，但控件仍在', () => {
+    const html = renderToStaticMarkup(
+      <PersonaPage
+        companion={companion({ state: snapshot({ phase: 'offline', connectionId: 'c1' }) })}
+        presentation={presentation()}
+        notify={noop}
+      />,
+    );
+    expect(html).toContain('当前未连接服务，这里只能看不能改');
+    expect(html).toContain('data-testid="profile-name"');
   });
 
   it('本机呈现字段在：双击、状态气泡、回复气泡与三个范围', () => {

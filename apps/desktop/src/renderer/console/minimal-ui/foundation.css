@@ -161,7 +161,12 @@
 }
 .rail__foot {
   margin-top: auto;
+  /* 侧栏宽由 grid 决定；footer 不能反过来被内容撑开。 */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 10px 14px;
+  box-sizing: border-box;
 }
 .content__notice {
   margin-bottom: 16px;
@@ -248,14 +253,23 @@ html[data-console-style='minimal'] .pk-dialog__body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 /* 折叠轨里只放得下状态与一枚图标按钮；宽窗口的完整文字保持原样。 */
 .pb-run__icon {
   display: none;
 }
-.pb-run__state {
+.pb-run__state,
+.pb-run__name {
+  /* flex 项默认 min-width:auto 会被内容顶开，省略号因此不生效。 */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   color: var(--ink-quiet);
   font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 button.stage__pet {
   padding: 0;
@@ -1213,8 +1227,14 @@ dialog::backdrop {
   .rail__meta {
     display: none;
   }
-  /* 轨道内宽只有 48px：footer 不再留 14px 内边距，否则按钮必然越界。 */
+  /* 轨道内宽只有 48px：footer 不再留 14px 内边距，且必须被轨道宽度约束住。
+     align-items:center 会让子项按内容撑开，所以这里显式钉住宽度。 */
   .rail__foot {
+    /* align-items:center 会让子项按内容收缩；这里明确要求撑满轨道。 */
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 8px 0;
   }
   .pb-run {
@@ -1223,7 +1243,10 @@ dialog::backdrop {
     gap: 6px;
   }
   .pb-run__state,
+  .pb-run__name,
   .pb-run .row__value {
+    width: 100%;
+    min-width: 0;
     max-width: 100%;
     overflow: hidden;
     font-size: 11px;

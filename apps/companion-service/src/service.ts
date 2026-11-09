@@ -226,8 +226,13 @@ export async function createCompanionService(
           const profile = await current.profile();
           const foreground = await requireModels().foreground(context.owner);
           return createCorticoPlugin(
-            { name: profile.name, persona: profile.persona, ...foreground },
-            current.harnessPorts(corticoKey),
+            {
+              name: profile.name,
+              persona: profile.persona,
+              profileRevision: profile.revision,
+              ...foreground,
+            },
+            current.harnessPorts(corticoKey, profile),
           ).activate(context);
         },
       }),
@@ -238,8 +243,11 @@ export async function createCompanionService(
       preset: 'allow',
       enabled: false,
       definition: definePlugin({
-        activate(context) {
-          return createFixturePlugin(requireRuntime().harnessPorts(fixtureKey)).activate(context);
+        async activate(context) {
+          const current = requireRuntime();
+          return createFixturePlugin(
+            current.harnessPorts(fixtureKey, await current.profile()),
+          ).activate(context);
         },
       }),
     },
@@ -271,6 +279,10 @@ export async function createCompanionService(
       executionPluginId: cloudManifest.id,
       executionProviderId: 'docker',
       executionTimeoutMs: executionConfig.value.timeoutMs,
+      profileOverrides: {
+        name: options.name !== undefined,
+        persona: options.persona !== undefined,
+      },
     });
     models = new ModelConnectionController(host, runtime, connections);
     runtime.setModelControls(models);

@@ -16,6 +16,11 @@ import type {
   CompanionModelSaveCommand,
   CompanionModelTestCommand,
   CompanionModelView,
+  CompanionMemoryForgetCommand,
+  CompanionMemoryMutationResult,
+  CompanionMemoryUpsertCommand,
+  CompanionMemoryView,
+  CompanionProfileSaveCommand,
   CompanionProfileView,
   CompanionTask,
   DesktopArtifactSave,
@@ -85,6 +90,10 @@ export interface CompanionView {
   stopTask(commandId: string, taskId: string): Promise<CompanionResult>;
   stopForeground(): Promise<CompanionResult>;
   readProfile(): Promise<Result<CompanionProfileView>>;
+  readMemory(): Promise<Result<CompanionMemoryView>>;
+  saveProfile(command: CompanionProfileSaveCommand): Promise<Result<CompanionProfileView>>;
+  upsertFact(command: CompanionMemoryUpsertCommand): Promise<Result<CompanionMemoryMutationResult>>;
+  forgetFact(command: CompanionMemoryForgetCommand): Promise<Result<CompanionMemoryMutationResult>>;
   readTask(taskId: string): Promise<Result<CompanionTask>>;
   saveArtifact(artifactId: string): Promise<Result<DesktopArtifactSave>>;
   saveModel(command: CompanionModelSaveCommand): Promise<Result<CompanionModelView>>;
@@ -344,6 +353,25 @@ export function useCompanion(): CompanionView {
     () => readWith((bridge, connectionId) => bridge.readProfile({ connectionId })),
     [readWith, state],
   );
+  const readMemory = useCallback(
+    () => readWith((bridge, connectionId) => bridge.readMemory({ connectionId })),
+    [readWith, state],
+  );
+  const saveProfile = useCallback(
+    (command: CompanionProfileSaveCommand) =>
+      readWith((bridge, connectionId) => bridge.saveProfile({ connectionId, command })),
+    [readWith, state],
+  );
+  const upsertFact = useCallback(
+    (command: CompanionMemoryUpsertCommand) =>
+      readWith((bridge, connectionId) => bridge.upsertFact({ connectionId, command })),
+    [readWith, state],
+  );
+  const forgetFact = useCallback(
+    (command: CompanionMemoryForgetCommand) =>
+      readWith((bridge, connectionId) => bridge.forgetFact({ connectionId, command })),
+    [readWith, state],
+  );
   const readTask = useCallback(
     (taskId: string) =>
       readWith((bridge, connectionId) => bridge.readTask({ connectionId, taskId })),
@@ -382,6 +410,10 @@ export function useCompanion(): CompanionView {
     stopTask,
     stopForeground,
     readProfile,
+    readMemory,
+    saveProfile,
+    upsertFact,
+    forgetFact,
     readTask,
     saveArtifact,
     saveModel,

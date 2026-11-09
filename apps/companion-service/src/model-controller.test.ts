@@ -716,7 +716,11 @@ it.each(['extra-field', 'oversized', 'bad-auth', 'bad-shape'] as const)(
   'rejects a custom projector %s without leaking settings or failing the history snapshot',
   async (mode) => {
     const f = await setup();
+    const memory = await f.service().runtime.state('memorySnapshot', {});
     await f.service().runtime.state('rememberFact', {
+      expectedMemoryRevision: memory.memoryRevision,
+      expectedFactRevision: 0,
+      origin: { kind: 'owner-form' },
       commandId: crypto.randomUUID(),
       key: 'preserved',
       value: 'authoritative',
@@ -776,7 +780,11 @@ it('budgets real SQLite history once at the final Result/snapshot boundary with 
       stdout: 's'.repeat(12000),
       stderr: 'e'.repeat(12000),
     });
+    const memory = await runtime.state('memorySnapshot', {});
     await runtime.state('rememberFact', {
+      expectedMemoryRevision: memory.memoryRevision,
+      expectedFactRevision: 0,
+      origin: { kind: 'owner-form' },
       commandId: `budget-fact-${index}`,
       key: `fact-${index}`,
       value: 'f'.repeat(200),
