@@ -885,3 +885,57 @@ Completed the selected Linux shared-text stage with one source-owned Main connec
 ### Next Steps
 
 - Continue controlled persona/memory research as the next separately scoped stage. Keep its untracked parent research excluded from this closure; parent creates the next child after this handoff.
+
+
+## Session 25: Controlled persona and explicit persistent memory
+
+**Date**: 2026-11-09
+**Task**: Controlled persona and explicit persistent memory
+**Branch**: `feat/controlled-persona-memory`
+
+### Summary
+
+Completed persona CAS and revisioned active-memory management with explicit synthetic v1 migration, preserved work and actual web/Linux Electron acceptance. Root gates were segmented; final UI and replay evidence passed. Archived only M3 while retaining parent planning and platform/semantic limits.
+
+### Main Changes
+
+#### Delivered stage
+
+- Core Config owns persona CAS; SQLite v2 owns revisioned active facts and atomic fact/origin/receipt/event effects. Web and desktop share one form, captured baselines and frozen forget intents; saved state remains distinct from real Harness application, and deliberately disabled Harnesses stay disabled. Identity, history, independent work and connector credentials retain their original owners.
+- Explicit offline migration holds the existing exclusive writer lock and verifies a full-root backup before version changes. Synthetic baseline-state writer, rollback, ABA and legacy replay evidence passed; no original user/trial root was opened or migrated. Forget removes active facts/context authority, not transcripts/logs/backups. Natural memory admission is host-bound and verbatim-grounded, while semantic selection remains model-dependent.
+- Final UI repaired long-name rail sizing/title, quiet disabled empty editors and the web full-profile read owner. Actual desktop-to-web updates refreshed full persona/application; dirty old CAS returned409, then explicit rebase saved successfully. Final b76ad918 verified880/1100 geometry, keyboard/save/reset and pet DOM/bitmap alpha. Six service/Main/preload/worker/admission artifacts remained byte-identical to BUILD0; frontend artifacts have the final target build identity.
+
+#### Verification and evidence
+
+- Root checks completed in segments: initial7dd7a603539f45e2 passed types/package tests (desktop933/service49/text204), then stopped on an old QA wrapper dropping profile. After exact argument forwarding,4cb53391190140aa passed rootQA139 with4 explicit-image skips, then lint found3 unused comments. Comment-only cleanup followed by57e8a432a0344f09 passed lint/format/production build. The original pnpm check is not relabeled exit0.
+- Parent collected final service51/51, independent Core4 plus actual Docker/service18 with0skips in41d48e00976b4103, final UI lint/format/text-client+desktop target build ca391612b4af4cca, and final lint/format/diff/context10+10 in34805613283f475d, all passed. Component DOM20, production-CSS geometry5 and actual App/client controlled-HTTP7 remain supporting browser evidence, distinct from service/native E2E.
+- Actual probes cover built-entry migration, seven controlled Core natural cases, real Docker work-result memory refusal, same-worker continuity, restart/Harness persistence, production web/Electron forms and real HTTP committed-response loss/same-ID replay across correction/forget/recreate/restart. Old-target cancellation in forms did not deliver the old response to an open renderer; it is separate from the lost-receipt replay test. All used synthetic data/controlled peers without new live-model calls.
+- [Single QA entry](../../../qa/fixtures/companion-persona-memory/acceptance.md), [archived final progress](../../tasks/archive/2026-11/11-08-controlled-persona-memory/progress.md), [archived PRD](../../tasks/archive/2026-11/11-08-controlled-persona-memory/prd.md) and [operator guide](../../../docs/37-persona-and-memory.md) own exact scenarios, hashes and limits. The final QA whitelist has45 files;14 failed/intermediate diagnostics were excluded and parent moved them into ignored private storage with unchanged SHA. This journal does not duplicate their logs.
+
+#### Commits, preservation and continuation
+
+- User explicitly approved planned commits, stage records and continuation. Work commits c673f2d (feature63) and3277f2a (QA/operator/task62) precede archive6cfc5c6 and reference-fix976f533; no push/amend. Only M3 was archived, with final work3277f2a in metadata. Parent architecture stays planning with all four child relationships preserved.
+- Actual Linux Electron45 uses private QA RPATH/GTK/Xvfb tooling and --no-sandbox; Windows native devices/compositor and OS sandbox properties remain unverified. QA instances/jobs are closed; original4120/data/token remain stopped and intact. Bookkeeping performed no product edit, build, source test, model or service launch.
+- Next is separately scoped voice-entry research under the approved roadmap. M4 voice-entry/voice-ux files are excluded and not read or edited here; no next child was created. Private roots, keys, raw diagnostics and HOME-risk images were not read or committed.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c673f2d` | (see git log) |
+| `3277f2a` | (see git log) |
+
+### Testing
+
+- Parent-collected segmented types/package/rootQA/lint/format/build gates passed at their recorded steps; the original `pnpm check` did not exit0. Final service51, independent Core4/Docker18 without skips, final UI target build and final lint/format/diff/context10+10 passed.
+- Actual migration/Core/work/restart/HTTP replay and final web/Linux Electron UI evidence passed with retained build identities and the semantic/platform limits in the [single QA entry](../../../qa/fixtures/companion-persona-memory/acceptance.md). No live-model validation was added.
+- Bookkeeping-only validation passed:181 local Markdown targets,45 exact QA references, JSONL10+10, zero stale tracked old-task backlinks, completed metadata and unchanged parentplanning/children. No product tests/builds/services were rerun during archival.
+
+### Status
+
+[OK] **M3 selected-scope stage completed and archived**. Parent architecture remains **planning**; active-memory forgetting and Linux native evidence retain their stated limits.
+
+### Next Steps
+
+- Parent continues the separately scoped voice-entry research and creates any next child. M4 research stays excluded and untouched by this closure; original4120/profile/token remain preserved.

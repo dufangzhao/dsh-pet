@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 24
-- **Last Active**: 2026-11-08
+- **Total Sessions**: 25
+- **Last Active**: 2026-11-09
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~887 | Active |
+| `journal-1.md` | ~941 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 25 | 2026-11-09 | Controlled persona and explicit persistent memory | `c673f2d`, `3277f2a` | `feat/controlled-persona-memory` |
 | 24 | 2026-11-08 | Shared desktop pet and console Agent entry | `ec441f8`, `8321cfa` | `feat/shared-desktop-agent-entry` |
 | 23 | 2026-11-08 | Replaceable Magpie connection and useful text stage | `6778eec`, `0be35b1`, `6c49a21` | `feat/companion-model-text-loop` |
 | 22 | 2026-11-08 | Text-first continuous Agent foundation | `1a7b082`, `8fc76f7`, `9d86962` | `feat/text-agent-foundation` |
