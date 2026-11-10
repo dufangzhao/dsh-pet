@@ -1,0 +1,12 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Verify actual package ownership and checks; no second scheduler/database or fabricated hardware success."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Review permission/source/media/credential authority and actual drain, including late permission and cancelled IO."}
+{"file":".trellis/spec/shared/typescript.md","reason":"Check boundary-only validation, strict unions and browser-safe exports."}
+{"file":".trellis/spec/backend/companion-service.md","reason":"Verify ordinary message effects and uncertainty/replay reuse while existing work and identity persist."}
+{"file":".trellis/spec/backend/model-connections.md","reason":"Verify exact native resource authority, binary bounds, full logical model IDs, key scope and saved/applied truth."}
+{"file":".trellis/spec/backend/desktop-companion.md","reason":"Check fixed bridge role/target generation and no late source mutation or auth-token leakage."}
+{"file":".trellis/spec/frontend/project-patterns.md","reason":"Verify real capture/ack/tail/release rather than hook simulations or automatic media-consent bypass."}
+{"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Check real min-size geometry, owner-bound async results and UI source/draft separation."}
+{"file":".trellis/spec/frontend/model-settings.md","reason":"Review reachable settings/read/retry, captured baselines and truthful unsupported/configured/check states."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/voice-entry.md","reason":"Distinguish upstream source, local compatibility reference, actual GET discovery and unexecuted speech; no AstrBot identity dependency."}
+{"file":".trellis/tasks/11-09-shared-voice-input/research/voice-input-ux.md","reason":"Check normal text remains usable, transcription preserves typed drafts and independent outbox intents, and cancel is distinct from finish."}
+{"file":".trellis/tasks/11-09-shared-voice-input/research/qa-preparation.md","reason":"Q1–Q7 is the only acceptance catalog; distinguish real synthetic capture/permission, controlled native HTTP and separately scoped real speech evidence."}
