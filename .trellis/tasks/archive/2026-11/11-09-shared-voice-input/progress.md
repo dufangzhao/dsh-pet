@@ -1,6 +1,6 @@
 # Shared voice input: implementation and acceptance
 
-Current phase: the selected M4 scope is implemented and verified, including explicitly authorized real ASR. Full-scope review and final root/production checks passed. Await Phase3.4 work-commit confirmation, then archive/journal; no owned runtime remains running. Task remains `in_progress`, branch `feat/shared-voice-input`, after M3 journal `4d6ac41`. M3 work/archive/journal are complete. Roadmap goal was explicitly resumed after model-stream interruptions; latest parent revision is9. Do not claim inactive agents are running or that a partial gate is complete.
+Current phase: the selected M4 scope is implemented and verified, including explicitly authorized real ASR. Full-scope review and final root/production checks passed. Phase3.4 was explicitly approved and work commits `b58c995`/`c1583c1` completed. Archive/journal bookkeeping is now being applied; no owned runtime remains running. Task remains `in_progress`, branch `feat/shared-voice-input`, after M3 journal `4d6ac41`. M3 work/archive/journal are complete. Roadmap goal was explicitly resumed after model-stream interruptions; latest parent revision is9. Do not claim inactive agents are running or that a partial gate is complete.
 
 The canonical evidence/status record is [M4 acceptance](../../../qa/fixtures/companion-voice-input/acceptance.md). It distinguishes source tests, real controlled HTTP, production native capture and real-model inference. Maintain test results there rather than duplicating counts here.
 

@@ -28,7 +28,7 @@ Parent performed a read-only `GET http://127.0.0.1:3425/v1/models` on2026-11-09:
 - [x] Q4 Retarget/disconnect/withdrawal cannot move old audio or transcripts into a new target; cancelled input is not submitted, accepted work is preserved.
 - [x] Q5 Real web/desktop UI reflects capture/transcription/error/finish/review states, preserves drafts and uses current permission/secure-context facts. No synthetic-device result is called real hardware or recognition-quality evidence.
 - [x] Q6 The selected real-provider path is validated only with an authorized model/route and supplied or explicitly approved test audio; otherwise the delivered scope must explicitly remain an unconfigured adapter with controlled-peer evidence, not a claim of usable recognition.
-- [ ] Q7 Focused/root/native checks, exact capability/format/error specs, operator instructions and Trellis records are complete for the selected scope.
+- [x] Q7 Focused/root/native checks, exact capability/format/error specs, operator instructions and Trellis records are complete for the selected scope.
 
 ## Material decision before convergence
 
