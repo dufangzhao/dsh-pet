@@ -8,7 +8,6 @@ export const SHARED_FORBIDDEN_PLUGIN_IDS: ReadonlySet<string> = new Set([
   'pet.voice-chat',
   'pet.asr-local',
   'pet.asr-cloud',
-  'pet.audio-capture',
   'pet.talk-key',
 ]);
 /** Keep archived personality fields unchanged even through generic host/SDK config saves. */

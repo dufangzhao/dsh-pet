@@ -1,7 +1,8 @@
 import { expect, test } from 'vitest';
 
 /**
- * worklet 的输出契约回归：
+ * worklet 的输出契约回归（旧路径的 `capture-worklet.ts` 只是一行转发，所以这里跑的
+ * 就是 `@pet/audio-capture/capture-worklet` 那份共用实现）：
  * 1. 不足一帧的尾巴必须在结束标记之前交出去，否则最后一个音节静默消失。
  * 2. 出线程的必须是标准 Float32 PCM：重采样/AGC 的轻微 overshoot 饱和到 [-1,1]；
  *    非 finite 是数据损坏，只能发格式标记，不能夹成 ±1、更不能补 0。

@@ -26,7 +26,13 @@ import type {
   DesktopArtifactSave,
   DesktopCompanionBridge,
   DesktopCompanionState,
+  DesktopVoiceBridge,
   Result,
+  VoiceAsrSettings,
+  VoiceCatalog,
+  VoiceProviderCommand,
+  VoiceSettingsCommand,
+  VoiceView,
 } from '@pet/contracts';
 import { makeError } from '@pet/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -57,6 +63,15 @@ const STALE: CompanionResult = { outcome: 'stale', error: null };
 /** 「请求可能已经被处理」才算未知；服务端明确拒绝不能假装未知。 */
 export function isUnknownOutcome(code: string): boolean {
   return ['network', 'timeout', 'unavailable', 'internal'].includes(code);
+}
+
+/** 语音桥：与 companion 桥分开暴露；缺失就是这台机器没有这条通道。 */
+function readVoiceBridge(): DesktopVoiceBridge | null {
+  if (typeof window === 'undefined') return null;
+  const candidate = (window as { petVoice?: DesktopVoiceBridge }).petVoice;
+  return typeof candidate === 'object' && candidate !== null && candidate.version === 1
+    ? candidate
+    : null;
 }
 
 function readBridge(): DesktopCompanionBridge | null {
@@ -98,6 +113,16 @@ export interface CompanionView {
   saveArtifact(artifactId: string): Promise<Result<DesktopArtifactSave>>;
   saveModel(command: CompanionModelSaveCommand): Promise<Result<CompanionModelView>>;
   testModel(command: CompanionModelTestCommand): Promise<Result<CompanionModelView>>;
+  /** 语音设置：与文字模型分开的一份，保存它不改连接也不重建 Core。 */
+  readVoice(): Promise<Result<VoiceView>>;
+  saveVoiceSettings(command: VoiceSettingsCommand): Promise<Result<VoiceView>>;
+  saveAsrProvider(command: {
+    providerRef: string;
+    expectedRevision: number;
+    settings: VoiceAsrSettings;
+  }): Promise<Result<VoiceView>>;
+  /** 只读已保存绑定的 ASR 目录；同样受 connectionId 栅栏。 */
+  readAsrCatalog(input: { providerRef: string; bindingId: string }): Promise<Result<VoiceCatalog>>;
   /** 清掉当前回执；页面切换时用。 */
   clearNotice(): void;
 }
@@ -393,6 +418,66 @@ export function useCompanion(): CompanionView {
     [readWith, state],
   );
 
+  /**
+   * 语音读写的栅栏与其它读取一致：结果只对发起时那个 connectionId 成立，
+   * 换连接后旧回执变成 stale-owner，界面不采纳。
+   */
+  const readVoice = useCallback(async (): Promise<Result<VoiceView>> => {
+    const bridge = readVoiceBridge();
+    const companion = bridgeRef.current;
+    const current = state;
+    if (bridge === null || companion === null || current === null || current.connectionId === null)
+      return { ok: false, error: makeError('not-ready', false) };
+    const target = current.connectionId;
+    if (settleTarget(latest.current, target) === 'stale')
+      return { ok: false, error: makeError('stale-owner', false) };
+    const result = await bridge.readVoice({ connectionId: target });
+    if ((await settle(companion, target)) === 'stale')
+      return { ok: false, error: makeError('stale-owner', false) };
+    return result;
+  }, [settle, state]);
+
+  const voiceWrite = useCallback(
+    async <T>(
+      call: (bridge: DesktopVoiceBridge, connectionId: string) => Promise<Result<T>>,
+    ): Promise<Result<T>> => {
+      const bridge = readVoiceBridge();
+      const companion = bridgeRef.current;
+      const current = state;
+      if (
+        bridge === null ||
+        companion === null ||
+        current === null ||
+        current.connectionId === null
+      )
+        return { ok: false, error: makeError('not-ready', false) };
+      const target = current.connectionId;
+      if (settleTarget(latest.current, target) === 'stale')
+        return { ok: false, error: makeError('stale-owner', false) };
+      const result = await call(bridge, target);
+      if ((await settle(companion, target)) === 'stale')
+        return { ok: false, error: makeError('stale-owner', false) };
+      return result;
+    },
+    [settle, state],
+  );
+
+  const saveVoiceSettings = useCallback(
+    (command: VoiceSettingsCommand) =>
+      voiceWrite((bridge, connectionId) => bridge.saveVoiceSettings({ connectionId, command })),
+    [voiceWrite],
+  );
+  const saveAsrProvider = useCallback(
+    (command: VoiceProviderCommand) =>
+      voiceWrite((bridge, connectionId) => bridge.saveAsrProvider({ connectionId, command })),
+    [voiceWrite],
+  );
+  const readAsrCatalog = useCallback(
+    (input: { providerRef: string; bindingId: string }) =>
+      voiceWrite((bridge, connectionId) => bridge.readAsrCatalog({ connectionId, ...input })),
+    [voiceWrite],
+  );
+
   const refresh = useCallback(() => void read(true), [read]);
   const clearNotice = useCallback(() => setNotice(null), []);
 
@@ -418,6 +503,10 @@ export function useCompanion(): CompanionView {
     saveArtifact,
     saveModel,
     testModel,
+    readVoice,
+    saveVoiceSettings,
+    saveAsrProvider,
+    readAsrCatalog,
     clearNotice,
   };
 }

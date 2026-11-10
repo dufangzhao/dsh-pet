@@ -10,14 +10,47 @@ import type { ClientState } from './state.js';
 import { ConnectionLine } from './status.js';
 import { TaskStrip } from './tasks.js';
 import { PersonaMemory } from './persona-memory.js';
+import { VoiceInput, useVoiceInput } from './voice-input.js';
+import { createVoiceSampler } from './voice-sampler.js';
+import { createWebVoiceTransport } from './voice-web.js';
+import { VoiceSettings } from './voice-settings.js';
 import './persona-memory.css';
+import './voice-input.css';
+
+/** 服务在同一个源上托管 worklet；CSP 的 script-src 'self' 只认这个固定路径。 */
+const WORKLET_URL = '/voice-capture-worklet.js';
 
 export function App(): JSX.Element {
   const client = useMemo(() => new CompanionClient(), []);
   const state = useClientState(client);
   const [draft, setDraft] = useState('');
   const [modelOpen, setModelOpen] = useState(false);
+  const [voiceSettingsOpen, setVoiceSettingsOpen] = useState(false);
   const [profile, setProfile] = useState<CompanionProfileView | null>(null);
+
+  /**
+   * 语音 owner 挂在 App 上：换视图、写草稿、开设置都不打断录音。
+   *
+   * 目标换一次就换一条 transport（客户端每次连接生成新的 clientId），
+   * 旧采集的结果因此不会落到新目标上。采样器只做形状适配，设备仍在
+   * `@pet/audio-capture/browser` 手里。
+   */
+  const voiceTarget = client.getVoiceTarget();
+  const voiceTargetKey =
+    voiceTarget === null ? 'none' : `${voiceTarget.clientId}:${voiceTarget.agentId}`;
+  const voiceTransport = useMemo(
+    () => (voiceTarget === null ? null : createWebVoiceTransport(client, voiceTarget)),
+    // 换目标必须换 transport；client 实例本身不变。
+    [client, voiceTargetKey],
+  );
+  const sampler = useMemo(() => createVoiceSampler(), []);
+  const voice = useVoiceInput({
+    transport: voiceTransport,
+    sampler,
+    workletUrl: WORKLET_URL,
+    live: state.phase === 'live',
+    targetKey: voiceTargetKey,
+  });
 
   /**
    * 这份正文是按哪一个「服务 + 版本」读的。
@@ -131,6 +164,8 @@ export function App(): JSX.Element {
         onReconnect={() => void client.reconnect()}
         onDisconnect={() => client.disconnect()}
         onOpenModel={() => setModelOpen(true)}
+        onOpenVoice={() => setVoiceSettingsOpen(true)}
+        voiceAvailable={voiceTransport !== null}
       />
       <ModelDialog
         open={modelOpen}
@@ -139,6 +174,43 @@ export function App(): JSX.Element {
         agentStatus={state.snapshot?.agent.status ?? null}
         transport={client}
         onClose={() => setModelOpen(false)}
+      />
+      <VoiceSettings
+        key={voiceTargetKey}
+        open={voiceSettingsOpen}
+        view={voice.view}
+        live={state.phase === 'live'}
+        actions={
+          voiceTarget === null
+            ? null
+            : {
+                saveFeature: async (command) => {
+                  const result = await client.saveVoiceSettings(command, voiceTarget);
+                  voice.reload();
+                  if (!result.ok) return { ok: false, error: errorMessage(result.error) };
+                  return { ok: true, error: null, view: result.value };
+                },
+                saveProvider: async (command) => {
+                  const result = await client.saveAsrProvider(command, voiceTarget);
+                  voice.reload();
+                  if (!result.ok) return { ok: false, error: errorMessage(result.error) };
+                  return { ok: true, error: null, view: result.value };
+                },
+                writeCredential: async (command) => {
+                  const result = await client.writeVoiceCredential(command, voiceTarget);
+                  voice.reload();
+                  if (!result.ok) return { ok: false, error: errorMessage(result.error) };
+                  return { ok: true, error: null, view: result.value };
+                },
+                readCatalog: async (input) => {
+                  const result = await client.readAsrCatalog(input, voiceTarget);
+                  return result.ok
+                    ? { ok: true, catalog: result.value }
+                    : { ok: false, error: errorMessage(result.error) };
+                },
+              }
+        }
+        onClose={() => setVoiceSettingsOpen(false)}
       />
       {state.error === null ? null : (
         <p className="tc-banner" role="status">
@@ -151,7 +223,13 @@ export function App(): JSX.Element {
         </p>
       )}
       <div className="tc-body">
-        <Conversation state={state} draft={draft} onDraftChange={setDraft} onSubmit={submit} />
+        <Conversation
+          state={state}
+          draft={draft}
+          onDraftChange={setDraft}
+          onSubmit={submit}
+          voice={<VoiceInput controller={voice} />}
+        />
         <Side
           state={state}
           client={client}
@@ -170,11 +248,15 @@ export function Header({
   onReconnect,
   onDisconnect,
   onOpenModel,
+  onOpenVoice,
+  voiceAvailable,
 }: {
   state: ClientState;
   onReconnect: () => void;
   onDisconnect: () => void;
   onOpenModel: () => void;
+  onOpenVoice: () => void;
+  voiceAvailable: boolean;
 }): JSX.Element {
   return (
     <header className="tc-head">
@@ -187,6 +269,16 @@ export function Header({
               模型
             </button>
           )}
+          {/* 语音设置与模型设置是两件事：这里只读语音自己的视图。 */}
+          <button
+            type="button"
+            className="tc-link"
+            onClick={onOpenVoice}
+            disabled={!voiceAvailable}
+            data-testid="open-voice-settings"
+          >
+            语音
+          </button>
           <button type="button" className="tc-link tc-head__exit" onClick={onDisconnect}>
             断开
           </button>

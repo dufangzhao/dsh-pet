@@ -17,6 +17,8 @@ import {
   PRESENTATION_IPC,
   SPEECH_OUTPUT_IPC,
   DESKTOP_COMPANION_IPC,
+  DESKTOP_VOICE_IPC,
+  VOICE_CAPTURE_PLUGIN_ID,
   DESKTOP_PRESENTATION_IPC,
   DESKTOP_COMPANION_PLUGIN_ID,
   APPLICATION_PLUGIN_IDS,
@@ -57,6 +59,11 @@ import {
 } from './speech-output-controller.js';
 import { createDemoTray } from './demo-tray.js';
 
+import { SharedVoiceController } from './shared-voice-controller.js';
+import { SharedVoiceCaptureHost } from './shared-voice-capture-host.js';
+import { handleDesktopVoiceRequest, type DesktopVoiceAction } from './shared-voice-request.js';
+import { installSharedVoicePermission } from './shared-voice-permission.js';
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const petEntry = path.resolve(here, '../renderer/pet/index.html');
 const consoleEntry = path.resolve(here, '../renderer/console/index.html');
@@ -65,6 +72,7 @@ const consoleUrl = pathToFileURL(consoleEntry).href;
 const preload = path.resolve(here, '../preload/index.cjs');
 let host: DesktopHost | undefined;
 let companion: DesktopCompanionController | undefined;
+let voice: SharedVoiceController | undefined;
 let local: LocalPresentationController | undefined;
 let speech: SpeechOutputController | undefined;
 let pet: PetWindowController | undefined;
@@ -74,7 +82,25 @@ let preferences: DesktopPresentationPreferences | null = null;
 let quitting = false;
 let petBudgetStart = performance.now();
 let petRequests = 0;
-const settings = new ConsoleWindow(consoleEntry, preload, () => presentation.ownerClosed());
+const settings = new ConsoleWindow(
+  consoleEntry,
+  preload,
+  () => presentation.ownerClosed(),
+  false,
+  (owner) => {
+    let documentFrame = owner.webContents.mainFrame;
+    owner.on('hide', () => voice?.ownerHidden());
+    owner.webContents.on('did-start-navigation', (details) => {
+      if (details.isMainFrame && !details.isSameDocument) voice?.ownerHidden();
+    });
+    owner.webContents.on('did-navigate', () => {
+      voice?.ownerGone(documentFrame);
+      documentFrame = owner.webContents.mainFrame;
+    });
+    owner.webContents.on('render-process-gone', () => voice?.ownerGone(documentFrame));
+    owner.webContents.once('destroyed', () => voice?.ownerGone(documentFrame));
+  },
+);
 const broadcast = (channel: string): void => {
   for (const target of [window, settings.current])
     if (target && !target.isDestroyed()) target.webContents.send(channel);
@@ -130,6 +156,7 @@ async function quit(exitCode = 0): Promise<void> {
   try {
     // PluginManager joins the client source's Main drain and actual worker disposal.
     const stopped = await host?.shutdown();
+    await voice?.close();
     await companion?.close();
     app.exit(stopped && !stopped.exitConfirmed ? 1 : exitCode);
   } catch {
@@ -153,6 +180,7 @@ if (!app.isPackaged) {
 if (!app.requestSingleInstanceLock()) app.exit(0);
 const localRoles = [
   DESKTOP_COMPANION_PLUGIN_ID,
+  VOICE_CAPTURE_PLUGIN_ID,
   APPLICATION_PLUGIN_IDS.profile,
   APPLICATION_PLUGIN_IDS.start,
   APPLICATION_PLUGIN_IDS.persona,
@@ -188,7 +216,13 @@ const startup = app
           await companion?.retireSource(owner);
         },
       },
-      adapters: mvpReadiness(path.resolve(here, '../../../../.cache/asr-models')),
+      captureLifecycle: {
+        sourcePluginId: VOICE_CAPTURE_PLUGIN_ID,
+        stopFor: async (owner) => {
+          await voice?.retireSource(owner);
+        },
+      },
+      adapters: mvpReadiness(path.resolve(here, '../../../../.cache/asr-models'), true),
       onChanged: () => {
         speech?.onHostChanged();
         void local?.refresh();
@@ -220,6 +254,32 @@ const startup = app
       },
       () => broadcast(DESKTOP_COMPANION_IPC.changed),
     );
+    voice = new SharedVoiceController(
+      companion,
+      new SharedVoiceCaptureHost(activeHost),
+      () => {
+        const contents = settings.current?.webContents;
+        return contents && !contents.isDestroyed() && contents.getURL() === consoleUrl
+          ? contents.mainFrame
+          : null;
+      },
+      () => broadcast(DESKTOP_VOICE_IPC.changed),
+    );
+    installSharedVoicePermission(session.defaultSession, settings, consoleUrl, voice);
+    const activeVoice = voice;
+    const voiceService = companion;
+    for (const [action, channel] of Object.entries(DESKTOP_VOICE_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleDesktopVoiceRequest(
+            requestSource(event),
+            event.senderFrame,
+            action as DesktopVoiceAction,
+            args,
+            activeVoice,
+            voiceService,
+          ),
+        );
     local = new LocalPresentationController(
       activeHost,
       () => ({ available: !!window && !window.isDestroyed(), shown: !!window?.isVisible() }),

@@ -4,6 +4,9 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { App, Header } from '../src/client/app.tsx';
+import { VoiceInput } from '../src/client/voice-input.tsx';
+import { VoiceSettings } from '../src/client/voice-settings.tsx';
+import { emptyVoiceState } from '../src/client/voice-form.ts';
 import { AgentLine, Conversation } from '../src/client/chat.tsx';
 import { ConnectForm } from '../src/client/connect.tsx';
 import { initialClientState, reduce, taskStatusView } from '../src/client/state.ts';
@@ -462,4 +465,171 @@ test('a non-writable remote entry never offers a key input, whatever the URL loo
   assert.match(html, /当前没有可用密钥/);
   assert.doesNotMatch(html, /type="password"/);
   assert.doesNotMatch(html, /清除密钥/);
+});
+
+/* ------------------------------------------------------------------ 语音输入 */
+
+function voiceView(over = {}) {
+  const provider = {
+    providerRef: 'pet.asr-magpie/magpie',
+    label: 'Magpie',
+    synthetic: false,
+    source: 'ready',
+    configRevision: 3,
+    settings: {
+      baseUrl: 'https://gw.example/v1',
+      modelRef: 'xiaomi/mimo-v2.5-asr',
+      authMode: 'gateway-key',
+      protocol: 'mimo-native',
+    },
+    bindingId: 'binding-1',
+    credential: { available: true, writable: false, version: '1', source: 'memory' },
+    readiness: 'configured',
+    reason: null,
+    ...(over.provider ?? {}),
+  };
+  return {
+    version: 1,
+    feature: {
+      source: 'ready',
+      configRevision: 3,
+      providerRef: 'pet.asr-magpie/magpie',
+      finishMode: 'send',
+      ...(over.feature ?? {}),
+    },
+    providers: [provider],
+  };
+}
+
+function controller(over = {}) {
+  return {
+    state: emptyVoiceState,
+    view: voiceView(),
+    mode: 'send',
+    hint: '最多录 20 秒，到时自动结束并发送。',
+    rules: { ok: true, reason: null },
+    level: 0,
+    reload: noop,
+    recover: noop,
+    start: noop,
+    finish: noop,
+    cancel: noop,
+    send: noop,
+    edit: noop,
+    ...over,
+  };
+}
+
+test('语音控件把 20 秒上限写在开始按钮的可访问描述里', () => {
+  const html = renderToStaticMarkup(createElement(VoiceInput, { controller: controller() }));
+  assert.match(html, /最多录 20 秒/);
+  assert.match(html, /结束后直接发送/);
+  // aria-describedby 指向那句提示，读屏用户点之前就能听到。
+  const describedBy = /aria-describedby="([^"]+)"/.exec(html);
+  assert.ok(describedBy);
+  assert.match(html, new RegExp(`id="${describedBy[1]}"`));
+});
+
+test('未配置模型时说明真实原因，开始按钮不可用', () => {
+  const html = renderToStaticMarkup(
+    createElement(VoiceInput, {
+      controller: controller({
+        view: voiceView({
+          provider: { readiness: 'unconfigured', reason: 'model-unconfigured' },
+        }),
+        rules: { ok: false, reason: '还没有选择转写模型。' },
+      }),
+    }),
+  );
+  assert.match(html, /还没有选择转写模型/);
+  // 属性顺序不是契约：只看这个按钮上确实带了 disabled。
+  const button = /<button[^>]*data-testid="voice-start"[^>]*>/.exec(html);
+  assert.ok(button);
+  assert.match(button[0], /disabled=""/);
+});
+
+test('preview 可编辑，且与文字草稿是两个值', () => {
+  const html = renderToStaticMarkup(
+    createElement(VoiceInput, {
+      controller: controller({
+        mode: 'review',
+        state: {
+          ...emptyVoiceState,
+          phase: 'review',
+          preview: '识别到的文本',
+          intent: {
+            captureId: 'c',
+            clientId: 'cl',
+            agentId: 'a',
+            serviceEpoch: 'e',
+            finishMode: 'review',
+            targetKey: 'k',
+          },
+        },
+      }),
+    }),
+  );
+  assert.match(html, /识别到的文本/);
+  assert.match(html, /data-testid="voice-preview"/);
+  assert.match(html, /data-testid="voice-send"/);
+  // 只有语音自己的预览框，没有第二份 composer。
+  assert.equal((html.match(/<textarea/g) ?? []).length, 1);
+});
+
+test('语音设置不提供密钥输入：桌面 writable 恒为 false', () => {
+  const html = renderToStaticMarkup(
+    createElement(VoiceSettings, {
+      open: true,
+      view: voiceView(),
+      live: true,
+      actions: {
+        saveFeature: async () => ({ ok: true, error: null }),
+        saveProvider: async () => ({ ok: true, error: null }),
+      },
+      onClose: noop,
+    }),
+  );
+  assert.match(html, /由服务侧写入/);
+  assert.doesNotMatch(html, /type="password"/);
+  assert.match(html, /xiaomi\/mimo-v2\.5-asr/);
+});
+
+test('语音设置给出「读取模型」入口，但候选只来自真实目录', () => {
+  const html = renderToStaticMarkup(
+    createElement(VoiceSettings, {
+      open: true,
+      view: voiceView(),
+      live: true,
+      actions: {
+        saveFeature: async () => ({ ok: true, error: null }),
+        saveProvider: async () => ({ ok: true, error: null }),
+        readCatalog: async () => ({ ok: false, error: '还没读' }),
+      },
+      onClose: noop,
+    }),
+  );
+  assert.match(html, /data-testid="voice-settings-read-catalog"/);
+  assert.match(html, /读取模型/);
+  // 还没读之前没有任何候选，选择框只有那一个空选项。
+  assert.match(html, /还没有读取目录/);
+  const candidate =
+    /<select[^>]*data-testid="voice-settings-candidate"[^>]*>([\s\S]*?)<\/select>/.exec(html);
+  assert.ok(candidate);
+  assert.equal((candidate[1].match(/<option/g) ?? []).length, 1);
+  // 手填完整 ref 的输入框仍然在：目录是辅助，不是唯一入口。
+  assert.match(html, /data-testid="voice-settings-model"/);
+});
+
+test('语音设置读不到视图时说清是没读到，不铺一个假表单', () => {
+  const html = renderToStaticMarkup(
+    createElement(VoiceSettings, {
+      open: true,
+      view: null,
+      live: false,
+      actions: null,
+      onClose: noop,
+    }),
+  );
+  assert.match(html, /还没有读到语音设置/);
+  assert.doesNotMatch(html, /data-testid="voice-settings-model"/);
 });

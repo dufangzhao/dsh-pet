@@ -18,6 +18,7 @@
 | [model-connections.md](./model-connections.md) | Native connector authority, model configuration/checks and snapshot budget | Model-connection plugins and owner APIs |
 | [desktop-companion.md](./desktop-companion.md) | Shared Main/preload client, source lifetime, saved facts and native publication | Desktop service entry and connection/lifecycle changes |
 | [persona-memory.md](./persona-memory.md) | Canonical persona application, explicit memory authority, CAS/replay and SQLite v2 migration | Persona/memory APIs, Harness context and format upgrades |
+| [shared-voice-input.md](./shared-voice-input.md) | Shared ASR/capture authority, fixed bridge, bounded media, lifetime and UI state contracts | Service voice sources and web/desktop voice consumers |
 | [directory-structure.md](./directory-structure.md) | Project structure and domain organization         | Starting a new feature             |
 | [api-module.md](./api-module.md)                   | API module pattern (types, procedures, lib)       | Creating/modifying service modules |
 | [api-patterns.md](./api-patterns.md)               | Common patterns for API calls and data operations | Implementing CRUD, pagination      |

@@ -162,6 +162,49 @@ async function fixture(projected: CompanionSnapshot = snapshot) {
   };
 }
 describe('shared desktop contract seam', () => {
+  it('preserves distinct text/voice command IDs and refuses the seventeenth entry with zero HTTP and no overwrite', async () => {
+    const f = await fixture();
+    const connected = await f.controller.connect({
+      baseUrl: f.baseUrl,
+      token: 't'.repeat(24),
+      expectedRevision: 1,
+    });
+    if (!connected.ok || !connected.value.connectionId) throw new Error('connect failed');
+    const target = { connectionId: connected.value.connectionId };
+    let release = () => {};
+    const gate = new Promise<void>((done) => {
+      release = done;
+    });
+    f.holdReceipt(gate, false);
+    const pending = Array.from({ length: 16 }, (_, index) =>
+      f.controller.sendMessage({
+        ...target,
+        commandId: `command-${index}`,
+        text: index === 1 ? 'distinct voice intent' : `text-${index}`,
+      }),
+    );
+    try {
+      await vi.waitFor(() => expect(f.admitted()).toBe(16));
+      expect(
+        await f.controller.sendMessage({ ...target, commandId: 'command-0', text: 'changed' }),
+      ).toMatchObject({ ok: false, error: { code: 'conflict' } });
+      expect(
+        await f.controller.sendMessage({
+          ...target,
+          commandId: 'new-voice',
+          text: 'retained locally',
+        }),
+      ).toMatchObject({ ok: false, error: { code: 'quota-exceeded' } });
+      expect(f.admitted()).toBe(16);
+      expect(f.messages).not.toContain('changed');
+      expect(f.messages).not.toContain('retained locally');
+      const state = await f.controller.getState();
+      expect(state.ok && state.value.pending).toHaveLength(16);
+    } finally {
+      release();
+      await Promise.all(pending);
+    }
+  });
   it('an already-aborted source returned after a gated admission never claims connecting or sends HTTP', async () => {
     const f = await fixture();
     let release = () => {};

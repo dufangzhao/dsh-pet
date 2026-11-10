@@ -89,6 +89,7 @@ export interface ConfigurationCommit {
   readonly pluginId: string;
   readonly instanceId: string;
   readonly revision: number;
+  readonly data: Readonly<JsonObject>;
 }
 type ConfigurationObserver = (commit: ConfigurationCommit) => void;
 
@@ -158,7 +159,7 @@ export class CompanionPluginHost {
           const { pluginId, instanceId, revision } = saved.value.snapshot;
           for (const observer of configurationObservers) {
             try {
-              observer({ pluginId, instanceId, revision });
+              observer({ pluginId, instanceId, revision, data: saved.value.snapshot.data });
             } catch {
               configurationFaults.observers++;
             }

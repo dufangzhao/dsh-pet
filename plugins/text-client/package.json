@@ -2,7 +2,7 @@
   "name": "@pet/text-client",
   "version": "0.1.0",
   "private": true,
-  "description": "协议驱动的可替换文字客户端：同源 HTTP/SSE，静态 panel 贡献",
+  "description": "\u534f\u8bae\u9a71\u52a8\u7684\u53ef\u66ff\u6362\u6587\u5b57\u5ba2\u6237\u7aef\uff1a\u540c\u6e90 HTTP/SSE\uff0c\u9759\u6001 panel \u8d21\u732e",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
@@ -25,7 +25,12 @@
       "types": "./src/persona-memory-ui.ts",
       "default": "./src/persona-memory-ui.ts"
     },
-    "./persona-memory.css": "./src/client/persona-memory.css"
+    "./persona-memory.css": "./src/client/persona-memory.css",
+    "./voice-input-ui": {
+      "types": "./src/voice-input-ui.ts",
+      "default": "./src/voice-input-ui.ts"
+    },
+    "./voice-input.css": "./src/client/voice-input.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -35,7 +40,8 @@
   "dependencies": {
     "@pet/contracts": "workspace:*",
     "@pet/plugin-sdk": "workspace:*",
-    "@pet/ui-kit": "workspace:*"
+    "@pet/ui-kit": "workspace:*",
+    "@pet/audio-capture": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

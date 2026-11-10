@@ -8,3 +8,5 @@ export * from './model-view.js';
 export * from './model-description.js';
 export * from './model-connections.js';
 export * from './fixture-model.js';
+export * from './voice-input-types.js';
+export * from './voice-providers.js';

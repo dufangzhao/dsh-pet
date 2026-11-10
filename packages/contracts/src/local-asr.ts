@@ -67,5 +67,7 @@ export const LOCAL_ASR_MODELS: readonly LocalAsrModel[] = [
     ],
   },
 ];
-export const LOCAL_ASR_SAMPLE_RATE = 16000;
-export const LOCAL_ASR_MAX_SECONDS = 20;
+export {
+  VOICE_SAMPLE_RATE as LOCAL_ASR_SAMPLE_RATE,
+  VOICE_MAX_SECONDS as LOCAL_ASR_MAX_SECONDS,
+} from './audio-capture.js';

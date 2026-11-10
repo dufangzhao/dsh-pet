@@ -782,3 +782,149 @@ describe('发送意图的类型仍在', () => {
     expect(Object.keys(command).sort()).toEqual(['commandId', 'text']);
   });
 });
+
+describe('语音目录读取也走同一条栅栏', () => {
+  /** 语音桥与 companion 桥是两条通道，所以这里要两份都装上。 */
+  function mountVoice(readAsrCatalog: (input: unknown) => Promise<Result<unknown>>): {
+    catalog: ReturnType<typeof vi.fn>;
+    readVoice: ReturnType<typeof vi.fn>;
+  } {
+    const catalog = vi.fn(readAsrCatalog);
+    const readVoice = vi.fn(async () => ({
+      ok: true as const,
+      value: {
+        version: 1 as const,
+        feature: {
+          source: 'ready' as const,
+          configRevision: 1,
+          providerRef: 'pet.asr-magpie/magpie',
+          finishMode: 'send' as const,
+        },
+        providers: [],
+      },
+    }));
+    const bridge = bridgeWith([{ ok: true, value: state(1, 'old') }]);
+    vi.stubGlobal('window', {
+      petCompanion: bridge,
+      petVoice: {
+        version: 1,
+        getState: async () => ({
+          ok: true,
+          value: {
+            version: 1,
+            revision: 999,
+            connectionId: 'old',
+            phase: 'idle',
+            captureId: null,
+            samples: 0,
+            cleanup: 'settled',
+            error: null,
+          },
+        }),
+        onChanged: () => () => {},
+        readVoice,
+        saveVoiceSettings: () => readVoice(),
+        saveAsrProvider: () => readVoice(),
+        readAsrCatalog: (input: unknown) => catalog(input),
+        begin: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        readCaptureResult: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        captureReady: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        pushAudio: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        finishCapture: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        cancelCapture: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        reportCaptureError: async () => ({ ok: false, error: makeError('not-ready', false) }),
+        reportCaptureReleased: async () => ({ ok: false, error: makeError('not-ready', false) }),
+      },
+    });
+    harness.hooks.length = 0;
+    harness.pending.length = 0;
+    harness.cleanups.length = 0;
+    harness.cursor = 0;
+    render();
+    return { catalog, readVoice };
+  }
+
+  it('高 revision 的语音投影不能进入 Companion 的 snapshot/source/endpoint/pending', async () => {
+    mountVoice(async () => ({
+      ok: true,
+      value: { providerRef: 'pet.asr-magpie/magpie', bindingId: 'binding-1', candidates: [] },
+    }));
+    await flush();
+    const before = current();
+    const actions = [
+      () => view().readVoice(),
+      () =>
+        view().saveVoiceSettings({
+          expectedRevision: 1,
+          providerRef: 'pet.asr-magpie/magpie',
+          finishMode: 'review',
+        }),
+      () =>
+        view().saveAsrProvider({
+          providerRef: 'pet.asr-magpie/magpie',
+          expectedRevision: 1,
+          settings: {
+            baseUrl: 'http://127.0.0.1:3425/v1',
+            modelRef: '',
+            authMode: 'local-client-id',
+            protocol: 'mimo-native',
+          },
+        }),
+      () => view().readAsrCatalog({ providerRef: 'pet.asr-magpie/magpie', bindingId: 'binding-1' }),
+    ];
+    for (const action of actions) {
+      expect((await action()).ok).toBe(true);
+      render();
+      expect(current()).toEqual(before);
+      expect(current()?.snapshot?.agent.name).toBe('阿蓝');
+      expect(current()?.source).toBe('ready');
+      expect(current()?.baseUrl).toBe('http://127.0.0.1:4120');
+      expect(current()?.pending).toEqual([]);
+    }
+  });
+
+  it('当前连接读目录：原样带上 providerRef/bindingId', async () => {
+    const { catalog } = mountVoice(async () => ({
+      ok: true,
+      value: { providerRef: 'pet.asr-magpie/magpie', bindingId: 'binding-1', candidates: [] },
+    }));
+    await flush();
+    const result = await view().readAsrCatalog({
+      providerRef: 'pet.asr-magpie/magpie',
+      bindingId: 'binding-1',
+    });
+    expect(result.ok).toBe(true);
+    expect(catalog).toHaveBeenCalledTimes(1);
+    expect(catalog.mock.calls[0]?.[0]).toEqual({
+      connectionId: 'old',
+      providerRef: 'pet.asr-magpie/magpie',
+      bindingId: 'binding-1',
+    });
+  });
+
+  it('旧连接的结果不返回：换代后是 stale-owner，调用方不得用它填新选择框', async () => {
+    const inFlight = deferred<Result<unknown>>();
+    const { catalog } = mountVoice(() => inFlight.promise);
+    await flush();
+    const reading = view().readAsrCatalog({
+      providerRef: 'pet.asr-magpie/magpie',
+      bindingId: 'binding-1',
+    });
+    // 在途期间 Main 切到新连接并被采纳。
+    const bridge = (globalThis as unknown as { window: { petCompanion: DesktopCompanionBridge } })
+      .window.petCompanion;
+    bridge.getState = async () => ({ ok: true, value: state(2, 'new') });
+    await view().refresh();
+    await flush();
+    expect(current()?.connectionId).toBe('new');
+
+    inFlight.resolve({
+      ok: true,
+      value: { providerRef: 'pet.asr-magpie/magpie', bindingId: 'binding-1', candidates: [] },
+    });
+    const result = await reading;
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe('stale-owner');
+    expect(catalog).toHaveBeenCalledTimes(1);
+  });
+});

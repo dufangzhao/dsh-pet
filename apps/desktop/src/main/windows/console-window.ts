@@ -7,6 +7,7 @@ export class ConsoleWindow {
     private readonly preload: string,
     private readonly onClosed: () => void = () => {},
     private readonly startDesignLab = false,
+    private readonly onCreated: (window: BrowserWindow) => void = () => {},
   ) {}
   get current(): BrowserWindow | undefined {
     return this.#window;
@@ -40,6 +41,7 @@ export class ConsoleWindow {
       },
     });
     this.#window = window;
+    this.onCreated(window);
     window.webContents.on('before-input-event', (event, input) => {
       if (input.type !== 'keyDown' || !input.control || input.alt || input.meta) return;
       const reset = input.code === 'Digit0' || input.code === 'Numpad0';

@@ -1,14 +1,14 @@
 # Source-backed frontend patterns
 
-Existing desktop baseline: b9a803e. This guide records current patterns; the active task design specifies the future Cortico/pet-first changes. Read AGENTS.md and the shared project-baseline before modifying UI.
+This guide records source-backed frontend patterns for the shared persistent Agent and its desktop/web consumers. Read AGENTS.md, the shared project-baseline and the relevant feature code-spec before modifying UI.
 
 ## Ownership and layout
 
 Console source is apps/desktop/src/renderer/console, with page components under pages/, stateful use-*.ts hooks, local copy/labels and console.css. Pet source is the sibling pet/ directory. Shared primitives are packages/ui-kit/src. Main/preload and browser-safe contracts remain separate packages/layers; do not create the template src/renderer/src/features or src/shared alias hierarchy.
 
-ConsoleApp currently owns navigation, theme, actual snapshots, security actions, toasts and the one useDemo recording state. It passes view state/actions to page components. Existing navigation is React state because trusted requests check the exact window URL; do not introduce hash/URL routes without changing and validating that boundary. A new page must not independently create another microphone or conversation owner.
+ConsoleApp owns navigation, theme, actual snapshots, security actions, toasts and the above-page shared voice owner. It passes view state/actions to page components; the retained Demo remains separate from the production shared Agent entry. Existing navigation is React state because trusted requests check the exact window URL; do not introduce hash/URL routes without changing and validating that boundary. A new page must not independently create another microphone or conversation owner.
 
-Evidence: [console-app.tsx](../../../apps/desktop/src/renderer/console/console-app.tsx), [pages.ts](../../../apps/desktop/src/renderer/console/pages.ts), [demo-console.tsx](../../../apps/desktop/src/renderer/console/pages/demo-console.tsx).
+Evidence: [console-app.tsx](../../../apps/desktop/src/renderer/console/console-app.tsx), [use-console-voice.ts](../../../apps/desktop/src/renderer/console/use-console-voice.ts), [demo-console.tsx](../../../apps/desktop/src/renderer/console/pages/demo-console.tsx).
 
 ## Multiple style candidates
 
@@ -34,7 +34,7 @@ A menu and its trigger must participate in the outside-dismiss containment check
 
 ## Configuration drafts and real state
 
-usePluginConfig keeps an inspection snapshot, one draft and a baseline key. It builds a validated candidate, saves with the inspected revision (zero creates a first record), and only promotes the draft baseline on success. Conflict retains the draft and requires explicit reload. A failed read clears the old form rather than leave an editable stale revision. Follow the same boundary for person-name and full-prompt editing; do not save each keypress or erase draft input on a background refresh.
+usePluginConfig keeps an inspection snapshot, one draft and a baseline key. It builds a validated candidate, saves with the inspected revision (zero creates a first record), and only promotes the draft baseline on success. Conflict retains the draft and requires explicit reload. A failed read clears the old form rather than leave an editable stale revision. Follow the same boundary for person-name and full-prompt editing; do not save each keypress or erase draft input on a background refresh. When one dialog edits independent feature, provider and credential fields, a successful operation advances only its own baseline; it must not reseed another dirty draft. Save from the captured baseline, not the latest props revision, and require an explicit rebase after an external change.
 
 ConfigApplyMode is a declared mode, not evidence that a running service has applied a change. The planned Cortico prefix reload must wait for actual application and show saved/pending/applied separately; do not copy a generic savedText(immediate) message as runtime proof.
 
@@ -48,6 +48,10 @@ useDemo numbers snapshot reads so stale results cannot replace newer state. The 
 
 Recording identity is the active AbortController/token, not a snapshot read sequence. Register the local session before asynchronous device setup so arming can be canceled. Dispose a late device if its controller is no longer current. Preserve capture above navigation, flush tail/await real IPC acknowledgments, and submit recognition only on the explicit completed-capture path. Error cleanup must not issue an extra cancel that clears the actual backend failure.
 
+Release covers acquisitions already in progress, not just resources assigned when cancellation was requested. One owned cleanup completion must include late permission, started frame acknowledgements and actual AudioContext closure; cancellation skips queued frames, while a normal finish still flushes its tail. A close failure is not successful release unless closure is actually established.
+
+Prove those lifetimes with deferred gates: start the real tested action, assert cancel/released is still pending before opening the gate, then verify release after settlement. Do not await cancellation before granting the deliberately held permission, or call a test an acknowledgement test without sending a frame and observing push start. Type-check success and eventual stopped state do not establish the missing interval. A finish-tail test must emit its partial frame after the finish request, as the real worklet does; sending the tail before calling finish cannot detect a closing guard that discards it.
+
 When an async completion clears shared references, verify it still owns that session after await as well as before sending the operation. The current ended callback has its pre-submit check at use-demo.ts:383 and cleanup after await at:388; this is a review point for restart/cancel/new-session tests, not a pattern to assume safe across every await.
 
 Evidence: [use-demo.ts:132](../../../apps/desktop/src/renderer/console/use-demo.ts:132), [use-demo.ts:333](../../../apps/desktop/src/renderer/console/use-demo.ts:333), [microphone.ts](../../../apps/desktop/src/renderer/console/demo/microphone.ts), [capture-worklet.test.ts](../../../apps/desktop/src/renderer/console/demo/capture-worklet.test.ts), [microphone.test.ts](../../../apps/desktop/src/renderer/console/demo/microphone.test.ts).
@@ -57,6 +61,8 @@ Evidence: [use-demo.ts:132](../../../apps/desktop/src/renderer/console/use-demo.
 The console and demo bridges are frozen objects with named methods, exact arity and Result<T>. Renderer components consume their typed values and dispose subscriptions; they do not receive ipcRenderer, raw invoke/send, manager/control/broker objects, Node APIs or plaintext secret readers. Import shared types from @pet/contracts; validation and host services stay outside the browser bundle.
 
 Binary PCM is the separate Uint8Array argument to pushAudio, not a JSON object/list or control-channel base64. Keep unavailable-bridge errors distinguishable from a valid backend rejection. Do not infer a provider is connected from key presence.
+
+Each facade's getState has its own projection and revision domain. Never cast a voice bridge to a companion bridge to reuse a confirmation helper: a large voice revision must not replace CompanionState. Voice actions confirm connection ownership through the actual companion bridge, while their returned VoiceView stays in voice state. Cover this with deliberately different revision values, not equal fixture revisions that hide adoption bugs.
 
 Evidence: [console-bridge.ts](../../../apps/desktop/src/preload/console-bridge.ts), [demo-bridge.ts](../../../apps/desktop/src/preload/demo-bridge.ts), [console.ts](../../../packages/contracts/src/console.ts), [demo.ts](../../../packages/contracts/src/demo.ts).
 

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.audio-capture",
+  "version": "0.1.0",
+  "displayName": { "en": "Owned microphone capture", "zh-CN": "麦克风采样" },
+  "description": { "en": "One Main-authorized console renderer capture owner" },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "renderer",
+      "capability": "input.audio.capture@1",
+      "features": { "methodPermissions": { "describe": [] } }
+    }
+  ],
+  "permissions": [{ "kind": "microphone" }],
+  "config": {
+    "version": 1,
+    "schema": { "type": "object", "additionalProperties": false, "properties": {} }
+  }
+}

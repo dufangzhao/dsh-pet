@@ -95,6 +95,9 @@ importers:
 
   apps/companion-service:
     dependencies:
+      '@pet/asr-magpie':
+        specifier: workspace:*
+        version: link:../../plugins/asr-magpie
       '@pet/cloud-exec':
         specifier: workspace:*
         version: link:../../plugins/cloud-exec
@@ -116,6 +119,9 @@ importers:
       '@pet/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
+      '@pet/shared-voice':
+        specifier: workspace:*
+        version: link:../../plugins/shared-voice
       '@pet/state-sqlite':
         specifier: workspace:*
         version: link:../../plugins/state-sqlite
@@ -144,6 +150,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@pet/audio-capture':
+        specifier: workspace:*
+        version: link:../../plugins/audio-capture
       '@pet/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -367,6 +376,9 @@ importers:
 
   plugins/asr-cloud:
     dependencies:
+      '@pet/audio-capture':
+        specifier: workspace:*
+        version: link:../audio-capture
       '@pet/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -412,11 +424,52 @@ importers:
         specifier: 'catalog:'
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
-  plugins/audio-capture:
+  plugins/asr-magpie:
+    dependencies:
+      '@pet/audio-capture':
+        specifier: workspace:*
+        version: link:../audio-capture
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/audio-capture:
+    dependencies:
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -714,6 +767,34 @@ importers:
         specifier: 'catalog:'
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  plugins/shared-voice:
+    dependencies:
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   plugins/state-sqlite:
     dependencies:
       '@pet/contracts':
@@ -782,6 +863,9 @@ importers:
 
   plugins/text-client:
     dependencies:
+      '@pet/audio-capture':
+        specifier: workspace:*
+        version: link:../audio-capture
       '@pet/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

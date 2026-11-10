@@ -24,7 +24,9 @@
     "@pet/text-client": "workspace:*",
     "@pet/model-connection-magpie": "workspace:*",
     "cortico": "0.2.7",
-    "tsx": "4.23.15"
+    "tsx": "4.23.15",
+    "@pet/asr-magpie": "workspace:*",
+    "@pet/shared-voice": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

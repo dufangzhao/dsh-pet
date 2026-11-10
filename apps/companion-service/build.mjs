@@ -7,6 +7,8 @@ for (const name of [
   'cloud-exec',
   'harness-cortico',
   'model-connection-magpie',
+  'asr-magpie',
+  'shared-voice',
   'text-client',
 ]) {
   execFileSync(process.execPath, ['build.mjs'], {

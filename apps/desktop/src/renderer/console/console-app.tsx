@@ -35,6 +35,7 @@ import { StartPage } from './pages/start.js';
 import { MinimalShell as SettingsShell } from './minimal-ui/shell.js';
 import { connectionView } from '../shared/companion-state.js';
 import { useCompanion } from '../shared/use-companion.js';
+import { useConsoleVoice } from './use-console-voice.js';
 import { useLocalPresentation } from '../shared/use-local-presentation.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
 import { actionLabel, usePluginActions } from './use-plugin-actions.js';
@@ -100,6 +101,8 @@ export function ConsoleApp(): JSX.Element {
   const dirtyRef = useRef(false);
   const toasts = useToastStore();
   const companion = useCompanion();
+  // 语音 owner 挂在外壳上：换页不打断录音，页面只拿视图。
+  const voice = useConsoleVoice(companion);
   const presentation = useLocalPresentation();
   const snapshotState = useConsoleSnapshot();
   const securityState = useSecurity();
@@ -284,12 +287,20 @@ export function ConsoleApp(): JSX.Element {
     }
     switch (view) {
       case 'start':
-        return <StartPage companion={companion} presentation={presentation} notify={notify} />;
+        return (
+          <StartPage
+            companion={companion}
+            presentation={presentation}
+            voice={voice.controller}
+            notify={notify}
+          />
+        );
       case 'conversation':
         return (
           <ConversationPage
             companion={companion}
             notify={notify}
+            voice={voice.controller}
             onGoToStart={() => select('start')}
           />
         );

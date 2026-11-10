@@ -31,7 +31,11 @@ import {
   type ModelConnectionRegistration,
   type ServicePluginRegistration,
 } from '@pet/companion-runtime';
+import { createMagpieAsrPlugin, parseMagpieAsrSettings } from '@pet/asr-magpie';
+import { createSharedVoicePlugin } from '@pet/shared-voice';
+import { type VoiceAsrRegistration, type VoiceAsrPortsFor } from '@pet/companion-runtime';
 import { ModelConnectionController } from './model-controller.js';
+import { VoiceController } from './voice-controller.js';
 import { serveText, type TextService } from './server.js';
 
 export interface CompanionServiceOptions {
@@ -51,6 +55,7 @@ export interface CompanionServiceOptions {
   readonly connectionPlugins?: readonly ((
     portsFor: ModelConnectionPortsFor,
   ) => ModelConnectionRegistration)[];
+  readonly voicePlugins?: readonly ((portsFor: VoiceAsrPortsFor) => VoiceAsrRegistration)[];
   readonly name?: string;
   readonly persona?: string;
   readonly onError?: (error: unknown) => void;
@@ -60,6 +65,7 @@ export interface CompanionService {
   readonly runtime: CompanionRuntime;
   readonly host: CompanionPluginHost;
   readonly models: ModelConnectionController;
+  readonly voice: VoiceController;
   close(): Promise<void>;
 }
 async function manifest(directory: string): Promise<PluginManifest> {
@@ -83,15 +89,26 @@ export async function createCompanionService(
     harness: path.join(root, 'plugins/harness-cortico'),
     text: path.join(root, 'plugins/text-client'),
     magpie: path.join(root, 'plugins/model-connection-magpie'),
+    voice: path.join(root, 'plugins/shared-voice'),
+    asr: path.join(root, 'plugins/asr-magpie'),
   };
-  const [stateManifest, cloudManifest, harnessManifest, textManifest, magpieManifest] =
-    await Promise.all([
-      manifest(directories.state),
-      manifest(directories.cloud),
-      manifest(directories.harness),
-      manifest(directories.text),
-      manifest(directories.magpie),
-    ]);
+  const [
+    stateManifest,
+    cloudManifest,
+    harnessManifest,
+    textManifest,
+    magpieManifest,
+    voiceManifest,
+    asrManifest,
+  ] = await Promise.all([
+    manifest(directories.state),
+    manifest(directories.cloud),
+    manifest(directories.harness),
+    manifest(directories.text),
+    manifest(directories.magpie),
+    manifest(directories.voice),
+    manifest(directories.asr),
+  ]);
   const configRoot = path.join(data, 'configuration');
   await mkdir(configRoot, { recursive: true, mode: 0o700 });
   const configStore = new FileConfigStore(configRoot);
@@ -127,6 +144,11 @@ export async function createCompanionService(
   let host: CompanionPluginHost | undefined;
   let http: TextService | undefined;
   let models: ModelConnectionController | undefined;
+  let voice: VoiceController | undefined;
+  const requireVoice = (): VoiceController => {
+    if (!voice) throw new KernelFault('not-ready');
+    return voice;
+  };
   const requireRuntime = (): CompanionRuntime => {
     if (!runtime) throw new KernelFault('not-ready');
     return runtime;
@@ -186,6 +208,24 @@ export async function createCompanionService(
       },
     },
     ...(options.connectionPlugins ?? []).map((create) => create(portsFor)),
+  ];
+  const asrPortsFor: VoiceAsrPortsFor = (context) => requireVoice().providers.portsFor(context);
+  const asrRegistrations: VoiceAsrRegistration[] = [
+    {
+      manifest: asrManifest,
+      directory: directories.asr,
+      preset: 'allow',
+      enabled: !disabled.has(asrManifest.id),
+      hostCredentials: ['asr-api-key'],
+      definition: createMagpieAsrPlugin(asrPortsFor),
+      asr: {
+        providerId: 'magpie',
+        label: 'Magpie',
+        synthetic: false,
+        parseConfig: parseMagpieAsrSettings,
+      },
+    },
+    ...(options.voicePlugins ?? []).map((create) => create(asrPortsFor)),
   ];
   const registrations: ServicePluginRegistration[] = [
     {
@@ -259,6 +299,23 @@ export async function createCompanionService(
       enabled: !disabled.has(textManifest.id),
     },
     ...connections,
+    {
+      manifest: voiceManifest,
+      directory: directories.voice,
+      preset: 'allow',
+      enabled: false,
+      definition: createSharedVoicePlugin((context) => requireVoice().featurePorts(context)),
+    },
+    ...asrRegistrations.map((registration) => ({
+      ...registration,
+      enabled: false,
+      definition: definePlugin({
+        async activate(context) {
+          await requireVoice().providerPorts(context);
+          return registration.definition.activate(context);
+        },
+      }),
+    })),
   ];
   try {
     host = await CompanionPluginHost.create({
@@ -290,10 +347,13 @@ export async function createCompanionService(
       await models.seedEnvironment(MAGPIE_CONNECTION, options.modelApiKey, options.modelBaseUrl);
     await models.initialize();
     await runtime.initialize();
+    voice = new VoiceController(host, runtime, asrRegistrations);
+    await voice.initialize();
     http = await serveText({
       runtime,
       host,
       models,
+      voice,
       token: options.token,
       clientPluginId: textManifest.id,
       clientDirectory: path.join(directories.text, 'dist'),
@@ -309,34 +369,53 @@ export async function createCompanionService(
     const activeRuntime = runtime;
     const activeHttp = http;
     const activeModels = models;
+    const activeVoice = voice;
     let closing: Promise<void> | undefined;
     return {
       url: http.url,
       host,
       runtime,
       models,
+      voice,
       close() {
         return (closing ??= (async () => {
-          await activeHttp.close();
           try {
-            await activeRuntime.close();
+            await activeHttp.close();
           } finally {
             try {
-              await activeModels.close();
+              await activeVoice.close();
             } finally {
-              await activeHost.close();
+              try {
+                await activeRuntime.close();
+              } finally {
+                try {
+                  await activeModels.close();
+                } finally {
+                  await activeHost.close();
+                }
+              }
             }
           }
         })());
       },
     };
   } catch (error) {
-    await http?.close();
     try {
-      await runtime?.close();
+      await http?.close();
     } finally {
-      await models?.close();
-      await host?.close();
+      try {
+        await voice?.close();
+      } finally {
+        try {
+          await runtime?.close();
+        } finally {
+          try {
+            await models?.close();
+          } finally {
+            await host?.close();
+          }
+        }
+      }
     }
     throw error;
   }

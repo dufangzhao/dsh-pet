@@ -18,7 +18,12 @@ await build({
 // Reusable entries keep the host's React instance and existing kit dependency.
 await build({
   absWorkingDir: root,
-  entryPoints: ['src/protocol.ts', 'src/model-ui.ts', 'src/persona-memory-ui.ts'],
+  entryPoints: [
+    'src/protocol.ts',
+    'src/model-ui.ts',
+    'src/persona-memory-ui.ts',
+    'src/voice-input-ui.ts',
+  ],
   outdir: 'dist',
   bundle: true,
   platform: 'browser',
@@ -36,6 +41,22 @@ await copyFile(
   new URL('src/client/persona-memory.css', import.meta.url),
   new URL('dist/persona-memory.css', import.meta.url),
 );
+
+await copyFile(
+  new URL('src/client/voice-input.css', import.meta.url),
+  new URL('dist/voice-input.css', import.meta.url),
+);
+
+// Worklet stays a fixed same-origin asset under the existing CSP.
+await build({
+  absWorkingDir: root,
+  entryPoints: ['../audio-capture/src/capture-worklet.ts'],
+  outfile: 'dist/voice-capture-worklet.js',
+  bundle: true,
+  platform: 'browser',
+  format: 'esm',
+  target: 'es2022',
+});
 
 // 浏览器端：client.js 自带 React，页面只引这一个脚本和一份 CSS。
 await build({

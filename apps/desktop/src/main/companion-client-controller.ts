@@ -24,6 +24,12 @@ import {
   type OwnerRef,
   type Result,
   type KernelError,
+  type VoiceView,
+  type VoiceTicket,
+  type VoiceBeginSelection,
+  type VoiceResultKey,
+  type VoiceSettingsCommand,
+  type VoiceProviderCommand,
 } from '@pet/contracts';
 import { KernelFault } from '@pet/host-kernel';
 import {
@@ -40,6 +46,14 @@ import {
   saveModel,
   testModel,
   streamEvents,
+  getVoice,
+  saveVoiceSettings,
+  saveAsrProvider,
+  getVoiceCatalog,
+  beginVoiceCapture,
+  getVoiceCapture,
+  cancelVoiceCapture,
+  uploadVoiceCapture,
   type ClientTransport,
 } from '@pet/text-client/protocol';
 import type {
@@ -53,6 +67,8 @@ import {
   isCommittedArtifactSave,
   type ArtifactSaveCommit,
 } from './companion-artifact.js';
+
+import type { CompanionVoiceSession } from './companion-voice-service.js';
 
 const hasControls = (text: string): boolean =>
   [...text].some((character) => {
@@ -125,6 +141,7 @@ interface Pending {
 }
 interface Connection {
   readonly id: string;
+  readonly clientId: string;
   readonly source: DesktopCompanionSource;
   token: string;
   readonly abort: AbortController;
@@ -148,6 +165,7 @@ export class DesktopCompanionController {
   #retiring: Promise<void> | null = null;
   #control = false;
   #closed = false;
+  readonly #voiceRetiring = new Set<(connectionId: string) => Promise<void>>();
   #initialization = 0;
   readonly #offCommit: () => void;
   constructor(
@@ -256,6 +274,88 @@ export class DesktopCompanionController {
       connection.work.delete(work);
     }
   }
+  onVoiceRetiring(listener: (connectionId: string) => Promise<void>): () => void {
+    this.#voiceRetiring.add(listener);
+    return () => {
+      this.#voiceRetiring.delete(listener);
+    };
+  }
+  voiceSession(target: DesktopCompanionTarget): CompanionVoiceSession {
+    const connection = this.#binding(target);
+    const agent = this.#state.snapshot?.agent;
+    if (!agent || agent.status === 'unavailable') throw new KernelFault('not-ready');
+    const agentId = agent.id;
+    const serviceEpoch = this.#state.snapshot?.epoch;
+    const current = () =>
+      this.#current(connection) &&
+      this.#state.phase === 'live' &&
+      this.#state.snapshot?.agent.id === agentId &&
+      this.#state.snapshot.epoch === serviceEpoch;
+    const run = <T>(
+      operation: (transport: ClientTransport, signal: AbortSignal) => Promise<Result<T>>,
+      signal?: AbortSignal,
+    ) => {
+      if (!current()) return Promise.resolve(fail<T>('stale-owner'));
+      return this.#run(connection, async (transport, authorized) => {
+        if (!current()) return fail<T>('stale-owner');
+        const value = await operation(
+          transport,
+          signal ? AbortSignal.any([authorized, signal]) : authorized,
+        );
+        return current() ? value : fail<T>('stale-owner');
+      });
+    };
+    const view = (value: VoiceView) => ({
+      ...value,
+      providers: value.providers.map((provider) => ({
+        ...provider,
+        credential: { ...provider.credential, writable: false },
+      })),
+    });
+    const manage = async (operation: Parameters<typeof run<VoiceView>>[0]) => {
+      const result = await run(operation);
+      return result.ok ? { ok: true as const, value: view(result.value) } : result;
+    };
+    return Object.freeze<CompanionVoiceSession>({
+      connectionId: connection.id,
+      clientId: connection.clientId,
+      agentId,
+      signal: connection.abort.signal,
+      isCurrent: async () => {
+        if (!current()) return false;
+        const valid = await this.host.isCurrent(connection.source);
+        return current() && valid;
+      },
+      readVoice: async (signal?: AbortSignal) => {
+        const result = await run((t, s) => getVoice(t, s), signal);
+        return result.ok ? { ok: true as const, value: view(result.value) } : result;
+      },
+      saveSettings: (command: VoiceSettingsCommand) =>
+        manage((t, s) => saveVoiceSettings(t, command, s)),
+      saveProvider: (command: VoiceProviderCommand) =>
+        manage((t, s) => saveAsrProvider(t, command, s)),
+      catalog: (input: { providerRef: string; bindingId: string }) =>
+        run((t, s) => getVoiceCatalog(t, input, s)),
+      begin: (selection: VoiceBeginSelection, signal: AbortSignal) =>
+        run<VoiceTicket>(
+          (t, s) =>
+            beginVoiceCapture(t, { ...selection, clientId: connection.clientId, agentId }, s),
+          signal,
+        ),
+      upload: (ticket: VoiceTicket, samples: number, pcm: Uint8Array, signal: AbortSignal) =>
+        ticket.clientId !== connection.clientId || ticket.agentId !== agentId
+          ? Promise.resolve(fail('stale-owner'))
+          : run((t, s) => uploadVoiceCapture(t, ticket, samples, pcm, s), signal),
+      result: (key: VoiceResultKey, signal?: AbortSignal) =>
+        key.clientId !== connection.clientId || key.agentId !== agentId
+          ? Promise.resolve(fail('stale-owner'))
+          : run((t, s) => getVoiceCapture(t, key, s), signal),
+      cancel: (ticket: VoiceTicket) =>
+        ticket.clientId !== connection.clientId || ticket.agentId !== agentId
+          ? Promise.resolve(fail('stale-owner'))
+          : run((t, s) => cancelVoiceCapture(t, ticket, s)),
+    });
+  }
   async connect(input: {
     expectedRevision: number;
     baseUrl: string;
@@ -320,6 +420,7 @@ export class DesktopCompanionController {
       }
       const connection: Connection = {
         id: randomUUID(),
+        clientId: randomUUID(),
         source: current.value,
         token: input.token,
         abort: new AbortController(),
@@ -435,6 +536,14 @@ export class DesktopCompanionController {
   }
   #adopt(connection: Connection, snapshot: CompanionSnapshot): void {
     if (!this.#current(connection)) return;
+    const previous = this.#state.snapshot;
+    if (
+      previous &&
+      (previous.agent.id !== snapshot.agent.id || previous.epoch !== snapshot.epoch)
+    ) {
+      // Fence the captured audio intent before publishing a replacement Agent/service epoch.
+      void Promise.allSettled([...this.#voiceRetiring].map((listener) => listener(connection.id)));
+    }
     for (const [id, pending] of connection.pending) {
       if (pending.view.kind === 'message' && snapshot.messages.some((item) => item.inputId === id))
         connection.pending.delete(id);
@@ -801,8 +910,11 @@ export class DesktopCompanionController {
     if (connection.timer) clearTimeout(connection.timer);
     connection.timer = null;
     this.#publish({ phase: 'retiring' });
+    const retireVoice = [...this.#voiceRetiring].map((listener) =>
+      Promise.resolve().then(() => listener(connection.id)),
+    );
     const retiring = (async () => {
-      const results = await Promise.allSettled([...connection.work]);
+      const results = await Promise.allSettled([...retireVoice, ...connection.work]);
       if (results.some((item) => item.status === 'rejected')) throw new KernelFault('unavailable');
       if (this.#connection === connection) this.#connection = null;
       this.#publish({ phase: 'offline', connectionId: null, pending: [] });

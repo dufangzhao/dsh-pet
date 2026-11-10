@@ -28,12 +28,15 @@ import {
   petStateOf,
 } from '../../shared/companion-state.js';
 import { Button, Card, Field, Status, type StatusTone } from '../minimal-ui/controls.js';
+import type { VoiceController } from '@pet/text-client/voice-input-ui';
+import { VoiceCard } from './voice-card.js';
 
 import '@pet/text-client/model.css';
 
 export interface StartPageProps {
   companion: CompanionView;
   presentation: LocalPresentationView;
+  voice: VoiceController;
   notify: (message: string, tone: 'ok' | 'danger') => void;
 }
 
@@ -49,11 +52,12 @@ function toneOf(tone: string): StatusTone {
   return STATUS_TONE[tone] ?? 'muted';
 }
 
-export function StartPage({ companion, presentation, notify }: StartPageProps): JSX.Element {
+export function StartPage({ companion, presentation, voice, notify }: StartPageProps): JSX.Element {
   return (
     <>
       <ConnectionCard companion={companion} notify={notify} />
       <ModelCard companion={companion} />
+      <VoiceCard companion={companion} voice={voice} notify={notify} />
       <PetCard companion={companion} presentation={presentation} notify={notify} />
     </>
   );

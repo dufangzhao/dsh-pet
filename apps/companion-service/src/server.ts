@@ -17,6 +17,8 @@ import {
 import { KernelFault } from '@pet/host-kernel';
 import type { CompanionRuntime, CompanionPluginHost } from '@pet/companion-runtime';
 import type { ModelConnectionController } from './model-controller.js';
+import type { VoiceController } from './voice-controller.js';
+import { voiceHttp } from './voice-http.js';
 
 const MAX_BODY = 64 * 1024;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
@@ -137,6 +139,7 @@ export interface TextServiceOptions {
   readonly runtime: CompanionRuntime;
   readonly host: CompanionPluginHost;
   readonly models?: ModelConnectionController;
+  readonly voice?: VoiceController;
   readonly token: string;
   readonly hostname?: string;
   readonly port?: number;
@@ -269,6 +272,7 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
         '/index.html': 'index.html',
         '/client.js': 'client.js',
         '/client.css': 'client.css',
+        '/voice-capture-worklet.js': 'voice-capture-worklet.js',
       };
       const name = names[pathname];
       if (!name) {
@@ -304,6 +308,11 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       host: request.headers.host,
       origin: typeof origin === 'string' ? origin : undefined,
     });
+    if (pathname.startsWith('/api/voice')) {
+      if (!options.voice) throw new KernelFault('not-ready');
+      if (await voiceHttp({ request, response, url, writable, voice: options.voice, body, send }))
+        return;
+    }
     if (method === 'GET' && pathname === '/api/snapshot') {
       const snapshot = await options.runtime.snapshot();
       send(response, 200, {

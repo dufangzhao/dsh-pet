@@ -7,6 +7,18 @@
  */
 import {
   errorMessage,
+  COMPANION_MAX_TEXT,
+  type CompanionMessageCommand,
+  type VoiceSubmitTarget,
+  type VoiceBegin,
+  type VoiceTicket,
+  type VoiceResultKey,
+  type VoiceView,
+  type VoiceCatalog,
+  type VoiceCaptureResult,
+  type VoiceSettingsCommand,
+  type VoiceProviderCommand,
+  type VoiceCredentialCommand,
   type CompanionProfileView,
   type CompanionProfileSaveCommand,
   type CompanionMemoryView,
@@ -40,6 +52,7 @@ import {
   STREAM_IDLE_TIMEOUT_MS,
   type ClientTransport,
 } from './protocol.js';
+import * as voiceProtocol from './voice-protocol.js';
 import {
   initialClientState,
   reduce,
@@ -76,6 +89,7 @@ export class CompanionClient {
   #state: ClientState = initialClientState;
   #token = '';
   #controller: AbortController | null = null;
+  #clientId: string | null = null;
   #refreshTimer: ReturnType<typeof setTimeout> | null = null;
   #refreshing = false;
   #refreshPending = false;
@@ -110,6 +124,7 @@ export class CompanionClient {
     this.#dispatch({ type: 'connect' });
     const controller = new AbortController();
     this.#controller = controller;
+    this.#clientId = newCommandId();
     const snapshot = await getSnapshot(this.#transport, controller.signal);
     if (controller.signal.aborted) return;
     if (!snapshot.ok) {
@@ -139,16 +154,74 @@ export class CompanionClient {
     await this.connect(this.#token);
   }
 
-  /** 提交一条文字。结果不明时复用同一 commandId；内容变了就是新意图。 */
+  /** A generation fence, not a token or a mutable dispatch target. */
+  getVoiceTarget(): VoiceSubmitTarget | null {
+    const agent = this.#state.snapshot?.agent.id;
+    return this.#state.phase === 'live' &&
+      this.#controller !== null &&
+      this.#clientId !== null &&
+      agent
+      ? { clientId: this.#clientId, agentId: agent }
+      : null;
+  }
+
+  /** Ordinary typing retains its same-text uncertain retry policy. */
   async submit(text: string): Promise<SubmitOutcome> {
+    const target = this.getVoiceTarget();
     const trimmed = text.trim();
-    if (trimmed === '' || this.#state.phase !== 'live') return 'skipped';
-    const commandId = reuseCommandId(this.#state.outbox, trimmed) ?? this.#newCommandId();
-    this.#dispatch({
-      type: 'outbox-add',
-      entry: { commandId, text: trimmed, uncertain: false },
-    });
-    const result = await sendMessage(this.#transport, { commandId, text: trimmed });
+    if (!target || !trimmed) return 'skipped';
+    return this.submitIntent(
+      {
+        commandId: reuseCommandId(this.#state.outbox, trimmed) ?? this.#newCommandId(),
+        text: trimmed,
+      },
+      target,
+    );
+  }
+
+  /** Voice uses an explicit immutable intent without overwriting another composer/outbox entry. */
+  async submitIntent(
+    command: CompanionMessageCommand,
+    target: VoiceSubmitTarget,
+  ): Promise<SubmitOutcome> {
+    const current = this.getVoiceTarget();
+    const controller = this.#controller;
+    if (
+      !current ||
+      !controller ||
+      current.clientId !== target.clientId ||
+      current.agentId !== target.agentId
+    )
+      return 'skipped';
+    const text = command.text.trim();
+    if (
+      !text ||
+      text.length > COMPANION_MAX_TEXT ||
+      !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(command.commandId)
+    )
+      return 'failed';
+    const existing = this.#state.outbox.find((entry) => entry.commandId === command.commandId);
+    if (existing && existing.text !== text) return 'failed';
+    const transport = this.#transport;
+    const commandId = command.commandId;
+    this.#dispatch({ type: 'outbox-add', entry: { commandId, text, uncertain: false } });
+    const result = await sendMessage(transport, { commandId, text }, controller.signal);
+    const after = this.getVoiceTarget();
+    if (
+      controller.signal.aborted ||
+      this.#controller !== controller ||
+      !after ||
+      after.clientId !== target.clientId ||
+      after.agentId !== target.agentId
+    )
+      return 'skipped';
+    if (
+      this.#state.snapshot?.messages.some(
+        (message) =>
+          message.role === 'user' && message.inputId === commandId && message.text === text,
+      )
+    )
+      return 'accepted';
     if (result.ok) {
       this.#dispatch({ type: 'outbox-accepted', commandId });
       this.#scheduleRefresh();
@@ -160,6 +233,90 @@ export class CompanionClient {
     }
     this.#dispatch({ type: 'outbox-failed', commandId, error: result.error });
     return 'failed';
+  }
+
+  async #voiceOperation<T>(
+    target: VoiceSubmitTarget,
+    operation: (transport: ClientTransport, signal: AbortSignal) => Promise<Result<T>>,
+  ): Promise<Result<T>> {
+    const current = this.getVoiceTarget();
+    const controller = this.#controller;
+    if (
+      !current ||
+      !controller ||
+      current.clientId !== target.clientId ||
+      current.agentId !== target.agentId
+    )
+      return { ok: false, error: makeError('stale-owner', false) };
+    const result = await operation(this.#transport, controller.signal);
+    const after = this.getVoiceTarget();
+    return !controller.signal.aborted &&
+      this.#controller === controller &&
+      after?.clientId === target.clientId &&
+      after.agentId === target.agentId
+      ? result
+      : { ok: false, error: makeError('stale-owner', false) };
+  }
+  readVoice(target: VoiceSubmitTarget): Promise<Result<VoiceView>> {
+    return this.#voiceOperation(target, (transport, signal) =>
+      voiceProtocol.getVoice(transport, signal),
+    );
+  }
+  saveVoiceSettings(
+    command: VoiceSettingsCommand,
+    target: VoiceSubmitTarget,
+  ): Promise<Result<VoiceView>> {
+    return this.#voiceOperation(target, (transport, signal) =>
+      voiceProtocol.saveVoiceSettings(transport, command, signal),
+    );
+  }
+  saveAsrProvider(
+    command: VoiceProviderCommand,
+    target: VoiceSubmitTarget,
+  ): Promise<Result<VoiceView>> {
+    return this.#voiceOperation(target, (transport, signal) =>
+      voiceProtocol.saveAsrProvider(transport, command, signal),
+    );
+  }
+  writeVoiceCredential(
+    command: VoiceCredentialCommand,
+    target: VoiceSubmitTarget,
+  ): Promise<Result<VoiceView>> {
+    return this.#voiceOperation(target, (transport, signal) =>
+      voiceProtocol.writeVoiceCredential(transport, command, signal),
+    );
+  }
+  readAsrCatalog(
+    input: { providerRef: string; bindingId: string },
+    target: VoiceSubmitTarget,
+  ): Promise<Result<VoiceCatalog>> {
+    return this.#voiceOperation(target, (transport, signal) =>
+      voiceProtocol.getVoiceCatalog(transport, input, signal),
+    );
+  }
+  beginVoiceCapture(input: VoiceBegin): Promise<Result<VoiceTicket>> {
+    return this.#voiceOperation(input, (transport, signal) =>
+      voiceProtocol.beginVoiceCapture(transport, input, signal),
+    );
+  }
+  uploadVoiceCapture(
+    ticket: VoiceTicket,
+    samples: number,
+    pcm: Uint8Array,
+  ): Promise<Result<VoiceCaptureResult>> {
+    return this.#voiceOperation(ticket, (transport, signal) =>
+      voiceProtocol.uploadVoiceCapture(transport, ticket, samples, pcm, signal),
+    );
+  }
+  readVoiceCapture(key: VoiceResultKey): Promise<Result<VoiceCaptureResult>> {
+    return this.#voiceOperation(key, (transport, signal) =>
+      voiceProtocol.getVoiceCapture(transport, key, signal),
+    );
+  }
+  cancelVoiceCapture(key: VoiceResultKey): Promise<Result<VoiceCaptureResult>> {
+    return this.#voiceOperation(key, (transport, signal) =>
+      voiceProtocol.cancelVoiceCapture(transport, key, signal),
+    );
   }
 
   async requestStop(taskId: string): Promise<void> {
@@ -362,6 +519,7 @@ export class CompanionClient {
     this.#refreshPending = false;
     this.#controller?.abort();
     this.#controller = null;
+    this.#clientId = null;
   }
 
   #dispatch(action: ClientAction): void {

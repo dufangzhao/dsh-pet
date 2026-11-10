@@ -7,9 +7,13 @@
 import { errorMessage, type CompanionMessage } from '@pet/contracts';
 import { useEffect, useRef, useState, type JSX } from 'react';
 
+import { VoiceInput, type VoiceController } from '@pet/text-client/voice-input-ui';
+
 import { Button, Status } from '../minimal-ui/controls.js';
 import type { CompanionView } from '../../shared/use-companion.js';
 import { newCommandId } from '../../shared/commands.js';
+import '@pet/text-client/voice-input.css';
+
 import {
   agentModeLabel,
   canSend,
@@ -24,6 +28,8 @@ import {
 
 export interface ConversationPageProps {
   companion: CompanionView;
+  /** 语音 owner 的视图；owner 在外壳上，这里只挂载，不持有设备。 */
+  voice: VoiceController;
   onGoToStart: () => void;
   notify: (message: string, tone: 'ok' | 'danger') => void;
 }
@@ -50,6 +56,7 @@ function MessageRow({ message, name }: { message: CompanionMessage; name: string
 
 export function ConversationPage({
   companion,
+  voice,
   onGoToStart,
   notify,
 }: ConversationPageProps): JSX.Element {
@@ -334,6 +341,9 @@ export function ConversationPage({
           发送
         </Button>
       </form>
+
+      {/* 语音与打字并行：录音不禁用输入框，草稿也互不覆盖。 */}
+      <VoiceInput controller={voice} />
     </section>
   );
 }

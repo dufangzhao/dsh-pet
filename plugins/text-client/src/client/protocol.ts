@@ -29,7 +29,6 @@ import {
 } from '@pet/contracts';
 
 import {
-  parseEnvelope,
   parseMemory,
   parseMemoryMutation,
   parseEvent,
@@ -40,6 +39,7 @@ import {
   parseTask,
 } from './guards.js';
 import { SseDecoder, type SseMessage } from './sse.js';
+import { networkError, statusError, requestJson } from './request.js';
 
 export interface ClientTransport {
   /** 服务根地址；同源部署时为空串，请求走相对路径。 */
@@ -77,10 +77,6 @@ export type SnapshotResult =
   | { readonly ok: true; readonly value: CompanionSnapshot }
   | { readonly ok: false; readonly error: KernelError; readonly protocolVersion?: number };
 
-function networkError(): KernelError {
-  return makeError('network');
-}
-
 /** 单个 HTTP 请求的上限。SSE 有自己的心跳看门狗，不走这个值。 */
 export const REQUEST_TIMEOUT_MS = 20_000;
 let requestTimeoutMs = REQUEST_TIMEOUT_MS;
@@ -89,87 +85,12 @@ export function setRequestTimeoutMs(value: number): void {
   requestTimeoutMs = value;
 }
 
-/** 认证失败与其它错误分开：前者不该自动重试，后者可以手动重连。 */
-function statusError(status: number): KernelError {
-  if (status === 401 || status === 403) return makeError('auth-failed', false);
-  if (status === 409) return makeError('conflict', false);
-  if (status === 429) return makeError('rate-limited');
-  if (status === 404) return makeError('unavailable', false);
-  if (status >= 500) return makeError('unavailable');
-  return makeError('invalid-input', false);
-}
-
-async function responseJson(response: Response): Promise<unknown> {
-  if (!response.body) throw new Error('Missing JSON body');
-  const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  try {
-    for (;;) {
-      const next = await reader.read();
-      if (next.done) break;
-      size += next.value.byteLength;
-      if (size > 64 * 1024) throw new Error('Wire budget exceeded');
-      chunks.push(next.value);
-    }
-  } finally {
-    await reader.cancel().catch(() => {});
-    reader.releaseLock();
-  }
-  const bytes = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
-}
-
-async function request(
+function request(
   transport: ClientTransport,
   path: string,
   init: RequestInit,
 ): Promise<Result<unknown>> {
-  // 断网时 TCP 常常只是挂起而不报错：没有上限就会永远等下去，
-  // 让上层一直以为连接还活着。这个上限与「空闲轮询」无关。
-  const timeout = AbortSignal.timeout(requestTimeoutMs);
-  const signal =
-    init.signal === null || init.signal === undefined
-      ? timeout
-      : AbortSignal.any([init.signal, timeout]);
-  let response: Response;
-  try {
-    response = await fetch(`${transport.baseUrl}${path}`, {
-      ...init,
-      signal,
-      headers: {
-        Authorization: `Bearer ${transport.token}`,
-        Accept: 'application/json',
-        ...init.headers,
-      },
-      // 同源部署没有跨站 cookie 需求；显式关闭以免携带无关凭据。
-      credentials: 'omit',
-      redirect: 'error',
-      cache: 'no-store',
-    });
-  } catch {
-    return { ok: false, error: timeout.aborted ? makeError('timeout') : networkError() };
-  }
-  let body: unknown;
-  try {
-    body = await responseJson(response);
-  } catch {
-    if (timeout.aborted) return { ok: false, error: makeError('timeout') };
-    // 200 却不是 JSON，说明中间有代理或服务本身坏了，不能当成正常拒绝。
-    return {
-      ok: false,
-      error: response.ok ? makeError('unavailable', false) : statusError(response.status),
-    };
-  }
-  const envelope = parseEnvelope(body);
-  if (!envelope.ok) return { ok: false, error: envelope.failure.error };
-  if (!response.ok) return { ok: false, error: statusError(response.status) };
-  return { ok: true, value: envelope.value };
+  return requestJson(transport, path, init, requestTimeoutMs);
 }
 
 export async function getSnapshot(

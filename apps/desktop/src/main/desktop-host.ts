@@ -94,6 +94,10 @@ export class DesktopHost {
       readonly sourcePluginId: string;
       stopFor(owner: OwnerRef): Promise<void>;
     };
+    captureLifecycle?: {
+      readonly sourcePluginId: string;
+      stopFor(owner: OwnerRef): Promise<void>;
+    };
     onChanged?: () => void;
     workerEntry: string;
     builtinDirectory: string;
@@ -212,12 +216,17 @@ export class DesktopHost {
         return result;
       }
     })(new FileConfigStore(configRoot), (owner) => reference.manager?.isLive(owner) === true);
-    const lifecycle = options.companionLifecycle;
-    const managedDriver: RuntimeDriver = lifecycle
+    const lifecycles = [options.companionLifecycle, options.captureLifecycle].filter(
+      (item) => item !== undefined,
+    );
+    const managedDriver: RuntimeDriver = lifecycles.length
       ? {
           start(activation, registrar) {
             const session = driver.start(activation, registrar);
-            if (activation.owner.pluginId !== lifecycle.sourcePluginId) return session;
+            const lifecycle = lifecycles.find(
+              (item) => activation.owner.pluginId === item.sourcePluginId,
+            );
+            if (!lifecycle) return session;
             return {
               ready: session.ready,
               async stop() {

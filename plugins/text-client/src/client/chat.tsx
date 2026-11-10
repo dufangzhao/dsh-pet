@@ -1,4 +1,4 @@
-import { useEffect, useRef, type JSX } from 'react';
+import { useEffect, useRef, type JSX, type ReactNode } from 'react';
 import { StatusBadge } from '@pet/ui-kit';
 import type { CompanionMessage, CompanionTask } from '@pet/contracts';
 
@@ -12,6 +12,8 @@ interface ConversationProps {
   readonly draft: string;
   readonly onDraftChange: (value: string) => void;
   readonly onSubmit: () => void;
+  /** 语音 owner 的视图；它自己持有设备与 intent，这里只挂载。 */
+  readonly voice?: ReactNode;
 }
 
 export function Conversation({
@@ -19,6 +21,7 @@ export function Conversation({
   draft,
   onDraftChange,
   onSubmit,
+  voice,
 }: ConversationProps): JSX.Element {
   const listRef = useRef<HTMLDivElement>(null);
   const messages = state.snapshot?.messages ?? [];
@@ -118,6 +121,8 @@ export function Conversation({
           </button>
         </div>
       </form>
+      {/* 语音与打字并行：录音不禁用输入框，草稿也互不覆盖。 */}
+      {voice}
     </div>
   );
 }

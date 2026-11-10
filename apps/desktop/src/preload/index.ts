@@ -6,6 +6,7 @@ import {
   PRESENTATION_IPC,
   SPEECH_OUTPUT_IPC,
   DESKTOP_COMPANION_IPC,
+  DESKTOP_VOICE_IPC,
   DESKTOP_PRESENTATION_IPC,
   type PetPrototypeBridge,
   type PetReply,
@@ -28,6 +29,7 @@ import { createConsoleBridge } from './console-bridge.js';
 import { createSettingsLauncher } from './settings-launcher.js';
 import { createSecurityBridge } from './security-bridge.js';
 import { createHostStatusBridge } from './host-bridge.js';
+import { createDesktopVoiceBridge } from './shared-voice-bridge.js';
 const cleanup = new Set<() => void>();
 function subscribe<T>(channel: string, listener: (value: T) => void): () => void {
   const receive = (_event: Electron.IpcRendererEvent, value: T) => listener(value);
@@ -68,6 +70,13 @@ contextBridge.exposeInMainWorld(
   createDesktopCompanionBridge(
     (channel, ...args) => ipcRenderer.invoke(channel, ...args),
     (listener) => changed(DESKTOP_COMPANION_IPC.changed, listener),
+  ),
+);
+contextBridge.exposeInMainWorld(
+  'petVoice',
+  createDesktopVoiceBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => changed(DESKTOP_VOICE_IPC.changed, listener),
   ),
 );
 contextBridge.exposeInMainWorld(

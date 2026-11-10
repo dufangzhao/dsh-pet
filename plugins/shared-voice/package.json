@@ -1,0 +1,32 @@
+{
+  "name": "@pet/shared-voice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*",
+    "@pet/host-kernel": "workspace:*",
+    "@pet/companion-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "esbuild": "0.28.2"
+  }
+}

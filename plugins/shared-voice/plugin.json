@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.shared-voice",
+  "version": "0.1.0",
+  "displayName": { "en": "Shared voice input", "zh-CN": "共享语音输入" },
+  "description": { "en": "Explicit utterance input for the same continuing companion" },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "input",
+      "capability": "companion.voice.input@1",
+      "features": {
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "consumes": [{ "capability": "companion.voice.asr@1", "optional": true }],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "capability-use", "capability": "companion.voice.asr@1" }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["providerRef", "finishMode"],
+      "properties": {
+        "providerRef": { "type": "string", "maxLength": 256, "default": "pet.asr-magpie/magpie" },
+        "finishMode": { "type": "string", "enum": ["send", "review"], "default": "send" }
+      }
+    },
+    "apply": { "providerRef": "immediate", "finishMode": "immediate" }
+  }
+}

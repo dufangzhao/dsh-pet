@@ -7,6 +7,8 @@ import { ConversationPage } from './conversation.js';
 import { PersonaPage } from './persona.js';
 import { StartPage } from './start.js';
 import type { CompanionView } from '../../shared/use-companion.js';
+import type { VoiceController } from '@pet/text-client/voice-input-ui';
+import { emptyVoiceState } from '@pet/text-client/voice-input-ui';
 import type { LocalPresentationView } from '../../shared/use-local-presentation.js';
 import { endpointBaseline, endpointMoved, rebaseOnConnect } from '../../shared/companion-state.js';
 import { initialDesktopCompanionState } from '../test-state.js';
@@ -17,6 +19,26 @@ import { initialDesktopCompanionState } from '../test-state.js';
  * 本机呈现的开关改的是这台机器，不是服务里的助手。
  */
 const noop = (): void => undefined;
+
+/** 语音 owner 的静态替身：只有视图，没有设备。 */
+function voice(over: Partial<VoiceController> = {}): VoiceController {
+  return {
+    state: emptyVoiceState,
+    view: null,
+    mode: 'send',
+    hint: '最多录 20 秒，到时自动结束并发送。',
+    rules: { ok: false, reason: '当前未连接服务。' },
+    level: 0,
+    reload: noop,
+    recover: noop,
+    start: noop,
+    finish: noop,
+    cancel: noop,
+    send: noop,
+    edit: noop,
+    ...over,
+  };
+}
 
 const snapshot = (over: Partial<DesktopCompanionState> = {}): DesktopCompanionState => ({
   ...initialDesktopCompanionState(),
@@ -71,6 +93,22 @@ function companion(over: Partial<CompanionView> = {}): CompanionView {
       error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
     }),
     testModel: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    readVoice: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    saveVoiceSettings: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    saveAsrProvider: async () => ({
+      ok: false,
+      error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
+    }),
+    readAsrCatalog: async () => ({
       ok: false,
       error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },
     }),
@@ -143,6 +181,7 @@ describe('开始页', () => {
       <StartPage
         companion={companion({ available: false, state: null })}
         presentation={presentation()}
+        voice={voice()}
         notify={noop}
       />,
     );
@@ -152,7 +191,12 @@ describe('开始页', () => {
 
   it('还没连接：状态说未连接，连接按钮在，令牌框默认不占位', () => {
     const html = renderToStaticMarkup(
-      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+      <StartPage
+        companion={companion()}
+        presentation={presentation()}
+        voice={voice()}
+        notify={noop}
+      />,
     );
     expect(html).toContain('未连接');
     expect(html).toContain('data-testid="start-address"');
@@ -189,7 +233,12 @@ describe('开始页', () => {
       },
     });
     const html = renderToStaticMarkup(
-      <StartPage companion={companion({ state })} presentation={presentation()} notify={noop} />,
+      <StartPage
+        companion={companion({ state })}
+        presentation={presentation()}
+        voice={voice()}
+        notify={noop}
+      />,
     );
     expect(html).toContain('阿蓝');
     expect(html).toContain('脚本演示，未调用模型');
@@ -244,7 +293,12 @@ describe('开始页', () => {
 
   it('令牌输入收起时不占位，且有一条显式取消的路', () => {
     const html = renderToStaticMarkup(
-      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+      <StartPage
+        companion={companion()}
+        presentation={presentation()}
+        voice={voice()}
+        notify={noop}
+      />,
     );
     // 没点开就没有密码框：不默认铺一个 secret 输入。
     expect(html).not.toContain('data-testid="start-token"');
@@ -255,7 +309,12 @@ describe('开始页', () => {
 
   it('地址字段与令牌字段是两件事：换地址不需要重新点开输入', () => {
     const html = renderToStaticMarkup(
-      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+      <StartPage
+        companion={companion()}
+        presentation={presentation()}
+        voice={voice()}
+        notify={noop}
+      />,
     );
     expect(html).toContain('data-testid="start-address"');
     expect(html).toContain('令牌只用于这一次连接');
@@ -266,6 +325,7 @@ describe('开始页', () => {
       <StartPage
         companion={companion({ state: snapshot({ phase: 'live', connectionId: 'c1' }) })}
         presentation={presentation()}
+        voice={voice()}
         notify={noop}
       />,
     );
@@ -279,6 +339,7 @@ describe('开始页', () => {
       <StartPage
         companion={companion({ state: snapshot({ phase: 'offline', connectionId: 'c1' }) })}
         presentation={presentation()}
+        voice={voice()}
         notify={noop}
       />,
     );
@@ -288,7 +349,12 @@ describe('开始页', () => {
 
   it('未连接时按钮可用，措辞是初次连接', () => {
     const html = renderToStaticMarkup(
-      <StartPage companion={companion()} presentation={presentation()} notify={noop} />,
+      <StartPage
+        companion={companion()}
+        presentation={presentation()}
+        voice={voice()}
+        notify={noop}
+      />,
     );
     expect(tag(html, 'start-ask-token')).not.toContain('disabled');
     expect(html).toContain('输入令牌并连接');
@@ -300,6 +366,7 @@ describe('开始页', () => {
         <StartPage
           companion={companion({ state: snapshot({ phase, connectionId: 'c1' }) })}
           presentation={presentation()}
+          voice={voice()}
           notify={noop}
         />,
       );
@@ -313,6 +380,7 @@ describe('开始页', () => {
         <StartPage
           companion={companion({ state: snapshot({ source, phase: 'live', connectionId: 'c1' }) })}
           presentation={presentation()}
+          voice={voice()}
           notify={noop}
         />,
       );
@@ -325,6 +393,7 @@ describe('开始页', () => {
       <StartPage
         companion={companion({ state: snapshot({ source: 'disabled' }) })}
         presentation={presentation()}
+        voice={voice()}
         notify={noop}
       />,
     );
@@ -336,7 +405,7 @@ describe('开始页', () => {
 describe('对话页', () => {
   it('还没连上：说清去哪里连，不给一个能发出去的输入框', () => {
     const html = renderToStaticMarkup(
-      <ConversationPage companion={companion()} notify={noop} onGoToStart={noop} />,
+      <ConversationPage companion={companion()} voice={voice()} notify={noop} onGoToStart={noop} />,
     );
     expect(html).toContain('还没有连上服务');
     expect(html).toContain('data-testid="conversation-go-start"');
@@ -401,7 +470,12 @@ describe('对话页', () => {
       },
     });
     const html = renderToStaticMarkup(
-      <ConversationPage companion={companion({ state })} notify={noop} onGoToStart={noop} />,
+      <ConversationPage
+        companion={companion({ state })}
+        voice={voice()}
+        notify={noop}
+        onGoToStart={noop}
+      />,
     );
     expect(html).toContain('现在几点');
     expect(html).toContain('十点整。');
@@ -437,7 +511,12 @@ describe('对话页', () => {
       },
     });
     const html = renderToStaticMarkup(
-      <ConversationPage companion={companion({ state })} notify={noop} onGoToStart={noop} />,
+      <ConversationPage
+        companion={companion({ state })}
+        voice={voice()}
+        notify={noop}
+        onGoToStart={noop}
+      />,
     );
     expect(html).toContain('上一条消息结果未知');
     expect(html).toContain('重试会复用同一次提交');
