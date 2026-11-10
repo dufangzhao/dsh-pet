@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 25
-- **Last Active**: 2026-11-09
+- **Total Sessions**: 26
+- **Last Active**: 2026-11-11
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~941 | Active |
+| `journal-1.md` | ~975 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 26 | 2026-11-11 | Complete shared voice input and live Magpie ASR verification | `b58c9958a6a2f029490a2dbfc52cd58565738a91`, `c1583c179283624a06d5f091dfc480a3b3da968a` | `feat/shared-voice-input` |
 | 25 | 2026-11-09 | Controlled persona and explicit persistent memory | `c673f2d`, `3277f2a` | `feat/controlled-persona-memory` |
 | 24 | 2026-11-08 | Shared desktop pet and console Agent entry | `ec441f8`, `8321cfa` | `feat/shared-desktop-agent-entry` |
 | 23 | 2026-11-08 | Replaceable Magpie connection and useful text stage | `6778eec`, `0be35b1`, `6c49a21` | `feat/companion-model-text-loop` |

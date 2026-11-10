@@ -939,3 +939,37 @@ Completed persona CAS and revisioned active-memory management with explicit synt
 ### Next Steps
 
 - Parent continues the separately scoped voice-entry research and creates any next child. M4 research stays excluded and untouched by this closure; original4120/profile/token remain preserved.
+
+
+## Session 26: Complete shared voice input and live Magpie ASR verification
+
+**Date**: 2026-11-11
+**Task**: Complete shared voice input and live Magpie ASR verification
+**Branch**: `feat/shared-voice-input`
+
+### Summary
+
+Completed M4 shared web/desktop voice input through ordinary Magpie sources, exact capture ownership, real release/tail handling, catalog/draft CAS and existing same-Agent outbox. Full root gate passed; frozen production native/Web, independent Core/Docker, and one explicitly authorized 3-second real MiMo ASR request passed (开放时间早上九点; 2655ms; no Agent message/task). Task archived with code-spec, operator guide and scoped evidence. Next: plan Magpie TTS output under the ongoing roadmap; real hardware/Windows and full duplex remain separate scope.
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `b58c9958a6a2f029490a2dbfc52cd58565738a91` | (see git log) |
+| `c1583c179283624a06d5f091dfc480a3b3da968a` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
