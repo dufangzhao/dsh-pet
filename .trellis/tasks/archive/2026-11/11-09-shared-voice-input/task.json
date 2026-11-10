@@ -15,7 +15,7 @@
   "branch": "feat/shared-voice-input",
   "base_branch": "feat/controlled-persona-memory",
   "worktree_path": null,
-  "commit": null,
+  "commit": "c1583c179283624a06d5f091dfc480a3b3da968a",
   "pr_url": null,
   "subtasks": [],
   "children": [],

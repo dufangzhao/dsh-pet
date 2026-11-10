@@ -8,4 +8,4 @@
 {"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Single snapshots, render-captured target fences, independent drafts and native window behavior."}
 {"file":".trellis/spec/frontend/model-settings.md","reason":"Explicit configure/read/check outcomes, draft CAS, secrets and stale async completion behavior."}
 {"file":".trellis/tasks/11-06-unified-companion-architecture/research/voice-entry.md","reason":"Verified capture/provider seams, local AstrBot reference and actual independent Magpie complete catalog; metadata is not inference evidence."}
-{"file":".trellis/tasks/11-09-shared-voice-input/research/voice-input-ux.md","reason":"First-slice finish/send/cancel/review controls, editable draft/outbox preservation and real DOM requirements."}
+{"file":".trellis/tasks/archive/2026-11/11-09-shared-voice-input/research/voice-input-ux.md","reason":"First-slice finish/send/cancel/review controls, editable draft/outbox preservation and real DOM requirements."}

@@ -10,11 +10,11 @@ The service keeps identity, persona, memory, messages and work. Audio preparatio
 
 ## Evidence that changes the design
 
-The source and observation record is maintained once in [parent voice research](../11-06-unified-companion-architecture/research/voice-entry.md). The latest parent observation takes precedence over the earlier generic-list inference: an independent UA with `GET /v1/models?kind=all` received nineteen rows, including three real MiMo audio references. The untyped ASR row is recognized by the reference's bounded ASR name rule; the AstrBot-specific response adds some role labels but is unnecessary for finding these candidates.
+The source and observation record is maintained once in [parent voice research](../../../11-06-unified-companion-architecture/research/voice-entry.md). The latest parent observation takes precedence over the earlier generic-list inference: an independent UA with `GET /v1/models?kind=all` received nineteen rows, including three real MiMo audio references. The untyped ASR row is recognized by the reference's bounded ASR name rule; the AstrBot-specific response adds some role labels but is unnecessary for finding these candidates.
 
 Use this project's own identity and its configured gateway credential scope. No AstrBot User-Agent, discovery switch, configuration import, new gateway compatibility patch or gateway restart is needed. Discovered local references are selectable candidates, not defaults for every installation or evidence of successful inference.
 
-[Renderer capture](../../../apps/desktop/src/renderer/console/demo/microphone.ts), [worklet](../../../apps/desktop/src/renderer/console/demo/capture-worklet.ts), [Main tickets](../../../apps/desktop/src/main/demo-controller.ts#L626), [TaskMediaPeer](../../../packages/host-kernel/src/tasks/media-peer.ts) and [source authority](../../../packages/companion-runtime/src/source-authority.ts) already implement relevant mechanisms. Reuse/extract these; do not import the legacy Demo history/turn orchestration. Old voice-chat calls a local Agent and stays excluded.
+[Renderer capture](../../../../../apps/desktop/src/renderer/console/demo/microphone.ts), [worklet](../../../../../apps/desktop/src/renderer/console/demo/capture-worklet.ts), [Main tickets](../../../../../apps/desktop/src/main/demo-controller.ts#L626), [TaskMediaPeer](../../../../../packages/host-kernel/src/tasks/media-peer.ts) and [source authority](../../../../../packages/companion-runtime/src/source-authority.ts) already implement relevant mechanisms. Reuse/extract these; do not import the legacy Demo history/turn orchestration. Old voice-chat calls a local Agent and stays excluded.
 
 ## Responsibilities and placement
 
@@ -60,9 +60,9 @@ Capture is bounded locally before upload. There is no network dependency in the 
 
 ## Narrow service integration
 
-[Headless SDK media](../../../packages/companion-runtime/src/plugin-host.ts#L233) is currently unavailable, and the service readiness guard rejects ordinary generic network/resource adapters. Do not flip those defaults or activate a Windows-only legacy ASR plugin.
+[Headless SDK media](../../../../../packages/companion-runtime/src/plugin-host.ts#L233) is currently unavailable, and the service readiness guard rejects ordinary generic network/resource adapters. Do not flip those defaults or activate a Windows-only legacy ASR plugin.
 
-Use the existing native-port pattern from [model connections](../../../.trellis/spec/backend/model-connections.md): an ordinary ASR plugin exposes bounded JSON description, and its factory binds a private native transcription implementation. The feature consumer acquires its ASR capability lease; the provider acquires source/config and credential leases. The host supplies only two target-bound transport operations: catalog GET and supported MiMo ASR POST. Neither browser nor SDK receives arbitrary fetch, a raw secret, a TaskSupervisor handle or a native provider object.
+Use the existing native-port pattern from [model connections](../../../../../.trellis/spec/backend/model-connections.md): an ordinary ASR plugin exposes bounded JSON description, and its factory binds a private native transcription implementation. The feature consumer acquires its ASR capability lease; the provider acquires source/config and credential leases. The host supplies only two target-bound transport operations: catalog GET and supported MiMo ASR POST. Neither browser nor SDK receives arbitrary fetch, a raw secret, a TaskSupervisor handle or a native provider object.
 
 Within the provider's supervised task, pair the existing media peers around one host-derived owner/task/stream reference. HTTP input is repacketized into bounded frames; credits, cancellation and actual settlement reuse kernel implementations. This is an ASR-local media adapter, not general headless SDK media enablement. Generic `openInput/openOutput` and unrelated readiness checks stay unchanged.
 

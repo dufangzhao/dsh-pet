@@ -1,7 +1,7 @@
 # Shared voice input: QA preparation
 
 [PRD Q1–Q7](../prd.md#L23) is the sole acceptance catalog; [the reviewed contract C1–C12](../implementation-contract.md) owns interfaces and limits.
-The child is in progress, but Phase 0 declarations are not yet a source-export handoff; QA script implementation remains frozen.
+This is the historical preparation snapshot before the Phase0 source-export handoff. Current results and delivered scope are maintained in the task's linked acceptance record.
 This document specifies observations, not a second DTO, endpoint or bridge definition.
 No product, gateway, device, microphone, model or account was used for this QA preparation.
 
@@ -14,7 +14,7 @@ No product, gateway, device, microphone, model or account was used for this QA p
 - MiMo ASR retains `xiaomi/mimo-v2.5-asr` as the logical ref; the source-backed native forwarding route ends in `/xiaomi/v1/chat/completions`.
 - WAV/data-URL/base64, when required by that native codec, is bounded inside the private upstream adapter; it is not control IPC, snapshots or SSE.
 - Keep the existing 64 KiB control JSON and 80 KiB desktop aggregate limits; audio travels over the actual declared bounded binary/media path.
-- Existing [media budgets](../../../../packages/contracts/src/media.ts#L14) and [capture/worklet](../../../../apps/desktop/src/renderer/console/demo/microphone.ts#L25) are reuse evidence; new limits are specified in [C7](../implementation-contract.md#L189) and await source declarations.
+- Existing [media budgets](../../../../../../packages/contracts/src/media.ts#L14) and [capture/worklet](../../../../../../apps/desktop/src/renderer/console/demo/microphone.ts#L25) are reuse evidence; new limits are specified in [C7](../implementation-contract.md#L189) and await source declarations.
 - The AstrBot reference root is source-only research; it is not product authority or a test target.
 - Future runs use isolated synthetic roots and separate browser/Electron child HOME and XDG directories; never repoint the user's profile.
 - Before any future execution, freeze sources/builds, capture runner and actual product hashes, and get parent integration authorization.

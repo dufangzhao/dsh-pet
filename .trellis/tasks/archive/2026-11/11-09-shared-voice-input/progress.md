@@ -1,8 +1,8 @@
 # Shared voice input: implementation and acceptance
 
-Current phase: the selected M4 scope is implemented and verified, including explicitly authorized real ASR. Full-scope review and final root/production checks passed. Phase3.4 was explicitly approved and work commits `b58c995`/`c1583c1` completed. Archive/journal bookkeeping is now being applied; no owned runtime remains running. Task remains `in_progress`, branch `feat/shared-voice-input`, after M3 journal `4d6ac41`. M3 work/archive/journal are complete. Roadmap goal was explicitly resumed after model-stream interruptions; latest parent revision is9. Do not claim inactive agents are running or that a partial gate is complete.
+Current phase: the selected M4 scope is implemented and verified, including explicitly authorized real ASR. Full-scope review and final root/production checks passed. Phase3.4 was explicitly approved and work commits `b58c995`/`c1583c1` completed. The task is archived as `completed` on2026-11-11; no owned runtime remains running. Work branch is `feat/shared-voice-input`, after M3 journal `4d6ac41`. M3 work/archive/journal are complete. Roadmap goal was explicitly resumed after model-stream interruptions; latest parent revision is9. Do not claim inactive agents are running or that a partial gate is complete.
 
-The canonical evidence/status record is [M4 acceptance](../../../qa/fixtures/companion-voice-input/acceptance.md). It distinguishes source tests, real controlled HTTP, production native capture and real-model inference. Maintain test results there rather than duplicating counts here.
+The canonical evidence/status record is [M4 acceptance](../../../../../qa/fixtures/companion-voice-input/acceptance.md). It distinguishes source tests, real controlled HTTP, production native capture and real-model inference. Maintain test results there rather than duplicating counts here.
 
 ## Decisions already settled
 
@@ -12,7 +12,7 @@ The canonical evidence/status record is [M4 acceptance](../../../qa/fixtures/com
 - Main owns the console capture permission/ticket/lifetime; no Pet microphone or relay. Renderer acknowledges actual released resources, including late grants and old-frame cleanup-only ACKs. Desktop begin forwards rendered provider/revision/binding/mode via `VoiceBeginSelection`; Main only adds actual identity.
 - TTS/full-duplex and other platforms are later increments, not rejected goals. Original4120/data remain outside QA.
 
-Detailed reference research remains [voice entry](../11-06-unified-companion-architecture/research/voice-entry.md) and [voice UX](../11-06-unified-companion-architecture/research/voice-ux.md). The actual local AstrBot plugin3.0.0 and discovery patch were read, without user secrets/config/persona/screenshots or changes to that workspace. Exact source revisions and hashes are maintained in that research record.
+Detailed reference research remains [voice entry](../../../11-06-unified-companion-architecture/research/voice-entry.md) and [voice UX](../../../11-06-unified-companion-architecture/research/voice-ux.md). The actual local AstrBot plugin3.0.0 and discovery patch were read, without user secrets/config/persona/screenshots or changes to that workspace. Exact source revisions and hashes are maintained in that research record.
 
 ## Current ownership and next gate
 
@@ -29,4 +29,4 @@ Detailed reference research remains [voice entry](../11-06-unified-companion-arc
 
 A pinned public three-second speech fixture was obtained through a mirror after direct Hugging Face networking failed, and matched original Git blob SHA1 `24a2bfc5c039f9d97db2cf1f2461699b582e0a90`. Local clip SHA256 is `17e7fba4b006f086d644468a94c937d0d8cff182d16e479887fefa913b2a9467`, under ignored `.companion-data/qa-private/companion-voice-input/public-speech-4v4u4zp5/`. Q6 was explicitly authorized by the user on2026-11-10 for this one three-second sample through Magpie/MiMo ASR, one upload and no Agent dispatch. Probe job `bash-be522bf51d234d40` has started. Do not rerun it if tool state is lost: inspect the private `live-mimo-3s-attempt.json` marker and its `reportPath` first. Result is now collected with exit0: one upload returned final/settled text“开放时间早上九点”in2655ms, with no Agent message/task; the isolated service is closed. The safe report is in the acceptance evidence. Do not run the probe again.
 
-Next: confirm the concrete work-commit plan → commit code/spec and QA/operator/task records → archive this task and record its session → continue the authorized roadmap with Magpie TTS planning. Do not complete the broader roadmap goal at voice input alone, restart broad research, or reopen the Magpie routing decision.
+M4 work commits and archive are complete. The stage session is maintained in the [developer journal index](../../../../workspace/kingBZ/index.md). Continue the authorized roadmap with Magpie TTS planning. Do not complete the broader roadmap goal at voice input alone, restart broad research, or reopen the Magpie routing decision.

@@ -6,12 +6,12 @@ Read-only planning research, 2026-11-09. No product edit, build, install, device
 
 | Piece | Source | What it gives us |
 | --- | --- | --- |
-| Renderer sampling | [microphone.ts](../../../../apps/desktop/src/renderer/console/demo/microphone.ts#L19) | `getUserMedia` + 16 kHz AudioWorklet, frame/chunk discipline, tail flush on finish, explicit track/context teardown, fixed error reasons |
-| Main permission + ticket | [demo-controller.ts](../../../../apps/desktop/src/main/demo-controller.ts#L626) | `beginRecording` issues a bounded ticket (token, sample rate, max/chunk samples) before any device opens |
-| Talk-key gesture | [gesture.ts](../../../../plugins/talk-key/src/gesture.ts#L3) | Pure press-vs-hold rule; no session concept |
-| Playback owner | [playback-owner.tsx](../../../../apps/desktop/src/renderer/speech-output/playback-owner.tsx#L5) | The single place that owns speaking today |
-| Text submit | [chat.tsx](../../../../plugins/text-client/src/client/chat.tsx#L17) | Controlled draft + submit; the only working route to the Agent |
-| Model settings | [model.tsx](../../../../plugins/text-client/src/client/model.tsx#L95) | Existing connector selection and save/test surface |
+| Renderer sampling | [microphone.ts](../../../../../../apps/desktop/src/renderer/console/demo/microphone.ts#L19) | `getUserMedia` + 16 kHz AudioWorklet, frame/chunk discipline, tail flush on finish, explicit track/context teardown, fixed error reasons |
+| Main permission + ticket | [demo-controller.ts](../../../../../../apps/desktop/src/main/demo-controller.ts#L626) | `beginRecording` issues a bounded ticket (token, sample rate, max/chunk samples) before any device opens |
+| Talk-key gesture | [gesture.ts](../../../../../../plugins/talk-key/src/gesture.ts#L3) | Pure press-vs-hold rule; no session concept |
+| Playback owner | [playback-owner.tsx](../../../../../../apps/desktop/src/renderer/speech-output/playback-owner.tsx#L5) | The single place that owns speaking today |
+| Text submit | [chat.tsx](../../../../../../plugins/text-client/src/client/chat.tsx#L17) | Controlled draft + submit; the only working route to the Agent |
+| Model settings | [model.tsx](../../../../../../plugins/text-client/src/client/model.tsx#L95) | Existing connector selection and save/test surface |
 
 The capture chain is **split by design**: Main owns permission and lifecycle, the renderer owns the device call. The first slice keeps that split rather than inventing a third owner.
 
@@ -26,7 +26,7 @@ Not in this slice: automatic TTS, background listening, wake words, duplex, barg
 One explicit control on each existing surface. No new page, route or window.
 
 - **Start** — an explicit press. Desktop goes through Main's permission/ticket path; web relies on the browser permission prompt and requires a secure context.
-- **While recording** — a visible recording state with elapsed/capacity feedback and a stop control. Only the **voice-transcription send path** is unavailable while the utterance is still audio; the existing text composer stays usable: [R19](../../11-06-unified-companion-architecture/prd.md#L29) keeps text interaction as the foundation, and recording does not suspend it. A transcript must never overwrite text the user typed in the meantime.
+- **While recording** — a visible recording state with elapsed/capacity feedback and a stop control. Only the **voice-transcription send path** is unavailable while the utterance is still audio; the existing text composer stays usable: [R19](../../../../11-06-unified-companion-architecture/prd.md#L29) keeps text interaction as the foundation, and recording does not suspend it. A transcript must never overwrite text the user typed in the meantime.
 - **Finish** — stops capture, flushes the acknowledged tail, transcribes, then hands the text on. The default for this increment is decided: **finish-and-send**, one explicit action, one submit. An optional preview keeps the transcription editable before sending; a per-utterance confirmation gate is not required.
 - **Cancel** — discards this capture and its transcription, joins the real release, and never submits late. Cancel is not the same action as finish, and neither is the same as stopping playback.
 - **Thinking** — recording stays available. The existing composer is usable while a turn runs, and starting a recording does not stop the Core or any worker.
@@ -42,7 +42,7 @@ A model catalog row is a **candidate**, not a capability claim. The UI must rend
 - **available but not configured** — the row exists, nothing is selected;
 - **unavailable** — the row exists but the route/key/format is missing or rejected.
 
-Two honesty rules follow. An unsupported protocol or key must never render as ready, and a text-capable connector must not be shown as speech-ready merely because text works. [CompanionModelConnectorView](../../../../packages/contracts/src/companion-model.ts#L18) today carries `id/label/synthetic/configRevision/settings/model/credential` — **no role or `serves` field**, so the current view cannot distinguish an ASR candidate from a TTS one. That is a real gap for GPT's contract work, not something the UI can infer.
+Two honesty rules follow. An unsupported protocol or key must never render as ready, and a text-capable connector must not be shown as speech-ready merely because text works. [CompanionModelConnectorView](../../../../../../packages/contracts/src/companion-model.ts#L18) today carries `id/label/synthetic/configRevision/settings/model/credential` — **no role or `serves` field**, so the current view cannot distinguish an ASR candidate from a TTS one. That is a real gap for GPT's contract work, not something the UI can infer.
 
 Discovery output must therefore be treated as "these refs came back", with role classification applied only where the contract actually says so.
 
@@ -97,14 +97,14 @@ These run in a real browser and the real Electron window. A hook stand-in or sta
 
 ## Cleanup is part of the contract
 
-Every path — finish, cancel, error, permission denial, retarget, unmount — must end in the same observable state: tracks stopped, context closed, worklet disconnected, pending acks settled or abandoned. The existing [microphone.ts](../../../../apps/desktop/src/renderer/console/demo/microphone.ts#L19) already models this ordering for finish; the slice must not weaken it for cancel.
+Every path — finish, cancel, error, permission denial, retarget, unmount — must end in the same observable state: tracks stopped, context closed, worklet disconnected, pending acks settled or abandoned. The existing [microphone.ts](../../../../../../apps/desktop/src/renderer/console/demo/microphone.ts#L19) already models this ordering for finish; the slice must not weaken it for cancel.
 
 ## Settled for this increment
 
 These are no longer open product choices.
 
 - **Review default is decided.** The first slice defaults to an explicit **finish-and-send**: one deliberate action transcribes and then submits exactly once. An optional preview can let the owner inspect the text first, but a per-utterance confirmation gate is not required. This is this increment's decision, not a placeholder.
-- **Connector role metadata comes from the exact contract.** Role/`serves` classification will be supplied by the new voice/provider view GPT is defining; [CompanionModelConnectorView](../../../../packages/contracts/src/companion-model.ts#L18) does not have to carry it. The frontend waits for that handoff rather than inferring a role from text-connector fields.
+- **Connector role metadata comes from the exact contract.** Role/`serves` classification will be supplied by the new voice/provider view GPT is defining; [CompanionModelConnectorView](../../../../../../packages/contracts/src/companion-model.ts#L18) does not have to carry it. The frontend waits for that handoff rather than inferring a role from text-connector fields.
 - **Capture packaging is backend design work in progress.** Whether the working chain is extracted into a neutral consumer or kept as a Main-supervised path is being settled in the actual backend design. The frontend waits for the declared seam.
 
 Also settled for this slice: starting a recording does **not** stop the Core or any worker, `thinking` does not disable recording, and TTS playback is not part of it. The **console root is the single capture owner** — no pet microphone and no cross-window relay; the exact DTO for that seam comes with GPT's contract handoff.

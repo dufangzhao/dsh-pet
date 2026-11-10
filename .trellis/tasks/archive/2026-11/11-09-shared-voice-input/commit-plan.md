@@ -2,7 +2,7 @@
 
 Status: user confirmed the complete plan. Work commits executed in order: `b58c9958a6a2f029490a2dbfc52cd58565738a91` and `c1583c179283624a06d5f091dfc480a3b3da968a`. No push. This document retains the reviewed pre-archive file grouping.
 
-The selected scope is verified; see [acceptance](../../../qa/fixtures/companion-voice-input/acceptance.md) and [operator guide](../../../docs/38-shared-voice-input.md). Code/spec comes first, acceptance/operator/task records second; task archive and session journal commits follow via Trellis. No remote push.
+The selected scope is verified; see [acceptance](../../../../../qa/fixtures/companion-voice-input/acceptance.md) and [operator guide](../../../../../docs/38-shared-voice-input.md). Code/spec comes first, acceptance/operator/task records second; task archive and session journal commits follow via Trellis. No remote push.
 
 ## 1. feat(companion): add shared Magpie voice input
 

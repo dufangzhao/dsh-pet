@@ -8,5 +8,5 @@
 {"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Check real min-size geometry, owner-bound async results and UI source/draft separation."}
 {"file":".trellis/spec/frontend/model-settings.md","reason":"Review reachable settings/read/retry, captured baselines and truthful unsupported/configured/check states."}
 {"file":".trellis/tasks/11-06-unified-companion-architecture/research/voice-entry.md","reason":"Distinguish upstream source, local compatibility reference, actual GET discovery and unexecuted speech; no AstrBot identity dependency."}
-{"file":".trellis/tasks/11-09-shared-voice-input/research/voice-input-ux.md","reason":"Check normal text remains usable, transcription preserves typed drafts and independent outbox intents, and cancel is distinct from finish."}
-{"file":".trellis/tasks/11-09-shared-voice-input/research/qa-preparation.md","reason":"Q1–Q7 is the only acceptance catalog; distinguish real synthetic capture/permission, controlled native HTTP and separately scoped real speech evidence."}
+{"file":".trellis/tasks/archive/2026-11/11-09-shared-voice-input/research/voice-input-ux.md","reason":"Check normal text remains usable, transcription preserves typed drafts and independent outbox intents, and cancel is distinct from finish."}
+{"file":".trellis/tasks/archive/2026-11/11-09-shared-voice-input/research/qa-preparation.md","reason":"Q1–Q7 is the only acceptance catalog; distinguish real synthetic capture/permission, controlled native HTTP and separately scoped real speech evidence."}

@@ -1,6 +1,6 @@
 # Shared explicit voice input
 
-Status: parent-reviewed and activated for implementation on2026-11-09 after completed model text, shared desktop and controlled persona/memory stages. Runtime/voice acceptance remains to be executed; no device/audio model call has occurred. [Parent requirements](../11-06-unified-companion-architecture/prd.md) retain the eventual full-duplex goal; this first utterance-input slice is not labeled duplex.
+Status: completed and archived2026-11-11 after the approved work commits. The selected Linux/browser synthetic-device scope, production Web/Electron flows, independent work and explicitly authorized real Magpie ASR sample have been verified; scope limits remain explicit in the acceptance record. [Parent requirements](../../../11-06-unified-companion-architecture/prd.md) retain the eventual full-duplex goal; this first utterance-input slice is not labeled duplex.
 
 ## Goal
 
@@ -8,7 +8,7 @@ The owner can record a bounded utterance from the existing web/desktop surface, 
 
 ## Evidence and proposed scope
 
-[Backend research](../11-06-unified-companion-architecture/research/voice-entry.md) and [UX research](../11-06-unified-companion-architecture/research/voice-ux.md) locate the reusable renderer microphone/worklet, Main supervised permission/ticket/ack path and old ASR providers. The old voice-chat orchestration invokes a local Agent and cannot be reenabled wholesale. Main is desktop authority/lifetime owner; renderer does actual sampling. Web uses browser permission and requires a secure context.
+[Backend research](../../../11-06-unified-companion-architecture/research/voice-entry.md) and [UX research](../../../11-06-unified-companion-architecture/research/voice-ux.md) locate the reusable renderer microphone/worklet, Main supervised permission/ticket/ack path and old ASR providers. The old voice-chat orchestration invokes a local Agent and cannot be reenabled wholesale. Main is desktop authority/lifetime owner; renderer does actual sampling. Web uses browser permission and requires a secure context.
 
 Parent performed a read-only `GET http://127.0.0.1:3425/v1/models` on2026-11-09: HTTP200, six advertised models with text/image input metadata, no advertised audio modality. This was catalog discovery, not inference or proof that gateway audio endpoints are absent. Public pinned Magpie source exposes bounded file transcription; the installed audio model/provider/key availability remains unconfirmed. No account/profile files or credentials were read.
 
