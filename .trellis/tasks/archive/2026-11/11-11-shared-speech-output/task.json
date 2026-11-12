@@ -1,0 +1,32 @@
+{
+  "id": "shared-speech-output",
+  "name": "shared-speech-output",
+  "title": "Implement optional Magpie speech output",
+  "description": "Optional default-off Magpie Pet TTS implemented and verified2026-11-12. Native10/Web3/Core-work-ASR gates and one authorized live request passed. Work commits complete and this child archived; the broader roadmap remains open.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-11-11",
+  "completedAt": "2026-11-12",
+  "branch": "feat/shared-speech-output",
+  "base_branch": "feat/shared-voice-input",
+  "worktree_path": null,
+  "commit": "3287f42a6de08a63a0145af4e4139382a02b190c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "11-06-unified-companion-architecture",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "workCommits": [
+      "5e61f9668388d05740825b4185a6444bead4696b",
+      "3287f42a6de08a63a0145af4e4139382a02b190c"
+    ],
+    "liveTtsAuthorizationConsumed": true
+  }
+}

@@ -1,6 +1,6 @@
 # M5 verified handoff
 
-Implementation was approved2026-11-11. All selected behavior and scoped verification are complete; only the Phase3.4 commit approval/batch and archive/journal remain. [Acceptance](../../../qa/fixtures/companion-speech-output/acceptance.md) is the single executed-result record. Do not ask whether to implement again, restart original4120, or repeat the consumed live request.
+Implementation was approved2026-11-11. All selected behavior and scoped verification are complete. The user approved the local batch; work commits5e61f96/3287f42 are complete and this child is archived. The following journal step is maintained in the Trellis workspace. [Acceptance](../../../../../qa/fixtures/companion-speech-output/acceptance.md) is the single executed-result record. Do not ask whether to implement again, restart original4120, or repeat the consumed live request.
 
 ## Completed state
 
@@ -8,8 +8,8 @@ Implementation was approved2026-11-11. All selected behavior and scoped verifica
 - Full root/scoped gates and independent source review passed. Final controlled production native d71f3948 passed10 cases; production standalone Web c5852eaf passed3; headless actual Core/Docker/held-ASR and the standard Core gate passed within their recorded scopes.
 - User approved `m5_one_live_tts`; exactly one ordinary MiMo/冰糖 request succeeded. The4.96-second WAV is a dedicated test artifact, not product audio cache. Marker and authorization are consumed. No live call may be repeated from this record.
 - All owned browsers/Electron, services, peers, containers, Pulse/Xvfb instances, readers and managed jobs were collected/closed. Products/fixtures remained frozen during each actual run.
-- Final raw/summaries and safe screenshots are retained publicly.27 intermediate/redundant files were moved into ignored private evidence with before/after SHA verification, not deleted. See [retention receipt](../../../qa/fixtures/companion-speech-output/evidence-retention-c5852eaf.md).
-- Code-spec/operator guide, backend/frontend indexes and14+14 curated contexts are complete. Exact source signatures/limits are linked by [the code-spec](../../spec/backend/shared-speech-output.md), not copied across drafts.
+- Final raw/summaries and safe screenshots are retained publicly.27 intermediate/redundant files were moved into ignored private evidence with before/after SHA verification, not deleted. See [retention receipt](../../../../../qa/fixtures/companion-speech-output/evidence-retention-c5852eaf.md).
+- Code-spec/operator guide, backend/frontend indexes and14+14 curated contexts are complete. Exact source signatures/limits are linked by [the code-spec](../../../../spec/backend/shared-speech-output.md), not copied across drafts.
 
 ## Final integration facts
 
@@ -42,4 +42,4 @@ The fixes remain purpose-specific. No generic retry/cache/queue/registry, audio 
 
 ### 5. Knowledge capture and remaining steps
 
-The seven-section code-spec and existing task records capture these lessons. This application has no Trellis template tree to synchronize. Prepare the concrete two-work-commit plan, obtain the required one-shot approval, commit source then evidence/docs, archive only this child with rebased references, and journal the work hashes. Keep the broader roadmap and unrelated unfinished tasks open. No remote push.
+The seven-section code-spec and task records capture these lessons. This application has no Trellis template tree to synchronize. The reviewed batch was approved and committed as source then evidence/docs; only this child was archived and its references rebased. Workspace journaling records the two work hashes after the archive commit. The broader roadmap and unrelated unfinished tasks stay open; nothing was pushed.

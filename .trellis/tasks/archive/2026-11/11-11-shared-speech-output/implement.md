@@ -1,18 +1,18 @@
 # M5 implementation and verification
 
-Implementation was explicitly approved on2026-11-11 after the final summary, with TTS required to use Magpie gateway model interfaces. Product code is now implemented; integrated verification is still in progress. [PRD](prd.md) owns acceptance, [design](design.md) records choices, and the [code-spec](../../spec/backend/shared-speech-output.md) points to actual declarations and executable contracts. Do not ask whether to start again.
+Implementation was explicitly approved on2026-11-11 after the final summary, with TTS required to use Magpie gateway model interfaces. Product code is now implemented; integrated verification is still in progress. [PRD](prd.md) owns acceptance, [design](design.md) records choices, and the [code-spec](../../../../spec/backend/shared-speech-output.md) points to actual declarations and executable contracts. Do not ask whether to start again.
 
 ## 1. Completed implementation slices
 
 - [x] Establish real curated context and read applicable specs. Current implement/check manifests contain14 real entries each.
-- [x] Declare browser-safe [speech contracts](../../../packages/contracts/src/companion-speech.ts), [desktop bridge/receipts](../../../packages/contracts/src/desktop-speech.ts) and [private runtime ports](../../../packages/companion-runtime/src/speech-output-types.ts). Limits and schemas live in source.
+- [x] Declare browser-safe [speech contracts](../../../../../packages/contracts/src/companion-speech.ts), [desktop bridge/receipts](../../../../../packages/contracts/src/desktop-speech.ts) and [private runtime ports](../../../../../packages/companion-runtime/src/speech-output-types.ts). Limits and schemas live in source.
 - [x] Add State `getMessage({id,eventSequence})` with actual event/message correspondence and read permission; mark it readonly in runtime. Speech admission separately requires assistant role; no DB migration or new canonical input.
-- [x] Implement exact service-owned [text slices](../../../plugins/shared-speech/src/segments.ts). The canonical reply remains one FIFO item; slice concatenation equals the original text, without normalization or summary.
-- [x] Implement ordinary [Magpie TTS provider](../../../plugins/tts-magpie/src/index.ts), incremental [PCM/SSE codec](../../../plugins/tts-magpie/src/stream.ts), private authority/credential binding and fixed native transport. Only configured Magpie routes are used.
+- [x] Implement exact service-owned [text slices](../../../../../plugins/shared-speech/src/segments.ts). The canonical reply remains one FIFO item; slice concatenation equals the original text, without normalization or summary.
+- [x] Implement ordinary [Magpie TTS provider](../../../../../plugins/tts-magpie/src/index.ts), incremental [PCM/SSE codec](../../../../../plugins/tts-magpie/src/stream.ts), private authority/credential binding and fixed native transport. Only configured Magpie routes are used.
 - [x] Implement real service feature `pet.shared-speech`, single-consumer reserve/audio flow, known-ID cancel/status, bounded records and orphan/watchdog cleanup. Produced progress is independent from drain; actual whole cleanup releases the outer authority lifetime even with no subsequent client request.
-- [x] Implement [Main controller](../../../apps/desktop/src/main/shared-speech-controller.ts), local task/media host, fixed preload and per-event consumption of the existing single SSE reader. Ordinary utterance failure preserves a healthy feed; connection/source/feed invalidation and explicit stop fence it.
+- [x] Implement [Main controller](../../../../../apps/desktop/src/main/shared-speech-controller.ts), local task/media host, fixed preload and per-event consumption of the existing single SSE reader. Ordinary utterance failure preserves a healthy feed; connection/source/feed invalidation and explicit stop fence it.
 - [x] Implement local optional `pet.speech-output`, explicit default-off ledger and startup/lifecycle integration. Production shared entry does not construct the legacy system-TTS controller. Quit waits for the actual Pet release before destroying its frame.
-- [x] Implement [Pet stream player](../../../apps/desktop/src/renderer/speech-output/stream-playback.ts): bounded scheduled nodes, immediate short chunk-tail ACK, complete identity, real pending-resume/receipt/close joins and persistent failed-close eligibility across replacements.
+- [x] Implement [Pet stream player](../../../../../apps/desktop/src/renderer/speech-output/stream-playback.ts): bounded scheduled nodes, immediate short chunk-tail ACK, complete identity, real pending-resume/receipt/close joins and persistent failed-close eligibility across replacements.
 - [x] Implement console configuration/Pet stop/status. Remote drafts bind captured companion target/provider/revision; local volume has its own first-edit revision and explicit rebase. Configuration progress does not cause remote polling. Local volume changes affect future replies; master sound off stops/refuses. Old speechEnabled is not automatic permission.
 
 ## 2. Reviewed regressions
@@ -27,7 +27,7 @@ Implementation was explicitly approved on2026-11-11 after the final summary, wit
 
 ## 3. Verification gates
 
-- [x] Affected source packages have scoped types/tests/lint results. Exact executed scope is recorded only in [acceptance](../../../qa/fixtures/companion-speech-output/acceptance.md), not inferred from checklist completion.
+- [x] Affected source packages have scoped types/tests/lint results. Exact executed scope is recorded only in [acceptance](../../../../../qa/fixtures/companion-speech-output/acceptance.md), not inferred from checklist completion.
 - [x] Controlled service/native SSE/media/client round-trip, full canonical multi-segment delivery, cancellation, malformed/partial stream and source/CAS/revocation cases.
 - [x] Headless actual Core/Docker/held-ASR continuity probe. The successful rerun preserved the same thinking request, ASR capture and background task through one TTS completion and one cancellation, with exact artifact bytes and complete cleanup. Backend/dependency/runner hashes were frozen; desktop/renderer were explicitly outside that probe's scope.
 - [x] Full root `pnpm check` and diff gate passed. Later narrowly scoped Main fixes passed their regressions/types/lint and a fresh full build before the final frozen production run.
@@ -39,8 +39,8 @@ No production/native instance may remain open when product/build files change. C
 
 ## 4. Documentation and closure
 
-- [x] Write [operator guidance](../../../docs/39-shared-speech-output.md) with the actual loopback credential API, current UI scope and default-off behavior. There is no TTS Key web form or new environment injection to document.
+- [x] Write [operator guidance](../../../../../docs/39-shared-speech-output.md) with the actual loopback credential API, current UI scope and default-off behavior. There is no TTS Key web form or new environment injection to document.
 - [x] Write the seven-section speech code-spec, link backend/frontend indexes and curate both task manifests. Keep API fields/limits in code and results in acceptance.
 - [x] Finalize acceptance against actual source/build/live evidence; preserve intermediate diagnostics privately with a verified relocation manifest.
-- [ ] Present the concrete work-commit batch for the Phase3.4 one-shot approval.
-- [ ] Execute approved work commits, archive only this child with working references, and record the journal. Keep the parent roadmap and other unfinished tasks open.
+- [x] Present the concrete work-commit batch and receive the Phase3.4 one-shot approval.
+- [x] Execute work commits5e61f96/3287f42 and archive only this child with rebased references. The separate workspace journal follows the archive commit; the parent roadmap and other unfinished tasks remain open.

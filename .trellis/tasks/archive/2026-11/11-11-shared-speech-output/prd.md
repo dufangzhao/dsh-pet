@@ -1,6 +1,6 @@
 # Shared speech output through Magpie
 
-Status: implementation and scoped verification complete2026-11-12; commit/archive handoff remains. The user approved the final implementation summary2026-11-11 and separately approved exactly one live Magpie TTS request, now successfully completed with its one-shot marker consumed. [Parent roadmap](../11-06-unified-companion-architecture/prd.md) retains the broader Agent/full-duplex/platform goals.
+Status: completed and archived2026-11-12 after scoped verification and approved local work commits. The session journal is maintained in the Trellis workspace. The user approved the final implementation summary2026-11-11 and separately approved exactly one live Magpie TTS request, now successfully completed with its one-shot marker consumed. [Parent roadmap](../../../11-06-unified-companion-architecture/prd.md) retains the broader Agent/full-duplex/platform goals.
 
 ## Goal
 
@@ -8,7 +8,7 @@ Offer a real optional built-in TTS plugin. When enabled, it automatically reads 
 
 ## Evidence baseline
 
-[M4 acceptance](../../../qa/fixtures/companion-voice-input/acceptance.md) establishes shared web/desktop input and an authorized real ASR check; that authorization does not cover TTS. The existing desktop speech path provides reusable ownership/media primitives but has whole-buffer and immediate-idle limitations. [Source research](research/speech-output-entry.md), [UX research](research/speech-output-ux.md) and [current official MiMo evidence](research/mimo-tts-current.md) distinguish existing behavior, documented streaming capability and unexecuted local TTS/playback validation. Ordinary MiMo documents24kHz PCM16LE mono streaming; the old non-streaming example is not a provider limit.
+[M4 acceptance](../../../../../qa/fixtures/companion-voice-input/acceptance.md) establishes shared web/desktop input and an authorized real ASR check; that authorization does not cover TTS. The existing desktop speech path provides reusable ownership/media primitives but has whole-buffer and immediate-idle limitations. [Source research](research/speech-output-entry.md), [UX research](research/speech-output-ux.md) and [current official MiMo evidence](research/mimo-tts-current.md) distinguish existing behavior, documented streaming capability and unexecuted local TTS/playback validation. Ordinary MiMo documents24kHz PCM16LE mono streaming; the old non-streaming example is not a provider limit.
 
 ## Requirements and user decisions
 
@@ -26,7 +26,7 @@ Offer a real optional built-in TTS plugin. When enabled, it automatically reads 
 
 - New plugin defaults off; old default-true audition settings do not opt a user into automatic speech. Persist actual explicit source enablement in the existing ledger.
 - Ordinary MiMo streaming PCM is the first codec, through the service's fixed-purpose native transport. Use one explicit preset voice, frozen for the entire utterance. Voice-design/clone, old SAPI numeric-rate mapping and hidden non-streaming/system fallback are excluded.
-- Existing FIFO counts complete replies, not transport chunks. Service-owned text slicing preserves the canonical message; common replies use one native call. Audio is received and played with bounded buffers rather than retained as a whole reply. Actual limits/identity/clock declarations live in source, linked once by the [code-spec](../../spec/backend/shared-speech-output.md).
+- Existing FIFO counts complete replies, not transport chunks. Service-owned text slicing preserves the canonical message; common replies use one native call. Audio is received and played with bounded buffers rather than retained as a whole reply. Actual limits/identity/clock declarations live in source, linked once by the [code-spec](../../../../spec/backend/shared-speech-output.md).
 - Stop clears the current and pending speech intents while leaving the plugin enabled for future new replies. Disable turns off that future behavior as well. Hiding the existing Pet window does not itself disable TTS; actual close/disconnect/source retirement stops owned output.
 - Failures and unknown outcomes do not automatically re-synthesize, re-download or switch providers. Native completion, complete transport, playback-to-tail and actual release must all be checked before reporting a completed utterance.
 
@@ -42,4 +42,4 @@ Offer a real optional built-in TTS plugin. When enabled, it automatically reads 
 
 ## Verified handoff
 
-O7/O8/O9 remain the selected product scope. The approved implementation, independent review corrections, root/scoped gates,10-case controlled native run, standalone Web checks, Core/Docker/ASR continuity and one authorized live TTS check are complete within the [recorded acceptance boundaries](../../../qa/fixtures/companion-speech-output/acceptance.md). Live authorization is consumed. The14-entry context manifests and executable code-spec retain the source contracts; [implementation](implement.md) tracks final commit/archive bookkeeping. Do not reopen settled choices, repeat live requests or archive the ongoing parent roadmap.
+O7/O8/O9 remain the selected product scope. The approved implementation, independent review corrections, root/scoped gates,10-case controlled native run, standalone Web checks, Core/Docker/ASR continuity and one authorized live TTS check are complete within the [recorded acceptance boundaries](../../../../../qa/fixtures/companion-speech-output/acceptance.md). Live authorization is consumed. The14-entry context manifests and executable code-spec retain the source contracts; [implementation](implement.md) tracks final commit/archive bookkeeping. Do not reopen settled choices, repeat live requests or archive the ongoing parent roadmap.

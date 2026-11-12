@@ -1,5 +1,5 @@
 {
-  "status": "approved-for-local-commit-and-archive",
+  "status": "work-commits-complete",
   "branch": "feat/shared-speech-output",
   "groups": [
     {
@@ -171,5 +171,10 @@
     "questionId": "m5_commit_archive",
     "selected": "按清单提交并归档",
     "remotePush": false
-  }
+  },
+  "workCommits": [
+    "5e61f9668388d05740825b4185a6444bead4696b",
+    "3287f42a6de08a63a0145af4e4139382a02b190c"
+  ],
+  "historicalPaths": "File groups record the approved original pre-archive staging paths; the work commits are complete and must not be re-executed."
 }

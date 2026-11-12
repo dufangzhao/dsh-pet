@@ -1,6 +1,6 @@
 # M5 speech-output acceptance — verification complete
 
-The optional Magpie TTS implementation has passed controlled production desktop/Web verification and the separately authorized one-shot live TTS check. Commit/archive bookkeeping is the remaining stage. [PRD](../../../.trellis/tasks/11-11-shared-speech-output/prd.md) owns requirements, [code-spec](../../../.trellis/spec/backend/shared-speech-output.md) owns implementation contracts, and [operator guidance](../../../docs/39-shared-speech-output.md) explains use. This file is the canonical executed-scope record.
+The optional Magpie TTS implementation has passed controlled production desktop/Web verification and the separately authorized one-shot live TTS check. The approved work commits are5e61f96/3287f42 and this child is archived; the session journal is maintained in the Trellis workspace. [PRD](../../../.trellis/tasks/archive/2026-11/11-11-shared-speech-output/prd.md) owns requirements, [code-spec](../../../.trellis/spec/backend/shared-speech-output.md) owns implementation contracts, and [operator guidance](../../../docs/39-shared-speech-output.md) explains use. This file is the canonical executed-scope record.
 
 ## Production desktop result
 
@@ -50,6 +50,6 @@ Earlier failed native runs remain honest failures. They exposed the Linux profil
 | S4 Core/work/ASR isolation | Headless actual Core/Docker/ASR probe, standard Core gate and current M4 voice regressions |
 | S5 Controls, drafts and Web unchanged | Desktop controls, independent22 hook/draft regressions and standalone Web text/ASR with zero TTS passed |
 | S6 Controlled production and live TTS | Native d71f3948 and the explicitly authorized live43147468 check passed within their separate scopes; live authorization consumed |
-| S7 Documentation and Trellis handoff | Code-spec/operator guide and verification records exist; evidence curation, approved commit batch and archive/journal finish the handoff |
+| S7 Documentation and Trellis handoff | Code-spec, operator guide and curated evidence are complete; approved work commits5e61f96/3287f42 and the archived child retain the handoff, with session journaling in the workspace |
 
 Source/unit tests for reasoning/notice exclusion are not mislabeled as native model observations. Prior-version profile migration, physical output, Windows runtime, word-level hearing and an upstream live latency distribution have not been established by this suite. Original4120/data, DSH and unrelated profiles remain outside the test target. Stop/cancel receipts do not guarantee vendor computation or billing stopped.

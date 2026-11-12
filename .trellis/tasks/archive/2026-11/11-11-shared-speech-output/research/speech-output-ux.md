@@ -1,6 +1,6 @@
 # 共享语音输出：桌面自动朗读的前端/UX 现状与候选
 
-只读研究，2026-11-11（第五版，用户决定 O7/R23/O8/O9 之后）。未改产品代码、未构建、未安装、未开浏览器/设备、未调真实模型。需求见[子 PRD](../prd.md)（O7/O8/O9）与 [R23](../../11-06-unified-companion-architecture/prd.md#L35)；provider/协议归 GPT，当前 MiMo 官方证据见 [mimo-tts-current.md](mimo-tts-current.md)。本文只回答**界面现在有什么、自动朗读接在哪、哪些状态必须可见**。不新造 DTO。
+只读研究，2026-11-11（第五版，用户决定 O7/R23/O8/O9 之后）。未改产品代码、未构建、未安装、未开浏览器/设备、未调真实模型。需求见[子 PRD](../prd.md)（O7/O8/O9）与 [R23](../../../../11-06-unified-companion-architecture/prd.md#L35)；provider/协议归 GPT，当前 MiMo 官方证据见 [mimo-tts-current.md](mimo-tts-current.md)。本文只回答**界面现在有什么、自动朗读接在哪、哪些状态必须可见**。不新造 DTO。
 
 ## 版本说明：四轮决定都已收敛；本版只做事实修正
 
@@ -17,53 +17,53 @@
 
 **默认 off 应作为 final review 建议**：新的自动能力不能继承旧的"默认 true 试听"状态，否则升级即自动出声。
 
-**O9 改变了一处既有事实的定位**：今天的播放器是**整段缓冲**（`new Uint8Array(session.bytes)` → 单个 `AudioBuffer`，[playback.ts:114-122](../../../../apps/desktop/src/renderer/speech-output/playback.ts#L114-L122)），`SPEECH_OUTPUT_MAX_BYTES` 直接等于 2 MiB 流上限（[speech-output.ts:16](../../../../packages/contracts/src/speech-output.ts#L16)）。这**不是**产品规则，而是**当前实现的物理上限**。O9 要求长回复完整朗读，所以"超长就拒绝"必须从产品行为里删掉。
+**O9 改变了一处既有事实的定位**：今天的播放器是**整段缓冲**（`new Uint8Array(session.bytes)` → 单个 `AudioBuffer`，[playback.ts:114-122](../../../../../../apps/desktop/src/renderer/speech-output/playback.ts#L114-L122)），`SPEECH_OUTPUT_MAX_BYTES` 直接等于 2 MiB 流上限（[speech-output.ts:16](../../../../../../packages/contracts/src/speech-output.ts#L16)）。这**不是**产品规则，而是**当前实现的物理上限**。O9 要求长回复完整朗读，所以"超长就拒绝"必须从产品行为里删掉。
 
-**而且"整段合成完才开始播"同样不是首片产品硬规则。** 官方文档（2026-07-15/17）已明确 ordinary `mimo-v2.5-tts` 支持真低延迟 streaming：`stream:true` + `audio.format:pcm16`，SSE 里 base64 音频，输出为 **24kHz PCM16LE mono**，见 [MiMo TTS 证据](mimo-tts-current.md#L12-L13)。这与本仓契约恰好对得上——`SPEECH_OUTPUT_SAMPLE_RATE = 24000`（[speech-output.ts:15](../../../../packages/contracts/src/speech-output.ts#L15)），descriptor 收 `pcm-s16le`、8000–96000Hz、mono/stereo（[speech-output.ts:146-149](../../../../packages/contracts/src/speech-output.ts#L146-L149)）。所以首片**不必**先假设"整段合成完才播"，也**不必**为了长回复先去切 part。
+**而且"整段合成完才开始播"同样不是首片产品硬规则。** 官方文档（2026-07-15/17）已明确 ordinary `mimo-v2.5-tts` 支持真低延迟 streaming：`stream:true` + `audio.format:pcm16`，SSE 里 base64 音频，输出为 **24kHz PCM16LE mono**，见 [MiMo TTS 证据](mimo-tts-current.md#L12-L13)。这与本仓契约恰好对得上——`SPEECH_OUTPUT_SAMPLE_RATE = 24000`（[speech-output.ts:15](../../../../../../packages/contracts/src/speech-output.ts#L15)），descriptor 收 `pcm-s16le`、8000–96000Hz、mono/stereo（[speech-output.ts:146-149](../../../../../../packages/contracts/src/speech-output.ts#L146-L149)）。所以首片**不必**先假设"整段合成完才播"，也**不必**为了长回复先去切 part。
 
 ## 一、现有事实（源码可查）
 
 | 事项 | 现状 | 含义 |
 | --- | --- | --- |
-| 合成入口 | `speak({text, utteranceId})`，[speech-output.ts:121](../../../../packages/contracts/src/speech-output.ts#L121) | 不绑定 message id，`utteranceId` 自由（≤128），**无幂等语义** |
-| 唯一调用点 | 设置台试听，[use-speech-output.ts:247](../../../../apps/desktop/src/renderer/console/minimal-ui/use-speech-output.ts#L247) | 产品内**没有**"回复→朗读"接线 |
+| 合成入口 | `speak({text, utteranceId})`，[speech-output.ts:121](../../../../../../packages/contracts/src/speech-output.ts#L121) | 不绑定 message id，`utteranceId` 自由（≤128），**无幂等语义** |
+| 唯一调用点 | 设置台试听，[use-speech-output.ts:247](../../../../../../apps/desktop/src/renderer/console/minimal-ui/use-speech-output.ts#L247) | 产品内**没有**"回复→朗读"接线 |
 | 控制器视野 | `SpeechOutputController` 不 import companion/snapshot | 它**看不到回复**；自动触发必须由 Main 侧喂入 |
-| 播放器 | `SpeechOutputPlaybackOwner` 只在桌宠根挂一次，[App.tsx:914](../../../../apps/desktop/src/renderer/pet/App.tsx#L914) | 桌宠是唯一 owner；控制台不挂播放器（符合 O5） |
-| 音频投递 | 字节只发桌宠窗口，[index.ts:366-372](../../../../apps/desktop/src/main/index.ts#L366-L372)；`changed` 才广播两窗 | 控制台能看状态、收不到字节 |
-| 两窗同一 preload | console 与 pet 都用同一个 `preload`，[index.ts:85-87](../../../../apps/desktop/src/main/index.ts#L85-L87)、[index.ts:475-476](../../../../apps/desktop/src/main/index.ts#L475-L476) | 控制台**有** `petSpeechOutput`；但见第四节对 Web 的纠正 |
-| 现有开关 | `speechEnabled` 在 profile Config，默认 **true**，[application.ts:43](../../../../packages/contracts/src/application.ts#L43)；Config 存**本机**（[file-store.ts:22-31](../../../../packages/host-kernel/src/config/file-store.ts#L22-L31)） | 是**配置布尔**，不是插件生命周期；默认开 |
-| 插件是否可选 | speech provider 恒在 `localRoles` 内被 admit，[index.ts:190](../../../../apps/desktop/src/main/index.ts#L190) | 今天没有"语音输出插件级启停"，只有设置开关 |
-| 真插件启停 | `PluginManager.enable/disable`，[plugin-manager.ts:253](../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L253)、[:425](../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L425)；`disable` 走 `stop()` → `deactivating` → `disabled`，卸载 capabilities | 生命周期**已存在**，可直接承载 O8 的"真插件"；`desiredActive` 是它自己的持久状态 |
-| 控制台插件入口 | 插件页已有启用/停用与重试，[plugins.tsx:163-175](../../../../apps/desktop/src/renderer/console/pages/plugins.tsx#L163-L175)；动作经 `runPluginAction` | **现成入口**，不需要新页面 |
-| 关闭的副作用 | `!soundEnabled \|\| !speechEnabled` → `speech.stop()`，[index.ts:291](../../../../apps/desktop/src/main/index.ts#L291) | 停播放，**不碰** Core/任务 |
-| 播放态 | `phase: idle\|synthesizing\|playing\|error`，[speech-output.ts:90](../../../../packages/contracts/src/speech-output.ts#L90) | **没有 `stopping` 阶段**；`stopNow` 直接置 `idle`（[speech-output-controller.ts:576-581](../../../../apps/desktop/src/main/speech-output-controller.ts#L576-L581)） |
-| 桌宠可见性 | `PET_STATES` 无 `speaking`，[pet-prototype.ts:12](../../../../packages/contracts/src/pet-prototype.ts#L12)；`petStateOf` 不读语音快照 | 播放时角色仍 `replying`/`idle`，嘴不动 |
-| 停止入口 | 桌宠菜单"停止"=`stopForeground`，[App.tsx:854](../../../../apps/desktop/src/renderer/pet/App.tsx#L854)，仅 `agent.status==='busy'` 出现 | 朗读中它不出现，停不了播放 |
-| 托盘 | "停止本地播放"=`speech.stop()`，[index.ts:489-497](../../../../apps/desktop/src/main/index.ts#L489-L497) | 桌宠外唯一停播放入口 |
-| 控制台停止 | 声音卡片"停止播放"，[speech-settings.tsx:280-289](../../../../apps/desktop/src/renderer/console/minimal-ui/speech-settings.tsx#L280-L289) | 已有，在"人格 → 声音" |
+| 播放器 | `SpeechOutputPlaybackOwner` 只在桌宠根挂一次，[App.tsx:914](../../../../../../apps/desktop/src/renderer/pet/App.tsx#L914) | 桌宠是唯一 owner；控制台不挂播放器（符合 O5） |
+| 音频投递 | 字节只发桌宠窗口，[index.ts:366-372](../../../../../../apps/desktop/src/main/index.ts#L366-L372)；`changed` 才广播两窗 | 控制台能看状态、收不到字节 |
+| 两窗同一 preload | console 与 pet 都用同一个 `preload`，[index.ts:85-87](../../../../../../apps/desktop/src/main/index.ts#L85-L87)、[index.ts:475-476](../../../../../../apps/desktop/src/main/index.ts#L475-L476) | 控制台**有** `petSpeechOutput`；但见第四节对 Web 的纠正 |
+| 现有开关 | `speechEnabled` 在 profile Config，默认 **true**，[application.ts:43](../../../../../../packages/contracts/src/application.ts#L43)；Config 存**本机**（[file-store.ts:22-31](../../../../../../packages/host-kernel/src/config/file-store.ts#L22-L31)） | 是**配置布尔**，不是插件生命周期；默认开 |
+| 插件是否可选 | speech provider 恒在 `localRoles` 内被 admit，[index.ts:190](../../../../../../apps/desktop/src/main/index.ts#L190) | 今天没有"语音输出插件级启停"，只有设置开关 |
+| 真插件启停 | `PluginManager.enable/disable`，[plugin-manager.ts:253](../../../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L253)、[:425](../../../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L425)；`disable` 走 `stop()` → `deactivating` → `disabled`，卸载 capabilities | 生命周期**已存在**，可直接承载 O8 的"真插件"；`desiredActive` 是它自己的持久状态 |
+| 控制台插件入口 | 插件页已有启用/停用与重试，[plugins.tsx:163-175](../../../../../../apps/desktop/src/renderer/console/pages/plugins.tsx#L163-L175)；动作经 `runPluginAction` | **现成入口**，不需要新页面 |
+| 关闭的副作用 | `!soundEnabled \|\| !speechEnabled` → `speech.stop()`，[index.ts:291](../../../../../../apps/desktop/src/main/index.ts#L291) | 停播放，**不碰** Core/任务 |
+| 播放态 | `phase: idle\|synthesizing\|playing\|error`，[speech-output.ts:90](../../../../../../packages/contracts/src/speech-output.ts#L90) | **没有 `stopping` 阶段**；`stopNow` 直接置 `idle`（[speech-output-controller.ts:576-581](../../../../../../apps/desktop/src/main/speech-output-controller.ts#L576-L581)） |
+| 桌宠可见性 | `PET_STATES` 无 `speaking`，[pet-prototype.ts:12](../../../../../../packages/contracts/src/pet-prototype.ts#L12)；`petStateOf` 不读语音快照 | 播放时角色仍 `replying`/`idle`，嘴不动 |
+| 停止入口 | 桌宠菜单"停止"=`stopForeground`，[App.tsx:854](../../../../../../apps/desktop/src/renderer/pet/App.tsx#L854)，仅 `agent.status==='busy'` 出现 | 朗读中它不出现，停不了播放 |
+| 托盘 | "停止本地播放"=`speech.stop()`，[index.ts:489-497](../../../../../../apps/desktop/src/main/index.ts#L489-L497) | 桌宠外唯一停播放入口 |
+| 控制台停止 | 声音卡片"停止播放"，[speech-settings.tsx:280-289](../../../../../../apps/desktop/src/renderer/console/minimal-ui/speech-settings.tsx#L280-L289) | 已有，在"人格 → 声音" |
 | 服务端音频 | service/server 中 speech 出现 **0 次** | 无服务端音频路由，无播放端登记 |
-| 文本上限 | `SPEECH_OUTPUT_MAX_TEXT=4000`；旧 speech 层将 `MEDIA_MAX_STREAM_BYTES` 借用为整段音频上限，[speech-output.ts:13-16](../../../../packages/contracts/src/speech-output.ts#L13-L16) | Kernel 的2MiB流缓冲与旧 speech 的2MiB整段限制是两个事实。后者需要为O9拆开，不能据相同数值推断底层总流容量，也不能谎称旧播放器已经不限整段大小。 |
-| 播放缓冲 | 整段收齐后一次性建 `AudioBuffer`，[playback.ts:114-122](../../../../apps/desktop/src/renderer/speech-output/playback.ts#L114-L122) | 这是**当前实现**的形态，不是首片产品规则；官方 MiMo 已支持 24kHz PCM16 流式，改为边收边播是技术选择，**尚未实现** |
-| 队列 | 4 槽，超限 `quota-exceeded`，[speech-output-controller.ts:240](../../../../apps/desktop/src/main/speech-output-controller.ts#L240) | 已有唯一队列，不要再建 |
+| 文本上限 | `SPEECH_OUTPUT_MAX_TEXT=4000`；旧 speech 层将 `MEDIA_MAX_STREAM_BYTES` 借用为整段音频上限，[speech-output.ts:13-16](../../../../../../packages/contracts/src/speech-output.ts#L13-L16) | Kernel 的2MiB流缓冲与旧 speech 的2MiB整段限制是两个事实。后者需要为O9拆开，不能据相同数值推断底层总流容量，也不能谎称旧播放器已经不限整段大小。 |
+| 播放缓冲 | 整段收齐后一次性建 `AudioBuffer`，[playback.ts:114-122](../../../../../../apps/desktop/src/renderer/speech-output/playback.ts#L114-L122) | 这是**当前实现**的形态，不是首片产品规则；官方 MiMo 已支持 24kHz PCM16 流式，改为边收边播是技术选择，**尚未实现** |
+| 队列 | 4 槽，超限 `quota-exceeded`，[speech-output-controller.ts:240](../../../../../../apps/desktop/src/main/speech-output-controller.ts#L240) | 已有唯一队列，不要再建 |
 | 格式 | 只收 `pcm-s16le`，8000–96000Hz | Magpie 实际输出格式未知 |
 | 现有 provider | `pet.builtin-speech`(音调)、`pet.system-tts`(Windows) | `providers()` 不过滤状态，Linux 上仍列出但 `active:false`；**Magpie TTS provider 不存在** |
-| 播放证据 | `playing` 需 `reportPlayback('started')`，[speech-output-controller.ts:549-560](../../../../apps/desktop/src/main/speech-output-controller.ts#L549-L560) | `started` 只证明缓冲开始，不证明可闻 |
-| 设置副作用 | `saveSettings` 调 `stopNow()`，[speech-output-controller.ts:609](../../../../apps/desktop/src/main/speech-output-controller.ts#L609) | 调音量/换声会掐掉当前朗读 |
+| 播放证据 | `playing` 需 `reportPlayback('started')`，[speech-output-controller.ts:549-560](../../../../../../apps/desktop/src/main/speech-output-controller.ts#L549-L560) | `started` 只证明缓冲开始，不证明可闻 |
+| 设置副作用 | `saveSettings` 调 `stopNow()`，[speech-output-controller.ts:609](../../../../../../apps/desktop/src/main/speech-output-controller.ts#L609) | 调音量/换声会掐掉当前朗读 |
 
 ## 二、"最终正式回复"如何判定（保留证据）
 
 O7 要求只读最终正式回复。**今天不需要新字段，也不需要文本启发式：**
 
-1. **思考与 delta 从不成为消息。** harness output tap 明确 `externalizes: () => false`，注释写着"token events are not presented to a client"，[harness.mjs:330-331](../../../../plugins/harness-cortico/src/harness.mjs#L330-L331)。流式 token 不进历史，"朗读 draft"结构上不可能。
-2. **正式回复只有一条落库路径：`role:'assistant'`。** `publish` → [runtime.ts:1045](../../../../packages/companion-runtime/src/runtime.ts#L1045)。两个来源都算正式回复：模型 `onRoundEnd` 的 `round.text`（[harness.mjs:332-337](../../../../plugins/harness-cortico/src/harness.mjs#L332-L337)）与 `say` 工具的 `args.text`（[harness.mjs:183-185](../../../../plugins/harness-cortico/src/harness.mjs#L183-L185)）。两者互斥：输出含 `function_call` 时 `round.text` 不设置，[harness.mjs:245](../../../../plugins/harness-cortico/src/harness.mjs#L245)。
-3. **notice 是分开的 role。** `admission-*`（[runtime.ts:711-716](../../../../packages/companion-runtime/src/runtime.ts#L711-L716)）、`work-result-*`（[runtime.ts:873-877](../../../../packages/companion-runtime/src/runtime.ts#L873-L877)）。任务 stdout/stderr 在 `CompanionTask` 字段，从不是 assistant。
+1. **思考与 delta 从不成为消息。** harness output tap 明确 `externalizes: () => false`，注释写着"token events are not presented to a client"，[harness.mjs:330-331](../../../../../../plugins/harness-cortico/src/harness.mjs#L330-L331)。流式 token 不进历史，"朗读 draft"结构上不可能。
+2. **正式回复只有一条落库路径：`role:'assistant'`。** `publish` → [runtime.ts:1045](../../../../../../packages/companion-runtime/src/runtime.ts#L1045)。两个来源都算正式回复：模型 `onRoundEnd` 的 `round.text`（[harness.mjs:332-337](../../../../../../plugins/harness-cortico/src/harness.mjs#L332-L337)）与 `say` 工具的 `args.text`（[harness.mjs:183-185](../../../../../../plugins/harness-cortico/src/harness.mjs#L183-L185)）。两者互斥：输出含 `function_call` 时 `round.text` 不设置，[harness.mjs:245](../../../../../../plugins/harness-cortico/src/harness.mjs#L245)。
+3. **notice 是分开的 role。** `admission-*`（[runtime.ts:711-716](../../../../../../packages/companion-runtime/src/runtime.ts#L711-L716)）、`work-result-*`（[runtime.ts:873-877](../../../../../../packages/companion-runtime/src/runtime.ts#L873-L877)）。任务 stdout/stderr 在 `CompanionTask` 字段，从不是 assistant。
 4. **结论**：过滤条件就是 `role === 'assistant'`。`say` 的文本是**正式回答**，不是"原始 tool 材料"；`start_work`/`list_work` 的回执才是原始材料且不进 assistant。
 
 三个必须处理的边界：
 
-- **一轮可能有多条正式回复。** `rounds` 是 soft 8/hard 12，[harness.mjs:326](../../../../plugins/harness-cortico/src/harness.mjs#L326)，且 `say` 无"每轮一次"守卫。触发单位是**每条已提交的 assistant 消息**，不是"每轮一条"——O7 已明确不许把多条折叠成猜的"最后一条"。
-- **事件不带正文。** SSE message 事件只有 `{messageId, inputId, taskId, role}`，[state.ts:399-408](../../../../plugins/state-sqlite/src/state.ts#L399-L408)；必须回读快照才有 text。
-- **刷新是合并的。** Main 以 120ms 合并，[companion-client-controller.ts:567-573](../../../../apps/desktop/src/main/companion-client-controller.ts#L567-L573)，一次快照可能带来多条新回复。必须按游标逐条判定。
+- **一轮可能有多条正式回复。** `rounds` 是 soft 8/hard 12，[harness.mjs:326](../../../../../../plugins/harness-cortico/src/harness.mjs#L326)，且 `say` 无"每轮一次"守卫。触发单位是**每条已提交的 assistant 消息**，不是"每轮一条"——O7 已明确不许把多条折叠成猜的"最后一条"。
+- **事件不带正文。** SSE message 事件只有 `{messageId, inputId, taskId, role}`，[state.ts:399-408](../../../../../../plugins/state-sqlite/src/state.ts#L399-L408)；必须回读快照才有 text。
+- **刷新是合并的。** Main 以 120ms 合并，[companion-client-controller.ts:567-573](../../../../../../apps/desktop/src/main/companion-client-controller.ts#L567-L573)，一次快照可能带来多条新回复。必须按游标逐条判定。
 
 **推论**：自动触发必须由 **Main 侧**判定"新增了哪些 assistant 消息"，再喂给 `SpeechOutputController`；渲染层比 UI 差异会因卸载/隐藏/重连而漏或重复。
 
@@ -74,12 +74,12 @@ O8 要求"真 source + 生命周期启停"，并明确旧默认 true 不能当�
 | 机制 | 今天有什么 | 能否冒充 O8 的启用 |
 | --- | --- | --- |
 | 设置布尔 `speechEnabled` | profile Config 字段，默认 true | **不能**。它只是偏好，provider 照样被 admit，插件仍在跑 |
-| 插件生命周期 | `enable/disable` + `desiredActive`，[plugin-manager.ts:253](../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L253)/[:425](../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L425) | **这才是** O8 要的：`disable` 会 `deactivating → disabled` 并卸载 capability |
+| 插件生命周期 | `enable/disable` + `desiredActive`，[plugin-manager.ts:253](../../../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L253)/[:425](../../../../../../packages/host-kernel/src/runtime/plugin-manager.ts#L425) | **这才是** O8 要的：`disable` 会 `deactivating → disabled` 并卸载 capability |
 | 试听开关 | 同一 `speechEnabled` 驱动试听按钮 | 旧语义；升级后不能自动变成"自动朗读已开" |
 
 界面含义（不新增页面）：
 
-- **入口用既有的**：插件页的启用/停用（[plugins.tsx:163](../../../../apps/desktop/src/renderer/console/pages/plugins.tsx#L163)）就是真启停，已有 busy/失败/重试处理；"人格 → 声音"卡片继续承担音色/音量配置。
+- **入口用既有的**：插件页的启用/停用（[plugins.tsx:163](../../../../../../apps/desktop/src/renderer/console/pages/plugins.tsx#L163)）就是真启停，已有 busy/失败/重试处理；"人格 → 声音"卡片继续承担音色/音量配置。
 - **两处必须说清不同**：插件页显示"已停用"，声音卡片里的试听/配置就该说明"语音输出插件已停用，无法试听"，而不是把设置项置灰了事。
 - **默认 off**：新能力首次出现时 `desiredActive=false`。旧 `speechEnabled=true` 只保留给"这台机器是否允许出声"的偏好，**不得**在升级后触发自动朗读。两者不要共用同一默认值。
 - **禁用即围栏**：`disable` 后不得合成、不得播放、迟到音频丢弃；`stop()` 已做清队列+停当前+围栏（`epoch++`）。
@@ -90,17 +90,17 @@ O8 要求"真 source + 生命周期启停"，并明确旧默认 true 不能当�
 Parent 的"各客户端独立"指桌面应用整体，不是"每窗口一个端"。上一版把单机两窗写成"双响"是错的：O5/O8 明确**只有桌宠一个 owner**，控制台不挂播放器，所以同一台机器**不会**双响。上一版那句"独立每端在单机上直接双响"作废。
 
 **纠正 2：独立 Web 不注入 Electron preload，所以不能说 Web 已有桥。**
-`petSpeechOutput` 由 desktop preload 注入；Web 由服务提供，加载的是 `client.js`（[server.ts:271-275](../../../../apps/companion-service/src/server.ts#L271-L275)），**没有任何 Electron preload**，`plugins/text-client` 里也搜不到 `petSpeechOutput`。上一版说"控制台已有桥所以 Web 也有"是混用——**控制台有桥不等于 Web 有桥**。本片段 Web 保持纯文字，符合 O5/S5。
+`petSpeechOutput` 由 desktop preload 注入；Web 由服务提供，加载的是 `client.js`（[server.ts:271-275](../../../../../../apps/companion-service/src/server.ts#L271-L275)），**没有任何 Electron preload**，`plugins/text-client` 里也搜不到 `petSpeechOutput`。上一版说"控制台已有桥所以 Web 也有"是混用——**控制台有桥不等于 Web 有桥**。本片段 Web 保持纯文字，符合 O5/S5。
 
 **纠正 3：隐藏桌宠当前仍会继续播放，不能写"隐藏就无声"。**
-`syncPet` 只 `hide()`（[index.ts:144-146](../../../../apps/desktop/src/main/index.ts#L144-L146)），不销毁窗口；`backgroundThrottling:false`（[pet-window.ts:169](../../../../apps/desktop/src/main/windows/pet-window.ts#L169)）；`SpeechPlaybackOwner` 不看 `visibilityState`（播放器里 0 处引用）。所以**隐藏状态下音频照常播**。上一版"关掉或隐藏就没有声音"是错的。
+`syncPet` 只 `hide()`（[index.ts:144-146](../../../../../../apps/desktop/src/main/index.ts#L144-L146)），不销毁窗口；`backgroundThrottling:false`（[pet-window.ts:169](../../../../../../apps/desktop/src/main/windows/pet-window.ts#L169)）；`SpeechPlaybackOwner` 不看 `visibilityState`（播放器里 0 处引用）。所以**隐藏状态下音频照常播**。上一版"关掉或隐藏就没有声音"是错的。
 
 三种情形要分开，不能合成一句"无声"：
 
 | 情形 | 今天实际发生 | 首版建议 |
 | --- | --- | --- |
 | **hide**（`visible=false`） | 窗口还在、渲染器活着、**继续播放** | 允许继续播（用户只是不想看见角色）；界面别声称"已静音" |
-| **实际 close / 窗口销毁** | `dispose()` → `window.destroy()`（[pet-window.ts:466-478](../../../../apps/desktop/src/main/windows/pet-window.ts#L466-L478)）；渲染器没了，音频无接收方 | 播放自然终止；**不要**把它报成"播放失败"，那是设备端消失 |
+| **实际 close / 窗口销毁** | `dispose()` → `window.destroy()`（[pet-window.ts:466-478](../../../../../../apps/desktop/src/main/windows/pet-window.ts#L466-L478)）；渲染器没了，音频无接收方 | 播放自然终止；**不要**把它报成"播放失败"，那是设备端消失 |
 | **禁用插件** | `disable` → capability 卸载 | 必须主动停合成/播放并围栏；这是唯一的"用户意图静音" |
 
 ## 五、启用/关闭、停止播放、停止工作：四件事不能合并
@@ -119,13 +119,13 @@ Parent 的"各客户端独立"指桌面应用整体，不是"每窗口一个端"
 
 **产品规则（用户已定）**：长回复也要完整朗读；保留完整原文与顺序；**不截断、不摘要、不换说法**。一条正式回复始终是**一个逻辑朗读意图 / 一个 FIFO 条目**。
 
-**底层怎么实现不是产品规则，UX 不预设。** 官方 MiMo 文档（2026-07-15/17）已确认 ordinary `mimo-v2.5-tts` 支持真低延迟 streaming（`stream:true`、`audio.format:pcm16`、24kHz PCM16LE mono），见 [MiMo TTS 证据](mimo-tts-current.md#L12-L13)。所以"整段合成完才开始播"只是**当前播放器**的形态（[playback.ts:114-122](../../../../apps/desktop/src/renderer/speech-output/playback.ts#L114-L122)），**不是首片产品硬规则**；"必须先把文本切成 part"也不是。
+**底层怎么实现不是产品规则，UX 不预设。** 官方 MiMo 文档（2026-07-15/17）已确认 ordinary `mimo-v2.5-tts` 支持真低延迟 streaming（`stream:true`、`audio.format:pcm16`、24kHz PCM16LE mono），见 [MiMo TTS 证据](mimo-tts-current.md#L12-L13)。所以"整段合成完才开始播"只是**当前播放器**的形态（[playback.ts:114-122](../../../../../../apps/desktop/src/renderer/speech-output/playback.ts#L114-L122)），**不是首片产品硬规则**；"必须先把文本切成 part"也不是。
 
 两种底层路径都能满足 O9，UX 对两者提出同样的要求：
 
 | 路径 | 今天 | 对本 UX 的影响 |
 | --- | --- | --- |
-| 流式合成/边收边播 | 契约已收 24kHz `pcm-s16le`（[speech-output.ts:15](../../../../packages/contracts/src/speech-output.ts#L15)/[:146-149](../../../../packages/contracts/src/speech-output.ts#L146-L149)），但播放器仍整段缓冲 | 首字节更早，**"准备"阶段会变短**；仍要有准备/朗读/停止/未完成四类可见事实 |
+| 流式合成/边收边播 | 契约已收 24kHz `pcm-s16le`（[speech-output.ts:15](../../../../../../packages/contracts/src/speech-output.ts#L15)/[:146-149](../../../../../../packages/contracts/src/speech-output.ts#L146-L149)），但播放器仍整段缓冲 | 首字节更早，**"准备"阶段会变短**；仍要有准备/朗读/停止/未完成四类可见事实 |
 | 有界文本 part 顺序合成 | 未实现 | 准备/朗读可能在一条回复内反复切换，但**UI 仍只显示"这一条"**，不暴露 part |
 
 必须保持的语义（写成行为契约，不写 DTO，也不指定底层）：
@@ -163,18 +163,18 @@ Parent 的"各客户端独立"指桌面应用整体，不是"每窗口一个端"
 | 合成中 | `phase==='synthesizing'` | "正在准备声音" |
 | 播放中 | `phase==='playing'` 且 `current.utteranceId===本条` | "播放中" + 停止 |
 | 停止/已释放 | 旧idle/空current不足以证明释放；新契约须来自实际task/media/player清理确认 | 释放未确认时不报idle成功；释放确认也不等于正文播放完整 |
-| 失败 | `phase==='error'` + `reason` | 复用 6 类原因文案（[speech-settings.tsx:15-22](../../../../apps/desktop/src/renderer/console/minimal-ui/speech-settings.tsx#L15-L22)），可重试；文字保留 |
+| 失败 | `phase==='error'` + `reason` | 复用 6 类原因文案（[speech-settings.tsx:15-22](../../../../../../apps/desktop/src/renderer/console/minimal-ui/speech-settings.tsx#L15-L22)），可重试；文字保留 |
 | 长回复未完成 | **契约暂无此事实** | 如实说"这条没有读完"；资源可以已经释放，但不能把释放当作整条播放完成，两种事实分别表达 |
 
-**没有 `stopping` 播放阶段**——契约只有四态（[speech-output.ts:90](../../../../packages/contracts/src/speech-output.ts#L90)），`stopNow` 直接置 `idle`。所以不能把"正在停止播放"当成一个会持续存在的生命周期状态来展示。区别要分清：声音卡片里的 `form.stopping` 只是**这次 stop 请求在途**的按钮 busy 标记（[speech-settings.tsx:284](../../../../apps/desktop/src/renderer/console/minimal-ui/speech-settings.tsx#L284)），请求返回即结束；它不等于"音频正在释放"。若确实需要跨请求的"正在释放音频"状态，须由 GPT 增补并给出证据——**UI 不能自己编一个契约里没有的阶段**。
+**没有 `stopping` 播放阶段**——契约只有四态（[speech-output.ts:90](../../../../../../packages/contracts/src/speech-output.ts#L90)），`stopNow` 直接置 `idle`。所以不能把"正在停止播放"当成一个会持续存在的生命周期状态来展示。区别要分清：声音卡片里的 `form.stopping` 只是**这次 stop 请求在途**的按钮 busy 标记（[speech-settings.tsx:284](../../../../../../apps/desktop/src/renderer/console/minimal-ui/speech-settings.tsx#L284)），请求返回即结束；它不等于"音频正在释放"。若确实需要跨请求的"正在释放音频"状态，须由 GPT 增补并给出证据——**UI 不能自己编一个契约里没有的阶段**。
 
-两条诚实线：`started` 不等于"用户听见了"（静音、无输出设备、窗口隐藏都可能无声），所以不给消息加"已朗读"标记、不写历史；`lastUtterance` 在 `speak()` 入口就写入（[speech-output-controller.ts:225](../../../../apps/desktop/src/main/speech-output-controller.ts#L225)），早于开关/provider 检查，**不是播放证据**。
+两条诚实线：`started` 不等于"用户听见了"（静音、无输出设备、窗口隐藏都可能无声），所以不给消息加"已朗读"标记、不写历史；`lastUtterance` 在 `speak()` 入口就写入（[speech-output-controller.ts:225](../../../../../../apps/desktop/src/main/speech-output-controller.ts#L225)），早于开关/provider 检查，**不是播放证据**。
 
 ## 八、UI 只承诺可验证的东西（音色/音量）
 
-契约里真实存在、可验证的是 `voice`（自由字符串，≤256）与 `volume`（0–100），[speech-output.ts:37-39](../../../../packages/contracts/src/speech-output.ts#L37-L39)；`volume` 在播放器里直接映射为 `gain`（[playback.ts:134](../../../../apps/desktop/src/renderer/speech-output/playback.ts#L134)），是真实生效的。
+契约里真实存在、可验证的是 `voice`（自由字符串，≤256）与 `volume`（0–100），[speech-output.ts:37-39](../../../../../../packages/contracts/src/speech-output.ts#L37-L39)；`volume` 在播放器里直接映射为 `gain`（[playback.ts:134](../../../../../../apps/desktop/src/renderer/speech-output/playback.ts#L134)），是真实生效的。
 
-**`rate` 不要做伪映射。** 旧 Windows 系统朗读把 `rate`(-10..10) 直接赋给 SAPI 的 `Rate`（[system-speech.ps1:23](../../../../plugins/system-tts/src/system-speech.ps1#L23)），那是 SAPI 自己的标度；Magpie 的 TTS 未必有等价参数，语义也不同。**首版不要声称"语速可调"**，除非 provider 真的支持并验证过。要么隐藏该项，要么标明"仅对当前 provider 有效"——不要把一个旧 provider 的标度当成产品能力。
+**`rate` 不要做伪映射。** 旧 Windows 系统朗读把 `rate`(-10..10) 直接赋给 SAPI 的 `Rate`（[system-speech.ps1:23](../../../../../../plugins/system-tts/src/system-speech.ps1#L23)），那是 SAPI 自己的标度；Magpie 的 TTS 未必有等价参数，语义也不同。**首版不要声称"语速可调"**，除非 provider 真的支持并验证过。要么隐藏该项，要么标明"仅对当前 provider 有效"——不要把一个旧 provider 的标度当成产品能力。
 
 **官方文档里的"自然语言 style 控制"不等于数字 `rate` 已支持。** MiMo 文档提到可用可选的 user content 提供 style/context（那段内容本身不被朗读），也提到 `finish_reason` 与 `optimize_text_preview` 等；这些**都不是**本仓 `rate: -10..10` 的语义。不能因为文档有"风格"字样就推断数字语速可用，也不能把 style 文本塞进正文（那会违反"不改写"）。两者若要做，都是独立的新能力，不在本片段。
 
@@ -182,11 +182,11 @@ Parent 的"各客户端独立"指桌面应用整体，不是"每窗口一个端"
 
 ## 九、M4 复用：只复用位置，不合并保存域
 
-- **输入设置是 ASR 专属**：`VoiceSettings` 字段是"结束方式 / 转写提供者 / 网关地址 / 转写模型 / 目录 / 鉴权 / 密钥"，[voice-settings.tsx:302-505](../../../../plugins/text-client/src/client/voice-settings.tsx#L302-L505)，**没有一个输出字段**。
+- **输入设置是 ASR 专属**：`VoiceSettings` 字段是"结束方式 / 转写提供者 / 网关地址 / 转写模型 / 目录 / 鉴权 / 密钥"，[voice-settings.tsx:302-505](../../../../../../plugins/text-client/src/client/voice-settings.tsx#L302-L505)，**没有一个输出字段**。
 - **输出设置是另一套**：`speechProvider/speechVoice/speechRate/speechVolume` 在 profile 里，经 `saveSettings` 走自己的 CAS。
 - **不要把 TTS 塞进 `VoiceSettings` 弹窗**：会让"保存语音设置"同时改输入与输出，破坏 M4 已验证的独立草稿/CAS。
-- **位置可复用**：`VoiceInput` 与输入框并排（[conversation.tsx:346](../../../../apps/desktop/src/renderer/console/pages/conversation.tsx#L346)）、消息列表在上方；行内播放态/停止放这里不需要新布局。
-- 输入在"开始 → 语音输入"弹窗（[start.tsx:60](../../../../apps/desktop/src/renderer/console/pages/start.tsx#L60)），输出在"人格 → 声音"卡片（[persona.tsx:251](../../../../apps/desktop/src/renderer/console/pages/persona.tsx#L251)）；这个不对称不必在本片段修复。
+- **位置可复用**：`VoiceInput` 与输入框并排（[conversation.tsx:346](../../../../../../apps/desktop/src/renderer/console/pages/conversation.tsx#L346)）、消息列表在上方；行内播放态/停止放这里不需要新布局。
+- 输入在"开始 → 语音输入"弹窗（[start.tsx:60](../../../../../../apps/desktop/src/renderer/console/pages/start.tsx#L60)），输出在"人格 → 声音"卡片（[persona.tsx:251](../../../../../../apps/desktop/src/renderer/console/pages/persona.tsx#L251)）；这个不对称不必在本片段修复。
 
 ## 十、最小验收
 
