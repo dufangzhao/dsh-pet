@@ -973,3 +973,37 @@ Completed M4 shared web/desktop voice input through ordinary Magpie sources, exa
 ### Next Steps
 
 - None - task complete
+
+
+## Session 27: 完成 M5 共享 Magpie 语音输出
+
+**Date**: 2026-11-12
+**Task**: 完成 M5 共享 Magpie 语音输出
+**Branch**: `feat/shared-speech-output`
+
+### Summary
+
+实现默认关闭的可选桌宠 TTS，使用 Magpie 普通 MiMo 流式接口自动朗读新正式回复，长文完整分段，停止/来源撤销与 Core、ASR、独立工作分离。完成实际生命周期、配置通知与已应用绑定、真实 profile 生成器平台声明等回归；受控生产桌面10场景、独立 Web3场景、Core/Docker/ASR隔离和根/定点门禁通过。用户单独批准的一次真实 TTS 请求成功，生成4.96秒WAV；授权已耗尽，不可重跑。最终证据与操作指南留档，中间诊断保留私有SHA清单，只归档M5并修正全部引用；原4120保持停止，所有测试实例已清场，未推送远端。
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5e61f9668388d05740825b4185a6444bead4696b` | (see git log) |
+| `3287f42a6de08a63a0145af4e4139382a02b190c` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
