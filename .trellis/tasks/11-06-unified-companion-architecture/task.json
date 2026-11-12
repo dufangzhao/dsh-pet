@@ -23,7 +23,8 @@
     "11-08-companion-model-text-loop",
     "11-08-shared-desktop-agent-entry",
     "11-08-controlled-persona-memory",
-    "11-09-shared-voice-input"
+    "11-09-shared-voice-input",
+    "11-11-shared-speech-output"
   ],
   "parent": null,
   "relatedFiles": [],

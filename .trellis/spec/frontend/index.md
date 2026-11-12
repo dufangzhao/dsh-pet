@@ -10,7 +10,8 @@ The actual baseline uses Electron45, React19, Vite, strict TypeScript, existing 
 4. [Shared desktop entry](shared-desktop-entry.md) — the pet window and console reading one service connection: single snapshot owner, fence-not-dispatcher targeting, projection vs Config revisions, endpoint draft CAS, token lifetime and pet presentation/hit-shape rules.
 5. [Persona and active memory](persona-memory.md) — the shared owner form both clients render: nullable CAS baselines, render-captured target with an operation-identity lock, frozen forget intent, per-feature rebase and saved-versus-applied labels.
 6. [Shared voice input](../backend/shared-voice-input.md) — capture/release ownership, native and web adapters, catalog/draft baselines, terminal errors and actual verification boundaries.
-7. The active task PRD/design/implementation plan and curated implement.jsonl/check.jsonl — target behavior and approved scope.
+7. [Shared speech output](../backend/shared-speech-output.md) — single Pet player, bounded stream/receipt lifetimes, source opt-in and captured settings/volume draft ownership.
+8. The active task PRD/design/implementation plan and curated implement.jsonl/check.jsonl — target behavior and approved scope.
 
 ## Pre-development checklist
 

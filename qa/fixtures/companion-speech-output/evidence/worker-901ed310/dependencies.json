@@ -1,0 +1,2101 @@
+[
+  {
+    "name": "@pet/companion-service",
+    "version": "0.0.0",
+    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/apps/companion-service",
+    "private": true,
+    "dependencies": {
+      "@pet/cloud-exec": {
+        "from": "@pet/cloud-exec",
+        "version": "link:../../plugins/cloud-exec",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/cloud-exec",
+        "deduped": true,
+        "dedupedDependenciesCount": 2
+      },
+      "@pet/companion-runtime": {
+        "from": "@pet/companion-runtime",
+        "version": "link:../../packages/companion-runtime",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime",
+        "deduped": true,
+        "dedupedDependenciesCount": 241
+      },
+      "@pet/contracts": {
+        "from": "@pet/contracts",
+        "version": "link:../../packages/contracts",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+        "deduped": true,
+        "dedupedDependenciesCount": 6
+      },
+      "@pet/harness-cortico": {
+        "from": "@pet/harness-cortico",
+        "version": "link:../../plugins/harness-cortico",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/harness-cortico",
+        "deduped": true,
+        "dedupedDependenciesCount": 226
+      },
+      "@pet/host-kernel": {
+        "from": "@pet/host-kernel",
+        "version": "link:../../packages/host-kernel",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+        "deduped": true,
+        "dedupedDependenciesCount": 5
+      },
+      "@pet/plugin-sdk": {
+        "from": "@pet/plugin-sdk",
+        "version": "link:../../packages/plugin-sdk",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+        "deduped": true,
+        "dedupedDependenciesCount": 1
+      },
+      "@pet/state-sqlite": {
+        "from": "@pet/state-sqlite",
+        "version": "link:../../plugins/state-sqlite",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/state-sqlite",
+        "deduped": true,
+        "dedupedDependenciesCount": 2
+      },
+      "cortico": {
+        "from": "cortico",
+        "version": "0.2.7",
+        "resolved": "https://registry.npmjs.org/cortico/-/cortico-0.2.7.tgz",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/cortico@0.2.7_patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995/node_modules/cortico",
+        "deduped": true,
+        "dedupedDependenciesCount": 193
+      },
+      "tsx": {
+        "from": "tsx",
+        "version": "4.23.15",
+        "resolved": "https://registry.npmjs.org/tsx/-/tsx-4.23.15.tgz",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/tsx@4.23.15/node_modules/tsx",
+        "deduped": true,
+        "dedupedDependenciesCount": 28
+      },
+      "@pet/model-connection-magpie": {
+        "from": "@pet/model-connection-magpie",
+        "version": "link:../../plugins/model-connection-magpie",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/model-connection-magpie",
+        "dependencies": {
+          "@pet/companion-runtime": {
+            "from": "@pet/companion-runtime",
+            "version": "link:../../packages/companion-runtime",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime",
+            "deduped": true,
+            "dedupedDependenciesCount": 241
+          },
+          "@pet/contracts": {
+            "from": "@pet/contracts",
+            "version": "link:../../packages/contracts",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+            "deduped": true,
+            "dedupedDependenciesCount": 6
+          },
+          "@pet/host-kernel": {
+            "from": "@pet/host-kernel",
+            "version": "link:../../packages/host-kernel",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+            "deduped": true,
+            "dedupedDependenciesCount": 5
+          },
+          "@pet/plugin-sdk": {
+            "from": "@pet/plugin-sdk",
+            "version": "link:../../packages/plugin-sdk",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+            "deduped": true,
+            "dedupedDependenciesCount": 1
+          },
+          "cortico": {
+            "from": "cortico",
+            "version": "0.2.7",
+            "resolved": "https://registry.npmjs.org/cortico/-/cortico-0.2.7.tgz",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/cortico@0.2.7_patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995/node_modules/cortico",
+            "deduped": true,
+            "dedupedDependenciesCount": 193
+          },
+          "tsx": {
+            "from": "tsx",
+            "version": "4.23.15",
+            "resolved": "https://registry.npmjs.org/tsx/-/tsx-4.23.15.tgz",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/tsx@4.23.15/node_modules/tsx",
+            "deduped": true,
+            "dedupedDependenciesCount": 28
+          }
+        }
+      },
+      "@pet/shared-speech": {
+        "from": "@pet/shared-speech",
+        "version": "link:../../plugins/shared-speech",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/shared-speech",
+        "dependencies": {
+          "@pet/companion-runtime": {
+            "from": "@pet/companion-runtime",
+            "version": "link:../../packages/companion-runtime",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime",
+            "deduped": true,
+            "dedupedDependenciesCount": 241
+          },
+          "@pet/contracts": {
+            "from": "@pet/contracts",
+            "version": "link:../../packages/contracts",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+            "deduped": true,
+            "dedupedDependenciesCount": 6
+          },
+          "@pet/host-kernel": {
+            "from": "@pet/host-kernel",
+            "version": "link:../../packages/host-kernel",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+            "deduped": true,
+            "dedupedDependenciesCount": 5
+          },
+          "@pet/plugin-sdk": {
+            "from": "@pet/plugin-sdk",
+            "version": "link:../../packages/plugin-sdk",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+            "deduped": true,
+            "dedupedDependenciesCount": 1
+          }
+        }
+      },
+      "@pet/shared-voice": {
+        "from": "@pet/shared-voice",
+        "version": "link:../../plugins/shared-voice",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/shared-voice",
+        "dependencies": {
+          "@pet/companion-runtime": {
+            "from": "@pet/companion-runtime",
+            "version": "link:../../packages/companion-runtime",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime",
+            "deduped": true,
+            "dedupedDependenciesCount": 241
+          },
+          "@pet/contracts": {
+            "from": "@pet/contracts",
+            "version": "link:../../packages/contracts",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+            "deduped": true,
+            "dedupedDependenciesCount": 6
+          },
+          "@pet/host-kernel": {
+            "from": "@pet/host-kernel",
+            "version": "link:../../packages/host-kernel",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+            "deduped": true,
+            "dedupedDependenciesCount": 5
+          },
+          "@pet/plugin-sdk": {
+            "from": "@pet/plugin-sdk",
+            "version": "link:../../packages/plugin-sdk",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+            "deduped": true,
+            "dedupedDependenciesCount": 1
+          }
+        }
+      },
+      "@pet/text-client": {
+        "from": "@pet/text-client",
+        "version": "link:../../plugins/text-client",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/text-client",
+        "dependencies": {
+          "@pet/audio-capture": {
+            "from": "@pet/audio-capture",
+            "version": "link:../../plugins/audio-capture",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/audio-capture",
+            "deduped": true,
+            "dedupedDependenciesCount": 9
+          },
+          "@pet/contracts": {
+            "from": "@pet/contracts",
+            "version": "link:../../packages/contracts",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+            "deduped": true,
+            "dedupedDependenciesCount": 6
+          },
+          "@pet/plugin-sdk": {
+            "from": "@pet/plugin-sdk",
+            "version": "link:../../packages/plugin-sdk",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+            "deduped": true,
+            "dedupedDependenciesCount": 1
+          },
+          "@pet/ui-kit": {
+            "from": "@pet/ui-kit",
+            "version": "link:../../packages/ui-kit",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/ui-kit"
+          }
+        }
+      },
+      "@pet/tts-magpie": {
+        "from": "@pet/tts-magpie",
+        "version": "link:../../plugins/tts-magpie",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/tts-magpie",
+        "dependencies": {
+          "@pet/asr-magpie": {
+            "from": "@pet/asr-magpie",
+            "version": "link:../../plugins/asr-magpie",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/asr-magpie",
+            "deduped": true,
+            "dedupedDependenciesCount": 255
+          },
+          "@pet/companion-runtime": {
+            "from": "@pet/companion-runtime",
+            "version": "link:../../packages/companion-runtime",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime",
+            "deduped": true,
+            "dedupedDependenciesCount": 241
+          },
+          "@pet/contracts": {
+            "from": "@pet/contracts",
+            "version": "link:../../packages/contracts",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+            "deduped": true,
+            "dedupedDependenciesCount": 6
+          },
+          "@pet/host-kernel": {
+            "from": "@pet/host-kernel",
+            "version": "link:../../packages/host-kernel",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+            "deduped": true,
+            "dedupedDependenciesCount": 5
+          },
+          "@pet/plugin-sdk": {
+            "from": "@pet/plugin-sdk",
+            "version": "link:../../packages/plugin-sdk",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+            "deduped": true,
+            "dedupedDependenciesCount": 1
+          }
+        }
+      },
+      "@pet/asr-magpie": {
+        "from": "@pet/asr-magpie",
+        "version": "link:../../plugins/asr-magpie",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/asr-magpie",
+        "dependencies": {
+          "@pet/contracts": {
+            "from": "@pet/contracts",
+            "version": "link:../../packages/contracts",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+            "deduped": true,
+            "dedupedDependenciesCount": 6
+          },
+          "@pet/host-kernel": {
+            "from": "@pet/host-kernel",
+            "version": "link:../../packages/host-kernel",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+            "deduped": true,
+            "dedupedDependenciesCount": 5
+          },
+          "@pet/plugin-sdk": {
+            "from": "@pet/plugin-sdk",
+            "version": "link:../../packages/plugin-sdk",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+            "deduped": true,
+            "dedupedDependenciesCount": 1
+          },
+          "@pet/audio-capture": {
+            "from": "@pet/audio-capture",
+            "version": "link:../../plugins/audio-capture",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/audio-capture",
+            "dependencies": {
+              "@pet/plugin-sdk": {
+                "from": "@pet/plugin-sdk",
+                "version": "link:../../packages/plugin-sdk",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+                "dependencies": {
+                  "@pet/contracts": {
+                    "from": "@pet/contracts",
+                    "version": "link:../../packages/contracts",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 6
+                  }
+                }
+              },
+              "@pet/contracts": {
+                "from": "@pet/contracts",
+                "version": "link:../../packages/contracts",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                "dependencies": {
+                  "semver": {
+                    "from": "semver",
+                    "version": "7.8.5",
+                    "resolved": "https://registry.npmjs.org/semver/-/semver-7.8.5.tgz",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/semver@7.8.5/node_modules/semver"
+                  },
+                  "ajv": {
+                    "from": "ajv",
+                    "version": "8.20.0",
+                    "resolved": "https://registry.npmjs.org/ajv/-/ajv-8.20.0.tgz",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ajv@8.20.0/node_modules/ajv",
+                    "dependencies": {
+                      "fast-deep-equal": {
+                        "from": "fast-deep-equal",
+                        "version": "3.1.3",
+                        "resolved": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal"
+                      },
+                      "fast-uri": {
+                        "from": "fast-uri",
+                        "version": "3.1.9",
+                        "resolved": "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.9.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri"
+                      },
+                      "json-schema-traverse": {
+                        "from": "json-schema-traverse",
+                        "version": "1.0.0",
+                        "resolved": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/json-schema-traverse@1.0.0/node_modules/json-schema-traverse"
+                      },
+                      "require-from-string": {
+                        "from": "require-from-string",
+                        "version": "2.0.2",
+                        "resolved": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/require-from-string@2.0.2/node_modules/require-from-string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "@pet/companion-runtime": {
+            "from": "@pet/companion-runtime",
+            "version": "link:../../packages/companion-runtime",
+            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime",
+            "dependencies": {
+              "@pet/contracts": {
+                "from": "@pet/contracts",
+                "version": "link:../../packages/contracts",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                "deduped": true,
+                "dedupedDependenciesCount": 6
+              },
+              "@pet/plugin-sdk": {
+                "from": "@pet/plugin-sdk",
+                "version": "link:../../packages/plugin-sdk",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+                "deduped": true,
+                "dedupedDependenciesCount": 1
+              },
+              "@pet/cloud-exec": {
+                "from": "@pet/cloud-exec",
+                "version": "link:../../plugins/cloud-exec",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/cloud-exec",
+                "dependencies": {
+                  "@pet/contracts": {
+                    "from": "@pet/contracts",
+                    "version": "link:../../packages/contracts",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 6
+                  },
+                  "@pet/plugin-sdk": {
+                    "from": "@pet/plugin-sdk",
+                    "version": "link:../../packages/plugin-sdk",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 1
+                  }
+                }
+              },
+              "@pet/state-sqlite": {
+                "from": "@pet/state-sqlite",
+                "version": "link:../../plugins/state-sqlite",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/state-sqlite",
+                "dependencies": {
+                  "@pet/contracts": {
+                    "from": "@pet/contracts",
+                    "version": "link:../../packages/contracts",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 6
+                  },
+                  "@pet/plugin-sdk": {
+                    "from": "@pet/plugin-sdk",
+                    "version": "link:../../packages/plugin-sdk",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 1
+                  }
+                }
+              },
+              "@pet/host-kernel": {
+                "from": "@pet/host-kernel",
+                "version": "link:../../packages/host-kernel",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/host-kernel",
+                "dependencies": {
+                  "@pet/contracts": {
+                    "from": "@pet/contracts",
+                    "version": "link:../../packages/contracts",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 6
+                  },
+                  "@pet/plugin-sdk": {
+                    "from": "@pet/plugin-sdk",
+                    "version": "link:../../packages/plugin-sdk",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 1
+                  },
+                  "@deepseek-ai/cordis": {
+                    "from": "@deepseek-ai/cordis",
+                    "version": "4.0.5",
+                    "resolved": "https://registry.npmjs.org/@deepseek-ai/cordis/-/cordis-4.0.5.tgz",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@deepseek-ai+cordis@4.0.5/node_modules/@deepseek-ai/cordis",
+                    "dependencies": {
+                      "@deepseek-ai/cosmokit": {
+                        "from": "@deepseek-ai/cosmokit",
+                        "version": "1.8.6",
+                        "resolved": "https://registry.npmjs.org/@deepseek-ai/cosmokit/-/cosmokit-1.8.6.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@deepseek-ai+cosmokit@1.8.6/node_modules/@deepseek-ai/cosmokit"
+                      },
+                      "@standard-schema/spec": {
+                        "from": "@standard-schema/spec",
+                        "version": "1.1.0",
+                        "resolved": "https://registry.npmjs.org/@standard-schema/spec/-/spec-1.1.0.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@standard-schema+spec@1.1.0/node_modules/@standard-schema/spec"
+                      }
+                    }
+                  }
+                }
+              },
+              "@pet/harness-cortico": {
+                "from": "@pet/harness-cortico",
+                "version": "link:../../plugins/harness-cortico",
+                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/plugins/harness-cortico",
+                "dependencies": {
+                  "@pet/contracts": {
+                    "from": "@pet/contracts",
+                    "version": "link:../../packages/contracts",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 6
+                  },
+                  "@pet/plugin-sdk": {
+                    "from": "@pet/plugin-sdk",
+                    "version": "link:../../packages/plugin-sdk",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/plugin-sdk",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 1
+                  },
+                  "ajv": {
+                    "from": "ajv",
+                    "version": "8.20.0",
+                    "resolved": "https://registry.npmjs.org/ajv/-/ajv-8.20.0.tgz",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ajv@8.20.0/node_modules/ajv",
+                    "deduped": true,
+                    "dedupedDependenciesCount": 4
+                  },
+                  "tsx": {
+                    "from": "tsx",
+                    "version": "4.23.15",
+                    "resolved": "https://registry.npmjs.org/tsx/-/tsx-4.23.15.tgz",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/tsx@4.23.15/node_modules/tsx",
+                    "dependencies": {
+                      "fsevents": {
+                        "from": "fsevents",
+                        "version": "2.3.3",
+                        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fsevents@2.3.3/node_modules/fsevents"
+                      },
+                      "esbuild": {
+                        "from": "esbuild",
+                        "version": "0.28.2",
+                        "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.2.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/esbuild@0.28.2/node_modules/esbuild",
+                        "dependencies": {
+                          "@esbuild/aix-ppc64": {
+                            "from": "@esbuild/aix-ppc64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+aix-ppc64@0.28.2/node_modules/@esbuild/aix-ppc64"
+                          },
+                          "@esbuild/android-arm": {
+                            "from": "@esbuild/android-arm",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+android-arm@0.28.2/node_modules/@esbuild/android-arm"
+                          },
+                          "@esbuild/android-arm64": {
+                            "from": "@esbuild/android-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+android-arm64@0.28.2/node_modules/@esbuild/android-arm64"
+                          },
+                          "@esbuild/android-x64": {
+                            "from": "@esbuild/android-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+android-x64@0.28.2/node_modules/@esbuild/android-x64"
+                          },
+                          "@esbuild/darwin-arm64": {
+                            "from": "@esbuild/darwin-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+darwin-arm64@0.28.2/node_modules/@esbuild/darwin-arm64"
+                          },
+                          "@esbuild/darwin-x64": {
+                            "from": "@esbuild/darwin-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+darwin-x64@0.28.2/node_modules/@esbuild/darwin-x64"
+                          },
+                          "@esbuild/freebsd-arm64": {
+                            "from": "@esbuild/freebsd-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+freebsd-arm64@0.28.2/node_modules/@esbuild/freebsd-arm64"
+                          },
+                          "@esbuild/freebsd-x64": {
+                            "from": "@esbuild/freebsd-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+freebsd-x64@0.28.2/node_modules/@esbuild/freebsd-x64"
+                          },
+                          "@esbuild/linux-arm": {
+                            "from": "@esbuild/linux-arm",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-arm@0.28.2/node_modules/@esbuild/linux-arm"
+                          },
+                          "@esbuild/linux-arm64": {
+                            "from": "@esbuild/linux-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-arm64@0.28.2/node_modules/@esbuild/linux-arm64"
+                          },
+                          "@esbuild/linux-ia32": {
+                            "from": "@esbuild/linux-ia32",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-ia32@0.28.2/node_modules/@esbuild/linux-ia32"
+                          },
+                          "@esbuild/linux-loong64": {
+                            "from": "@esbuild/linux-loong64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-loong64@0.28.2/node_modules/@esbuild/linux-loong64"
+                          },
+                          "@esbuild/linux-mips64el": {
+                            "from": "@esbuild/linux-mips64el",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-mips64el@0.28.2/node_modules/@esbuild/linux-mips64el"
+                          },
+                          "@esbuild/linux-ppc64": {
+                            "from": "@esbuild/linux-ppc64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-ppc64@0.28.2/node_modules/@esbuild/linux-ppc64"
+                          },
+                          "@esbuild/linux-riscv64": {
+                            "from": "@esbuild/linux-riscv64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-riscv64@0.28.2/node_modules/@esbuild/linux-riscv64"
+                          },
+                          "@esbuild/linux-s390x": {
+                            "from": "@esbuild/linux-s390x",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-s390x@0.28.2/node_modules/@esbuild/linux-s390x"
+                          },
+                          "@esbuild/linux-x64": {
+                            "from": "@esbuild/linux-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+linux-x64@0.28.2/node_modules/@esbuild/linux-x64"
+                          },
+                          "@esbuild/netbsd-arm64": {
+                            "from": "@esbuild/netbsd-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/netbsd-arm64/-/netbsd-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+netbsd-arm64@0.28.2/node_modules/@esbuild/netbsd-arm64"
+                          },
+                          "@esbuild/netbsd-x64": {
+                            "from": "@esbuild/netbsd-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+netbsd-x64@0.28.2/node_modules/@esbuild/netbsd-x64"
+                          },
+                          "@esbuild/openbsd-arm64": {
+                            "from": "@esbuild/openbsd-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/openbsd-arm64/-/openbsd-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+openbsd-arm64@0.28.2/node_modules/@esbuild/openbsd-arm64"
+                          },
+                          "@esbuild/openbsd-x64": {
+                            "from": "@esbuild/openbsd-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+openbsd-x64@0.28.2/node_modules/@esbuild/openbsd-x64"
+                          },
+                          "@esbuild/openharmony-arm64": {
+                            "from": "@esbuild/openharmony-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/openharmony-arm64/-/openharmony-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+openharmony-arm64@0.28.2/node_modules/@esbuild/openharmony-arm64"
+                          },
+                          "@esbuild/sunos-x64": {
+                            "from": "@esbuild/sunos-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+sunos-x64@0.28.2/node_modules/@esbuild/sunos-x64"
+                          },
+                          "@esbuild/win32-arm64": {
+                            "from": "@esbuild/win32-arm64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+win32-arm64@0.28.2/node_modules/@esbuild/win32-arm64"
+                          },
+                          "@esbuild/win32-ia32": {
+                            "from": "@esbuild/win32-ia32",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+win32-ia32@0.28.2/node_modules/@esbuild/win32-ia32"
+                          },
+                          "@esbuild/win32-x64": {
+                            "from": "@esbuild/win32-x64",
+                            "version": "0.28.2",
+                            "resolved": "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.28.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@esbuild+win32-x64@0.28.2/node_modules/@esbuild/win32-x64"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "cortico": {
+                    "from": "cortico",
+                    "version": "0.2.7",
+                    "resolved": "https://registry.npmjs.org/cortico/-/cortico-0.2.7.tgz",
+                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/cortico@0.2.7_patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995/node_modules/cortico",
+                    "dependencies": {
+                      "fflate": {
+                        "from": "fflate",
+                        "version": "0.8.3",
+                        "resolved": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fflate@0.8.3/node_modules/fflate"
+                      },
+                      "react": {
+                        "from": "react",
+                        "version": "19.3.1",
+                        "resolved": "https://registry.npmjs.org/react/-/react-19.3.1.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+                      },
+                      "ws": {
+                        "from": "ws",
+                        "version": "8.22.0",
+                        "resolved": "https://registry.npmjs.org/ws/-/ws-8.22.0.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ws@8.22.0/node_modules/ws"
+                      },
+                      "@types/react": {
+                        "from": "@types/react",
+                        "version": "19.3.0",
+                        "resolved": "https://registry.npmjs.org/@types/react/-/react-19.3.0.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react",
+                        "dependencies": {
+                          "csstype": {
+                            "from": "csstype",
+                            "version": "3.2.3",
+                            "resolved": "https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype"
+                          }
+                        }
+                      },
+                      "@types/react-dom": {
+                        "from": "@types/react-dom",
+                        "version": "19.3.0",
+                        "resolved": "https://registry.npmjs.org/@types/react-dom/-/react-dom-19.3.0.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react-dom@19.3.0_@types+react@19.3.0/node_modules/@types/react-dom",
+                        "dependencies": {
+                          "@types/react": {
+                            "from": "@types/react",
+                            "version": "19.3.0",
+                            "resolved": "https://registry.npmjs.org/@types/react/-/react-19.3.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 1
+                          }
+                        }
+                      },
+                      "@types/tar-stream": {
+                        "from": "@types/tar-stream",
+                        "version": "3.1.4",
+                        "resolved": "https://registry.npmjs.org/@types/tar-stream/-/tar-stream-3.1.4.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+tar-stream@3.1.4/node_modules/@types/tar-stream",
+                        "dependencies": {
+                          "@types/node": {
+                            "from": "@types/node",
+                            "version": "24.19.2",
+                            "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 1
+                          }
+                        }
+                      },
+                      "@types/ws": {
+                        "from": "@types/ws",
+                        "version": "8.18.2",
+                        "resolved": "https://registry.npmjs.org/@types/ws/-/ws-8.18.2.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+ws@8.18.2/node_modules/@types/ws",
+                        "dependencies": {
+                          "@types/node": {
+                            "from": "@types/node",
+                            "version": "24.19.2",
+                            "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 1
+                          }
+                        }
+                      },
+                      "react-dom": {
+                        "from": "react-dom",
+                        "version": "19.3.1",
+                        "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.3.1.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom",
+                        "dependencies": {
+                          "react": {
+                            "from": "react",
+                            "version": "19.3.1",
+                            "resolved": "https://registry.npmjs.org/react/-/react-19.3.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+                          },
+                          "scheduler": {
+                            "from": "scheduler",
+                            "version": "0.28.0",
+                            "resolved": "https://registry.npmjs.org/scheduler/-/scheduler-0.28.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/scheduler@0.28.0/node_modules/scheduler"
+                          }
+                        }
+                      },
+                      "react-textarea-autosize": {
+                        "from": "react-textarea-autosize",
+                        "version": "8.5.9",
+                        "resolved": "https://registry.npmjs.org/react-textarea-autosize/-/react-textarea-autosize-8.5.9.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react-textarea-autosize@8.5.9_@types+react@19.3.0_react@19.3.1/node_modules/react-textarea-autosize",
+                        "dependencies": {
+                          "@babel/runtime": {
+                            "from": "@babel/runtime",
+                            "version": "7.29.10",
+                            "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.10.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@babel+runtime@7.29.10/node_modules/@babel/runtime"
+                          },
+                          "react": {
+                            "from": "react",
+                            "version": "19.3.1",
+                            "resolved": "https://registry.npmjs.org/react/-/react-19.3.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+                          },
+                          "use-composed-ref": {
+                            "from": "use-composed-ref",
+                            "version": "1.4.0",
+                            "resolved": "https://registry.npmjs.org/use-composed-ref/-/use-composed-ref-1.4.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/use-composed-ref@1.4.0_@types+react@19.3.0_react@19.3.1/node_modules/use-composed-ref",
+                            "dependencies": {
+                              "@types/react": {
+                                "from": "@types/react",
+                                "version": "19.3.0",
+                                "resolved": "https://registry.npmjs.org/@types/react/-/react-19.3.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "react": {
+                                "from": "react",
+                                "version": "19.3.1",
+                                "resolved": "https://registry.npmjs.org/react/-/react-19.3.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+                              }
+                            }
+                          },
+                          "use-latest": {
+                            "from": "use-latest",
+                            "version": "1.3.0",
+                            "resolved": "https://registry.npmjs.org/use-latest/-/use-latest-1.3.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/use-latest@1.3.0_@types+react@19.3.0_react@19.3.1/node_modules/use-latest",
+                            "dependencies": {
+                              "@types/react": {
+                                "from": "@types/react",
+                                "version": "19.3.0",
+                                "resolved": "https://registry.npmjs.org/@types/react/-/react-19.3.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "react": {
+                                "from": "react",
+                                "version": "19.3.1",
+                                "resolved": "https://registry.npmjs.org/react/-/react-19.3.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+                              },
+                              "use-isomorphic-layout-effect": {
+                                "from": "use-isomorphic-layout-effect",
+                                "version": "1.2.1",
+                                "resolved": "https://registry.npmjs.org/use-isomorphic-layout-effect/-/use-isomorphic-layout-effect-1.2.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/use-isomorphic-layout-effect@1.2.1_@types+react@19.3.0_react@19.3.1/node_modules/use-isomorphic-layout-effect",
+                                "dependencies": {
+                                  "@types/react": {
+                                    "from": "@types/react",
+                                    "version": "19.3.0",
+                                    "resolved": "https://registry.npmjs.org/@types/react/-/react-19.3.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react",
+                                    "deduped": true,
+                                    "dedupedDependenciesCount": 1
+                                  },
+                                  "react": {
+                                    "from": "react",
+                                    "version": "19.3.1",
+                                    "resolved": "https://registry.npmjs.org/react/-/react-19.3.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "@types/express": {
+                        "from": "@types/express",
+                        "version": "4.17.25",
+                        "resolved": "https://registry.npmjs.org/@types/express/-/express-4.17.25.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+express@4.17.25/node_modules/@types/express",
+                        "dependencies": {
+                          "@types/qs": {
+                            "from": "@types/qs",
+                            "version": "6.15.1",
+                            "resolved": "https://registry.npmjs.org/@types/qs/-/qs-6.15.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+qs@6.15.1/node_modules/@types/qs"
+                          },
+                          "@types/express-serve-static-core": {
+                            "from": "@types/express-serve-static-core",
+                            "version": "4.19.9",
+                            "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.19.9.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+express-serve-static-core@4.19.9/node_modules/@types/express-serve-static-core",
+                            "dependencies": {
+                              "@types/node": {
+                                "from": "@types/node",
+                                "version": "24.19.2",
+                                "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "@types/qs": {
+                                "from": "@types/qs",
+                                "version": "6.15.1",
+                                "resolved": "https://registry.npmjs.org/@types/qs/-/qs-6.15.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+qs@6.15.1/node_modules/@types/qs"
+                              },
+                              "@types/range-parser": {
+                                "from": "@types/range-parser",
+                                "version": "1.2.7",
+                                "resolved": "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.7.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+range-parser@1.2.7/node_modules/@types/range-parser"
+                              },
+                              "@types/send": {
+                                "from": "@types/send",
+                                "version": "1.2.1",
+                                "resolved": "https://registry.npmjs.org/@types/send/-/send-1.2.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+send@1.2.1/node_modules/@types/send",
+                                "dependencies": {
+                                  "@types/node": {
+                                    "from": "@types/node",
+                                    "version": "24.19.2",
+                                    "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                                    "deduped": true,
+                                    "dedupedDependenciesCount": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "@types/serve-static": {
+                            "from": "@types/serve-static",
+                            "version": "1.15.10",
+                            "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.15.10.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+serve-static@1.15.10/node_modules/@types/serve-static",
+                            "dependencies": {
+                              "@types/http-errors": {
+                                "from": "@types/http-errors",
+                                "version": "2.0.5",
+                                "resolved": "https://registry.npmjs.org/@types/http-errors/-/http-errors-2.0.5.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+http-errors@2.0.5/node_modules/@types/http-errors"
+                              },
+                              "@types/node": {
+                                "from": "@types/node",
+                                "version": "24.19.2",
+                                "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "@types/send": {
+                                "from": "@types/send",
+                                "version": "0.17.6",
+                                "resolved": "https://registry.npmjs.org/@types/send/-/send-0.17.6.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+send@0.17.6/node_modules/@types/send",
+                                "dependencies": {
+                                  "@types/mime": {
+                                    "from": "@types/mime",
+                                    "version": "1.3.5",
+                                    "resolved": "https://registry.npmjs.org/@types/mime/-/mime-1.3.5.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+mime@1.3.5/node_modules/@types/mime"
+                                  },
+                                  "@types/node": {
+                                    "from": "@types/node",
+                                    "version": "24.19.2",
+                                    "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                                    "deduped": true,
+                                    "dedupedDependenciesCount": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "@types/body-parser": {
+                            "from": "@types/body-parser",
+                            "version": "1.19.6",
+                            "resolved": "https://registry.npmjs.org/@types/body-parser/-/body-parser-1.19.6.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+body-parser@1.19.6/node_modules/@types/body-parser",
+                            "dependencies": {
+                              "@types/node": {
+                                "from": "@types/node",
+                                "version": "24.19.2",
+                                "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "@types/connect": {
+                                "from": "@types/connect",
+                                "version": "3.4.38",
+                                "resolved": "https://registry.npmjs.org/@types/connect/-/connect-3.4.38.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+connect@3.4.38/node_modules/@types/connect",
+                                "dependencies": {
+                                  "@types/node": {
+                                    "from": "@types/node",
+                                    "version": "24.19.2",
+                                    "resolved": "https://registry.npmjs.org/@types/node/-/node-24.19.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+node@24.19.2/node_modules/@types/node",
+                                    "dependencies": {
+                                      "undici-types": {
+                                        "from": "undici-types",
+                                        "version": "7.24.6",
+                                        "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-7.24.6.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/undici-types@7.24.6/node_modules/undici-types"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "tar-stream": {
+                        "from": "tar-stream",
+                        "version": "3.2.1",
+                        "resolved": "https://registry.npmjs.org/tar-stream/-/tar-stream-3.2.1.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/tar-stream@3.2.1/node_modules/tar-stream",
+                        "dependencies": {
+                          "b4a": {
+                            "from": "b4a",
+                            "version": "1.9.0",
+                            "resolved": "https://registry.npmjs.org/b4a/-/b4a-1.9.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/b4a@1.9.0/node_modules/b4a"
+                          },
+                          "fast-fifo": {
+                            "from": "fast-fifo",
+                            "version": "1.3.2",
+                            "resolved": "https://registry.npmjs.org/fast-fifo/-/fast-fifo-1.3.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fast-fifo@1.3.2/node_modules/fast-fifo"
+                          },
+                          "streamx": {
+                            "from": "streamx",
+                            "version": "2.28.1",
+                            "resolved": "https://registry.npmjs.org/streamx/-/streamx-2.28.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/streamx@2.28.1/node_modules/streamx",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 5
+                          },
+                          "bare-fs": {
+                            "from": "bare-fs",
+                            "version": "4.8.4",
+                            "resolved": "https://registry.npmjs.org/bare-fs/-/bare-fs-4.8.4.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-fs@4.8.4/node_modules/bare-fs",
+                            "dependencies": {
+                              "bare-events": {
+                                "from": "bare-events",
+                                "version": "2.9.2",
+                                "resolved": "https://registry.npmjs.org/bare-events/-/bare-events-2.9.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-events@2.9.2/node_modules/bare-events"
+                              },
+                              "bare-path": {
+                                "from": "bare-path",
+                                "version": "3.1.2",
+                                "resolved": "https://registry.npmjs.org/bare-path/-/bare-path-3.1.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-path@3.1.2/node_modules/bare-path"
+                              },
+                              "fast-fifo": {
+                                "from": "fast-fifo",
+                                "version": "1.3.2",
+                                "resolved": "https://registry.npmjs.org/fast-fifo/-/fast-fifo-1.3.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fast-fifo@1.3.2/node_modules/fast-fifo"
+                              },
+                              "bare-url": {
+                                "from": "bare-url",
+                                "version": "2.5.5",
+                                "resolved": "https://registry.npmjs.org/bare-url/-/bare-url-2.5.5.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-url@2.5.5/node_modules/bare-url",
+                                "dependencies": {
+                                  "bare-path": {
+                                    "from": "bare-path",
+                                    "version": "3.1.2",
+                                    "resolved": "https://registry.npmjs.org/bare-path/-/bare-path-3.1.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-path@3.1.2/node_modules/bare-path"
+                                  }
+                                }
+                              },
+                              "bare-stream": {
+                                "from": "bare-stream",
+                                "version": "2.13.4",
+                                "resolved": "https://registry.npmjs.org/bare-stream/-/bare-stream-2.13.4.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-stream@2.13.4_bare-events@2.9.2/node_modules/bare-stream",
+                                "dependencies": {
+                                  "b4a": {
+                                    "from": "b4a",
+                                    "version": "1.9.0",
+                                    "resolved": "https://registry.npmjs.org/b4a/-/b4a-1.9.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/b4a@1.9.0/node_modules/b4a"
+                                  },
+                                  "bare-events": {
+                                    "from": "bare-events",
+                                    "version": "2.9.2",
+                                    "resolved": "https://registry.npmjs.org/bare-events/-/bare-events-2.9.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-events@2.9.2/node_modules/bare-events"
+                                  },
+                                  "teex": {
+                                    "from": "teex",
+                                    "version": "1.0.1",
+                                    "resolved": "https://registry.npmjs.org/teex/-/teex-1.0.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/teex@1.0.1/node_modules/teex",
+                                    "dependencies": {
+                                      "streamx": {
+                                        "from": "streamx",
+                                        "version": "2.28.1",
+                                        "resolved": "https://registry.npmjs.org/streamx/-/streamx-2.28.1.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/streamx@2.28.1/node_modules/streamx",
+                                        "deduped": true,
+                                        "dedupedDependenciesCount": 5
+                                      }
+                                    }
+                                  },
+                                  "streamx": {
+                                    "from": "streamx",
+                                    "version": "2.28.1",
+                                    "resolved": "https://registry.npmjs.org/streamx/-/streamx-2.28.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/streamx@2.28.1/node_modules/streamx",
+                                    "dependencies": {
+                                      "fast-fifo": {
+                                        "from": "fast-fifo",
+                                        "version": "1.3.2",
+                                        "resolved": "https://registry.npmjs.org/fast-fifo/-/fast-fifo-1.3.2.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fast-fifo@1.3.2/node_modules/fast-fifo"
+                                      },
+                                      "events-universal": {
+                                        "from": "events-universal",
+                                        "version": "1.0.1",
+                                        "resolved": "https://registry.npmjs.org/events-universal/-/events-universal-1.0.1.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/events-universal@1.0.1/node_modules/events-universal",
+                                        "dependencies": {
+                                          "bare-events": {
+                                            "from": "bare-events",
+                                            "version": "2.9.2",
+                                            "resolved": "https://registry.npmjs.org/bare-events/-/bare-events-2.9.2.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bare-events@2.9.2/node_modules/bare-events"
+                                          }
+                                        }
+                                      },
+                                      "text-decoder": {
+                                        "from": "text-decoder",
+                                        "version": "1.2.7",
+                                        "resolved": "https://registry.npmjs.org/text-decoder/-/text-decoder-1.2.7.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/text-decoder@1.2.7/node_modules/text-decoder",
+                                        "dependencies": {
+                                          "b4a": {
+                                            "from": "b4a",
+                                            "version": "1.9.0",
+                                            "resolved": "https://registry.npmjs.org/b4a/-/b4a-1.9.0.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/b4a@1.9.0/node_modules/b4a"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "express": {
+                        "from": "express",
+                        "version": "4.22.3",
+                        "resolved": "https://registry.npmjs.org/express/-/express-4.22.3.tgz",
+                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/express@4.22.3/node_modules/express",
+                        "dependencies": {
+                          "array-flatten": {
+                            "from": "array-flatten",
+                            "version": "1.1.1",
+                            "resolved": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/array-flatten@1.1.1/node_modules/array-flatten"
+                          },
+                          "content-type": {
+                            "from": "content-type",
+                            "version": "1.0.5",
+                            "resolved": "https://registry.npmjs.org/content-type/-/content-type-1.0.5.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/content-type@1.0.5/node_modules/content-type"
+                          },
+                          "cookie": {
+                            "from": "cookie",
+                            "version": "0.7.2",
+                            "resolved": "https://registry.npmjs.org/cookie/-/cookie-0.7.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/cookie@0.7.2/node_modules/cookie"
+                          },
+                          "cookie-signature": {
+                            "from": "cookie-signature",
+                            "version": "1.0.7",
+                            "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.7.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/cookie-signature@1.0.7/node_modules/cookie-signature"
+                          },
+                          "debug": {
+                            "from": "debug",
+                            "version": "2.6.9",
+                            "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/debug@2.6.9/node_modules/debug",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 1
+                          },
+                          "depd": {
+                            "from": "depd",
+                            "version": "2.0.0",
+                            "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/depd@2.0.0/node_modules/depd"
+                          },
+                          "encodeurl": {
+                            "from": "encodeurl",
+                            "version": "2.0.0",
+                            "resolved": "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/encodeurl@2.0.0/node_modules/encodeurl"
+                          },
+                          "escape-html": {
+                            "from": "escape-html",
+                            "version": "1.0.3",
+                            "resolved": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html"
+                          },
+                          "etag": {
+                            "from": "etag",
+                            "version": "1.8.1",
+                            "resolved": "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/etag@1.8.1/node_modules/etag"
+                          },
+                          "fresh": {
+                            "from": "fresh",
+                            "version": "0.5.2",
+                            "resolved": "https://registry.npmjs.org/fresh/-/fresh-0.5.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fresh@0.5.2/node_modules/fresh"
+                          },
+                          "http-errors": {
+                            "from": "http-errors",
+                            "version": "2.0.1",
+                            "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/http-errors@2.0.1/node_modules/http-errors",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 5
+                          },
+                          "merge-descriptors": {
+                            "from": "merge-descriptors",
+                            "version": "1.0.3",
+                            "resolved": "https://registry.npmjs.org/merge-descriptors/-/merge-descriptors-1.0.3.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/merge-descriptors@1.0.3/node_modules/merge-descriptors"
+                          },
+                          "methods": {
+                            "from": "methods",
+                            "version": "1.1.2",
+                            "resolved": "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/methods@1.1.2/node_modules/methods"
+                          },
+                          "on-finished": {
+                            "from": "on-finished",
+                            "version": "2.4.2",
+                            "resolved": "https://registry.npmjs.org/on-finished/-/on-finished-2.4.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/on-finished@2.4.2/node_modules/on-finished",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 1
+                          },
+                          "parseurl": {
+                            "from": "parseurl",
+                            "version": "1.3.3",
+                            "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/parseurl@1.3.3/node_modules/parseurl"
+                          },
+                          "path-to-regexp": {
+                            "from": "path-to-regexp",
+                            "version": "0.1.13",
+                            "resolved": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.13.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/path-to-regexp@0.1.13/node_modules/path-to-regexp"
+                          },
+                          "qs": {
+                            "from": "qs",
+                            "version": "6.16.1",
+                            "resolved": "https://registry.npmjs.org/qs/-/qs-6.16.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/qs@6.16.1/node_modules/qs",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 39
+                          },
+                          "range-parser": {
+                            "from": "range-parser",
+                            "version": "1.2.1",
+                            "resolved": "https://registry.npmjs.org/range-parser/-/range-parser-1.2.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/range-parser@1.2.1/node_modules/range-parser"
+                          },
+                          "safe-buffer": {
+                            "from": "safe-buffer",
+                            "version": "5.2.1",
+                            "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/safe-buffer@5.2.1/node_modules/safe-buffer"
+                          },
+                          "setprototypeof": {
+                            "from": "setprototypeof",
+                            "version": "1.2.0",
+                            "resolved": "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/setprototypeof@1.2.0/node_modules/setprototypeof"
+                          },
+                          "statuses": {
+                            "from": "statuses",
+                            "version": "2.0.2",
+                            "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/statuses@2.0.2/node_modules/statuses"
+                          },
+                          "type-is": {
+                            "from": "type-is",
+                            "version": "1.6.18",
+                            "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.18.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/type-is@1.6.18/node_modules/type-is",
+                            "deduped": true,
+                            "dedupedDependenciesCount": 2
+                          },
+                          "utils-merge": {
+                            "from": "utils-merge",
+                            "version": "1.0.1",
+                            "resolved": "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/utils-merge@1.0.1/node_modules/utils-merge"
+                          },
+                          "vary": {
+                            "from": "vary",
+                            "version": "1.1.2",
+                            "resolved": "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/vary@1.1.2/node_modules/vary"
+                          },
+                          "content-disposition": {
+                            "from": "content-disposition",
+                            "version": "0.5.4",
+                            "resolved": "https://registry.npmjs.org/content-disposition/-/content-disposition-0.5.4.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/content-disposition@0.5.4/node_modules/content-disposition",
+                            "dependencies": {
+                              "safe-buffer": {
+                                "from": "safe-buffer",
+                                "version": "5.2.1",
+                                "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/safe-buffer@5.2.1/node_modules/safe-buffer"
+                              }
+                            }
+                          },
+                          "finalhandler": {
+                            "from": "finalhandler",
+                            "version": "1.3.2",
+                            "resolved": "https://registry.npmjs.org/finalhandler/-/finalhandler-1.3.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/finalhandler@1.3.2/node_modules/finalhandler",
+                            "dependencies": {
+                              "debug": {
+                                "from": "debug",
+                                "version": "2.6.9",
+                                "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/debug@2.6.9/node_modules/debug",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "encodeurl": {
+                                "from": "encodeurl",
+                                "version": "2.0.0",
+                                "resolved": "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/encodeurl@2.0.0/node_modules/encodeurl"
+                              },
+                              "escape-html": {
+                                "from": "escape-html",
+                                "version": "1.0.3",
+                                "resolved": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html"
+                              },
+                              "on-finished": {
+                                "from": "on-finished",
+                                "version": "2.4.2",
+                                "resolved": "https://registry.npmjs.org/on-finished/-/on-finished-2.4.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/on-finished@2.4.2/node_modules/on-finished",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "parseurl": {
+                                "from": "parseurl",
+                                "version": "1.3.3",
+                                "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/parseurl@1.3.3/node_modules/parseurl"
+                              },
+                              "statuses": {
+                                "from": "statuses",
+                                "version": "2.0.2",
+                                "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/statuses@2.0.2/node_modules/statuses"
+                              },
+                              "unpipe": {
+                                "from": "unpipe",
+                                "version": "1.0.0",
+                                "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/unpipe@1.0.0/node_modules/unpipe"
+                              }
+                            }
+                          },
+                          "proxy-addr": {
+                            "from": "proxy-addr",
+                            "version": "2.0.8",
+                            "resolved": "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.8.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/proxy-addr@2.0.8/node_modules/proxy-addr",
+                            "dependencies": {
+                              "forwarded": {
+                                "from": "forwarded",
+                                "version": "0.2.0",
+                                "resolved": "https://registry.npmjs.org/forwarded/-/forwarded-0.2.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/forwarded@0.2.0/node_modules/forwarded"
+                              },
+                              "ipaddr.js": {
+                                "from": "ipaddr.js",
+                                "version": "1.9.1",
+                                "resolved": "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.9.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ipaddr.js@1.9.1/node_modules/ipaddr.js"
+                              }
+                            }
+                          },
+                          "send": {
+                            "from": "send",
+                            "version": "0.19.2",
+                            "resolved": "https://registry.npmjs.org/send/-/send-0.19.2.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/send@0.19.2/node_modules/send",
+                            "dependencies": {
+                              "debug": {
+                                "from": "debug",
+                                "version": "2.6.9",
+                                "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/debug@2.6.9/node_modules/debug",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "depd": {
+                                "from": "depd",
+                                "version": "2.0.0",
+                                "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/depd@2.0.0/node_modules/depd"
+                              },
+                              "destroy": {
+                                "from": "destroy",
+                                "version": "1.2.0",
+                                "resolved": "https://registry.npmjs.org/destroy/-/destroy-1.2.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/destroy@1.2.0/node_modules/destroy"
+                              },
+                              "encodeurl": {
+                                "from": "encodeurl",
+                                "version": "2.0.0",
+                                "resolved": "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/encodeurl@2.0.0/node_modules/encodeurl"
+                              },
+                              "escape-html": {
+                                "from": "escape-html",
+                                "version": "1.0.3",
+                                "resolved": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html"
+                              },
+                              "etag": {
+                                "from": "etag",
+                                "version": "1.8.1",
+                                "resolved": "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/etag@1.8.1/node_modules/etag"
+                              },
+                              "fresh": {
+                                "from": "fresh",
+                                "version": "0.5.2",
+                                "resolved": "https://registry.npmjs.org/fresh/-/fresh-0.5.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/fresh@0.5.2/node_modules/fresh"
+                              },
+                              "http-errors": {
+                                "from": "http-errors",
+                                "version": "2.0.1",
+                                "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/http-errors@2.0.1/node_modules/http-errors",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 5
+                              },
+                              "mime": {
+                                "from": "mime",
+                                "version": "1.6.0",
+                                "resolved": "https://registry.npmjs.org/mime/-/mime-1.6.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/mime@1.6.0/node_modules/mime"
+                              },
+                              "ms": {
+                                "from": "ms",
+                                "version": "2.1.3",
+                                "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ms@2.1.3/node_modules/ms"
+                              },
+                              "on-finished": {
+                                "from": "on-finished",
+                                "version": "2.4.2",
+                                "resolved": "https://registry.npmjs.org/on-finished/-/on-finished-2.4.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/on-finished@2.4.2/node_modules/on-finished",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 1
+                              },
+                              "range-parser": {
+                                "from": "range-parser",
+                                "version": "1.2.1",
+                                "resolved": "https://registry.npmjs.org/range-parser/-/range-parser-1.2.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/range-parser@1.2.1/node_modules/range-parser"
+                              },
+                              "statuses": {
+                                "from": "statuses",
+                                "version": "2.0.2",
+                                "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/statuses@2.0.2/node_modules/statuses"
+                              }
+                            }
+                          },
+                          "serve-static": {
+                            "from": "serve-static",
+                            "version": "1.16.3",
+                            "resolved": "https://registry.npmjs.org/serve-static/-/serve-static-1.16.3.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/serve-static@1.16.3/node_modules/serve-static",
+                            "dependencies": {
+                              "encodeurl": {
+                                "from": "encodeurl",
+                                "version": "2.0.0",
+                                "resolved": "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/encodeurl@2.0.0/node_modules/encodeurl"
+                              },
+                              "escape-html": {
+                                "from": "escape-html",
+                                "version": "1.0.3",
+                                "resolved": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html"
+                              },
+                              "parseurl": {
+                                "from": "parseurl",
+                                "version": "1.3.3",
+                                "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/parseurl@1.3.3/node_modules/parseurl"
+                              },
+                              "send": {
+                                "from": "send",
+                                "version": "0.19.2",
+                                "resolved": "https://registry.npmjs.org/send/-/send-0.19.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/send@0.19.2/node_modules/send",
+                                "deduped": true,
+                                "dedupedDependenciesCount": 13
+                              }
+                            }
+                          },
+                          "accepts": {
+                            "from": "accepts",
+                            "version": "1.3.8",
+                            "resolved": "https://registry.npmjs.org/accepts/-/accepts-1.3.8.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/accepts@1.3.8/node_modules/accepts",
+                            "dependencies": {
+                              "negotiator": {
+                                "from": "negotiator",
+                                "version": "0.6.3",
+                                "resolved": "https://registry.npmjs.org/negotiator/-/negotiator-0.6.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/negotiator@0.6.3/node_modules/negotiator"
+                              },
+                              "mime-types": {
+                                "from": "mime-types",
+                                "version": "2.1.35",
+                                "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/mime-types@2.1.35/node_modules/mime-types",
+                                "dependencies": {
+                                  "mime-db": {
+                                    "from": "mime-db",
+                                    "version": "1.52.0",
+                                    "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/mime-db@1.52.0/node_modules/mime-db"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "body-parser": {
+                            "from": "body-parser",
+                            "version": "1.20.9",
+                            "resolved": "https://registry.npmjs.org/body-parser/-/body-parser-1.20.9.tgz",
+                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/body-parser@1.20.9/node_modules/body-parser",
+                            "dependencies": {
+                              "bytes": {
+                                "from": "bytes",
+                                "version": "3.1.2",
+                                "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bytes@3.1.2/node_modules/bytes"
+                              },
+                              "content-type": {
+                                "from": "content-type",
+                                "version": "1.0.5",
+                                "resolved": "https://registry.npmjs.org/content-type/-/content-type-1.0.5.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/content-type@1.0.5/node_modules/content-type"
+                              },
+                              "depd": {
+                                "from": "depd",
+                                "version": "2.0.0",
+                                "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/depd@2.0.0/node_modules/depd"
+                              },
+                              "destroy": {
+                                "from": "destroy",
+                                "version": "1.2.0",
+                                "resolved": "https://registry.npmjs.org/destroy/-/destroy-1.2.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/destroy@1.2.0/node_modules/destroy"
+                              },
+                              "unpipe": {
+                                "from": "unpipe",
+                                "version": "1.0.0",
+                                "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/unpipe@1.0.0/node_modules/unpipe"
+                              },
+                              "debug": {
+                                "from": "debug",
+                                "version": "2.6.9",
+                                "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/debug@2.6.9/node_modules/debug",
+                                "dependencies": {
+                                  "ms": {
+                                    "from": "ms",
+                                    "version": "2.0.0",
+                                    "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ms@2.0.0/node_modules/ms"
+                                  }
+                                }
+                              },
+                              "http-errors": {
+                                "from": "http-errors",
+                                "version": "2.0.1",
+                                "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/http-errors@2.0.1/node_modules/http-errors",
+                                "dependencies": {
+                                  "depd": {
+                                    "from": "depd",
+                                    "version": "2.0.0",
+                                    "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/depd@2.0.0/node_modules/depd"
+                                  },
+                                  "inherits": {
+                                    "from": "inherits",
+                                    "version": "2.0.4",
+                                    "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/inherits@2.0.4/node_modules/inherits"
+                                  },
+                                  "setprototypeof": {
+                                    "from": "setprototypeof",
+                                    "version": "1.2.0",
+                                    "resolved": "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/setprototypeof@1.2.0/node_modules/setprototypeof"
+                                  },
+                                  "statuses": {
+                                    "from": "statuses",
+                                    "version": "2.0.2",
+                                    "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/statuses@2.0.2/node_modules/statuses"
+                                  },
+                                  "toidentifier": {
+                                    "from": "toidentifier",
+                                    "version": "1.0.1",
+                                    "resolved": "https://registry.npmjs.org/toidentifier/-/toidentifier-1.0.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/toidentifier@1.0.1/node_modules/toidentifier"
+                                  }
+                                }
+                              },
+                              "iconv-lite": {
+                                "from": "iconv-lite",
+                                "version": "0.4.24",
+                                "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/iconv-lite@0.4.24/node_modules/iconv-lite",
+                                "dependencies": {
+                                  "safer-buffer": {
+                                    "from": "safer-buffer",
+                                    "version": "2.1.2",
+                                    "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/safer-buffer@2.1.2/node_modules/safer-buffer"
+                                  }
+                                }
+                              },
+                              "on-finished": {
+                                "from": "on-finished",
+                                "version": "2.4.2",
+                                "resolved": "https://registry.npmjs.org/on-finished/-/on-finished-2.4.2.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/on-finished@2.4.2/node_modules/on-finished",
+                                "dependencies": {
+                                  "ee-first": {
+                                    "from": "ee-first",
+                                    "version": "1.1.1",
+                                    "resolved": "https://registry.npmjs.org/ee-first/-/ee-first-1.1.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/ee-first@1.1.1/node_modules/ee-first"
+                                  }
+                                }
+                              },
+                              "raw-body": {
+                                "from": "raw-body",
+                                "version": "2.5.3",
+                                "resolved": "https://registry.npmjs.org/raw-body/-/raw-body-2.5.3.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/raw-body@2.5.3/node_modules/raw-body",
+                                "dependencies": {
+                                  "bytes": {
+                                    "from": "bytes",
+                                    "version": "3.1.2",
+                                    "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/bytes@3.1.2/node_modules/bytes"
+                                  },
+                                  "http-errors": {
+                                    "from": "http-errors",
+                                    "version": "2.0.1",
+                                    "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/http-errors@2.0.1/node_modules/http-errors",
+                                    "deduped": true,
+                                    "dedupedDependenciesCount": 5
+                                  },
+                                  "iconv-lite": {
+                                    "from": "iconv-lite",
+                                    "version": "0.4.24",
+                                    "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/iconv-lite@0.4.24/node_modules/iconv-lite",
+                                    "deduped": true,
+                                    "dedupedDependenciesCount": 1
+                                  },
+                                  "unpipe": {
+                                    "from": "unpipe",
+                                    "version": "1.0.0",
+                                    "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/unpipe@1.0.0/node_modules/unpipe"
+                                  }
+                                }
+                              },
+                              "type-is": {
+                                "from": "type-is",
+                                "version": "1.6.18",
+                                "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.18.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/type-is@1.6.18/node_modules/type-is",
+                                "dependencies": {
+                                  "media-typer": {
+                                    "from": "media-typer",
+                                    "version": "0.3.0",
+                                    "resolved": "https://registry.npmjs.org/media-typer/-/media-typer-0.3.0.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/media-typer@0.3.0/node_modules/media-typer"
+                                  },
+                                  "mime-types": {
+                                    "from": "mime-types",
+                                    "version": "2.1.35",
+                                    "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/mime-types@2.1.35/node_modules/mime-types",
+                                    "deduped": true,
+                                    "dedupedDependenciesCount": 1
+                                  }
+                                }
+                              },
+                              "qs": {
+                                "from": "qs",
+                                "version": "6.16.1",
+                                "resolved": "https://registry.npmjs.org/qs/-/qs-6.16.1.tgz",
+                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/qs@6.16.1/node_modules/qs",
+                                "dependencies": {
+                                  "es-define-property": {
+                                    "from": "es-define-property",
+                                    "version": "1.0.1",
+                                    "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-define-property@1.0.1/node_modules/es-define-property"
+                                  },
+                                  "side-channel": {
+                                    "from": "side-channel",
+                                    "version": "1.1.1",
+                                    "resolved": "https://registry.npmjs.org/side-channel/-/side-channel-1.1.1.tgz",
+                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/side-channel@1.1.1/node_modules/side-channel",
+                                    "dependencies": {
+                                      "es-errors": {
+                                        "from": "es-errors",
+                                        "version": "1.3.0",
+                                        "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                      },
+                                      "object-inspect": {
+                                        "from": "object-inspect",
+                                        "version": "1.13.4",
+                                        "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/object-inspect@1.13.4/node_modules/object-inspect"
+                                      },
+                                      "side-channel-list": {
+                                        "from": "side-channel-list",
+                                        "version": "1.0.1",
+                                        "resolved": "https://registry.npmjs.org/side-channel-list/-/side-channel-list-1.0.1.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/side-channel-list@1.0.1/node_modules/side-channel-list",
+                                        "dependencies": {
+                                          "es-errors": {
+                                            "from": "es-errors",
+                                            "version": "1.3.0",
+                                            "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                          },
+                                          "object-inspect": {
+                                            "from": "object-inspect",
+                                            "version": "1.13.4",
+                                            "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/object-inspect@1.13.4/node_modules/object-inspect"
+                                          }
+                                        }
+                                      },
+                                      "side-channel-weakmap": {
+                                        "from": "side-channel-weakmap",
+                                        "version": "1.0.2",
+                                        "resolved": "https://registry.npmjs.org/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/side-channel-weakmap@1.0.2/node_modules/side-channel-weakmap",
+                                        "dependencies": {
+                                          "call-bound": {
+                                            "from": "call-bound",
+                                            "version": "1.0.4",
+                                            "resolved": "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/call-bound@1.0.4/node_modules/call-bound",
+                                            "deduped": true,
+                                            "dedupedDependenciesCount": 21
+                                          },
+                                          "es-errors": {
+                                            "from": "es-errors",
+                                            "version": "1.3.0",
+                                            "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                          },
+                                          "get-intrinsic": {
+                                            "from": "get-intrinsic",
+                                            "version": "1.3.0",
+                                            "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/get-intrinsic@1.3.0/node_modules/get-intrinsic",
+                                            "deduped": true,
+                                            "dedupedDependenciesCount": 17
+                                          },
+                                          "object-inspect": {
+                                            "from": "object-inspect",
+                                            "version": "1.13.4",
+                                            "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/object-inspect@1.13.4/node_modules/object-inspect"
+                                          },
+                                          "side-channel-map": {
+                                            "from": "side-channel-map",
+                                            "version": "1.0.1",
+                                            "resolved": "https://registry.npmjs.org/side-channel-map/-/side-channel-map-1.0.1.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/side-channel-map@1.0.1/node_modules/side-channel-map",
+                                            "deduped": true,
+                                            "dedupedDependenciesCount": 25
+                                          }
+                                        }
+                                      },
+                                      "side-channel-map": {
+                                        "from": "side-channel-map",
+                                        "version": "1.0.1",
+                                        "resolved": "https://registry.npmjs.org/side-channel-map/-/side-channel-map-1.0.1.tgz",
+                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/side-channel-map@1.0.1/node_modules/side-channel-map",
+                                        "dependencies": {
+                                          "es-errors": {
+                                            "from": "es-errors",
+                                            "version": "1.3.0",
+                                            "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                          },
+                                          "get-intrinsic": {
+                                            "from": "get-intrinsic",
+                                            "version": "1.3.0",
+                                            "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/get-intrinsic@1.3.0/node_modules/get-intrinsic",
+                                            "deduped": true,
+                                            "dedupedDependenciesCount": 17
+                                          },
+                                          "object-inspect": {
+                                            "from": "object-inspect",
+                                            "version": "1.13.4",
+                                            "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/object-inspect@1.13.4/node_modules/object-inspect"
+                                          },
+                                          "call-bound": {
+                                            "from": "call-bound",
+                                            "version": "1.0.4",
+                                            "resolved": "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz",
+                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/call-bound@1.0.4/node_modules/call-bound",
+                                            "dependencies": {
+                                              "call-bind-apply-helpers": {
+                                                "from": "call-bind-apply-helpers",
+                                                "version": "1.0.2",
+                                                "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+                                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/call-bind-apply-helpers@1.0.2/node_modules/call-bind-apply-helpers",
+                                                "dependencies": {
+                                                  "es-errors": {
+                                                    "from": "es-errors",
+                                                    "version": "1.3.0",
+                                                    "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                                  },
+                                                  "function-bind": {
+                                                    "from": "function-bind",
+                                                    "version": "1.1.2",
+                                                    "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/function-bind@1.1.2/node_modules/function-bind"
+                                                  }
+                                                }
+                                              },
+                                              "get-intrinsic": {
+                                                "from": "get-intrinsic",
+                                                "version": "1.3.0",
+                                                "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+                                                "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/get-intrinsic@1.3.0/node_modules/get-intrinsic",
+                                                "dependencies": {
+                                                  "call-bind-apply-helpers": {
+                                                    "from": "call-bind-apply-helpers",
+                                                    "version": "1.0.2",
+                                                    "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/call-bind-apply-helpers@1.0.2/node_modules/call-bind-apply-helpers",
+                                                    "deduped": true,
+                                                    "dedupedDependenciesCount": 2
+                                                  },
+                                                  "es-define-property": {
+                                                    "from": "es-define-property",
+                                                    "version": "1.0.1",
+                                                    "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-define-property@1.0.1/node_modules/es-define-property"
+                                                  },
+                                                  "es-errors": {
+                                                    "from": "es-errors",
+                                                    "version": "1.3.0",
+                                                    "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                                  },
+                                                  "function-bind": {
+                                                    "from": "function-bind",
+                                                    "version": "1.1.2",
+                                                    "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/function-bind@1.1.2/node_modules/function-bind"
+                                                  },
+                                                  "gopd": {
+                                                    "from": "gopd",
+                                                    "version": "1.2.0",
+                                                    "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/gopd@1.2.0/node_modules/gopd"
+                                                  },
+                                                  "has-symbols": {
+                                                    "from": "has-symbols",
+                                                    "version": "1.1.0",
+                                                    "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/has-symbols@1.1.0/node_modules/has-symbols"
+                                                  },
+                                                  "math-intrinsics": {
+                                                    "from": "math-intrinsics",
+                                                    "version": "1.1.0",
+                                                    "resolved": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/math-intrinsics@1.1.0/node_modules/math-intrinsics"
+                                                  },
+                                                  "es-object-atoms": {
+                                                    "from": "es-object-atoms",
+                                                    "version": "1.1.2",
+                                                    "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-object-atoms@1.1.2/node_modules/es-object-atoms",
+                                                    "dependencies": {
+                                                      "es-errors": {
+                                                        "from": "es-errors",
+                                                        "version": "1.3.0",
+                                                        "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                                      }
+                                                    }
+                                                  },
+                                                  "hasown": {
+                                                    "from": "hasown",
+                                                    "version": "2.0.4",
+                                                    "resolved": "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/hasown@2.0.4/node_modules/hasown",
+                                                    "dependencies": {
+                                                      "function-bind": {
+                                                        "from": "function-bind",
+                                                        "version": "1.1.2",
+                                                        "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+                                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/function-bind@1.1.2/node_modules/function-bind"
+                                                      }
+                                                    }
+                                                  },
+                                                  "get-proto": {
+                                                    "from": "get-proto",
+                                                    "version": "1.0.1",
+                                                    "resolved": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz",
+                                                    "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/get-proto@1.0.1/node_modules/get-proto",
+                                                    "dependencies": {
+                                                      "es-object-atoms": {
+                                                        "from": "es-object-atoms",
+                                                        "version": "1.1.2",
+                                                        "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz",
+                                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-object-atoms@1.1.2/node_modules/es-object-atoms",
+                                                        "deduped": true,
+                                                        "dedupedDependenciesCount": 1
+                                                      },
+                                                      "dunder-proto": {
+                                                        "from": "dunder-proto",
+                                                        "version": "1.0.1",
+                                                        "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+                                                        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/dunder-proto@1.0.1/node_modules/dunder-proto",
+                                                        "dependencies": {
+                                                          "call-bind-apply-helpers": {
+                                                            "from": "call-bind-apply-helpers",
+                                                            "version": "1.0.2",
+                                                            "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+                                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/call-bind-apply-helpers@1.0.2/node_modules/call-bind-apply-helpers",
+                                                            "deduped": true,
+                                                            "dedupedDependenciesCount": 2
+                                                          },
+                                                          "es-errors": {
+                                                            "from": "es-errors",
+                                                            "version": "1.3.0",
+                                                            "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+                                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/es-errors@1.3.0/node_modules/es-errors"
+                                                          },
+                                                          "gopd": {
+                                                            "from": "gopd",
+                                                            "version": "1.2.0",
+                                                            "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+                                                            "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/gopd@1.2.0/node_modules/gopd"
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unsavedDependencies": {
+      "electron": {
+        "from": "electron",
+        "version": "link:../../node_modules/.pnpm/electron@45.0.0/node_modules/electron",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/electron@45.0.0/node_modules/electron"
+      },
+      "eslint": {
+        "from": "eslint",
+        "version": "link:../../node_modules/.pnpm/eslint@10.13.0_jiti@2.7.0/node_modules/eslint",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/eslint@10.13.0_jiti@2.7.0/node_modules/eslint"
+      },
+      "globals": {
+        "from": "globals",
+        "version": "link:../../node_modules/.pnpm/globals@17.13.0/node_modules/globals",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/globals@17.13.0/node_modules/globals"
+      },
+      "eslint-config-prettier": {
+        "from": "eslint-config-prettier",
+        "version": "link:../../node_modules/.pnpm/eslint-config-prettier@10.1.8_eslint@10.13.0_jiti@2.7.0_/node_modules/eslint-config-prettier",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/eslint-config-prettier@10.1.8_eslint@10.13.0_jiti@2.7.0_/node_modules/eslint-config-prettier"
+      },
+      "koffi": {
+        "from": "koffi",
+        "version": "link:../../node_modules/.pnpm/koffi@3.3.1/node_modules/koffi",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/koffi@3.3.1/node_modules/koffi"
+      },
+      "prettier": {
+        "from": "prettier",
+        "version": "link:../../node_modules/.pnpm/prettier@3.9.10/node_modules/prettier",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/prettier@3.9.10/node_modules/prettier"
+      },
+      "react": {
+        "from": "react",
+        "version": "link:../../node_modules/.pnpm/react@19.3.1/node_modules/react",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react@19.3.1/node_modules/react"
+      },
+      "react-dom": {
+        "from": "react-dom",
+        "version": "link:../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom"
+      },
+      "sherpa-onnx-node": {
+        "from": "sherpa-onnx-node",
+        "version": "link:../../node_modules/.pnpm/sherpa-onnx-node@1.13.8/node_modules/sherpa-onnx-node",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/sherpa-onnx-node@1.13.8/node_modules/sherpa-onnx-node"
+      },
+      "tailwindcss": {
+        "from": "tailwindcss",
+        "version": "link:../../node_modules/.pnpm/tailwindcss@4.3.3/node_modules/tailwindcss",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/tailwindcss@4.3.3/node_modules/tailwindcss"
+      },
+      "typescript-eslint": {
+        "from": "typescript-eslint",
+        "version": "link:../../node_modules/.pnpm/typescript-eslint@8.72.0_eslint@10.13.0_jiti@2.7.0__typescript@6.0.3/node_modules/typescript-eslint",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/typescript-eslint@8.72.0_eslint@10.13.0_jiti@2.7.0__typescript@6.0.3/node_modules/typescript-eslint"
+      },
+      "@deepseek-ai/cordis": {
+        "from": "@deepseek-ai/cordis",
+        "version": "link:../../node_modules/.pnpm/@deepseek-ai+cordis@4.0.5/node_modules/@deepseek-ai/cordis",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@deepseek-ai+cordis@4.0.5/node_modules/@deepseek-ai/cordis"
+      },
+      "@playwright/test": {
+        "from": "@playwright/test",
+        "version": "link:../../node_modules/.pnpm/@playwright+test@1.64.1/node_modules/@playwright/test",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@playwright+test@1.64.1/node_modules/@playwright/test"
+      },
+      "@tailwindcss/vite": {
+        "from": "@tailwindcss/vite",
+        "version": "link:../../node_modules/.pnpm/@tailwindcss+vite@4.3.3_vite@8.3.5_@types+node@24.19.2_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.15_/node_modules/@tailwindcss/vite",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@tailwindcss+vite@4.3.3_vite@8.3.5_@types+node@24.19.2_esbuild@0.28.2_jiti@2.7.0_tsx@4.23.15_/node_modules/@tailwindcss/vite"
+      },
+      "@types/react": {
+        "from": "@types/react",
+        "version": "link:../../node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react@19.3.0/node_modules/@types/react"
+      },
+      "@types/react-dom": {
+        "from": "@types/react-dom",
+        "version": "link:../../node_modules/.pnpm/@types+react-dom@19.3.0_@types+react@19.3.0/node_modules/@types/react-dom",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@types+react-dom@19.3.0_@types+react@19.3.0/node_modules/@types/react-dom"
+      },
+      "@eslint/js": {
+        "from": "@eslint/js",
+        "version": "link:../../node_modules/.pnpm/@eslint+js@10.0.1_eslint@10.13.0_jiti@2.7.0_/node_modules/@eslint/js",
+        "path": "/home/kingBZ/DeepSeek-WorkSpace/dsh-pet/node_modules/.pnpm/@eslint+js@10.0.1_eslint@10.13.0_jiti@2.7.0_/node_modules/@eslint/js"
+      }
+    }
+  }
+]
