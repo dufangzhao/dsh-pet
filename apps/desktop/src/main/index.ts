@@ -15,18 +15,18 @@ import {
   HOST_IPC,
   CONSOLE_IPC,
   PRESENTATION_IPC,
-  SPEECH_OUTPUT_IPC,
+  DESKTOP_SPEECH_IPC,
+  SPEECH_FEATURE_PLUGIN_ID,
   DESKTOP_COMPANION_IPC,
   DESKTOP_VOICE_IPC,
   VOICE_CAPTURE_PLUGIN_ID,
   DESKTOP_PRESENTATION_IPC,
   DESKTOP_COMPANION_PLUGIN_ID,
   APPLICATION_PLUGIN_IDS,
-  SPEECH_OUTPUT_PLUGIN_IDS,
   type DesktopPresentationPreferences,
   type PetSnapshot,
 } from '@pet/contracts';
-import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
+import { createSafeStorageCipher, KernelFault, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { DesktopCompanionController } from './companion-client-controller.js';
 import { DesktopCompanionHostAdapter } from './companion-client-host.js';
@@ -52,11 +52,9 @@ import { handleConsoleConfigRequest } from './console-config-request.js';
 import { ConsolePluginRequests } from './console-plugin-request.js';
 import { ConsoleSecurityRequests } from './console-security-request.js';
 import { PresentationController, handlePresentationRequest } from './presentation-controller.js';
-import {
-  SpeechOutputController,
-  handleSpeechOutputRequest,
-  type SpeechOutputAction,
-} from './speech-output-controller.js';
+import { SharedSpeechController } from './shared-speech-controller.js';
+import { SharedSpeechHost } from './shared-speech-host.js';
+import { handleDesktopSpeechRequest, type DesktopSpeechAction } from './shared-speech-request.js';
 import { createDemoTray } from './demo-tray.js';
 
 import { SharedVoiceController } from './shared-voice-controller.js';
@@ -74,7 +72,7 @@ let host: DesktopHost | undefined;
 let companion: DesktopCompanionController | undefined;
 let voice: SharedVoiceController | undefined;
 let local: LocalPresentationController | undefined;
-let speech: SpeechOutputController | undefined;
+let speech: SharedSpeechController | undefined;
 let pet: PetWindowController | undefined;
 let window: BrowserWindow | undefined;
 let tray: ReturnType<typeof createDemoTray> | undefined;
@@ -145,12 +143,35 @@ function syncPet(): void {
   if (visible && !window.isVisible()) window.showInactive();
   if (!visible && window.isVisible()) window.hide();
 }
+function refreshSpeech(): void {
+  void speech?.refreshSource().catch(() => console.error('Speech source refresh failed'));
+}
+function stopSpeech(): void {
+  const current = speech;
+  if (!current) return;
+  void current
+    .getState()
+    .then(async (state) => {
+      if (!state.ok) throw new KernelFault(state.error.code);
+      if (!state.value.connectionId) return;
+      const result = await current.stop({ connectionId: state.value.connectionId });
+      if (!result.ok && result.error.code !== 'stale-owner')
+        throw new KernelFault(result.error.code);
+    })
+    .catch(() => console.error('Speech stop failed'));
+}
 async function quit(exitCode = 0): Promise<void> {
   if (quitting) return;
   quitting = true;
   tray?.destroy();
   presentation.ownerClosed();
-  speech?.close();
+  let speechCleanupFailed = false;
+  try {
+    // The Pet frame and live connection must remain available for release/cancel acknowledgments.
+    await speech?.close();
+  } catch {
+    speechCleanupFailed = true;
+  }
   settings.close();
   pet?.dispose();
   try {
@@ -158,7 +179,7 @@ async function quit(exitCode = 0): Promise<void> {
     const stopped = await host?.shutdown();
     await voice?.close();
     await companion?.close();
-    app.exit(stopped && !stopped.exitConfirmed ? 1 : exitCode);
+    app.exit(speechCleanupFailed || (stopped && !stopped.exitConfirmed) ? 1 : exitCode);
   } catch {
     app.exit(1);
   }
@@ -181,13 +202,13 @@ if (!app.requestSingleInstanceLock()) app.exit(0);
 const localRoles = [
   DESKTOP_COMPANION_PLUGIN_ID,
   VOICE_CAPTURE_PLUGIN_ID,
+  SPEECH_FEATURE_PLUGIN_ID,
   APPLICATION_PLUGIN_IDS.profile,
   APPLICATION_PLUGIN_IDS.start,
   APPLICATION_PLUGIN_IDS.persona,
   APPLICATION_PLUGIN_IDS.appearance,
   APPLICATION_PLUGIN_IDS.conversation,
   'pet.avatar-default',
-  ...Object.values(SPEECH_OUTPUT_PLUGIN_IDS),
 ];
 const startup = app
   .whenReady()
@@ -222,19 +243,20 @@ const startup = app
           await voice?.retireSource(owner);
         },
       },
+      speechLifecycle: {
+        sourcePluginId: SPEECH_FEATURE_PLUGIN_ID,
+        stopFor: async (owner) => {
+          await speech?.stopFor(owner);
+        },
+      },
       adapters: mvpReadiness(path.resolve(here, '../../../../.cache/asr-models'), true),
       onChanged: () => {
-        speech?.onHostChanged();
+        refreshSpeech();
         void local?.refresh();
       },
       media: {
         input: (_reference, writer) => writer.cancel(),
-        output: (reference, reader) => {
-          if (!speech?.output(reference, reader)) reader.cancel();
-        },
-        capabilityTask: (parent, child, capability, method) => {
-          speech?.capabilityTask(parent, child, capability, method);
-        },
+        output: (_reference, reader) => reader.cancel(),
       },
       ...(cipher ? { cipher } : {}),
     });
@@ -285,11 +307,12 @@ const startup = app
       () => ({ available: !!window && !window.isDestroyed(), shown: !!window?.isVisible() }),
       () => broadcast(DESKTOP_PRESENTATION_IPC.changed),
       (next) => {
+        const wasSoundEnabled = preferences?.soundEnabled;
         preferences = next;
         if (!next.draggable) pet?.endDrag();
         window?.setAlwaysOnTop(next.alwaysOnTop);
-        if (!next.soundEnabled || !next.speechEnabled) void speech?.stop();
-        speech?.onHostChanged();
+        if (wasSoundEnabled !== false && !next.soundEnabled) stopSpeech();
+        refreshSpeech();
         syncPet();
       },
     );
@@ -316,6 +339,7 @@ const startup = app
     const activeLocal = local;
     const securityChanged = () => {
       broadcast(CONSOLE_IPC.securityChanged);
+      refreshSpeech();
       syncPet();
     };
     const consoleView = () =>
@@ -363,23 +387,42 @@ const startup = app
             presentation,
           ),
         );
-    speech = new SpeechOutputController(
-      activeHost,
-      () => broadcast(SPEECH_OUTPUT_IPC.changed),
-      (event, payload) => {
-        if (window && !window.isDestroyed())
-          window.webContents.send(SPEECH_OUTPUT_IPC.audio, event, payload);
+    speech = new SharedSpeechController(
+      activeCompanion,
+      new SharedSpeechHost(activeHost),
+      () => {
+        const contents = window?.webContents;
+        return contents && !contents.isDestroyed() && contents.getURL() === petUrl
+          ? contents.mainFrame
+          : null;
+      },
+      () => broadcast(DESKTOP_SPEECH_IPC.changed),
+      (frame, event, payload) => {
+        const contents = window?.webContents;
+        if (
+          contents &&
+          !contents.isDestroyed() &&
+          contents.mainFrame === frame &&
+          contents.getURL() === petUrl
+        )
+          contents.send(DESKTOP_SPEECH_IPC.audio, event, payload);
+      },
+      async () => {
+        if (!preferences?.soundEnabled) throw new KernelFault('not-ready');
+        return preferences.speechVolume;
       },
     );
     const activeSpeech = speech;
-    for (const [action, channel] of Object.entries(SPEECH_OUTPUT_IPC))
+    for (const [action, channel] of Object.entries(DESKTOP_SPEECH_IPC))
       if (!['changed', 'audio'].includes(action))
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
-          handleSpeechOutputRequest(
+          handleDesktopSpeechRequest(
             requestSource(event),
-            action as SpeechOutputAction,
+            event.senderFrame,
+            action as DesktopSpeechAction,
             args,
             activeSpeech,
+            activeCompanion,
           ),
         );
     ipcMain.handle(CONSOLE_IPC.snapshot, (event, ...args: unknown[]) =>
@@ -395,7 +438,7 @@ const startup = app
     );
     ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
       handleConsoleRequest(sourceFor(event, settings.current, consoleUrl), args, () => {
-        void speech?.stop();
+        stopSpeech();
         return activeHost.status();
       }),
     );
@@ -479,12 +522,21 @@ const startup = app
     });
     if (!(pet.window instanceof BrowserWindow)) throw new Error('Invalid pet window');
     window = pet.window;
+    let speechFrame = window.webContents.mainFrame;
+    window.webContents.on('did-navigate', () => {
+      speech?.ownerGone(speechFrame);
+      if (window && !window.webContents.isDestroyed()) speechFrame = window.webContents.mainFrame;
+      refreshSpeech();
+    });
+    window.webContents.on('render-process-gone', () => speech?.ownerGone(speechFrame));
+    window.webContents.once('destroyed', () => speech?.ownerGone(speechFrame));
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event) => event.preventDefault());
     window.webContents.on('will-redirect', (event) => event.preventDefault());
     window.webContents.on('will-attach-webview', (event) => event.preventDefault());
     await settings.open(false);
     await activeLocal.refresh();
+    await speech.refreshSource();
     syncPet();
     tray = createDemoTray({
       stopLabel: '停止本地播放',
@@ -493,7 +545,7 @@ const startup = app
         void settings.open();
       },
       stop: () => {
-        void speech?.stop();
+        stopSpeech();
       },
       quit: () => app.quit(),
     });

@@ -30,7 +30,13 @@ export interface LocalPresentationView {
   /** 最近一次保存的结论；成功不弹，失败说原因。 */
   notice: string | null;
   saving: boolean;
-  save(patch: Partial<DesktopPresentationPreferences>): Promise<boolean>;
+  /**
+   * 保存白名单里的键。
+   *
+   * `expectedRevision` 是**调用方捕获**的基线：一份已经编辑过的表单必须用它的
+   * 基线提交，不能借最新 revision 静默覆盖别处的更新。省略时用当前快照（无草稿的场景）。
+   */
+  save(patch: Partial<DesktopPresentationPreferences>, expectedRevision?: number): Promise<boolean>;
   refresh(): void;
 }
 
@@ -87,7 +93,10 @@ export function useLocalPresentation(): LocalPresentationView {
   }, [read]);
 
   const save = useCallback(
-    async (patch: Partial<DesktopPresentationPreferences>): Promise<boolean> => {
+    async (
+      patch: Partial<DesktopPresentationPreferences>,
+      expectedRevision?: number,
+    ): Promise<boolean> => {
       const bridge = bridgeRef.current;
       const current = snapshot;
       if (bridge === null || current === null) {
@@ -98,7 +107,10 @@ export function useLocalPresentation(): LocalPresentationView {
       setSaving(true);
       setNotice(null);
       try {
-        const result = await bridge.save({ expectedRevision: current.revision, patch });
+        const result = await bridge.save({
+          expectedRevision: expectedRevision ?? current.revision,
+          patch,
+        });
         if (!alive.current) return false;
         if (result.ok) {
           accept(result.value);

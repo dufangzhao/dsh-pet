@@ -435,6 +435,13 @@ export class CompanionPluginHost {
     return !!source && this.permissions.isTrusted(identity(pluginId), source.fingerprint);
   }
 
+  /** Exact reviewed package identity for host-private captured native bindings. */
+  sourceFingerprint(pluginId: string): string {
+    const source = this.sources.get(pluginId);
+    if (!source || !this.verifySource(pluginId)) throw new KernelFault('package-changed');
+    return source.fingerprint;
+  }
+
   isEnabled(pluginId: string): boolean {
     return this.manager.get(identity(pluginId))?.state === 'active';
   }

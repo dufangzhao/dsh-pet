@@ -30,6 +30,7 @@
           "memorySnapshot": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "forgetFact": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "rememberFact": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "getMessage": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "getTask": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "getTaskByExecution": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "getArtifact": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],

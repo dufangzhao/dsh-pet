@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.tts-magpie",
+  "version": "0.1.0",
+  "displayName": { "en": "Magpie speech synthesis", "zh-CN": "Magpie 语音合成" },
+  "description": {
+    "en": "Source-owned ordinary MiMo PCM streaming through the configured Magpie gateway"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "magpie",
+      "capability": "companion.speech.output@1",
+      "features": {
+        "nativeSpeech": 1,
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["tts-api-key"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrl", "modelRef", "authMode", "protocol", "voice"],
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "default": "http://127.0.0.1:3425/v1"
+        },
+        "modelRef": { "type": "string", "maxLength": 128, "default": "" },
+        "authMode": {
+          "type": "string",
+          "enum": ["local-client-id", "gateway-key"],
+          "default": "local-client-id"
+        },
+        "protocol": {
+          "type": "string",
+          "enum": ["mimo-native-pcm16-sse"],
+          "default": "mimo-native-pcm16-sse"
+        },
+        "voice": {
+          "type": "string",
+          "enum": ["mimo_default", "冰糖", "茉莉", "苏打", "白桦", "Mia", "Chloe", "Milo", "Dean"],
+          "default": "mimo_default"
+        }
+      }
+    },
+    "apply": {
+      "baseUrl": "reload",
+      "modelRef": "reload",
+      "authMode": "reload",
+      "protocol": "reload",
+      "voice": "reload"
+    }
+  }
+}

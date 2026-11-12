@@ -32,7 +32,17 @@ it('declares an ordinary manifest and returns payload Result under plugin lifecy
   const checked = validateManifest(manifest);
   expect(checked.ok).toBe(true);
   if (!checked.ok) throw new Error(checked.error.code);
-  expect(checked.value.provides).toMatchObject([{ id: 'sqlite', capability: 'companion.state@1' }]);
+  expect(checked.value.provides).toMatchObject([
+    {
+      id: 'sqlite',
+      capability: 'companion.state@1',
+      features: {
+        methodPermissions: {
+          getMessage: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+        },
+      },
+    },
+  ]);
   const directory = mkdtempSync(join(tmpdir(), 'pet-state-sqlite-test-'));
   roots.push(directory);
   let methods: Readonly<Record<string, Method>> = {};

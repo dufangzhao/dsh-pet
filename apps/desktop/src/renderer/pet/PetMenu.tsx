@@ -19,6 +19,10 @@ export interface PetMenuProps {
   canStop?: boolean;
   stopping?: boolean;
   onStop?(): void;
+  /** 停止朗读：只停本机音频，不影响生成、后台任务或语音输入。 */
+  canStopSpeech?: boolean;
+  stoppingSpeech?: boolean;
+  onStopSpeech?(): void;
   quitDisabled: boolean;
   onQuit(): void;
   onClose?(): void;
@@ -115,6 +119,9 @@ export function PetMenu({
   canStop = false,
   stopping = false,
   onStop,
+  canStopSpeech = false,
+  stoppingSpeech = false,
+  onStopSpeech,
   quitDisabled,
   onQuit,
   onClose,
@@ -273,6 +280,18 @@ export function PetMenu({
             title={PET_COPY.stopTitle}
           >
             {stopping ? PET_COPY.stopping : PET_COPY.stop}
+          </button>
+        ) : null}
+        {canStopSpeech && onStopSpeech !== undefined ? (
+          <button
+            type="button"
+            className="pet-menu__button"
+            data-testid="pet-stop-speech"
+            onClick={onStopSpeech}
+            disabled={stoppingSpeech}
+            title="停止朗读；不会停止它正在做的事"
+          >
+            {stoppingSpeech ? '停止中…' : '停止朗读'}
           </button>
         ) : null}
         {onClose ? (

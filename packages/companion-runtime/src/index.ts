@@ -10,3 +10,6 @@ export * from './model-connections.js';
 export * from './fixture-model.js';
 export * from './voice-input-types.js';
 export * from './voice-providers.js';
+export type * from './speech-output-types.js';
+export * from './speech-providers.js';
+export * from './speech-output-errors.js';

@@ -204,6 +204,10 @@ export function validateInput<K extends keyof StateMethodInputs>(
         requireValue(text(body['value'], COMPANION_MEMORY_MAX_VALUE_UNITS));
       break;
     }
+    case 'getMessage':
+      keys(body, ['id', 'eventSequence']);
+      requireValue(id(body['id']) && integer(body['eventSequence'], 1));
+      break;
     case 'getTaskByExecution':
       keys(body, ['executionId']);
       requireValue(id(body['executionId']));

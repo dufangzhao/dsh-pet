@@ -38,7 +38,8 @@ import { PetBubble } from './PetBubble.js';
 import { PetComposer } from './PetComposer.js';
 import { PetMenu } from './PetMenu.js';
 import { PetTools } from './PetTools.js';
-import { SpeechOutputPlaybackOwner } from '../speech-output/playback-owner.js';
+import { SharedSpeechPlaybackMount } from '../speech-output/shared-playback-owner.js';
+import { usePetSpeechStatus } from './use-pet-speech.js';
 import { bubbleLifetime } from './bubble-lifetime.js';
 import { useBubblePresence, useReducedMotion } from './use-bubble-motion.js';
 import { petPresentationStyle, usePetSettings } from './use-pet-settings.js';
@@ -382,6 +383,9 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
   const uncertainSend = useRef<{ text: string; commandId: string } | null>(null);
   const menuCommandBusy = useRef(false);
   const settings = usePetSettings();
+  const speech = usePetSpeechStatus();
+  const [stoppingSpeech, setStoppingSpeech] = useState(false);
+  const speechStopBusy = useRef(false);
 
   // 同一份本机记录描述的就是桌面上这一只；没读到就沿用窗口原型自带的形态。
   const profile = presentation.snapshot?.preferences ?? null;
@@ -911,7 +915,7 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
       data-reduced-motion={reducedMotion ? 'true' : 'false'}
       data-connection={serviceState?.phase ?? 'none'}
     >
-      <SpeechOutputPlaybackOwner />
+      <SharedSpeechPlaybackMount />
       <div className="pet-root__avatar">
         <PetAvatar
           state={state}
@@ -1039,6 +1043,17 @@ export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
             canStop={canStopForeground}
             stopping={stoppingForeground}
             onStop={() => void stopForeground()}
+            canStopSpeech={speech.stoppable}
+            stoppingSpeech={stoppingSpeech}
+            onStopSpeech={() => {
+              if (speechStopBusy.current) return;
+              speechStopBusy.current = true;
+              setStoppingSpeech(true);
+              void speech.stop().finally(() => {
+                speechStopBusy.current = false;
+                if (!unmounting.current) setStoppingSpeech(false);
+              });
+            }}
             quitDisabled={!view.available}
             onQuit={handleQuit}
             onClose={() => {

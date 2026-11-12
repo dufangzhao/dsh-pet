@@ -36,6 +36,10 @@ import { createSharedVoicePlugin } from '@pet/shared-voice';
 import { type VoiceAsrRegistration, type VoiceAsrPortsFor } from '@pet/companion-runtime';
 import { ModelConnectionController } from './model-controller.js';
 import { VoiceController } from './voice-controller.js';
+import { createMagpieSpeechPlugin, parseMagpieSpeechSettings } from '@pet/tts-magpie';
+import { createSharedSpeechPlugin } from '@pet/shared-speech';
+import type { SpeechTtsRegistration, SpeechTtsPortsFor } from '@pet/companion-runtime';
+import { SpeechController } from './speech-controller.js';
 import { serveText, type TextService } from './server.js';
 
 export interface CompanionServiceOptions {
@@ -56,6 +60,7 @@ export interface CompanionServiceOptions {
     portsFor: ModelConnectionPortsFor,
   ) => ModelConnectionRegistration)[];
   readonly voicePlugins?: readonly ((portsFor: VoiceAsrPortsFor) => VoiceAsrRegistration)[];
+  readonly speechPlugins?: readonly ((portsFor: SpeechTtsPortsFor) => SpeechTtsRegistration)[];
   readonly name?: string;
   readonly persona?: string;
   readonly onError?: (error: unknown) => void;
@@ -66,6 +71,7 @@ export interface CompanionService {
   readonly host: CompanionPluginHost;
   readonly models: ModelConnectionController;
   readonly voice: VoiceController;
+  readonly speech: SpeechController;
   close(): Promise<void>;
 }
 async function manifest(directory: string): Promise<PluginManifest> {
@@ -91,6 +97,8 @@ export async function createCompanionService(
     magpie: path.join(root, 'plugins/model-connection-magpie'),
     voice: path.join(root, 'plugins/shared-voice'),
     asr: path.join(root, 'plugins/asr-magpie'),
+    speech: path.join(root, 'plugins/shared-speech'),
+    tts: path.join(root, 'plugins/tts-magpie'),
   };
   const [
     stateManifest,
@@ -100,6 +108,8 @@ export async function createCompanionService(
     magpieManifest,
     voiceManifest,
     asrManifest,
+    speechManifest,
+    ttsManifest,
   ] = await Promise.all([
     manifest(directories.state),
     manifest(directories.cloud),
@@ -108,6 +118,8 @@ export async function createCompanionService(
     manifest(directories.magpie),
     manifest(directories.voice),
     manifest(directories.asr),
+    manifest(directories.speech),
+    manifest(directories.tts),
   ]);
   const configRoot = path.join(data, 'configuration');
   await mkdir(configRoot, { recursive: true, mode: 0o700 });
@@ -145,6 +157,29 @@ export async function createCompanionService(
   let http: TextService | undefined;
   let models: ModelConnectionController | undefined;
   let voice: VoiceController | undefined;
+  let speech: SpeechController | undefined;
+  const cleanup = async (): Promise<void> => {
+    let failure: unknown;
+    for (const close of [
+      () => speech?.close(),
+      () => http?.close(),
+      () => voice?.close(),
+      () => runtime?.close(),
+      () => models?.close(),
+      () => host?.close(),
+    ]) {
+      try {
+        await close();
+      } catch (error) {
+        failure ??= error;
+      }
+    }
+    if (failure !== undefined) throw failure;
+  };
+  const requireSpeech = (): SpeechController => {
+    if (!speech) throw new KernelFault('not-ready');
+    return speech;
+  };
   const requireVoice = (): VoiceController => {
     if (!voice) throw new KernelFault('not-ready');
     return voice;
@@ -227,6 +262,25 @@ export async function createCompanionService(
     },
     ...(options.voicePlugins ?? []).map((create) => create(asrPortsFor)),
   ];
+  const speechPortsFor: SpeechTtsPortsFor = (context) =>
+    requireSpeech().providers.portsFor(context);
+  const speechRegistrations: SpeechTtsRegistration[] = [
+    {
+      manifest: ttsManifest,
+      directory: directories.tts,
+      preset: 'allow',
+      enabled: !disabled.has(ttsManifest.id),
+      hostCredentials: ['tts-api-key'],
+      definition: createMagpieSpeechPlugin(speechPortsFor),
+      tts: {
+        providerId: 'magpie',
+        label: 'Magpie',
+        synthetic: false,
+        parseConfig: parseMagpieSpeechSettings,
+      },
+    },
+    ...(options.speechPlugins ?? []).map((create) => create(speechPortsFor)),
+  ];
   const registrations: ServicePluginRegistration[] = [
     {
       manifest: companionHostManifest,
@@ -306,6 +360,23 @@ export async function createCompanionService(
       enabled: false,
       definition: createSharedVoicePlugin((context) => requireVoice().featurePorts(context)),
     },
+    {
+      manifest: speechManifest,
+      directory: directories.speech,
+      preset: 'allow',
+      enabled: false,
+      definition: createSharedSpeechPlugin((context) => requireSpeech().featurePorts(context)),
+    },
+    ...speechRegistrations.map((registration) => ({
+      ...registration,
+      enabled: false,
+      definition: definePlugin({
+        async activate(context) {
+          await requireSpeech().providerPorts(context);
+          return registration.definition.activate(context);
+        },
+      }),
+    })),
     ...asrRegistrations.map((registration) => ({
       ...registration,
       enabled: false,
@@ -349,11 +420,14 @@ export async function createCompanionService(
     await runtime.initialize();
     voice = new VoiceController(host, runtime, asrRegistrations);
     await voice.initialize();
+    speech = new SpeechController(host, runtime, speechRegistrations);
+    await speech.initialize();
     http = await serveText({
       runtime,
       host,
       models,
       voice,
+      speech,
       token: options.token,
       clientPluginId: textManifest.id,
       clientDirectory: path.join(directories.text, 'dist'),
@@ -365,11 +439,6 @@ export async function createCompanionService(
       ...(options.publicOrigin ? { publicOrigin: options.publicOrigin } : {}),
       ...(options.onError ? { onError: options.onError } : {}),
     });
-    const activeHost = host;
-    const activeRuntime = runtime;
-    const activeHttp = http;
-    const activeModels = models;
-    const activeVoice = voice;
     let closing: Promise<void> | undefined;
     return {
       url: http.url,
@@ -377,46 +446,13 @@ export async function createCompanionService(
       runtime,
       models,
       voice,
+      speech,
       close() {
-        return (closing ??= (async () => {
-          try {
-            await activeHttp.close();
-          } finally {
-            try {
-              await activeVoice.close();
-            } finally {
-              try {
-                await activeRuntime.close();
-              } finally {
-                try {
-                  await activeModels.close();
-                } finally {
-                  await activeHost.close();
-                }
-              }
-            }
-          }
-        })());
+        return (closing ??= cleanup());
       },
     };
   } catch (error) {
-    try {
-      await http?.close();
-    } finally {
-      try {
-        await voice?.close();
-      } finally {
-        try {
-          await runtime?.close();
-        } finally {
-          try {
-            await models?.close();
-          } finally {
-            await host?.close();
-          }
-        }
-      }
-    }
+    await cleanup();
     throw error;
   }
 }

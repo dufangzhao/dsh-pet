@@ -99,6 +99,8 @@ export interface StateMethodInputs {
   memorySnapshot: Record<string, never>;
   rememberFact: StateRememberInput;
   forgetFact: CompanionMemoryForgetCommand & { readonly origin: CompanionFactOrigin };
+  /** Exact canonical event/message pair; speech admission must additionally require assistant. */
+  getMessage: { readonly id: string; readonly eventSequence: number };
   getTask: { readonly id: string };
   getTaskByExecution: { readonly executionId: string };
   getArtifact: { readonly id: string };
@@ -117,6 +119,7 @@ export interface StateMethodOutputs {
   memorySnapshot: StateMemoryView;
   rememberFact: StateMemoryMutation;
   forgetFact: StateMemoryMutation;
+  getMessage: CompanionMessage;
   getTask: CompanionTask;
   getTaskByExecution: CompanionTask;
   getArtifact: StoredArtifact;
@@ -135,6 +138,7 @@ export const STATE_METHODS = [
   'memorySnapshot',
   'rememberFact',
   'forgetFact',
+  'getMessage',
   'getTask',
   'getTaskByExecution',
   'getArtifact',

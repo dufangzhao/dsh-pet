@@ -61,6 +61,8 @@ export interface EventStreamOptions {
    * 留足调度余量：三个心跳周期没消息才判定断开。
    */
   readonly idleTimeoutMs?: number;
+  /** 直接消费持久事件的宿主用来 fence；只靠快照刷新的网页不传此项。 */
+  readonly onInvalidEvent?: () => void;
 }
 
 /** 三个服务端心跳周期（15s）：容忍一次调度抖动，又不至于长时间谎称已连接。 */
@@ -353,6 +355,37 @@ export async function streamEvents(
   const decoder = new SseDecoder();
   const reader = response.body.getReader();
   const text = new TextDecoder();
+  // Speech observes byte corruption without changing the existing text reader's recovery policy.
+  let verifier = options.onInvalidEvent ? new TextDecoder('utf-8', { fatal: true }) : null;
+  const receive = (chunk?: Uint8Array): void => {
+    if (verifier) {
+      try {
+        verifier.decode(chunk, { stream: chunk !== undefined });
+      } catch {
+        verifier = new TextDecoder('utf-8', { fatal: true });
+        options.onInvalidEvent?.();
+      }
+    }
+    let messages: SseMessage[];
+    let incomplete: string | null | undefined;
+    try {
+      messages = decoder.push(text.decode(chunk, { stream: chunk !== undefined }));
+      if (chunk === undefined)
+        messages.push(
+          ...decoder.finish((event) => {
+            incomplete = event;
+          }),
+        );
+    } catch (error) {
+      options.onInvalidEvent?.();
+      throw error;
+    }
+    if (incomplete === null || incomplete === 'companion') options.onInvalidEvent?.();
+    for (const message of messages) {
+      const parsed = parseStreamMessage(message, options.onInvalidEvent);
+      if (parsed !== null) onMessage(parsed);
+    }
+  };
   // 用户主动断开要立刻生效，不能被后面的超时判定顶掉。
   // 同一个 signal 会在重连时复用，所以正常结束时必须摘掉监听，避免越积越多。
   let detach = (): void => {};
@@ -380,11 +413,11 @@ export async function streamEvents(
       }
       // 任何字节（含 keepalive 注释行）都算活着，只有真收到字节才重新计时。
       idle.touch();
-      if (outcome.read.done) return { kind: 'ended' };
-      for (const message of decoder.push(text.decode(outcome.read.value, { stream: true }))) {
-        const parsed = parseStreamMessage(message);
-        if (parsed !== null) onMessage(parsed);
+      if (outcome.read.done) {
+        if (options.onInvalidEvent) receive();
+        return { kind: 'ended' };
       }
+      receive(outcome.read.value);
     }
   } catch {
     // 用户主动断开优先于超时判定，不能被误报成网络故障。
@@ -432,17 +465,19 @@ function idleWatch(
   };
 }
 
-/** 坏帧直接丢弃：事件只是「有变化」的信号，游标以 snapshot 为准。 */
-function parseStreamMessage(message: SseMessage): EventMessage | null {
+/** 网页仍把事件当刷新提示；按事件执行副作用的宿主另接损坏通知。 */
+function parseStreamMessage(message: SseMessage, onInvalid?: () => void): EventMessage | null {
   if (message.event === 'refresh') return { kind: 'refresh' };
   if (message.event !== 'companion') return null;
   let data: unknown;
   try {
     data = JSON.parse(message.data);
   } catch {
+    onInvalid?.();
     return null;
   }
   const event = parseEvent(data);
+  if (event === null) onInvalid?.();
   return event === null ? null : { kind: 'companion', event };
 }
 

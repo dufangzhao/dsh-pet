@@ -4,4 +4,6 @@ export * from './client/guards.js';
 export * from './client/sse.js';
 export * from './client/voice-protocol.js';
 export * from './client/voice-guards.js';
+export * from './client/speech-protocol.js';
+export * from './client/speech-guards.js';
 export { isActive, isTerminal, taskStatusView } from './client/state.js';

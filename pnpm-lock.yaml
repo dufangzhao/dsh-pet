@@ -119,6 +119,9 @@ importers:
       '@pet/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
+      '@pet/shared-speech':
+        specifier: workspace:*
+        version: link:../../plugins/shared-speech
       '@pet/shared-voice':
         specifier: workspace:*
         version: link:../../plugins/shared-voice
@@ -128,6 +131,9 @@ importers:
       '@pet/text-client':
         specifier: workspace:*
         version: link:../../plugins/text-client
+      '@pet/tts-magpie':
+        specifier: workspace:*
+        version: link:../../plugins/tts-magpie
       cortico:
         specifier: 0.2.7
         version: 0.2.7(patch_hash=7fdf0b783f4465bd37ede05850748cf4a7b52ba4d7dc708ae2c9f81562243995)
@@ -767,6 +773,34 @@ importers:
         specifier: 'catalog:'
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  plugins/shared-speech:
+    dependencies:
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   plugins/shared-voice:
     dependencies:
       '@pet/companion-runtime':
@@ -778,6 +812,28 @@ importers:
       '@pet/host-kernel':
         specifier: workspace:*
         version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/speech-output:
+    dependencies:
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@pet/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
@@ -897,6 +953,37 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+
+  plugins/tts-magpie:
+    dependencies:
+      '@pet/asr-magpie':
+        specifier: workspace:*
+        version: link:../asr-magpie
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
   plugins/voice-chat:
     dependencies:

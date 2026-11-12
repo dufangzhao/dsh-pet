@@ -1,12 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createServer, type ServerResponse } from 'node:http';
+import { createServer, type ServerResponse, type IncomingMessage } from 'node:http';
 import { once } from 'node:events';
 import {
   DesktopCompanionController,
   companionEndpoint,
   initialDesktopCompanionState,
 } from './companion-client-controller.js';
-import { makeError, type CompanionSnapshot, type Result } from '@pet/contracts';
+import {
+  makeError,
+  SPEECH_AUDIO_HEADER,
+  SPEECH_FORMAT,
+  type CompanionSnapshot,
+  type Result,
+  type SpeechSegmentKey,
+} from '@pet/contracts';
+import type { SpeechConnectionEvent } from './companion-speech-service.js';
 import type { DesktopCompanionHostPort, DesktopCompanionSource } from './companion-client-types.js';
 import { handleDesktopCompanionRequest } from './companion-client-request.js';
 import { createDesktopCompanionBridge } from '../preload/companion-bridge.js';
@@ -42,11 +50,13 @@ async function fixture(projected: CompanionSnapshot = snapshot) {
   let receiptGate: Promise<void> | null = null;
   let dropReceipt = false;
   let admitted = 0;
+  let speechRoute: ((request: IncomingMessage, response: ServerResponse) => boolean) | null = null;
   const server = createServer((request, response) => {
     if (request.headers.authorization !== `Bearer ${'t'.repeat(24)}`) {
       response.writeHead(401).end('{}');
       return;
     }
+    if (speechRoute?.(request, response)) return;
     if (request.url?.startsWith('/api/events')) {
       streamsOpened++;
       response.writeHead(200, { 'content-type': 'text/event-stream' });
@@ -150,6 +160,12 @@ async function fixture(projected: CompanionSnapshot = snapshot) {
       receiptGate = gate;
       dropReceipt = drop;
     },
+    emitRaw: (raw: string | Uint8Array) => {
+      for (const response of responses) response.write(raw);
+    },
+    speechRoute: (route: (request: IncomingMessage, response: ServerResponse) => boolean) => {
+      speechRoute = route;
+    },
     emitRefresh: () => {
       for (const response of responses) response.write('event: refresh\ndata: {}\n\n');
     },
@@ -162,6 +178,125 @@ async function fixture(projected: CompanionSnapshot = snapshot) {
   };
 }
 describe('shared desktop contract seam', () => {
+  it('delivers formal events synchronously and observes malformed events without disrupting text', async () => {
+    const f = await fixture();
+    const observed: SpeechConnectionEvent[] = [];
+    f.controller.onSpeechEvent((event) => observed.push(event));
+    await f.controller.connect({ baseUrl: f.baseUrl, token: 't'.repeat(24), expectedRevision: 1 });
+    await vi.waitFor(() => expect(f.streamsOpened()).toBe(1));
+    const reads = f.reads();
+    f.emitRaw(
+      [1, 2]
+        .map((sequence) => {
+          const event = {
+            id: `epoch:${sequence}`,
+            epoch: 'epoch',
+            sequence,
+            time: 1,
+            kind: 'message',
+            data: { messageId: `say-${sequence}`, role: 'assistant', inputId: null, taskId: null },
+          };
+          return `event: companion\nid: ${event.id}\ndata: ${JSON.stringify(event)}\n\n`;
+        })
+        .join(''),
+    );
+    await vi.waitFor(() =>
+      expect(observed.filter((event) => event.kind === 'event')).toHaveLength(2),
+    );
+    expect(
+      observed.filter((event) => event.kind === 'event').map((event) => event.event.sequence),
+    ).toEqual([1, 2]);
+    expect(f.reads()).toBe(reads);
+    f.emitRaw('event: companion\ndata: {bad JSON}\n\n');
+    await vi.waitFor(() => expect(observed.some((event) => event.kind === 'invalid')).toBe(true));
+    f.emitRaw(new Uint8Array([58, 32, 0xc3, 0x28, 10, 10]));
+    await vi.waitFor(() =>
+      expect(observed.filter((event) => event.kind === 'invalid')).toHaveLength(2),
+    );
+    await vi.waitFor(async () =>
+      expect(await f.controller.getState()).toMatchObject({
+        ok: true,
+        value: { phase: 'live' },
+      }),
+    );
+    expect(f.streamsOpened()).toBe(1);
+  });
+  it('retains the captured token borrow through the complete speech PCM callback and refuses retired sessions', async () => {
+    const f = await fixture();
+    let scopes = 0,
+      gets = 0;
+    const withToken = f.host.withToken;
+    f.host.withToken = async (source, token, signal, operation, commit) => {
+      scopes++;
+      try {
+        return await withToken(source, token, signal, operation, commit);
+      } finally {
+        scopes--;
+      }
+    };
+    const connected = await f.controller.connect({
+      baseUrl: f.baseUrl,
+      token: 't'.repeat(24),
+      expectedRevision: 1,
+    });
+    if (!connected.ok || !connected.value.connectionId) throw new Error('not connected');
+    await vi.waitFor(() => expect(f.streamsOpened()).toBe(1));
+    const session = f.controller.speechSession({ connectionId: connected.value.connectionId });
+    const key: SpeechSegmentKey = {
+      utteranceId: 'utterance',
+      clientId: session.clientId,
+      agentId: session.agentId,
+      serviceEpoch: session.serviceEpoch,
+      utteranceBindingId: 'whole',
+      segmentIndex: 0,
+      requestId: 'request',
+    };
+    const binding = { providerRef: 'pet.tts-magpie/magpie', bindingId: 'binding' };
+    f.speechRoute((request, response) => {
+      if (!request.url?.includes('/segments/0/audio')) return false;
+      gets++;
+      response.writeHead(200, {
+        'content-type': 'application/octet-stream',
+        [SPEECH_AUDIO_HEADER]: JSON.stringify({
+          ...key,
+          ...binding,
+          version: 1,
+          format: SPEECH_FORMAT,
+        }),
+      });
+      response.end(new Uint8Array([1, 0, 2, 0]));
+      return true;
+    });
+    let release = () => {},
+      callbackEntered = false;
+    const drained = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const before = scopes;
+    const consumption = session.consumeAudio(
+      key,
+      binding,
+      new AbortController().signal,
+      async (_header, pcm) => {
+        let bytes = 0;
+        for await (const chunk of pcm) bytes += chunk.byteLength;
+        expect(bytes).toBe(4);
+        callbackEntered = true;
+        await drained;
+      },
+    );
+    await vi.waitFor(() => expect(callbackEntered).toBe(true));
+    expect(scopes).toBe(before + 1);
+    release();
+    expect(await consumption).toEqual({ ok: true, value: null });
+    expect(scopes).toBe(before);
+    expect(gets).toBe(1);
+    await f.controller.disconnect({ connectionId: connected.value.connectionId });
+    expect(
+      await session.consumeAudio(key, binding, new AbortController().signal, async () => {}),
+    ).toMatchObject({ ok: false, error: { code: 'stale-owner' } });
+    expect(gets).toBe(1);
+  });
   it('preserves distinct text/voice command IDs and refuses the seventeenth entry with zero HTTP and no overwrite', async () => {
     const f = await fixture();
     const connected = await f.controller.connect({

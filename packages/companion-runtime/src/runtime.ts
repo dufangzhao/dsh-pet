@@ -51,6 +51,7 @@ const READ_METHODS = new Set([
   'snapshot',
   'memorySnapshot',
   'events',
+  'getMessage',
   'getTask',
   'getTaskByExecution',
   'getArtifact',

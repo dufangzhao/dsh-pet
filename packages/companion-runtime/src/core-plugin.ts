@@ -6,7 +6,7 @@ export const STATE_CAPABILITY = 'companion.state@1';
 export const EXECUTION_CAPABILITY = 'execution.javascript@1';
 export const HARNESS_CAPABILITY = 'companion.harness@1';
 import { MODEL_CONNECTION_CAPABILITY } from './model-connection-types.js';
-import { VOICE_INPUT_CAPABILITY } from '@pet/contracts';
+import { VOICE_INPUT_CAPABILITY, SPEECH_CONTROL_CAPABILITY } from '@pet/contracts';
 
 /** Protected bootstrap only; persona content remains revisioned configuration. */
 export const companionHostManifest: PluginManifest = {
@@ -28,6 +28,7 @@ export const companionHostManifest: PluginManifest = {
     HARNESS_CAPABILITY,
     MODEL_CONNECTION_CAPABILITY,
     VOICE_INPUT_CAPABILITY,
+    SPEECH_CONTROL_CAPABILITY,
   ].map((capability) => ({
     capability,
     optional: true,
@@ -39,6 +40,7 @@ export const companionHostManifest: PluginManifest = {
       HARNESS_CAPABILITY,
       MODEL_CONNECTION_CAPABILITY,
       VOICE_INPUT_CAPABILITY,
+      SPEECH_CONTROL_CAPABILITY,
     ].map((capability) => ({
       kind: 'capability-use' as const,
       capability,

@@ -26,7 +26,9 @@
     "cortico": "0.2.7",
     "tsx": "4.23.15",
     "@pet/asr-magpie": "workspace:*",
-    "@pet/shared-voice": "workspace:*"
+    "@pet/shared-voice": "workspace:*",
+    "@pet/tts-magpie": "workspace:*",
+    "@pet/shared-speech": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

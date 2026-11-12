@@ -9,6 +9,8 @@ for (const name of [
   'model-connection-magpie',
   'asr-magpie',
   'shared-voice',
+  'tts-magpie',
+  'shared-speech',
   'text-client',
 ]) {
   execFileSync(process.execPath, ['build.mjs'], {

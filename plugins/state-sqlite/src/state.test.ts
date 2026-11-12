@@ -163,6 +163,84 @@ describe('SqliteState', () => {
     expect(value(state.snapshot()).messages).toEqual([message]);
   });
 
+  it('reads exact canonical message/event pairs beyond cropped snapshots without writing', () => {
+    const { state, directory } = open();
+    task(state); // Event sequence and messages.sequence intentionally differ.
+    const text = ' \r\n' + '中'.repeat(7993) + '😀\r\n';
+    expect(text.length).toBe(8000);
+    const reply = value(state.appendMessage({ id: 'formal:reply', role: 'assistant', text }));
+    const notice = value(state.appendMessage({ id: 'notice', role: 'notice', text: 'notice' }));
+    const user = value(state.acceptMessage({ commandId: 'user-input', text: 'user' })).message;
+    const before = value(state.snapshot({ messageLimit: 1 }));
+    expect(before.messages).toEqual([user]);
+    expect(before.hasMoreMessages).toBe(true);
+    expect(value(state.getMessage({ id: reply.id, eventSequence: 2 }))).toEqual(reply);
+    // State is role-neutral; TTS admission additionally requires assistant.
+    expect(value(state.getMessage({ id: notice.id, eventSequence: 3 }))).toEqual(notice);
+    expect(value(state.getMessage({ id: user.id, eventSequence: 4 }))).toEqual(user);
+    expect(value(state.snapshot({ messageLimit: 1 }))).toEqual(before);
+    state.close();
+    expect(value(open(directory).state.getMessage({ id: reply.id, eventSequence: 2 }))).toEqual(
+      reply,
+    );
+  });
+
+  it('rejects wrong message/event references and exact-shape boundary violations', () => {
+    const { state } = open();
+    task(state);
+    value(state.appendMessage({ id: 'reply-a', role: 'assistant', text: 'A' }));
+    value(state.appendMessage({ id: 'reply-b', role: 'assistant', text: 'B' }));
+    for (const input of [
+      { id: 'reply-a', eventSequence: 1 }, // Task event, not a message.
+      { id: 'reply-a', eventSequence: 3 }, // Another message's event.
+      { id: 'missing', eventSequence: 2 },
+    ]) {
+      expect(state.getMessage(input)).toEqual({ ok: false, error: makeError('conflict') });
+    }
+    expect(state.getMessage({ id: 'reply-a', eventSequence: 4 })).toEqual({
+      ok: false,
+      error: makeError('unavailable'),
+    });
+    for (const eventSequence of [0, -1, 1.5, '2', Number.MAX_SAFE_INTEGER + 1]) {
+      expect(state.invoke('getMessage', { id: 'reply-a', eventSequence })).toMatchObject({
+        ok: false,
+      });
+    }
+    expect(
+      state.invoke('getMessage', { id: 'reply-a', eventSequence: 2, text: 'injected' }),
+    ).toEqual({
+      ok: false,
+      error: makeError('invalid-input'),
+    });
+    expect(value(state.snapshot()).cursor).toBe(3);
+  });
+
+  it('checks the event role against the canonical message before returning text', () => {
+    const { state, directory } = open();
+    value(state.appendMessage({ id: 'reply', role: 'assistant', text: 'canonical' }));
+    const { epoch } = value(state.snapshot());
+    state.close();
+    const db = new DatabaseSync(join(directory, 'state.sqlite'));
+    try {
+      db.prepare('UPDATE events SET body=? WHERE sequence=1').run(
+        JSON.stringify({
+          id: `${epoch}:1`,
+          epoch,
+          sequence: 1,
+          time: Date.now(),
+          kind: 'message',
+          data: { messageId: 'reply', role: 'user' },
+        }),
+      );
+    } finally {
+      db.close();
+    }
+    expect(open(directory).state.getMessage({ id: 'reply', eventSequence: 1 })).toEqual({
+      ok: false,
+      error: makeError('conflict'),
+    });
+  });
+
   it('pages durable events without skipping, including empty reads after the final cursor', () => {
     const { state } = open();
     for (let index = 0; index < 5; index++)

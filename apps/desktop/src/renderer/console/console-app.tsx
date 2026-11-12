@@ -305,7 +305,14 @@ export function ConsoleApp(): JSX.Element {
           />
         );
       case 'persona':
-        return <PersonaPage companion={companion} presentation={presentation} notify={notify} />;
+        return (
+          <PersonaPage
+            companion={companion}
+            presentation={presentation}
+            notify={notify}
+            onOpenPlugins={() => select('plugins')}
+          />
+        );
       case 'appearance':
         return <AppearancePage presentation={presentation} notify={notify} />;
       case 'permissions':

@@ -19,6 +19,8 @@ import type { CompanionRuntime, CompanionPluginHost } from '@pet/companion-runti
 import type { ModelConnectionController } from './model-controller.js';
 import type { VoiceController } from './voice-controller.js';
 import { voiceHttp } from './voice-http.js';
+import type { SpeechController } from './speech-controller.js';
+import { speechHttp } from './speech-http.js';
 
 const MAX_BODY = 64 * 1024;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
@@ -140,6 +142,7 @@ export interface TextServiceOptions {
   readonly host: CompanionPluginHost;
   readonly models?: ModelConnectionController;
   readonly voice?: VoiceController;
+  readonly speech?: SpeechController;
   readonly token: string;
   readonly hostname?: string;
   readonly port?: number;
@@ -308,6 +311,13 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       host: request.headers.host,
       origin: typeof origin === 'string' ? origin : undefined,
     });
+    if (/^\/api\/speech(?:\/|$)/.test(pathname)) {
+      if (!options.speech) throw new KernelFault('not-ready');
+      if (
+        await speechHttp({ request, response, url, writable, speech: options.speech, body, send })
+      )
+        return;
+    }
     if (pathname.startsWith('/api/voice')) {
       if (!options.voice) throw new KernelFault('not-ready');
       if (await voiceHttp({ request, response, url, writable, voice: options.voice, body, send }))

@@ -7,6 +7,7 @@ import {
   SPEECH_OUTPUT_IPC,
   DESKTOP_COMPANION_IPC,
   DESKTOP_VOICE_IPC,
+  DESKTOP_SPEECH_IPC,
   DESKTOP_PRESENTATION_IPC,
   type PetPrototypeBridge,
   type PetReply,
@@ -30,6 +31,7 @@ import { createSettingsLauncher } from './settings-launcher.js';
 import { createSecurityBridge } from './security-bridge.js';
 import { createHostStatusBridge } from './host-bridge.js';
 import { createDesktopVoiceBridge } from './shared-voice-bridge.js';
+import { createDesktopSpeechBridge } from './shared-speech-bridge.js';
 const cleanup = new Set<() => void>();
 function subscribe<T>(channel: string, listener: (value: T) => void): () => void {
   const receive = (_event: Electron.IpcRendererEvent, value: T) => listener(value);
@@ -77,6 +79,24 @@ contextBridge.exposeInMainWorld(
   createDesktopVoiceBridge(
     (channel, ...args) => ipcRenderer.invoke(channel, ...args),
     (listener) => changed(DESKTOP_VOICE_IPC.changed, listener),
+  ),
+);
+contextBridge.exposeInMainWorld(
+  'petSharedSpeech',
+  createDesktopSpeechBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => changed(DESKTOP_SPEECH_IPC.changed, listener),
+    (listener) => {
+      const receive = (_event: Electron.IpcRendererEvent, event: unknown, payload?: Uint8Array) =>
+        listener(event, payload);
+      ipcRenderer.on(DESKTOP_SPEECH_IPC.audio, receive);
+      const off = () => {
+        ipcRenderer.removeListener(DESKTOP_SPEECH_IPC.audio, receive);
+        cleanup.delete(off);
+      };
+      cleanup.add(off);
+      return off;
+    },
   ),
 );
 contextBridge.exposeInMainWorld(

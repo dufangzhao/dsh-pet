@@ -46,6 +46,8 @@ export * from './desktop-companion.js';
 export * from './audio-capture.js';
 export * from './companion-voice.js';
 export * from './desktop-voice.js';
+export * from './companion-speech.js';
+export * from './desktop-speech.js';
 export type {
   ResponsesConnectionSettings,
   CompanionModelCredentialView,

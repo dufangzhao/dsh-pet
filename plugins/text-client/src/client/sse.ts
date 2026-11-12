@@ -37,6 +37,24 @@ export class SseDecoder {
     return messages;
   }
 
+  /** EOF 可以结束末尾 CR；未闭合事件只报告，不把半帧当消息投递。 */
+  finish(onIncomplete?: (event: string | null) => void): SseMessage[] {
+    const messages = this.#buffer.endsWith('\r') ? this.push('\n') : [];
+    const incomplete =
+      this.#event !== null ||
+      this.#id !== null ||
+      this.#data.length > 0 ||
+      (this.#buffer.length > 0 && !this.#buffer.startsWith(':'));
+    const event = this.#event;
+    this.#buffer = '';
+    this.#event = null;
+    this.#id = null;
+    this.#data = [];
+    this.#size = 0;
+    if (incomplete) onIncomplete?.(event);
+    return messages;
+  }
+
   #line(line: string): SseMessage | null {
     if (line.length > 64 * 1024) throw new Error('SSE line budget exceeded');
     if (line === '') {

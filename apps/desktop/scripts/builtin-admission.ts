@@ -6,11 +6,13 @@ import {
   DESKTOP_COMPANION_PLUGIN_ID,
   DEMO_PLUGIN_IDS,
   SPEECH_OUTPUT_PLUGIN_IDS,
+  SPEECH_FEATURE_PLUGIN_ID,
   VOICE_INPUT_PLUGIN_IDS,
 } from '../../../packages/contracts/src/index.js';
 export async function generateAdmission(workspace: string): Promise<void> {
   const admitted = new Set<string>([
     DESKTOP_COMPANION_PLUGIN_ID,
+    SPEECH_FEATURE_PLUGIN_ID,
     ...Object.values(APPLICATION_PLUGIN_IDS),
     ...Object.values(DEMO_PLUGIN_IDS),
     ...Object.values(SPEECH_OUTPUT_PLUGIN_IDS),

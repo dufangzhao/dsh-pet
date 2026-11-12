@@ -120,7 +120,7 @@ export class SqliteState {
     return this.#run(() => {
       const value = validateInput(method, input);
       return this.#execute(method, value);
-    }, !['snapshot', 'memorySnapshot', 'events', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand'].includes(method));
+    }, !['snapshot', 'memorySnapshot', 'events', 'getMessage', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand'].includes(method));
   }
 
   snapshot(input: StateMethodInputs['snapshot'] = {}): Result<StateMethodOutputs['snapshot']> {
@@ -155,6 +155,9 @@ export class SqliteState {
     input: StateMethodInputs['rememberFact'],
   ): Result<StateMethodOutputs['rememberFact']> {
     return this.invoke('rememberFact', input);
+  }
+  getMessage(input: StateMethodInputs['getMessage']): Result<StateMethodOutputs['getMessage']> {
+    return this.invoke('getMessage', input);
   }
   getTask(input: StateMethodInputs['getTask']): Result<StateMethodOutputs['getTask']> {
     return this.invoke('getTask', input);
@@ -218,6 +221,7 @@ export class SqliteState {
       memorySnapshot: () => this.#memory(),
       rememberFact: (value) => this.#rememberFact(value),
       forgetFact: (value) => this.#mutateMemory(value, true),
+      getMessage: (value) => this.#message(value),
       getTask: (value) => this.#task(value.id),
       getTaskByExecution: (value) =>
         decode<CompanionTask>(
@@ -255,6 +259,25 @@ export class SqliteState {
     this.#db
       .prepare('INSERT INTO events(sequence,body) VALUES(?,?)')
       .run(sequence, JSON.stringify(event));
+  }
+
+  #message(input: StateMethodInputs['getMessage']): CompanionMessage {
+    const event = decode<CompanionEvent>(
+      this.#db.prepare('SELECT body FROM events WHERE sequence=?').get(input.eventSequence),
+    );
+    if (
+      event.sequence !== input.eventSequence ||
+      event.epoch !== this.#epoch ||
+      event.kind !== 'message' ||
+      event.data['messageId'] !== input.id
+    )
+      throw new StateFailure('conflict');
+    const message = decode<CompanionMessage>(
+      this.#db.prepare('SELECT body FROM messages WHERE id=?').get(input.id),
+    );
+    if (message.id !== input.id || event.data['role'] !== message.role)
+      throw new StateFailure('conflict');
+    return message;
   }
 
   #task(id: string): CompanionTask {
