@@ -8,9 +8,9 @@
 
 现有入口的真实分布：
 
-- **桌面 Console** 有插件页（真 enable/disable + 重试）与 Schema 驱动的配置页（CAS + dirty 拦截）。但它的 `runPluginAction`/`inspectConfig`/`saveConfig` 作用在**本机 `activeHost`**（[index.ts:445-463](../../../../apps/desktop/src/main/index.ts#L445-L463)），管的是本机 sources，**管不到服务端 QQ 模块**。它的**交互范式**可复用，权限边界不可直接沿用。
-- **服务 Web** 有对话、任务、语音、模型、人格记忆，且**已经在写服务端配置**（`saveModel`/`writeModelCredential`/`saveVoiceSettings`/`saveProfile`，[client.ts:265-390](../../../../plugins/text-client/src/client/client.ts#L265-L390)）。它没有插件管理 UI，但"Web 不能管"不是所有权结论——配置唯一写入权始终在服务端 Config/CAS，两个 UI 不等于两个 owner。
-- **服务端**只有 `GET /api/plugins` 与 `POST /api/plugins/{id}`（[server.ts:355](../../../../apps/companion-service/src/server.ts#L355)、[:453](../../../../apps/companion-service/src/server.ts#L453)），**没有 QQ 配置的读取/保存路由**。这是真正的通道缺口。
+- **桌面 Console** 有插件页（真 enable/disable + 重试）与 Schema 驱动的配置页（CAS + dirty 拦截）。但它的 `runPluginAction`/`inspectConfig`/`saveConfig` 作用在**本机 `activeHost`**（[index.ts:445-463](../../../../../../apps/desktop/src/main/index.ts#L445-L463)），管的是本机 sources，**管不到服务端 QQ 模块**。它的**交互范式**可复用，权限边界不可直接沿用。
+- **服务 Web** 有对话、任务、语音、模型、人格记忆，且**已经在写服务端配置**（`saveModel`/`writeModelCredential`/`saveVoiceSettings`/`saveProfile`，[client.ts:265-390](../../../../../../plugins/text-client/src/client/client.ts#L265-L390)）。它没有插件管理 UI，但"Web 不能管"不是所有权结论——配置唯一写入权始终在服务端 Config/CAS，两个 UI 不等于两个 owner。
+- **服务端**只有 `GET /api/plugins` 与 `POST /api/plugins/{id}`（[server.ts:355](../../../../../../apps/companion-service/src/server.ts#L355)、[:453](../../../../../../apps/companion-service/src/server.ts#L453)），**没有 QQ 配置的读取/保存路由**。这是真正的通道缺口。
 
 **管理入口已由 Q14 定案：服务 Web 是完整管理面，桌面只显示状态与打开 Web 的入口。** 所以本文不再给候选，具体界面规划见 [Web 主管理界面规划](ui-plan.md)。不受选择影响的一条仍然成立：**普通 QQ 成员永远看不到管理面**。
 
@@ -18,12 +18,12 @@
 
 | 现有物 | 位置 | 可复用什么 | 不能复用什么 |
 | --- | --- | --- | --- |
-| 插件页 | [plugins.tsx:163](../../../../apps/desktop/src/renderer/console/pages/plugins.tsx#L163) | 真 `enable/disable`、`busy`、失败重试、`desiredActive` 与 `state` 分开显示 | 它按"一个插件一个开关"设计，装不下"一个模块两协议 + 四个策略域" |
-| 插件配置页 | [plugin-config.tsx:24](../../../../apps/desktop/src/renderer/console/pages/plugin-config.tsx#L24) | **Schema 驱动**、`dirty` 拦截切页、冲突处理、错误摘要聚焦 | 它是扁平字段表单，装不下名单列表、概率、模型选择这类结构化编辑 |
-| 声音卡 | [shared-speech-settings.tsx](../../../../apps/desktop/src/renderer/console/minimal-ui/shared-speech-settings.tsx) | "本机/远端两个 source 分两行说清"的呈现范式 | — |
-| 语音输入卡 | [voice-card.tsx](../../../../apps/desktop/src/renderer/console/pages/voice-card.tsx) | 提供者/就绪/原因三段式、独立保存域 | — |
-| 模型连接 | [model.tsx](../../../../plugins/text-client/src/client/model.tsx) | 凭证可写性、连接测试、已保存≠已应用 | 不要把 QQ 账号塞进模型连接 |
-| ui-kit 控件 | [controls.tsx](../../../../apps/desktop/src/renderer/console/minimal-ui/controls.tsx) | `Button/Card/Field/Select/Switch/Status` 已够用 | — |
+| 插件页 | [plugins.tsx:163](../../../../../../apps/desktop/src/renderer/console/pages/plugins.tsx#L163) | 真 `enable/disable`、`busy`、失败重试、`desiredActive` 与 `state` 分开显示 | 它按"一个插件一个开关"设计，装不下"一个模块两协议 + 四个策略域" |
+| 插件配置页 | [plugin-config.tsx:24](../../../../../../apps/desktop/src/renderer/console/pages/plugin-config.tsx#L24) | **Schema 驱动**、`dirty` 拦截切页、冲突处理、错误摘要聚焦 | 它是扁平字段表单，装不下名单列表、概率、模型选择这类结构化编辑 |
+| 声音卡 | [shared-speech-settings.tsx](../../../../../../apps/desktop/src/renderer/console/minimal-ui/shared-speech-settings.tsx) | "本机/远端两个 source 分两行说清"的呈现范式 | — |
+| 语音输入卡 | [voice-card.tsx](../../../../../../apps/desktop/src/renderer/console/pages/voice-card.tsx) | 提供者/就绪/原因三段式、独立保存域 | — |
+| 模型连接 | [model.tsx](../../../../../../plugins/text-client/src/client/model.tsx) | 凭证可写性、连接测试、已保存≠已应用 | 不要把 QQ 账号塞进模型连接 |
+| ui-kit 控件 | [controls.tsx](../../../../../../apps/desktop/src/renderer/console/minimal-ui/controls.tsx) | `Button/Card/Field/Select/Switch/Status` 已够用 | — |
 
 **结论：不需要新控件体系。** 需要的是一个新的组合方式：一个模块卡 + 若干子域 + 一个名单编辑器。
 
@@ -95,15 +95,15 @@ QQ 接入                                  [状态: 已连接 / 未配置 / 已�
 
 ### 桌面 Console（只显示状态 + 打开 Web 入口）
 
-Q14 已定桌面不做管理面。桌面插件页今天管的是**本机 `activeHost`**（[index.ts:445-463](../../../../apps/desktop/src/main/index.ts#L445-L463)），本来就管不到服务端 QQ，所以这不是削减，是与它的实际边界一致。
+Q14 已定桌面不做管理面。桌面插件页今天管的是**本机 `activeHost`**（[index.ts:445-463](../../../../../../apps/desktop/src/main/index.ts#L445-L463)），本来就管不到服务端 QQ，所以这不是削减，是与它的实际边界一致。
 
 桌面只做两件事：显示 QQ 连接状态、提供一个打开服务 Web 管理页的入口。**入口不得携带 owner token**——现有令牌生命周期是"这次连接"，明确不写 URL、不写 web storage。
 
 ### 服务 Web（完整管理面）
 
-Q14 已定。Web 今天已在写服务端配置（`saveModel`/`writeModelCredential`/`saveVoiceSettings`/`saveProfile`，[client.ts:265-390](../../../../plugins/text-client/src/client/client.ts#L265-L390)），所以"Web 管理"不是新的所有权模型。
+Q14 已定。Web 今天已在写服务端配置（`saveModel`/`writeModelCredential`/`saveVoiceSettings`/`saveProfile`，[client.ts:265-390](../../../../../../plugins/text-client/src/client/client.ts#L265-L390)），所以"Web 管理"不是新的所有权模型。
 
-真正的缺口是**服务端没有 QQ 配置路由**（只有 `GET /api/plugins` 与 `POST /api/plugins/{id}`，[server.ts:355](../../../../apps/companion-service/src/server.ts#L355)、[:453](../../../../apps/companion-service/src/server.ts#L453)），以及 `CompanionPluginView` 字段不足。这是通道缺口，归 GPT。
+真正的缺口是**服务端没有 QQ 配置路由**（只有 `GET /api/plugins` 与 `POST /api/plugins/{id}`，[server.ts:355](../../../../../../apps/companion-service/src/server.ts#L355)、[:453](../../../../../../apps/companion-service/src/server.ts#L453)），以及 `CompanionPluginView` 字段不足。这是通道缺口，归 GPT。
 
 具体分区、控件复用、状态落点见 [Web 主管理界面规划](ui-plan.md)。
 

@@ -4,9 +4,9 @@ Executed 2026-11-13, Asia/Shanghai. **The scoped SDK/permit gate passed.** This 
 
 ## Changes owned by this slice
 
-- [model-permit.ts](../../../../plugins/harness-cortico/src/model-permit.ts): one FIFO native-model permit; `run(signal, operation)` parks before entering the operation. Queued cancellation removes only that waiter. An active caller's abort does not release the permit before the operation actually settles. Native values/errors retain identity. The caller remains responsible for joining any native/credential work before its operation promise settles.
-- [permit tests](../../../../plugins/harness-cortico/tests/model-permit.test.mjs): FIFO order, active cancellation versus physical settlement, cancelled parked waiter/no borrow, already-aborted and grant/abort race, error identity and subsequent progress.
-- [proof](../../../../qa/probes/companion-qq-context-proof.mjs) and [isolated fixture](../../../../qa/fixtures/companion-qq-context-proof/runtime.mjs): real Cortico Core, native Session/event files, TaskSupervisor and CredentialBroker. Provider responses, credential authorization and independent work bodies are synthetic and explicitly controlled.
+- [model-permit.ts](../../../../../../plugins/harness-cortico/src/model-permit.ts): one FIFO native-model permit; `run(signal, operation)` parks before entering the operation. Queued cancellation removes only that waiter. An active caller's abort does not release the permit before the operation actually settles. Native values/errors retain identity. The caller remains responsible for joining any native/credential work before its operation promise settles.
+- [permit tests](../../../../../../plugins/harness-cortico/tests/model-permit.test.mjs): FIFO order, active cancellation versus physical settlement, cancelled parked waiter/no borrow, already-aborted and grant/abort race, error identity and subsequent progress.
+- [proof](../../../../../../qa/probes/companion-qq-context-proof.mjs) and [isolated fixture](../../../../../../qa/fixtures/companion-qq-context-proof/runtime.mjs): real Cortico Core, native Session/event files, TaskSupervisor and CredentialBroker. Provider responses, credential authorization and independent work bodies are synthetic and explicitly controlled.
 
 No main Harness index, existing Harness facade or runtime wiring was edited. No public origin/material/QQ contract, model-connection source or existing data was edited by this slice. No commit/push, account login, QQ message, real model, Docker job, desktop device or HTTP service was used.
 
@@ -24,7 +24,7 @@ node node_modules/prettier/bin/prettier.cjs --ignore-path /dev/null --check plug
 
 Unit result: **4 tests, 4 passed, 0 failed/skipped**. Package typecheck, scoped source/test lint and all four files' formatting passed. No full workspace or native/UI acceptance was started; Parent owns those gates.
 
-The final proof ran at `2026-11-12T20:59:25.268Z` (2026-11-13 04:59:25 Asia/Shanghai), on Node26.13.0. Its raw generated [report](/tmp/companion-qq-context-proof-AV93AJ/report.json), [ordered trace](/tmp/companion-qq-context-proof-AV93AJ/trace.json) and native context directories remain in that fresh temporary root. The checked-in task JSON preserves the result/source hashes; raw local files are not claimed to be permanent remote artifacts.
+The final proof ran at `2026-11-12T20:59:25.268Z` (2026-11-13 04:59:25 Asia/Shanghai), on Node26.13.0. Its raw generated [report](../../../../../../../../../../tmp/companion-qq-context-proof-AV93AJ/report.json), [ordered trace](../../../../../../../../../../tmp/companion-qq-context-proof-AV93AJ/trace.json) and native context directories remain in that fresh temporary root. The checked-in task JSON preserves the result/source hashes; raw local files are not claimed to be permanent remote artifacts.
 
 ## Actual assertions and outcomes
 

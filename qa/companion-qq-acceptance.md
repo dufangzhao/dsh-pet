@@ -1,8 +1,8 @@
 # M6 QQ controlled acceptance
 
-2026-11-13, Linux amd64, Node26.13.0, pnpm11.24.0. Branch `feat/qq-platform-entry`, based on M5 `b706007`; M6 is still an uncommitted working tree. The original4120 service/data/token were not started, read for credentials or migrated by these checks.
+2026-11-13, Linux amd64, Node26.13.0, pnpm11.24.0. Branch `feat/qq-platform-entry`, based on M5 `b706007`. Approved work commits: `f2aa4d1` (scoped runtime/State), `85f4457` (QQ protocols/media/delivery), `ee1045e` (clients), `f6333e3` (evidence/guidance). The original4120 service/data/token were not started, read for credentials or migrated by these checks.
 
-**Status: controlled implementation, all workspace quality stages, Web interactions, actual container recovery and the serial production Electron subset passed. Local commit/archive approval is the remaining workflow step.** These results are not real QQ account verification. This record will hold the final result rather than summing repeated focused runs.
+**Status: controlled implementation, all workspace quality stages, Web interactions, actual container recovery and the serial production Electron subset passed. The user approved the local work commits and Trellis archive/journal; no remote push is included.** These results are not real QQ account verification. This record will hold the final result rather than summing repeated focused runs.
 
 ## Verification levels
 
@@ -64,6 +64,6 @@ The stages of `pnpm check` were run across the complete workspace, with final fa
 
 Native verification used actual Electron45 Main/preload/two file windows with a fresh scripted service. Both surfaces read its actual QQ status. The real UI opener passed through the frozen facade/IPC/Main to a process-local `shell.openExternal` spy; extra URL fields, an untrusted exact frame and old connection IDs were refused. A new connection's click used the new target. All149 frozen inputs matched before/after and a separate current-file rehash. Electron/service/Xvfb were joined; the owned profile/home/data directories were identity-verified and removed. The report records `--no-sandbox` and makes neither an OS browser launch nor OS sandbox claim.
 
-Final task context/link validation and the concrete commit plan are recorded with the task. Archive and journal follow the one-shot work-commit approval; no M6 commit or push has been made yet.
+Final task context/link validation and the concrete approved commit plan are retained in the archived task. The Trellis journal references the four work commits above; archive/journal commits are separate bookkeeping. No remote push or real-account trial was performed.
 
 Exact platform account permission, deployed protocol version, public-network deployment and actual QQ media display/listening remain separate evidence. They are not silently substituted by these controlled results.

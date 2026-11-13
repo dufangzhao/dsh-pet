@@ -12,10 +12,10 @@
 {"file": ".trellis/spec/frontend/qq-management.md", "reason": "Verify actual two-CAS/secret/owner regression cases and whole Web/Desktop interactions, not only fields or static test counts."}
 {"file": ".trellis/spec/frontend/model-settings.md", "reason": "Verify: Saved versus applied, captured draft/CAS, private credential writability and one config owner."}
 {"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Verify: Cross-check storage/runtime/Harness/native/UI data and authority semantics."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/runtime-entry.md", "reason": "Verify: Source-backed actor/audience/full origin/task/delivery gaps and existing authority ports."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/runtime-media.md", "reason": "Verify: Actual image capability, missing resolver/input, M4/M5 reuse and binary artifact/judge-purpose gaps."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/astrbot-qq.md", "reason": "Verify: Pinned adapter and actor/context/permission evidence; no AGPL copying or lossy send/fallback inheritance."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/protocol-test-plan.md", "reason": "Verify: Protocol/media/receipt distinctions, SDK versus handler facts and per-platform test cells; deployment remains unverified."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/ui-plan.md", "reason": "Verify: Selected Web management/Desktop status and all configured behavior with mandatory text/additive voice."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/architecture-proposal.md", "reason": "Verify: SDK facts and candidate comparison only; final design supersedes destructive re-plan and one-work-per-input candidate."}
-{"file": ".trellis/tasks/11-12-qq-platform-entry/research/codec-options.md", "reason": "Verify: Pinned codec API/resource facts; metadata is not an executed codec/platform test."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/runtime-entry.md", "reason": "Verify: Source-backed actor/audience/full origin/task/delivery gaps and existing authority ports."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/runtime-media.md", "reason": "Verify: Actual image capability, missing resolver/input, M4/M5 reuse and binary artifact/judge-purpose gaps."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/astrbot-qq.md", "reason": "Verify: Pinned adapter and actor/context/permission evidence; no AGPL copying or lossy send/fallback inheritance."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/protocol-test-plan.md", "reason": "Verify: Protocol/media/receipt distinctions, SDK versus handler facts and per-platform test cells; deployment remains unverified."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/ui-plan.md", "reason": "Verify: Selected Web management/Desktop status and all configured behavior with mandatory text/additive voice."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/architecture-proposal.md", "reason": "Verify: SDK facts and candidate comparison only; final design supersedes destructive re-plan and one-work-per-input candidate."}
+{"file": ".trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/codec-options.md", "reason": "Verify: Pinned codec API/resource facts; metadata is not an executed codec/platform test."}

@@ -1,6 +1,6 @@
 # Pluggable QQ platform entry
 
-Status: implementation approved by the user2026-11-13 and task activated. The reviewed scope below is authorized; real account connections, message sends and paid-model trials still require their separately specified scope. [Parent roadmap](../11-06-unified-companion-architecture/prd.md) owns the continuing-Agent goal; [M5](../archive/2026-11/11-11-shared-speech-output/prd.md) is completed and its one-shot live TTS authorization is consumed.
+Status: implementation approved by the user2026-11-13 and task activated. The reviewed scope below is authorized; real account connections, message sends and paid-model trials still require their separately specified scope. [Parent roadmap](../../../11-06-unified-companion-architecture/prd.md) owns the continuing-Agent goal; [M5](../11-11-shared-speech-output/prd.md) is completed and its one-shot live TTS authorization is consumed.
 
 ## Goal and value
 

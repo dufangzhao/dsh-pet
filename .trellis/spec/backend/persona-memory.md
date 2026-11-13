@@ -120,7 +120,7 @@ Fixed KernelError/HTTP mapping applies to public/runtime/state boundaries; nativ
 - [Protocol tests](../../../plugins/text-client/tests/management.test.mjs) validate metadata/receipts/foreign identity and otherwise-valid invalid IDs; UUID/unavailable sentinel positives stay valid. [Main tests](../../../apps/desktop/src/main/companion-client-controller.test.ts) enforce frozen facade/current frame and console-only form writes.
 - [Harness tests](../../../plugins/harness-cortico/tests/harness.test.mjs) retain real Core/effect/cancellation/native-error behavior. Pure UI/form tests and component DOM checks do not establish service/Main E2E.
 
-Historical M1 controlled regressions do not establish current M6 completion, paid-model behavior or all-language semantics. Current scoped migration/context/media/platform results and remaining gates live in [M6 progress/evidence](../../tasks/11-12-qq-platform-entry/progress.md); production and real-platform acceptance are separate.
+Historical M1 controlled regressions do not establish current M6 completion, paid-model behavior or all-language semantics. Current scoped migration/context/media/platform results and remaining gates live in [M6 progress/evidence](../../tasks/archive/2026-11/11-12-qq-platform-entry/progress.md); production and real-platform acceptance are separate.
 
 ## 7. Wrong vs correct
 

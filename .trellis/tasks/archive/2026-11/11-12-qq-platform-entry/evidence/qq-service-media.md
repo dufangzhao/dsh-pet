@@ -2,7 +2,7 @@
 
 Executed2026-11-13 at12:37:48 Asia/Shanghai after ingress handoff freeze. **4/4 cases passed**, tests26.185s / runner27.05s. Service package typecheck, owned-file ESLint/Prettier and scoped diff whitespace checks passed.
 
-Only [qq-service-media.test.ts](../../../../apps/companion-service/src/qq-service-media.test.ts) and its dedicated [fixture](../../../../apps/companion-service/src/qq-service-media-fixture.ts) were authored. Product code and other tests were not changed.
+Only [qq-service-media.test.ts](../../../../../../apps/companion-service/src/qq-service-media.test.ts) and its dedicated [fixture](../../../../../../apps/companion-service/src/qq-service-media-fixture.ts) were authored. Product code and other tests were not changed.
 
 ## Actual scope
 

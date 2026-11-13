@@ -5,7 +5,7 @@ These fixtures are synthetic and contain no real accounts, credentials, messages
 - [official-group-at.json](./official-group-at.json) covers QQ's stripped mention, distinct event/message/reference IDs, private attachment references, voice metadata and nested quoted content. The synthetic auth token is a canary that must not appear in the decoded projection.
 - [onebot-group.json](./onebot-group.json) covers array segments, signed message IDs, opaque quote IDs, mixed media and an untrusted group role. It does not establish a product principal or administrator.
 
-Sources and provenance are maintained in [the task's protocol research](../../../../.trellis/tasks/11-12-qq-platform-entry/research/protocol-test-plan.md) and [media research](../../../../.trellis/tasks/11-12-qq-platform-entry/research/qq-media.md). No upstream implementation was copied. SnowLuma shapes refer to the documented archive, not the user's installed version.
+Sources and provenance are maintained in [the task's protocol research](../../../../.trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/protocol-test-plan.md) and [media research](../../../../.trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/qq-media.md). No upstream implementation was copied. SnowLuma shapes refer to the documented archive, not the user's installed version.
 
 ## Executed verification
 

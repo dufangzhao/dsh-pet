@@ -2,7 +2,7 @@
 
 日期：2026-11-12。状态：**研究与测试计划，所有测试均未执行，真实平台联调未授权**。本轮仅新增本文；没有产品修改、安装、运行、连接真实端点、登录、消息发送、模型调用或其他 agent。本轮 2 个成功 Anysearch search 子查询已全部评分。
 
-需求基准为 [当前 PRD](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/tasks/11-12-qq-platform-entry/prd.md>) Q1–Q16：官方 QQ WS 与 OneBot v11 同属首版；多人私聊白名单及指定群；受限成员工具与自己的任务；按人/群隔离并共享显式公开 facts；规则/概率或 Magpie 模型 judge 可配置；文本、图片、语音、文件均纳入；**每次回复保留文字，语音仅为可选附加输出；长期 facts 的创建/修改/删除/公开仅 owner/显式管理员可做；Web 完整管理，Desktop 仅状态与入口。**
+需求基准为 [当前 PRD](<../prd.md>) Q1–Q16：官方 QQ WS 与 OneBot v11 同属首版；多人私聊白名单及指定群；受限成员工具与自己的任务；按人/群隔离并共享显式公开 facts；规则/概率或 Magpie 模型 judge 可配置；文本、图片、语音、文件均纳入；**每次回复保留文字，语音仅为可选附加输出；长期 facts 的创建/修改/删除/公开仅 owner/显式管理员可做；Web 完整管理，Desktop 仅状态与入口。**
 
 “文字必有”是产品内容与发送计划约束，不是网络失败时仍能保证用户收到：文字生成、持久保留、发送尝试、平台接受、用户收取须分别记事实。语音失败不能删除、撤回或重发已经成功的文字；任何媒体或长回复部分成功不能整体重发。
 
@@ -10,8 +10,8 @@
 
 | 来源 | 可用于什么 | 不能推出什么 |
 | --- | --- | --- |
-| [既有 AstrBot 研究](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/tasks/11-12-qq-platform-entry/research/astrbot-qq.md>)；源码 pin `2c3ee62b15eb0d329f608481002bed5fc45e84e7` | adapter入口、字段、旧实现缺陷、权限/会话参考 | 本项目应复制框架或 AGPL 实现；参考成功即本项目通过。 |
-| [媒体矩阵](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/tasks/11-12-qq-platform-entry/research/qq-media.md>)；QQ当前官方文档 | 官方C2C/群的字段、上传步骤、配额、已知冲突 | 账号权限、所有客户端格式、真实收取/播放已验证。 |
+| [既有 AstrBot 研究](<astrbot-qq.md>)；源码 pin `2c3ee62b15eb0d329f608481002bed5fc45e84e7` | adapter入口、字段、旧实现缺陷、权限/会话参考 | 本项目应复制框架或 AGPL 实现；参考成功即本项目通过。 |
+| [媒体矩阵](<qq-media.md>)；QQ当前官方文档 | 官方C2C/群的字段、上传步骤、配额、已知冲突 | 账号权限、所有客户端格式、真实收取/播放已验证。 |
 | [OneBot v11 原始规范][ob-root]，pin `d4456ee706f9ada9c2dfde56a2bcfc69752600e4` | 基础消息/鉴权/action/echo语义 | 所有实现支持同一文件扩展、相同限额或可靠历史补发。 |
 | 用户报告“现有 AstrBot 据说接 SnowLuma” | 优先兼容目标线索 | 已安装版本、端点、token、运行状态；也不是读取私有配置或连接许可。 |
 | [SnowLuma 第三方存档][sl-root]，tag名 v2.3.4，镜像commit `62bb85d2a1c186dc7e40c63a3ffc06be46f7d325` | 本轮可读的 SDK README、公开类型、action名称与反向WS说明，用于提出兼容测试 | 原作者仓库真实性/字节等同、用户实际安装版本、原生运行兼容。不能将archive tag填入installedVersion。 |

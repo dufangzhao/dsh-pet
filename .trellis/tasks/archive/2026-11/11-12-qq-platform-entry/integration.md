@@ -1,6 +1,6 @@
 # QQ integration handoff
 
-Implementation coordination. Product/design remain in the approved artifacts; current verification is recorded in [progress](progress.md). Public schemas/types are maintained only in [contracts](../../../packages/contracts/src/companion-qq.ts). The service now installs these HTTP/private seams; remaining whole-product checks are not implied by this wiring map.
+Implementation coordination. Product/design remain in the approved artifacts; current verification is recorded in [progress](progress.md). Public schemas/types are maintained only in [contracts](../../../../../packages/contracts/src/companion-qq.ts). The service now installs these HTTP/private seams; remaining whole-product checks are not implied by this wiring map.
 
 ## Owner HTTP routes
 

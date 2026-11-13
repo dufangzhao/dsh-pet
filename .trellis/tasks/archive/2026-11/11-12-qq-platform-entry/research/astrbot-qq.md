@@ -153,7 +153,7 @@ SDK 亦有影响：[botpy `_handle_response`][botpy-http] 将 HTTP 200/202/204 �
 
 ## 7. 对照本项目：复用什么、重做什么
 
-本项目证据：[companion service contracts](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/spec/backend/companion-service.md>)、[model connection contracts](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/spec/backend/model-connections.md>)、[CompanionPluginHost](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime/src/plugin-host.ts#L282>)、[withSourceAuthority](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/companion-runtime/src/source-authority.ts#L6>)、[消息契约](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/packages/contracts/src/companion.ts#L49>)。
+本项目证据：[companion service contracts](<../../../../../spec/backend/companion-service.md>)、[model connection contracts](<../../../../../spec/backend/model-connections.md>)、[CompanionPluginHost](<../../../../../../packages/companion-runtime/src/plugin-host.ts#L282>)、[withSourceAuthority](<../../../../../../packages/companion-runtime/src/source-authority.ts#L6>)、[消息契约](<../../../../../../packages/contracts/src/companion.ts#L49>)。
 
 | 可借鉴的机制 | 本项目必须自己的实现与边界 |
 | --- | --- |
@@ -174,7 +174,7 @@ SDK 亦有影响：[botpy `_handle_response`][botpy-http] 将 HTTP 200/202/204 �
 
 ## 8. License 与研究限度
 
-AstrBot [LICENSE][license] 和 [pyproject][pyproject] 明确 **AGPL-3.0-or-later**，不仅是笼统“开源”。本项目 [LICENSE](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/LICENSE>) 是 MIT。直接移植或翻译 AstrBot 的受保护实现不能假定仍可只按 MIT 发布；AGPL 第 5/13 条涉及修改作品的分发与远程交互源代码义务。本轮建议记录协议事实和设计经验，按公开 QQ/OneBot 接口与本项目契约独立实现，不复制整个框架或适配器。
+AstrBot [LICENSE][license] 和 [pyproject][pyproject] 明确 **AGPL-3.0-or-later**，不仅是笼统“开源”。本项目 [LICENSE](<../../../../../../LICENSE>) 是 MIT。直接移植或翻译 AstrBot 的受保护实现不能假定仍可只按 MIT 发布；AGPL 第 5/13 条涉及修改作品的分发与远程交互源代码义务。本轮建议记录协议事实和设计经验，按公开 QQ/OneBot 接口与本项目契约独立实现，不复制整个框架或适配器。
 
 所核 [qq-botpy LICENSE][botpy-license] 与 [aiocqhttp LICENSE][aiocqhttp-license] 为 MIT，但这是各自上游代码的许可，不会消除 AstrBot adapter 的 AGPL；也不自动构成选用 Python SDK 或某个 Node SDK 的决定。未审计 NapCat 等具体 OneBot 实现的部署、账号权限或许可证。
 

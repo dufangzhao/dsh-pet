@@ -1,7 +1,7 @@
 {
   "version": 1,
   "task": "11-12-qq-platform-entry",
-  "status": "approved-for-local-commit-and-archive",
+  "status": "work-commits-completed",
   "branch": "feat/qq-platform-entry",
   "baseCommit": "b70600779c7f829b462fd1e02e06f00d89c6b61c",
   "groups": [
@@ -622,5 +622,24 @@
     "selected": "按清单提交并归档 (Recommended)",
     "at": "2026-11-13T15:07:51+08:00",
     "remotePush": false
-  }
+  },
+  "workCommits": [
+    {
+      "hash": "f2aa4d1cf61567b17568512ae26f3a0f79d1527c",
+      "message": "feat(runtime): isolate input contexts and scope durable state"
+    },
+    {
+      "hash": "85f4457a9f84b773721a3ac5b5f355fa1e0bc0d5",
+      "message": "feat(qq): add protocol plugins and supervised media delivery"
+    },
+    {
+      "hash": "ee1045e9e1d38738790ffd4c4abca68e2eec74fc",
+      "message": "feat(clients): add QQ management and scoped material views"
+    },
+    {
+      "hash": "f6333e3cb72e48d888d8a69e3adfecbe63d0d79b",
+      "message": "test(qq): record acceptance and operator guidance"
+    }
+  ],
+  "fileHashesDescribe": "Approved pre-commit snapshot; later task archival rebasing and bookkeeping are excluded."
 }

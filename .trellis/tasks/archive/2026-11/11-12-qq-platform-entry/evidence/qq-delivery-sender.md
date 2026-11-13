@@ -4,9 +4,9 @@
 
 ## Owned code
 
-- [qq-delivery.ts](../../../../apps/companion-service/src/qq-delivery.ts): supervised terminal delivery, private transport contract, actual State claim/update, per-route/reference ordering, grant/connection cancellation and additive voice gate.
-- [qq-delivery-plan.ts](../../../../apps/companion-service/src/qq-delivery-plan.ts): stable IDs, Unicode/CRLF-preserving inline splitting, full-origin union and required image/file/text attachment planning.
-- [qq-delivery.test.ts](../../../../apps/companion-service/src/qq-delivery.test.ts): real Host/TaskSupervisor/State/material store with controlled transport and trusted audio-port fixtures.
+- [qq-delivery.ts](../../../../../../apps/companion-service/src/qq-delivery.ts): supervised terminal delivery, private transport contract, actual State claim/update, per-route/reference ordering, grant/connection cancellation and additive voice gate.
+- [qq-delivery-plan.ts](../../../../../../apps/companion-service/src/qq-delivery-plan.ts): stable IDs, Unicode/CRLF-preserving inline splitting, full-origin union and required image/file/text attachment planning.
+- [qq-delivery.test.ts](../../../../../../apps/companion-service/src/qq-delivery.test.ts): real Host/TaskSupervisor/State/material store with controlled transport and trusted audio-port fixtures.
 
 No runtime, State, contracts, ingress, actual native adapter, source manifest or lockfile was changed by this slice. No real QQ/model/codec operation or original4120 data was used. Native adapter and real codec correctness are separate gates; the positive audio fixture tests sender ordering and reference/byte handling, not SILK encoding.
 

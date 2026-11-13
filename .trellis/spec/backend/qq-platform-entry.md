@@ -4,7 +4,7 @@
 
 Use for official production QQ WebSocket or authenticated OneBot v11 reverse-Universal entry, participant policy, scoped State/Core/work, materials, judgment, delivery, or personal-surface integration. These ordinary plugins share the existing Agent, selected Harness, kernel and SQL writer; an account/group/context is not another Agent or a second bot runtime.
 
-This is the canonical M6 code-spec. Reuse [service](companion-service.md), [model](model-connections.md), [memory](persona-memory.md), [ASR](shared-voice-input.md), [TTS](shared-speech-output.md) and [Desktop](desktop-companion.md) contracts for unchanged mechanisms. Executed scope and outstanding integration belong to [task progress](../../tasks/11-12-qq-platform-entry/progress.md#implemented-gates--2026-11-13) and its linked evidence, not to a declaration of whole-product or real-QQ acceptance here.
+This is the canonical M6 code-spec. Reuse [service](companion-service.md), [model](model-connections.md), [memory](persona-memory.md), [ASR](shared-voice-input.md), [TTS](shared-speech-output.md) and [Desktop](desktop-companion.md) contracts for unchanged mechanisms. Executed scope and outstanding integration belong to [task progress](../../tasks/archive/2026-11/11-12-qq-platform-entry/progress.md#implemented-gates--2026-11-13) and its linked evidence, not to a declaration of whole-product or real-QQ acceptance here.
 
 ## 2. Signatures
 
@@ -98,7 +98,7 @@ Reuse existing KernelError and native Result layers. Exact source/request error 
 | Source-backed gate | Assertion points |
 | --- | --- |
 | [State format3](../../../plugins/state-sqlite/src/format-three.test.ts), [migration](../../../apps/companion-service/src/migrate.test.ts) | Scoped filtering before limits, old IDs/fingerprints/retries preserved, one writer/verified backup/rollback, no historical effects |
-| [Runtime inputs](../../../packages/companion-runtime/src/runtime-inputs.test.ts), [Harness tests](../../../plugins/harness-cortico/tests/harness.test.mjs), [real SDK proof](../../tasks/11-12-qq-platform-entry/evidence/phase0-context-proof.md) | Input-owned Core/tail, cancelled parked permit makes zero model calls, lazy admission/real join, multiple work effects, policy handoff and work reader after input retirement |
+| [Runtime inputs](../../../packages/companion-runtime/src/runtime-inputs.test.ts), [Harness tests](../../../plugins/harness-cortico/tests/harness.test.mjs), [real SDK proof](../../tasks/archive/2026-11/11-12-qq-platform-entry/evidence/phase0-context-proof.md) | Input-owned Core/tail, cancelled parked permit makes zero model calls, lazy admission/real join, multiple work effects, policy handoff and work reader after input retirement |
 | [Policy](../../../apps/companion-service/src/qq-policy.test.ts), [controller races](../../../apps/companion-service/src/qq-controller-race.test.ts), [ingress/service](../../../apps/companion-service/src/qq-service.test.ts) | Empty lists, exact actor/aliases, no role promotion, immediate parallel/sticky revoke, real frame→State→Core→frozen output and zero duplicate dispatch |
 | [Model bindings](../../../packages/companion-runtime/src/model-connections.test.ts), [judge](../../../apps/companion-service/src/qq-judge.test.ts) | Independent simultaneous purposes/config/key retirement, no primary switch, durable budget/event dedup, no tools/private facts, true usage/unknown outcomes |
 | [Material store](../../../apps/companion-service/src/material-store.test.ts), [transfer](../../../apps/companion-service/src/qq-media-transfer.test.ts) | Actual image/full-text bytes, ACL/hash/path/inode, current material/quoted-note separation, exact observation/resource lookup, no repeated ready-material download |
@@ -107,7 +107,7 @@ Reuse existing KernelError and native Result layers. Exact source/request error 
 | [QQ audio](../../../apps/companion-service/src/qq-audio.test.ts), [codec evidence](../../../qa/fixtures/companion-qq-codec/README.md) | Actual pinned encode/decode,120s/six exact spans, real streamed ASR/TTS/leases, semantic document bytes, actual resource/cancel cleanup |
 | [Main](../../../apps/desktop/src/main/companion-client-controller.test.ts), [FIFO](../../../apps/desktop/src/main/shared-speech-controller.test.ts), [public speech](../../../apps/companion-service/src/speech.test.ts), [central guards](../../../packages/contracts/src/companion-qq.test.ts) | Personal-only projection/queue, scoped cursor gaps, fixed Web opener, document resolver/hash, same-key fact scopes, page summary and effect predicates |
 
-Latest scoped results and limitations are recorded in [progress](../../tasks/11-12-qq-platform-entry/progress.md); do not sum overlapping counts or treat controlled peers/Docker/Chromium as real account/media acceptance. Final whole-project and product acceptance remain separate gates.
+Latest scoped results and limitations are recorded in [progress](../../tasks/archive/2026-11/11-12-qq-platform-entry/progress.md); do not sum overlapping counts or treat controlled peers/Docker/Chromium as real account/media acceptance. Final whole-project and product acceptance remain separate gates.
 
 ## 7. Wrong vs Correct
 

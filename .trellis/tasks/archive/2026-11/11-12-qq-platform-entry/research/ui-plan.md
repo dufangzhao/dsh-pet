@@ -12,17 +12,17 @@
 
 | 需要表达的东西 | 现成控件/样式 | 位置 |
 | --- | --- | --- |
-| 分组标题 + 说明 + 右侧动作 | `Section`（`pk-section`） | [section.tsx](../../../../packages/ui-kit/src/section.tsx#L12) |
-| 协议模块列表、成员列表、群列表 | `List` + `ListItem`（`pk-list`） | [list.tsx](../../../../packages/ui-kit/src/list.tsx#L9) |
-| 表单字段 + hint + 错误关联 | `Field`（`pk-input`） | [field.tsx](../../../../packages/ui-kit/src/field.tsx) |
-| 配置面板容器 | `Dialog`（原生 `showModal`） | [dialog.tsx](../../../../packages/ui-kit/src/dialog.tsx) |
-| 保存/关闭/次要动作 | `Button`（primary/secondary/ghost） | [button.tsx](../../../../packages/ui-kit/src/button.tsx) |
-| 就绪/未配置/失败徽标 | `StatusBadge` | [status-badge.tsx](../../../../packages/ui-kit/src/status-badge.tsx) |
-| 空列表说明 | `EmptyState` | [empty-state.tsx](../../../../packages/ui-kit/src/empty-state.tsx) |
-| 顶栏入口（"模型""语音"同款） | `tc-link` | [styles.css:173](../../../../plugins/text-client/src/client/styles.css#L173) |
-| 现有设置弹窗的布局范式 | `tc-model-dialog` / `tc-voice-settings` | [model.css:11](../../../../plugins/text-client/src/client/model.css#L11) |
+| 分组标题 + 说明 + 右侧动作 | `Section`（`pk-section`） | [section.tsx](../../../../../../packages/ui-kit/src/section.tsx#L12) |
+| 协议模块列表、成员列表、群列表 | `List` + `ListItem`（`pk-list`） | [list.tsx](../../../../../../packages/ui-kit/src/list.tsx#L9) |
+| 表单字段 + hint + 错误关联 | `Field`（`pk-input`） | [field.tsx](../../../../../../packages/ui-kit/src/field.tsx) |
+| 配置面板容器 | `Dialog`（原生 `showModal`） | [dialog.tsx](../../../../../../packages/ui-kit/src/dialog.tsx) |
+| 保存/关闭/次要动作 | `Button`（primary/secondary/ghost） | [button.tsx](../../../../../../packages/ui-kit/src/button.tsx) |
+| 就绪/未配置/失败徽标 | `StatusBadge` | [status-badge.tsx](../../../../../../packages/ui-kit/src/status-badge.tsx) |
+| 空列表说明 | `EmptyState` | [empty-state.tsx](../../../../../../packages/ui-kit/src/empty-state.tsx) |
+| 顶栏入口（"模型""语音"同款） | `tc-link` | [styles.css:173](../../../../../../plugins/text-client/src/client/styles.css#L173) |
+| 现有设置弹窗的布局范式 | `tc-model-dialog` / `tc-voice-settings` | [model.css:11](../../../../../../plugins/text-client/src/client/model.css#L11) |
 
-**范式可以直接沿用**：模型弹窗（[model.tsx](../../../../plugins/text-client/src/client/model.tsx)）已经解决了"保存/测试/凭证可写性/已保存≠已应用"的整套表达；语音设置弹窗（[voice-settings.tsx](../../../../plugins/text-client/src/client/voice-settings.tsx)）已经解决了"提供者 + 目录 + 独立密钥"的分组。QQ 是这两者的组合，不是新范式。
+**范式可以直接沿用**：模型弹窗（[model.tsx](../../../../../../plugins/text-client/src/client/model.tsx)）已经解决了"保存/测试/凭证可写性/已保存≠已应用"的整套表达；语音设置弹窗（[voice-settings.tsx](../../../../../../plugins/text-client/src/client/voice-settings.tsx)）已经解决了"提供者 + 目录 + 独立密钥"的分组。QQ 是这两者的组合，不是新范式。
 
 ## 二、信息架构
 
@@ -98,7 +98,7 @@ Q4 要求分层。界面上每一层都要有落点，且不能合并：
 1. **显示 QQ 连接状态**（已连接/未配置/已停用 + 协议名）。数据来自服务端视图，桌面不自己判断。
 2. **一个"打开 Web 管理"的入口**，打开服务 Web 的 QQ 页。
 
-**关键约束：URL 里不能带 owner token。** 现有连接令牌的生命周期是"这次连接"，明确不写进 URL、不写进 web storage（见[共享桌面入口研究](../../11-06-unified-companion-architecture/research/shared-desktop-entry.md)）。所以入口只能是"打开 Web 首页/QQ 页"，让用户在那里自己完成认证，**不能**拼一个带凭据的深链。
+**关键约束：URL 里不能带 owner token。** 现有连接令牌的生命周期是"这次连接"，明确不写进 URL、不写进 web storage（见[共享桌面入口研究](../../../../11-06-unified-companion-architecture/research/shared-desktop-entry.md)）。所以入口只能是"打开 Web 首页/QQ 页"，让用户在那里自己完成认证，**不能**拼一个带凭据的深链。
 
 如果桌面本来就没连上服务，这个入口应说明"先连接服务"而不是打开一个会 401 的页面。
 
@@ -123,7 +123,7 @@ Q4 要求分层。界面上每一层都要有落点，且不能合并：
 
 ## 八、待技术确认（归 GPT）
 
-- **服务端 QQ 配置路由**：今天只有 `GET /api/plugins` 与 `POST /api/plugins/{id}`，没有配置读取/保存。Web 主管理需要新增（[server.ts:355](../../../../apps/companion-service/src/server.ts#L355)/[:453](../../../../apps/companion-service/src/server.ts#L453)）。
+- **服务端 QQ 配置路由**：今天只有 `GET /api/plugins` 与 `POST /api/plugins/{id}`，没有配置读取/保存。Web 主管理需要新增（[server.ts:355](../../../../../../apps/companion-service/src/server.ts#L355)/[:453](../../../../../../apps/companion-service/src/server.ts#L453)）。
 - **视图字段**：`CompanionPluginView` 只有 id/name/state，不够表达"已连接·官方 WS·某账号"。
 - **配置 Schema 表达力**：名单数组、每群覆盖、概率、模型引用能否用现有 Config Schema 表达，还是需要结构化扩展。
 - **归属缺口**（来自 [qq-ux.md](qq-ux.md#L138)）：消息无平台/发送者/会话字段；多输入折叠为 `inputIds[0]`；`startTask` 丢弃 origin——这三条不解决，界面上"谁在哪个群说了什么""看/停自己的 work"都没有数据来源。

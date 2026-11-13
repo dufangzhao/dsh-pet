@@ -4,7 +4,7 @@
 
 已选需求保持不变：**官方 QQ WebSocket + OneBot v11；白名单多人私聊与指定群；文本、图片、语音、文件全部支持；受限成员工具/own tasks；按人/群隔离并共享公开 facts；群 context、唤醒词/@、可配置主动回复（规则/概率或 Magpie 模型 judge）**。下文列出实现这些需求需履行的协议契约，不把条件或未知项解释成删减媒体范围。
 
-基础注册、身份、权限、生命周期与许可证研究集中在 [AstrBot QQ 研究](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/tasks/11-12-qq-platform-entry/research/astrbot-qq.md>)。本轮继续固定 AstrBot `2c3ee62b15eb0d329f608481002bed5fc45e84e7`、OneBot v11 规范 `d4456ee706f9ada9c2dfde56a2bcfc69752600e4`；QQ 在线文档是本日读取，未取得不可变文档 commit。静态支持不等于账号权限、格式兼容和用户实际收取已验收。
+基础注册、身份、权限、生命周期与许可证研究集中在 [AstrBot QQ 研究](<astrbot-qq.md>)。本轮继续固定 AstrBot `2c3ee62b15eb0d329f608481002bed5fc45e84e7`、OneBot v11 规范 `d4456ee706f9ada9c2dfde56a2bcfc69752600e4`；QQ 在线文档是本日读取，未取得不可变文档 commit。静态支持不等于账号权限、格式兼容和用户实际收取已验收。
 
 ## 1. 结论
 
@@ -77,7 +77,7 @@
 
 [AstrBot Tencent helpers][astr-silk] 的 `tencent_silk_to_wav` 接受 `0x02/0x03` 前缀 SILK，解码为 **24 kHz、mono、16-bit PCM WAV**；`wav_to_tencent_silk` 以实际 WAV 参数处理并 `tencent=True` 编码，输出 QQ 兼容 SILK。`convert_to_pcm_wav` 的 ffmpeg 分支还加 2 秒 padding，这是参考实现选择，不是平台规则，不应盲目复制。
 
-本项目 [M5 协议](</home/kingBZ/DeepSeek-WorkSpace/dsh-pet/.trellis/spec/backend/shared-speech-output.md#L35>) 的 Magpie TTS 输出是 PCM16LE/24 kHz/mono **流**。原始 PCM chunk 不是 WAV 容器，也不是 SILK；不能仅换扩展名、base64 后作为 QQ Record。需在受监督媒体任务中生成有效容器/编码、校验完整采样和结束状态，再发送。QQ 普通语音上传接口不是实时 PCM 播放流；按段上传时每段又是独立消息及配额消耗，必须明确部分成功与剩余失败。
+本项目 [M5 协议](<../../../../../spec/backend/shared-speech-output.md#L35>) 的 Magpie TTS 输出是 PCM16LE/24 kHz/mono **流**。原始 PCM chunk 不是 WAV 容器，也不是 SILK；不能仅换扩展名、base64 后作为 QQ Record。需在受监督媒体任务中生成有效容器/编码、校验完整采样和结束状态，再发送。QQ 普通语音上传接口不是实时 PCM 播放流；按段上传时每段又是独立消息及配额消耗，必须明确部分成功与剩余失败。
 
 ## 4. 官方 QQ：主动、被动、引用与长回复
 

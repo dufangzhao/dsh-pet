@@ -30,7 +30,7 @@ QQ 官方机器人和 OneBot 是同一个 Agent 的两个可独立启停入口�
 
 `127.0.0.1` 只适合同机访问；绑定全部网卡时，应向协议端提供实际可达的服务主机地址，不能把 `0.0.0.0` 当作连接地址。端点提示只描述配置，不证明网络或鉴权已通。当前不提供 forward/split 通道、任意扩展协议回退，或临时私聊会话自动转好友私聊。
 
-文件传输依赖选定的 SnowLuma 扩展，不能推断任意 OneBot v11 实现都兼容。反向连接、流式文件动作及实际版本的核对依据见[协议研究](../.trellis/tasks/11-12-qq-platform-entry/research/onebot-environment.md)。
+文件传输依赖选定的 SnowLuma 扩展，不能推断任意 OneBot v11 实现都兼容。反向连接、流式文件动作及实际版本的核对依据见[协议研究](../.trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/onebot-environment.md)。
 
 ## 身份、名单与公开记忆
 
@@ -92,4 +92,4 @@ QQ AppSecret、OneBot token 和判断 Key 使用独立的进程内凭据槽，�
 
 关闭单个协议连接不会取消已经接受的后台工作。工作结果保留原主体、受众和逻辑路由；来源离线、权限撤销或官方被动窗口过期时，结果仍可保留在 State，QQ 投递明确失败/阻止。清理未确认时不会把旧来源当作已成功退出。
 
-开发者应读[唯一 QQ 代码契约](../.trellis/spec/backend/qq-platform-entry.md)；当前执行范围与未完成门禁见[任务进度](../.trellis/tasks/11-12-qq-platform-entry/progress.md)。
+开发者应读[唯一 QQ 代码契约](../.trellis/spec/backend/qq-platform-entry.md)；当前执行范围与未完成门禁见[任务进度](../.trellis/tasks/archive/2026-11/11-12-qq-platform-entry/progress.md)。

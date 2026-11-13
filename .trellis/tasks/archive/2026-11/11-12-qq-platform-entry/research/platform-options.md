@@ -24,6 +24,6 @@ The initial recommendation was official WebSocket first. The user subsequently s
 
 ## Existing project constraints that affect either option
 
-The current [message command and message DTOs](../../../../packages/contracts/src/companion.ts#L49) carry no platform actor/conversation/reply target. [Publishing currently retains only the first input ID](../../../../packages/companion-runtime/src/runtime.ts#L1040). An external plugin therefore needs explicit canonical provenance and reply association; “send the latest assistant message to the last QQ sender” is not a valid plan.
+The current [message command and message DTOs](../../../../../../packages/contracts/src/companion.ts#L49) carry no platform actor/conversation/reply target. [Publishing currently retains only the first input ID](../../../../../../packages/companion-runtime/src/runtime.ts#L1040). An external plugin therefore needs explicit canonical provenance and reply association; “send the latest assistant message to the last QQ sender” is not a valid plan.
 
 The current operator bearer is a management authority, not QQ-sender authorization. Same Agent identity/memory does not grant every QQ user the owner's facts or tool/task permissions. Audience, trigger and trust/context visibility remain the next product decisions after transport scope.
