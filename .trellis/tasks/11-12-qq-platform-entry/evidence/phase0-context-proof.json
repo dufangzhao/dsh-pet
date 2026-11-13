@@ -1,0 +1,51 @@
+{
+  "scope": "phase0-native-core-permit-proof",
+  "status": "passed",
+  "node": "26.13.0",
+  "root": "/tmp/companion-qq-context-proof-AV93AJ",
+  "startedAt": "2026-11-12T20:59:25.268Z",
+  "checks": [
+    "independent-Core-dataDir-store-bus-and-native-input-canaries",
+    "FIFO-B-gets-next-native-dispatch-before-A-second-step",
+    "parked-input-holds-no-credential-borrow",
+    "A-retains-original-native-tool-calls-and-actual-supervisor-receipts",
+    "three-start_work-effects-without-rebuild-or-one-work-cap",
+    "sibling-close-waits-World-return-and-does-not-retire-A-or-independent-work",
+    "separate-persisted-native-tails-with-zero-foreign-canaries",
+    "cancelled-parked-D-unblocks-with-zero-provider-and-credential-calls",
+    "logical-cancel-keeps-permit-until-native-and-broker-task-actually-settle",
+    "all-native-world-task-credential-work-joined-before-awaited-loader-unregister"
+  ],
+  "networkCalls": 0,
+  "sources": {
+    "plugins/harness-cortico/src/model-permit.ts": "25f0ce5367d445849434cd266218ff71ec254ee7377e2fb812bd8c0c7e3a5b6c",
+    "qa/fixtures/companion-qq-context-proof/runtime.mjs": "a0d53e236d0c4bbaab3ba3d2383bdb6209587598ffc9c5c4c3f6238da1618c5a",
+    "qa/probes/companion-qq-context-proof.mjs": "50533179730c88d6082eeec21ee00eff96d5db5732173a885661740c905e3971",
+    "plugins/harness-cortico/node_modules/cortico/src/core/core.ts": "8485e87935d3583f5eb5728f855ad80de7814944e0818b5a2dd93c0fb50cd75f",
+    "plugins/harness-cortico/node_modules/cortico/src/core/loop.ts": "208eb24d1836c43bc3a5dbed41c85ff34059159a942d782dd036dcd6dee06f02"
+  },
+  "limits": [
+    "Synthetic credential grants/provider/work bodies; no real model, QQ, Docker or service.",
+    "Does not establish runtime audience policy, canonical State admissions or integrated source lifecycle.",
+    "Main Harness/index/facade/runtime remain unchanged; this proves the SDK composition and permit."
+  ],
+  "cleanup": {
+    "contextsJoined": ["input-B", "input-A", "input-D", "input-C"],
+    "worldsStopped": ["input-B", "input-A", "input-D", "input-C"],
+    "nativeCalls": 5,
+    "nativeSettled": 5,
+    "maxNativeActive": 1,
+    "leases": 0,
+    "tasks": {
+      "activeTasks": 0,
+      "pendingWork": 0,
+      "retained": 0,
+      "observers": 0,
+      "observerFailures": 0,
+      "cleanupFailures": 0
+    },
+    "credentials": { "pendingUses": 0, "pendingWork": 0, "disposed": true },
+    "permit": { "active": false, "waiting": 0 },
+    "loaderUnregisteredLast": true
+  }
+}

@@ -26,6 +26,8 @@ Canonical declarations live in source; extend them there instead of copying DTOs
 `saveEndpoint(baseUrl, expectedRevision)` returns `Result<DesktopCompanionEndpointSave>`: outer success retains canonical saved baseUrl/configRevision plus a nested source Result.
 `withToken<T>(source,token,signal,operation,commit?)` is host-only; its optional commit metadata is never a renderer/SDK credential bypass.
 Preload exposes frozen named [facades](../../../apps/desktop/src/preload/companion-bridge.ts); Main's [closed request table](../../../apps/desktop/src/main/companion-client-request.ts) checks roles, arity, exact keys and the current trusted file frame.
+`openWeb({connectionId}): Promise<Result<null>>` accepts no URL/token. Main validates the exact trusted frame, rechecks the captured current connection after async source checks, and calls its injected opener only with the normalized service root; pending opening work joins the existing connection lifetime. The [startup](../../../apps/desktop/src/main/index.ts) injects `shell.openExternal`. It exposes no QQ management configuration.
+
 Only console manages auth/model and owner-form writes. The fixed bridge adds `readMemory`, `saveProfile`, `upsertFact`, `forgetFact`; exact types, saved/applied facts and counters live once in [persona-memory.md](persona-memory.md). There is no arbitrary HTTP/path method or Main `/api/model/credential` relay.
 
 ## 3. Contracts
@@ -43,13 +45,13 @@ Only console manages auth/model and owner-form writes. The fixed bridge adds `re
 
 **One projection and bounded wire**
 
-- One Main snapshot/fetch-SSE owner maintains confirmed service state; command views/receipts never replace snapshot state.
+- One Main snapshot/fetch-SSE owner maintains confirmed service state; command views/receipts never replace snapshot state. [M6 personal-surface rules](qq-platform-entry.md#personal-surfaces) add bounded readonly `snapshot.qq`, without another reader/config API. `desktopPersonalSnapshot` filters owner-private messages/work and owner/public facts; unknown audience is not owner. Same-key fact rows in different scopes remain distinct.
 - Main-local revision orders projections; connectionId identifies the captured client binding, not an Agent, task or execution Session.
 - Ordinary JSON reads use20s deadlines; SSE bytes/comments renew45s liveness. Failed reads/ended streams leave live state before reconciliation.
 - Offline retains last confirmed content/time and labels nonterminal work unknown. Snapshot refresh alone cannot invent a live stream; reconnect retains one reader.
-- Service JSON remains≤64KiB UTF-8. Direct Main IPC state has its own≤80KiB ceiling around that unmodified snapshot and≤16 pending metadata entries.
+- Service JSON remains≤64KiB UTF-8. Direct Main IPC state has its own≤80KiB ceiling around the canonical personal projection and≤16 pending metadata entries. Scope filtering is not another byte-trimming pass.
 - Do not run this80KiB aggregate through64KiB supervisor/preload validation or trim canonical facts/history again. Supervised native operations return null privately.
-- Message limit is8000 UTF-16 code units (`string.length`); name/persona limits are80/16384 code points in the existing Config validator, with separate UTF-8 budgets.
+- Inline message text remains8000 UTF-16 code units (`string.length`); canonical semantic text may be a declared document when the complete record exceeds its local budget. Preserve its content/material metadata instead of treating the explanation as the full body. Name/persona limits remain80/16384 code points in the existing Config validator, with separate UTF-8 budgets.
 - Profile reads are bounded, read-only, omit raw Config and must match current agentId/profileRevision; mismatches conflict, not overwrite persona.
 
 **Source authority and actual settlement**

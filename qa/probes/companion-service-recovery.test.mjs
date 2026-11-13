@@ -353,7 +353,10 @@ for (const recoveredState of ['exited', 'running']) {
         const identity = (await snapshot(first)).agent.id;
         const memory = value(await first.get('/api/memory'));
         assert.ok(Number.isSafeInteger(memory.revision));
-        assert.equal(memory.facts.find((fact) => fact.key === 'recovery'), undefined);
+        assert.equal(
+          memory.facts.find((fact) => fact.key === 'recovery'),
+          undefined,
+        );
         const remembered = value(
           await first.post('/api/facts', {
             commandId: randomUUID(),
@@ -446,13 +449,13 @@ for (const recoveredState of ['exited', 'running']) {
 }
 
 test(
-  'HTTP input B enters the next real Core inference with start_work receipt while Docker work runs',
+  'HTTP input B gets the next model permit while A retains its actual receipt and Docker work runs',
   {
     skip: !image,
     timeout: 60000,
   },
   async (t) => {
-    const controlled = controlledClient();
+    const controlled = controlledClient({ holdResponses: 3 });
     const f = await fixture(t, {
       image,
       mode: 'model',
@@ -509,35 +512,51 @@ test(
       const rendered = JSON.stringify(second.request.input);
       assert.match(rendered, /INPUT_B continue talking now/);
       assert.match(rendered, new RegExp(inputB.messageId));
-      const output = second.request.input.find(
-        (item) => item.type === 'function_call_output' && item.call_id === 'http-start-A',
+      assert.equal(
+        second.request.input.some(
+          (item) => item.type === 'function_call_output' && item.call_id === 'http-start-A',
+        ),
+        false,
+        "B cannot inherit A's private native tool tail",
       );
-      assert.ok(output, 'next inference must carry the actual start_work tool output');
-      assert.match(JSON.stringify(output), /accepted/);
-      const receiptMatch = JSON.stringify(output).match(
-        /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/g,
-      );
+      assert.notEqual(second.options.sessionId, first.options.sessionId);
+      record = await effectRecord(f.dataDirectory);
       const current = await snapshot(f);
       assert.equal(current.tasks.length, 1);
-      assert(
-        receiptMatch?.includes(current.tasks[0].id),
-        'tool receipt identifies the canonical logical task',
-      );
       assert.equal(
         phases.includes('ready'),
         false,
         'no onIdle-ready boundary may precede B entering the next inference',
       );
-      record = await effectRecord(f.dataDirectory);
       assert.equal((await task(f, current.tasks[0].id)).status, 'running');
       assert.equal(f.service.runtime.diagnostics().work, 1);
       second.complete([assistantMessage('ANSWER_B while independent work is running')]);
+      const continuationA = await controlled.next(3);
+      assert.equal(
+        continuationA.options.sessionId,
+        first.options.sessionId,
+        'A resumes its retained native session rather than being reconstructed',
+      );
+      assert.equal(continuationA.options.signal.aborted, false);
+      const output = continuationA.request.input.find(
+        (item) => item.type === 'function_call_output' && item.call_id === 'http-start-A',
+      );
+      assert.ok(output, 'A continuation carries its actual start_work tool output');
+      assert.match(JSON.stringify(output), /accepted/);
+      const receiptMatch = JSON.stringify(output).match(
+        /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/g,
+      );
+      assert(
+        receiptMatch?.includes(current.tasks[0].id),
+        'A tool receipt identifies the canonical logical task',
+      );
       await until(
         () => snapshot(f),
         (state) =>
           state.messages.some(
             (message) =>
               message.role === 'assistant' &&
+              message.inputId === inputB.messageId &&
               message.text === 'ANSWER_B while independent work is running',
           ),
         'committed answer B',
@@ -545,6 +564,8 @@ test(
       assert.equal((await inspectOwned(record)).container.state.Running, true);
       assert.equal((await task(f, current.tasks[0].id)).status, 'running');
       value(await f.post('/api/foreground/stop', { commandId: randomUUID() }));
+      assert.equal(continuationA.done, true, 'foreground stop joins the outstanding A inference');
+      assert.equal(continuationA.options.signal.aborted, true);
       assert.equal(
         (await inspectOwned(record)).container.state.Running,
         true,
@@ -564,7 +585,7 @@ test(
       assert.equal(await f.artifact(done.artifacts[0].id), 'once\n');
       await within(f.service.runtime.whenWorkSettled(), 'independent work drain');
       await assertAbsent(record);
-      assert.equal(controlled.requests.length >= 2, true);
+      assert.equal(controlled.requests.length >= 3, true);
     } finally {
       controlled.close();
       restore();

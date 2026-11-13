@@ -4,7 +4,7 @@
 
 Read this when changing shared voice sources, native ASR, capture lifetime, service voice routes, Main/preload, or their web/console consumers. Voice is an explicit utterance input to the existing Agent. It does not create another Core, durable audio store, message queue, or credential registry. Starting/cancelling capture must not stop unrelated foreground thinking, work or playback.
 
-The initial production provider is Magpie with the bounded MiMo ASR codec. TTS and full duplex are separate increments. Operator steps are in [the voice guide](../../../docs/38-shared-voice-input.md); executed scope is in [acceptance](../../../qa/fixtures/companion-voice-input/acceptance.md).
+The production ASR provider is Magpie with the bounded MiMo codec. [M6 QQ audio](qq-platform-entry.md#frozen-delivery-quota-and-audio) reuses the host-private `VoiceController.withAsrConsumer` with independent caller authority and actual stream/key lifetime; it does not reuse a browser microphone ticket or raise the per-request capture bound. TTS has its [own contract](shared-speech-output.md); full duplex is separate. Operator steps are in [the voice guide](../../../docs/38-shared-voice-input.md); executed scope is in [acceptance](../../../qa/fixtures/companion-voice-input/acceptance.md).
 
 ## 2. Canonical signatures
 

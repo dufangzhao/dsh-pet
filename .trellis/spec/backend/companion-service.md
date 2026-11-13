@@ -11,7 +11,7 @@ Use this spec for `packages/companion-runtime`, `apps/companion-service`, and th
 - `runtime.message(command)`, `startTask(command, signal?)`, `stopTask(taskId,commandId)` return `CompanionCommandReceipt`. Persona/memory owner methods, private projection ports and legacy readonly retry semantics are maintained in [persona-memory.md](persona-memory.md#2-signatures); `remember(command)` is not a new blind-write API.
 - `runtime.state<M>(method: M, input: StateMethodInputs[M], signal?)` unwraps a **provider payload Result** separately from the host transport Result.
 - `withSourceAuthority(host, sourcePluginId, permissions, operation, options?)` creates a tracked source-owner task, acquires leases, preserves private return/error objects, and awaits actual settlement.
-- State capability `companion.state@1` / provider `sqlite`: `snapshot`, `events`, `acceptMessage`, `createTask`, `updateTask`, `appendMessage`, `memorySnapshot`, `rememberFact`, `forgetFact`, `getTask`, `getTaskByExecution`, `getArtifact`, `recover`, `recordCommand`, `getCommand`.
+- State capability `companion.state@1` / provider `sqlite`: the exact method/input/output catalog is [types.ts](../../../plugins/state-sqlite/src/types.ts). [M6 contracts](qq-platform-entry.md) cover scoped reads, input-owned contexts/work, materials, native QQ and delivery; public metadata never substitutes for private host authority.
 - Execution capability `execution.javascript@1` / provider `docker`: `execute(task,input)` and `reconcile(task,{after?,limit?})`.
 - Harness capability `companion.harness@1`: `accept`, `status`, `stopForeground`. The Cortico factory binds product ports; its generic unbound default is deliberately unavailable.
 
@@ -23,13 +23,13 @@ Browser-safe DTOs are maintained in [companion.ts](../../../packages/contracts/s
 
 A command ID identifies one submitted intent. Reuse it for an uncertain retry of the same payload; changed payload conflicts. Product task ID, durable execution ID, supervisor task ID and native Session ID are different identities. The frontend needs no Session selection.
 
-`CompanionEvent.sequence` is a committed durable cursor. SSE `companion` frames carry events; `refresh` has no ID and only prompts a coalesced snapshot refresh. Snapshot/event reads are bounded and indicate omitted history/details. A stale epoch or future cursor is a conflict requiring a new snapshot.
+`CompanionEvent.sequence` is a committed durable cursor. Conversation scope filtering occurs before pagination and can skip sequences; a page's scanned cursor advances over an invisible tail without revealing payloads. Do not infer lost data from a missing `+1`. SSE `companion` frames carry events; `refresh` has no ID and only prompts a coalesced snapshot refresh. Snapshot/event reads are bounded and indicate omitted history/details. A stale epoch or future cursor is a conflict requiring a new snapshot.
 
 ### Storage
 
 `FileConfigStore` remains the only configuration CAS owner. Storage identity is **only** `{pluginId,instanceId}`: do not pass an `OwnerRef` containing generation into exact storage-identity validation or source-trust lookups.
 
-The state provider uses `node:sqlite`, `user_version=2` (v1 requires explicit offline backup/migration; see [format and rollback rules](persona-memory.md#3-contracts)), and the unchanged tables `identity`, `messages`, `tasks`, `facts`, `artifacts`, `commands`, `events`. DELETE journal + EXCLUSIVE locking + synchronous FULL establishes one writer. State, dedup receipt and event commit in the same synchronous transaction; no network/tool work runs inside it.
+The state provider uses `node:sqlite`, current `user_version=3`; formats1/2 require explicit cold backup/migration. [M6 scope and migration](qq-platform-entry.md#canonical-identity-visibility-and-migration) owns the added scoped columns/composite fact identity and input/material/observation/delivery/judgment ledgers. DELETE journal + EXCLUSIVE locking + synchronous FULL still establishes one writer. State, dedup receipt and event commit in the same synchronous transaction; no network/tool work runs inside it.
 
 Task `execution_id` is unique. The runtime reserves its deterministic execution identity **before** SQL can expose the accepted task, so a stop racing the transaction can mark the pending admission. It writes running state before launching external execution. Every launched handle is captured and awaited even on error.
 
@@ -45,7 +45,7 @@ A recovered `unknown` task may receive a verified exit code/logs/artifact **with
 
 Provider `features.methodPermissions` covers every exposed state/execution/Harness method. Omitting it checks only the consumer and bypasses provider file/process policy. Source Harness ports use source leases rather than unrestricted core authority. Cortico consumes the selected model capability; the connection plugin owns its source/config-read and credential leases under its actual generation. Explicit owner checks use the companion-host consumer. Native private dispatch acquires both sides directly, preserving opaque values/errors and actual drain; a JSON describe lease is insufficient. Provisioning, callback/config fences and credential retirement are maintained once in [model connection contracts](model-connections.md).
 
-An activating Harness can receive a read-only initial context only through the host's checked bootstrap grant (trusted source, declared capability, allowed policy epoch, same owner). Normal work requires an active source task. Old owner callbacks cannot update a replacement.
+An activating Harness can receive a read-only owner bootstrap only through the host's checked bootstrap grant (trusted source, declared capability, allowed policy epoch, same owner). [M6 input-owned bindings](qq-platform-entry.md#admission-context-and-physical-work) replace global context authority for admitted inputs; retiring bootstrap withdraws its applied claim. Normal work requires an active source task/private captured grant. Old owner callbacks cannot update a replacement.
 
 `manager.enable/disable` can return `ok:true` with `unready` or `pending_restart`. The host checks actual target state. Do not activate a replacement until cleanup is confirmed. Lifecycle commands converge on desired state even if an earlier receipt existed; accepted is not applied.
 

@@ -10,6 +10,8 @@
 
 Linux 服务端使用 Node 26.13.0+。完成依赖安装后运行 `pnpm companion:build`，配置独立的 `COMPANION_DATA_DIR` 和 `COMPANION_TOKEN`，再运行 `pnpm companion:start`。默认监听 `http://127.0.0.1:4120`；默认脚本模式有明确标记。真实模型、Docker 镜像、数据恢复与云端运行方法见[文字服务指南](docs/35-text-agent-foundation.md)。
 
+QQ 官方机器人与 OneBot 双入口的配置、身份名单、可选语音和投递说明见[QQ 接入指南](docs/40-qq-platform-entry.md)。它们默认停用，沿用同一 Agent 的持久状态与工作；桌面只读状态，完整管理在 Web。
+
 ## 打开现有桌面 Demo
 
 双击项目根目录的[启动桌宠.cmd](启动桌宠.cmd)，桌宠和设置台会按当前已保存的启用选择显示。首次可直接在桌宠气泡完成初始化。重复双击复用同一设置窗口；桌宠面板和托盘都可退出。首次选择模型、确认功能与对话步骤见[当前使用说明](docs/34-plugin-pet-guide.md)。启动器直接打开当前构建，不需要全局安装 Node 或 pnpm。
@@ -53,7 +55,7 @@ pnpm format:check
 pnpm test:qa
 ```
 
-或运行 `pnpm check` 一次完成工作区类型/测试、QA回归、lint、格式与构建；该命令不接管真实鼠标或键盘。
+或运行 `pnpm check` 一次完成工作区类型/测试、QA回归、lint、格式与构建；该命令不接管真实鼠标或键盘。M6 服务集成测试还会创建和清理自有 Docker 夹具，需预先准备固定 codec/worker 镜像；构建方法和验收层次见[QQ 验收记录](qa/companion-qq-acceptance.md)与[codec 说明](plugins/qq-media-codec/README.md)，测试不会自动拉取镜像或使用真实账号。
 
 M0-01曾为空跑；当前已有真实工作区测试、下载安全测试与Electron集成探针。
 

@@ -13,10 +13,10 @@ pnpm install --frozen-lockfile --ignore-scripts
 pnpm companion:build
 ```
 
-设置独立数据目录和访问令牌后启动：
+首次创建服务时，设置独立数据目录和访问令牌后启动。已有 Agent 应继续使用原资料根，升级按冷迁移流程进行；换目录会创建另一个身份。
 
 ```sh
-export COMPANION_DATA_DIR="$PWD/.companion-data"
+export COMPANION_DATA_DIR="$PWD/.companion-data/agent"
 export COMPANION_TOKEN='替换为至少24字节的随机访问令牌'
 # 选择已准备好的 Node 镜像；未设置时仍可文字交互，执行提供者不启用。
 export COMPANION_EXEC_IMAGE='node:26-bookworm-slim'
@@ -40,7 +40,7 @@ pnpm companion:start
 
 默认模型连接插件访问独立运行的 Magpie 网关；本服务不托管网关进程或导入 DSH 密钥。连接失败会明确报告，不会静默换成脚本。配置和连接测试是两件事，实际账号与模型可用性由显式测试确认。
 
-网关 Key 可由宿主环境/密钥管理设施注入，或经受控本机/SSH 入口临时写入当前进程；环境注入须同时指定完整 API base URL。Key 不进入插件配置或聊天记录，切离连接或更换目标后需要重新提供。远程页面不提供 Key 写入能力。反向代理必须阻断 `/api/model/credential`，示例已显式返回403；本机 peer/Host 判断不能证明管理员额外搭建的转发链路。远程部署使用宿主注入，相关原生传输、权限、取消与错误保留规则见[服务契约](../.trellis/spec/backend/companion-service.md)。
+网关 Key 可由宿主环境/密钥管理设施注入，或经受控本机/SSH 入口临时写入当前进程；环境注入须同时指定完整 API base URL。Key 不进入插件配置或聊天记录，切离连接或更换目标后需要重新提供。远程页面不提供 Key 写入能力。反向代理必须阻断所有 credential 写入口，[部署模板](deploy/companion.Caddyfile.example)已显式返回403；本机 peer/Host 判断不能证明管理员额外搭建的转发链路。远程部署使用宿主注入，相关原生传输、权限、取消与错误保留规则见[服务契约](../.trellis/spec/backend/companion-service.md)。
 
 ## 配置默认 Magpie 连接
 
@@ -55,7 +55,7 @@ pnpm companion:start
 
 ## 使用与运行语义
 
-- 长任务先返回受理回执。仍可继续输入；Cortico 在下一推理步接收新的输入，不需要等整个任务完成。
+- 长任务先返回受理回执。新输入使用独立受控的 Cortico 上下文，模型调用按同一 FIFO 许可排队；不需要等整个后台任务完成，也不会将另一个人的输入注入旧上下文。
 - 每个任务有自己的停止按钮。`cancel-requested` 表示已请求停止，最终状态依据执行器的实际结算。完成与停止竞争时，已完成的事实保留。
 - 文件执行使用 Node ES modules（`import`、顶层 `await`），不是宿主 shell。输入文件和输出路径均为任务相对路径。文件/日志/时间/内存/CPU/PID 有明确上限，当前最多4个并发执行，无隐藏任务队列。
 - 浏览器通过认证的 fetch SSE 订阅变化；令牌不在 URL、localStorage 或产物链接中。断线时保留最后确认内容，并将非终态任务标成状态未知；重连从快照及游标对账。
@@ -66,8 +66,9 @@ pnpm companion:start
 | 目录 | 所有者与作用 |
 | --- | --- |
 | `configuration/` | 现有 FileConfigStore：配置及 revision，CAS 单一写入路径 |
-| `state/state.sqlite` | SQLite 状态插件：稳定 identity、messages、facts、tasks、artifacts、commands、events |
+| `state/state.sqlite` | SQLite 状态插件：稳定 identity、范围化消息/事实/任务、产物、命令、输入/投递与预算事实 |
 | `plugin-data/pet.cloud-exec/jobs/` | 隔离工作目录、保留产物及宿主专用 `.records/` 执行记录 |
+| `plugin-data/pet.companion-host/materials/` | 经真实字节验证的材料与暂存区；由宿主授权访问，不将路径交给模型 |
 | `plugin-data/pet.harness-cortico/projections/` | 可重建的 Cortico 私有运行投影，不是产品状态的另一个主库 |
 
 使用同一数据根时只运行一个服务实例；SQLite 的实际独占锁会拒绝另一写入者。备份应在服务停止后覆盖整个数据根。执行器的 `jobs` 布局是此参考服务的固定存储约定，修改目录布局需要明确迁移，不会静默覆盖配置。
@@ -112,4 +113,4 @@ PET_CLOUD_EXEC_IMAGE=<已准备镜像> PET_CLOUD_EXEC_DOCKER_TEST=1 pnpm --filte
 
 [验收记录](../qa/companion-acceptance.md)区分包级测试、实际 HTTP/SQLite/Docker、浏览器操作与未执行的外部验证。测试使用临时独立数据、控制的模型协议服务和实际容器，不调用付费模型。
 
-后续按既定范围接入语音/全双工、Live2D、完整管理界面、QQ/哔哩哔哩、语义记忆和第二个真实 Harness。本次没有迁移旧桌面数据，没有真实账号发布，也没有将本地验收包装成付费云部署。
+共享功能的当前入口分别见[语音输入](38-shared-voice-input.md)、[语音输出](39-shared-speech-output.md)和[QQ 接入](40-qq-platform-entry.md)。全双工、Live2D、哔哩哔哩、语义记忆和第二个真实 Harness 仍按后续任务推进。既有桌面数据没有自动迁入；本地受控验收不等于真实账号上线或付费云部署。

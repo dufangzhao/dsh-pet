@@ -1,0 +1,21 @@
+{"file": ".trellis/spec/shared/project-baseline.md", "reason": "Actual kernel/SDK/storage/UI/tooling boundaries; no generic-template architecture."}
+{"file": ".trellis/spec/shared/plugin-application-contracts.md", "reason": "Existing source/config/task/provider authority and real lifecycle/application boundaries."}
+{"file": ".trellis/spec/shared/typescript.md", "reason": "Strict browser-safe DTOs and private typed ports; no broad casts or arbitrary dispatch."}
+{"file": ".trellis/spec/backend/qq-platform-entry.md", "reason": "Current implemented M6 authority, context, State, byteplane, independent judgment, immutable delivery and personal-surface contracts; source declarations remain canonical."}
+{"file": ".trellis/spec/backend/companion-service.md", "reason": "Canonical input/command/effect identity, one State writer, independent work and HTTP/source ownership."}
+{"file": ".trellis/spec/backend/model-connections.md", "reason": "Captured model/credential lifetime and actual native settlement; purpose isolation must not switch primary selection."}
+{"file": ".trellis/spec/backend/persona-memory.md", "reason": "Explicit fact authority, CAS, scope-aware migration and actual applied-context acknowledgements."}
+{"file": ".trellis/spec/backend/shared-voice-input.md", "reason": "Preserve M4 capture/ASR budgets and source/device/media cleanup while adding QQ attachment input."}
+{"file": ".trellis/spec/backend/shared-speech-output.md", "reason": "M5 canonical content/lifetime and owner-Pet eligibility; QQ voice is a separate authorized consumer."}
+{"file": ".trellis/spec/backend/desktop-companion.md", "reason": "Captured connection/owner and status/open-Web integration without credential URLs."}
+{"file": ".trellis/spec/frontend/project-patterns.md", "reason": "Current DOM/ui-kit/bridge patterns, draft lifetimes and production evidence."}
+{"file": ".trellis/spec/frontend/qq-management.md", "reason": "Verified QQ draft domains, paired judgment CAS, captured secret/connection owners, complete controls, public facts and bounded material interactions."}
+{"file": ".trellis/spec/frontend/model-settings.md", "reason": "Saved versus applied, captured draft/CAS, private credential writability and one config owner."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Cross-check storage/runtime/Harness/native/UI data and authority semantics."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/runtime-entry.md", "reason": "Source-backed actor/audience/full origin/task/delivery gaps and existing authority ports."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/runtime-media.md", "reason": "Actual image capability, missing resolver/input, M4/M5 reuse and binary artifact/judge-purpose gaps."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/astrbot-qq.md", "reason": "Pinned adapter and actor/context/permission evidence; no AGPL copying or lossy send/fallback inheritance."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/protocol-test-plan.md", "reason": "Protocol/media/receipt distinctions, SDK versus handler facts and per-platform test cells; deployment remains unverified."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/ui-plan.md", "reason": "Selected Web management/Desktop status and all configured behavior with mandatory text/additive voice."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/architecture-proposal.md", "reason": "SDK facts and candidate comparison only; final design supersedes destructive re-plan and one-work-per-input candidate."}
+{"file": ".trellis/tasks/11-12-qq-platform-entry/research/codec-options.md", "reason": "Pinned codec API/resource facts; metadata is not an executed codec/platform test."}

@@ -289,10 +289,19 @@ test(
       if (key !== ALTERNATIVE) return ports;
       return {
         ...ports,
-        async publish(output) {
-          reached.resolve();
-          await release.promise;
-          return ports.publish(output);
+        async bindInput(input, contextId) {
+          const binding = await ports.bindInput(input, contextId);
+          return {
+            ...binding,
+            ports: {
+              ...binding.ports,
+              async publish(output) {
+                reached.resolve();
+                await release.promise;
+                return binding.ports.publish(output);
+              },
+            },
+          };
         },
       };
     });

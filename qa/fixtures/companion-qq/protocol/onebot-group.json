@@ -1,0 +1,20 @@
+{
+  "time": 1794513600,
+  "self_id": 10001,
+  "post_type": "message",
+  "message_type": "group",
+  "sub_type": "normal",
+  "message_id": -42,
+  "message_seq": 17,
+  "group_id": 20001,
+  "user_id": 30001,
+  "sender": {"user_id": 30001, "nickname": "Synthetic member", "role": "owner"},
+  "message": [
+    {"type": "at", "data": {"qq": "10001"}},
+    {"type": "text", "data": {"text": "  test\r\n🦜 "}},
+    {"type": "image", "data": {"file": "image-ref", "url": "https://media.example.invalid/image"}},
+    {"type": "record", "data": {"file": "voice-ref", "url": "https://media.example.invalid/voice"}},
+    {"type": "file", "data": {"file_id": "file-fixture", "file_hash": "hash-fixture", "file_size": 10, "name": "report.txt"}},
+    {"type": "reply", "data": {"id": "opaque-message-fixture"}}
+  ]
+}

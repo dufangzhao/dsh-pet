@@ -15,9 +15,10 @@
 | File                                               | Description                                       | When to Read                       |
 | -------------------------------------------------- | ------------------------------------------------- | ---------------------------------- |
 | [companion-service.md](./companion-service.md) | Executable service/state/worker/Harness contracts | Headless service and feature plugins |
+| [qq-platform-entry.md](./qq-platform-entry.md) | Canonical M6 scoped admission, input-owned Core/work, materials, native QQ, judgment and delivery | QQ entry and cross-layer scope/authority changes |
 | [model-connections.md](./model-connections.md) | Native connector authority, model configuration/checks and snapshot budget | Model-connection plugins and owner APIs |
 | [desktop-companion.md](./desktop-companion.md) | Shared Main/preload client, source lifetime, saved facts and native publication | Desktop service entry and connection/lifecycle changes |
-| [persona-memory.md](./persona-memory.md) | Canonical persona application, explicit memory authority, CAS/replay and SQLite v2 migration | Persona/memory APIs, Harness context and format upgrades |
+| [persona-memory.md](./persona-memory.md) | Canonical persona application, scoped fact authority, CAS/replay and cold migration | Persona/memory APIs, Harness context and format upgrades |
 | [shared-voice-input.md](./shared-voice-input.md) | Shared ASR/capture authority, fixed bridge, bounded media, lifetime and UI state contracts | Service voice sources and web/desktop voice consumers |
 | [shared-speech-output.md](./shared-speech-output.md) | Canonical TTS admission, Magpie streaming, bounded playback, real cleanup and settings ownership | Speech sources, Main/Pet audio and speech configuration |
 | [directory-structure.md](./directory-structure.md) | Project structure and domain organization         | Starting a new feature             |

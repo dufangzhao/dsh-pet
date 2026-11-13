@@ -22,6 +22,10 @@
 | [ADR-0015](adr/0015-independent-continuous-agent-runtime.md) | 独立持续Agent、多Harness、内部Session | 已采纳；文字基础服务已实现 |
 | [ADR-0016](adr/0016-cloud-service-and-pluggable-features.md) | 可部署云端的服务、最小内核、可插拔功能与本地交互 | 已采纳；本轮为文字与真实代码执行 |
 | [独立文字 Agent 指南](35-text-agent-foundation.md) | 服务启动、模型/执行配置、状态恢复、插件与部署模板 | 当前使用入口，验收见关联记录 |
+| [共享桌面 Agent](36-shared-desktop-agent.md) | 桌宠与设置台连接同一服务 | 原生连接与个人界面 |
+| [人设与主动记忆](37-persona-and-memory.md) | 人设、事实编辑与明确写入 | 持久配置与范围化事实 |
+| [共享语音输入](38-shared-voice-input.md) / [语音输出](39-shared-speech-output.md) | ASR、独立声音提供者与桌宠播放 | 各自的运行和验证边界 |
+| [QQ 接入](40-qq-platform-entry.md) | 双协议、名单/主体、主动判断、四类媒体、投递与部署 | 完整 Web 管理与桌面只读入口；受控验收不等于真实账号验证 |
 | [ADR-0003](adr/0003-mit-license.md) | 本项目MIT与第三方材料边界 | 已采纳 |
 | [总体架构草案](05-architecture-overview.md) | 职责分层、能力工作流与验证项 | 方向已定，技术未冻结 |
 | [ADR-0004](adr/0004-capability-centered-host.md) | 能力/插件中心，而非固定Agent中心 | 已采纳 |

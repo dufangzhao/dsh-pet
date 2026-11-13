@@ -14,9 +14,9 @@
 
 如果启动进程显式设置了 `COMPANION_NAME` 或 `COMPANION_PERSONA`，界面会提示下次启动可能覆盖保存值。需要由操作者调整自己的启动参数；界面不会修改启动脚本或环境文件。
 
-## 已有 v1 数据的显式升级
+## 已有 v1/v2 数据的显式升级
 
-新资料根直接使用 SQLite格式v2。普通服务启动拒绝静默升级已有v1。升级入口是构建后的 `apps/companion-service/dist/migrate.mjs` 导出的 `migrateCompanionData`，不是 HTTP 接口，也不是一次聊天操作。
+当前新资料根使用 SQLite 格式v3，支持范围化事实、输入和投递记录。普通服务启动拒绝静默升级已有v1/v2。升级入口是构建后的 `apps/companion-service/dist/migrate.mjs` 导出的 `migrateCompanionData`，不是 HTTP 接口，也不是一次聊天操作。
 
 1. 等待工作完成，或明确停止已有工作；正常关闭并排空服务与它拥有的执行进程。资料根必须没有另一个写者。
 2. 选定原服务资料根和一个**尚不存在**的备份目录。备份的父目录须存在，备份与资料根不能互相包含。
@@ -28,12 +28,12 @@ import { migrateCompanionData } from "./apps/companion-service/dist/migrate.mjs"
 const [dataDirectory, backupDirectory] = process.argv.slice(1);
 if (!dataDirectory || !backupDirectory) throw new Error("需要资料根和新的备份目录");
 console.log(await migrateCompanionData({ dataDirectory, backupDirectory }));
-' /absolute/service-data /absolute/backups/service-before-v2
+' /absolute/service-data /absolute/backups/service-before-v3
 ```
 
-迁移先取得现有 SQLite 排他锁，再复制并逐项核对整个资料根的备份，之后才提交格式版本和记忆集合版本。保留 Agent ID、epoch、事实、消息、命令回执、任务与产物；旧事实来源显示未知。不能覆盖既有备份，不能在原服务仍持有写锁时迁移。失败时会明确报错，未提交的 SQLite 变更回滚；失败的备份目录也不是升级成功的证明。
+迁移先取得现有 SQLite 排他锁，再复制并逐项核对整个资料根的备份，之后才提交格式版本和记忆集合版本。保留 Agent ID、epoch、事实、消息、原命令指纹与回执、任务及产物；旧内容归为个人范围，旧事实来源显示未知。不会创建历史 QQ 输入、重发旧消息或重跑工作。不能覆盖既有备份，不能在原服务仍持有写锁时迁移。失败时会明确报错，未提交的 SQLite 变更回滚；失败的备份目录也不是升级成功的证明。
 
-升级后用新版启动该资料根。需要回滚时，先停下新版并保留其资料副本，再恢复验证过的**完整**升级前备份，最后使用旧程序。不要只替换一个 SQLite 文件，也不要让旧程序写入v2资料。
+升级后用新版启动该资料根。需要回滚时，先停下新版并保留其资料副本，再恢复验证过的**完整**升级前备份，最后使用旧程序。不要只替换一个 SQLite 文件，也不要让旧程序写入升级后的v3资料。
 
 这里的命令是操作者说明；开发验收只使用合成资料。原4120试用服务仍按此前要求关闭，原资料与凭据没有被这次实现自动读取或迁移。
 
