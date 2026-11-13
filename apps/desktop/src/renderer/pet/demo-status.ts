@@ -168,10 +168,21 @@ export function replyBubble(mode: DemoReplyMode | null, text: string): string {
   return mode === 'demo' ? `${PET_COPY.replyTag}${clipped}` : clipped;
 }
 
+/**
+ * 桌宠气泡只取**主人私聊**那条回复。
+ *
+ * DemoMessage 目前不带 audience（它来自桌面自己的演示快照，不含 QQ 消息），
+ * 所以这里没有可过滤的归属字段。保留这个入口的语义边界：一旦消息带 audience，
+ * 非 owner-private 的一律不弹到桌面上——桌宠不是多参与者视图。
+ */
 export function lastAssistantReply(snapshot: DemoSnapshot): DemoMessage | null {
   for (let index = snapshot.messages.length - 1; index >= 0; index -= 1) {
     const message = snapshot.messages[index];
-    if (message !== undefined && message.role === 'assistant') return message;
+    if (message === undefined || message.role !== 'assistant') continue;
+    const audience = (message as { readonly audience?: { readonly kind?: string } }).audience;
+    if (audience !== undefined && audience.kind !== undefined && audience.kind !== 'owner-private')
+      continue;
+    return message;
   }
   return null;
 }

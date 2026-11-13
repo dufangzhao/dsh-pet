@@ -10,6 +10,7 @@ import {
   SPEECH_STATUS_TIMEOUT_MS,
   SPEECH_TAIL_GRACE_MS,
   isSpeechVerifiedTerminal,
+  isCompanionConversationAudience,
   matchesDesktopSpeechAudioHeader,
   makeError,
   type DesktopCompanionTarget,
@@ -307,16 +308,14 @@ export class SharedSpeechController {
       event.event.sequence <= baseline.cursor
     )
       return;
-    if (event.event.sequence !== baseline.cursor + 1) {
-      this.#recover(baseline.connectionId);
-      return;
-    }
     this.#baseline = { ...baseline, cursor: event.event.sequence };
     const data = event.event.data;
     if (
       event.event.kind !== 'message' ||
       data['role'] !== 'assistant' ||
-      typeof data['messageId'] !== 'string'
+      typeof data['messageId'] !== 'string' ||
+      !isCompanionConversationAudience(data['audience']) ||
+      data['audience'].kind !== 'owner-private'
     )
       return;
     const provider = this.#view.providers.find(

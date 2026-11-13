@@ -14,6 +14,7 @@ import {
   COMPANION_MEMORY_MAX_FACTS,
   COMPANION_MEMORY_MAX_KEY_UNITS,
   COMPANION_MEMORY_MAX_VALUE_UNITS,
+  companionAudienceKey,
   errorMessage,
   type CompanionAgentView,
   type CompanionApplication,
@@ -34,6 +35,7 @@ import {
   codePointLength,
   adoptProfile,
   applicationLabel,
+  audienceLabel,
   availability,
   beginOperation,
   cancelEditing,
@@ -53,6 +55,7 @@ import {
   seedProfile,
   startAdding,
   startEditing,
+  startPublicCopy,
   upsertCommand,
   valueProblem,
   type PersonaMemoryForm,
@@ -235,6 +238,7 @@ export function PersonaMemory({
       effective.editingKey,
       effective.factBaseline,
       form.busy === 'memory',
+      effective.editingAudience,
     );
   const row = editingFact(effective, facts);
   // 未动过的空草稿不是错误：只在真的输入过之后才报问题，且只报一次。
@@ -379,6 +383,7 @@ export function PersonaMemory({
         expectedMemoryRevision: frozen.memoryRevision,
         expectedFactRevision: frozen.fact.revision,
         key: frozen.fact.key,
+        ...(frozen.fact.audience === undefined ? {} : { audience: frozen.fact.audience }),
       });
     } catch {
       release(token);
@@ -656,43 +661,92 @@ export function PersonaMemory({
               {facts.length === 0 ? (
                 <li className="tc-persona-memory__empty">还没有记下任何事。</li>
               ) : (
-                facts.map((fact) => (
-                  <li
-                    className="tc-persona-memory__row"
-                    key={fact.key}
-                    data-testid="memory-row"
-                    data-key={fact.key}
-                  >
-                    <div className="tc-persona-memory__rowmain">
-                      <span className="tc-persona-memory__key">{fact.key}</span>
-                      <span className="tc-persona-memory__value">{fact.value}</span>
-                      <span className="tc-persona-memory__origin" data-testid="memory-origin">
-                        {originLabel(fact.origin)} · 修订 {fact.revision}
-                      </span>
-                    </div>
-                    <div className="tc-persona-memory__rowactions">
-                      <Button
-                        size="small"
-                        disabled={!rules.canWriteMemory}
-                        data-testid={`memory-edit-${fact.key}`}
-                        onClick={() => editFact(fact)}
-                      >
-                        修改
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="quiet"
-                        disabled={!rules.canWriteMemory}
-                        data-testid={`memory-forget-${fact.key}`}
-                        onClick={() => askForget(fact)}
-                      >
-                        忘记
-                      </Button>
-                    </div>
-                  </li>
-                ))
+                facts.map((fact) => {
+                  // 同键的私有行与公开行是两条：key、testid 都必须带 scope，否则会撞。
+                  const scope = companionAudienceKey(fact.audience ?? { kind: 'owner-private' });
+                  return (
+                    <li
+                      className="tc-persona-memory__row"
+                      /* 行身份是 (scope, key)：同一个 scope 下可以有多条不同 key 的事实，
+                         只按 scope 做 key 会让它们互相顶掉。 */
+                      key={JSON.stringify([scope, fact.key])}
+                      data-testid="memory-row"
+                      data-key={fact.key}
+                      data-scope={scope}
+                    >
+                      <div className="tc-persona-memory__rowmain">
+                        <span className="tc-persona-memory__key">{fact.key}</span>
+                        <span className="tc-persona-memory__value">{fact.value}</span>
+                        <span className="tc-persona-memory__origin" data-testid="memory-origin">
+                          {audienceLabel(fact.audience)} · {originLabel(fact.origin)} · 修订{' '}
+                          {fact.revision}
+                        </span>
+                      </div>
+                      <div className="tc-persona-memory__rowactions">
+                        <Button
+                          size="small"
+                          disabled={!rules.canWriteMemory}
+                          data-testid={`memory-edit-${fact.key}`}
+                          data-scope={scope}
+                          onClick={() => editFact(fact)}
+                        >
+                          修改
+                        </Button>
+                        {/* 把这一条发布成公开副本：原行保持它自己的 scope。 */}
+                        {fact.audience?.kind === 'public' ? null : (
+                          <Button
+                            size="small"
+                            variant="quiet"
+                            disabled={!rules.canWriteMemory || status === null}
+                            data-testid={`memory-public-copy-${fact.key}`}
+                            onClick={() => {
+                              if (status === null) return;
+                              setForm(startPublicCopy(effective, fact, status));
+                            }}
+                          >
+                            创建公开副本
+                          </Button>
+                        )}
+                        <Button
+                          size="small"
+                          variant="quiet"
+                          disabled={!rules.canWriteMemory}
+                          data-testid={`memory-forget-${fact.key}`}
+                          data-scope={scope}
+                          onClick={() => askForget(fact)}
+                        >
+                          忘记
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                })
               )}
             </ul>
+
+            {effective.editingKey === null ? (
+              <Field label="这一条谁能看到" hint="公开后会出现在获准的 QQ 对话上下文里">
+                {({ inputId, describedBy }) => (
+                  <select
+                    id={inputId}
+                    className="pk-input"
+                    aria-describedby={describedBy}
+                    value={effective.addingScope}
+                    disabled={!rules.canWriteMemory}
+                    data-testid="memory-add-scope"
+                    onChange={(event) =>
+                      setForm({
+                        ...effective,
+                        addingScope: event.target.value as 'owner-private' | 'public',
+                      })
+                    }
+                  >
+                    <option value="owner-private">只有我</option>
+                    <option value="public">公开（获准的对话可见）</option>
+                  </select>
+                )}
+              </Field>
+            ) : null}
 
             <Field
               label={effective.editingKey === null ? '新增一条' : '修改这一条'}

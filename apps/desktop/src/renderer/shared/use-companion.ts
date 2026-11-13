@@ -104,6 +104,13 @@ export interface CompanionView {
   send(commandId: string, text: string): Promise<CompanionResult>;
   stopTask(commandId: string, taskId: string): Promise<CompanionResult>;
   stopForeground(): Promise<CompanionResult>;
+  /**
+   * 打开服务 Web 的管理页。
+   *
+   * 只传**当前渲染捕获的** connectionId；URL 由 Main 自己按已连接的配置拼，
+   * 渲染层拿不到也传不了任意地址或 operator token。
+   */
+  openWeb(): Promise<CompanionResult>;
   readProfile(): Promise<Result<CompanionProfileView>>;
   readMemory(): Promise<Result<CompanionMemoryView>>;
   saveProfile(command: CompanionProfileSaveCommand): Promise<Result<CompanionProfileView>>;
@@ -350,6 +357,17 @@ export function useCompanion(): CompanionView {
     return result;
   }, [run, state]);
 
+  const openWeb = useCallback(async (): Promise<CompanionResult> => {
+    const current = state;
+    if (current === null || current.connectionId === null)
+      return { outcome: 'failed', error: '还没有连接服务，先连上再打开管理页。' };
+    const target = current.connectionId;
+    setNotice(null);
+    // 走同一条栅栏：换连接之后旧闭包的结果不落地。
+    const { result } = await run((bridge) => bridge.openWeb({ connectionId: target }), target);
+    return result;
+  }, [run, state]);
+
   /**
    * 读取类动作：结果只对发起时那个 connectionId 成立。
    * 返回前同样过栅栏；换代的旧读取一律变成 stale-owner，界面据此不采纳旧正文。
@@ -494,6 +512,7 @@ export function useCompanion(): CompanionView {
     send,
     stopTask,
     stopForeground,
+    openWeb,
     readProfile,
     readMemory,
     saveProfile,

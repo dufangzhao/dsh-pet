@@ -60,6 +60,7 @@ function companion(over: Partial<CompanionView> = {}): CompanionView {
     send: async () => ({ outcome: 'accepted', error: null }),
     stopTask: async () => ({ outcome: 'accepted', error: null }),
     stopForeground: async () => ({ outcome: 'accepted', error: null }),
+    openWeb: async () => ({ outcome: 'accepted', error: null }),
     readProfile: async () => ({
       ok: false,
       error: { code: 'not-ready', messageKey: 'errors.not-ready', retryable: true },

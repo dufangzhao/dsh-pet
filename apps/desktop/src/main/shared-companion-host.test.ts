@@ -236,6 +236,14 @@ async function connectedFixture(token = 'native-source-operator-token-1234') {
       {
         id: 'task',
         executionId: 'execution',
+        origin: {
+          inputId: null,
+          principalId: 'owner',
+          audience: { kind: 'owner-private' },
+          route: { kind: 'owner-private' },
+          origins: [],
+          materialIds: [],
+        },
         title: 'file',
         status: 'completed',
         createdAt: 1,
@@ -366,7 +374,12 @@ it.each([false, true])(
       { connectionId: connected.value.connectionId, artifactId: 'artifact' },
       1,
     );
-    await entered.promise;
+    await Promise.race([
+      entered.promise,
+      save.then(() => {
+        throw new Error('Artifact save completed before the controlled rename');
+      }),
+    ]);
     let replaced = false;
     const replacement = f.controller
       .connect({

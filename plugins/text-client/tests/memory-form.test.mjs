@@ -31,6 +31,7 @@ import {
   seedProfile,
   startAdding,
   startEditing,
+  startPublicCopy,
   upsertCommand,
   valueProblem,
 } from '../src/client/memory-form.ts';
@@ -369,4 +370,52 @@ test('编辑既有行时能取到那一行；新增时为空', () => {
   const editing = startEditing(seeded(), fact(), status());
   assert.equal(editingFact(editing, [fact()])?.key, '常喝的茶');
   assert.equal(editingFact(startAdding(seeded(), status()), [fact()]), null);
+});
+
+/**
+ * 公开 scope：默认仍然省略 audience（旧指纹不变），只有显式选「公开」才带。
+ */
+test('新增默认不带 audience，保持旧命令 JSON 不变', () => {
+  const form = {
+    ...emptyPersonaMemoryForm,
+    key: 'k',
+    value: 'v',
+    memoryBaseline: 3,
+    factBaseline: 0,
+  };
+  const plan = { kind: 'upsert', commandId: 'c1', fingerprint: 'f' };
+  const command = upsertCommand(form, plan);
+  assert.equal('audience' in command, false);
+});
+
+test('新增选公开时显式带 public audience', () => {
+  const form = {
+    ...emptyPersonaMemoryForm,
+    key: 'k',
+    value: 'v',
+    memoryBaseline: 3,
+    factBaseline: 0,
+    addingScope: 'public',
+  };
+  const command = upsertCommand(form, { kind: 'upsert', commandId: 'c1', fingerprint: 'f' });
+  assert.deepEqual(command.audience, { kind: 'public' });
+});
+
+test('创建公开副本不改原行 scope，只产生一份新的新增草稿', () => {
+  const status = { revision: 5 };
+  const fact = {
+    key: '茶',
+    value: '乌龙',
+    revision: 2,
+    updatedAt: 1,
+    audience: { kind: 'person-private', principalId: 'person-1' },
+  };
+  const form = startPublicCopy(emptyPersonaMemoryForm, fact, status);
+  // 新草稿是「新增」，不是编辑那一行。
+  assert.equal(form.editingKey, null);
+  assert.equal(form.addingScope, 'public');
+  assert.equal(form.key, '茶');
+  assert.equal(form.value, '乌龙');
+  // 原行本身没有被改动（它是入参，函数不修改它）。
+  assert.deepEqual(fact.audience, { kind: 'person-private', principalId: 'person-1' });
 });

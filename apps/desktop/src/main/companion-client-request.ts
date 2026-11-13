@@ -1,4 +1,9 @@
-import { makeError, type DesktopCompanionBridge, type Result } from '@pet/contracts';
+import {
+  makeError,
+  isCompanionAudience,
+  type DesktopCompanionBridge,
+  type Result,
+} from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { exactKeys, record } from '@pet/host-kernel';
 import { isTrustedPetSource } from './ipc-request.js';
@@ -22,6 +27,8 @@ export async function handleDesktopCompanionRequest(
   controller: DesktopCompanionController,
 ): Promise<Result<unknown>> {
   if (!isTrustedPetSource(source)) return denied('permission-denied');
+  if (action === 'openWeb' && source.role !== 'console' && source.role !== 'pet')
+    return denied('permission-denied');
   if (
     [
       'connect',
@@ -59,9 +66,15 @@ export async function handleDesktopCompanionRequest(
   if (!id(body['connectionId'])) return denied('invalid-input');
   const target = { connectionId: body['connectionId'] };
   if (
-    ['reconnect', 'disconnect', 'refresh', 'stopForeground', 'readProfile', 'readMemory'].includes(
-      action,
-    )
+    [
+      'reconnect',
+      'disconnect',
+      'refresh',
+      'openWeb',
+      'stopForeground',
+      'readProfile',
+      'readMemory',
+    ].includes(action)
   ) {
     if (!exactKeys(body, ['connectionId'])) return denied('invalid-input');
     switch (action) {
@@ -71,6 +84,8 @@ export async function handleDesktopCompanionRequest(
         return controller.disconnect(target);
       case 'refresh':
         return controller.refresh(target);
+      case 'openWeb':
+        return controller.openWeb(target);
       case 'stopForeground':
         return controller.stopForeground(target);
       case 'readMemory':
@@ -106,14 +121,19 @@ export async function handleDesktopCompanionRequest(
         'expectedFactRevision',
         'key',
         ...(action === 'upsertFact' ? ['value'] : []),
+        ...(Object.hasOwn(command, 'audience') ? ['audience'] : []),
       ]) ||
       !id(command['commandId']) ||
       !revision(command['expectedMemoryRevision']) ||
       !revision(command['expectedFactRevision']) ||
-      typeof command['key'] !== 'string'
+      typeof command['key'] !== 'string' ||
+      (Object.hasOwn(command, 'audience') && !isCompanionAudience(command['audience']))
     )
       return denied('invalid-input');
     const base = {
+      ...(Object.hasOwn(command, 'audience') && isCompanionAudience(command['audience'])
+        ? { audience: command['audience'] }
+        : {}),
       commandId: command['commandId'],
       expectedMemoryRevision: command['expectedMemoryRevision'],
       expectedFactRevision: command['expectedFactRevision'],

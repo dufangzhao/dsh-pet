@@ -3,6 +3,7 @@ import { StatusBadge } from '@pet/ui-kit';
 import type { CompanionMessage, CompanionTask } from '@pet/contracts';
 
 import { clockTime } from './format.js';
+import { MessageMaterials, type MaterialActions } from './message-materials.js';
 import type { ClientState } from './state.js';
 
 const ROLE_LABELS = { user: '你', assistant: '助手', notice: '通知' } as const;
@@ -14,6 +15,8 @@ interface ConversationProps {
   readonly onSubmit: () => void;
   /** 语音 owner 的视图；它自己持有设备与 intent，这里只挂载。 */
   readonly voice?: ReactNode;
+  /** 材料读取：没有它就只显示正文，不摆一个点了没用的下载按钮。 */
+  readonly materials?: MaterialActions;
 }
 
 export function Conversation({
@@ -22,6 +25,7 @@ export function Conversation({
   onDraftChange,
   onSubmit,
   voice,
+  materials,
 }: ConversationProps): JSX.Element {
   const listRef = useRef<HTMLDivElement>(null);
   const messages = state.snapshot?.messages ?? [];
@@ -61,6 +65,7 @@ export function Conversation({
               key={message.id}
               message={message}
               task={message.taskId === null ? undefined : taskById.get(message.taskId)}
+              materials={materials}
             />
           ))
         )}
@@ -130,9 +135,11 @@ export function Conversation({
 function MessageRow({
   message,
   task,
+  materials,
 }: {
   message: CompanionMessage;
   task: CompanionTask | undefined;
+  materials: MaterialActions | undefined;
 }): JSX.Element {
   return (
     <article className={`tc-msg tc-msg--${message.role}`}>
@@ -144,6 +151,7 @@ function MessageRow({
         {task === undefined ? null : <span className="tc-msg__flag">任务 · {task.title}</span>}
       </header>
       <p className="tc-msg__text">{message.text}</p>
+      {materials === undefined ? null : <MessageMaterials message={message} actions={materials} />}
     </article>
   );
 }

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from 'react';
-import { errorMessage, type CompanionProfileView } from '@pet/contracts';
+import { errorMessage, type CompanionProfileView, type QQView } from '@pet/contracts';
 
 import { AgentLine, Conversation } from './chat.js';
 import { ModelDialog } from './model.js';
+import { QQPanel, type QQTransport } from './qq-panel.js';
+import { materialActions } from './message-materials.js';
 import { CompanionClient } from './client.js';
 import { ConnectForm } from './connect.js';
 import { useClientState } from './hooks.js';
@@ -15,6 +17,7 @@ import { createVoiceSampler } from './voice-sampler.js';
 import { createWebVoiceTransport } from './voice-web.js';
 import { VoiceSettings } from './voice-settings.js';
 import './persona-memory.css';
+import './qq.css';
 import './voice-input.css';
 
 /** 服务在同一个源上托管 worklet；CSP 的 script-src 'self' 只认这个固定路径。 */
@@ -26,6 +29,8 @@ export function App(): JSX.Element {
   const [draft, setDraft] = useState('');
   const [modelOpen, setModelOpen] = useState(false);
   const [voiceSettingsOpen, setVoiceSettingsOpen] = useState(false);
+  const [qqOpen, setQQOpen] = useState(false);
+  const [qqView, setQQView] = useState<QQView | null>(null);
   const [profile, setProfile] = useState<CompanionProfileView | null>(null);
 
   /**
@@ -44,6 +49,80 @@ export function App(): JSX.Element {
     [client, voiceTargetKey],
   );
   const sampler = useMemo(() => createVoiceSampler(), []);
+  /**
+   * QQ 面板只做「转发 + 重新读」：写成功之后必须重新读一次视图，
+   * 否则界面会把「命令被记录」当成「已经连上」。
+   */
+  const openQQ = (): void => {
+    setQQOpen(true);
+    const captured = client.getConnectionId();
+    if (captured === null) return;
+    void client.readQQ(captured).then(
+      (result) => {
+        if (result.ok) setQQView(result.value);
+      },
+      () => undefined,
+    );
+  };
+
+  /**
+   * 连接世代必须随每次 connect() 变化，而 `state` 在重连时可能短暂保持同一
+   * phase——所以这里读 client 自己的世代，并用 state 作为「有变化」的触发源。
+   */
+  const connectionId = client.getConnectionId() ?? '';
+  // 材料读取按渲染时的连接世代锁定：换连接后旧结果不落地。
+  const materials = useMemo(
+    () => (connectionId === '' ? undefined : materialActions(connectionId, client.transport)),
+    [connectionId, client],
+  );
+  /**
+   * 面板打开期间，服务端状态一变就重读一次 QQ 视图。
+   *
+   * 触发源是既有的 `state`（SSE 已经驱动它），所以这不是新轮询，也不是
+   * 第二个 view truth：只是把同一个 owner 的最新值取回来。
+   */
+  useEffect(() => {
+    if (!qqOpen || connectionId === '') return;
+    let cancelled = false;
+    void client.readQQ(connectionId).then(
+      (result) => {
+        if (!cancelled && result.ok) setQQView(result.value);
+      },
+      () => undefined,
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [client, connectionId, qqOpen, state]);
+
+  const qqTransport = useMemo<QQTransport>(
+    () => ({
+      /**
+       * 连接身份：每次 connect() 生成的尝试世代。
+       *
+       * 不能用 snapshot.epoch——那是持久 State 身份，重连不变。
+       * 连接不在时是空串：面板据此拒掉所有旧闭包。
+       */
+      connectionId: connectionId,
+      /*
+       * 每个方法都把**捕获的** connectionId 交给 client：client 会在发请求前
+       * 核对它是不是当前连接，对不上就返回 stale-owner，一个请求都不发。
+       * 这样旧闭包不会把 A 的操作打到 B 的服务上。
+       */
+      read: () => client.readQQ(connectionId),
+      savePolicy: (command) => client.saveQQPolicy(command, connectionId),
+      saveSource: (command) => client.saveQQSource(command, connectionId),
+      writeCredential: (command) => client.writeQQCredential(command, connectionId),
+      saveJudge: (command) => client.saveQQJudge(command, connectionId),
+      writeJudgeCredential: (command) => client.writeQQJudgeCredential(command, connectionId),
+      setEnabled: (pluginId, commandId, enabled) =>
+        client.setQQSourceEnabled(pluginId, commandId, enabled, connectionId),
+      readDeliveries: (after) => client.readQQDeliveries(after, connectionId),
+      readDelivery: (id) => client.readQQDelivery(id, connectionId),
+    }),
+    [client, connectionId],
+  );
+
   const voice = useVoiceInput({
     transport: voiceTransport,
     sampler,
@@ -158,14 +237,22 @@ export function App(): JSX.Element {
   }
 
   return (
-    <div className="tc-shell">
+    <div className="tc-shell" data-connection-id={connectionId}>
       <Header
         state={state}
         onReconnect={() => void client.reconnect()}
         onDisconnect={() => client.disconnect()}
         onOpenModel={() => setModelOpen(true)}
         onOpenVoice={() => setVoiceSettingsOpen(true)}
+        onOpenQQ={openQQ}
         voiceAvailable={voiceTransport !== null}
+      />
+      <QQPanel
+        open={qqOpen}
+        view={qqView}
+        transport={qqTransport}
+        onClose={() => setQQOpen(false)}
+        onView={setQQView}
       />
       <ModelDialog
         open={modelOpen}
@@ -229,6 +316,7 @@ export function App(): JSX.Element {
           onDraftChange={setDraft}
           onSubmit={submit}
           voice={<VoiceInput controller={voice} />}
+          {...(materials === undefined ? {} : { materials })}
         />
         <Side
           state={state}
@@ -249,6 +337,7 @@ export function Header({
   onDisconnect,
   onOpenModel,
   onOpenVoice,
+  onOpenQQ,
   voiceAvailable,
 }: {
   state: ClientState;
@@ -256,6 +345,7 @@ export function Header({
   onDisconnect: () => void;
   onOpenModel: () => void;
   onOpenVoice: () => void;
+  onOpenQQ: () => void;
   voiceAvailable: boolean;
 }): JSX.Element {
   return (
@@ -279,6 +369,17 @@ export function Header({
           >
             语音
           </button>
+          {/* 只在服务真的给了 QQ 状态时才摆入口：旧服务上不显示一个点了会空的按钮。 */}
+          {state.snapshot?.qq === undefined ? null : (
+            <button
+              type="button"
+              className="tc-link"
+              onClick={onOpenQQ}
+              data-testid="open-qq-settings"
+            >
+              QQ
+            </button>
+          )}
           <button type="button" className="tc-link tc-head__exit" onClick={onDisconnect}>
             断开
           </button>

@@ -296,3 +296,159 @@ test('a synthetic connector and a verified check keep their distinct facts', () 
   assert.equal(parsed.value.model.connectors[0].synthetic, true);
   assert.equal(parsed.value.model.check.evidence, 'synthetic');
 });
+
+/**
+ * 多参与者之后，消息/任务多了归属与内容形态。这些字段一旦被这一层剥掉，
+ * 界面就会把群里的话当成自己的、把长文显示成不完整正文——所以逐条钉住。
+ */
+const qqAccount = {
+  protocol: 'official',
+  sourcePluginId: 'pet.qq-official',
+  instanceId: 'default',
+  accountId: 'app-1',
+};
+const qqAudience = { kind: 'qq-group', account: qqAccount, groupId: 'group-A' };
+const qqOrigin = {
+  kind: 'qq',
+  inputId: 'input-group',
+  principalId: 'person-1',
+  audience: qqAudience,
+  route: {
+    kind: 'qq',
+    account: qqAccount,
+    scene: 'group',
+    targetId: 'group-A',
+    reference: {
+      eventId: 'event-1',
+      messageId: 'message-1',
+      occurredAt: 1,
+      displayReference: null,
+    },
+  },
+  policyRevision: 7,
+  actor: { account: qqAccount, scene: 'group', senderId: 'member-1', groupId: 'group-A' },
+  eventKey: 'event-key-1',
+  messageId: 'message-1',
+  trigger: 'mention',
+  quote: null,
+};
+const qqRoute = {
+  kind: 'qq',
+  account: qqAccount,
+  scene: 'group',
+  targetId: 'group-A',
+  reference: { eventId: 'event-1', messageId: 'message-1', occurredAt: 1, displayReference: null },
+};
+
+test('消息的 audience/origins/materials/content 不被剥掉', () => {
+  const parsed = parseSnapshot(
+    snapshot({
+      messages: [
+        {
+          id: 'm1',
+          role: 'assistant',
+          text: '群里那句话',
+          createdAt: 1_700_000_000_000,
+          inputId: null,
+          taskId: null,
+          audience: qqAudience,
+          origins: [qqOrigin],
+          materials: [],
+          content: { kind: 'inline-text' },
+        },
+      ],
+    }),
+  );
+  assert.equal(parsed.ok, true);
+  const message = parsed.value.messages[0];
+  assert.deepEqual(message.audience, qqAudience);
+  assert.equal(message.origins.length, 1);
+  assert.deepEqual(message.materials, []);
+  assert.deepEqual(message.content, { kind: 'inline-text' });
+});
+
+test('读不懂的 audience 让整条快照作废，不落半个归属', () => {
+  const parsed = parseSnapshot(
+    snapshot({
+      messages: [
+        {
+          id: 'm1',
+          role: 'assistant',
+          text: 'x',
+          createdAt: 1_700_000_000_000,
+          inputId: null,
+          taskId: null,
+          audience: { kind: 'public' },
+        },
+      ],
+    }),
+  );
+  // public 不是会话受众：能读成 JSON，但不是合法的 CompanionConversationAudience。
+  assert.equal(parsed.ok, false);
+});
+
+test('旧消息没有 audience 时照常解析', () => {
+  const parsed = parseSnapshot(snapshot());
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.value.messages[0].audience, undefined);
+});
+
+test('任务 origin 不被剥掉', () => {
+  const origin = {
+    inputId: 'input-group',
+    principalId: 'person-1',
+    audience: qqAudience,
+    route: qqRoute,
+    origins: [qqOrigin],
+    materialIds: [],
+  };
+  const parsed = parseSnapshot(snapshot({ tasks: [{ ...task(), origin }] }));
+  assert.equal(parsed.ok, true);
+  assert.deepEqual(parsed.value.tasks[0].origin, origin);
+});
+
+test('快照里的 qq 状态整份校验，坏了就作废', () => {
+  const status = {
+    version: 1,
+    sources: [
+      {
+        protocol: 'official',
+        sourcePluginId: 'pet.qq-official',
+        desiredEnabled: true,
+        source: 'ready',
+        phase: 'ready',
+        account: {
+          protocol: 'official',
+          sourcePluginId: 'pet.qq-official',
+          instanceId: 'default',
+          accountId: 'bot-1',
+        },
+        cleanup: 'settled',
+        error: null,
+      },
+    ],
+  };
+  const parsed = parseSnapshot(snapshot({ qq: status }));
+  assert.equal(parsed.ok, true);
+  assert.deepEqual(parsed.value.qq, status);
+
+  // 缺 cleanup 的 qq 不能变成半个对象进界面。
+  const broken = parseSnapshot(
+    snapshot({ qq: { version: 1, sources: [{ ...status.sources[0], cleanup: undefined }] } }),
+  );
+  assert.equal(broken.ok, false);
+});
+
+test('事件 data 原样保留，不重建也不丢字段', () => {
+  const parsed = parseEvent({
+    id: 'e1',
+    epoch: 'epoch-1',
+    sequence: 7,
+    time: 1_700_000_000_000,
+    kind: 'message',
+    data: { messageId: 'm1', audience: qqAudience },
+  });
+  // parseEvent 返回事件本身（不是 Result）：data 原样带过来。
+  assert.deepEqual(parsed.data.audience, qqAudience);
+  assert.equal(parsed.data.messageId, 'm1');
+});

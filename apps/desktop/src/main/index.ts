@@ -5,6 +5,7 @@ import {
   session,
   safeStorage,
   dialog,
+  shell,
   type IpcMainInvokeEvent,
 } from 'electron';
 import path from 'node:path';
@@ -275,6 +276,7 @@ const startup = app
         },
       },
       () => broadcast(DESKTOP_COMPANION_IPC.changed),
+      (url) => shell.openExternal(url),
     );
     voice = new SharedVoiceController(
       companion,

@@ -13,6 +13,16 @@ import {
   COMPANION_MEMORY_MAX_DATA_BYTES,
   COMPANION_MEMORY_MAX_ORIGIN_BYTES,
   type CompanionApplication,
+  type CompanionAudience,
+  type CompanionMaterialRef,
+  isCompanionAudience,
+  isCompanionConversationAudience,
+  isCompanionMessageContent,
+  isCompanionMaterialRef,
+  isCompanionOrigins,
+  isCompanionTaskOrigin,
+  isQQStatus,
+  COMPANION_MATERIAL_MAX_PARTS,
   type CompanionFactOrigin,
   type CompanionMemoryStatus,
   type CompanionMemoryView,
@@ -182,7 +192,57 @@ function parseMessage(value: unknown): CompanionMessage | null {
   if (role !== 'user' && role !== 'assistant' && role !== 'notice') return null;
   if (inputId !== null && !isText(inputId)) return null;
   if (taskId !== null && !isText(taskId)) return null;
-  return { id, role, text, createdAt, inputId, taskId };
+
+  /**
+   * 多参与者之后，消息多了归属与内容形态。
+   *
+   * 这些字段是可选的（旧服务/旧记录没有），但**一旦出现就必须整份读得懂**：
+   * 剥掉 audience 会让界面把群里的话当成自己的，剥掉 materials/content 会让
+   * 长文与附件显示成不完整正文。用契约自己的 guard 判定，界面不再复述形状。
+   */
+  const audience =
+    value['audience'] === undefined
+      ? undefined
+      : isCompanionConversationAudience(value['audience'])
+        ? value['audience']
+        : null;
+  if (audience === null) return null;
+  const origins =
+    value['origins'] === undefined
+      ? undefined
+      : isCompanionOrigins(value['origins'])
+        ? value['origins']
+        : null;
+  if (origins === null) return null;
+  const materials =
+    value['materials'] === undefined
+      ? undefined
+      : Array.isArray(value['materials']) &&
+          value['materials'].length <= COMPANION_MATERIAL_MAX_PARTS &&
+          value['materials'].every(isCompanionMaterialRef)
+        ? (value['materials'] as readonly CompanionMaterialRef[])
+        : null;
+  if (materials === null) return null;
+  const content =
+    value['content'] === undefined
+      ? undefined
+      : isCompanionMessageContent(value['content'])
+        ? value['content']
+        : null;
+  if (content === null) return null;
+
+  return {
+    id,
+    role,
+    text,
+    createdAt,
+    inputId,
+    taskId,
+    ...(audience === undefined ? {} : { audience }),
+    ...(origins === undefined ? {} : { origins }),
+    ...(materials === undefined ? {} : { materials }),
+    ...(content === undefined ? {} : { content }),
+  };
 }
 
 function parseFact(value: unknown): CompanionFact | null {
@@ -205,7 +265,17 @@ function parseFact(value: unknown): CompanionFact | null {
     return null;
   const origin = value['origin'] === undefined ? undefined : parseOrigin(value['origin']);
   if (origin === null) return null;
-  return { key, value: text, revision, updatedAt, ...(origin === undefined ? {} : { origin }) };
+  // scope 是行身份的一部分：同键的私有行与公开行是两条，丢了它就没法区分。
+  const audience = value['audience'] === undefined ? undefined : parseAudience(value['audience']);
+  if (audience === null) return null;
+  return {
+    key,
+    value: text,
+    revision,
+    updatedAt,
+    ...(origin === undefined ? {} : { origin }),
+    ...(audience === undefined ? {} : { audience }),
+  };
 }
 
 function parsePlugin(value: unknown): CompanionPluginView | null {
@@ -244,6 +314,14 @@ export function parseTask(value: unknown): CompanionTask | null {
     artifacts.some((artifact) => artifact.taskId !== id)
   )
     return null;
+  // 任务的发起人/受众是权限与路由的依据，不能在这一层被剥掉。
+  const origin =
+    value['origin'] === undefined
+      ? undefined
+      : isCompanionTaskOrigin(value['origin'])
+        ? value['origin']
+        : null;
+  if (origin === null) return null;
   return {
     id,
     executionId,
@@ -257,6 +335,7 @@ export function parseTask(value: unknown): CompanionTask | null {
     logsTruncated,
     artifacts,
     error,
+    ...(origin === undefined ? {} : { origin }),
   };
 }
 
@@ -484,6 +563,10 @@ export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
   if (model === null) return malformed();
   const memory = value['memory'] === undefined ? undefined : parseMemoryStatus(value['memory']);
   if (memory === null || (memory && !memoryFactsMatch(memory, facts))) return malformed();
+  // `qq` 同样是可选成员：缺省是「这个服务没有 QQ」，出现了就必须整份读得懂。
+  // 桌面只读这一份状态，不另开 reader。
+  const qq = value['qq'] === undefined ? undefined : isQQStatus(value['qq']) ? value['qq'] : null;
+  if (qq === null) return malformed();
   return {
     ok: true,
     value: {
@@ -499,6 +582,7 @@ export function parseSnapshot(value: unknown): ParseResult<CompanionSnapshot> {
       ...(projection === undefined ? {} : { projection }),
       ...(model === undefined ? {} : { model }),
       ...(memory === undefined ? {} : { memory }),
+      ...(qq === undefined ? {} : { qq }),
     },
   };
 }
@@ -609,6 +693,11 @@ export function parseOrigin(value: unknown): CompanionFactOrigin | null {
     evidence: { start: evidence['start'], end: evidence['end'] },
   };
 }
+/** 事实的 scope：用契约自己的判定，界面不再复述一遍 audience 的形状。 */
+export function parseAudience(value: unknown): CompanionAudience | null {
+  return isCompanionAudience(value) ? value : null;
+}
+
 export function parseMemoryStatus(value: unknown): CompanionMemoryStatus | null {
   if (!isRecord(value) || !isCount(value['revision'])) return null;
   const application = parseApplication(value['application']);

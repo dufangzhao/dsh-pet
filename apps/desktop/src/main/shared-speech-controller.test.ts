@@ -11,6 +11,7 @@ import {
   type SpeechUtteranceStatus,
   type DesktopSpeechAudioEvent,
   type CompanionEvent,
+  type JsonObject,
 } from '@pet/contracts';
 import { SharedSpeechController } from './shared-speech-controller.js';
 import { SharedSpeechHost } from './shared-speech-host.js';
@@ -276,14 +277,20 @@ async function fixture(
   });
   const initialization = controller.refreshSource();
   if (!readGates.has(1)) await initialization;
-  const emit = (id = `reply-${sequence + 1}`, role = 'assistant') => {
+  const emit = (
+    id = `reply-${sequence + 1}`,
+    role = 'assistant',
+    scope: JsonObject = { audience: { kind: 'owner-private' } },
+    advance = 1,
+  ) => {
+    sequence += advance;
     const event: CompanionEvent = {
-      id: `epoch:${++sequence}`,
+      id: `epoch:${sequence}`,
       epoch: 'epoch',
       sequence,
       time: 1,
       kind: 'message',
-      data: { messageId: id, role, inputId: null, taskId: null },
+      data: { messageId: id, role, inputId: null, taskId: null, ...scope },
     };
     listener({
       kind: 'event',
@@ -555,6 +562,34 @@ it('disabling fences queued invalidations and waits for the actual old read to r
   await disabling;
   expect(f.session.readSpeech).toHaveBeenCalledTimes(2);
   expect((await state(f)).source).toBe('disabled');
+});
+it('admits only explicit owner-private events before FIFO and accepts scope-filtered sequence gaps', async () => {
+  const f = await fixture();
+  f.ready(false);
+  const account = {
+    protocol: 'official',
+    sourcePluginId: 'pet.qq-official',
+    instanceId: 'default',
+    accountId: 'app',
+  };
+  for (const scope of [
+    { audience: { kind: 'qq-group', account, groupId: 'group-A' } },
+    { audience: { kind: 'person-private', principalId: 'another' } },
+    { audience: { kind: 'public' } },
+    { audience: null },
+    {},
+    { audience: { kind: 'owner-private', role: 'administrator' } },
+  ])
+    f.emit('not-personal', 'assistant', scope);
+  expect(await state(f)).toMatchObject({ phase: 'idle', messageId: null, queued: 0 });
+  expect(f.session.begin).not.toHaveBeenCalled();
+  f.emit('personal-after-filtered-gap', 'assistant', { audience: { kind: 'owner-private' } }, 3);
+  await vi.waitFor(() => expect(f.session.begin).toHaveBeenCalledTimes(1));
+  expect(f.session.begin).toHaveBeenCalledWith(
+    expect.objectContaining({ messageId: 'personal-after-filtered-gap' }),
+    expect.any(AbortSignal),
+  );
+  expect(f.session.readSpeech).toHaveBeenCalledTimes(1);
 });
 it('keeps a 64KiB chunk and its one-frame tail ordered, then waits for actual release', async () => {
   const f = await fixture();

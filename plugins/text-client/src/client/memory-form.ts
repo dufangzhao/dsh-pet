@@ -11,6 +11,7 @@
  */
 import {
   errorMessage,
+  type CompanionAudience,
   type CompanionFact,
   type CompanionFactOrigin,
   type CompanionMemoryForgetCommand,
@@ -39,8 +40,20 @@ export interface PersonaMemoryForm {
   readonly profileBaseline: number | null;
   /** 用户是否动过人格。不能用内容差异判断：服务端改值也会造成差异。 */
   readonly profileEdited: boolean;
-  /** 记忆区当前正在编辑的那一行；null 表示在「新增」。 */
+  /**
+   * 记忆区当前正在编辑的那一行；null 表示在「新增」。
+   *
+   * 行的身份是 (audience, key)：管理视图可以同时存在同键的私有行与公开行，
+   * 只按 key 找会抓到另一条，随后用不带 audience 的命令改到 owner 事实上。
+   */
   readonly editingKey: string | null;
+  /** 那一行的 scope；null = 新增，或旧数据里没有 scope 的 owner 事实。 */
+  readonly editingAudience: CompanionAudience | null;
+  /**
+   * 新增一条时选的 scope：'owner-private' 保持旧行为（命令里省略 audience），
+   * 'public' 才显式带上 `{kind:'public'}`。编辑既有行时这个字段不参与。
+   */
+  readonly addingScope: 'owner-private' | 'public';
   readonly key: string;
   readonly value: string;
   /** 这次记忆改动读到的集合版本与（编辑既有行时的）行版本；null = 尚未捕获。 */
@@ -58,6 +71,8 @@ export const emptyPersonaMemoryForm: PersonaMemoryForm = {
   profileBaseline: null,
   profileEdited: false,
   editingKey: null,
+  editingAudience: null,
+  addingScope: 'owner-private',
   key: '',
   value: '',
   memoryBaseline: null,
@@ -130,11 +145,12 @@ export function memoryChangedUnderneath(
   editingKey: string | null,
   factBaseline: number | null,
   selfPending = false,
+  editingAudience: CompanionAudience | null = null,
 ): boolean {
   if (selfPending) return false;
   if (baseline !== null && status.revision > baseline) return true;
   if (editingKey === null) return false;
-  const row = facts.find((fact) => fact.key === editingKey);
+  const row = facts.find((fact) => sameFact(fact, editingKey, editingAudience));
   // 正在编辑的行没了：那是别人删的。
   if (row === undefined) return true;
   // 行被改到比我们捕获的版本更新：那是别人改的。
@@ -188,13 +204,27 @@ export function profilePlan(
   };
 }
 
+/**
+ * 一条事实是不是「正在编辑的那一行」。
+ *
+ * 必须同时比 scope 与键：同键不同 scope 是两条不同的行。
+ * 旧数据没有 audience 字段，`undefined` 与 `null` 视为同一 scope（owner 缺省）。
+ */
+export function sameFact(
+  fact: CompanionFact,
+  key: string | null,
+  audience: CompanionAudience | null,
+): boolean {
+  return fact.key === key && (fact.audience ?? null) === (audience ?? null);
+}
+
 /** 记忆区此刻在编辑哪一行：新增时是 null，改既有行时是那一行。 */
 export function editingFact(
   form: PersonaMemoryForm,
   facts: readonly CompanionFact[],
 ): CompanionFact | null {
   if (form.editingKey === null) return null;
-  return facts.find((fact) => fact.key === form.editingKey) ?? null;
+  return facts.find((fact) => sameFact(fact, form.editingKey, form.editingAudience)) ?? null;
 }
 
 export interface MemoryPlan {
@@ -245,6 +275,15 @@ export function upsertCommand(
     expectedFactRevision: form.factBaseline ?? 0,
     key: normalizeKey(form.key),
     value: form.value,
+    // 编辑既有行：带它捕获的 scope。新增行：只有选了「公开」才显式带上，
+    // 默认仍然省略——这样旧命令的 JSON 与指纹一个字节都不变。
+    ...(form.editingKey !== null
+      ? form.editingAudience === null
+        ? {}
+        : { audience: form.editingAudience }
+      : form.addingScope === 'public'
+        ? { audience: { kind: 'public' as const } }
+        : {}),
   };
 }
 
@@ -259,6 +298,7 @@ export function forgetCommand(
     expectedMemoryRevision: form.memoryBaseline ?? 0,
     expectedFactRevision: form.factBaseline ?? 0,
     key,
+    ...(form.editingAudience === null ? {} : { audience: form.editingAudience }),
   };
 }
 
@@ -362,11 +402,15 @@ export function adoptMemory(
 ): PersonaMemoryForm {
   const duplicate = result.committedRevision === null;
   const stillThere =
-    form.editingKey === null ? null : (facts.find((f) => f.key === form.editingKey) ?? null);
+    form.editingKey === null
+      ? null
+      : (facts.find((f) => sameFact(f, form.editingKey, form.editingAudience)) ?? null);
   return {
     ...form,
     busy: null,
     editingKey: null,
+    editingAudience: null,
+    addingScope: 'owner-private',
     key: '',
     value: '',
     memoryTouched: false,
@@ -402,13 +446,22 @@ export function forgetSucceeded(
 ): PersonaMemoryForm {
   // 忘记的正好是正在编辑的那一行才收起编辑态；否则那是**另一行**，草稿必须留着。
   const keepEditing = form.editingKey !== null && form.editingKey !== forgottenKey;
-  const row = keepEditing ? (facts.find((f) => f.key === form.editingKey) ?? null) : null;
+  const row = keepEditing
+    ? (facts.find((f) => sameFact(f, form.editingKey, form.editingAudience)) ?? null)
+    : null;
   return {
     ...form,
     busy: null,
     ...(keepEditing
       ? { factBaseline: row?.revision ?? form.factBaseline }
-      : { editingKey: null, key: '', value: '', factBaseline: null, memoryTouched: false }),
+      : {
+          editingKey: null,
+          editingAudience: null,
+          key: '',
+          value: '',
+          factBaseline: null,
+          memoryTouched: false,
+        }),
     memoryBaseline: result.committedRevision ?? form.memoryBaseline,
     notice: {
       kind: result.view.application.error === null ? 'ok' : 'info',
@@ -448,7 +501,8 @@ export function rebaseOnLatest(
   const row =
     memory === null || form.editingKey === null
       ? null
-      : (memory.facts.find((fact) => fact.key === form.editingKey) ?? null);
+      : (memory.facts.find((fact) => sameFact(fact, form.editingKey, form.editingAudience)) ??
+        null);
 
   const next: PersonaMemoryForm = {
     ...form,
@@ -502,6 +556,31 @@ export function noteOperation(form: PersonaMemoryForm, text: string): PersonaMem
 }
 
 /** 开始编辑既有行：捕获它的键与版本，值原样放进草稿。 */
+/**
+ * 把一条既有事实「创建公开副本」。
+ *
+ * 不是把原行改成公开：那会静默改变它自己的 scope（原来群里的上下文会失去它）。
+ * 这里返回的是一份新的新增草稿，key 沿用，scope 设为 public。
+ */
+export function startPublicCopy(
+  form: PersonaMemoryForm,
+  fact: CompanionFact,
+  status: CompanionMemoryStatus,
+): PersonaMemoryForm {
+  return {
+    ...form,
+    editingKey: null,
+    editingAudience: null,
+    addingScope: 'public',
+    key: fact.key,
+    value: fact.value,
+    memoryTouched: true,
+    memoryBaseline: status.revision,
+    factBaseline: 0,
+    notice: null,
+  };
+}
+
 export function startEditing(
   form: PersonaMemoryForm,
   fact: CompanionFact,
@@ -510,6 +589,8 @@ export function startEditing(
   return {
     ...form,
     editingKey: fact.key,
+    // 捕获这一行自己的 scope：之后保存/忘记都必须打回同一条。
+    editingAudience: fact.audience ?? null,
     key: fact.key,
     value: fact.value,
     memoryBaseline: status.revision,
@@ -526,6 +607,8 @@ export function startAdding(
   return {
     ...form,
     editingKey: null,
+    editingAudience: null,
+    addingScope: 'owner-private',
     key: '',
     value: '',
     memoryTouched: false,
@@ -537,7 +620,34 @@ export function startAdding(
 
 /** 取消编辑：草稿清空，回到「新增」状态。 */
 export function cancelEditing(form: PersonaMemoryForm): PersonaMemoryForm {
-  return { ...form, editingKey: null, key: '', value: '', factBaseline: 0, notice: null };
+  return {
+    ...form,
+    editingKey: null,
+    editingAudience: null,
+    addingScope: 'owner-private',
+    key: '',
+    value: '',
+    factBaseline: 0,
+    notice: null,
+  };
+}
+
+/**
+ * scope 怎么说。界面必须让人看出这一行属于谁，
+ * 否则「同键两条」会看起来像重复渲染。
+ */
+export function audienceLabel(audience: CompanionAudience | undefined): string {
+  switch (audience?.kind) {
+    case 'public':
+      return '公开';
+    case 'person-private':
+      return '某人私有';
+    case 'qq-group':
+      return `群 ${audience.groupId}`;
+    default:
+      // 缺省就是 owner 私有：旧数据的 audience 字段本来就不存在。
+      return '仅自己';
+  }
 }
 
 /** 来源怎么说。旧数据不猜成「你添加的」。 */

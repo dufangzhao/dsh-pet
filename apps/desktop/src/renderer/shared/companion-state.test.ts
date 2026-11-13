@@ -1,4 +1,4 @@
-import type { CompanionTask, DesktopCompanionState } from '@pet/contracts';
+import type { CompanionMessage, CompanionTask, DesktopCompanionState } from '@pet/contracts';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -11,6 +11,7 @@ import {
   petStateOf,
   sendBlockedReason,
   taskView,
+  lastAssistant,
 } from './companion-state.js';
 import { initialDesktopCompanionState } from '../console/test-state.js';
 
@@ -145,5 +146,40 @@ describe('角色状态与发送理由', () => {
   it('脚本与模型两种模式各有各的说法，脚本必须标出来', () => {
     expect(agentModeLabel({ mode: 'scripted', status: 'ready' })).toContain('脚本演示');
     expect(agentModeLabel({ mode: 'model', status: 'ready' })).toBe('模型回复');
+  });
+});
+
+describe('桌宠只读主人私聊', () => {
+  const message = (
+    id: string,
+    role: 'user' | 'assistant' | 'notice',
+    audience?: { readonly kind: string },
+  ): CompanionMessage =>
+    ({
+      id,
+      role,
+      text: id,
+      createdAt: 1,
+      inputId: null,
+      taskId: null,
+      ...(audience === undefined ? {} : { audience }),
+    }) as CompanionMessage;
+
+  it('跳过群里和别人私聊的回复，只取主人私聊那条', () => {
+    const messages = [
+      message('m1', 'assistant', { kind: 'owner-private' }),
+      message('m2', 'assistant', { kind: 'qq-group' }),
+      message('m3', 'assistant', { kind: 'person-private' }),
+    ];
+    // 最后一条是别人群里的回复：不能弹到主人桌面。
+    expect(lastAssistant(messages)?.id).toBe('m1');
+  });
+
+  it('没有 audience 的旧消息仍按主人私聊处理', () => {
+    expect(lastAssistant([message('legacy', 'assistant')])?.id).toBe('legacy');
+  });
+
+  it('只有别人的回复时返回 null，不冒充有回复', () => {
+    expect(lastAssistant([message('m2', 'assistant', { kind: 'qq-group' })])).toBeNull();
   });
 });

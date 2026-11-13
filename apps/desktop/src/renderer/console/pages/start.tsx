@@ -30,6 +30,7 @@ import {
 import { Button, Card, Field, Status, type StatusTone } from '../minimal-ui/controls.js';
 import type { VoiceController } from '@pet/text-client/voice-input-ui';
 import { VoiceCard } from './voice-card.js';
+import { QQStatusCard, qqOf } from './qq-status.js';
 
 import '@pet/text-client/model.css';
 
@@ -57,6 +58,11 @@ export function StartPage({ companion, presentation, voice, notify }: StartPageP
     <>
       <ConnectionCard companion={companion} notify={notify} />
       <ModelCard companion={companion} />
+      <QQStatusCard
+        qq={qqOf(companion.state?.snapshot ?? null)}
+        connectionId={companion.state?.connectionId ?? null}
+        openWeb={companion.openWeb}
+      />
       <VoiceCard companion={companion} voice={voice} notify={notify} />
       <PetCard companion={companion} presentation={presentation} notify={notify} />
     </>

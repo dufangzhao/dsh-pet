@@ -1,0 +1,75 @@
+/* ---- QQ 管理（对话框内） ---- */
+
+/*
+ * 与模型对话框同一条理由：模态打开时 body 已锁滚动，长内容必须自己滚，
+ * 底部按钮常驻。只约束这一个对话框。
+ */
+.tc-qq-dialog .pk-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  width: min(680px, calc(100vw - 32px));
+}
+
+.tc-qq-dialog .pk-dialog[open] .pk-dialog__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tc-qq-dialog .pk-dialog[open] .pk-dialog__footer {
+  flex: none;
+}
+
+.tc-qq__note {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.tc-qq__note--error {
+  color: var(--pk-danger);
+}
+
+.tc-qq__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  flex-wrap: wrap;
+}
+
+.tc-qq__detail {
+  color: var(--pk-muted);
+  font-size: 0.8125rem;
+}
+
+.tc-qq__row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.tc-qq__check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  margin: 4px 0;
+}
+
+.tc-qq__group {
+  padding: 8px 0;
+  border-top: 1px solid var(--pk-border);
+}
+
+.tc-qq__proactive {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import {
   DESKTOP_COMPANION_MAX_PENDING,
+  isCompanionAudience,
+  isCompanionConversationAudience,
+  isQQStatus,
   type CompanionProfileSaveCommand,
   type CompanionMemoryView,
   type CompanionMemoryUpsertCommand,
@@ -137,6 +140,28 @@ export function desktopModelView(view: CompanionModelView): CompanionModelView {
     })),
   };
 }
+/** This bridge is the personal projection, never the operator's broader management view. */
+export function desktopPersonalSnapshot(snapshot: CompanionSnapshot): CompanionSnapshot {
+  if (snapshot.qq !== undefined && !isQQStatus(snapshot.qq)) throw new KernelFault('invalid-input');
+  return {
+    ...snapshot,
+    messages: snapshot.messages.filter(
+      (message) =>
+        isCompanionConversationAudience(message.audience) &&
+        message.audience.kind === 'owner-private',
+    ),
+    tasks: snapshot.tasks.filter(
+      (task) =>
+        isCompanionConversationAudience(task.origin?.audience) &&
+        task.origin.audience.kind === 'owner-private',
+    ),
+    facts: snapshot.facts.filter(
+      (fact) =>
+        isCompanionAudience(fact.audience) &&
+        (fact.audience.kind === 'owner-private' || fact.audience.kind === 'public'),
+    ),
+  };
+}
 const fail = <T>(code: KernelError['code']): Result<T> => ({
   ok: false,
   error: makeError(code, false),
@@ -200,6 +225,7 @@ export class DesktopCompanionController {
     private readonly host: DesktopCompanionHostPort,
     private readonly destination: DesktopArtifactDestination,
     private readonly changed: () => void,
+    private readonly openExternal?: (url: string) => Promise<void>,
   ) {
     this.#offCommit = host.onConfigurationCommit((revision) => {
       if (!this.#connection || this.#connection.source.configRevision === revision) return;
@@ -662,6 +688,32 @@ export class DesktopCompanionController {
       this.#control = false;
     }
   }
+  async openWeb(target: DesktopCompanionTarget): Promise<Result<null>> {
+    try {
+      const connection = this.#binding(target);
+      const open = this.openExternal;
+      if (!open) return fail('not-ready');
+      const url = companionEndpoint(connection.source.baseUrl);
+      const work = (async (): Promise<Result<null>> => {
+        const current = await this.host.isCurrent(connection.source);
+        if (!this.#current(connection) || this.#state.phase !== 'live') return fail('stale-owner');
+        if (!current) {
+          this.#invalidate(connection, makeError('permission-denied', false));
+          return fail('stale-owner');
+        }
+        await open(url);
+        return { ok: true, value: null };
+      })();
+      connection.work.add(work);
+      try {
+        return await work;
+      } finally {
+        connection.work.delete(work);
+      }
+    } catch (error) {
+      return { ok: false, error: problem(error) };
+    }
+  }
   async refresh(target: DesktopCompanionTarget): Promise<Result<DesktopCompanionState>> {
     try {
       await this.#refresh(this.#binding(target));
@@ -672,6 +724,12 @@ export class DesktopCompanionController {
   }
   #adopt(connection: Connection, snapshot: CompanionSnapshot): void {
     if (!this.#current(connection)) return;
+    try {
+      snapshot = desktopPersonalSnapshot(snapshot);
+    } catch (error) {
+      this.#publish({ phase: 'offline', error: problem(error) });
+      return;
+    }
     const previous = this.#state.snapshot;
     if (
       previous &&

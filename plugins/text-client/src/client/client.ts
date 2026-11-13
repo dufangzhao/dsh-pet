@@ -14,6 +14,16 @@ import {
   type VoiceTicket,
   type VoiceResultKey,
   type VoiceView,
+  type QQView,
+  type QQStatus,
+  type QQPolicyCommand,
+  type QQSourceSettingsCommand,
+  type QQCredentialCommand,
+  type QQJudgeSettingsCommand,
+  type QQJudgeCredentialCommand,
+  type QQDeliveryPage,
+  type QQDeliveryView,
+  type CompanionCommandReceipt,
   type VoiceCatalog,
   type VoiceCaptureResult,
   type VoiceSettingsCommand,
@@ -52,6 +62,7 @@ import {
   STREAM_IDLE_TIMEOUT_MS,
   type ClientTransport,
 } from './protocol.js';
+import * as qqProtocol from './qq-protocol.js';
 import * as voiceProtocol from './voice-protocol.js';
 import {
   initialClientState,
@@ -152,6 +163,29 @@ export class CompanionClient {
   async reconnect(): Promise<void> {
     if (this.#token === '') return;
     await this.connect(this.#token);
+  }
+
+  /**
+   * 这次**连接尝试**的世代。
+   *
+   * 与 `snapshot.epoch` 不是一回事：epoch 是持久 State 的身份，重连、甚至服务重启
+   * 都可能不变。这里每次 `connect()` 都生成新的，所以同 endpoint、同 Agent、
+   * 同 epoch 的重新连接也能被区分开——旧的 HTTP/密钥闭包不能写到新连接上。
+   *
+   * 没有连接时是 null：那时任何闭包都不该落地。
+   */
+  /**
+   * 供材料读取使用的传输身份。
+   *
+   * 只暴露 baseUrl/token 这两个本来就存在于内存里的字段；调用方拿不到
+   * 连接控制器，也没法用它发别的请求。
+   */
+  get transport(): ClientTransport {
+    return this.#transport;
+  }
+
+  getConnectionId(): string | null {
+    return this.#clientId;
   }
 
   /** A generation fence, not a token or a mutable dispatch target. */
@@ -379,6 +413,121 @@ export class CompanionClient {
     const result = await writeModelCredential(this.#transport, command);
     if (result.ok) this.#scheduleRefresh();
     return result;
+  }
+
+  /**
+   * QQ 管理面：全部是服务端事实，没有第二份本地状态。
+   *
+   * 这些读取/写入不走快照——QQ 视图比快照大，也不属于对话投影。
+   * 每次写成功都让调用方重新读一次，界面上「已保存」与「已连接」因此永远分开。
+   */
+  /**
+   * 按**捕获的连接**发 QQ 请求。
+   *
+   * 不能只转调 `this.#transport`：那是 mutable 的当前连接，旧闭包会在换连接后
+   * 把请求打到新服务上。这里要求调用方带上发起时捕获的 connectionId，
+   * 对不上就一个请求都不发。
+   */
+  #qqTransportFor(expectedConnectionId: string): ClientTransport | null {
+    if (this.#clientId === null || this.#clientId !== expectedConnectionId) return null;
+    return this.#transport;
+  }
+
+  readQQ(expectedConnectionId: string): Promise<Result<QQView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.getQQ(transport, this.#controller?.signal);
+  }
+
+  readQQStatus(): Promise<Result<QQStatus>> {
+    return qqProtocol.getQQStatus(this.#transport, this.#controller?.signal);
+  }
+
+  saveQQPolicy(command: QQPolicyCommand, expectedConnectionId: string): Promise<Result<QQView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.saveQQPolicy(transport, command, this.#controller?.signal);
+  }
+
+  saveQQSource(
+    command: QQSourceSettingsCommand,
+    expectedConnectionId: string,
+  ): Promise<Result<QQView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.saveQQSource(transport, command, this.#controller?.signal);
+  }
+
+  writeQQCredential(
+    command: QQCredentialCommand,
+    expectedConnectionId: string,
+  ): Promise<Result<QQView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.writeQQCredential(transport, command, this.#controller?.signal);
+  }
+
+  saveQQJudge(
+    command: QQJudgeSettingsCommand,
+    expectedConnectionId: string,
+  ): Promise<Result<QQView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.saveQQJudge(transport, command, this.#controller?.signal);
+  }
+
+  writeQQJudgeCredential(
+    command: QQJudgeCredentialCommand,
+    expectedConnectionId: string,
+  ): Promise<Result<QQView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.writeQQJudgeCredential(transport, command, this.#controller?.signal);
+  }
+
+  setQQSourceEnabled(
+    pluginId: string,
+    commandId: string,
+    enabled: boolean,
+    expectedConnectionId: string,
+  ): Promise<Result<CompanionCommandReceipt>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.setQQSourceEnabled(
+      transport,
+      pluginId,
+      commandId,
+      enabled,
+      this.#controller?.signal,
+    );
+  }
+
+  readQQDelivery(id: string, expectedConnectionId: string): Promise<Result<QQDeliveryView>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.readQQDelivery(transport, id, this.#controller?.signal);
+  }
+
+  readQQDeliveries(
+    after: string | undefined,
+    expectedConnectionId: string,
+  ): Promise<Result<QQDeliveryPage>> {
+    const transport = this.#qqTransportFor(expectedConnectionId);
+    if (transport === null)
+      return Promise.resolve({ ok: false, error: makeError('stale-owner', false) });
+    return qqProtocol.readQQDeliveries(
+      transport,
+      after === undefined ? {} : { after },
+      this.#controller?.signal,
+    );
   }
 
   readProfile(): Promise<Result<CompanionProfileView>> {

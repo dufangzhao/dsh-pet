@@ -193,10 +193,19 @@ export function petStateOf(state: DesktopCompanionState): PetState {
   return 'idle';
 }
 
+/**
+ * 桌宠只展示**主人私聊**里最后一条回复。
+ *
+ * 接入 QQ 之后，同一份消息流里还有群回复与别人私聊的回复；直接取「最后一条
+ * assistant」会把别人的对话弹到主人桌面上。缺 audience 的旧消息按主人私聊处理
+ * （那时还没有多参与者）。
+ */
 export function lastAssistant(messages: readonly CompanionMessage[]): CompanionMessage | null {
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
-    if (message !== undefined && message.role === 'assistant') return message;
+    if (message === undefined || message.role !== 'assistant') continue;
+    if (message.audience !== undefined && message.audience.kind !== 'owner-private') continue;
+    return message;
   }
   return null;
 }

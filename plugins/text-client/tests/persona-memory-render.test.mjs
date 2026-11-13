@@ -222,3 +222,37 @@ test('没有 metadata 时两端都说明各自的事实，不说版本过旧', (
   assert.ok(!html.includes('版本过旧'));
   assert.ok(!html.includes('旧版本'));
 });
+
+test('同一 scope 下多条不同 key 的事实各自成行，不互相顶掉', () => {
+  const html = render({
+    memory: memory({
+      facts: [
+        fact({ key: '茶', value: '乌龙', audience: { kind: 'owner-private' } }),
+        fact({ key: '咖啡', value: '浅烘', audience: { kind: 'owner-private' } }),
+      ],
+    }),
+  });
+  // 两行都在：React key 必须含 fact.key，不能只按 scope。
+  assert.equal(html.match(/data-testid="memory-row"/g)?.length, 2);
+  assert.match(html, /乌龙/);
+  assert.match(html, /浅烘/);
+  // 每行有自己的修改/忘记入口，操作不会串到另一行。
+  assert.ok(html.includes('data-testid="memory-edit-茶"'));
+  assert.ok(html.includes('data-testid="memory-edit-咖啡"'));
+  assert.ok(html.includes('data-testid="memory-forget-茶"'));
+  assert.ok(html.includes('data-testid="memory-forget-咖啡"'));
+});
+
+test('同 key 不同 scope 仍是两行，且各自带自己的 scope', () => {
+  const html = render({
+    memory: memory({
+      facts: [
+        fact({ key: '共享', value: '私有值', audience: { kind: 'owner-private' } }),
+        fact({ key: '共享', value: '公开值', audience: { kind: 'public' } }),
+      ],
+    }),
+  });
+  assert.equal(html.match(/data-testid="memory-row"/g)?.length, 2);
+  assert.match(html, /私有值/);
+  assert.match(html, /公开值/);
+});

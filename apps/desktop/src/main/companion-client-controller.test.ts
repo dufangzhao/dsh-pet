@@ -5,6 +5,7 @@ import {
   DesktopCompanionController,
   companionEndpoint,
   initialDesktopCompanionState,
+  desktopPersonalSnapshot,
 } from './companion-client-controller.js';
 import {
   makeError,
@@ -41,7 +42,10 @@ const snapshot: CompanionSnapshot = {
   facts: [],
   plugins: [],
 };
-async function fixture(projected: CompanionSnapshot = snapshot) {
+async function fixture(
+  projected: CompanionSnapshot = snapshot,
+  openExternal?: (url: string) => Promise<void>,
+) {
   const responses = new Set<ServerResponse>();
   const messages: string[] = [];
   let failReads = false;
@@ -136,7 +140,12 @@ async function fixture(projected: CompanionSnapshot = snapshot) {
     isCurrent: async (entry) => entry.configRevision === revision && !abort.signal.aborted,
     withToken: async (_source, token, signal, operation) => operation(token, signal),
   };
-  const controller = new DesktopCompanionController(host, { choose: async () => null }, () => {});
+  const controller = new DesktopCompanionController(
+    host,
+    { choose: async () => null },
+    () => {},
+    openExternal,
+  );
   await controller.initialize();
   close.push(async () => {
     for (const response of responses) response.end();
@@ -460,7 +469,15 @@ describe('shared desktop contract seam', () => {
             ...snapshot,
             cursor: 1,
             messages: [
-              { id: 'm', role: 'user', text: 'hello', createdAt: 1, inputId: 'cmd', taskId: null },
+              {
+                id: 'm',
+                role: 'user',
+                audience: { kind: 'owner-private' },
+                text: 'hello',
+                createdAt: 1,
+                inputId: 'cmd',
+                taskId: null,
+              },
             ],
           }
         : {
@@ -469,6 +486,14 @@ describe('shared desktop contract seam', () => {
             tasks: [
               {
                 id: 'task',
+                origin: {
+                  inputId: null,
+                  principalId: 'owner',
+                  audience: { kind: 'owner-private' },
+                  route: { kind: 'owner-private' },
+                  origins: [],
+                  materialIds: [],
+                },
                 executionId: 'execution',
                 title: 'work',
                 status: 'completed',
@@ -517,7 +542,15 @@ describe('shared desktop contract seam', () => {
       ...snapshot,
       cursor: 1,
       messages: [
-        { id: 'm', role: 'user', text: 'hello', createdAt: 1, inputId: 'cmd', taskId: null },
+        {
+          id: 'm',
+          role: 'user',
+          audience: { kind: 'owner-private' },
+          text: 'hello',
+          createdAt: 1,
+          inputId: 'cmd',
+          taskId: null,
+        },
       ],
     });
     const reads = f.reads();
@@ -570,6 +603,7 @@ describe('shared desktop contract seam', () => {
     const messages = Array.from({ length: 9 }, (_, i) => ({
       id: `m-${i}`,
       role: 'assistant' as const,
+      audience: { kind: 'owner-private' as const },
       text: '',
       createdAt: 1,
       inputId: null,
@@ -639,6 +673,263 @@ describe('shared desktop contract seam', () => {
     expect(await controller.getState()).toMatchObject({
       value: { phase: 'idle', connectionId: null, snapshot: { agent: { id: 'agent' } } },
     });
+  });
+  it('keeps QQ status on the one personal projection while excluding foreign or unknown messages and work', async () => {
+    const ownerMessage = {
+      id: 'owner',
+      role: 'assistant' as const,
+      text: 'personal',
+      createdAt: 1,
+      inputId: null,
+      taskId: null,
+      audience: { kind: 'owner-private' as const },
+    };
+    const account = {
+      protocol: 'official' as const,
+      sourcePluginId: 'pet.qq-official',
+      instanceId: 'default' as const,
+      accountId: 'app',
+    };
+    const audience = { kind: 'qq-group' as const, account, groupId: 'group-A' };
+    const route = {
+      kind: 'qq' as const,
+      account,
+      scene: 'group' as const,
+      targetId: 'group-A',
+      reference: { eventId: null, messageId: 'native-1', occurredAt: 1, displayReference: null },
+    };
+    const origin = {
+      kind: 'qq' as const,
+      inputId: 'qq-input',
+      principalId: 'person-1',
+      audience,
+      route,
+      policyRevision: 1,
+      actor: { account, scene: 'group' as const, groupId: 'group-A', senderId: 'person-openid' },
+      eventKey: 'normalized-1',
+      messageId: 'native-1',
+      trigger: 'mention' as const,
+      quote: null,
+    };
+    const ownerTask = {
+      id: 'owner-task',
+      executionId: 'execution',
+      title: 'personal',
+      status: 'running' as const,
+      createdAt: 1,
+      updatedAt: 1,
+      exitCode: null,
+      stdout: '',
+      stderr: '',
+      logsTruncated: false,
+      artifacts: [],
+      error: null,
+      origin: {
+        inputId: null,
+        principalId: 'owner',
+        audience: { kind: 'owner-private' as const },
+        route: { kind: 'owner-private' as const },
+        origins: [],
+        materialIds: [],
+      },
+    };
+    const qq: NonNullable<CompanionSnapshot['qq']> = {
+      version: 1,
+      sources: [
+        {
+          protocol: 'official',
+          sourcePluginId: 'pet.qq-official',
+          desiredEnabled: false,
+          source: 'disabled',
+          phase: 'disabled',
+          account: null,
+          cleanup: 'settled',
+          error: null,
+        },
+        {
+          protocol: 'onebot-v11',
+          sourcePluginId: 'pet.qq-onebot',
+          desiredEnabled: true,
+          source: 'unavailable',
+          phase: 'retiring',
+          account: null,
+          cleanup: 'pending',
+          error: null,
+        },
+      ],
+    };
+    const fact = { key: 'same-key', value: 'value', revision: 1, updatedAt: 1 };
+    const incoming: CompanionSnapshot = {
+      ...snapshot,
+      qq,
+      messages: [
+        ownerMessage,
+        {
+          ...ownerMessage,
+          id: 'qq-private',
+          audience: { kind: 'person-private', principalId: 'person-1' },
+        },
+        { ...ownerMessage, id: 'group', audience },
+        {
+          id: 'unknown',
+          role: 'assistant',
+          text: 'unclassified',
+          createdAt: 1,
+          inputId: null,
+          taskId: null,
+        },
+      ],
+      tasks: [
+        ownerTask,
+        {
+          ...ownerTask,
+          id: 'qq-task',
+          origin: {
+            inputId: origin.inputId,
+            principalId: origin.principalId,
+            audience,
+            route,
+            origins: [origin],
+            materialIds: [],
+          },
+        },
+      ],
+      facts: [
+        { ...fact, audience: { kind: 'owner-private' } },
+        { ...fact, audience: { kind: 'public' } },
+        { ...fact, audience },
+      ],
+    };
+    const projected = desktopPersonalSnapshot(incoming);
+    expect(projected.messages.map((message) => message.id)).toEqual(['owner']);
+    expect(projected.tasks.map((task) => task.id)).toEqual(['owner-task']);
+    expect(projected.facts).toHaveLength(2);
+    expect(projected.qq).toEqual(qq);
+    const f = await fixture(incoming);
+    const connected = await f.controller.connect({
+      baseUrl: f.baseUrl,
+      token: 't'.repeat(24),
+      expectedRevision: 1,
+    });
+    expect(connected).toMatchObject({ ok: true, value: { snapshot: projected } });
+    expect(await f.controller.getState()).toMatchObject({ value: { snapshot: projected } });
+    const invalid = { ...snapshot, qq: { ...qq, policy: { secret: 'not-for-desktop' } } };
+    expect(() => desktopPersonalSnapshot(invalid)).toThrow();
+  });
+  it('opens only the captured current Web root after exact trusted-frame and target validation', async () => {
+    const opened = vi.fn(async (_url: string) => {});
+    const f = await fixture(snapshot, opened);
+    const connected = await f.controller.connect({
+      baseUrl: f.baseUrl,
+      token: 't'.repeat(24),
+      expectedRevision: 1,
+    });
+    if (!connected.ok || !connected.value.connectionId) throw new Error('not connected');
+    const target = { connectionId: connected.value.connectionId };
+    const trusted = {
+      role: 'console' as const,
+      senderId: 1,
+      expectedId: 1,
+      mainFrame: true,
+      frameUrl: 'file:///app/console.html',
+      expectedUrl: 'file:///app/console.html',
+    };
+    expect(
+      await handleDesktopCompanionRequest(
+        { ...trusted, mainFrame: false },
+        'openWeb',
+        [target],
+        f.controller,
+      ),
+    ).toMatchObject({ ok: false });
+    expect(
+      await handleDesktopCompanionRequest(
+        trusted,
+        'openWeb',
+        [{ ...target, url: 'https://attacker.example/?token=private' }],
+        f.controller,
+      ),
+    ).toMatchObject({ ok: false, error: { code: 'invalid-input' } });
+    expect(await f.controller.openWeb({ connectionId: 'old-target' })).toMatchObject({ ok: false });
+    expect(opened).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(f.streamsOpened()).toBe(1));
+    const reads = f.reads();
+    expect(await handleDesktopCompanionRequest(trusted, 'openWeb', [target], f.controller)).toEqual(
+      { ok: true, value: null },
+    );
+    expect(opened).toHaveBeenCalledExactlyOnceWith(f.baseUrl);
+    expect(f.reads()).toBe(reads);
+    expect(f.streamsOpened()).toBe(1);
+    const invoke = vi.fn(async () => ({ ok: true, value: null }));
+    const bridge = createDesktopCompanionBridge(invoke, () => () => {});
+    expect(await bridge.openWeb(target)).toEqual({ ok: true, value: null });
+    expect(invoke).toHaveBeenCalledExactlyOnceWith('companion:desktop:v1:openWeb', target);
+    expect(await Reflect.apply(bridge.openWeb, bridge, [target, 'extra'])).toMatchObject({
+      ok: false,
+    });
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+  it('does not open a retired target after an asynchronous source-current check', async () => {
+    const opened = vi.fn(async (_url: string) => {}),
+      f = await fixture(snapshot, opened);
+    const connected = await f.controller.connect({
+      baseUrl: f.baseUrl,
+      token: 't'.repeat(24),
+      expectedRevision: 1,
+    });
+    if (!connected.ok || !connected.value.connectionId) throw new Error('not connected');
+    const target = { connectionId: connected.value.connectionId };
+    let release = (_value: boolean) => {};
+    const gate = new Promise<boolean>((resolve) => {
+      release = resolve;
+    });
+    const current = vi.spyOn(f.host, 'isCurrent').mockImplementationOnce(() => gate);
+    const opening = f.controller.openWeb(target);
+    const retiring = f.controller.disconnect(target);
+    release(true);
+    expect(await opening).toMatchObject({ ok: false });
+    await retiring;
+    current.mockRestore();
+    expect(opened).not.toHaveBeenCalled();
+    expect(await f.controller.getState()).toMatchObject({ value: { phase: 'idle' } });
+  });
+  it('forwards explicit fact audience without deduplicating same-key scopes or adding an absent scope', async () => {
+    const f = await fixture();
+    const trusted = {
+      role: 'console' as const,
+      senderId: 1,
+      expectedId: 1,
+      mainFrame: true,
+      frameUrl: 'file:///app/console.html',
+      expectedUrl: 'file:///app/console.html',
+    };
+    const forget = vi
+      .spyOn(f.controller, 'forgetFact')
+      .mockResolvedValue({ ok: false, error: makeError('not-ready', false) });
+    const command = {
+      commandId: 'forget',
+      expectedMemoryRevision: 1,
+      expectedFactRevision: 1,
+      key: 'same-key',
+    };
+    await handleDesktopCompanionRequest(
+      trusted,
+      'forgetFact',
+      [{ connectionId: 'target', command }],
+      f.controller,
+    );
+    expect(forget).toHaveBeenLastCalledWith({ connectionId: 'target', command });
+    await handleDesktopCompanionRequest(
+      trusted,
+      'forgetFact',
+      [{ connectionId: 'target', command: { ...command, audience: { kind: 'public' } } }],
+      f.controller,
+    );
+    expect(forget).toHaveBeenLastCalledWith({
+      connectionId: 'target',
+      command: { ...command, audience: { kind: 'public' } },
+    });
+    forget.mockRestore();
   });
   it('frozen bridge validates arity, and pet cannot perform console credential management', async () => {
     let invokes = 0;
