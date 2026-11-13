@@ -11,6 +11,9 @@ import {
   SPEECH_ATTACH_TIMEOUT_MS,
   SPEECH_NEXT_SEGMENT_GRACE_MS,
   type Result,
+  type CompanionMessage,
+  type CompanionInputOrigin,
+  type CompanionMaterialRef,
   type SpeechBegin,
   type SpeechSegmentKey,
 } from '@pet/contracts';
@@ -121,14 +124,23 @@ async function setup(options: Record<string, unknown> = {}) {
     );
   };
   let number = 0;
-  const begin = async (text = ' 正式回复🌳。\r\n保留空白。 ', clientId = 'speech-client') => {
+  const prepare = async (
+    text = ' 正式回复🌳。\r\n保留空白。 ',
+    clientId = 'speech-client',
+    metadata: Pick<CompanionMessage, 'audience' | 'origins' | 'content' | 'materials'> = {},
+  ): Promise<SpeechBegin> => {
     const before = await active.runtime.snapshot();
     const message = await active.runtime.state('appendMessage', {
+      ...metadata,
       id: `tts-message-${++number}`,
       role: 'assistant',
       text,
     });
-    const events = await active.runtime.events(before.cursor, before.epoch);
+    const events = await active.runtime.state('events', {
+      after: before.cursor,
+      epoch: before.epoch,
+      scope: { kind: 'management' },
+    });
     const event = events.events.find(
       (event) => event.kind === 'message' && event.data['messageId'] === message.id,
     );
@@ -147,7 +159,61 @@ async function setup(options: Record<string, unknown> = {}) {
       providerRef: SPEECH_TTS_PROVIDER,
       bindingId: provider.bindingId,
     };
+    return input;
+  };
+  const begin = async (text = ' 正式回复🌳。\r\n保留空白。 ', clientId = 'speech-client') => {
+    const input = await prepare(text, clientId);
     return { input, receipt: unwrap(await beginSpeechUtterance(transport, input)) };
+  };
+  const document = async (
+    text: string,
+    inputOrigin?: CompanionInputOrigin,
+  ): Promise<Pick<CompanionMessage, 'audience' | 'origins' | 'content' | 'materials'>> => {
+    const origin: CompanionInputOrigin = inputOrigin ?? {
+      kind: 'owner',
+      inputId: `doc-input-${++number}`,
+      principalId: 'owner',
+      audience: { kind: 'owner-private' },
+      route: { kind: 'owner-private' },
+      policyRevision: 0,
+    };
+    if (!origin.inputId) throw new Error('Fixture requires a real input');
+    await active.runtime.state('createInput', {
+      id: origin.inputId,
+      commandId: `command-${origin.inputId}`,
+      origin,
+      evidence: {},
+      materialIds: [],
+    });
+    await active.runtime.state('commitInput', { id: origin.inputId, text: 'Fixture question' });
+    const material: CompanionMaterialRef = {
+      id: `document-${origin.inputId}`,
+      kind: 'text',
+      name: 'complete.txt',
+      mediaType: 'text/plain',
+      sizeBytes: Buffer.byteLength(text),
+      sha256: createHash('sha256').update(text).digest('hex'),
+      durationMs: null,
+      audience: origin.audience,
+      originInputIds: [origin.inputId],
+    };
+    await active.runtime.state('putMaterial', {
+      id: material.id,
+      inputId: origin.inputId,
+      observationId: null,
+      audience: origin.audience,
+      phase: 'ready',
+      reference: material,
+      storageKey: `materials/${material.id}`,
+      cleanup: 'settled',
+      error: null,
+    });
+    return {
+      audience: origin.audience,
+      origins: [origin],
+      materials: [material],
+      content: { kind: 'text-document', material },
+    };
   };
   const reserve = async (
     receipt: Awaited<ReturnType<typeof begin>>['receipt'],
@@ -165,7 +231,7 @@ async function setup(options: Record<string, unknown> = {}) {
     unwrap(await reserveSpeechSegment(transport, key));
     return key;
   };
-  return { peer, service: active, transport, configure, begin, reserve };
+  return { peer, service: active, transport, configure, begin, prepare, document, reserve };
 }
 
 it.each(['plan', 'attach', 'next-segment'] as const)(
@@ -624,6 +690,112 @@ it('fences cancel before admission and rejects wrong canonical role/target witho
   ).toBe(false);
   expect(f.peer.snapshot.requestCount).toBe(0);
   await cancelSpeechUtterance(f.transport, input);
+}, 20000);
+
+it('never synthesizes a document stub and resolves the exact owner-private body with existing M5 slices', async () => {
+  const f = await setup({ frames: 4 });
+  await f.configure();
+  const text = ' 正文' + '林'.repeat(7990) + '\r\n';
+  const metadata = await f.document(text);
+  const input = await f.prepare('全文保存在材料中。', 'document-client', metadata);
+  expect(await beginSpeechUtterance(f.transport, input)).toMatchObject({
+    ok: false,
+    error: { code: 'not-ready' },
+  });
+  expect(f.peer.snapshot.requestCount).toBe(0);
+  f.service.speech.setCanonicalTextResolver(async () => '全文保存在材料中。');
+  expect(
+    await beginSpeechUtterance(f.transport, { ...input, utteranceId: 'wrong-document-body' }),
+  ).toMatchObject({ ok: false, error: { code: 'invalid-input' } });
+  expect(f.peer.snapshot.requestCount).toBe(0);
+  const resolver = vi.fn(async (message: CompanionMessage, signal: AbortSignal) => {
+    expect(message.id).toBe(input.messageId);
+    expect(message.content).toEqual(metadata.content);
+    expect(signal.aborted).toBe(false);
+    return text;
+  });
+  f.service.speech.setCanonicalTextResolver(resolver);
+  const receipt = unwrap(
+    await beginSpeechUtterance(f.transport, { ...input, utteranceId: 'full-document-body' }),
+  );
+  expect(receipt.segmentCount).toBe(2);
+  for (let index = 0; index < receipt.segmentCount; index++) {
+    const key = await f.reserve(receipt, index);
+    unwrap(
+      await consumeSpeechAudio(f.transport, key, receipt, async (_header, audio) => {
+        for await (const chunk of audio) expect(chunk.length).toBeGreaterThan(0);
+      }),
+    );
+  }
+  expect(resolver).toHaveBeenCalledTimes(1);
+  expect(f.peer.snapshot.requests.map((request) => request.textSha256)).toEqual(
+    [text.slice(0, 4000), text.slice(4000)].map((part) =>
+      createHash('sha256').update(part).digest('hex'),
+    ),
+  );
+}, 20000);
+
+it('keeps QQ and unknown audience out of public Pet synthesis before any document resolver', async () => {
+  const f = await setup({ frames: 4 });
+  await f.configure();
+  const account = {
+    protocol: 'official' as const,
+    sourcePluginId: 'pet.qq-official',
+    instanceId: 'default' as const,
+    accountId: 'fixture-app',
+  };
+  const audience = { kind: 'qq-group' as const, account, groupId: 'group-A' };
+  const route = {
+    kind: 'qq' as const,
+    account,
+    scene: 'group' as const,
+    targetId: 'group-A',
+    reference: {
+      eventId: null,
+      messageId: 'native-qq-message',
+      occurredAt: 1,
+      displayReference: null,
+    },
+  };
+  const origin: CompanionInputOrigin = {
+    kind: 'qq',
+    inputId: 'qq-doc-input',
+    principalId: 'person-1',
+    audience,
+    route,
+    policyRevision: 1,
+    actor: { account, scene: 'group', groupId: 'group-A', senderId: 'sender' },
+    eventKey: 'host-qq-key',
+    messageId: 'native-qq-message',
+    trigger: 'mention',
+    quote: null,
+  };
+  const metadata = await f.document('group-private text', origin),
+    input = await f.prepare('private document', 'group-client', metadata);
+  const resolver = vi.fn(async () => 'group-private text');
+  f.service.speech.setCanonicalTextResolver(resolver);
+  expect(await beginSpeechUtterance(f.transport, input)).toMatchObject({
+    ok: false,
+    error: { code: 'permission-denied' },
+  });
+  const personal = await f.prepare('owner-inline');
+  const read = f.service.runtime.state.bind(f.service.runtime);
+  const stateRead = vi
+    .spyOn(f.service.runtime, 'state')
+    .mockImplementation(async (method, body, signal) => {
+      const value = await read(method, body, signal);
+      return method === 'getMessage' ? Object.assign({}, value, { audience: undefined }) : value;
+    });
+  try {
+    expect(await beginSpeechUtterance(f.transport, personal)).toMatchObject({
+      ok: false,
+      error: { code: 'permission-denied' },
+    });
+  } finally {
+    stateRead.mockRestore();
+  }
+  expect(resolver).not.toHaveBeenCalled();
+  expect(f.peer.snapshot.requestCount).toBe(0);
 }, 20000);
 
 it('cancels and joins a live held native response without touching Core identity', async () => {

@@ -28,10 +28,17 @@
     "@pet/asr-magpie": "workspace:*",
     "@pet/shared-voice": "workspace:*",
     "@pet/tts-magpie": "workspace:*",
-    "@pet/shared-speech": "workspace:*"
+    "@pet/shared-speech": "workspace:*",
+    "@pet/shared-qq": "workspace:*",
+    "@pet/qq-official": "workspace:*",
+    "@pet/qq-onebot": "workspace:*",
+    "@pet/qq-participation-magpie": "workspace:*",
+    "@pet/qq-media-codec": "workspace:*",
+    "ws": "8.22.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/ws": "8.18.2",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "esbuild": "0.28.2"

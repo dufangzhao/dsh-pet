@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.qq-participation-magpie",
+  "version": "0.1.0",
+  "displayName": { "en": "QQ participation model", "zh-CN": "QQ 主动参与判断模型" },
+  "description": {
+    "en": "Independent Magpie model binding for deciding whether to participate in a QQ group",
+    "zh-CN": "通过独立的 Magpie 模型连接判断是否参与群聊"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "magpie",
+      "capability": "companion.model.connection@1",
+      "features": {
+        "nativeResponses": 1,
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["model-api-key"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrl", "model", "authMode"],
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "default": "http://127.0.0.1:3425/v1"
+        },
+        "model": { "type": "string", "minLength": 0, "maxLength": 128, "default": "" },
+        "authMode": {
+          "type": "string",
+          "enum": ["local-client-id", "gateway-key"],
+          "default": "local-client-id"
+        }
+      }
+    },
+    "apply": { "baseUrl": "reload", "model": "reload", "authMode": "reload" }
+  }
+}

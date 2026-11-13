@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { mkdtemp, readFile, readdir, realpath, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -14,6 +14,9 @@ import { jsonPreflight } from '@pet/contracts/validation';
 import { KernelFault } from '@pet/host-kernel';
 import {
   createFixtureModelClient,
+  createFixtureModelPlugin,
+  describeFixtureModel,
+  fixtureModelManifest,
   FIXTURE_MODEL_CONNECTION,
   MAGPIE_CONNECTION,
   type CompanionRuntime,
@@ -201,6 +204,61 @@ async function setup(publicOrigin?: string) {
     },
   };
 }
+
+it('does not expose or select a participation source through foreground model controls', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'companion-model-purpose-'));
+  const sourceDirectory = path.join(directory, 'judgment-source');
+  const manifest = { ...fixtureModelManifest, id: 'pet.judgment-model-fixture' };
+  const connectorId = `${manifest.id}/fixture`;
+  await mkdir(sourceDirectory);
+  await writeFile(path.join(sourceDirectory, 'plugin.json'), JSON.stringify(manifest));
+  cleanups.push(async () => {
+    const target = await realpath(directory);
+    if (
+      path.dirname(target) !== (await realpath(tmpdir())) ||
+      !path.basename(target).startsWith('companion-model-purpose-')
+    )
+      throw new Error('unexpected cleanup target');
+    await rm(target, { recursive: true });
+  });
+  const service = await createCompanionService({
+    dataDirectory: path.join(directory, 'data'),
+    token,
+    port: 0,
+    connectionPlugins: [
+      (ports) => ({
+        manifest,
+        directory: sourceDirectory,
+        definition: createFixtureModelPlugin(ports),
+        enabled: false,
+        preset: 'allow',
+        connection: {
+          providerId: 'fixture',
+          purpose: 'qq-participation',
+          describeConfig: describeFixtureModel,
+        },
+      }),
+    ],
+  });
+  cleanups.push(() => service.close());
+  const before = await service.models.view();
+  expect(service.models.connections.list('qq-participation').map(([key]) => key)).toContain(
+    connectorId,
+  );
+  expect(before.connectors.some((entry) => entry.id === connectorId)).toBe(false);
+  await expect(
+    service.models.save({
+      commandId: crypto.randomUUID(),
+      expectedProfileRevision: before.profileRevision,
+      connectorId,
+      expectedConfigRevision: 1,
+      mode: 'model',
+    }),
+  ).rejects.toMatchObject({ error: { code: 'invalid-input' } });
+  const after = await service.models.view();
+  expect(after.profileRevision).toBe(before.profileRevision);
+  expect(after.desired).toEqual(before.desired);
+});
 
 it('permits controlled loopback/SSH only, not a claimed remote TLS entry through a local proxy', () => {
   expect(
@@ -790,11 +848,18 @@ it('budgets real SQLite history once at the final Result/snapshot boundary with 
       value: 'f'.repeat(200),
     });
   }
-  for (let index = 0; index < 100; index++)
-    await runtime.state('acceptMessage', {
+  for (let index = 0; index < 100; index++) {
+    const accepted = await runtime.state('acceptMessage', {
       commandId: `budget-message-${index}`,
       text: 'm'.repeat(8000),
     });
+    // This fixture represents retained history, not one hundred live ready inputs.
+    await runtime.state('updateInput', {
+      id: accepted.message.id,
+      phase: 'completed',
+      cleanup: 'settled',
+    });
+  }
   const raw = await runtime.state('snapshot', {});
   const initial = await f.view();
   const first = initial.connectors[0];

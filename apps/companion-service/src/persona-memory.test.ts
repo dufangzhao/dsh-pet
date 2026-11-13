@@ -8,8 +8,12 @@ import {
   FIXTURE_MODEL_CONNECTION,
 } from '@pet/companion-runtime';
 import { KernelFault } from '@pet/host-kernel';
-import { makeError } from '@pet/contracts';
-import type { ResponseClient } from '@pet/harness-cortico';
+import {
+  makeError,
+  COMPANION_INPUT_CONTEXT_DEFAULT,
+  COMPANION_INPUT_READY_PER_AUDIENCE,
+} from '@pet/contracts';
+import type { ResponseClient, HarnessInputBinding } from '@pet/harness-cortico';
 import { createCompanionService } from './service.js';
 
 const token = 'persona-memory-controlled-owner-token';
@@ -60,6 +64,24 @@ const tool = (name: string, input: Record<string, unknown>): Output => [
     status: 'completed',
   },
 ];
+function deliveredInput(request: Parameters<ResponseClient['respond']>[0]): string {
+  if (!Array.isArray(request.input)) throw new Error('missing native request items');
+  const events = request.input.flatMap((item) =>
+    item.type === 'message' && Array.isArray(item.content)
+      ? item.content
+          .filter(
+            (part) =>
+              part.type === 'input_text' && part.text.includes('"source":"companion.service"'),
+          )
+          .map((part) => (part.type === 'input_text' ? part.text : ''))
+      : [],
+  );
+  expect(events).toHaveLength(1);
+  const value: unknown = JSON.parse(events[0]!);
+  if (!value || typeof value !== 'object' || !('id' in value) || typeof value.id !== 'string')
+    throw new Error('missing actual delivered input');
+  return value.id;
+}
 function peer() {
   const base = createFixtureModelClient();
   const calls: Array<{
@@ -364,10 +386,15 @@ it.each([
   15000,
 );
 
-it('finishing delivered A preserves queued B admission before its model delivery', async () => {
-  let ports: ReturnType<CompanionRuntime['harnessPorts']> | undefined;
-  const f = await setup((value) => {
-    ports = value;
+it('finishing A preserves B memory admission across independent model permits', async () => {
+  const bindings = new Map<string, HarnessInputBinding>();
+  const f = await setup((ports) => {
+    const bind = ports.bindInput.bind(ports);
+    ports.bindInput = async (input, contextId) => {
+      const binding = await bind(input, contextId);
+      bindings.set(input.id, binding);
+      return binding;
+    };
   });
   const a = await f.service.runtime.message({ commandId: 'adjacent-A', text: '先回应这一句。' });
   const first = await f.next(0);
@@ -375,8 +402,11 @@ it('finishing delivered A preserves queued B admission before its model delivery
     commandId: 'adjacent-B',
     text: '请记住我喜欢乌龙茶。',
   });
-  // A is delivered; B is only queued. Source completion may release A, never all owner admissions.
-  ports?.finishInputs([a.messageId ?? '']);
+  // B has not obtained the model permit. A's scoped completion must not consume B's admission.
+  const aBinding = bindings.get(a.messageId ?? '');
+  if (!aBinding) throw new Error('missing actual A binding');
+  aBinding.ports.finishInputs([a.messageId ?? '']);
+  expect(deliveredInput(first.request)).toBe(a.messageId);
   await expect(
     f.service.runtime.savePersona({
       expectedProfileRevision: (await f.service.runtime.profile()).revision,
@@ -386,12 +416,39 @@ it('finishing delivered A preserves queued B admission before its model delivery
   ).rejects.toThrow();
   first.complete(tool('say', { inputId: a.messageId, text: 'A已回应。' }));
   const second = await f.next(1);
+  expect(deliveredInput(second.request)).toBe(b.messageId);
   second.complete(tool('remember', { inputId: b.messageId, key: 'drink', value: '我喜欢乌龙茶' }));
-  const third = await f.next(2);
-  expect((await f.service.runtime.memoryView()).facts[0]?.value).toBe('我喜欢乌龙茶');
-  third.complete(tool('say', { inputId: b.messageId, text: 'B已记住。' }));
-  (await f.next(3)).complete([]);
+  let finishedA = false,
+    saidB = false,
+    finishedB = false;
+  // A still has its post-say inference. Route each real request to its own input, not a global round index.
+  for (let index = 2; index < 5; index++) {
+    const next = await f.next(index);
+    const id = deliveredInput(next.request);
+    if (id === a.messageId) {
+      expect(finishedA).toBe(false);
+      finishedA = true;
+      next.complete([]);
+    } else {
+      expect(id).toBe(b.messageId);
+      if (!saidB) {
+        expect((await f.service.runtime.memoryView()).facts[0]?.value).toBe('我喜欢乌龙茶');
+        saidB = true;
+        next.complete(tool('say', { inputId: b.messageId, text: 'B已记住。' }));
+      } else {
+        expect(finishedB).toBe(false);
+        finishedB = true;
+        next.complete([]);
+      }
+    }
+  }
+  expect({ finishedA, saidB, finishedB }).toEqual({
+    finishedA: true,
+    saidB: true,
+    finishedB: true,
+  });
   await f.idle();
+  expect(f.calls).toHaveLength(5);
 }, 15000);
 
 it.each([
@@ -464,16 +521,46 @@ it('direct host remember refuses missing canonical admission independently of ad
   expect(f.calls).toHaveLength(0);
 }, 15000);
 
-it('full memory admission capacity preserves exact durable message retries without new slots or events', async () => {
+it('full owner ready capacity preserves exact durable message retries without new slots or events', async () => {
   const f = await setup();
   const command = { commandId: 'full-memory-0', text: '请记住明确值0。' };
   const accepted = await f.service.runtime.message(command);
-  await f.next(0); // Hold this inference while the other admitted inputs remain queued.
-  for (let index = 1; index < 32; index++)
-    await f.service.runtime.message({
+  if (!accepted.messageId) throw new Error('missing current input');
+  const activeIds = [accepted.messageId];
+  await f.next(0); // Hold the single inference permit; the other context may bind but cannot infer.
+  for (let index = 1; index < COMPANION_INPUT_CONTEXT_DEFAULT; index++) {
+    const input = await f.service.runtime.message({
       commandId: `full-memory-${index}`,
       text: `请记住明确值${index}。`,
     });
+    if (!input.messageId) throw new Error('missing queued input');
+    activeIds.push(input.messageId);
+  }
+  await vi.waitFor(async () => {
+    const phases = await Promise.all(
+      activeIds.map((id) =>
+        f.service.runtime.state('getInput', { id, scope: { kind: 'management' } }),
+      ),
+    );
+    expect(phases.every((input) => input.phase === 'active')).toBe(true);
+  });
+  const readyIds: string[] = [];
+  for (let index = 0; index < COMPANION_INPUT_READY_PER_AUDIENCE; index++) {
+    const input = await f.service.runtime.message({
+      commandId: `full-memory-ready-${index}`,
+      text: `请记住排队值${index}。`,
+    });
+    if (!input.messageId) throw new Error('missing ready input');
+    readyIds.push(input.messageId);
+  }
+  expect(
+    await Promise.all(
+      readyIds.map(
+        async (id) =>
+          (await f.service.runtime.state('getInput', { id, scope: { kind: 'management' } })).phase,
+      ),
+    ),
+  ).toEqual(readyIds.map(() => 'ready'));
   const before = await f.service.runtime.snapshot();
   expect(await f.service.runtime.message(command)).toEqual({ ...accepted, status: 'duplicate' });
   await expect(
@@ -482,6 +569,7 @@ it('full memory admission capacity preserves exact durable message retries witho
   await expect(
     f.service.runtime.message({ commandId: 'full-memory-new', text: '请记住新的值。' }),
   ).rejects.toMatchObject({ error: { code: 'quota-exceeded' } });
+  expect(await f.service.runtime.message(command)).toEqual({ ...accepted, status: 'duplicate' });
   const after = await f.service.runtime.snapshot();
   expect(after.cursor).toBe(before.cursor);
   expect(after.messages).toEqual(before.messages);

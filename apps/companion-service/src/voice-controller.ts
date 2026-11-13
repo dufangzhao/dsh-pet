@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto';
 import {
   VOICE_FEATURE_PLUGIN_ID,
   VOICE_INPUT_CAPABILITY,
+  VOICE_ASR_CAPABILITY,
+  type VoiceFinal,
   VOICE_VIEW_MAX_BYTES,
   VOICE_ASR_TIMEOUT_MS,
   VOICE_TICKET_TTL_MS,
@@ -74,6 +76,15 @@ interface Feature {
   signal: AbortSignal;
 }
 
+export interface AsrConsumer {
+  check(): Promise<void>;
+  recognize(
+    samples: number,
+    pcm: AsyncIterable<Uint8Array>,
+    signal?: AbortSignal,
+  ): Promise<VoiceFinal>;
+}
+
 /** Host management and fixed native dispatch; ConfigService remains the only CAS writer. */
 export class VoiceController {
   readonly providers: VoiceProviders;
@@ -85,6 +96,11 @@ export class VoiceController {
   private management = false;
   private closed = false;
   private selected = '';
+  private readonly consumerSessions = new Set<{
+    providerRef: string;
+    abort: AbortController;
+    done: Promise<void>;
+  }>();
   private readonly offCommit: () => void;
   constructor(
     readonly host: CompanionPluginHost,
@@ -269,7 +285,97 @@ export class VoiceController {
     )
       throw new KernelFault('conflict');
   }
+  /** Independent attachment consumer; it never creates a browser capture or changes finish mode. */
+  async withAsrConsumer<T>(
+    consumer: string,
+    signal: AbortSignal,
+    consume: (session: AsrConsumer, signal: AbortSignal) => Promise<T>,
+  ): Promise<T> {
+    if (this.closed) throw new KernelFault('not-ready');
+    const feature = await this.featureConfig(),
+      ref = feature.data.providerRef;
+    const configured = await this.configured(ref),
+      binding = this.providers.binding(ref);
+    if (
+      !binding ||
+      !configured.settings.modelRef ||
+      (configured.settings.authMode === 'gateway-key' && !configured.slot.value)
+    )
+      throw new KernelFault('not-ready');
+    const credentialVersion = configured.slot.version;
+    const abort = new AbortController();
+    let finish = () => {};
+    const done = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const active = { providerRef: ref, abort, done };
+    this.consumerSessions.add(active);
+    const check = async (): Promise<void> => {
+      if (this.closed || signal.aborted || abort.signal.aborted) throw new KernelFault('cancelled');
+      const selected = await this.featureConfig(),
+        current = await this.configured(ref);
+      if (
+        selected.data.providerRef !== ref ||
+        current.revision !== configured.revision ||
+        current.slot.version !== credentialVersion ||
+        this.providers.binding(ref)?.bindingId !== binding.bindingId
+      )
+        throw new KernelFault('conflict');
+    };
+    try {
+      return await withSourceAuthority(
+        this.host,
+        consumer,
+        [{ kind: 'capability-use', capability: VOICE_ASR_CAPABILITY }],
+        (consumerSignal) =>
+          withSourceAuthority(
+            this.host,
+            configured.registration.manifest.id,
+            [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+            async (sourceSignal) => {
+              const combined = AbortSignal.any([sourceSignal, abort.signal, signal]);
+              const session: AsrConsumer = {
+                check: async () => {
+                  combined.throwIfAborted();
+                  await check();
+                },
+                recognize: async (samples, pcm, operationSignal) => {
+                  combined.throwIfAborted();
+                  await check();
+                  const nativeSignal = operationSignal
+                    ? AbortSignal.any([combined, operationSignal])
+                    : combined;
+                  const result = await this.providers.recognize(
+                    consumer,
+                    ref,
+                    binding.bindingId,
+                    samples,
+                    pcm,
+                    nativeSignal,
+                    VOICE_ASR_TIMEOUT_MS,
+                  );
+                  combined.throwIfAborted();
+                  await check();
+                  return result;
+                },
+              };
+              await session.check();
+              const value = await consume(session, combined);
+              await session.check();
+              return value;
+            },
+            { signal: consumerSignal },
+          ),
+        { signal: AbortSignal.any([signal, abort.signal]) },
+      );
+    } finally {
+      this.consumerSessions.delete(active);
+      finish();
+    }
+  }
   private cancelProvider(ref: string): void {
+    for (const session of this.consumerSessions)
+      if (session.providerRef === ref) session.abort.abort();
     for (const lifetime of this.lifetimes.values())
       if (lifetime.providerRef === ref)
         void this.feature?.native
@@ -594,6 +700,8 @@ export class VoiceController {
     if (this.closed) return;
     this.closed = true;
     this.offCommit();
+    for (const session of this.consumerSessions) session.abort.abort();
+    await Promise.allSettled([...this.consumerSessions].map((session) => session.done));
     this.cancelAll();
     await Promise.allSettled([...this.lifetimes.values()].map((v) => v.work));
     try {

@@ -11,6 +11,7 @@ import {
   type CompanionModelView,
   type JsonObject,
   type KernelError,
+  type OwnerRef,
 } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { CredentialError, KernelFault, SecretRedactor } from '@pet/host-kernel';
@@ -21,6 +22,7 @@ import {
   emptyModelCheck,
   validateModelConnectionDescription,
   parseResponsesConnectionSettings,
+  type AuthorizedResponseTransport,
   type CompanionPluginHost,
   type CompanionRuntime,
   type ModelConnectionDescription,
@@ -96,12 +98,17 @@ export class ModelConnectionController {
     readonly host: CompanionPluginHost,
     readonly runtime: CompanionRuntime,
     registrations: readonly ModelConnectionRegistration[],
+    participationTransport?: (owner: OwnerRef, baseUrl: string) => AuthorizedResponseTransport,
   ) {
     this.connections = new ModelConnections(host, registrations, (owner, baseUrl) => {
       const key = this.connections
         .list()
         .find(([, registration]) => registration.manifest.id === owner.pluginId)?.[0];
       if (!key) throw new KernelFault('not-ready');
+      if (this.connections.purpose(key) === 'qq-participation') {
+        if (!participationTransport) throw new KernelFault('not-ready');
+        return participationTransport(owner, baseUrl);
+      }
       const slot = this.slots.get(key);
       if (!slot) throw new KernelFault('not-ready');
       const auth = JSON.parse(slot.target) as [string, string | null, string | null];
@@ -142,6 +149,7 @@ export class ModelConnectionController {
     slot: CredentialSlot;
   }> {
     const registration = this.connections.registration(key);
+    if (this.connections.purpose(key) !== 'foreground') throw new KernelFault('invalid-input');
     if (!this.host.verifySource(registration.manifest.id)) throw new KernelFault('package-changed');
     const snapshot = await this.host.configs.get(identity(registration.manifest.id));
     if (!snapshot.ok) throw new KernelFault(snapshot.error.code);
@@ -280,7 +288,7 @@ export class ModelConnectionController {
     const connectors: CompanionModelConnectorView[] = [];
     let selected: Awaited<ReturnType<ModelConnectionController['configured']>> | undefined;
     let sourceError: KernelError | null = null;
-    for (const [key, registration] of this.connections.list()) {
+    for (const [key, registration] of this.connections.list('foreground')) {
       try {
         const current = await this.configured(key);
         if (key === desired.connectorId) selected = current;

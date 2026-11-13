@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   SPEECH_CONTROL_CAPABILITY,
   SPEECH_OUTPUT_STREAM_CAPABILITY,
@@ -6,6 +6,10 @@ import {
   SPEECH_STATUS_TIMEOUT_MS,
   SPEECH_SEGMENT_TIMEOUT_MS,
   SPEECH_VIEW_MAX_BYTES,
+  COMPANION_MAX_TEXT,
+  isCompanionConversationAudience,
+  isCompanionMessageContent,
+  type CompanionMessage,
   isSpeechBegin,
   isSpeechCredentialCommand,
   isSpeechProviderCommand,
@@ -51,6 +55,19 @@ const keyOf = (v: SpeechUtteranceKey): SpeechUtteranceKey => ({
   agentId: v.agentId,
   serviceEpoch: v.serviceEpoch,
 });
+/** Host-only material reader, installed by service composition; never exposed through HTTP/SDK JSON. */
+export type PetCanonicalTextResolver = (
+  message: CompanionMessage,
+  signal: AbortSignal,
+) => Promise<string>;
+export interface TtsConsumer {
+  check(): Promise<void>;
+  consume(
+    key: SpeechSegmentKey,
+    text: string,
+    receive: (pcm: AsyncIterable<Uint8Array>, signal: AbortSignal) => Promise<void>,
+  ): Promise<void>;
+}
 interface Slot {
   target: string;
   version: string;
@@ -83,8 +100,17 @@ export class SpeechController {
   private readonly lifetimes = new Map<string, Lifetime>();
   private feature: Feature | undefined;
   private selected = '';
+  private readonly consumerSessions = new Set<{
+    providerRef: string;
+    abort: AbortController;
+    done: Promise<void>;
+  }>();
   private management = false;
   private closed = false;
+  private canonicalTextResolver: PetCanonicalTextResolver | undefined;
+  setCanonicalTextResolver(resolver: PetCanonicalTextResolver | undefined): void {
+    this.canonicalTextResolver = resolver;
+  }
   private readonly offCommit: () => void;
   constructor(
     readonly host: CompanionPluginHost,
@@ -262,8 +288,39 @@ export class SpeechController {
         const message = await this.runtime.state('getMessage', input, context.signal);
         valid();
         if (message.role !== 'assistant') throw new KernelFault('invalid-input');
-        if (this.redactor.containsValue(message)) throw new KernelFault('permission-denied');
-        return { ...message, role: 'assistant' };
+        if (
+          !isCompanionConversationAudience(message.audience) ||
+          message.audience.kind !== 'owner-private'
+        )
+          throw new KernelFault('permission-denied');
+        let text = message.text;
+        if (message.content !== undefined) {
+          if (!isCompanionMessageContent(message.content)) throw new KernelFault('invalid-input');
+          if (message.content.kind === 'text-document') {
+            const material = message.content.material;
+            if (
+              !isCompanionConversationAudience(material.audience) ||
+              material.audience.kind !== 'owner-private'
+            )
+              throw new KernelFault('permission-denied');
+            const resolve = this.canonicalTextResolver;
+            if (!resolve) throw new KernelFault('not-ready');
+            text = await resolve(message, context.signal);
+            valid();
+            if (typeof text !== 'string' || !text.length || text.length > COMPANION_MAX_TEXT)
+              throw new KernelFault('invalid-input');
+            const bytes = Buffer.from(text, 'utf8');
+            if (
+              bytes.toString('utf8') !== text ||
+              bytes.byteLength !== material.sizeBytes ||
+              createHash('sha256').update(bytes).digest('hex') !== material.sha256
+            )
+              throw new KernelFault('invalid-input');
+          }
+        }
+        if (this.redactor.containsValue({ ...message, text }))
+          throw new KernelFault('permission-denied');
+        return { ...message, text, role: 'assistant' };
       },
       captureBinding: async (input) => {
         valid();
@@ -331,7 +388,141 @@ export class SpeechController {
     }
     void l.feature.native.cancel(l.key).then(l.finish, l.finish);
   }
+  /** Independent export authority; no Pet readiness, playback preference or public utterance is fabricated. */
+  async withTtsConsumer<T>(
+    consumer: string,
+    signal: AbortSignal,
+    consume: (session: TtsConsumer, signal: AbortSignal) => Promise<T>,
+  ): Promise<T> {
+    if (this.closed) throw new KernelFault('not-ready');
+    const feature = await this.featureConfig(),
+      ref = feature.data.providerRef;
+    const configured = await this.configured(ref),
+      native = this.providers.binding(ref);
+    if (
+      !native ||
+      !configured.settings.modelRef ||
+      (configured.settings.authMode === 'gateway-key' && !configured.slot.value)
+    )
+      throw new KernelFault('not-ready');
+    const binding = await this.providers.capture(ref, native.bindingId, configured.slot.version);
+    const abort = new AbortController();
+    let finish = () => {};
+    const done = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const active = { providerRef: ref, abort, done };
+    this.consumerSessions.add(active);
+    const check = async (): Promise<void> => {
+      if (this.closed || signal.aborted || abort.signal.aborted) throw new KernelFault('cancelled');
+      const selected = await this.featureConfig(),
+        current = await this.configured(ref);
+      if (
+        selected.data.providerRef !== ref ||
+        current.revision !== binding.configRevision ||
+        current.slot.version !== binding.credentialVersion ||
+        this.providers.binding(ref)?.bindingId !== binding.bindingId
+      )
+        throw new KernelFault('conflict');
+    };
+    try {
+      return await withSourceAuthority(
+        this.host,
+        consumer,
+        [{ kind: 'capability-use', capability: SPEECH_OUTPUT_STREAM_CAPABILITY }],
+        (consumerSignal) =>
+          withSourceAuthority(
+            this.host,
+            binding.sourcePluginId,
+            [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+            async (sourceSignal) => {
+              const combined = AbortSignal.any([sourceSignal, signal, abort.signal]);
+              const session: TtsConsumer = {
+                check: async () => {
+                  combined.throwIfAborted();
+                  await check();
+                },
+                consume: async (key, text, receive) => {
+                  combined.throwIfAborted();
+                  await check();
+                  if (this.redactor.containsValue(text)) throw new KernelFault('permission-denied');
+                  const operation = await this.providers.synthesize(
+                    consumer,
+                    { key, binding, text },
+                    combined,
+                  );
+                  let drained = 0,
+                    ended = false,
+                    failure: unknown;
+                  const pcm: AsyncIterable<Uint8Array> = {
+                    async *[Symbol.asyncIterator]() {
+                      for await (const bytes of operation.audio) {
+                        combined.throwIfAborted();
+                        drained += bytes.byteLength;
+                        yield bytes;
+                      }
+                      ended = true;
+                    },
+                  };
+                  try {
+                    await receive(pcm, combined);
+                    if (!ended) throw new KernelFault('invalid-input');
+                    const result = await operation.result;
+                    if (
+                      result.finishReason !== 'stop' ||
+                      result.producedBytes !== drained ||
+                      result.producedFrames !== operation.producedFrames
+                    )
+                      throw new KernelFault('audio-format');
+                    await check();
+                  } catch (error) {
+                    failure = error;
+                  } finally {
+                    if (failure) {
+                      operation.cancel();
+                      operation.audio.cancel();
+                    }
+                    try {
+                      await operation.result;
+                    } catch (error) {
+                      if (
+                        !(failure instanceof KernelFault) ||
+                        ![
+                          'quota-exceeded',
+                          'permission-denied',
+                          'invalid-input',
+                          'conflict',
+                          'stale-owner',
+                        ].includes(failure.error.code)
+                      )
+                        failure = error;
+                    }
+                    try {
+                      await operation.settled;
+                    } catch (error) {
+                      failure = error;
+                    }
+                  }
+                  if (failure) throw failure;
+                },
+              };
+              await session.check();
+              const value = await consume(session, combined);
+              await session.check();
+              return value;
+            },
+            { signal: consumerSignal },
+          ),
+        { signal: AbortSignal.any([signal, abort.signal]) },
+      );
+    } finally {
+      this.consumerSessions.delete(active);
+      finish();
+    }
+  }
   private cancelProvider(ref: string): void {
+    for (const session of this.consumerSessions)
+      if (session.providerRef === ref) session.abort.abort();
     for (const l of this.lifetimes.values()) if (l.providerRef === ref) this.cancelLifetime(l);
   }
   private cancelAll(): void {
@@ -676,6 +867,8 @@ export class SpeechController {
     if (this.closed) return;
     this.closed = true;
     this.offCommit();
+    for (const session of this.consumerSessions) session.abort.abort();
+    await Promise.allSettled([...this.consumerSessions].map((session) => session.done));
     this.cancelAll();
     try {
       if (this.host.isEnabled(SPEECH_SERVICE_PLUGIN_ID))

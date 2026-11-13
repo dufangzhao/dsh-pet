@@ -119,6 +119,21 @@ importers:
       '@pet/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
+      '@pet/qq-media-codec':
+        specifier: workspace:*
+        version: link:../../plugins/qq-media-codec
+      '@pet/qq-official':
+        specifier: workspace:*
+        version: link:../../plugins/qq-official
+      '@pet/qq-onebot':
+        specifier: workspace:*
+        version: link:../../plugins/qq-onebot
+      '@pet/qq-participation-magpie':
+        specifier: workspace:*
+        version: link:../../plugins/qq-participation-magpie
+      '@pet/shared-qq':
+        specifier: workspace:*
+        version: link:../../plugins/shared-qq
       '@pet/shared-speech':
         specifier: workspace:*
         version: link:../../plugins/shared-speech
@@ -140,10 +155,16 @@ importers:
       tsx:
         specifier: 4.23.15
         version: 4.23.15
+      ws:
+        specifier: 8.22.0
+        version: 8.22.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      '@types/ws':
+        specifier: 8.18.2
+        version: 8.18.2
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -766,6 +787,134 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/qq-media-codec:
+    dependencies:
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/qq-official:
+    dependencies:
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
+  plugins/qq-onebot:
+    dependencies:
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../../packages/companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
+  plugins/qq-participation-magpie:
+    dependencies:
+      '@pet/model-connection-magpie':
+        specifier: workspace:*
+        version: link:../model-connection-magpie
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/shared-qq:
+    dependencies:
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

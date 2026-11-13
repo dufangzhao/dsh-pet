@@ -11,6 +11,11 @@ for (const name of [
   'shared-voice',
   'tts-magpie',
   'shared-speech',
+  'shared-qq',
+  'qq-official',
+  'qq-onebot',
+  'qq-participation-magpie',
+  'qq-media-codec',
   'text-client',
 ]) {
   execFileSync(process.execPath, ['build.mjs'], {

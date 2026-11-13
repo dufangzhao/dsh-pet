@@ -1,12 +1,21 @@
 import { mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { JsonObject, PluginManifest } from '@pet/contracts';
+import {
+  makeError,
+  QQ_CODEC_PLUGIN_ID,
+  QQ_OFFICIAL_PLUGIN_ID,
+  QQ_ONEBOT_PLUGIN_ID,
+  type JsonObject,
+  type PluginManifest,
+  type QQInputReceipt,
+  type KernelError,
+} from '@pet/contracts';
 import { validateManifest } from '@pet/contracts/validation';
 import { FileConfigStore, KernelFault } from '@pet/host-kernel';
 import { definePlugin } from '@pet/plugin-sdk';
 import stateDefinition from '@pet/state-sqlite';
-import cloudDefinition, { parseConfig as parseExecutionConfig } from '@pet/cloud-exec';
+import { createCloudExecPlugin, parseConfig as parseExecutionConfig } from '@pet/cloud-exec';
 import textDefinition from '@pet/text-client';
 import { createCorticoPlugin, type ResponseClient } from '@pet/harness-cortico';
 import {
@@ -41,6 +50,26 @@ import { createSharedSpeechPlugin } from '@pet/shared-speech';
 import type { SpeechTtsRegistration, SpeechTtsPortsFor } from '@pet/companion-runtime';
 import { SpeechController } from './speech-controller.js';
 import { serveText, type TextService } from './server.js';
+import { createSharedQQPlugin } from '@pet/shared-qq';
+import { createOfficialQqPlugin } from '@pet/qq-official';
+import { createOneBotQqPlugin } from '@pet/qq-onebot';
+import {
+  createQqMediaCodecPlugin,
+  parseCodecConfig,
+  type CodecImagePin,
+} from '@pet/qq-media-codec';
+import { createMagpieConnectionPlugin as createQQJudgePlugin } from '@pet/qq-participation-magpie';
+import { QQController, type QQControllerOptions } from './qq-controller.js';
+import { QQIngress } from './qq-ingress.js';
+import { QQJudgeController } from './qq-judge.js';
+import { createQQJudgeNativeProvider } from './qq-judge-native.mjs';
+import { QQAudio } from './qq-audio.js';
+import { createMaterialStore, type HostMaterialStore } from './material-store.js';
+import { createReplyMaterialResolver } from './reply-materials.js';
+import { qqGroupSettings } from './qq-policy.js';
+import { createQQMediaTransfer, type QQMediaTransfer } from './qq-media-transfer.js';
+import { QQDeliveryController } from './qq-delivery.js';
+import { createQQDeliverySource } from './qq-delivery-transport.js';
 
 export interface CompanionServiceOptions {
   readonly dataDirectory: string;
@@ -61,6 +90,10 @@ export interface CompanionServiceOptions {
   ) => ModelConnectionRegistration)[];
   readonly voicePlugins?: readonly ((portsFor: VoiceAsrPortsFor) => VoiceAsrRegistration)[];
   readonly speechPlugins?: readonly ((portsFor: SpeechTtsPortsFor) => SpeechTtsRegistration)[];
+  /** Host-only controlled composition seams; these are not Web configuration fields. */
+  readonly qqController?: QQControllerOptions;
+  readonly codecPin?: CodecImagePin;
+  readonly onQQInputReceipt?: (receipt: QQInputReceipt) => void;
   readonly name?: string;
   readonly persona?: string;
   readonly onError?: (error: unknown) => void;
@@ -72,6 +105,11 @@ export interface CompanionService {
   readonly models: ModelConnectionController;
   readonly voice: VoiceController;
   readonly speech: SpeechController;
+  readonly qq: QQController;
+  readonly ingress: QQIngress;
+  readonly audio: QQAudio;
+  readonly materials: HostMaterialStore;
+  readonly delivery: QQDeliveryController;
   close(): Promise<void>;
 }
 async function manifest(directory: string): Promise<PluginManifest> {
@@ -99,6 +137,11 @@ export async function createCompanionService(
     asr: path.join(root, 'plugins/asr-magpie'),
     speech: path.join(root, 'plugins/shared-speech'),
     tts: path.join(root, 'plugins/tts-magpie'),
+    qq: path.join(root, 'plugins/shared-qq'),
+    qqOfficial: path.join(root, 'plugins/qq-official'),
+    qqOnebot: path.join(root, 'plugins/qq-onebot'),
+    qqJudge: path.join(root, 'plugins/qq-participation-magpie'),
+    qqCodec: path.join(root, 'plugins/qq-media-codec'),
   };
   const [
     stateManifest,
@@ -110,6 +153,11 @@ export async function createCompanionService(
     asrManifest,
     speechManifest,
     ttsManifest,
+    qqManifest,
+    qqOfficialManifest,
+    qqOnebotManifest,
+    qqJudgeManifest,
+    qqCodecManifest,
   ] = await Promise.all([
     manifest(directories.state),
     manifest(directories.cloud),
@@ -120,6 +168,25 @@ export async function createCompanionService(
     manifest(directories.asr),
     manifest(directories.speech),
     manifest(directories.tts),
+    manifest(directories.qq),
+    manifest(directories.qqOfficial),
+    manifest(directories.qqOnebot),
+    manifest(directories.qqJudge),
+    manifest(directories.qqCodec),
+  ]);
+  const rawCodecLock: unknown = JSON.parse(
+    await readFile(path.join(directories.qqCodec, 'codec-image.lock.json'), 'utf8'),
+  );
+  if (!rawCodecLock || typeof rawCodecLock !== 'object' || Array.isArray(rawCodecLock))
+    throw new KernelFault('invalid-input');
+  const codecLock = rawCodecLock as Record<string, unknown>;
+  const codecPin = parseCodecConfig({
+    imageId: String(codecLock['imageId']),
+    manifestSha256: String(codecLock['manifestSha256']),
+  });
+  const hostDataDirectory = path.join(data, 'plugin-data', COMPANION_HOST_ID);
+  const artifactRoots = new Map([
+    [cloudManifest.id, path.join(data, 'plugin-data', cloudManifest.id, 'jobs')],
   ]);
   const configRoot = path.join(data, 'configuration');
   await mkdir(configRoot, { recursive: true, mode: 0o700 });
@@ -158,13 +225,29 @@ export async function createCompanionService(
   let models: ModelConnectionController | undefined;
   let voice: VoiceController | undefined;
   let speech: SpeechController | undefined;
+  let qq: QQController | undefined;
+  let judge: QQJudgeController | undefined;
+  let ingress: QQIngress | undefined;
+  let audio: QQAudio | undefined;
+  let materials: HostMaterialStore | undefined;
+  let mediaTransfer: QQMediaTransfer | undefined;
+  let delivery: QQDeliveryController | undefined;
+  let offTerminal: (() => void) | undefined;
   const cleanup = async (): Promise<void> => {
     let failure: unknown;
     for (const close of [
-      () => speech?.close(),
+      () => offTerminal?.(),
       () => http?.close(),
+      () => ingress?.close(),
+      () => delivery?.close(),
+      () => mediaTransfer?.close(),
+      () => audio?.close(),
+      () => qq?.close(),
+      () => judge?.close(),
+      () => speech?.close(),
       () => voice?.close(),
       () => runtime?.close(),
+      () => materials?.close(),
       () => models?.close(),
       () => host?.close(),
     ]) {
@@ -175,6 +258,18 @@ export async function createCompanionService(
       }
     }
     if (failure !== undefined) throw failure;
+  };
+  const requireQQ = (): QQController => {
+    if (!qq) throw new KernelFault('not-ready');
+    return qq;
+  };
+  const requireJudge = (): QQJudgeController => {
+    if (!judge) throw new KernelFault('not-ready');
+    return judge;
+  };
+  const requireAudio = (): QQAudio => {
+    if (!audio) throw new KernelFault('not-ready');
+    return audio;
   };
   const requireSpeech = (): SpeechController => {
     if (!speech) throw new KernelFault('not-ready');
@@ -242,6 +337,20 @@ export async function createCompanionService(
         describeConfig: (config) => describeFixtureModel(config, fixtureModel),
       },
     },
+    {
+      manifest: qqJudgeManifest,
+      directory: directories.qqJudge,
+      preset: 'allow',
+      enabled: false,
+      hostCredentials: ['model-api-key'],
+      definition: createQQJudgePlugin(portsFor),
+      connection: {
+        providerId: 'magpie',
+        purpose: 'qq-participation',
+        describeConfig: describeMagpieConfig,
+        nativeProvider: createQQJudgeNativeProvider,
+      },
+    },
     ...(options.connectionPlugins ?? []).map((create) => create(portsFor)),
   ];
   const asrPortsFor: VoiceAsrPortsFor = (context) => requireVoice().providers.portsFor(context);
@@ -289,6 +398,7 @@ export async function createCompanionService(
       preset: 'allow',
       enabled: true,
       protected: true,
+      dataDirectory: hostDataDirectory,
       ...(Object.keys(profileOverrides).length ? { config: profileOverrides } : {}),
     },
     {
@@ -302,7 +412,9 @@ export async function createCompanionService(
     {
       manifest: cloudManifest,
       directory: directories.cloud,
-      definition: cloudDefinition,
+      definition: createCloudExecPlugin({
+        readMaterial: (request, consume) => requireRuntime().readWorkMaterial(request, consume),
+      }),
       preset: 'allow',
       enabled: executionEnabled,
       initialConfig: { image: 'unconfigured', workspaceDirectory: 'jobs' },
@@ -353,6 +465,59 @@ export async function createCompanionService(
       enabled: !disabled.has(textManifest.id),
     },
     ...connections,
+    {
+      manifest: qqManifest,
+      directory: directories.qq,
+      preset: 'allow',
+      enabled: false,
+      definition: createSharedQQPlugin((context) => requireQQ().featurePorts(context)),
+    },
+    {
+      manifest: qqOfficialManifest,
+      directory: directories.qqOfficial,
+      preset: 'allow',
+      enabled: false,
+      hostCredentials: ['qq-official-app-secret'],
+      definition: definePlugin({
+        async activate(context) {
+          const controller = requireQQ();
+          await controller.prepareSource(context);
+          return createOfficialQqPlugin((source) => controller.officialPorts(source)).activate(
+            context,
+          );
+        },
+      }),
+    },
+    {
+      manifest: qqOnebotManifest,
+      directory: directories.qqOnebot,
+      preset: 'allow',
+      enabled: false,
+      hostCredentials: ['qq-onebot-access-token'],
+      definition: definePlugin({
+        async activate(context) {
+          const controller = requireQQ();
+          await controller.prepareSource(context);
+          return createOneBotQqPlugin((source) => controller.onebotPorts(source)).activate(context);
+        },
+      }),
+    },
+    {
+      manifest: qqCodecManifest,
+      directory: directories.qqCodec,
+      preset: 'allow',
+      enabled: false,
+      initialConfig: { imageId: codecPin.imageId, manifestSha256: codecPin.manifestSha256 },
+      ...(options.codecPin
+        ? {
+            config: {
+              imageId: options.codecPin.imageId,
+              manifestSha256: options.codecPin.manifestSha256,
+            },
+          }
+        : {}),
+      definition: createQqMediaCodecPlugin((context) => requireAudio().codecPorts(context)),
+    },
     {
       manifest: voiceManifest,
       directory: directories.voice,
@@ -407,12 +572,15 @@ export async function createCompanionService(
       executionPluginId: cloudManifest.id,
       executionProviderId: 'docker',
       executionTimeoutMs: executionConfig.value.timeoutMs,
+      optionalPluginIds: [QQ_OFFICIAL_PLUGIN_ID, QQ_ONEBOT_PLUGIN_ID],
       profileOverrides: {
         name: options.name !== undefined,
         persona: options.persona !== undefined,
       },
     });
-    models = new ModelConnectionController(host, runtime, connections);
+    models = new ModelConnectionController(host, runtime, connections, (owner, baseUrl) =>
+      requireJudge().transport(owner, baseUrl),
+    );
     runtime.setModelControls(models);
     if (options.modelApiKey && options.modelBaseUrl)
       await models.seedEnvironment(MAGPIE_CONNECTION, options.modelApiKey, options.modelBaseUrl);
@@ -422,18 +590,102 @@ export async function createCompanionService(
     await voice.initialize();
     speech = new SpeechController(host, runtime, speechRegistrations);
     await speech.initialize();
+    materials = await createMaterialStore({ directory: hostDataDirectory, host, state: runtime });
+    speech.setCanonicalTextResolver(materials.resolvePetCanonicalText);
+    audio = new QQAudio({ host, runtime, voice, speech, materials });
+    qq = new QQController(host, runtime, models.connections, options.qqController);
+    judge = new QQJudgeController(host, runtime, models.connections, qq.judgePolicyPorts());
+    qq.setJudge(judge);
+    mediaTransfer = createQQMediaTransfer({ host, runtime, qq, materials, audio });
+    ingress = new QQIngress(host, runtime, qq, {
+      judge,
+      prepareMedia: mediaTransfer.prepareInput,
+      ...(options.onQQInputReceipt ? { onReceipt: options.onQQInputReceipt } : {}),
+    });
+    qq.setIngress(ingress.handlers);
+    qq.setCodecStatusProvider(() => requireAudio().codecStatus());
+    const activeMaterials = materials;
+    const activeQQ = qq;
+    const activeIngress = ingress;
+    runtime.setInputPorts({
+      resolveInput: activeMaterials.resolveInput,
+      storeFullText: activeMaterials.storeFullText,
+      grantForWorkResult: (origin) => activeIngress.grantForWorkResult(origin),
+      conversationWindow: (origin) => {
+        const audience = origin.audience;
+        if (audience.kind !== 'qq-group') throw new KernelFault('invalid-input');
+        const group = qqGroupSettings(
+          activeQQ.policy().settings,
+          audience.account,
+          audience.groupId,
+        );
+        return { maxMessages: group.contextMessages, maxAgeMs: group.contextMaxAgeMs };
+      },
+      prepareWork: mediaTransfer.prepareWork,
+      readWorkMaterial: async (request, access, consume) => {
+        try {
+          await activeMaterials.withMaterial(
+            request.selection.materialId,
+            access,
+            async (reference, chunks) => {
+              await consume({
+                sizeBytes: reference.sizeBytes,
+                sha256: reference.sha256,
+                chunks,
+                check: () => access.check(),
+              });
+            },
+          );
+          return { ok: true, value: null };
+        } catch (error) {
+          return {
+            ok: false,
+            error: error instanceof KernelFault ? error.error : makeError('internal', false),
+          };
+        }
+      },
+      resolveReplyAttachment: createReplyMaterialResolver({
+        host,
+        runtime,
+        materials,
+        artifactRoots,
+      }),
+    });
+    delivery = new QQDeliveryController({
+      host,
+      runtime,
+      materials,
+      audio,
+      policy: async () => activeQQ.policy(),
+      sourceFor: (account) => createQQDeliverySource(activeQQ.sourceFor(account)),
+      allowOfficialProactive: async (grant) => {
+        if (grant.origin.kind !== 'qq-proactive' || grant.origin.audience.kind !== 'qq-group')
+          return false;
+        await grant.check();
+        const audience = grant.origin.audience;
+        return qqGroupSettings(activeQQ.policy().settings, audience.account, audience.groupId)
+          .proactive.enabled;
+      },
+      ...(options.onError ? { onError: (error: KernelError) => options.onError?.(error) } : {}),
+    });
+    const activeDelivery = delivery;
+    offTerminal = runtime.onInputTerminal((event) => activeDelivery.enqueue(event));
+    await qq.initialize();
+    await judge.initialize();
+    runtime.setQQStatusProvider(() => activeQQ.status());
+    if (!disabled.has(QQ_CODEC_PLUGIN_ID)) await host.setEnabled(QQ_CODEC_PLUGIN_ID, true);
     http = await serveText({
       runtime,
       host,
       models,
       voice,
       speech,
+      qq,
+      materials,
       token: options.token,
       clientPluginId: textManifest.id,
       clientDirectory: path.join(directories.text, 'dist'),
-      artifactRoots: new Map([
-        [cloudManifest.id, path.join(data, 'plugin-data', cloudManifest.id, 'jobs')],
-      ]),
+      artifactRoots,
       ...(options.hostname ? { hostname: options.hostname } : {}),
       ...(options.port !== undefined ? { port: options.port } : {}),
       ...(options.publicOrigin ? { publicOrigin: options.publicOrigin } : {}),
@@ -447,6 +699,11 @@ export async function createCompanionService(
       models,
       voice,
       speech,
+      qq,
+      ingress,
+      audio,
+      materials,
+      delivery,
       close() {
         return (closing ??= cleanup());
       },

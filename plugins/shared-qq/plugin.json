@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.shared-qq",
+  "version": "0.1.0",
+  "displayName": { "en": "Shared QQ entry", "zh-CN": "共享 QQ 接入" },
+  "description": {
+    "en": "Service-owned QQ admission, participation and reply policy for the continuing Agent",
+    "zh-CN": "同一 Agent 的 QQ 准入、参与和回复策略"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "control",
+      "capability": "companion.qq.entry@1",
+      "features": {
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "consumes": [
+    { "capability": "companion.qq.protocol@1", "optional": true },
+    { "capability": "companion.state@1", "optional": true },
+    { "capability": "companion.model.connection@1", "optional": true },
+    { "capability": "companion.voice.asr@1", "optional": true },
+    { "capability": "companion.speech.output@1", "optional": true },
+    { "capability": "companion.qq.codec@1", "optional": true }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "capability-use", "capability": "companion.qq.protocol@1" },
+    { "kind": "capability-use", "capability": "companion.state@1" },
+    { "kind": "capability-use", "capability": "companion.model.connection@1" },
+    { "kind": "capability-use", "capability": "companion.voice.asr@1" },
+    { "kind": "capability-use", "capability": "companion.speech.output@1" },
+    { "kind": "capability-use", "capability": "companion.qq.codec@1" }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateAllowlist",
+        "groupAllowlist",
+        "principalAliases",
+        "administratorPrincipalIds",
+        "knownMachineActors",
+        "groupDefaults",
+        "groups",
+        "voiceOutputEnabled",
+        "judge"
+      ],
+      "properties": {
+        "privateAllowlist": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["account", "scene", "senderId"],
+            "properties": {
+              "account": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["protocol", "sourcePluginId", "instanceId", "accountId"],
+                "properties": {
+                  "protocol": { "enum": ["official", "onebot-v11"], "type": "string" },
+                  "sourcePluginId": { "type": "string", "maxLength": 128 },
+                  "instanceId": { "const": "default", "type": "string" },
+                  "accountId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                }
+              },
+              "scene": { "type": "string", "enum": ["private", "group"] },
+              "senderId": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "groupId": { "type": "string", "minLength": 1, "maxLength": 256 }
+            }
+          },
+          "default": []
+        },
+        "groupAllowlist": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["account", "groupId"],
+            "properties": {
+              "account": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["protocol", "sourcePluginId", "instanceId", "accountId"],
+                "properties": {
+                  "protocol": { "enum": ["official", "onebot-v11"], "type": "string" },
+                  "sourcePluginId": { "type": "string", "maxLength": 128 },
+                  "instanceId": { "const": "default", "type": "string" },
+                  "accountId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                }
+              },
+              "groupId": { "type": "string", "minLength": 1, "maxLength": 256 }
+            }
+          },
+          "default": []
+        },
+        "principalAliases": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["actor", "principalId"],
+            "properties": {
+              "actor": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account", "scene", "senderId"],
+                "properties": {
+                  "account": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["protocol", "sourcePluginId", "instanceId", "accountId"],
+                    "properties": {
+                      "protocol": { "enum": ["official", "onebot-v11"], "type": "string" },
+                      "sourcePluginId": { "type": "string", "maxLength": 128 },
+                      "instanceId": { "const": "default", "type": "string" },
+                      "accountId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                    }
+                  },
+                  "scene": { "type": "string", "enum": ["private", "group"] },
+                  "senderId": { "type": "string", "minLength": 1, "maxLength": 256 },
+                  "groupId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                }
+              },
+              "principalId": { "type": "string" }
+            }
+          },
+          "default": []
+        },
+        "administratorPrincipalIds": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": { "type": "string" },
+          "default": []
+        },
+        "knownMachineActors": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["account", "scene", "senderId"],
+            "properties": {
+              "account": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["protocol", "sourcePluginId", "instanceId", "accountId"],
+                "properties": {
+                  "protocol": { "enum": ["official", "onebot-v11"], "type": "string" },
+                  "sourcePluginId": { "type": "string", "maxLength": 128 },
+                  "instanceId": { "const": "default", "type": "string" },
+                  "accountId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                }
+              },
+              "scene": { "type": "string", "enum": ["private", "group"] },
+              "senderId": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "groupId": { "type": "string", "minLength": 1, "maxLength": 256 }
+            }
+          },
+          "default": []
+        },
+        "groupDefaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contextMessages",
+            "contextMaxAgeMs",
+            "mentionEnabled",
+            "wakeWords",
+            "proactive"
+          ],
+          "properties": {
+            "contextMessages": { "type": "integer", "minimum": 0, "maximum": 30 },
+            "contextMaxAgeMs": { "type": "integer", "minimum": 1000, "maximum": 1800000 },
+            "mentionEnabled": { "type": "boolean" },
+            "wakeWords": {
+              "type": "array",
+              "maxItems": 16,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+            },
+            "proactive": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "mode", "probability", "cooldownMs", "maxRepliesPerHour"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "mode": { "enum": ["rule-probability", "model-assisted"], "type": "string" },
+                "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+                "cooldownMs": { "type": "integer", "minimum": 1000, "maximum": 86400000 },
+                "maxRepliesPerHour": { "type": "integer", "minimum": 1, "maximum": 60 }
+              }
+            }
+          },
+          "default": {
+            "contextMessages": 30,
+            "contextMaxAgeMs": 1800000,
+            "mentionEnabled": true,
+            "wakeWords": [],
+            "proactive": {
+              "enabled": false,
+              "mode": "rule-probability",
+              "probability": 0.1,
+              "cooldownMs": 60000,
+              "maxRepliesPerHour": 6
+            }
+          }
+        },
+        "groups": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["account", "groupId", "settings"],
+            "properties": {
+              "account": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["protocol", "sourcePluginId", "instanceId", "accountId"],
+                "properties": {
+                  "protocol": { "enum": ["official", "onebot-v11"], "type": "string" },
+                  "sourcePluginId": { "type": "string", "maxLength": 128 },
+                  "instanceId": { "const": "default", "type": "string" },
+                  "accountId": { "type": "string", "minLength": 1, "maxLength": 256 }
+                }
+              },
+              "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "settings": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "contextMessages",
+                  "contextMaxAgeMs",
+                  "mentionEnabled",
+                  "wakeWords",
+                  "proactive"
+                ],
+                "properties": {
+                  "contextMessages": { "type": "integer", "minimum": 0, "maximum": 30 },
+                  "contextMaxAgeMs": { "type": "integer", "minimum": 1000, "maximum": 1800000 },
+                  "mentionEnabled": { "type": "boolean" },
+                  "wakeWords": {
+                    "type": "array",
+                    "maxItems": 16,
+                    "uniqueItems": true,
+                    "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+                  },
+                  "proactive": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "enabled",
+                      "mode",
+                      "probability",
+                      "cooldownMs",
+                      "maxRepliesPerHour"
+                    ],
+                    "properties": {
+                      "enabled": { "type": "boolean" },
+                      "mode": { "enum": ["rule-probability", "model-assisted"], "type": "string" },
+                      "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+                      "cooldownMs": { "type": "integer", "minimum": 1000, "maximum": 86400000 },
+                      "maxRepliesPerHour": { "type": "integer", "minimum": 1, "maximum": 60 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": []
+        },
+        "voiceOutputEnabled": { "type": "boolean", "default": false },
+        "judge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "providerRef",
+            "maxAttemptsPerHour",
+            "perGroupIntervalMs",
+            "timeoutMs",
+            "maxOutputTokens"
+          ],
+          "properties": {
+            "providerRef": { "type": "string", "minLength": 3, "maxLength": 257 },
+            "maxAttemptsPerHour": { "type": "integer", "minimum": 1, "maximum": 30 },
+            "perGroupIntervalMs": { "type": "integer", "minimum": 60000, "maximum": 3600000 },
+            "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 10000 },
+            "maxOutputTokens": { "type": "integer", "minimum": 1, "maximum": 256 }
+          },
+          "default": {
+            "providerRef": "pet.qq-participation-magpie/magpie",
+            "maxAttemptsPerHour": 30,
+            "perGroupIntervalMs": 60000,
+            "timeoutMs": 10000,
+            "maxOutputTokens": 256
+          }
+        }
+      }
+    },
+    "apply": {
+      "privateAllowlist": "immediate",
+      "groupAllowlist": "immediate",
+      "principalAliases": "immediate",
+      "administratorPrincipalIds": "immediate",
+      "knownMachineActors": "immediate",
+      "groupDefaults": "immediate",
+      "groups": "immediate",
+      "voiceOutputEnabled": "immediate",
+      "judge": "immediate"
+    }
+  }
+}

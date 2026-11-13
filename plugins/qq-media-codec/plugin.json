@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.qq-media-codec",
+  "version": "0.1.0",
+  "displayName": { "en": "QQ media codec", "zh-CN": "QQ 媒体转码" },
+  "description": {
+    "en": "Decode bounded voice attachments and encode Tencent SILK in a fixed owned Docker job",
+    "zh-CN": "在固定受控 Docker job 中解码语音并编码 Tencent SILK"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64"],
+  "entries": { "runtime": "dist/index.mjs", "workers": { "codec": "dist/index.mjs" } },
+  "provides": [
+    {
+      "id": "docker",
+      "capability": "companion.qq.codec@1",
+      "features": {
+        "methodPermissions": {
+          "describe": [
+            { "kind": "process", "workers": ["codec"] },
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "process", "workers": ["codec"] },
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["imageId", "manifestSha256"],
+      "properties": {
+        "imageId": {
+          "type": "string",
+          "maxLength": 71,
+          "default": ""
+        },
+        "manifestSha256": {
+          "type": "string",
+          "maxLength": 64,
+          "default": ""
+        }
+      }
+    },
+    "apply": { "imageId": "reload", "manifestSha256": "reload" }
+  }
+}

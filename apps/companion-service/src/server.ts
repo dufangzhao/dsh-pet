@@ -7,7 +7,10 @@ import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import {
   isKernelErrorCode,
+  isCompanionRecordId,
   makeError,
+  QQ_OFFICIAL_PLUGIN_ID,
+  QQ_ONEBOT_PLUGIN_ID,
   type CompanionModelView,
   type CompanionMessageCommand,
   type CompanionTaskCommand,
@@ -21,8 +24,12 @@ import type { VoiceController } from './voice-controller.js';
 import { voiceHttp } from './voice-http.js';
 import type { SpeechController } from './speech-controller.js';
 import { speechHttp } from './speech-http.js';
+import type { QQController } from './qq-controller.js';
+import { qqHttp } from './qq-http.js';
+import type { HostMaterialStore } from './material-store.js';
 
 const MAX_BODY = 64 * 1024;
+const MAX_STREAMS = 16;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const object = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -115,7 +122,7 @@ function checkedRelative(root: string, relative: string): string {
 }
 
 /** Reject symlink ancestors as well as a substituted final artifact. */
-async function openOwnedFile(
+export async function openOwnedFile(
   root: string,
   relative: string,
 ): Promise<Awaited<ReturnType<typeof open>>> {
@@ -143,6 +150,8 @@ export interface TextServiceOptions {
   readonly models?: ModelConnectionController;
   readonly voice?: VoiceController;
   readonly speech?: SpeechController;
+  readonly qq?: QQController;
+  readonly materials?: HostMaterialStore;
   readonly token: string;
   readonly hostname?: string;
   readonly port?: number;
@@ -183,7 +192,7 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     response: ServerResponse,
     url: URL,
   ): Promise<void> => {
-    if (streams.size >= 16) throw new KernelFault('quota-exceeded');
+    if (streams.size >= MAX_STREAMS) throw new KernelFault('quota-exceeded');
     const after = Number(url.searchParams.get('after') ?? '0');
     const epoch = url.searchParams.get('epoch');
     if (!Number.isSafeInteger(after) || after < 0 || !epoch) throw new KernelFault('invalid-input');
@@ -252,6 +261,55 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     if (!controller.signal.aborted) await once(controller.signal, 'abort');
   };
 
+  const material = async (
+    request: IncomingMessage,
+    response: ServerResponse,
+    id: string,
+  ): Promise<void> => {
+    if (!options.materials) throw new KernelFault('not-ready');
+    if (streams.size >= MAX_STREAMS) throw new KernelFault('quota-exceeded');
+    const controller = new AbortController();
+    const stop = (): void => {
+      if (!response.writableFinished) controller.abort();
+    };
+    request.once('aborted', stop);
+    response.once('close', stop);
+    streams.add(controller);
+    try {
+      await options.materials.withMaterial(
+        id,
+        {
+          scope: { kind: 'management' },
+          signal: controller.signal,
+          check: async () => {
+            if (closing || controller.signal.aborted || !authorized(request))
+              throw new KernelFault('permission-denied');
+          },
+        },
+        async (reference, chunks) => {
+          response.writeHead(200, {
+            'Content-Type':
+              reference.kind === 'text' ? 'text/plain; charset=utf-8' : reference.mediaType,
+            'Content-Length': reference.sizeBytes,
+            'Content-Disposition': `attachment; filename="material"; filename*=UTF-8''${encodeURIComponent(reference.name)}`,
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff',
+          });
+          for await (const chunk of chunks) {
+            controller.signal.throwIfAborted();
+            if (!response.write(chunk))
+              await once(response, 'drain', { signal: controller.signal });
+          }
+        },
+      );
+      response.end();
+    } finally {
+      streams.delete(controller);
+      request.off('aborted', stop);
+      response.off('close', stop);
+    }
+  };
+
   const handle = async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
     if (closing) throw new KernelFault('not-ready');
     const url = new URL(request.url ?? '/', 'http://service.invalid');
@@ -311,6 +369,22 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       host: request.headers.host,
       origin: typeof origin === 'string' ? origin : undefined,
     });
+    const materialMatch = /^\/api\/materials\/([^/]+)$/.exec(pathname);
+    if (method === 'GET' && materialMatch?.[1]) {
+      let id: string;
+      try {
+        id = decodeURIComponent(materialMatch[1]);
+      } catch {
+        throw new KernelFault('invalid-input');
+      }
+      if (!isCompanionRecordId(id)) throw new KernelFault('invalid-input');
+      await material(request, response, id);
+      return;
+    }
+    if (/^\/api\/qq(?:\/|$)/.test(pathname)) {
+      if (!options.qq) throw new KernelFault('not-ready');
+      if (await qqHttp({ request, response, url, writable, qq: options.qq, body, send })) return;
+    }
     if (/^\/api\/speech(?:\/|$)/.test(pathname)) {
       if (!options.speech) throw new KernelFault('not-ready');
       if (
@@ -453,7 +527,10 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     if (pluginMatch?.[1] && typeof input['enabled'] === 'boolean') {
       send(response, 200, {
         ok: true,
-        value: await options.runtime.setPlugin(pluginMatch[1], input['enabled'], id),
+        value:
+          options.qq && [QQ_OFFICIAL_PLUGIN_ID, QQ_ONEBOT_PLUGIN_ID].includes(pluginMatch[1])
+            ? await options.qq.setPlugin(pluginMatch[1], input['enabled'], id)
+            : await options.runtime.setPlugin(pluginMatch[1], input['enabled'], id),
       });
       return;
     }
