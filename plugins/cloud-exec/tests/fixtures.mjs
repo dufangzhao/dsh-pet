@@ -15,12 +15,17 @@ if (process.env['PET_CLOUD_EXEC_DOCKER_TEST'] === '1' && !process.env['PET_CLOUD
 }
 const scratch = fileURLToPath(new URL('../.cache/', import.meta.url));
 
-export async function fixture(t, overrides = {}) {
+export async function fixture(t, overrides = {}, readMaterial) {
   await mkdir(scratch, { recursive: true });
   const root = await mkdtemp(path.join(scratch, 'test-'));
   const config = parseConfig({ image, timeoutMs: 10_000, ...overrides });
   assert.equal(config.ok, true);
-  const executor = new DockerExecutor({ workspaceRoot: root, config: config.value, owner });
+  const executor = new DockerExecutor({
+    workspaceRoot: root,
+    config: config.value,
+    owner,
+    ...(readMaterial ? { readMaterial } : {}),
+  });
   t.after(async () => {
     await executor.close();
     // Verify the exact fixture root before recursive deletion; no shared data roots are used.

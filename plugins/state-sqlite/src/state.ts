@@ -1,6 +1,6 @@
-import { createHash, randomUUID } from 'node:crypto';
-import type { DatabaseSync, SQLOutputValue } from 'node:sqlite';
-import { makeError } from '@pet/contracts';
+import { randomUUID } from 'node:crypto';
+import type { DatabaseSync } from 'node:sqlite';
+import { makeError, companionAudienceKey } from '@pet/contracts';
 import type {
   CompanionArtifact,
   CompanionCommandReceipt,
@@ -9,36 +9,71 @@ import type {
   CompanionMessage,
   CompanionTask,
   CompanionTaskStatus,
-  JsonValue,
+  CompanionAudience,
+  CompanionInputAdmission,
   Result,
 } from '@pet/contracts';
-import { STATE_LOG_BYTES, STATE_MAX_ARTIFACTS, STATE_MAX_RESULT_BYTES } from './types.js';
-import type { StateMethodInputs, StateMethodOutputs, StoredArtifact } from './types.js';
+import {
+  STATE_LOG_BYTES,
+  STATE_MAX_ARTIFACTS,
+  STATE_MAX_MESSAGE_BYTES,
+  STATE_MAX_RESULT_BYTES,
+} from './types.js';
+import type {
+  StateMethodInputs,
+  StateMethodOutputs,
+  StoredArtifact,
+  StateReadScope,
+} from './types.js';
+import {
+  assertVisible,
+  legacyOrigin,
+  legacyTaskOrigin,
+  OWNER_AUDIENCE,
+  ownerOrigin,
+  ownerTaskOrigin,
+  scopeWhere,
+} from './scope.js';
+import { STATE_FORMAT_VERSION, upgradeStateV2ToV3 } from './schema.js';
+import { decode, scalar, fingerprint, receipt } from './records.js';
+import type { RecordWriter } from './records.js';
+import {
+  assertInputCapacity,
+  createInput,
+  commitInput,
+  claimInput,
+  inputMessage,
+  inputNotices,
+  getInput,
+  findInput,
+  updateInput,
+  putMaterial,
+  getMaterial,
+  findMaterial,
+  recoverInputs,
+} from './inputs.js';
+import { observe, observations, getObservation, pruneObservations } from './observations.js';
+import {
+  createDelivery,
+  updateDelivery,
+  claimDeliveryAttempt,
+  passiveReplyBudget,
+  getDelivery,
+  deliveries,
+  recoverDeliveries,
+} from './deliveries.js';
+import {
+  claimJudgment,
+  finishJudgment,
+  judgmentUsage,
+  proactiveReadiness,
+  recoverJudgments,
+} from './judgments.js';
 import { openStateDatabase } from './database.js';
 import { memoryUsage } from './memory.js';
-import { boundedText, canonical, jsonBytes, StateFailure, validateInput } from './validation.js';
-
-type Row = Record<string, SQLOutputValue>;
+import { boundedText, jsonBytes, StateFailure, validateInput } from './validation.js';
 const NONTERMINAL = ['accepted', 'running', 'cancel-requested'];
 const SETTLED = ['completed', 'failed', 'cancelled'];
-
-function decode<T>(row: Row | undefined): T {
-  if (!row || typeof row['body'] !== 'string') throw new StateFailure('unavailable');
-  // Only this provider writes these versioned, boundary-validated JSON records.
-  return JSON.parse(row['body']) as T;
-}
-
-function scalar(row: Row | undefined, key: string): number {
-  const value = row?.[key];
-  if (typeof value !== 'number' || !Number.isSafeInteger(value)) throw new StateFailure('internal');
-  return value;
-}
-
-function fingerprint(value: unknown): string {
-  return createHash('sha256')
-    .update(canonical(value as JsonValue))
-    .digest('hex');
-}
 
 function publicArtifact({
   id,
@@ -48,14 +83,6 @@ function publicArtifact({
   sizeBytes,
 }: StoredArtifact): CompanionArtifact {
   return { id, taskId, name, mediaType, sizeBytes };
-}
-
-function receipt(
-  commandId: string,
-  messageId: string | null,
-  taskId: string | null,
-): CompanionCommandReceipt {
-  return { commandId, status: 'accepted', messageId, taskId };
 }
 
 function mergeLog(previous: string, next: string | undefined): string {
@@ -76,8 +103,8 @@ export class SqliteState {
     this.#db = db;
     try {
       const version = scalar(db.prepare('PRAGMA user_version').get(), 'user_version');
-      if (version === 1) throw new StateFailure('not-ready');
-      if (version !== 0 && version !== 2) throw new StateFailure('conflict');
+      if (version === 1 || version === 2) throw new StateFailure('not-ready');
+      if (version !== 0 && version !== STATE_FORMAT_VERSION) throw new StateFailure('conflict');
       if (version === 0) {
         db.exec(`
           CREATE TABLE identity (singleton INTEGER PRIMARY KEY CHECK(singleton=1), body TEXT NOT NULL);
@@ -93,6 +120,7 @@ export class SqliteState {
         db.prepare('INSERT INTO identity(singleton,body) VALUES(1,?)').run(
           JSON.stringify({ assistantId: randomUUID(), epoch: randomUUID(), memoryRevision: 0 }),
         );
+        upgradeStateV2ToV3(db);
       }
       const identity = decode<{ assistantId: string; epoch: string }>(
         db.prepare('SELECT body FROM identity WHERE singleton=1').get(),
@@ -120,14 +148,131 @@ export class SqliteState {
     return this.#run(() => {
       const value = validateInput(method, input);
       return this.#execute(method, value);
-    }, !['snapshot', 'memorySnapshot', 'events', 'getMessage', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand'].includes(method));
+    }, !['snapshot', 'memorySnapshot', 'events', 'getMessage', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand', 'getInput', 'findInput', 'inputMessage', 'inputNotices', 'getObservation', 'getMaterial', 'findMaterial', 'getDelivery', 'passiveReplyBudget', 'deliveries', 'observations', 'judgmentUsage', 'proactiveReadiness'].includes(method));
+  }
+
+  claimJudgment(
+    input: StateMethodInputs['claimJudgment'],
+  ): Result<StateMethodOutputs['claimJudgment']> {
+    return this.invoke('claimJudgment', input);
+  }
+  finishJudgment(
+    input: StateMethodInputs['finishJudgment'],
+  ): Result<StateMethodOutputs['finishJudgment']> {
+    return this.invoke('finishJudgment', input);
+  }
+  proactiveReadiness(
+    input: StateMethodInputs['proactiveReadiness'],
+  ): Result<StateMethodOutputs['proactiveReadiness']> {
+    return this.invoke('proactiveReadiness', input);
+  }
+  judgmentUsage(
+    input: StateMethodInputs['judgmentUsage'] = {},
+  ): Result<StateMethodOutputs['judgmentUsage']> {
+    return this.invoke('judgmentUsage', input);
   }
 
   snapshot(input: StateMethodInputs['snapshot'] = {}): Result<StateMethodOutputs['snapshot']> {
     return this.invoke('snapshot', input);
   }
-  memorySnapshot(): Result<StateMethodOutputs['memorySnapshot']> {
-    return this.invoke('memorySnapshot', {});
+  memorySnapshot(
+    input: StateMethodInputs['memorySnapshot'] = {},
+  ): Result<StateMethodOutputs['memorySnapshot']> {
+    return this.invoke('memorySnapshot', input);
+  }
+  inputNotices(
+    input: StateMethodInputs['inputNotices'],
+  ): Result<StateMethodOutputs['inputNotices']> {
+    return this.invoke('inputNotices', input);
+  }
+  inputMessage(
+    input: StateMethodInputs['inputMessage'],
+  ): Result<StateMethodOutputs['inputMessage']> {
+    return this.invoke('inputMessage', input);
+  }
+  getObservation(
+    input: StateMethodInputs['getObservation'],
+  ): Result<StateMethodOutputs['getObservation']> {
+    return this.invoke('getObservation', input);
+  }
+  observe(input: StateMethodInputs['observe']): Result<StateMethodOutputs['observe']> {
+    return this.invoke('observe', input);
+  }
+  observations(
+    input: StateMethodInputs['observations'],
+  ): Result<StateMethodOutputs['observations']> {
+    return this.invoke('observations', input);
+  }
+  pruneObservations(
+    input: StateMethodInputs['pruneObservations'] = {},
+  ): Result<StateMethodOutputs['pruneObservations']> {
+    return this.invoke('pruneObservations', input);
+  }
+  claimInput(input: StateMethodInputs['claimInput']): Result<StateMethodOutputs['claimInput']> {
+    return this.invoke('claimInput', input);
+  }
+  createInput(input: StateMethodInputs['createInput']): Result<StateMethodOutputs['createInput']> {
+    return this.invoke('createInput', input);
+  }
+  commitInput(input: StateMethodInputs['commitInput']): Result<StateMethodOutputs['commitInput']> {
+    return this.invoke('commitInput', input);
+  }
+  findInput(input: StateMethodInputs['findInput']): Result<StateMethodOutputs['findInput']> {
+    return this.invoke('findInput', input);
+  }
+  getInput(input: StateMethodInputs['getInput']): Result<StateMethodOutputs['getInput']> {
+    return this.invoke('getInput', input);
+  }
+  updateInput(input: StateMethodInputs['updateInput']): Result<StateMethodOutputs['updateInput']> {
+    return this.invoke('updateInput', input);
+  }
+  putMaterial(input: StateMethodInputs['putMaterial']): Result<StateMethodOutputs['putMaterial']> {
+    return this.invoke('putMaterial', input);
+  }
+  findMaterial(
+    input: StateMethodInputs['findMaterial'],
+  ): Result<StateMethodOutputs['findMaterial']> {
+    return this.invoke('findMaterial', input);
+  }
+  getMaterial(input: StateMethodInputs['getMaterial']): Result<StateMethodOutputs['getMaterial']> {
+    return this.invoke('getMaterial', input);
+  }
+  createDelivery(
+    input: StateMethodInputs['createDelivery'],
+  ): Result<StateMethodOutputs['createDelivery']> {
+    return this.invoke('createDelivery', input);
+  }
+  updateDelivery(
+    input: StateMethodInputs['updateDelivery'],
+  ): Result<StateMethodOutputs['updateDelivery']> {
+    return this.invoke('updateDelivery', input);
+  }
+  claimDeliveryAttempt(
+    input: StateMethodInputs['claimDeliveryAttempt'],
+  ): Result<StateMethodOutputs['claimDeliveryAttempt']> {
+    return this.invoke('claimDeliveryAttempt', input);
+  }
+  passiveReplyBudget(
+    input: StateMethodInputs['passiveReplyBudget'],
+  ): Result<StateMethodOutputs['passiveReplyBudget']> {
+    return this.invoke('passiveReplyBudget', input);
+  }
+  getDelivery(input: StateMethodInputs['getDelivery']): Result<StateMethodOutputs['getDelivery']> {
+    return this.invoke('getDelivery', input);
+  }
+  deliveries(input: StateMethodInputs['deliveries']): Result<StateMethodOutputs['deliveries']> {
+    return this.invoke('deliveries', input);
+  }
+
+  #writer(): RecordWriter {
+    return {
+      db: this.#db,
+      event: (kind, data, time, audience, principalId) =>
+        this.#event(kind, data, time, audience, principalId),
+      appendMessage: (input) => this.#appendMessage(input),
+      command: (id, digest) => this.#command(id, digest),
+      saveCommand: (digest, value) => this.#saveCommand(digest, value),
+    };
   }
   forgetFact(input: StateMethodInputs['forgetFact']): Result<StateMethodOutputs['forgetFact']> {
     return this.invoke('forgetFact', input);
@@ -212,25 +357,56 @@ export class SqliteState {
     const operations: {
       [M in keyof StateMethodInputs]: (value: StateMethodInputs[M]) => StateMethodOutputs[M];
     } = {
+      claimJudgment: (value) => claimJudgment(this.#writer(), value),
+      finishJudgment: (value) => finishJudgment(this.#writer(), value),
+      judgmentUsage: (value) => judgmentUsage(this.#db, value),
+      proactiveReadiness: (value) => proactiveReadiness(this.#db, value),
       snapshot: (value) => this.#snapshot(value),
       events: (value) => this.#events(value),
       acceptMessage: (value) => this.#acceptMessage(value),
       createTask: (value) => this.#createTask(value),
       updateTask: (value) => this.#updateTask(value),
       appendMessage: (value) => this.#appendMessage(value),
-      memorySnapshot: () => this.#memory(),
+      memorySnapshot: (value) => this.#memory(value.scope),
+      inputMessage: (value) => inputMessage(this.#db, value),
+      inputNotices: (value) => inputNotices(this.#db, value),
+      getObservation: (value) => getObservation(this.#db, value),
+      observe: (value) => observe(this.#db, value),
+      observations: (value) => observations(this.#db, value),
+      pruneObservations: (value) => pruneObservations(this.#db, value),
+      claimInput: (value) => claimInput(this.#writer(), value),
+      createInput: (value) => createInput(this.#writer(), value),
+      commitInput: (value) => commitInput(this.#writer(), value),
+      getInput: (value) => getInput(this.#db, value),
+      findInput: (value) => findInput(this.#db, value),
+      updateInput: (value) => updateInput(this.#writer(), value),
+      putMaterial: (value) => putMaterial(this.#writer(), value),
+      getMaterial: (value) => getMaterial(this.#db, value),
+      findMaterial: (value) => findMaterial(this.#db, value),
+      createDelivery: (value) => createDelivery(this.#writer(), value),
+      updateDelivery: (value) => updateDelivery(this.#writer(), value),
+      claimDeliveryAttempt: (value) => claimDeliveryAttempt(this.#writer(), value),
+      getDelivery: (value) => getDelivery(this.#db, value),
+      passiveReplyBudget: (value) => passiveReplyBudget(this.#db, value),
+      deliveries: (value) => deliveries(this.#db, value),
       rememberFact: (value) => this.#rememberFact(value),
       forgetFact: (value) => this.#mutateMemory(value, true),
       getMessage: (value) => this.#message(value),
-      getTask: (value) => this.#task(value.id),
+      getTask: (value) => this.#visibleTask(this.#task(value.id), value.scope),
       getTaskByExecution: (value) =>
-        decode<CompanionTask>(
-          this.#db.prepare('SELECT body FROM tasks WHERE execution_id=?').get(value.executionId),
+        this.#visibleTask(
+          decode<CompanionTask>(
+            this.#db.prepare('SELECT body FROM tasks WHERE execution_id=?').get(value.executionId),
+          ),
+          value.scope,
         ),
-      getArtifact: (value) =>
-        decode<StoredArtifact>(
+      getArtifact: (value) => {
+        const artifact = decode<StoredArtifact>(
           this.#db.prepare('SELECT body FROM artifacts WHERE id=?').get(value.id),
-        ),
+        );
+        this.#visibleTask(this.#task(artifact.taskId), value.scope);
+        return artifact;
+      },
       recover: (value) => this.#recover(value),
       recordCommand: (value) => this.#recordCommand(value),
       getCommand: (value) =>
@@ -246,7 +422,13 @@ export class SqliteState {
     );
   }
 
-  #event(kind: CompanionEvent['kind'], data: CompanionEvent['data'], time = Date.now()): void {
+  #event(
+    kind: CompanionEvent['kind'],
+    data: CompanionEvent['data'],
+    time = Date.now(),
+    audience: CompanionAudience = OWNER_AUDIENCE,
+    principalId: string | null = 'owner',
+  ): void {
     const sequence = this.#cursor() + 1;
     const event: CompanionEvent = {
       id: `${this.#epoch}:${sequence}`,
@@ -257,8 +439,8 @@ export class SqliteState {
       data,
     };
     this.#db
-      .prepare('INSERT INTO events(sequence,body) VALUES(?,?)')
-      .run(sequence, JSON.stringify(event));
+      .prepare('INSERT INTO events(sequence,body,audience_key,principal_id) VALUES(?,?,?,?)')
+      .run(sequence, JSON.stringify(event), companionAudienceKey(audience), principalId);
   }
 
   #message(input: StateMethodInputs['getMessage']): CompanionMessage {
@@ -277,7 +459,14 @@ export class SqliteState {
     );
     if (message.id !== input.id || event.data['role'] !== message.role)
       throw new StateFailure('conflict');
+    assertVisible(message.audience ?? OWNER_AUDIENCE, input.scope);
     return message;
+  }
+
+  #visibleTask(task: CompanionTask, scope?: StateReadScope): CompanionTask {
+    const origin = task.origin ?? legacyTaskOrigin();
+    assertVisible(origin.audience, scope, origin.principalId);
+    return task;
   }
 
   #task(id: string): CompanionTask {
@@ -299,7 +488,7 @@ export class SqliteState {
   }
 
   #snapshot(input: StateMethodInputs['snapshot']): StateMethodOutputs['snapshot'] {
-    const memory = this.#memory();
+    const memory = this.#memory(input.scope);
     const facts = memory.facts;
     const tasks: CompanionTask[] = [];
     const messages: CompanionMessage[] = [];
@@ -319,9 +508,10 @@ export class SqliteState {
     // Facts are authoritative and never omitted to make a projection fit.
     if (jsonBytes(base) > budget) throw new StateFailure('quota-exceeded');
     const taskLimit = input.taskLimit ?? 20;
+    const taskScope = scopeWhere(input.scope, 'tasks');
     const taskRows = this.#db
-      .prepare('SELECT body FROM tasks ORDER BY sequence DESC LIMIT ?')
-      .all(taskLimit + 1);
+      .prepare(`SELECT body FROM tasks WHERE ${taskScope.sql} ORDER BY sequence DESC LIMIT ?`)
+      .all(...taskScope.params, taskLimit + 1);
     let taskDetailsTruncated = false;
     for (const row of taskRows.slice(0, taskLimit)) {
       const task = decode<CompanionTask>(row);
@@ -344,9 +534,10 @@ export class SqliteState {
         stdout !== task.stdout || stderr !== task.stderr || task.artifacts.length > 4;
     }
     const messageLimit = input.messageLimit ?? 50;
+    const messageScope = scopeWhere(input.scope, 'messages');
     const messageRows = this.#db
-      .prepare('SELECT body FROM messages ORDER BY sequence DESC LIMIT ?')
-      .all(messageLimit + 1);
+      .prepare(`SELECT body FROM messages WHERE ${messageScope.sql} ORDER BY sequence DESC LIMIT ?`)
+      .all(...messageScope.params, messageLimit + 1);
     base.hasMoreTasks = taskRows.length > tasks.length;
     base.taskDetailsTruncated = taskDetailsTruncated;
     for (const row of messageRows.slice(0, messageLimit)) {
@@ -367,16 +558,22 @@ export class SqliteState {
       throw new StateFailure('conflict');
     const events: CompanionEvent[] = [];
     let cursor = input.after;
+    const selected = scopeWhere(input.scope, 'events');
+    const limit = input.limit ?? 200;
     const rows = this.#db
-      .prepare('SELECT body FROM events WHERE sequence>? ORDER BY sequence LIMIT ?')
-      .all(input.after, input.limit ?? 200);
-    for (const row of rows) {
+      .prepare(
+        `SELECT body FROM events WHERE sequence>? AND ${selected.sql} ORDER BY sequence LIMIT ?`,
+      )
+      .all(input.after, ...selected.params, limit + 1);
+    for (const row of rows.slice(0, limit)) {
       const event = decode<CompanionEvent>(row);
       if (jsonBytes(events) + jsonBytes(event) > STATE_MAX_RESULT_BYTES - 1024) break;
       events.push(event);
       cursor = event.sequence;
     }
-    return { epoch: this.#epoch, cursor, events, hasMore: cursor < this.#cursor() };
+    const hasMore = rows.length > events.length;
+    // No visible tail remains: advance across filtered records without exposing their payloads.
+    return { epoch: this.#epoch, cursor: hasMore ? cursor : this.#cursor(), events, hasMore };
   }
 
   #acceptMessage(input: StateMethodInputs['acceptMessage']): StateMethodOutputs['acceptMessage'] {
@@ -391,12 +588,42 @@ export class SqliteState {
         ),
       };
     }
+    assertInputCapacity(this.#db, OWNER_AUDIENCE);
+    const id = randomUUID();
+    const origin = ownerOrigin(id);
     const message = this.#appendMessage({
-      id: randomUUID(),
+      id,
       role: 'user',
       text: input.text,
       inputId: input.commandId,
+      audience: origin.audience,
+      origins: [origin],
     });
+    const admission: CompanionInputAdmission = {
+      id,
+      messageId: id,
+      origin,
+      materialIds: [],
+      phase: 'ready',
+      cleanup: 'pending',
+      createdAt: message.createdAt,
+      updatedAt: message.createdAt,
+      error: null,
+    };
+    this.#db
+      .prepare(
+        'INSERT INTO input_admissions(id,command_id,fingerprint,audience_key,principal_id,phase,body,evidence) VALUES(?,?,?,?,?,?,?,?)',
+      )
+      .run(
+        id,
+        input.commandId,
+        digest,
+        companionAudienceKey(origin.audience),
+        'owner',
+        'ready',
+        JSON.stringify(admission),
+        JSON.stringify(input),
+      );
     const accepted = receipt(input.commandId, message.id, null);
     this.#saveCommand(digest, accepted);
     return { receipt: accepted, message };
@@ -412,13 +639,70 @@ export class SqliteState {
       if (known['fingerprint'] !== digest) throw new StateFailure('conflict');
       return decode<CompanionMessage>(known);
     }
-    if (normalized.taskId) this.#task(normalized.taskId);
-    const message: CompanionMessage = { ...normalized, createdAt: Date.now() };
+    const task = normalized.taskId ? this.#task(normalized.taskId) : null;
+    const admissionRow = normalized.inputId
+      ? this.#db.prepare('SELECT body FROM input_admissions WHERE id=?').get(normalized.inputId)
+      : undefined;
+    const admission = admissionRow ? decode<CompanionInputAdmission>(admissionRow) : null;
+    const inheritedAudience =
+      admission?.origin.audience ?? task?.origin?.audience ?? OWNER_AUDIENCE;
+    if (!input.audience && inheritedAudience.kind !== 'owner-private')
+      throw new StateFailure('invalid-input');
+    const audience = input.audience ?? OWNER_AUDIENCE;
+    const origins =
+      input.origins ??
+      (admission
+        ? [admission.origin]
+        : task?.origin?.origins.length
+          ? task.origin.origins
+          : [legacyOrigin()]);
+    if (
+      origins.some(
+        (origin) => companionAudienceKey(origin.audience) !== companionAudienceKey(audience),
+      )
+    )
+      throw new StateFailure('conflict');
+    if (
+      task?.origin &&
+      companionAudienceKey(task.origin.audience) !== companionAudienceKey(audience)
+    )
+      throw new StateFailure('conflict');
+    const materials = input.materials ?? [];
+    const content = input.content ?? { kind: 'inline-text' as const };
+    for (const reference of [
+      ...materials,
+      ...(content.kind === 'text-document' ? [content.material] : []),
+    ]) {
+      const stored = getMaterial(this.#db, { id: reference.id, scope: { kind: 'management' } });
+      if (
+        stored.phase !== 'ready' ||
+        fingerprint(stored.reference) !== fingerprint(reference) ||
+        companionAudienceKey(reference.audience) !== companionAudienceKey(audience) ||
+        reference.originInputIds.some((id) => !origins.some((origin) => origin.inputId === id))
+      )
+        throw new StateFailure('conflict');
+    }
+    const message: CompanionMessage = {
+      ...normalized,
+      audience,
+      origins,
+      materials,
+      content,
+      createdAt: Date.now(),
+    };
     // A single message must still fit alongside facts and task summaries in a snapshot.
-    if (jsonBytes(message) > 28 * 1024) throw new StateFailure('quota-exceeded');
+    if (jsonBytes(message) > STATE_MAX_MESSAGE_BYTES) throw new StateFailure('quota-exceeded');
     this.#db
-      .prepare('INSERT INTO messages(id,fingerprint,body) VALUES(?,?,?)')
-      .run(message.id, digest, JSON.stringify(message));
+      .prepare(
+        'INSERT INTO messages(id,fingerprint,body,audience_key,principal_id) VALUES(?,?,?,?,?)',
+      )
+      .run(
+        message.id,
+        digest,
+        JSON.stringify(message),
+        companionAudienceKey(audience),
+        origins[0]?.principalId ?? null,
+      );
     this.#event(
       'message',
       {
@@ -428,6 +712,8 @@ export class SqliteState {
         role: message.role,
       },
       message.createdAt,
+      audience,
+      origins[0]?.principalId ?? null,
     );
     return message;
   }
@@ -443,7 +729,25 @@ export class SqliteState {
     if (this.#db.prepare('SELECT id FROM tasks WHERE execution_id=?').get(executionId))
       throw new StateFailure('conflict');
     const time = Date.now();
+    const origin = input.origin ?? ownerTaskOrigin();
+    if (origin.inputId !== null) {
+      const admission = getInput(this.#db, { id: origin.inputId, scope: { kind: 'management' } });
+      if (
+        admission.origin.principalId !== origin.principalId ||
+        companionAudienceKey(admission.origin.audience) !== companionAudienceKey(origin.audience) ||
+        !origin.origins.some((item) => fingerprint(item) === fingerprint(admission.origin))
+      )
+        throw new StateFailure('conflict');
+    }
+    for (const materialId of origin.materialIds) {
+      const material = getMaterial(this.#db, {
+        id: materialId,
+        scope: { kind: 'conversation', audience: origin.audience, principalId: origin.principalId },
+      });
+      if (material.phase !== 'ready') throw new StateFailure('not-ready');
+    }
     const task: CompanionTask = {
+      origin,
       id: randomUUID(),
       executionId,
       title: input.title,
@@ -458,11 +762,27 @@ export class SqliteState {
       error: null,
     };
     this.#db
-      .prepare('INSERT INTO tasks(id,execution_id,status,body,command) VALUES(?,?,?,?,?)')
-      .run(task.id, executionId, task.status, JSON.stringify(task), JSON.stringify(input));
+      .prepare(
+        'INSERT INTO tasks(id,execution_id,status,body,command,audience_key,principal_id) VALUES(?,?,?,?,?,?,?)',
+      )
+      .run(
+        task.id,
+        executionId,
+        task.status,
+        JSON.stringify(task),
+        JSON.stringify(input),
+        companionAudienceKey(origin.audience),
+        origin.principalId,
+      );
     const accepted = receipt(input.commandId, null, task.id);
     this.#saveCommand(digest, accepted);
-    this.#event('task', { taskId: task.id, executionId, status: task.status }, time);
+    this.#event(
+      'task',
+      { taskId: task.id, executionId, status: task.status },
+      time,
+      origin.audience,
+      origin.principalId,
+    );
     return { receipt: accepted, task };
   }
 
@@ -530,19 +850,22 @@ export class SqliteState {
         artifactIds: artifacts.map((item) => item.id),
       },
       next.updatedAt,
+      current.origin?.audience ?? OWNER_AUDIENCE,
+      current.origin?.principalId ?? 'owner',
     );
     return next;
   }
 
-  #memory(): StateMethodOutputs['memorySnapshot'] {
+  #memory(scope?: StateReadScope): StateMethodOutputs['memorySnapshot'] {
     const identity = decode<{ memoryRevision: number }>(
       this.#db.prepare('SELECT body FROM identity WHERE singleton=1').get(),
     );
     if (!Number.isSafeInteger(identity.memoryRevision) || identity.memoryRevision < 0)
       throw new StateFailure('conflict');
+    const selected = scopeWhere(scope, 'facts');
     const facts = this.#db
-      .prepare('SELECT body FROM facts ORDER BY key')
-      .all()
+      .prepare(`SELECT body FROM facts WHERE ${selected.sql} ORDER BY audience_key,key`)
+      .all(...selected.params)
       .map((row) => {
         const fact = decode<CompanionFact>(row);
         return { ...fact, origin: fact.origin ?? { kind: 'legacy-unknown' as const } };
@@ -564,7 +887,10 @@ export class SqliteState {
       receipt: known,
       committedRevision: null,
       memory,
-      fact: memory.facts.find((f) => f.key === input.key) ?? null,
+      fact:
+        memory.facts.find(
+          (f) => f.key === input.key && (f.audience ?? OWNER_AUDIENCE).kind === 'owner-private',
+        ) ?? null,
     };
   }
   #mutateMemory(
@@ -576,7 +902,25 @@ export class SqliteState {
     const kind = forget ? 'memory.forget' : 'memory.upsert';
     const digest = fingerprint({ kind, payload: input });
     const known = this.#command(input.commandId, digest);
-    const memory = this.#memory();
+    const audience = input.audience ?? OWNER_AUDIENCE;
+    const audienceKey = companionAudienceKey(audience);
+    const scope: StateReadScope =
+      audience.kind === 'public'
+        ? { kind: 'management' }
+        : {
+            kind: 'conversation',
+            audience,
+            principalId:
+              audience.kind === 'owner-private'
+                ? 'owner'
+                : audience.kind === 'person-private'
+                  ? audience.principalId
+                  : null,
+          };
+    const memory = this.#memory(scope);
+    const matchingFact = (fact: CompanionFact): boolean =>
+      fact.key === input.key &&
+      companionAudienceKey(fact.audience ?? OWNER_AUDIENCE) === audienceKey;
     if (known) {
       const stored = decode<{ committedRevision: number }>(
         this.#db.prepare('SELECT body FROM commands WHERE id=?').get(input.commandId),
@@ -585,10 +929,10 @@ export class SqliteState {
         receipt: known,
         committedRevision: stored.committedRevision,
         memory,
-        fact: memory.facts.find((f) => f.key === input.key) ?? null,
+        fact: memory.facts.find(matchingFact) ?? null,
       };
     }
-    const previous = memory.facts.find((fact) => fact.key === input.key);
+    const previous = memory.facts.find(matchingFact);
     if (
       input.expectedMemoryRevision !== memory.memoryRevision ||
       input.expectedFactRevision !== (previous?.revision ?? 0) ||
@@ -598,7 +942,10 @@ export class SqliteState {
     const revision = memory.memoryRevision + 1;
     if (!Number.isSafeInteger(revision)) throw new StateFailure('quota-exceeded');
     let fact: CompanionFact | null = null;
-    if (forget) this.#db.prepare('DELETE FROM facts WHERE key=?').run(input.key);
+    if (forget)
+      this.#db
+        .prepare('DELETE FROM facts WHERE audience_key=? AND key=?')
+        .run(audienceKey, input.key);
     else {
       if (
         !('value' in input) ||
@@ -614,12 +961,13 @@ export class SqliteState {
         revision,
         updatedAt: Date.now(),
         origin: input.origin,
+        audience,
       };
       this.#db
         .prepare(
-          'INSERT INTO facts(key,body) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET body=excluded.body',
+          'INSERT INTO facts(audience_key,key,body) VALUES(?,?,?) ON CONFLICT(audience_key,key) DO UPDATE SET body=excluded.body',
         )
-        .run(fact.key, JSON.stringify(fact));
+        .run(audienceKey, fact.key, JSON.stringify(fact));
     }
     const identity = decode<Record<string, unknown>>(
       this.#db.prepare('SELECT body FROM identity WHERE singleton=1').get(),
@@ -627,7 +975,8 @@ export class SqliteState {
     this.#db
       .prepare('UPDATE identity SET body=? WHERE singleton=1')
       .run(JSON.stringify({ ...identity, memoryRevision: revision }));
-    const next = this.#memory(); // Quotas fail inside the same transaction, rolling back all effects.
+    this.#memory({ kind: 'management' }); // Global quotas remain one budget across all audiences.
+    const next = this.#memory(scope);
     const accepted = receipt(input.commandId, null, null);
     this.#db
       .prepare('INSERT INTO commands(id,fingerprint,body) VALUES(?,?,?)')
@@ -636,12 +985,17 @@ export class SqliteState {
         digest,
         JSON.stringify({ receipt: accepted, committedRevision: revision }),
       );
-    this.#event('fact', {
-      key: input.key,
-      operation: forget ? 'forget' : 'upsert',
-      memoryRevision: revision,
-      revision: fact?.revision ?? previous?.revision ?? 0,
-    });
+    this.#event(
+      'fact',
+      {
+        key: input.key,
+        operation: forget ? 'forget' : 'upsert',
+        memoryRevision: revision,
+        revision: fact?.revision ?? previous?.revision ?? 0,
+      },
+      Date.now(),
+      audience,
+    );
     return { receipt: accepted, committedRevision: revision, memory: next, fact };
   }
 
@@ -667,6 +1021,8 @@ export class SqliteState {
         'task',
         { taskId: task.id, executionId: task.executionId, status: next.status },
         next.updatedAt,
+        task.origin?.audience ?? OWNER_AUDIENCE,
+        task.origin?.principalId ?? 'owner',
       );
       taskIds.push(task.id);
     }
@@ -676,7 +1032,24 @@ export class SqliteState {
           "SELECT id FROM tasks WHERE status IN ('accepted','running','cancel-requested') LIMIT 1",
         )
         .get() !== undefined;
-    return { taskIds, hasMore };
+    const remaining = (input.limit ?? 200) - taskIds.length;
+    const recovered = recoverInputs(this.#writer(), remaining);
+    const delivery = recoverDeliveries(
+      this.#writer(),
+      remaining - recovered.inputIds.length - recovered.materialIds.length,
+    );
+    const judgments = recoverJudgments(
+      this.#writer(),
+      remaining - recovered.inputIds.length - recovered.materialIds.length - delivery.ids.length,
+    );
+    return {
+      taskIds,
+      inputIds: recovered.inputIds,
+      materialIds: recovered.materialIds,
+      deliveryIds: delivery.ids,
+      judgmentIds: judgments.ids,
+      hasMore: hasMore || recovered.hasMore || delivery.hasMore || judgments.hasMore,
+    };
   }
 
   #recordCommand(input: StateMethodInputs['recordCommand']): CompanionCommandReceipt {
@@ -687,7 +1060,11 @@ export class SqliteState {
         throw new StateFailure('conflict');
       return known;
     }
-    if (['message', 'task', 'fact', 'memory.upsert', 'memory.forget'].includes(input.kind))
+    if (
+      ['message', 'task', 'fact', 'memory.upsert', 'memory.forget', 'input.create'].includes(
+        input.kind,
+      )
+    )
       throw new StateFailure('invalid-input');
     if (input.taskId) this.#task(input.taskId);
     if (

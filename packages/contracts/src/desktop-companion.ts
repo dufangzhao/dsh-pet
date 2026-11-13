@@ -63,6 +63,8 @@ export interface DesktopCompanionBridge {
   reconnect(input: DesktopCompanionTarget): Promise<Result<DesktopCompanionState>>;
   disconnect(input: DesktopCompanionTarget): Promise<Result<DesktopCompanionState>>;
   refresh(input: DesktopCompanionTarget): Promise<Result<DesktopCompanionState>>;
+  /** Opens only the captured current service Web root, never a renderer-supplied URL/token. */
+  openWeb(input: DesktopCompanionTarget): Promise<Result<null>>;
   sendMessage(
     input: DesktopCompanionTarget & CompanionMessageCommand,
   ): Promise<Result<CompanionCommandReceipt>>;
@@ -101,6 +103,7 @@ export const DESKTOP_COMPANION_IPC = {
   reconnect: 'companion:desktop:v1:reconnect',
   disconnect: 'companion:desktop:v1:disconnect',
   refresh: 'companion:desktop:v1:refresh',
+  openWeb: 'companion:desktop:v1:openWeb',
   sendMessage: 'companion:desktop:v1:sendMessage',
   stopTask: 'companion:desktop:v1:stopTask',
   stopForeground: 'companion:desktop:v1:stopForeground',

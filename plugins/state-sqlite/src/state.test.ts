@@ -244,7 +244,7 @@ describe('SqliteState', () => {
   it('pages durable events without skipping, including empty reads after the final cursor', () => {
     const { state } = open();
     for (let index = 0; index < 5; index++)
-      value(state.acceptMessage({ commandId: `message-${index}`, text: `Input ${index}` }));
+      value(state.appendMessage({ id: `notice-${index}`, role: 'notice', text: `Event ${index}` }));
     const { epoch } = value(state.snapshot());
     const first = value(state.events({ after: 0, epoch, limit: 2 }));
     expect(first.events.map((event) => event.sequence)).toEqual([1, 2]);
@@ -469,7 +469,14 @@ describe('SqliteState', () => {
     expect(first.taskIds).toEqual([accepted.id, running.id]);
     expect(first.hasMore).toBe(true);
     expect(value(state.recover()).taskIds).toEqual([stopping.id]);
-    expect(value(state.recover())).toEqual({ taskIds: [], hasMore: false });
+    expect(value(state.recover())).toEqual({
+      taskIds: [],
+      inputIds: [],
+      materialIds: [],
+      deliveryIds: [],
+      judgmentIds: [],
+      hasMore: false,
+    });
     expect(value(state.getTask({ id: accepted.id })).status).toBe('interrupted');
     expect(value(state.getTask({ id: running.id }))).toMatchObject({
       status: 'unknown',
@@ -594,7 +601,10 @@ describe('SqliteState', () => {
   it('bounds snapshots, events and full retained logs below the kernel JSON budget', () => {
     const { state } = open();
     for (let index = 0; index < 60; index++) {
-      value(state.acceptMessage({ commandId: `message-${index}`, text: '字'.repeat(8_000) }));
+      const accepted = value(
+        state.acceptMessage({ commandId: `message-${index}`, text: '字'.repeat(8_000) }),
+      );
+      value(state.updateInput({ id: accepted.message.id, phase: 'completed', cleanup: 'settled' }));
       const work = task(state, `task-${index}`);
       value(
         state.updateTask({
@@ -659,7 +669,10 @@ describe('SqliteState', () => {
     for (let index = 0; index < 30; index++) {
       const work = task(state, `budget-task-${index}`);
       value(state.updateTask({ taskId: work.id, status: 'running', stdout: 'log'.repeat(4000) }));
-      value(state.acceptMessage({ commandId: `budget-message-${index}`, text: '字'.repeat(8000) }));
+      const accepted = value(
+        state.acceptMessage({ commandId: `budget-message-${index}`, text: '字'.repeat(8000) }),
+      );
+      value(state.updateInput({ id: accepted.message.id, phase: 'completed', cleanup: 'settled' }));
     }
     const original = value(state.snapshot());
     expect(value(state.snapshot({ byteBudget: STATE_MAX_RESULT_BYTES }))).toEqual(original);

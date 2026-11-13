@@ -39,10 +39,18 @@ it('declares an ordinary manifest and returns payload Result under plugin lifecy
       features: {
         methodPermissions: {
           getMessage: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+          findMaterial: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+          inputNotices: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+          proactiveReadiness: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+          passiveReplyBudget: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
         },
       },
     },
   ]);
+  const permissions = checked.value.provides?.[0]?.features?.['methodPermissions'];
+  expect(permissions && typeof permissions === 'object' ? Object.keys(permissions) : []).toEqual(
+    expect.arrayContaining([...STATE_METHODS]),
+  );
   const directory = mkdtempSync(join(tmpdir(), 'pet-state-sqlite-test-'));
   roots.push(directory);
   let methods: Readonly<Record<string, Method>> = {};

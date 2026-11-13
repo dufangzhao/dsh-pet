@@ -2,6 +2,14 @@
 import type { KernelError } from './errors.js';
 import type { CompanionModelView } from './companion-model.js';
 import type { JsonObject } from './json.js';
+import type { QQStatus } from './companion-qq.js';
+import type {
+  CompanionAudience,
+  CompanionConversationAudience,
+  CompanionInputOrigin,
+  CompanionTaskOrigin,
+} from './companion-origin.js';
+import type { CompanionMaterialRef, CompanionMessageContent } from './companion-material.js';
 import type {
   CompanionApplication,
   CompanionFactOrigin,
@@ -32,6 +40,8 @@ export interface CompanionArtifact {
 }
 
 export interface CompanionTask {
+  /** Absent only on legacy records; only the trusted host/migration can resolve legacy ownership. */
+  readonly origin?: CompanionTaskOrigin;
   readonly id: string;
   readonly executionId: string;
   readonly title: string;
@@ -47,6 +57,11 @@ export interface CompanionTask {
 }
 
 export interface CompanionMessage {
+  /** Optional for legacy decoding, never an owner grant for an external payload. */
+  readonly audience?: CompanionConversationAudience;
+  readonly origins?: readonly CompanionInputOrigin[];
+  readonly materials?: readonly CompanionMaterialRef[];
+  readonly content?: CompanionMessageContent;
   readonly id: string;
   readonly role: 'user' | 'assistant' | 'notice';
   readonly text: string;
@@ -56,6 +71,7 @@ export interface CompanionMessage {
 }
 
 export interface CompanionFact {
+  readonly audience?: CompanionAudience;
   readonly origin?: CompanionFactOrigin;
   readonly key: string;
   readonly value: string;
@@ -93,6 +109,8 @@ export interface CompanionSnapshot {
   readonly facts: readonly CompanionFact[];
   readonly memory?: CompanionMemoryStatus;
   readonly plugins: readonly CompanionPluginView[];
+  /** Bounded read-only QQ status; contains no management settings or credentials. */
+  readonly qq?: QQStatus;
   /** Absent only for a service predating explicit model connection management. */
   readonly model?: CompanionModelView;
   readonly projection?: {

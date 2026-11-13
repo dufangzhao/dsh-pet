@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "node build.mjs",
     "test": "node --import ./tests/source-loader.mjs --test tests/*.test.mjs",
-    "test:docker": "PET_CLOUD_EXEC_DOCKER_TEST=1 node --import ./tests/source-loader.mjs --test tests/docker.test.mjs"
+    "test:docker": "PET_CLOUD_EXEC_DOCKER_TEST=1 node --import ./tests/source-loader.mjs --test tests/*docker.test.mjs"
   },
   "dependencies": {
     "@pet/contracts": "workspace:*",

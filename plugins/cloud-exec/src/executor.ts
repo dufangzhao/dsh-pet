@@ -14,8 +14,10 @@ import {
   type JobRecord,
 } from './records.js';
 import { createWorkspace, retainArtifacts } from './workspace.js';
+import { MaterialInputFailure, stageMaterials } from './materials.js';
 import type {
   CloudExecConfig,
+  CloudMaterialReader,
   CloudExecutionRequest,
   CloudExecutionResult,
   CloudReconcileRequest,
@@ -27,6 +29,7 @@ export type DockerExecutorOptions = {
   config: CloudExecConfig;
   owner: OwnerRef;
   signal?: AbortSignal;
+  readMaterial?: CloudMaterialReader;
 };
 
 type Admission =
@@ -35,6 +38,7 @@ type Admission =
 export class DockerExecutor {
   readonly #config: CloudExecConfig;
   readonly #root: string;
+  readonly #readMaterial: CloudMaterialReader | undefined;
   readonly #pluginId: string;
   readonly #owner: string;
   readonly #lifetime = new AbortController();
@@ -59,6 +63,7 @@ export class DockerExecutor {
       throw new Error('invalid-executor-config');
     this.#config = checked.value;
     this.#root = path.resolve(options.workspaceRoot);
+    this.#readMaterial = options.readMaterial;
     this.#pluginId = options.owner.pluginId;
     this.#owner = `${options.owner.pluginId}:${options.owner.instanceId}:${options.owner.generation}:${randomUUID()}`;
     this.#signal = AbortSignal.any([
@@ -75,6 +80,8 @@ export class DockerExecutor {
     if (!validExecutionId(executionId) || !validExecutionId(task.taskId))
       return Promise.resolve({ ok: false, error: makeError('invalid-input') });
     const request = parsed.value;
+    if (request.materials?.length && !this.#readMaterial)
+      return Promise.resolve({ ok: false, error: makeError('unavailable') });
     const hash = createHash('sha256')
       .update(
         JSON.stringify({
@@ -85,6 +92,15 @@ export class DockerExecutor {
             mediaType: mediaType ?? 'application/octet-stream',
           })),
           timeoutMs: request.timeoutMs ?? null,
+          // Omit absent/empty selections to preserve every pre-material execution fingerprint.
+          ...(request.materials?.length
+            ? {
+                materials: request.materials.map(({ materialId, inputName }) => ({
+                  materialId,
+                  inputName,
+                })),
+              }
+            : {}),
         }),
       )
       .digest('hex');
@@ -248,7 +264,8 @@ export class DockerExecutor {
     if (!admission.ok) return admission;
     if (admission.value.kind === 'receipt') return { ok: true, value: admission.value.result };
     const record = admission.value.record;
-    const signal = AbortSignal.any([task.signal, this.#signal]);
+    const deadline = new AbortController();
+    const signal = AbortSignal.any([task.signal, this.#signal, deadline.signal]);
     const timeoutMs = Math.min(
       request.timeoutMs ?? this.#config.timeoutMs,
       task.deadline === undefined ? Infinity : Math.max(0, task.deadline - performance.now()),
@@ -268,11 +285,14 @@ export class DockerExecutor {
     const timer = setTimeout(
       () => {
         stopReason ??= 'timed-out';
+        deadline.abort();
         wake();
       },
       Math.max(0, timeoutMs),
     );
     const stopped = (): boolean => signal.aborted || stopReason !== null || timeoutMs <= 0;
+    const interruptionError = (): ReturnType<typeof makeError> =>
+      makeError(stopReason === 'timed-out' ? 'timeout' : 'cancelled');
     try {
       const image = await docker([
         'image',
@@ -291,6 +311,16 @@ export class DockerExecutor {
       ) {
         if (!stopped()) {
           await createWorkspace(this.#root, record.jobId, request);
+          if (request.materials?.length && this.#readMaterial) {
+            await stageMaterials(
+              this.#root,
+              record.jobId,
+              request,
+              { ...task, signal },
+              executionId,
+              this.#readMaterial,
+            );
+          }
           // Publish intent before Docker can create anything, then its verified ID before start.
           await saveRecord(this.#root, record);
           published = true;
@@ -380,9 +410,13 @@ export class DockerExecutor {
           }
         }
       }
-      if (stopped()) error = makeError(!signal.aborted ? 'timeout' : 'cancelled');
-    } catch {
-      error = makeError('unavailable');
+      if (stopped()) error = interruptionError();
+    } catch (cause) {
+      error = stopped()
+        ? interruptionError()
+        : cause instanceof MaterialInputFailure
+          ? cause.error
+          : makeError('unavailable');
     } finally {
       clearTimeout(timer);
       signal.removeEventListener('abort', abort);

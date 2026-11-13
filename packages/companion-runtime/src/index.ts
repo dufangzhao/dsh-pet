@@ -13,3 +13,12 @@ export * from './voice-providers.js';
 export type * from './speech-output-types.js';
 export * from './speech-providers.js';
 export * from './speech-output-errors.js';
+export type { QQIoOutcome, QQMediaRead, QQMediaSource, QQMediaConsumer } from './qq-io-types.js';
+export { captureInputGrant, checkInputGrant, inputScope } from './input-authority.js';
+export type {
+  RuntimeInputGrant,
+  RuntimeInputPorts,
+  RuntimeInputAccess,
+  RuntimeInputTerminal,
+  RuntimeWorkMaterialReadRequest,
+} from './input-authority.js';

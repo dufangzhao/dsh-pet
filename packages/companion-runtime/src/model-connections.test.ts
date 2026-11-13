@@ -26,8 +26,13 @@ afterEach(async () => {
 });
 const source = { pluginId: fixtureModelManifest.id, instanceId: 'default' };
 const consumer = { pluginId: 'pet.model-consumer', instanceId: 'default' };
+const judgmentSource = { pluginId: 'pet.judgment-fixture', instanceId: 'default' };
+const judgmentKey = `${judgmentSource.pluginId}/fixture`;
 
-async function fixture(client: ResponseClient = createFixtureModelClient()) {
+async function fixture(
+  client: ResponseClient = createFixtureModelClient(),
+  judgment?: ResponseClient,
+) {
   const directory = await mkdtemp(path.join(tmpdir(), 'companion-connection-test-'));
   let sourceContext: PluginContext | undefined;
   const manifest: PluginManifest = {
@@ -56,6 +61,25 @@ async function fixture(client: ResponseClient = createFixtureModelClient()) {
     }, client),
     connection: { providerId: 'fixture', describeConfig: describeFixtureModel },
   };
+  const registrations: ModelConnectionRegistration[] = [registration];
+  if (judgment) {
+    const judgmentManifest: PluginManifest = { ...manifest, id: judgmentSource.pluginId };
+    const judgmentDirectory = path.join(directory, judgmentSource.pluginId);
+    await mkdir(judgmentDirectory);
+    await writeFile(path.join(judgmentDirectory, 'plugin.json'), JSON.stringify(judgmentManifest));
+    registrations.push({
+      manifest: judgmentManifest,
+      directory: judgmentDirectory,
+      enabled: false,
+      preset: 'allow',
+      definition: createFixtureModelPlugin((context) => connections.portsFor(context), judgment),
+      connection: {
+        providerId: 'fixture',
+        purpose: 'qq-participation',
+        describeConfig: describeFixtureModel,
+      },
+    });
+  }
   const consumerManifest: PluginManifest = {
     ...fixtureModelManifest,
     id: consumer.pluginId,
@@ -86,14 +110,18 @@ async function fixture(client: ResponseClient = createFixtureModelClient()) {
         enabled: true,
         preset: 'allow',
       },
-      registration,
+      ...registrations,
     ],
   });
-  const connections = new ModelConnections(host, [registration], () => {
+  const connections = new ModelConnections(host, registrations, () => {
     throw new Error('fixture requires no key');
   });
   connections.select(FIXTURE_MODEL_CONNECTION);
   await connections.enable(FIXTURE_MODEL_CONNECTION);
+  if (judgment) {
+    connections.select(judgmentKey, 'qq-participation');
+    await connections.enable(judgmentKey);
+  }
   const model = connections;
   cleanups.push(async () => {
     await host.close();
@@ -111,6 +139,7 @@ async function fixture(client: ResponseClient = createFixtureModelClient()) {
     sourceDirectory,
     context: () => sourceContext,
     client: model.clientFor(host.owner(consumer.pluginId)),
+    judgment: judgment ? model.clientFor(host.owner(consumer.pluginId), 'qq-participation') : null,
   };
 }
 
@@ -128,6 +157,121 @@ const modelEvent = (delta: string): ModelEvent =>
     delta,
     logprobs: [],
   }) as ModelEvent;
+
+it('keeps participation selection and calls separate from the foreground purpose', async () => {
+  const native = createFixtureModelClient();
+  const calls: string[] = [];
+  const f = await fixture(
+    {
+      respond(...args) {
+        calls.push('foreground');
+        return native.respond(...args);
+      },
+    },
+    {
+      respond(...args) {
+        calls.push('judgment');
+        return native.respond(...args);
+      },
+    },
+  );
+  if (!f.judgment) throw new Error('missing judgment fixture');
+  expect(f.model.list('foreground').map(([key]) => key)).toEqual([FIXTURE_MODEL_CONNECTION]);
+  expect(f.model.list('qq-participation').map(([key]) => key)).toEqual([judgmentKey]);
+  expect(() => f.model.select(judgmentKey)).toThrow();
+  expect(() => f.model.select(FIXTURE_MODEL_CONNECTION, 'qq-participation')).toThrow();
+  await f.client.respond(request);
+  await f.judgment.respond(request);
+  await f.client.respond(request);
+  expect(calls).toEqual(['foreground', 'judgment', 'foreground']);
+  expect(f.model.binding()?.owner.pluginId).toBe(source.pluginId);
+  expect(f.model.binding(judgmentKey)?.owner.pluginId).toBe(judgmentSource.pluginId);
+  expect(f.host.permissions.diagnostics().leases).toBe(0);
+});
+
+it('fences and drains changed judgment work without retiring an in-flight foreground call', async () => {
+  const generation = await createFixtureModelClient().respond(request);
+  let foregroundOptions: Parameters<ResponseClient['respond']>[1];
+  let judgmentOptions: Parameters<ResponseClient['respond']>[1];
+  let foregroundStarted: () => void = () => {};
+  let judgmentStarted: () => void = () => {};
+  let finishForeground: () => void = () => {};
+  let finishJudgment: (error: unknown) => void = () => {};
+  const enteredForeground = new Promise<void>((resolve) => {
+    foregroundStarted = resolve;
+  });
+  const enteredJudgment = new Promise<void>((resolve) => {
+    judgmentStarted = resolve;
+  });
+  const f = await fixture(
+    {
+      respond(_request, options) {
+        foregroundOptions = options;
+        foregroundStarted();
+        return new Promise((resolve) => {
+          finishForeground = () => resolve(generation);
+        });
+      },
+    },
+    {
+      respond(_request, options) {
+        judgmentOptions = options;
+        judgmentStarted();
+        return new Promise((_resolve, reject) => {
+          finishJudgment = reject;
+        });
+      },
+    },
+  );
+  if (!f.judgment) throw new Error('missing judgment fixture');
+  const foregroundEvents: unknown[] = [];
+  const judgmentEvents: unknown[] = [];
+  const foreground = f.client.respond(request, {
+    onEvent: (event) => {
+      foregroundEvents.push(event);
+    },
+  });
+  const judgment = f.judgment
+    .respond(request, {
+      onEvent: (event) => {
+        judgmentEvents.push(event);
+      },
+    })
+    .catch((error: unknown) => error);
+  await Promise.all([enteredForeground, enteredJudgment]);
+  const original = new Error('judgment native cleanup');
+  let stopping: Promise<void> | undefined;
+  try {
+    const saved = await f.host.configs.save(judgmentSource, { label: 'changed' }, 1);
+    expect(saved.ok).toBe(true);
+    expect(judgmentOptions?.signal?.aborted).toBe(true);
+    expect(foregroundOptions?.signal?.aborted).toBe(false);
+    expect(f.model.binding()).not.toBeNull();
+    expect(f.model.binding(judgmentKey)).toBeNull();
+    judgmentOptions?.onEvent?.(modelEvent('stale judgment'));
+    foregroundOptions?.onEvent?.(modelEvent('current foreground'));
+    expect(judgmentEvents).toHaveLength(0);
+    expect(foregroundEvents).toHaveLength(1);
+    let drained = false;
+    stopping = f.model.disable(judgmentKey).then(() => {
+      drained = true;
+    });
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(drained).toBe(false);
+    finishJudgment(original);
+    expect(await judgment).toBe(original);
+    await stopping;
+    expect(foregroundOptions?.signal?.aborted).toBe(false);
+    finishForeground();
+    expect(await foreground).toBe(generation);
+    expect(f.host.permissions.diagnostics().leases).toBe(0);
+    expect(f.host.tasks.diagnostics().pendingWork).toBe(0);
+  } finally {
+    finishJudgment(original);
+    finishForeground();
+    await Promise.allSettled([foreground, judgment, ...(stopping ? [stopping] : [])]);
+  }
+});
 
 it('uses both source leases and preserves private native options and result identity', async () => {
   const native = createFixtureModelClient();

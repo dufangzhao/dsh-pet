@@ -1,5 +1,10 @@
 import { definePlugin, type PluginDefinition } from '@pet/plugin-sdk';
-import { makeError, type CompanionAgentView, type JsonValue } from '@pet/contracts';
+import {
+  isKernelErrorCode,
+  makeError,
+  type CompanionAgentView,
+  type JsonValue,
+} from '@pet/contracts';
 import {
   createCorticoHarness,
   type CorticoHarnessOptions,
@@ -14,9 +19,15 @@ export type {
   CorticoHarness,
   CorticoHarnessOptions,
   CorticoHarnessPorts,
+  CorticoHarnessInputPorts,
+  HarnessInputBinding,
+  HarnessInputTerminal,
+  HarnessResolvedImage,
   HarnessInput,
   HarnessOrigin,
   HarnessOutput,
+  HarnessReplyAttachment,
+  HarnessWorkRequest,
   ResponseClient,
 } from './harness.mjs';
 
@@ -25,8 +36,12 @@ async function receipt(operation: () => Promise<void>): Promise<JsonValue> {
     await operation();
     return { ok: true, value: null };
   } catch (error) {
-    const code =
-      error instanceof TypeError
+    const failure = error && typeof error === 'object' && 'error' in error ? error.error : error;
+    const tagged =
+      failure && typeof failure === 'object' && 'code' in failure ? failure.code : undefined;
+    const code = isKernelErrorCode(tagged)
+      ? tagged
+      : error instanceof TypeError
         ? 'invalid-input'
         : error instanceof DOMException && error.name === 'AbortError'
           ? 'cancelled'

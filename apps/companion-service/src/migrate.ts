@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs';
 import { cp, lstat, mkdir, readdir, readlink, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { KernelFault } from '@pet/host-kernel';
-import { memoryUsage, openStateDatabase } from '@pet/state-sqlite';
+import { memoryUsage, openStateDatabase, upgradeStateV2ToV3 } from '@pet/state-sqlite';
 import type { CompanionFact } from '@pet/contracts';
 
 async function inventory(root: string, relative = ''): Promise<readonly string[]> {
@@ -37,8 +37,8 @@ export async function migrateCompanionData(options: {
   dataDirectory: string;
   backupDirectory: string;
 }): Promise<{
-  fromVersion: 1;
-  toVersion: 2;
+  fromVersion: 1 | 2;
+  toVersion: 3;
   agentId: string;
   epoch: string;
   memoryRevision: number;
@@ -62,9 +62,9 @@ export async function migrateCompanionData(options: {
     throw new KernelFault('not-ready');
   const db = openStateDatabase(state);
   try {
-    if (db.prepare('PRAGMA user_version').get()?.['user_version'] !== 1)
-      throw new KernelFault('conflict');
-    // Admit the actual v1 format, not a partial database merely carrying its version marker.
+    const version = db.prepare('PRAGMA user_version').get()?.['user_version'];
+    if (version !== 1 && version !== 2) throw new KernelFault('conflict');
+    // Admit the actual old format, not a partial database merely carrying its version marker.
     for (const query of [
       'SELECT sequence,id,fingerprint,body FROM messages LIMIT 0',
       'SELECT sequence,id,execution_id,status,body,command FROM tasks LIMIT 0',
@@ -97,7 +97,14 @@ export async function migrateCompanionData(options: {
         throw new KernelFault('invalid-input');
     }
     memoryUsage(facts);
-    const revision = Math.max(0, ...facts.map((fact) => fact.revision));
+    const minimumRevision = Math.max(0, ...facts.map((fact) => fact.revision));
+    const revision = version === 1 ? minimumRevision : identity['memoryRevision'];
+    if (
+      typeof revision !== 'number' ||
+      !Number.isSafeInteger(revision) ||
+      revision < minimumRevision
+    )
+      throw new KernelFault('conflict');
     const before = await inventory(root);
     await mkdir(backup, { mode: 0o700 });
     for (const name of await readdir(root))
@@ -113,21 +120,25 @@ export async function migrateCompanionData(options: {
       JSON.stringify(before) !== JSON.stringify(await inventory(root))
     )
       throw new KernelFault('conflict');
-    // The full verified v1 copy exists before any record or version change.
-    db.prepare('UPDATE identity SET body=? WHERE singleton=1').run(
-      JSON.stringify({ ...identity, memoryRevision: revision }),
-    );
-    db.exec('PRAGMA user_version=2; COMMIT;');
+    // The complete old root is verified before either upgrade step changes any record.
+    if (version === 1) {
+      db.prepare('UPDATE identity SET body=? WHERE singleton=1').run(
+        JSON.stringify({ ...identity, memoryRevision: revision }),
+      );
+      db.exec('PRAGMA user_version=2;');
+    }
+    upgradeStateV2ToV3(db);
+    db.exec('COMMIT;');
     return {
-      fromVersion: 1,
-      toVersion: 2,
+      fromVersion: version,
+      toVersion: 3,
       agentId: identity['assistantId'],
       epoch: identity['epoch'],
       memoryRevision: revision,
       backupDirectory: backup,
     };
   } finally {
-    // Closing also rolls back an uncommitted failed migration; the original remains v1.
+    // Closing rolls back both upgrade steps together if any part fails.
     db.close();
   }
 }

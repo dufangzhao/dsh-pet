@@ -4,6 +4,8 @@ import {
   COMPANION_MEMORY_MAX_VALUE_UNITS,
   COMPANION_MAX_CODE,
   COMPANION_MAX_TEXT,
+  COMPANION_TASK_MATERIAL_MAX,
+  COMPANION_INPUT_MATERIAL_MAX,
 } from '@pet/contracts';
 
 const id = {
@@ -25,7 +27,21 @@ const relativePath = {
 };
 
 export const toolSchemas = {
-  say: object({ inputId: id, text: text(COMPANION_MAX_TEXT) }),
+  say: object(
+    {
+      inputId: id,
+      text: text(COMPANION_MAX_TEXT),
+      attachments: {
+        type: 'array',
+        maxItems: COMPANION_INPUT_MATERIAL_MAX,
+        uniqueItems: true,
+        description:
+          'Image/file/text material IDs or completed own-task artifact IDs to include with this text.',
+        items: object({ kind: { enum: ['material', 'artifact'] }, id }),
+      },
+    },
+    ['inputId', 'text'],
+  ),
   start_work: object(
     {
       inputId: id,
@@ -35,6 +51,19 @@ export const toolSchemas = {
         type: 'array',
         maxItems: 16,
         items: object({ path: relativePath, content: { type: 'string', maxLength: 24576 } }),
+      },
+      materials: {
+        type: 'array',
+        maxItems: COMPANION_TASK_MATERIAL_MAX,
+        uniqueItems: true,
+        description: 'Visible materials to copy into worker files.',
+        items: object({
+          materialId: id,
+          inputName: {
+            ...relativePath,
+            description: 'Worker-relative destination, unique across files and materials.',
+          },
+        }),
       },
       outputs: {
         type: 'array',
@@ -137,5 +166,28 @@ export function parseOptions(value) {
 export function parseTool(name, value) {
   const validator = validators[name];
   if (!validator) throw new TypeError('Unknown Harness tool');
-  return check(validator, value, 'tool arguments');
+  const parsed = check(validator, value, 'tool arguments');
+  if (name === 'start_work' && parsed.materials) {
+    const ids = new Set();
+    const names = (parsed.files ?? []).map((file) => file.path);
+    for (const selection of parsed.materials) {
+      if (
+        ids.has(selection.materialId) ||
+        names.some(
+          (name) =>
+            name === selection.inputName ||
+            name.startsWith(`${selection.inputName}/`) ||
+            selection.inputName.startsWith(`${name}/`),
+        )
+      )
+        throw new TypeError(
+          'Material inputs must have distinct IDs and nonoverlapping destinations',
+        );
+      ids.add(selection.materialId);
+      names.push(selection.inputName);
+    }
+    if (parsed.materials.length === 0) delete parsed.materials;
+  }
+  if (name === 'say' && parsed.attachments?.length === 0) delete parsed.attachments;
+  return parsed;
 }

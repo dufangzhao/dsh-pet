@@ -6,6 +6,7 @@ import { SqliteState } from './state.js';
 import { STATE_METHODS } from './types.js';
 
 export { openStateDatabase } from './database.js';
+export { STATE_FORMAT_VERSION, upgradeStateV2ToV3 } from './schema.js';
 export { memoryUsage } from './memory.js';
 export { SqliteState } from './state.js';
 export * from './types.js';

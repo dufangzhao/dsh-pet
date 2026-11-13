@@ -1,4 +1,10 @@
-import { makeError, type JsonValue, type Result } from '@pet/contracts';
+import {
+  COMPANION_TASK_MATERIAL_MAX,
+  isCompanionRecordId,
+  makeError,
+  type JsonValue,
+  type Result,
+} from '@pet/contracts';
 import type { CloudExecConfig, CloudExecutionRequest } from './types.js';
 
 export function validExecutionId(value: unknown): value is string {
@@ -74,7 +80,7 @@ export function parseRequest(
 ): Result<CloudExecutionRequest> {
   if (
     !record(input) ||
-    !onlyKeys(input, ['executionId', 'code', 'files', 'outputs', 'timeoutMs']) ||
+    !onlyKeys(input, ['executionId', 'code', 'files', 'materials', 'outputs', 'timeoutMs']) ||
     (input['executionId'] !== undefined && !validExecutionId(input['executionId'])) ||
     typeof input['code'] !== 'string' ||
     !input['code'].trim() ||
@@ -86,6 +92,12 @@ export function parseRequest(
   const outputs = input['outputs'] === undefined ? [] : input['outputs'];
   if (!Array.isArray(files) || files.length > 16 || !Array.isArray(outputs) || outputs.length > 16)
     return { ok: false, error: makeError('invalid-input') };
+  const accepted: CloudExecutionRequest = { code: input['code'] };
+  if (typeof input['executionId'] === 'string') accepted.executionId = input['executionId'];
+  if (typeof input['timeoutMs'] === 'number') accepted.timeoutMs = input['timeoutMs'];
+  if (input['files'] !== undefined) accepted.files = [];
+  if (input['outputs'] !== undefined) accepted.outputs = [];
+  if (input['materials'] !== undefined) accepted.materials = [];
   let bytes = 0;
   const names = new Set<string>();
   for (const file of files) {
@@ -98,9 +110,36 @@ export function parseRequest(
     )
       return { ok: false, error: makeError('invalid-input') };
     names.add(file['path']);
+    accepted.files?.push({ path: file['path'], content: file['content'] });
     bytes += Buffer.byteLength(file['content']);
   }
   if (bytes > 24_576) return { ok: false, error: makeError('quota-exceeded') };
+  const materials = input['materials'] === undefined ? [] : input['materials'];
+  if (!Array.isArray(materials) || materials.length > COMPANION_TASK_MATERIAL_MAX)
+    return { ok: false, error: makeError('invalid-input') };
+  const materialIds = new Set<string>();
+  for (const selection of materials) {
+    if (
+      !record(selection) ||
+      !onlyKeys(selection, ['materialId', 'inputName']) ||
+      !isCompanionRecordId(selection['materialId']) ||
+      !safeRelativePath(selection['inputName']) ||
+      materialIds.has(selection['materialId']) ||
+      [...names].some(
+        (name) =>
+          name === selection['inputName'] ||
+          name.startsWith(`${selection['inputName']}/`) ||
+          (selection['inputName'] as string).startsWith(`${name}/`),
+      )
+    )
+      return { ok: false, error: makeError('invalid-input') };
+    materialIds.add(selection['materialId']);
+    names.add(selection['inputName']);
+    accepted.materials?.push({
+      materialId: selection['materialId'],
+      inputName: selection['inputName'],
+    });
+  }
   names.clear();
   for (const output of outputs) {
     if (
@@ -114,6 +153,10 @@ export function parseRequest(
     )
       return { ok: false, error: makeError('invalid-input') };
     names.add(output['path']);
+    accepted.outputs?.push({
+      path: output['path'],
+      ...(typeof output['mediaType'] === 'string' ? { mediaType: output['mediaType'] } : {}),
+    });
   }
-  return { ok: true, value: structuredClone(input) as CloudExecutionRequest };
+  return { ok: true, value: accepted };
 }

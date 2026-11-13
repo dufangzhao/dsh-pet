@@ -82,6 +82,13 @@ export const companionHostManifest: PluginManifest = {
           items: { type: 'string', maxLength: 128 },
           default: [],
         },
+        enabledOptionalPlugins: {
+          type: 'array',
+          maxItems: 32,
+          uniqueItems: true,
+          items: { type: 'string', maxLength: 128 },
+          default: [],
+        },
       },
     },
   },

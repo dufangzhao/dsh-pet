@@ -1,6 +1,7 @@
 import {
   COMPANION_MEMORY_MAX_KEY_UNITS,
   COMPANION_MEMORY_MAX_VALUE_UNITS,
+  isCompanionAudience,
   type CompanionProfileSaveCommand,
   type CompanionMemoryUpsertCommand,
   type CompanionMemoryForgetCommand,
@@ -48,7 +49,9 @@ export function memoryCommand(
       'expectedFactRevision',
       'key',
       ...(forget ? [] : ['value']),
+      ...('audience' in body ? ['audience'] : []),
     ]) ||
+    ('audience' in body && !isCompanionAudience(body['audience'])) ||
     !id(body['commandId']) ||
     !revision(body['expectedMemoryRevision']) ||
     !revision(body['expectedFactRevision']) ||
@@ -63,6 +66,9 @@ export function memoryCommand(
     expectedMemoryRevision: body['expectedMemoryRevision'],
     expectedFactRevision: body['expectedFactRevision'],
     key: body['key'].trim(),
+    ...(isCompanionAudience(body['audience'])
+      ? { audience: structuredClone(body['audience']) }
+      : {}),
   };
   if (forget) return base;
   if (

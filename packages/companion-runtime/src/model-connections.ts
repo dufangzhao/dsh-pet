@@ -7,6 +7,7 @@ import {
   MODEL_CONNECTION_CAPABILITY,
   type AuthorizedResponseTransport,
   type ModelConnectionPorts,
+  type ModelConnectionPurpose,
   type ModelConnectionRegistration,
   type ResponseClient,
   type TextModelBinding,
@@ -30,18 +31,21 @@ export class ModelConnections {
   private readonly registrations = new Map<string, ModelConnectionRegistration>();
   private readonly prepared = new Map<string, { revision: number; controller: AbortController }>();
   private readonly bindings = new Map<string, BoundConnection>();
-  private selected = '';
+  private readonly selected = new Map<ModelConnectionPurpose, string>();
 
   constructor(
     private readonly host: CompanionPluginHost,
     registrations: readonly ModelConnectionRegistration[],
     private readonly transport: (owner: OwnerRef, baseUrl: string) => AuthorizedResponseTransport,
   ) {
-    if (registrations.length > 8) throw new KernelFault('quota-exceeded');
+    if (registrations.length > 16) throw new KernelFault('quota-exceeded');
     for (const registration of registrations) {
       const key = `${registration.manifest.id}/${registration.connection.providerId}`;
       if (
         this.registrations.has(key) ||
+        !['foreground', 'qq-participation'].includes(
+          registration.connection.purpose ?? 'foreground',
+        ) ||
         !registration.manifest.provides?.some(
           (provider) =>
             provider.id === registration.connection.providerId &&
@@ -50,6 +54,8 @@ export class ModelConnections {
         )
       )
         throw new KernelFault('invalid-input');
+      const purpose = registration.connection.purpose ?? 'foreground';
+      if (this.list(purpose).length >= 8) throw new KernelFault('quota-exceeded');
       this.registrations.set(key, registration);
     }
     host.onConfigurationCommit((commit) => {
@@ -90,7 +96,7 @@ export class ModelConnections {
     return (
       !record.retired &&
       !record.controller.signal.aborted &&
-      this.selected === record.key &&
+      this.selected.get(this.purpose(record.key)) === record.key &&
       this.bindings.get(record.key) === record &&
       this.host.manager.isActive(record.owner) &&
       this.host.verifySource(record.owner.pluginId) &&
@@ -103,8 +109,14 @@ export class ModelConnections {
     );
   }
 
-  list(): readonly [string, ModelConnectionRegistration][] {
-    return [...this.registrations];
+  list(purpose?: ModelConnectionPurpose): readonly [string, ModelConnectionRegistration][] {
+    return [...this.registrations].filter(
+      ([key]) => purpose === undefined || this.purpose(key) === purpose,
+    );
+  }
+
+  purpose(key: string): ModelConnectionPurpose {
+    return this.registration(key).connection.purpose ?? 'foreground';
   }
 
   registration(key: string): ModelConnectionRegistration {
@@ -113,9 +125,9 @@ export class ModelConnections {
     return registration;
   }
 
-  select(key: string): void {
-    this.registration(key);
-    this.selected = key;
+  select(key: string, purpose: ModelConnectionPurpose = 'foreground'): void {
+    if (this.purpose(key) !== purpose) throw new KernelFault('invalid-input');
+    this.selected.set(purpose, key);
   }
 
   async enable(key: string): Promise<void> {
@@ -212,7 +224,11 @@ export class ModelConnections {
     };
   }
 
-  binding(key = this.selected): { model: string; revision: number; owner: OwnerRef } | null {
+  binding(key = this.selected.get('foreground') ?? ''): {
+    model: string;
+    revision: number;
+    owner: OwnerRef;
+  } | null {
     const record = this.bindings.get(key);
     if (!record) return null;
     if (!this.sourceCurrent(record)) {
@@ -222,8 +238,8 @@ export class ModelConnections {
     return { model: record.model, revision: record.revision, owner: record.owner };
   }
 
-  clientFor(consumer: OwnerRef): ResponseClient {
-    const captured = this.bindings.get(this.selected);
+  clientFor(consumer: OwnerRef, purpose: ModelConnectionPurpose = 'foreground'): ResponseClient {
+    const captured = this.bindings.get(this.selected.get(purpose) ?? '');
     if (!captured) throw new KernelFault('not-ready');
     const consumerCurrent = (): boolean => {
       const current = this.host.manager.get(identity(consumer.pluginId));

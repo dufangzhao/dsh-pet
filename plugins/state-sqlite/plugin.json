@@ -21,6 +21,10 @@
       "capability": "companion.state@1",
       "features": {
         "methodPermissions": {
+          "claimJudgment": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "finishJudgment": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "judgmentUsage": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "proactiveReadiness": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "snapshot": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "events": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "acceptMessage": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
@@ -36,7 +40,32 @@
           "getArtifact": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "recover": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "recordCommand": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
-          "getCommand": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+          "getCommand": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "inputMessage": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "inputNotices": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "getObservation": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "observe": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "observations": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "pruneObservations": [
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ],
+          "createInput": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "commitInput": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "claimInput": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "getInput": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "findInput": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "updateInput": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "putMaterial": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "getMaterial": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "findMaterial": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "createDelivery": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "updateDelivery": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "claimDeliveryAttempt": [
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ],
+          "passiveReplyBudget": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "getDelivery": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "deliveries": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
         }
       }
     }

@@ -6,6 +6,7 @@ import type { ServicePluginRegistration } from './plugin-host.js';
 export type { ResponseClient } from '@pet/harness-cortico';
 export const MODEL_CONNECTION_CAPABILITY = 'companion.model.connection@1';
 export const MAGPIE_CONNECTION = 'pet.model-connection-magpie/magpie';
+export type ModelConnectionPurpose = 'foreground' | 'qq-participation';
 
 export interface TextModelBinding {
   readonly model: string;
@@ -33,6 +34,8 @@ export type NativeResponseProviderFactory = (baseUrl: string, apiKey: string) =>
 export interface ModelConnectionRegistration extends ServicePluginRegistration {
   readonly connection: {
     readonly providerId: string;
+    /** One source/config lifetime belongs to one model purpose. */
+    readonly purpose?: ModelConnectionPurpose;
     describeConfig(config: JsonObject): ModelConnectionDescription;
     /** Invoked inside this connector's authorized credential borrow; never a browser hook. */
     readonly nativeProvider?: NativeResponseProviderFactory;

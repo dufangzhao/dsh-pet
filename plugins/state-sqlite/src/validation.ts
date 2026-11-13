@@ -4,17 +4,38 @@ import {
   COMPANION_MAX_CODE,
   COMPANION_MAX_TEXT,
   isKernelErrorCode,
+  isCompanionAudience,
+  isCompanionConversationAudience,
+  isCompanionInputOrigin,
+  isCompanionOrigins,
+  isCompanionTaskOrigin,
+  isCompanionInputMaterials,
+  isCompanionMaterialRef,
+  isCompanionMessageContent,
+  isQQDeliveryView,
+  isQQDeliveryAttempt,
+  COMPANION_INPUT_MATERIAL_MAX,
+  COMPANION_TASK_MATERIAL_MAX,
+  QQ_PAGE_MAX_ITEMS,
+  isQQAccountRef,
+  isQQReplyRoute,
+  isQQExternalId,
+  sameQQAccount,
+  isQQJudgePolicy,
+  QQ_JUDGE_MAX_ATTEMPTS_HOUR,
+  QQ_JUDGE_MIN_GROUP_INTERVAL_MS,
+  QQ_JUDGE_TIMEOUT_MS,
+  QQ_JUDGE_MAX_OUTPUT_TOKENS,
+  QQ_PROACTIVE_MAX_REPLIES_HOUR,
 } from '@pet/contracts';
-import type { JsonValue, KernelErrorCode } from '@pet/contracts';
+import type { JsonValue } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { STATE_MAX_ARTIFACTS, STATE_MAX_RESULT_BYTES } from './types.js';
 import type { StateMethodInputs } from './types.js';
+import { isStateReadScope } from './scope.js';
 
-export class StateFailure extends Error {
-  constructor(readonly code: KernelErrorCode) {
-    super(code);
-  }
-}
+import { StateFailure } from './failure.js';
+export { StateFailure } from './failure.js';
 
 function requireValue(condition: boolean): asserts condition {
   if (!condition) throw new StateFailure('invalid-input');
@@ -78,6 +99,15 @@ function error(value: unknown): boolean {
   );
 }
 
+function proactiveLimits(value: unknown): void {
+  const limits = object(value);
+  keys(limits, ['cooldownMs', 'maxRepliesPerHour']);
+  requireValue(
+    integer(limits['cooldownMs'], 1000, 24 * 60 * 60 * 1000) &&
+      integer(limits['maxRepliesPerHour'], 1, QQ_PROACTIVE_MAX_REPLIES_HOUR),
+  );
+}
+
 export function validateInput<K extends keyof StateMethodInputs>(
   method: K,
   input: unknown,
@@ -86,15 +116,260 @@ export function validateInput<K extends keyof StateMethodInputs>(
   if (!checked.ok)
     throw new StateFailure(checked.code === 'bytes-exceeded' ? 'quota-exceeded' : 'invalid-input');
   const body = object(checked.value);
+  if ('scope' in body) requireValue(isStateReadScope(body['scope']));
   switch (method) {
+    case 'claimJudgment': {
+      keys(
+        body,
+        ['id', 'eventKey', 'audience', 'providerRef', 'policyRevision', 'configRevision'],
+        ['limits'],
+      );
+      requireValue(
+        id(body['id']) &&
+          isQQExternalId(body['eventKey']) &&
+          isCompanionConversationAudience(body['audience']) &&
+          body['audience'].kind === 'qq-group' &&
+          integer(body['policyRevision'], 0) &&
+          integer(body['configRevision'], 0),
+      );
+      const limits =
+        'limits' in body
+          ? object(body['limits'])
+          : {
+              maxAttemptsPerHour: QQ_JUDGE_MAX_ATTEMPTS_HOUR,
+              perGroupIntervalMs: QQ_JUDGE_MIN_GROUP_INTERVAL_MS,
+            };
+      keys(limits, ['maxAttemptsPerHour', 'perGroupIntervalMs']);
+      requireValue(
+        isQQJudgePolicy({
+          providerRef: body['providerRef'],
+          ...limits,
+          timeoutMs: QQ_JUDGE_TIMEOUT_MS,
+          maxOutputTokens: QQ_JUDGE_MAX_OUTPUT_TOKENS,
+        }),
+      );
+      break;
+    }
+    case 'finishJudgment':
+      keys(body, ['id', 'decision', 'inputTokens', 'outputTokens', 'error', 'cleanup']);
+      requireValue(
+        id(body['id']) &&
+          (body['decision'] === null || typeof body['decision'] === 'boolean') &&
+          (body['inputTokens'] === null || integer(body['inputTokens'], 0)) &&
+          (body['outputTokens'] === null || integer(body['outputTokens'], 0)) &&
+          error(body['error']) &&
+          ['pending', 'settled', 'failed', 'unknown'].includes(String(body['cleanup'])),
+      );
+      break;
+    case 'proactiveReadiness':
+      keys(body, ['audience'], ['limits']);
+      requireValue(
+        isCompanionConversationAudience(body['audience']) && body['audience'].kind === 'qq-group',
+      );
+      if ('limits' in body) proactiveLimits(body['limits']);
+      break;
+    case 'judgmentUsage':
+      keys(body, [], ['since', 'audience']);
+      optional(body, 'since', (v) => integer(v, 0));
+      optional(
+        body,
+        'audience',
+        (v) => isCompanionConversationAudience(v) && v.kind === 'qq-group',
+      );
+      break;
+    case 'observe': {
+      keys(body, ['observation']);
+      const v = object(body['observation']);
+      keys(v, [
+        'id',
+        'audience',
+        'principalId',
+        'observedAt',
+        'text',
+        'quotedText',
+        'materialIds',
+        'fileEvidence',
+      ]);
+      requireValue(
+        id(v['id']) &&
+          isCompanionConversationAudience(v['audience']) &&
+          (v['principalId'] === null || id(v['principalId'])) &&
+          integer(v['observedAt'], 0) &&
+          text(v['text'], COMPANION_MAX_TEXT, 0) &&
+          (v['quotedText'] === null || text(v['quotedText'], COMPANION_MAX_TEXT, 0)),
+      );
+      requireValue(
+        Array.isArray(v['materialIds']) &&
+          v['materialIds'].length <= COMPANION_INPUT_MATERIAL_MAX &&
+          v['materialIds'].every(id) &&
+          new Set(v['materialIds']).size === v['materialIds'].length,
+      );
+      if (v['fileEvidence'] !== null) {
+        const e = object(v['fileEvidence']);
+        keys(e, ['kind', 'account', 'groupId', 'fileId', 'busId', 'name', 'reportedSize']);
+        requireValue(
+          e['kind'] === 'qq-file' &&
+            isQQAccountRef(e['account']) &&
+            isQQExternalId(e['groupId']) &&
+            isQQExternalId(e['fileId']) &&
+            !String(e['fileId']).includes('://') &&
+            (e['busId'] === null || text(e['busId'], 64)) &&
+            text(e['name'], 240) &&
+            (e['reportedSize'] === null || integer(e['reportedSize'], 0)) &&
+            jsonBytes(e) <= 2048,
+        );
+        requireValue(
+          v['audience'].kind === 'qq-group' &&
+            sameQQAccount(v['audience'].account, e['account']) &&
+            v['audience'].groupId === e['groupId'],
+        );
+      }
+      break;
+    }
+    case 'observations':
+      keys(body, ['scope'], ['now']);
+      optional(body, 'now', (v) => integer(v, 0));
+      break;
+    case 'pruneObservations':
+      keys(body, [], ['now']);
+      optional(body, 'now', (v) => integer(v, 0));
+      break;
+    case 'claimInput':
+      keys(body, ['id']);
+      requireValue(id(body['id']));
+      break;
+    case 'createInput': {
+      keys(body, ['id', 'commandId', 'origin', 'evidence', 'materialIds'], ['proactiveLimits']);
+      requireValue(
+        id(body['id']) &&
+          id(body['commandId']) &&
+          isCompanionInputOrigin(body['origin']) &&
+          body['origin'].kind !== 'legacy-unknown' &&
+          body['origin'].inputId === body['id'],
+      );
+      if ('proactiveLimits' in body) {
+        requireValue(body['origin'].kind === 'qq-proactive');
+        proactiveLimits(body['proactiveLimits']);
+      }
+      object(body['evidence']);
+      requireValue(jsonBytes(body['evidence']) <= 24 * 1024);
+      const maximum =
+        body['origin'].kind === 'work-result'
+          ? COMPANION_TASK_MATERIAL_MAX
+          : COMPANION_INPUT_MATERIAL_MAX;
+      requireValue(
+        Array.isArray(body['materialIds']) &&
+          body['materialIds'].length <= maximum &&
+          body['materialIds'].every(id) &&
+          new Set(body['materialIds']).size === body['materialIds'].length,
+      );
+      break;
+    }
+    case 'commitInput':
+      keys(body, ['id', 'text'], ['materials', 'content']);
+      requireValue(id(body['id']) && text(body['text'], COMPANION_MAX_TEXT));
+      optional(body, 'materials', isCompanionInputMaterials);
+      optional(body, 'content', isCompanionMessageContent);
+      break;
+    case 'updateInput':
+      keys(body, ['id', 'phase', 'cleanup'], ['error']);
+      requireValue(
+        id(body['id']) &&
+          [
+            'preparing',
+            'ready',
+            'active',
+            'completed',
+            'cancelled',
+            'failed',
+            'interrupted',
+            'unknown',
+          ].includes(String(body['phase'])) &&
+          ['pending', 'settled', 'failed', 'unknown'].includes(String(body['cleanup'])),
+      );
+      optional(body, 'error', error);
+      break;
+    case 'putMaterial':
+      keys(body, [
+        'id',
+        'inputId',
+        'observationId',
+        'audience',
+        'phase',
+        'reference',
+        'storageKey',
+        'cleanup',
+        'error',
+      ]);
+      requireValue(
+        (body['inputId'] === null || id(body['inputId'])) &&
+          (body['observationId'] === null || id(body['observationId'])) &&
+          (body['inputId'] !== null || body['observationId'] !== null),
+      );
+      requireValue(
+        id(body['id']) &&
+          isCompanionConversationAudience(body['audience']) &&
+          ['preparing', 'ready', 'failed', 'released', 'unknown'].includes(String(body['phase'])) &&
+          ['pending', 'settled', 'failed', 'unknown'].includes(String(body['cleanup'])) &&
+          error(body['error']),
+      );
+      requireValue(body['reference'] === null || isCompanionMaterialRef(body['reference']));
+      requireValue(body['storageKey'] === null || relativePath(body['storageKey']));
+      if (body['phase'] === 'ready')
+        requireValue(body['reference'] !== null && body['storageKey'] !== null);
+      if (body['phase'] === 'released')
+        requireValue(body['storageKey'] === null && body['cleanup'] === 'settled');
+      break;
+    case 'createDelivery':
+    case 'updateDelivery':
+      keys(body, ['delivery']);
+      requireValue(isQQDeliveryView(body['delivery']));
+      break;
+    case 'passiveReplyBudget':
+      keys(body, ['route']);
+      requireValue(
+        isQQReplyRoute(body['route']) &&
+          body['route'].account.protocol === 'official' &&
+          body['route'].reference !== null &&
+          (body['route'].reference.messageId !== null || body['route'].reference.eventId !== null),
+      );
+      break;
+    case 'claimDeliveryAttempt':
+      keys(body, ['id', 'partId', 'attempt']);
+      requireValue(
+        id(body['id']) &&
+          id(body['partId']) &&
+          isQQDeliveryAttempt(body['attempt']) &&
+          body['attempt'].phase === 'claimed' &&
+          body['attempt'].outcome === 'pending' &&
+          body['attempt'].cleanup === 'pending' &&
+          body['attempt'].receipt === null,
+      );
+      break;
+    case 'inputMessage':
+    case 'inputNotices':
+    case 'getObservation':
+    case 'getInput':
+    case 'findInput':
+    case 'getMaterial':
+    case 'findMaterial':
+    case 'getDelivery':
+      keys(body, ['id', 'scope']);
+      requireValue(id(body['id']));
+      break;
+    case 'deliveries':
+      keys(body, ['scope'], ['after', 'limit']);
+      optional(body, 'after', id);
+      optional(body, 'limit', (v) => integer(v, 1, QQ_PAGE_MAX_ITEMS));
+      break;
     case 'snapshot':
-      keys(body, [], ['messageLimit', 'taskLimit', 'byteBudget']);
+      keys(body, [], ['messageLimit', 'taskLimit', 'byteBudget', 'scope']);
       optional(body, 'byteBudget', (value) => integer(value, 1, STATE_MAX_RESULT_BYTES));
       optional(body, 'messageLimit', (value) => integer(value, 1, 100));
       optional(body, 'taskLimit', (value) => integer(value, 1, 100));
       break;
     case 'events':
-      keys(body, ['after', 'epoch'], ['limit']);
+      keys(body, ['after', 'epoch'], ['limit', 'scope']);
       requireValue(integer(body['after'], 0) && id(body['epoch']));
       optional(body, 'limit', (value) => integer(value, 1, 200));
       break;
@@ -103,7 +378,12 @@ export function validateInput<K extends keyof StateMethodInputs>(
       requireValue(id(body['commandId']) && text(body['text'], COMPANION_MAX_TEXT));
       break;
     case 'createTask':
-      keys(body, ['commandId', 'title', 'code'], ['executionId', 'files', 'outputs', 'timeoutMs']);
+      keys(
+        body,
+        ['commandId', 'title', 'code'],
+        ['executionId', 'files', 'outputs', 'timeoutMs', 'origin', 'materials'],
+      );
+      optional(body, 'origin', isCompanionTaskOrigin);
       requireValue(
         id(body['commandId']) && text(body['title'], 256) && text(body['code'], COMPANION_MAX_CODE),
       );
@@ -127,6 +407,42 @@ export function validateInput<K extends keyof StateMethodInputs>(
           seen.add(path);
           if (field === 'files') requireValue(text(entry['content'], 32_768, 0));
           else optional(entry, 'mediaType', (value) => text(value, 128));
+        }
+      }
+      if ('materials' in body) {
+        const selections = body['materials'];
+        requireValue(Array.isArray(selections) && selections.length <= COMPANION_TASK_MATERIAL_MAX);
+        if (selections.length === 0) {
+          // Preserve every pre-material intent byte; never strip a nonempty selection.
+          delete body['materials'];
+        } else {
+          const ids = new Set<string>(),
+            names = new Set<string>();
+          const inlineNames = Array.isArray(body['files'])
+            ? body['files'].map((file) => object(file)['path'])
+            : [];
+          for (const value of selections) {
+            const selection = object(value);
+            keys(selection, ['materialId', 'inputName']);
+            requireValue(
+              id(selection['materialId']) &&
+                text(selection['inputName'], 240) &&
+                relativePath(selection['inputName']),
+            );
+            requireValue(
+              !ids.has(selection['materialId']) &&
+                !names.has(selection['inputName']) &&
+                !inlineNames.includes(selection['inputName']),
+            );
+            ids.add(selection['materialId']);
+            names.add(selection['inputName']);
+          }
+          const origin = body['origin'];
+          requireValue(
+            isCompanionTaskOrigin(origin) &&
+              origin.materialIds.length === ids.size &&
+              origin.materialIds.every((id) => ids.has(id)),
+          );
         }
       }
       break;
@@ -166,7 +482,17 @@ export function validateInput<K extends keyof StateMethodInputs>(
       }
       break;
     case 'appendMessage':
-      keys(body, ['id', 'role', 'text'], ['inputId', 'taskId']);
+      keys(
+        body,
+        ['id', 'role', 'text'],
+        ['inputId', 'taskId', 'audience', 'origins', 'materials', 'content'],
+      );
+      optional(body, 'audience', isCompanionConversationAudience);
+      optional(body, 'origins', isCompanionOrigins);
+      optional(body, 'materials', isCompanionInputMaterials);
+      optional(body, 'content', isCompanionMessageContent);
+      if ('audience' in body || 'origins' in body)
+        requireValue('audience' in body && 'origins' in body);
       requireValue(
         id(body['id']) &&
           ['user', 'assistant', 'notice'].includes(String(body['role'])) &&
@@ -176,7 +502,7 @@ export function validateInput<K extends keyof StateMethodInputs>(
       optional(body, 'taskId', (value) => value === null || id(value));
       break;
     case 'memorySnapshot':
-      keys(body, []);
+      keys(body, [], ['scope']);
       break;
     case 'rememberFact':
     case 'forgetFact': {
@@ -185,14 +511,19 @@ export function validateInput<K extends keyof StateMethodInputs>(
         keys(body, ['commandId', 'key', 'value'], ['expectedRevision']);
         optional(body, 'expectedRevision', (v) => integer(v, 0));
       } else {
-        keys(body, [
-          'commandId',
-          'key',
-          'expectedMemoryRevision',
-          'expectedFactRevision',
-          'origin',
-          ...(method === 'rememberFact' ? ['value'] : []),
-        ]);
+        keys(
+          body,
+          [
+            'commandId',
+            'key',
+            'expectedMemoryRevision',
+            'expectedFactRevision',
+            'origin',
+            ...(method === 'rememberFact' ? ['value'] : []),
+          ],
+          ['audience'],
+        );
+        optional(body, 'audience', isCompanionAudience);
         requireValue(
           integer(body['expectedMemoryRevision'], 0) &&
             integer(body['expectedFactRevision'], method === 'forgetFact' ? 1 : 0),
@@ -205,16 +536,16 @@ export function validateInput<K extends keyof StateMethodInputs>(
       break;
     }
     case 'getMessage':
-      keys(body, ['id', 'eventSequence']);
+      keys(body, ['id', 'eventSequence'], ['scope']);
       requireValue(id(body['id']) && integer(body['eventSequence'], 1));
       break;
     case 'getTaskByExecution':
-      keys(body, ['executionId']);
+      keys(body, ['executionId'], ['scope']);
       requireValue(id(body['executionId']));
       break;
     case 'getTask':
     case 'getArtifact':
-      keys(body, ['id']);
+      keys(body, ['id'], ['scope']);
       requireValue(id(body['id']));
       break;
     case 'recover':

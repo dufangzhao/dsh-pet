@@ -1,5 +1,6 @@
 import type { CompanionCommandReceipt, CompanionFact } from './companion.js';
 import type { KernelError } from './errors.js';
+import type { CompanionAudience } from './companion-origin.js';
 
 export const COMPANION_MEMORY_MAX_FACTS = 32;
 export const COMPANION_MEMORY_MAX_KEY_UNITS = 128;
@@ -34,6 +35,8 @@ export interface CompanionMemoryView extends CompanionMemoryStatus {
   readonly facts: readonly CompanionFact[];
 }
 export interface CompanionMemoryUpsertCommand {
+  /** Protected owner-management scope; omission preserves the legacy intent and JSON fingerprint. */
+  readonly audience?: CompanionAudience;
   readonly commandId: string;
   readonly expectedMemoryRevision: number;
   readonly expectedFactRevision: number;
@@ -41,6 +44,7 @@ export interface CompanionMemoryUpsertCommand {
   readonly value: string;
 }
 export interface CompanionMemoryForgetCommand {
+  readonly audience?: CompanionAudience;
   readonly commandId: string;
   readonly expectedMemoryRevision: number;
   readonly expectedFactRevision: number;
