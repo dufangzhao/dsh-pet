@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 27
-- **Last Active**: 2026-11-12
+- **Total Sessions**: 28
+- **Last Active**: 2026-11-13
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1009 | Active |
+| `journal-1.md` | ~1045 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 28 | 2026-11-13 | Implement pluggable QQ entry | `f2aa4d1`, `85f4457`, `ee1045e`, `f6333e3` | `feat/qq-platform-entry` |
 | 27 | 2026-11-12 | 完成 M5 共享 Magpie 语音输出 | `5e61f9668388d05740825b4185a6444bead4696b`, `3287f42a6de08a63a0145af4e4139382a02b190c` | `feat/shared-speech-output` |
 | 26 | 2026-11-11 | Complete shared voice input and live Magpie ASR verification | `b58c9958a6a2f029490a2dbfc52cd58565738a91`, `c1583c179283624a06d5f091dfc480a3b3da968a` | `feat/shared-voice-input` |
 | 25 | 2026-11-09 | Controlled persona and explicit persistent memory | `c673f2d`, `3277f2a` | `feat/controlled-persona-memory` |

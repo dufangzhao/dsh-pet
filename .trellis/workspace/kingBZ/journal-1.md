@@ -1007,3 +1007,39 @@ Completed M4 shared web/desktop voice input through ordinary Magpie sources, exa
 ### Next Steps
 
 - None - task complete
+
+
+## Session 28: Implement pluggable QQ entry
+
+**Date**: 2026-11-13
+**Task**: Implement pluggable QQ entry
+**Branch**: `feat/qq-platform-entry`
+
+### Summary
+
+Completed official QQ WebSocket and OneBot reverse-Universal plugins for the same Agent, scoped State v3 and input-owned Core contexts, participant authority, full text/image/voice/file transfers, independent participation judgment, durable single-attempt delivery, Web management and readonly desktop opener. Verified all workspace type/package/QA/lint/format/build stages; service315 and desktop1059, opt-in Docker service18 with no skips, real Web/material DOM, independent review canaries and production Electron149 frozen inputs. Preserved known receipts independently from cleanup, exact legacy fingerprints and source/grant lifetimes; fixed stale secret/CAS/connection and scene-filter bugs. No real QQ/paid-model trial, no original4120 data changes and no push. See [acceptance](../../../qa/companion-qq-acceptance.md) and [archived task](../../tasks/archive/2026-11/11-12-qq-platform-entry/prd.md).
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f2aa4d1` | (see git log) |
+| `85f4457` | (see git log) |
+| `ee1045e` | (see git log) |
+| `f6333e3` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
