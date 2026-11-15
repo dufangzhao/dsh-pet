@@ -3,7 +3,12 @@ import { createReadStream } from 'node:fs';
 import { cp, lstat, mkdir, readdir, readlink, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { KernelFault } from '@pet/host-kernel';
-import { memoryUsage, openStateDatabase, upgradeStateV2ToV3 } from '@pet/state-sqlite';
+import {
+  memoryUsage,
+  openStateDatabase,
+  upgradeStateV2ToV3,
+  upgradeStateV3ToV4,
+} from '@pet/state-sqlite';
 import type { CompanionFact } from '@pet/contracts';
 
 async function inventory(root: string, relative = ''): Promise<readonly string[]> {
@@ -37,8 +42,8 @@ export async function migrateCompanionData(options: {
   dataDirectory: string;
   backupDirectory: string;
 }): Promise<{
-  fromVersion: 1 | 2;
-  toVersion: 3;
+  fromVersion: 1 | 2 | 3;
+  toVersion: 4;
   agentId: string;
   epoch: string;
   memoryRevision: number;
@@ -63,7 +68,7 @@ export async function migrateCompanionData(options: {
   const db = openStateDatabase(state);
   try {
     const version = db.prepare('PRAGMA user_version').get()?.['user_version'];
-    if (version !== 1 && version !== 2) throw new KernelFault('conflict');
+    if (version !== 1 && version !== 2 && version !== 3) throw new KernelFault('conflict');
     // Admit the actual old format, not a partial database merely carrying its version marker.
     for (const query of [
       'SELECT sequence,id,fingerprint,body FROM messages LIMIT 0',
@@ -73,6 +78,20 @@ export async function migrateCompanionData(options: {
       'SELECT sequence,body FROM events LIMIT 0',
     ])
       db.prepare(query).all();
+    if (version === 3) {
+      for (const query of [
+        'SELECT audience_key,principal_id FROM messages LIMIT 0',
+        'SELECT audience_key,principal_id FROM tasks LIMIT 0',
+        'SELECT audience_key,principal_id FROM events LIMIT 0',
+        'SELECT audience_key,key,body FROM facts LIMIT 0',
+        'SELECT sequence,id,command_id,fingerprint,audience_key,principal_id,phase,body,evidence FROM input_admissions LIMIT 0',
+        'SELECT sequence,id,audience_key,observed_at,fingerprint,body FROM conversation_observations LIMIT 0',
+        'SELECT sequence,id,input_id,observation_id,audience_key,phase,body FROM materials LIMIT 0',
+        'SELECT sequence,id,audience_key,principal_id,phase,fingerprint,body FROM qq_deliveries LIMIT 0',
+        'SELECT id,event_key,audience_key,claimed_at,phase,fingerprint,body FROM qq_judgments LIMIT 0',
+      ])
+        db.prepare(query).all();
+    }
     if (db.prepare('PRAGMA foreign_key_check').all().length) throw new KernelFault('conflict');
     const row = db.prepare('SELECT body FROM identity WHERE singleton=1').get();
     const identity = JSON.parse(String(row?.['body'])) as Record<string, unknown>;
@@ -127,11 +146,12 @@ export async function migrateCompanionData(options: {
       );
       db.exec('PRAGMA user_version=2;');
     }
-    upgradeStateV2ToV3(db);
+    if (version !== 3) upgradeStateV2ToV3(db);
+    upgradeStateV3ToV4(db);
     db.exec('COMMIT;');
     return {
       fromVersion: version,
-      toVersion: 3,
+      toVersion: 4,
       agentId: identity['assistantId'],
       epoch: identity['epoch'],
       memoryRevision: revision,

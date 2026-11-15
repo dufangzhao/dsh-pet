@@ -2,7 +2,14 @@ import type { DatabaseSync } from 'node:sqlite';
 import type { CompanionFact, CompanionMessage, CompanionTask } from '@pet/contracts';
 import { legacyOrigin, legacyTaskOrigin, OWNER_AUDIENCE, OWNER_AUDIENCE_KEY } from './scope.js';
 
-export const STATE_FORMAT_VERSION = 3;
+export const STATE_FORMAT_VERSION = 4;
+
+/** Add private provenance without rewriting legacy delivery bodies, fingerprints or timestamps. */
+export function upgradeStateV3ToV4(db: DatabaseSync): void {
+  if (!db.isTransaction || db.prepare('PRAGMA user_version').get()?.['user_version'] !== 3)
+    throw new Error('state-migration-transaction-required');
+  db.exec('ALTER TABLE qq_deliveries ADD COLUMN execution_json TEXT; PRAGMA user_version=4;');
+}
 
 /** Called only inside the writer's existing transaction, after any required cold backup. */
 export function upgradeStateV2ToV3(db: DatabaseSync): void {

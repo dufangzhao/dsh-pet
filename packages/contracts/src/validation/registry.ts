@@ -20,11 +20,20 @@ import { RESOURCE_DECLARATION_SCHEMA } from '../resource.js';
 import { STREAM_HEADER_SCHEMA } from '../media.js';
 import { CONTROL_MESSAGE_SCHEMA } from '../control.js';
 import { KERNEL_ERROR_SCHEMA, OWNER_REF_SCHEMA } from '../shared-schemas.js';
+import {
+  LOCAL_HOST_SOURCE_BINDING_SCHEMA,
+  LOCAL_HOST_TASK_REFERENCE_SCHEMA,
+} from '../local-host.js';
+
+import { LOCAL_HOST_PROCESS_IDENTITY_SCHEMA } from '../local-host-process.js';
 
 export interface CompiledContractSchemas {
   manifest: ValidateFunction;
   controlMessage: ValidateFunction;
   streamHeader: ValidateFunction;
+  localHostSourceBinding: ValidateFunction;
+  localHostTaskReference: ValidateFunction;
+  localHostProcessIdentity: ValidateFunction;
 }
 
 interface Registry {
@@ -67,7 +76,20 @@ function build(): Registry {
   const controlMessage = ajv.compile(CONTROL_MESSAGE_SCHEMA);
   const streamHeader = ajv.compile(STREAM_HEADER_SCHEMA);
 
-  return { ajv, validators: { manifest, controlMessage, streamHeader } };
+  const localHostSourceBinding = ajv.compile(LOCAL_HOST_SOURCE_BINDING_SCHEMA);
+  const localHostTaskReference = ajv.compile(LOCAL_HOST_TASK_REFERENCE_SCHEMA);
+  const localHostProcessIdentity = ajv.compile(LOCAL_HOST_PROCESS_IDENTITY_SCHEMA);
+  return {
+    ajv,
+    validators: {
+      manifest,
+      controlMessage,
+      streamHeader,
+      localHostSourceBinding,
+      localHostTaskReference,
+      localHostProcessIdentity,
+    },
+  };
 }
 
 /** Compiled validators, created on first use and reused afterwards. */

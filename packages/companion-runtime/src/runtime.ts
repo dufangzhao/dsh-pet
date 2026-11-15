@@ -114,6 +114,7 @@ const READ_METHODS = new Set([
   'proactiveReadiness',
   'findInput',
   'getDelivery',
+  'getDeliveryExecution',
   'deliveries',
   'passiveReplyBudget',
 ]);

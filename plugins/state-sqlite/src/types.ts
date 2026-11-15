@@ -13,8 +13,12 @@ import type {
   QQDeliveryView,
   QQDeliveryPage,
   QQDeliveryAttempt,
-  QQAccountRef,
+  QQFileEvidence,
   QQReplyRoute,
+  QQRemoteReceipt,
+  LocalHostSourceBinding,
+  LocalHostTaskReference,
+  LocalHostProcessIdentity,
   CompanionFactOrigin,
   CompanionMemoryUpsertCommand,
   CompanionMemoryForgetCommand,
@@ -30,6 +34,41 @@ import type {
   JsonObject,
   KernelError,
 } from '@pet/contracts';
+
+/** Private immutable routing provenance, never a serialized authority grant. */
+export type ExecutionTarget =
+  | { readonly kind: 'remote'; readonly binding: LocalHostSourceBinding }
+  | { readonly kind: 'unavailable'; readonly hostId: string | null };
+export interface DeliveryExecutionAttempt {
+  readonly partId: string;
+  readonly attemptId: string;
+  readonly operation: QQDeliveryAttempt['operation'];
+  readonly contentHash: string;
+  readonly task: LocalHostTaskReference | null;
+  readonly dispatchObserved: boolean;
+}
+export interface StoredDeliveryExecution {
+  readonly target: ExecutionTarget;
+  /** Captured once with the first local task binding. Missing/null legacy records prove no OS identity. */
+  readonly processIdentity?: LocalHostProcessIdentity | null;
+  readonly attempts: readonly DeliveryExecutionAttempt[];
+}
+export interface DeliveryTaskBinding {
+  readonly id: string;
+  readonly partId: string;
+  readonly attemptId: string;
+  readonly binding: LocalHostSourceBinding;
+  readonly task: LocalHostTaskReference;
+  readonly contentHash: string;
+}
+export interface DeliveryAttemptFact {
+  readonly dispatch: 'unknown' | 'not-dispatched' | 'dispatched';
+  readonly outcome: Exclude<QQDeliveryAttempt['outcome'], 'pending'>;
+  readonly correlationId: string | null;
+  readonly receipt: QQRemoteReceipt | null;
+  readonly cleanup: CompanionCleanup;
+  readonly error: KernelError | null;
+}
 
 /** A host-authorized selector, never an action grant supplied by a participant. */
 export type StateReadScope =
@@ -48,15 +87,7 @@ export interface StoredMaterial extends CompanionMaterialView {
   readonly storageKey: string | null;
 }
 
-export interface QQFileEvidence {
-  readonly kind: 'qq-file';
-  readonly account: QQAccountRef;
-  readonly groupId: string;
-  readonly fileId: string;
-  readonly busId: string | null;
-  readonly name: string;
-  readonly reportedSize: number | null;
-}
+export type { QQFileEvidence } from '@pet/contracts';
 export interface StateObservation {
   /** Local context dedup identity, never a native reply/event ID or an input grant. */
   readonly id: string;
@@ -231,7 +262,14 @@ export interface StateMethodInputs {
   putMaterial: StoredMaterial;
   getMaterial: { readonly id: string; readonly scope: StateReadScope };
   findMaterial: { readonly id: string; readonly scope: StateReadScope };
-  createDelivery: { readonly delivery: QQDeliveryView };
+  createDelivery: { readonly delivery: QQDeliveryView; readonly execution?: ExecutionTarget };
+  getDeliveryExecution: { readonly id: string; readonly scope: StateReadScope };
+  bindDeliveryTask: DeliveryTaskBinding & { readonly processIdentity?: LocalHostProcessIdentity };
+  /** The host verifies actual OS/owned-resource cleanup; State only matches the original captured identity. */
+  settleDeliveryCleanup: DeliveryTaskBinding & {
+    readonly processIdentity: LocalHostProcessIdentity;
+  };
+  enrichDeliveryAttempt: DeliveryTaskBinding & { readonly fact: DeliveryAttemptFact };
   updateDelivery: { readonly delivery: QQDeliveryView };
   /** First official claim freezes the whole eligible plan's msgSeq reservations; always use returned delivery. Unsent reservations are not refunded or reused. */
   claimDeliveryAttempt: {
@@ -320,6 +358,10 @@ export interface StateMethodOutputs {
   getMaterial: StoredMaterial;
   findMaterial: StoredMaterial | null;
   createDelivery: QQDeliveryView;
+  getDeliveryExecution: StoredDeliveryExecution | null;
+  bindDeliveryTask: { readonly bound: boolean };
+  settleDeliveryCleanup: QQDeliveryView;
+  enrichDeliveryAttempt: QQDeliveryView;
   updateDelivery: QQDeliveryView;
   claimDeliveryAttempt: { readonly delivery: QQDeliveryView; readonly claimed: boolean };
   passiveReplyBudget: {
@@ -392,6 +434,10 @@ export const STATE_METHODS = [
   'getMaterial',
   'findMaterial',
   'createDelivery',
+  'getDeliveryExecution',
+  'bindDeliveryTask',
+  'settleDeliveryCleanup',
+  'enrichDeliveryAttempt',
   'updateDelivery',
   'claimDeliveryAttempt',
   'passiveReplyBudget',
@@ -407,5 +453,7 @@ export {
   COMPANION_MEMORY_MAX_DATA_BYTES as STATE_MAX_FACT_BYTES,
   COMPANION_MEMORY_MAX_FACTS as STATE_MAX_FACTS,
 } from '@pet/contracts';
+export const STATE_MAX_EXECUTION_BYTES = 16 * 1024;
+export const STATE_MAX_EXECUTION_ATTEMPTS = 16;
 export const STATE_MAX_ARTIFACTS = 16;
 export const STATE_LOG_BYTES = 12 * 1024;

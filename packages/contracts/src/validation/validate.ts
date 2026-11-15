@@ -18,6 +18,8 @@ import type { JsonValue } from '../json.js';
 import type { ControlMessage } from '../control.js';
 import { CONTROL_MAX_MESSAGE_BYTES } from '../control.js';
 import type { MediaFrame, StreamHeader } from '../media.js';
+import type { LocalHostSourceBinding, LocalHostTaskReference } from '../local-host.js';
+import type { LocalHostProcessIdentity } from '../local-host-process.js';
 import type { PluginManifest, PlatformTarget } from '../manifest.js';
 import { PLATFORM_TARGETS } from '../manifest.js';
 import { SEMVER_PATTERN } from '../patterns.js';
@@ -311,6 +313,29 @@ export function validateStreamHeader(input: unknown): Result<StreamHeader> {
     const { streamHeader } = contractValidators();
     assertSchema(streamHeader(value));
     return value as StreamHeader;
+  });
+}
+
+/** Shape/budget only: this provenance does not authenticate a remote task or source. */
+export function validateLocalHostSourceBinding(input: unknown): Result<LocalHostSourceBinding> {
+  return validateWith(input, (value) => {
+    assertSchema(contractValidators().localHostSourceBinding(value));
+    return value as LocalHostSourceBinding;
+  });
+}
+
+export function validateLocalHostTaskReference(input: unknown): Result<LocalHostTaskReference> {
+  return validateWith(input, (value) => {
+    assertSchema(contractValidators().localHostTaskReference(value));
+    return value as LocalHostTaskReference;
+  });
+}
+
+/** Shape only: OS identity metadata is not an exit, cleanup, or authority proof. */
+export function validateLocalHostProcessIdentity(input: unknown): Result<LocalHostProcessIdentity> {
+  return validateWith(input, (value) => {
+    assertSchema(contractValidators().localHostProcessIdentity(value));
+    return value as LocalHostProcessIdentity;
   });
 }
 

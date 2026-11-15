@@ -3,6 +3,7 @@ import {
   COMPANION_MEMORY_MAX_VALUE_UNITS,
   COMPANION_MAX_CODE,
   COMPANION_MAX_TEXT,
+  LOCAL_ID_PATTERN,
   isKernelErrorCode,
   isCompanionAudience,
   isCompanionConversationAudience,
@@ -29,7 +30,12 @@ import {
   QQ_PROACTIVE_MAX_REPLIES_HOUR,
 } from '@pet/contracts';
 import type { JsonValue } from '@pet/contracts';
-import { jsonPreflight } from '@pet/contracts/validation';
+import {
+  jsonPreflight,
+  validateLocalHostSourceBinding,
+  validateLocalHostTaskReference,
+  validateLocalHostProcessIdentity,
+} from '@pet/contracts/validation';
 import { STATE_MAX_ARTIFACTS, STATE_MAX_RESULT_BYTES } from './types.js';
 import type { StateMethodInputs } from './types.js';
 import { isStateReadScope } from './scope.js';
@@ -322,9 +328,79 @@ export function validateInput<K extends keyof StateMethodInputs>(
       break;
     case 'createDelivery':
     case 'updateDelivery':
-      keys(body, ['delivery']);
+      keys(body, ['delivery'], method === 'createDelivery' ? ['execution'] : []);
       requireValue(isQQDeliveryView(body['delivery']));
+      if ('execution' in body) {
+        const execution = object(body['execution']);
+        if (execution['kind'] === 'remote') {
+          keys(execution, ['kind', 'binding']);
+          requireValue(validateLocalHostSourceBinding(execution['binding']).ok);
+        } else {
+          keys(execution, ['kind', 'hostId']);
+          requireValue(
+            execution['kind'] === 'unavailable' &&
+              (execution['hostId'] === null ||
+                (typeof execution['hostId'] === 'string' &&
+                  new RegExp(LOCAL_ID_PATTERN).test(execution['hostId']))),
+          );
+        }
+      }
       break;
+    case 'bindDeliveryTask':
+    case 'settleDeliveryCleanup':
+    case 'enrichDeliveryAttempt': {
+      keys(
+        body,
+        [
+          'id',
+          'partId',
+          'attemptId',
+          'binding',
+          'task',
+          'contentHash',
+          ...(method === 'enrichDeliveryAttempt' ? ['fact'] : []),
+          ...(method === 'settleDeliveryCleanup' ? ['processIdentity'] : []),
+        ],
+        method === 'bindDeliveryTask' ? ['processIdentity'] : [],
+      );
+      if ('processIdentity' in body)
+        requireValue(validateLocalHostProcessIdentity(body['processIdentity']).ok);
+      requireValue(
+        id(body['id']) &&
+          id(body['partId']) &&
+          id(body['attemptId']) &&
+          validateLocalHostSourceBinding(body['binding']).ok &&
+          validateLocalHostTaskReference(body['task']).ok &&
+          typeof body['contentHash'] === 'string' &&
+          /^[a-f0-9]{64}$/.test(body['contentHash']),
+      );
+      if (method === 'enrichDeliveryAttempt') {
+        const fact = object(body['fact']);
+        keys(fact, ['dispatch', 'outcome', 'correlationId', 'receipt', 'cleanup', 'error']);
+        requireValue(
+          ['unknown', 'not-dispatched', 'dispatched'].includes(String(fact['dispatch'])) &&
+            ['accepted', 'rejected', 'failed', 'unknown', 'cancelled-before-dispatch'].includes(
+              String(fact['outcome']),
+            ),
+        );
+        // Shared receipt/error shape validation; outcome semantics follow the retained operation after merge.
+        requireValue(
+          isQQDeliveryAttempt({
+            id: body['attemptId'],
+            operation: 'send',
+            phase: 'settled',
+            outcome: 'unknown',
+            startedAt: 0,
+            settledAt: 0,
+            correlationId: fact['correlationId'],
+            receipt: fact['receipt'],
+            cleanup: fact['cleanup'],
+            error: fact['error'],
+          }),
+        );
+      }
+      break;
+    }
     case 'passiveReplyBudget':
       keys(body, ['route']);
       requireValue(
@@ -354,6 +430,7 @@ export function validateInput<K extends keyof StateMethodInputs>(
     case 'getMaterial':
     case 'findMaterial':
     case 'getDelivery':
+    case 'getDeliveryExecution':
       keys(body, ['id', 'scope']);
       requireValue(id(body['id']));
       break;

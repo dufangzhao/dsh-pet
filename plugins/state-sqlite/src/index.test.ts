@@ -39,6 +39,10 @@ it('declares an ordinary manifest and returns payload Result under plugin lifecy
       features: {
         methodPermissions: {
           getMessage: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+          getDeliveryExecution: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
+          bindDeliveryTask: [{ kind: 'files', scope: 'plugin-data', access: 'read-write' }],
+          settleDeliveryCleanup: [{ kind: 'files', scope: 'plugin-data', access: 'read-write' }],
+          enrichDeliveryAttempt: [{ kind: 'files', scope: 'plugin-data', access: 'read-write' }],
           findMaterial: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
           inputNotices: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],
           proactiveReadiness: [{ kind: 'files', scope: 'plugin-data', access: 'read' }],

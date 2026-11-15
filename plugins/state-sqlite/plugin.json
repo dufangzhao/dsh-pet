@@ -59,6 +59,14 @@
           "getMaterial": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "findMaterial": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
           "createDelivery": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "getDeliveryExecution": [{ "kind": "files", "scope": "plugin-data", "access": "read" }],
+          "bindDeliveryTask": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+          "settleDeliveryCleanup": [
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ],
+          "enrichDeliveryAttempt": [
+            { "kind": "files", "scope": "plugin-data", "access": "read-write" }
+          ],
           "updateDelivery": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
           "claimDeliveryAttempt": [
             { "kind": "files", "scope": "plugin-data", "access": "read-write" }

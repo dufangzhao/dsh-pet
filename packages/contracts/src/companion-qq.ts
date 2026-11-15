@@ -88,6 +88,17 @@ export const QQ_OFFICIAL_C2C_PASSIVE_MAX_PARTS = 4;
 export const QQ_OFFICIAL_GROUP_PASSIVE_MAX_PARTS = 5;
 export const QQ_OFFICIAL_PASSIVE_WINDOW_MS = 5 * 60 * 1000;
 
+/** Public native file-notice evidence; it contains no path, URL or read authority. */
+export interface QQFileEvidence {
+  readonly kind: 'qq-file';
+  readonly account: QQAccountRef;
+  readonly groupId: string;
+  readonly fileId: string;
+  readonly busId: string | null;
+  readonly name: string;
+  readonly reportedSize: number | null;
+}
+
 export interface QQOfficialSettings {
   readonly protocol: 'official';
   readonly appId: string;

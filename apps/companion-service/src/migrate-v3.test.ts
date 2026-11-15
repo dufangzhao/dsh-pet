@@ -161,7 +161,7 @@ it('cold migrates synthetic v2 only after full-root backup, preserving identitie
     });
     expect(result).toMatchObject({
       fromVersion: 2,
-      toVersion: 3,
+      toVersion: 4,
       agentId: 'retained-agent',
       epoch: 'retained-epoch',
       memoryRevision: 9,
@@ -177,7 +177,7 @@ it('cold migrates synthetic v2 only after full-root backup, preserving identitie
     );
     const inspect = new DatabaseSync(f.database);
     try {
-      expect(inspect.prepare('PRAGMA user_version').get()?.['user_version']).toBe(3);
+      expect(inspect.prepare('PRAGMA user_version').get()?.['user_version']).toBe(4);
       expect(
         inspect.prepare('SELECT fingerprint,body FROM commands WHERE id=?').get('old-command'),
       ).toMatchObject({ fingerprint: f.fingerprint, body: JSON.stringify(f.receipt) });

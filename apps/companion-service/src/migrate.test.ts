@@ -75,7 +75,7 @@ it('backs up a synthetic v1 under the real exclusive lock, fences old writers an
     });
     expect(result).toMatchObject({
       fromVersion: 1,
-      toVersion: 3,
+      toVersion: 4,
       agentId: 'original-agent',
       epoch: 'original-epoch',
       memoryRevision: 3,
@@ -84,7 +84,7 @@ it('backs up a synthetic v1 under the real exclusive lock, fences old writers an
       before,
     );
     const oldWriter = new DatabaseSync(file);
-    expect(oldWriter.prepare('PRAGMA user_version').get()?.['user_version']).toBe(3);
+    expect(oldWriter.prepare('PRAGMA user_version').get()?.['user_version']).toBe(4);
     oldWriter.close();
     state = new SqliteState({ dataDirectory: stateRoot });
     const memory = state.memorySnapshot();

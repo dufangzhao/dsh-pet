@@ -4,6 +4,7 @@ import {
   companionAudienceKey,
   sameCompanionReplyRoute,
   isQQDeliveryView,
+  isQQDeliveryAttempt,
   isQQDeliveryPartAccepted,
   makeError,
   QQ_PAGE_MAX_ITEMS,
@@ -15,11 +16,24 @@ import {
 import type {
   CompanionMessage,
   QQDeliveryAttempt,
+  QQDeliveryPart,
+  QQRemoteReceipt,
   QQDeliveryView,
   QQReplyRoute,
 } from '@pet/contracts';
-import type { StateMethodInputs, StateMethodOutputs } from './types.js';
-import { STATE_MAX_RESULT_BYTES } from './types.js';
+import type {
+  StateMethodInputs,
+  StateMethodOutputs,
+  StoredDeliveryExecution,
+  DeliveryExecutionAttempt,
+  DeliveryTaskBinding,
+  DeliveryAttemptFact,
+} from './types.js';
+import {
+  STATE_MAX_RESULT_BYTES,
+  STATE_MAX_EXECUTION_BYTES,
+  STATE_MAX_EXECUTION_ATTEMPTS,
+} from './types.js';
 import { decode, fingerprint, scalar } from './records.js';
 import type { RecordWriter } from './records.js';
 import { assertCleanup, assertVisible, scopeWhere } from './scope.js';
@@ -207,12 +221,348 @@ export function getDelivery(
   assertVisible(delivery.audience, input.scope);
   return delivery;
 }
+function readExecution(db: DatabaseSync, id: string): StoredDeliveryExecution | null {
+  const row = db.prepare('SELECT execution_json FROM qq_deliveries WHERE id=?').get(id);
+  if (!row) throw new StateFailure('unavailable');
+  if (row['execution_json'] === null) return null;
+  if (typeof row['execution_json'] !== 'string') throw new StateFailure('internal');
+  return JSON.parse(row['execution_json']) as StoredDeliveryExecution;
+}
+function executionJson(execution: StoredDeliveryExecution): string {
+  if (
+    execution.attempts.length > STATE_MAX_EXECUTION_ATTEMPTS ||
+    jsonBytes(execution) > STATE_MAX_EXECUTION_BYTES
+  )
+    throw new StateFailure('quota-exceeded');
+  return JSON.stringify(execution);
+}
+function writeExecution(db: DatabaseSync, id: string, execution: StoredDeliveryExecution): void {
+  db.prepare('UPDATE qq_deliveries SET execution_json=? WHERE id=?').run(
+    executionJson(execution),
+    id,
+  );
+}
+function contentHash(part: QQDeliveryPart): string {
+  if (part.content.kind === 'inline-text') return part.content.sha256;
+  if (!part.content.material) throw new StateFailure('not-ready');
+  return part.content.material.sha256;
+}
+function locateAttempt(
+  delivery: QQDeliveryView,
+  partId: string,
+  attemptId: string,
+): { part: QQDeliveryPart; attempt: QQDeliveryAttempt; slot: 'upload' | 'send' } {
+  const part = delivery.parts.find((part) => part.id === partId);
+  if (!part) throw new StateFailure('unavailable');
+  if (part.send?.id === attemptId) return { part, attempt: part.send, slot: 'send' };
+  if (part.upload?.id === attemptId) return { part, attempt: part.upload, slot: 'upload' };
+  throw new StateFailure('unavailable');
+}
+function observedDispatch(attempt: QQDeliveryAttempt | null): boolean {
+  return (
+    !!attempt &&
+    (attempt.phase === 'dispatched' ||
+      attempt.outcome === 'accepted' ||
+      (!!attempt.receipt &&
+        (attempt.receipt.messageId !== null ||
+          attempt.receipt.fileId !== null ||
+          attempt.receipt.transferId !== null ||
+          attempt.receipt.sequence !== null)))
+  );
+}
+
+/** Public progress/recovery must not erase the dispatch proof when phase becomes settled. */
+function syncExecution(
+  writer: RecordWriter,
+  current: QQDeliveryView,
+  next: QQDeliveryView,
+  claim: boolean,
+): void {
+  const execution = readExecution(writer.db, current.id);
+  if (!execution) return;
+  if (execution.target.kind === 'unavailable') {
+    if (
+      next.phase !== 'blocked' ||
+      next.outcome === 'pending' ||
+      next.error === null ||
+      next.parts.some((part) => part.upload || part.send)
+    )
+      fail();
+    return;
+  }
+  const attempts = [...execution.attempts];
+  for (const part of next.parts)
+    for (const slot of ['upload', 'send'] as const) {
+      const attempt = part[slot];
+      if (!attempt) continue;
+      const previous = current.parts.find((item) => item.id === part.id)?.[slot] ?? null;
+      let index = attempts.findIndex(
+        (item) => item.partId === part.id && item.attemptId === attempt.id,
+      );
+      if (index < 0) {
+        if (!claim || previous || attempts.some((item) => item.attemptId === attempt.id)) fail();
+        index = attempts.length;
+        attempts.push({
+          partId: part.id,
+          attemptId: attempt.id,
+          operation: attempt.operation,
+          contentHash: contentHash(part),
+          task: null,
+          dispatchObserved: false,
+        });
+      }
+      const entry = attempts[index];
+      if (
+        !entry ||
+        entry.operation !== attempt.operation ||
+        entry.contentHash !== contentHash(part)
+      )
+        fail();
+      const dispatchObserved =
+        entry.dispatchObserved || observedDispatch(previous) || observedDispatch(attempt);
+      if (
+        (dispatchObserved && !entry.task) ||
+        (dispatchObserved && attempt.outcome === 'cancelled-before-dispatch')
+      )
+        fail();
+      attempts[index] = { ...entry, dispatchObserved };
+    }
+  const updated = { ...execution, attempts };
+  if (fingerprint(updated) !== fingerprint(execution))
+    writeExecution(writer.db, current.id, updated);
+}
+
+export function getDeliveryExecution(
+  db: DatabaseSync,
+  input: StateMethodInputs['getDeliveryExecution'],
+): StoredDeliveryExecution | null {
+  getDelivery(db, input); // Visibility is checked before returning private routing metadata.
+  return readExecution(db, input.id);
+}
+function matchingExecution(
+  writer: RecordWriter,
+  input: DeliveryTaskBinding,
+): {
+  execution: StoredDeliveryExecution;
+  entry: DeliveryExecutionAttempt;
+  delivery: QQDeliveryView;
+  location: ReturnType<typeof locateAttempt>;
+} {
+  const delivery = getDelivery(writer.db, { id: input.id, scope: { kind: 'management' } });
+  const execution = readExecution(writer.db, input.id);
+  if (!execution || execution.target.kind !== 'remote') throw new StateFailure('not-ready');
+  if (
+    fingerprint(execution.target.binding) !== fingerprint(input.binding) ||
+    fingerprint(input.task.owner) !== fingerprint(input.binding.sourceOwner)
+  )
+    fail();
+  const location = locateAttempt(delivery, input.partId, input.attemptId);
+  const entry = execution.attempts.find(
+    (item) => item.partId === input.partId && item.attemptId === input.attemptId,
+  );
+  if (
+    !entry ||
+    entry.operation !== location.attempt.operation ||
+    entry.contentHash !== input.contentHash ||
+    input.contentHash !== contentHash(location.part)
+  )
+    fail();
+  return { execution, entry, delivery, location };
+}
+
+export function bindDeliveryTask(
+  writer: RecordWriter,
+  input: StateMethodInputs['bindDeliveryTask'],
+): StateMethodOutputs['bindDeliveryTask'] {
+  const { execution, entry, delivery, location } = matchingExecution(writer, input);
+  if (
+    delivery.phase !== 'sending' ||
+    delivery.outcome !== 'pending' ||
+    location.attempt.outcome !== 'pending' ||
+    location.attempt.phase === 'settled'
+  )
+    throw new StateFailure('not-ready');
+  if (input.processIdentity) {
+    if (execution.processIdentity) {
+      if (fingerprint(execution.processIdentity) !== fingerprint(input.processIdentity)) fail();
+    } else if (execution.attempts.some((item) => item.task !== null)) {
+      // An already authorized legacy task cannot acquire an OS identity after the fact.
+      fail();
+    }
+  }
+  if (entry.task) {
+    if (fingerprint(entry.task) !== fingerprint(input.task)) fail();
+    return { bound: false };
+  }
+  if (location.attempt.phase !== 'claimed' || entry.dispatchObserved) fail();
+  const attempts = execution.attempts.map((item) =>
+    item === entry ? { ...item, task: input.task } : item,
+  );
+  writeExecution(writer.db, input.id, {
+    ...execution,
+    ...(input.processIdentity && execution.processIdentity == null
+      ? { processIdentity: input.processIdentity }
+      : {}),
+    attempts,
+  });
+  writer.event(
+    'runtime',
+    { deliveryId: input.id, partId: input.partId, attemptId: input.attemptId, taskBound: true },
+    Date.now(),
+    delivery.audience,
+  );
+  return { bound: true };
+}
+
+/** The host supplies verified owned-resource cleanup; no OS proof or effect outcome is inferred here. */
+export function settleDeliveryCleanup(
+  writer: RecordWriter,
+  input: StateMethodInputs['settleDeliveryCleanup'],
+): QQDeliveryView {
+  const { execution, entry, delivery, location } = matchingExecution(writer, input);
+  if (delivery.phase !== 'terminal' || location.attempt.phase !== 'settled')
+    throw new StateFailure('not-ready');
+  if (!execution.processIdentity) throw new StateFailure('not-ready');
+  if (
+    fingerprint(execution.processIdentity) !== fingerprint(input.processIdentity) ||
+    !entry.task ||
+    fingerprint(entry.task) !== fingerprint(input.task)
+  )
+    fail();
+  if (location.attempt.cleanup === 'settled') return delivery;
+  assertCleanup(location.attempt.cleanup, 'settled');
+  const parts = delivery.parts.map((part) =>
+    part.id === input.partId
+      ? { ...part, [location.slot]: { ...location.attempt, cleanup: 'settled' as const } }
+      : part,
+  );
+  // Read the current row in this transaction, never replace it with a caller's stale receipt/fact.
+  return saveDelivery(writer, {
+    ...delivery,
+    parts,
+    updatedAt: Math.max(Date.now(), delivery.updatedAt),
+  });
+}
+
+function mergeFactValue<T>(previous: T | null, next: T | null): T | null {
+  if (previous !== null && next !== null && previous !== next) fail();
+  return previous ?? next;
+}
+function mergeReceipt(
+  previous: QQRemoteReceipt | null,
+  next: QQRemoteReceipt | null,
+): QQRemoteReceipt | null {
+  if (!previous) return next;
+  if (!next) return previous;
+  return {
+    messageId: mergeFactValue(previous.messageId, next.messageId),
+    fileId: mergeFactValue(previous.fileId, next.fileId),
+    transferId: mergeFactValue(previous.transferId, next.transferId),
+    sequence: mergeFactValue(previous.sequence, next.sequence),
+    sequenceAuthoritative: mergeFactValue(
+      previous.sequenceAuthoritative,
+      next.sequenceAuthoritative,
+    ),
+  };
+}
+function refinedOutcome(
+  previous: QQDeliveryAttempt['outcome'],
+  fact: DeliveryAttemptFact,
+): QQDeliveryAttempt['outcome'] {
+  if (previous === 'accepted') return 'accepted';
+  if (previous === 'unknown') return fact.outcome;
+  if (fact.outcome !== 'unknown' && previous !== fact.outcome) fail();
+  return previous;
+}
+function terminalOutcome(
+  parts: readonly QQDeliveryPart[],
+  previous: QQDeliveryView['outcome'],
+): QQDeliveryView['outcome'] {
+  if (previous === 'accepted' || parts.every(sent)) return 'accepted';
+  if (parts.some((part) => part.upload?.outcome === 'unknown' || part.send?.outcome === 'unknown'))
+    return 'unknown';
+  if (parts.some(sent)) return 'partial';
+  if (
+    parts.some((part) =>
+      [part.upload, part.send].some(
+        (attempt) => attempt?.outcome === 'failed' || attempt?.outcome === 'rejected',
+      ),
+    )
+  )
+    return 'failed';
+  return 'cancelled';
+}
+
+export function enrichDeliveryAttempt(
+  writer: RecordWriter,
+  input: StateMethodInputs['enrichDeliveryAttempt'],
+): QQDeliveryView {
+  const { execution, entry, delivery, location } = matchingExecution(writer, input);
+  if (delivery.phase !== 'terminal' || location.attempt.phase !== 'settled')
+    throw new StateFailure('not-ready');
+  if (!entry.task || fingerprint(entry.task) !== fingerprint(input.task)) fail();
+  const fact = input.fact,
+    current = location.attempt;
+  const receipt = mergeReceipt(current.receipt, fact.receipt);
+  const correlationId = mergeFactValue(current.correlationId, fact.correlationId);
+  const wasDispatched = entry.dispatchObserved || observedDispatch(current);
+  if (
+    fact.dispatch === 'not-dispatched' &&
+    (wasDispatched || fact.outcome === 'accepted' || receipt !== null)
+  )
+    fail();
+  if (
+    fact.outcome === 'cancelled-before-dispatch' &&
+    (fact.dispatch !== 'not-dispatched' || wasDispatched || receipt !== null)
+  )
+    fail();
+  if (fact.outcome === 'accepted' && fact.dispatch !== 'dispatched') fail();
+  assertCleanup(current.cleanup, fact.cleanup);
+  const outcome = refinedOutcome(current.outcome, fact);
+  const attempt: QQDeliveryAttempt = {
+    ...current,
+    outcome,
+    correlationId,
+    receipt,
+    cleanup: fact.cleanup,
+    error: fact.error,
+  };
+  if (!isQQDeliveryAttempt(attempt)) throw new StateFailure('invalid-input');
+  const dispatchObserved =
+    wasDispatched || fact.dispatch === 'dispatched' || observedDispatch(attempt);
+  const updatedExecution = {
+    ...execution,
+    attempts: execution.attempts.map((item) =>
+      item === entry ? { ...item, dispatchObserved } : item,
+    ),
+  };
+  const parts = delivery.parts.map((part) =>
+    part.id === input.partId ? { ...part, [location.slot]: attempt } : part,
+  );
+  const next: QQDeliveryView = {
+    ...delivery,
+    parts,
+    outcome: terminalOutcome(parts, delivery.outcome),
+  };
+  if (!isQQDeliveryView(next)) throw new StateFailure('invalid-input');
+  if (
+    fingerprint(updatedExecution) === fingerprint(execution) &&
+    fingerprint(next) === fingerprint(delivery)
+  )
+    return delivery;
+  writeExecution(writer.db, input.id, updatedExecution);
+  // No live-material lookup or execution transition: this only retains historical evidence.
+  return saveDelivery(writer, { ...next, updatedAt: Math.max(Date.now(), delivery.updatedAt) });
+}
+
 export function createDelivery(
   writer: RecordWriter,
   input: StateMethodInputs['createDelivery'],
 ): QQDeliveryView {
   const delivery = input.delivery,
-    digest = fingerprint(delivery);
+    digest = fingerprint(
+      input.execution === undefined ? delivery : { delivery, execution: input.execution },
+    );
   const row = writer.db
     .prepare('SELECT body,fingerprint FROM qq_deliveries WHERE id=?')
     .get(delivery.id);
@@ -226,10 +576,23 @@ export function createDelivery(
     (delivery.phase === 'prepared' && delivery.outcome !== 'pending')
   )
     fail();
+  if (
+    input.execution?.kind === 'unavailable' &&
+    (delivery.phase !== 'blocked' || delivery.outcome === 'pending' || delivery.error === null)
+  )
+    throw new StateFailure('invalid-input');
+  if (
+    input.execution?.kind === 'remote' &&
+    (input.execution.binding.sourceOwner.pluginId !== delivery.route.account.sourcePluginId ||
+      input.execution.binding.sourceOwner.instanceId !== delivery.route.account.instanceId)
+  )
+    fail();
   validateContents(writer, delivery);
+  const execution =
+    input.execution === undefined ? null : executionJson({ target: input.execution, attempts: [] });
   writer.db
     .prepare(
-      'INSERT INTO qq_deliveries(id,audience_key,principal_id,phase,fingerprint,body) VALUES(?,?,?,?,?,?)',
+      'INSERT INTO qq_deliveries(id,audience_key,principal_id,phase,fingerprint,body,execution_json) VALUES(?,?,?,?,?,?,?)',
     )
     .run(
       delivery.id,
@@ -238,6 +601,7 @@ export function createDelivery(
       delivery.phase,
       digest,
       JSON.stringify(delivery),
+      execution,
     );
   writer.event(
     'runtime',
@@ -269,6 +633,11 @@ function transition(
   const current = getDelivery(writer.db, { id: next.id, scope: { kind: 'management' } });
   if (fingerprint(current) === fingerprint({ ...next, updatedAt: current.updatedAt }))
     return current;
+  if (
+    current.phase === 'terminal' &&
+    readExecution(writer.db, current.id)?.target.kind === 'remote'
+  )
+    throw new StateFailure('not-ready');
   if (
     allocatingSequences &&
     (!claim ||
@@ -325,6 +694,7 @@ function transition(
   if (!isQQDeliveryView(next)) throw new StateFailure('invalid-input');
   // Settled receipts remain recordable after local bytes were cleaned up; metadata is retained.
   validateContents(writer, next, false);
+  syncExecution(writer, current, next, claim);
   return saveDelivery(writer, next);
 }
 export function updateDelivery(
@@ -463,6 +833,8 @@ export function claimDeliveryAttempt(
   input: StateMethodInputs['claimDeliveryAttempt'],
 ): StateMethodOutputs['claimDeliveryAttempt'] {
   const current = getDelivery(writer.db, { id: input.id, scope: { kind: 'management' } });
+  if (readExecution(writer.db, input.id)?.target.kind === 'unavailable')
+    throw new StateFailure('unavailable');
   const part = current.parts.find((part) => part.id === input.partId);
   if (!part) throw new StateFailure('unavailable');
   const slot = input.attempt.operation === 'send' ? 'send' : 'upload';
@@ -612,6 +984,7 @@ export function recoverDeliveries(
       updatedAt: now,
       error: unknown ? makeError('unavailable', false) : current.error,
     };
+    syncExecution(writer, current, next, false);
     saveDelivery(writer, next);
     ids.push(current.id);
   }

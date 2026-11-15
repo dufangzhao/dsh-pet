@@ -51,6 +51,11 @@ export * from './desktop-speech.js';
 export * from './companion-origin.js';
 export * from './companion-material.js';
 export * from './companion-qq.js';
+export * from './local-host.js';
+export * from './local-host-process.js';
+export * from './local-host-qq.js';
+export * from './local-host-console.js';
+export * from './desktop-local-host.js';
 export type {
   ResponsesConnectionSettings,
   CompanionModelCredentialView,

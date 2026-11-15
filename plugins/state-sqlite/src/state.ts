@@ -34,7 +34,7 @@ import {
   ownerTaskOrigin,
   scopeWhere,
 } from './scope.js';
-import { STATE_FORMAT_VERSION, upgradeStateV2ToV3 } from './schema.js';
+import { STATE_FORMAT_VERSION, upgradeStateV2ToV3, upgradeStateV3ToV4 } from './schema.js';
 import { decode, scalar, fingerprint, receipt } from './records.js';
 import type { RecordWriter } from './records.js';
 import {
@@ -55,6 +55,10 @@ import {
 import { observe, observations, getObservation, pruneObservations } from './observations.js';
 import {
   createDelivery,
+  getDeliveryExecution,
+  bindDeliveryTask,
+  settleDeliveryCleanup,
+  enrichDeliveryAttempt,
   updateDelivery,
   claimDeliveryAttempt,
   passiveReplyBudget,
@@ -103,7 +107,7 @@ export class SqliteState {
     this.#db = db;
     try {
       const version = scalar(db.prepare('PRAGMA user_version').get(), 'user_version');
-      if (version === 1 || version === 2) throw new StateFailure('not-ready');
+      if (version === 1 || version === 2 || version === 3) throw new StateFailure('not-ready');
       if (version !== 0 && version !== STATE_FORMAT_VERSION) throw new StateFailure('conflict');
       if (version === 0) {
         db.exec(`
@@ -121,6 +125,7 @@ export class SqliteState {
           JSON.stringify({ assistantId: randomUUID(), epoch: randomUUID(), memoryRevision: 0 }),
         );
         upgradeStateV2ToV3(db);
+        upgradeStateV3ToV4(db);
       }
       const identity = decode<{ assistantId: string; epoch: string }>(
         db.prepare('SELECT body FROM identity WHERE singleton=1').get(),
@@ -148,7 +153,7 @@ export class SqliteState {
     return this.#run(() => {
       const value = validateInput(method, input);
       return this.#execute(method, value);
-    }, !['snapshot', 'memorySnapshot', 'events', 'getMessage', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand', 'getInput', 'findInput', 'inputMessage', 'inputNotices', 'getObservation', 'getMaterial', 'findMaterial', 'getDelivery', 'passiveReplyBudget', 'deliveries', 'observations', 'judgmentUsage', 'proactiveReadiness'].includes(method));
+    }, !['snapshot', 'memorySnapshot', 'events', 'getMessage', 'getTask', 'getTaskByExecution', 'getArtifact', 'getCommand', 'getInput', 'findInput', 'inputMessage', 'inputNotices', 'getObservation', 'getMaterial', 'findMaterial', 'getDelivery', 'getDeliveryExecution', 'passiveReplyBudget', 'deliveries', 'observations', 'judgmentUsage', 'proactiveReadiness'].includes(method));
   }
 
   claimJudgment(
@@ -236,6 +241,26 @@ export class SqliteState {
   }
   getMaterial(input: StateMethodInputs['getMaterial']): Result<StateMethodOutputs['getMaterial']> {
     return this.invoke('getMaterial', input);
+  }
+  getDeliveryExecution(
+    input: StateMethodInputs['getDeliveryExecution'],
+  ): Result<StateMethodOutputs['getDeliveryExecution']> {
+    return this.invoke('getDeliveryExecution', input);
+  }
+  settleDeliveryCleanup(
+    input: StateMethodInputs['settleDeliveryCleanup'],
+  ): Result<StateMethodOutputs['settleDeliveryCleanup']> {
+    return this.invoke('settleDeliveryCleanup', input);
+  }
+  bindDeliveryTask(
+    input: StateMethodInputs['bindDeliveryTask'],
+  ): Result<StateMethodOutputs['bindDeliveryTask']> {
+    return this.invoke('bindDeliveryTask', input);
+  }
+  enrichDeliveryAttempt(
+    input: StateMethodInputs['enrichDeliveryAttempt'],
+  ): Result<StateMethodOutputs['enrichDeliveryAttempt']> {
+    return this.invoke('enrichDeliveryAttempt', input);
   }
   createDelivery(
     input: StateMethodInputs['createDelivery'],
@@ -384,6 +409,10 @@ export class SqliteState {
       getMaterial: (value) => getMaterial(this.#db, value),
       findMaterial: (value) => findMaterial(this.#db, value),
       createDelivery: (value) => createDelivery(this.#writer(), value),
+      getDeliveryExecution: (value) => getDeliveryExecution(this.#db, value),
+      bindDeliveryTask: (value) => bindDeliveryTask(this.#writer(), value),
+      settleDeliveryCleanup: (value) => settleDeliveryCleanup(this.#writer(), value),
+      enrichDeliveryAttempt: (value) => enrichDeliveryAttempt(this.#writer(), value),
       updateDelivery: (value) => updateDelivery(this.#writer(), value),
       claimDeliveryAttempt: (value) => claimDeliveryAttempt(this.#writer(), value),
       getDelivery: (value) => getDelivery(this.#db, value),
