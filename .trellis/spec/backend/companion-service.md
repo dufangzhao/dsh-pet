@@ -11,7 +11,7 @@ Use this spec for `packages/companion-runtime`, `apps/companion-service`, and th
 - `runtime.message(command)`, `startTask(command, signal?)`, `stopTask(taskId,commandId)` return `CompanionCommandReceipt`. Persona/memory owner methods, private projection ports and legacy readonly retry semantics are maintained in [persona-memory.md](persona-memory.md#2-signatures); `remember(command)` is not a new blind-write API.
 - `runtime.state<M>(method: M, input: StateMethodInputs[M], signal?)` unwraps a **provider payload Result** separately from the host transport Result.
 - `withSourceAuthority(host, sourcePluginId, permissions, operation, options?)` creates a tracked source-owner task, acquires leases, preserves private return/error objects, and awaits actual settlement.
-- State capability `companion.state@1` / provider `sqlite`: the exact method/input/output catalog is [types.ts](../../../plugins/state-sqlite/src/types.ts). [M6 contracts](qq-platform-entry.md) cover scoped reads, input-owned contexts/work, materials, native QQ and delivery; public metadata never substitutes for private host authority.
+- State capability `companion.state@1` / provider `sqlite`: the exact method/input/output catalog is [types.ts](../../../plugins/state-sqlite/src/types.ts). [QQ contracts](qq-platform-entry.md) cover scoped reads, input-owned contexts/work, materials, native sources and State4 execution facts; serialized metadata never substitutes for private host authority.
 - Execution capability `execution.javascript@1` / provider `docker`: `execute(task,input)` and `reconcile(task,{after?,limit?})`.
 - Harness capability `companion.harness@1`: `accept`, `status`, `stopForeground`. The Cortico factory binds product ports; its generic unbound default is deliberately unavailable.
 
@@ -29,7 +29,7 @@ A command ID identifies one submitted intent. Reuse it for an uncertain retry of
 
 `FileConfigStore` remains the only configuration CAS owner. Storage identity is **only** `{pluginId,instanceId}`: do not pass an `OwnerRef` containing generation into exact storage-identity validation or source-trust lookups.
 
-The state provider uses `node:sqlite`, current `user_version=3`; formats1/2 require explicit cold backup/migration. [M6 scope and migration](qq-platform-entry.md#canonical-identity-visibility-and-migration) owns the added scoped columns/composite fact identity and input/material/observation/delivery/judgment ledgers. DELETE journal + EXCLUSIVE locking + synchronous FULL still establishes one writer. State, dedup receipt and event commit in the same synchronous transaction; no network/tool work runs inside it.
+The state provider uses `node:sqlite`, current `user_version=4`; formats1/2/3 require explicit stopped, verified full-root backup and cold migration. [QQ scope and migration](qq-platform-entry.md#canonical-identity-visibility-and-migration) owns the scoped records and nullable private execution binding. DELETE journal + EXCLUSIVE locking + synchronous FULL still establishes one writer. State, dedup receipt and event commit in the same synchronous transaction; no network/tool work runs inside it. Legacy absent-execution fingerprints remain unchanged; normal open never upgrades an old root.
 
 Task `execution_id` is unique. The runtime reserves its deterministic execution identity **before** SQL can expose the accepted task, so a stop racing the transaction can mark the pending admission. It writes running state before launching external execution. Every launched handle is captured and awaited even on error.
 
@@ -40,6 +40,8 @@ Task `execution_id` is unique. The runtime reserves its deterministic execution 
 The execution provider persists protected `.records/<jobId>.json` outside container mounts: full owner token, execution/job/task IDs, exact container identity and mounts, request hash, outputs/config and terminal receipt. Reconcile pages use lexical job UUID cursors, default4/max8 records and 48KiB payload budget. Inspect every outstanding record before new admission. Cleanup requires exact full IDs, labels and mounts; never delete by name prefix.
 
 A recovered `unknown` task may receive a verified exit code/logs/artifact **without becoming completed**. The state provider must accept same-status enrichment and remain idempotent. Completion requires real exitCode0; repeated reconciliation must not change event cursor or duplicate files/effects.
+
+QQ remote attempts use the separate [terminal fact-enrichment contract](qq-platform-entry.md#frozen-delivery-quota-and-audio). A later authenticated receipt may refine the same bound attempt; it never authorizes another claim, peer selection or voice execution. Original process identity is captured once with task binding, never first-filled from a later report. Verified OS/resource recovery uses the cleanup-only transaction, which preserves current effect facts instead of writing back a stale read.
 
 ### Authority and lifetime
 
@@ -63,6 +65,7 @@ An activating Harness can receive a read-only owner bootstrap only through the h
 | Invalid path/symlink/hardlink or artifact containment failure | Reject; no read/export outside assigned namespace |
 | Unconfirmed cleanup | `unknown` / `pending_restart`; not clean cancellation |
 | Service crash without terminal evidence | Recover uncertainty and verified evidence; never rerun old code |
+| Format1/2/3 normal open or unverified migration backup | Refuse; use the stopped full-root migration to4, never patch a live store |
 | Projection/Harness unavailable after completed work | Keep committed work result; report projection failure separately |
 
 Inputs and provider results respect the existing 64KiB JSON boundary. State defaults to 60KiB; final snapshot aggregation reserves its actual model/agent/plugin/Result envelope before passing optional `snapshot.byteBudget` to the same state projector (see [single-budget rules](model-connections.md)). Facts and omission markers remain authoritative. Declared artifact names accept the execution provider's 240-character path budget. Times are Unix milliseconds; monotonic supervisor deadlines are not persisted across processes.
@@ -80,6 +83,7 @@ Inputs and provider results respect the existing 64KiB JSON boundary. State defa
 - [Service protocol probes](../../../qa/probes/companion-service.test.mjs): authentication, SSE, restart/facts, alternate Harness, view withdrawal and authenticated artifact download.
 - [Source authority tests](../../../packages/companion-runtime/src/source-authority.test.ts) and [model transport tests](../../../apps/companion-service/src/model-client.test.ts): missing grants, revoke/fingerprint changes, actual socket cancellation/native partials/private options, no credential persistence.
 - [State recovery test](../../../plugins/state-sqlite/src/recovery.test.ts): unknown-to-unknown enrichment and duplicate idempotence. State package tests also cover transaction rollback and real cross-process writer exclusion.
+- [State4 cold migration](../../../apps/companion-service/src/migrate-v4.test.ts), alongside the [format1](../../../apps/companion-service/src/migrate.test.ts) and [format2](../../../apps/companion-service/src/migrate-v3.test.ts) fixtures: verified full-root backup, old IDs/fingerprints/receipts unchanged, legacy private binding remains NULL, no historical replay, and transactional column/version rollback.
 - Cloud plugin Docker tests verify actual process/files/resources/ownership and crash windows. Offline tests must explicitly skip Docker rather than silently fake it.
 - Client tests cover damaged/unsupported DTOs, uncertain retry and actual stream-liveness cleanup. Ordinary JSON requests have a20s abort deadline. Any failed refresh keeps the last snapshot but transitions offline; a failed/ended stream also leaves live state before awaiting reconciliation. Any stream byte, including a heartbeat comment, renews the 45s watchdog; expiry aborts/cancels/releases the reader without polling, and explicit close does not report a timeout. Connected-browser checks cover keyboard, responsive layout, target stop, download and offline/reconnect truth.
 - Run the complete root quality gate; Linux portability fixes must retain Windows/security assertions, not skip them.

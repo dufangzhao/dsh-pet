@@ -26,6 +26,7 @@
 | [人设与主动记忆](37-persona-and-memory.md) | 人设、事实编辑与明确写入 | 持久配置与范围化事实 |
 | [共享语音输入](38-shared-voice-input.md) / [语音输出](39-shared-speech-output.md) | ASR、独立声音提供者与桌宠播放 | 各自的运行和验证边界 |
 | [QQ 接入](40-qq-platform-entry.md) | 双协议、名单/主体、主动判断、四类媒体、投递与部署 | 完整 Web 管理与桌面只读入口；受控验收不等于真实账号验证 |
+| [Windows 开发交接](41-windows-development-handoff.md) | 新 Windows 开发机的安装、PowerShell 启动、服务连接和当前复测 | 本机重装 Windows 依赖，源码与私有服务数据分开交接 |
 | [ADR-0003](adr/0003-mit-license.md) | 本项目MIT与第三方材料边界 | 已采纳 |
 | [总体架构草案](05-architecture-overview.md) | 职责分层、能力工作流与验证项 | 方向已定，技术未冻结 |
 | [ADR-0004](adr/0004-capability-centered-host.md) | 能力/插件中心，而非固定Agent中心 | 已采纳 |

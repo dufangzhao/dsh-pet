@@ -14,8 +14,9 @@
 
 | File                                               | Description                                       | When to Read                       |
 | -------------------------------------------------- | ------------------------------------------------- | ---------------------------------- |
-| [companion-service.md](./companion-service.md) | Executable service/state/worker/Harness contracts | Headless service and feature plugins |
-| [qq-platform-entry.md](./qq-platform-entry.md) | Canonical M6 scoped admission, input-owned Core/work, materials, native QQ, judgment and delivery | QQ entry and cross-layer scope/authority changes |
+| [companion-service.md](./companion-service.md) | Executable service/State4/worker/Harness contracts | Headless service and feature plugins |
+| [qq-platform-entry.md](./qq-platform-entry.md) | Scoped QQ admission, shared native sources, materials and State4 delivery facts | QQ entry and cross-layer scope/authority changes |
+| [local-plugin-host.md](./local-plugin-host.md) | Independent daemon, native console, remote task authority and portable runtime contracts | Local-host bridge, desktop handoff and package lifecycle changes |
 | [model-connections.md](./model-connections.md) | Native connector authority, model configuration/checks and snapshot budget | Model-connection plugins and owner APIs |
 | [desktop-companion.md](./desktop-companion.md) | Shared Main/preload client, source lifetime, saved facts and native publication | Desktop service entry and connection/lifecycle changes |
 | [persona-memory.md](./persona-memory.md) | Canonical persona application, scoped fact authority, CAS/replay and cold migration | Persona/memory APIs, Harness context and format upgrades |

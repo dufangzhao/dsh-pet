@@ -1,0 +1,13 @@
+{"file":".trellis/spec/shared/index.md","reason":"Check shared project constraints and actual supported-target evidence."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Verify no new plugin standard, fake owner/task, blanket trust or secret/control-plane leak."}
+{"file":".trellis/spec/backend/index.md","reason":"Check canonical backend declarations, errors and relevant layer guidelines."}
+{"file":".trellis/spec/backend/companion-service.md","reason":"Verify one server State/Agent, stopped full-root migrations, no history or effect replay."}
+{"file":".trellis/spec/backend/qq-platform-entry.md","reason":"Audit participant scope, both protocols/all media, immutable native basis and true effect receipts."}
+{"file":".trellis/spec/backend/desktop-companion.md","reason":"Verify personal-client regressions and captured target/connection ownership remain intact."}
+{"file":".trellis/spec/frontend/index.md","reason":"Check existing UI architecture, accessibility and actual behavioral acceptance."}
+{"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Check source/binding boot, projection and Config CAS fences; no late-result retargeting."}
+{"file":".trellis/spec/frontend/qq-management.md","reason":"Review secret drafts, local/server editing owners, real byte downloads and truthful status."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Challenge duplicate host/controller/state/queue/auth layers before accepting a new abstraction."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Follow effects across real process/network/State/material/native/UI seams, not only DTO mocks."}
+{"file":".trellis/tasks/11-13-local-plugin-host-qq-bridge/research/index.md","reason":"Retrieve relevant source-backed evidence and the corrected factory-exposed openWeb finding."}
+{"file":".trellis/tasks/11-13-local-plugin-host-qq-bridge/research/transport-reuse.md","reason":"Verify static method/size/credit limits, real task provenance and cleanup uncertainty under partition."}

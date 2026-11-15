@@ -42,6 +42,10 @@ Coopanion仅作为交互、设置台与架构参考，本阶段不二开，见[A
 本地 Git 主分支为 main；实现阶段按工作包审查、验证并使用约定式提交。
 不提交密钥、个人聊天、录音、模型权重、依赖目录与临时截图。公开仓库：[dufangzhao/dsh-pet](https://github.com/dufangzhao/dsh-pet)，主分支为 main。
 
+## 在 Windows 继续开发
+
+另一台 Windows 机器的环境安装、PowerShell 启动命令、已有服务连接和当前验收入口统一见 [Windows 开发交接](docs/41-windows-development-handoff.md)。源码从 GitHub 获取；依赖与 Windows Electron 在新机器重新安装，服务数据与密钥不随 Git 迁移。
+
 ## 开发检查
 
 现有桌面曾在 Node 24.18.0 验证；新文字服务与本轮完整工作区检查使用 Node 26.13.0 + pnpm 11.24.0。安装依赖时默认不运行第三方构建脚本；原生依赖逐项审阅。
