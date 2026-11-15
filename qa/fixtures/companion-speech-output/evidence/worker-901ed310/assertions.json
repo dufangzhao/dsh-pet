@@ -1,0 +1,50 @@
+{
+  "basis": "Assertions in the hash-recorded runner completed with actual exit 0; these are the verified assertion-window facts, not a separate packet capture or device observation.",
+  "managedJob": "bash-6bf9dd1a68054276",
+  "runnerSha256": "aaf6037a91715a7b02fff918366689a8af2689b501e877db05e1e3cec3db8442",
+  "scopeSha256BeforeAndAfter": "901ed310f6a41d52b5daf3129e3a78070b24985f748793ac4231a407d0d1800e",
+  "coreDuringSpeech": {
+    "heldInferenceOrdinal": 3,
+    "requestCount": 3,
+    "originalFlightDone": false,
+    "originalFlightSignalAborted": false,
+    "canonicalMessagesUnchanged": true
+  },
+  "asrDuringSpeech": {
+    "nativeRequestCount": 1,
+    "abortedResponseCount": 0,
+    "phase": "transcribing",
+    "laterReleasedPhase": "final",
+    "laterCleanup": "settled",
+    "transcriptSubmittedAsUserMessage": false
+  },
+  "speech": {
+    "logicalBeginOperations": 2,
+    "segmentReserveOperations": 2,
+    "binaryGetOperations": 2,
+    "controlledNativeRequestCount": 2,
+    "completedDeliveries": 1,
+    "cancelledDeliveries": 1,
+    "abortedNativeResponses": 1,
+    "retries": 0,
+    "completedFrames": 9600,
+    "completedBytes": 19200,
+    "pcmSha256": "0566839f5260aa06098367a73967cb2de276a8bfeddedf9fae06622ecbf6acf1",
+    "codecDeclaration": "synthetic pcm-s16le / 24000 Hz / mono; not measured device output"
+  },
+  "workDuringSpeech": {
+    "sameTaskExecutionJobAndContainer": true,
+    "inspectOwnedRunning": true,
+    "heartbeatAdvanced": true,
+    "effectExactlyOnce": true,
+    "artifactSha256": "e16003e8ee5e314f97adc58ad71ef65fc95d2ed202637e31017d1d6f82b93088"
+  },
+  "cleanup": {
+    "report": "settled",
+    "independentOwnedContainerInspection": "absent",
+    "durableTaskStatus": "completed",
+    "cloudResultExitCode": 0,
+    "cloudResultSettled": true
+  },
+  "scopeExclusions": ["apps/desktop", "renderer source and playback", "Electron/native acceptance", "physical devices", "external TTS or ASR", "whole-project freeze"]
+}

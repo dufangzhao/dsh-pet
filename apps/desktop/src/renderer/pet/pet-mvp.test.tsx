@@ -7,46 +7,33 @@ import { petPresentationStyle } from './use-pet-settings.js';
 
 const tools: PetToolsProps = {
   register: null,
-  hover: ['chat', 'voice'],
+  hover: ['chat'],
   chatOpen: false,
   canChat: true,
-  canRecord: true,
-  recording: false,
-  pending: false,
-  talkKeyLabel: 'F8',
   onChat: () => {},
-  onVoice: () => {},
 };
 
-describe('悬停工具反映已配置的真实能力', () => {
-  it('默认只有聊天和语音两个圆形按钮，快捷键取自快照', () => {
+describe('悬停工具只画服务里真有的入口', () => {
+  it('只有文字聊天这一枚圆形按钮，状态由连接决定', () => {
     const html = renderToStaticMarkup(<PetTools {...tools} />);
-    expect(html.match(/<button/g)).toHaveLength(2);
-    expect(html).toContain('F8');
-    expect(html).not.toContain('右 Alt');
-    expect(html).not.toContain('按住说话');
-    expect(html).not.toContain('轻按切换');
-    expect(renderToStaticMarkup(<PetTools {...tools} talkKeyLabel="右 Alt" />)).toContain(
-      '>右Alt<',
-    );
+    expect(html.match(/<button/g)).toHaveLength(1);
+    expect(html).toContain('pet-chat');
     expect(html).toContain('aria-expanded="false"');
-    expect(html).toContain('aria-pressed="false"');
+    // 共享组合里没有本机语音输入：不画一个按不动的麦克风。
+    expect(html).not.toContain('pet-mic');
+    expect(html).not.toContain('按住说话');
   });
-  it('不显示未选中的入口，不把未就绪的麦克风当成可用', () => {
-    const chat = renderToStaticMarkup(<PetTools {...tools} hover={['chat']} />);
-    expect(chat).toContain('pet-chat');
-    expect(chat).not.toContain('pet-mic');
-    const unavailable = renderToStaticMarkup(<PetTools {...tools} canRecord={false} />);
-    expect(unavailable).toMatch(/<button[^>]*data-testid="pet-mic"[^>]*disabled/);
+
+  it('没有连接通道时聊天入口禁用，并说明原因', () => {
+    const unavailable = renderToStaticMarkup(<PetTools {...tools} canChat={false} />);
+    expect(unavailable).toMatch(/<button[^>]*data-testid="pet-chat"[^>]*disabled/);
+    expect(unavailable).toContain('没有连接服务的通道');
   });
-  it('正在录音时保留明确的结束入口，等待回执时禁用重复请求', () => {
-    const recording = renderToStaticMarkup(<PetTools {...tools} canRecord={false} recording />);
-    expect(recording).toContain('aria-pressed="true"');
-    expect(recording).toContain('结束录音并发送');
-    expect(recording).not.toMatch(/<button[^>]*data-testid="pet-mic"[^>]*disabled/);
-    expect(renderToStaticMarkup(<PetTools {...tools} recording pending />)).toMatch(
-      /<button[^>]*data-testid="pet-mic"[^>]*disabled/,
-    );
+
+  it('悬停配置里没有 chat 时整条工具不出现', () => {
+    const html = renderToStaticMarkup(<PetTools {...tools} hover={[]} />);
+    expect(html).not.toContain('pet-chat');
+    expect(html.match(/<button/g)).toBeNull();
   });
 });
 

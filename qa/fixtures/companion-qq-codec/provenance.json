@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "silkVersion": "3.7.1",
+  "silkGitHead": "5971995be3ce05d4a1bf820fdf9d7ccdc942e945",
+  "silkIntegrity": "sha512-mXPwLRtZxrYV3TZx41jMAeKc80wvmyrcXIcs8HctFxK15Ahz2OJQENYhNgEPeCEOdI6Mbx1NxQsqxzwc3DKerw==",
+  "ffmpegVersion": "7.1.2",
+  "ffmpegSigningFingerprint": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+  "baseImageId": "sha256:a9975a0df83b07f6ef3a57098174a8303cb0e322570e1d2f175ceba33f417a72",
+  "baseImageDigest": "1panel/deepseek-harness@sha256:72c58e3b343cce588a05d0d107abb362f6b4c52eb313d54afe3a28ef4cef6d7f",
+  "baseNode": "24.21.0",
+  "results": [
+    {
+      "name": "silk-wasm-3.7.1.tgz",
+      "url": "https://registry.npmjs.org/silk-wasm/-/silk-wasm-3.7.1.tgz",
+      "bytes": 105403,
+      "sha256": "668087436d9a7160544eaefd256ce774697fb39c4ff1985897c5bb9c45580df0"
+    },
+    {
+      "name": "ffmpeg-7.1.2.tar.xz",
+      "url": "https://ffmpeg.org/releases/ffmpeg-7.1.2.tar.xz",
+      "bytes": 11030368,
+      "sha256": "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304"
+    },
+    {
+      "name": "ffmpeg-7.1.2.tar.xz.asc",
+      "url": "https://ffmpeg.org/releases/ffmpeg-7.1.2.tar.xz.asc",
+      "bytes": 520,
+      "sha256": "29e6cf9b9d40ae17c7308c96543257ce49bcb00fedd26b77433a21a38388e6f4"
+    },
+    {
+      "name": "ffmpeg-devel.asc",
+      "url": "https://ffmpeg.org/ffmpeg-devel.asc",
+      "bytes": 1709,
+      "sha256": "397b3becedcd5a98769967ff1ff8501ddc89f8368b8f766e4701377d7dbaabe5"
+    },
+    {
+      "name": "lame_3.100.orig.tar.gz",
+      "url": "https://deb.debian.org/debian/pool/main/l/lame/lame_3.100.orig.tar.gz",
+      "bytes": 1524133,
+      "sha256": "ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
+    },
+    {
+      "name": "lame_3.100-6.dsc",
+      "url": "https://deb.debian.org/debian/pool/main/l/lame/lame_3.100-6.dsc",
+      "bytes": 2168,
+      "sha256": "6a402771625fa80785a2b904697ba9c7e74a1ee4fa536354e9e88f08e2a4073b"
+    },
+    {
+      "name": "silk-sdk-license.txt",
+      "url": "https://raw.githubusercontent.com/idranme/silk-wasm/5971995be3ce05d4a1bf820fdf9d7ccdc942e945/binding/libSilkCodec/silk/LICENSE",
+      "bytes": 1291,
+      "sha256": "2605f550752714dccc2b9f38c5951582937b1f1e957bc0d0b51bad5a0ac5f6b6"
+    }
+  ],
+  "build": {
+    "version": 1,
+    "ffmpeg": "7.1.2",
+    "lame": "3.100",
+    "ffmpegSignature": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+    "flags": [
+      "--prefix=/codec/ffmpeg",
+      "--disable-shared",
+      "--enable-static",
+      "--disable-x86asm",
+      "--disable-doc",
+      "--disable-debug",
+      "--disable-network",
+      "--disable-autodetect",
+      "--disable-everything",
+      "--disable-iconv",
+      "--disable-zlib",
+      "--disable-bzlib",
+      "--disable-lzma",
+      "--pkg-config=/usr/bin/false",
+      "--enable-ffmpeg",
+      "--enable-ffprobe",
+      "--enable-avcodec",
+      "--enable-avformat",
+      "--enable-avfilter",
+      "--enable-swresample",
+      "--enable-protocol=file,pipe",
+      "--enable-demuxer=wav,mp3,ogg,mov,aac,flac",
+      "--enable-decoder=pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le,mp3float,mp2float,aac,opus,vorbis,flac,alac",
+      "--enable-parser=aac,mpegaudio,opus,vorbis,flac",
+      "--enable-filter=aresample,aformat,anull",
+      "--enable-encoder=pcm_s16le,pcm_f32le,aac,opus,vorbis,flac,libmp3lame",
+      "--enable-libmp3lame",
+      "--enable-muxer=wav,pcm_s16le,pcm_f32le,adts,ogg,flac,mp4,mp3",
+      "--extra-cflags=-I$QA_ROOT/build-prefix/include -ffile-prefix-map=$QA_ROOT/sources=/usr/src/codec -fno-ident",
+      "--extra-ldflags=-static -L$QA_ROOT/build-prefix/lib"
+    ],
+    "files": [
+      {
+        "name": "ffmpeg",
+        "bytes": 4815272,
+        "sha256": "1042a1f0b098c6b44905e3085cf1a9bf05dbfc3a51939a3c310007b102fa3327"
+      },
+      {
+        "name": "ffprobe",
+        "bytes": 4708040,
+        "sha256": "ef43beaec555f07b10b8b3499478cab15cac03bfb3e07991c7f6642fe1f43a6b"
+      }
+    ],
+    "compiler": "gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
+  }
+}

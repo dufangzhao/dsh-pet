@@ -1,0 +1,580 @@
+{
+  "version": 1,
+  "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+  "manifestSha256": "2a6fa69284522e45cf73c4c2c9ba9fc2f401ac568d7d178dcdb1afb08f98c0e7",
+  "success": true,
+  "activeJobs": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "cases": [
+    {
+      "name": "actual-sandbox-mount-env-cgroup-cpu-pid",
+      "env": [
+        "HOME",
+        "LANG",
+        "UV_THREADPOOL_SIZE"
+      ],
+      "runtime": "EROFS",
+      "input": "EROFS",
+      "network": [
+        "lo"
+      ],
+      "memory": "536870912",
+      "pids": "32",
+      "cpu": "10000 100000",
+      "cpuStat": "usage_usec 197403\nuser_usec 126902\nsystem_usec 70501\nnr_periods 20\nnr_throttled 18\nthrottled_usec 2167867\n",
+      "rejected": 36
+    },
+    {
+      "name": "wav-actual-decode-f32",
+      "frames": 16000,
+      "sha256": "afde5842f4396c9e378efd085883d2eb48ba8a633b9ee87c025e86df2cdfb229"
+    },
+    {
+      "name": "actual-mp3-decode",
+      "encodedBytes": 3464,
+      "frames": 16000,
+      "sha256": "eeae37d6c3e8fa35912fa9888a6add4d181e8566271d54a40b6e400b440ba1b6"
+    },
+    {
+      "name": "actual-aac-decode",
+      "encodedBytes": 6903,
+      "frames": 17408,
+      "sha256": "e84e186279de1647d7f25704fc9818bd105a4c959aa5feb25532e2ec564ae51e"
+    },
+    {
+      "name": "actual-m4a-decode",
+      "encodedBytes": 7678,
+      "frames": 16384,
+      "sha256": "ef70977f4ff5c6336cb84f42ed716fa9593df9cbdbfaf44128bada4d7dff497c"
+    },
+    {
+      "name": "actual-flac-decode",
+      "encodedBytes": 15008,
+      "frames": 16000,
+      "sha256": "afde5842f4396c9e378efd085883d2eb48ba8a633b9ee87c025e86df2cdfb229"
+    },
+    {
+      "name": "actual-vorbis-decode",
+      "encodedBytes": 5210,
+      "frames": 16000,
+      "sha256": "5ade6c56f021b607e9f4d147f0ed3abc68f40f95fbe3698ba671de7e9e41b491"
+    },
+    {
+      "name": "actual-opus-decode",
+      "encodedBytes": 6409,
+      "frames": 16000,
+      "sha256": "163f375404a90656f9144744d3b11e0df398f6720bfdd6434795485afb0f2da6"
+    },
+    {
+      "name": "120s-exact-nonoverlap-six-spans",
+      "frames": 1920000,
+      "bytes": 7680000,
+      "spans": [
+        {
+          "startFrame": 0,
+          "frames": 320000,
+          "sha256": "ee58e8709a517ce01937d7884277051d398519fd052db867fe938de9345bc08d"
+        },
+        {
+          "startFrame": 320000,
+          "frames": 320000,
+          "sha256": "69f36289a5e771a4732103ebb34a42d17494aea1df020e1dde9a786bc94bdc0b"
+        },
+        {
+          "startFrame": 640000,
+          "frames": 320000,
+          "sha256": "9f0888025430fe2a7c421b3fa7163ef68f87c2a21ec82a922afd0399220e038e"
+        },
+        {
+          "startFrame": 960000,
+          "frames": 320000,
+          "sha256": "672b02096dd347d6ac0009d833a2e5cc53cea77398b2dcb23aaec718bb971c5b"
+        },
+        {
+          "startFrame": 1280000,
+          "frames": 320000,
+          "sha256": "dcd2d6582bb64c7b707f16a70ccd5783dfec5b27d374ff2b58a93f11c370e156"
+        },
+        {
+          "startFrame": 1600000,
+          "frames": 320000,
+          "sha256": "d16e9cda2a0d254c5928019880c9c289f5eff9e5b65fc546f49f130eacd5e2ad"
+        }
+      ]
+    },
+    {
+      "name": "actual-24k-pcm-120s-silk-encode-and-validated-decode",
+      "frames": 2880000,
+      "bytes": 412546,
+      "sha256": "9875953c6e389bccf52cc4be34d33a694ab0dc31e15ff86cab3b91edd4672a25"
+    },
+    {
+      "name": "silk-120s-complete-decode-six-real-content-regions",
+      "frames": 1920000,
+      "tones": [
+        220,
+        293,
+        366,
+        439,
+        512,
+        585
+      ]
+    },
+    {
+      "name": "unknown-format",
+      "code": "audio-format",
+      "consumed": false
+    },
+    {
+      "name": "truncated-silk",
+      "code": "audio-format",
+      "consumed": false
+    },
+    {
+      "name": "odd-raw-pcm",
+      "code": "audio-format",
+      "consumed": false
+    },
+    {
+      "name": "duration-over-120-no-successful-truncation",
+      "code": "quota-exceeded",
+      "consumed": false
+    },
+    {
+      "name": "actual-memory-cgroup-rejection",
+      "oomKilled": true,
+      "exitCode": 137
+    },
+    {
+      "name": "actual-file-size-rlimit",
+      "consumed": false,
+      "exitCode": 1
+    },
+    {
+      "name": "cancel-joins-actual-running-container",
+      "containerId": "93ea6e4c01a7da5ee2722fde5123fc12e28abe651f8d1a692ccd4d6854cda337",
+      "pidObserved": 2322551,
+      "exitCode": 137
+    }
+  ],
+  "receipts": [
+    {
+      "id": "e3686943-0718-4cf8-9c1d-4e1b962488a6",
+      "mode": "decode",
+      "containerId": "6b649166c460516a74bb2a883dbef71cef5d314ea6bc724ba2437b8973931a26",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 32044,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16000,
+        "durationMs": 1000,
+        "sizeBytes": 64000,
+        "sha256": "afde5842f4396c9e378efd085883d2eb48ba8a633b9ee87c025e86df2cdfb229",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "15699ba9-2736-441b-a68d-7c7d2153b13a",
+      "mode": "decode",
+      "containerId": "a9ff7278635f41590ed417bff80a8f38731a898914d4538b1e68ef874d9845fb",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 3464,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16000,
+        "durationMs": 1000,
+        "sizeBytes": 64000,
+        "sha256": "eeae37d6c3e8fa35912fa9888a6add4d181e8566271d54a40b6e400b440ba1b6",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "a255267b-7e70-42ac-8896-c4608135e349",
+      "mode": "decode",
+      "containerId": "a80b5ef0e9985637fa8856d756adb8861029e875dfe05181f155d203b9e6f05e",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 6903,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 17408,
+        "durationMs": 1088,
+        "sizeBytes": 69632,
+        "sha256": "e84e186279de1647d7f25704fc9818bd105a4c959aa5feb25532e2ec564ae51e",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 17408
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "35b60516-fff5-4933-be21-55c6651b4e9b",
+      "mode": "decode",
+      "containerId": "b2cfefbea42f916e6c148f2ef138aaa15aaee808b1c218657e7c3e734347c584",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 7678,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16384,
+        "durationMs": 1024,
+        "sizeBytes": 65536,
+        "sha256": "ef70977f4ff5c6336cb84f42ed716fa9593df9cbdbfaf44128bada4d7dff497c",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16384
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "627309b3-683b-4145-865e-6bc8059d80d2",
+      "mode": "decode",
+      "containerId": "f86c90c2c2deb66d670bdab4183233bd65d4ee50638eabc48cbc178d2feceb40",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 15008,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16000,
+        "durationMs": 1000,
+        "sizeBytes": 64000,
+        "sha256": "afde5842f4396c9e378efd085883d2eb48ba8a633b9ee87c025e86df2cdfb229",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "7c793165-a021-4c51-ab5f-7c233e6cce51",
+      "mode": "decode",
+      "containerId": "181d97202ac622a102e17cb338f10f4ca15c5bc57574432b4a75aa72e5dd6a87",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 5210,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16000,
+        "durationMs": 1000,
+        "sizeBytes": 64000,
+        "sha256": "5ade6c56f021b607e9f4d147f0ed3abc68f40f95fbe3698ba671de7e9e41b491",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "68e29d84-fde4-4793-bdb0-6033c180fa2a",
+      "mode": "decode",
+      "containerId": "a4d4bbc7fef1dbd1c6645b372aff679e061d19c326a49074bd4aaa973a0c0c8b",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 6409,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16000,
+        "durationMs": 1000,
+        "sizeBytes": 64000,
+        "sha256": "163f375404a90656f9144744d3b11e0df398f6720bfdd6434795485afb0f2da6",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "bff6a558-fbe9-4f36-b8da-4cd1fd8320ed",
+      "mode": "decode",
+      "containerId": "9d860a9b0585ccb2fd463fe7e26c67893313074a7c25f8f1421daad67562f442",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 3840044,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 1920000,
+        "durationMs": 120000,
+        "sizeBytes": 7680000,
+        "sha256": "4c922623da42c9bdadfb1036ce4c85c72d4d82399293310b3fa6fde315aeddc8",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 320000
+          },
+          {
+            "startFrame": 320000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 640000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 960000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 1280000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 1600000,
+            "frames": 320000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "db49eb2c-1956-423d-bf84-27c3faa2ada9",
+      "mode": "encode",
+      "containerId": "3c77d652da68a9c5c7d3841c9afe1ecbdaf07e285d5abf9dbb97af3de3467838",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 5760000,
+      "output": {
+        "encoding": "tencent-silk-v3",
+        "sampleRate": 24000,
+        "channels": 1,
+        "frames": 2880000,
+        "durationMs": 120000,
+        "sizeBytes": 412546,
+        "sha256": "9875953c6e389bccf52cc4be34d33a694ab0dc31e15ff86cab3b91edd4672a25",
+        "spans": []
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "776d45dd-7159-4db5-b1e0-8d6535d0b353",
+      "mode": "decode",
+      "containerId": "37a10a8b020b03aab2f5cb2327653a40fb20050e2af3dfe6e3be0daeda043b03",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 412546,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 1920000,
+        "durationMs": 120000,
+        "sizeBytes": 7680000,
+        "sha256": "ec7daa4042769366b5fd84c0158b1b8223ebb22facf790efaf662b71fb68bf51",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 320000
+          },
+          {
+            "startFrame": 320000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 640000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 960000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 1280000,
+            "frames": 320000
+          },
+          {
+            "startFrame": 1600000,
+            "frames": 320000
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "2b714605-f6ab-41c1-ac5c-205aa4cb7db8",
+      "mode": "decode",
+      "containerId": "16b74d221144b0533f2f1639083fb06325c0c0973da23aec9371b978a5f6aeae",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 1,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 17,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "c2d50ff1-3eb7-410b-beda-6135e273bf86",
+      "mode": "decode",
+      "containerId": "4d3510c6c14a4a5ffe7215d66706737d4f295f17b93478b39bbd5e934a5b7376",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 1,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 412545,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "22878d65-2481-4c1e-b605-1c6efaa20502",
+      "mode": "encode",
+      "containerId": "7ba3da6c072623fc99af85dafd4210fb950c4084b09f200ed79fbee6924a30f2",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 1,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 1,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "35be22c7-02a7-439b-ab19-2401350c5eb6",
+      "mode": "decode",
+      "containerId": "c0234980b5167ad7de6b9e55dced56b8fc8f75b3ee58c57cd534ae8fab7b0398",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 1,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 3840046,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "44f9c274-e431-4de1-8bd9-a39dd386517a",
+      "mode": "encode",
+      "containerId": "6f66fadae81af298de1ae1c164922c1caa4922e21dc8381b264bd8fd1bbff406",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 137,
+      "oomKilled": true,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 960000,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "0d008bb1-e334-42f9-8134-0f36102952b4",
+      "mode": "decode",
+      "containerId": "2ccb44882909201ac9fb376eb2af6382c9301ce8bd51e0fbb3aef08acfdea72f",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 1,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 32044,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "2ad329aa-7877-42fd-b3a8-7e0865312c2f",
+      "mode": "encode",
+      "containerId": "93ea6e4c01a7da5ee2722fde5123fc12e28abe651f8d1a692ccd4d6854cda337",
+      "imageId": "sha256:d69d215df048437240543482c78a44ea144482d655027dcbc7fe12270d7d808b",
+      "exitCode": 137,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 5760000,
+      "output": null,
+      "diagnostic": null
+    }
+  ],
+  "scope": "synthetic local codec/Docker only; no platform/model/device/account or delivery test"
+}

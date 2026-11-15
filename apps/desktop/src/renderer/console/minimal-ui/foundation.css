@@ -161,7 +161,12 @@
 }
 .rail__foot {
   margin-top: auto;
+  /* 侧栏宽由 grid 决定；footer 不能反过来被内容撑开。 */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 10px 14px;
+  box-sizing: border-box;
 }
 .content__notice {
   margin-bottom: 16px;
@@ -248,10 +253,23 @@ html[data-console-style='minimal'] .pk-dialog__body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
-.pb-run__state {
+/* 折叠轨里只放得下状态与一枚图标按钮；宽窗口的完整文字保持原样。 */
+.pb-run__icon {
+  display: none;
+}
+.pb-run__state,
+.pb-run__name {
+  /* flex 项默认 min-width:auto 会被内容顶开，省略号因此不生效。 */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   color: var(--ink-quiet);
   font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 button.stage__pet {
   padding: 0;
@@ -397,7 +415,7 @@ body[data-motion='off'] * {
 .body {
   flex: 1;
   display: grid;
-  grid-template-columns: 226px 1fr;
+  grid-template-columns: 240px 1fr;
   min-height: 0;
 }
 
@@ -411,6 +429,12 @@ body[data-motion='off'] * {
   border-right: 1px solid var(--line);
   overflow-y: auto;
 }
+.rail__nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
 .rail__list {
   list-style: none;
   margin: 0;
@@ -419,8 +443,26 @@ body[data-motion='off'] * {
   flex-direction: column;
   gap: 4px;
 }
+.rail__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+}
+.rail__group:first-child {
+  margin-top: 0;
+}
+.rail__group-title {
+  margin: 0 0 4px;
+  padding: 0 10px;
+  color: var(--ink-quiet);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .rail__list--quiet {
-  margin-top: 14px;
+  margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
@@ -431,6 +473,7 @@ body[data-motion='off'] * {
 }
 
 .nav {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -460,10 +503,25 @@ body[data-motion='off'] * {
   color: var(--ink);
   font-weight: 600;
 }
+.nav[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
 .nav__icon {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+  border-radius: 7px;
+}
+.nav[aria-current='page'] .nav__icon {
+  background: var(--surface-quiet);
 }
 .rail__list--quiet .nav {
   min-height: 34px;
@@ -484,7 +542,7 @@ body[data-motion='off'] * {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 940px;
+  max-width: 860px;
 }
 .page__head {
   margin-bottom: 2px;
@@ -511,7 +569,7 @@ body[data-motion='off'] * {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 22px 0;
+  padding: 16px 20px 0;
 }
 .card__title {
   margin: 0;
@@ -526,8 +584,8 @@ body[data-motion='off'] * {
 .card__body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 18px 22px 22px;
+  gap: 16px;
+  padding: 16px 20px 20px;
 }
 .card__body--split {
   display: grid;
@@ -762,29 +820,75 @@ dialog > form.card {
 .icon-btn {
   display: grid;
   place-items: center;
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 8px;
-  background: none;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
   color: var(--ink-quiet);
   cursor: pointer;
   transition:
     background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
     color 0.2s ease-in-out;
+}
+.icon-btn--small {
+  flex-basis: 34px;
+  width: 34px;
+  height: 34px;
 }
 .icon-btn svg {
   width: 18px;
   height: 18px;
 }
-.icon-btn:hover {
+.icon-btn--secondary {
+  border-color: var(--field);
+  background: var(--surface);
+  color: var(--ink);
+}
+.icon-btn--primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--on-primary);
+}
+.icon-btn--danger {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+  color: var(--danger);
+}
+.icon-btn:hover:not(:disabled) {
   background: var(--surface-quiet);
   color: var(--ink);
+}
+.icon-btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 90%, var(--surface));
+  color: var(--on-primary);
+}
+.icon-btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  color: var(--danger);
 }
 .icon-btn:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 1px;
+}
+.icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.icon-btn__busy {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: icon-btn-spin 0.8s linear infinite;
+}
+@keyframes icon-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .icon-btn svg + svg {
   display: none;
@@ -797,6 +901,10 @@ dialog > form.card {
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 42px;
   padding: 0 18px;
   border: 1px solid #ededef;
@@ -809,6 +917,10 @@ dialog > form.card {
   transition:
     background-color 0.2s ease-in-out,
     border-color 0.2s ease-in-out;
+}
+.btn__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
 }
 .btn:hover {
   border-color: #dcdfe2;
@@ -1206,8 +1318,71 @@ dialog::backdrop {
     overflow: hidden;
     clip-path: inset(50%);
   }
+  .rail__group {
+    width: 100%;
+    gap: 1px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .rail__group:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .rail__group-title {
+    display: none;
+  }
   .rail__meta {
     display: none;
+  }
+  /* 轨道内宽只有 48px：footer 不再留 14px 内边距，且必须被轨道宽度约束住。
+     align-items:center 会让子项按内容撑开，所以这里显式钉住宽度。 */
+  .rail__foot {
+    /* align-items:center 会让子项按内容收缩；这里明确要求撑满轨道。 */
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 8px 0;
+  }
+  .pb-run {
+    width: 100%;
+    align-items: center;
+    gap: 6px;
+  }
+  .pb-run__state,
+  .pb-run__name,
+  .pb-run .row__value {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pb-run__icon {
+    display: inline-flex;
+  }
+  /* 文字仍留在无障碍树里，只是不再参与排版。 */
+  .pb-run__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .pb-run__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
   }
   .card__body--split {
     grid-template-columns: 1fr;

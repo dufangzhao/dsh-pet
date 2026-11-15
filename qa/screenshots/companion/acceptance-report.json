@@ -1,0 +1,151 @@
+{
+  "startedAt": "2026-11-07T17:35:37.488Z",
+  "serviceUrl": "http://127.0.0.1:38471",
+  "checks": [
+    {
+      "name": "令牌入口为中文标签，输入框为密码类型并声明只在内存中"
+    },
+    {
+      "name": "连接成功，token 不出现在页面 URL、资源 URL 或隐藏字段中",
+      "resourceCount": 4
+    },
+    {
+      "name": "助手名称与脚本模式标签准确（明说未调用模型）",
+      "agent": "同伴 · 离线脚本回复，未调用模型"
+    },
+    {
+      "name": "1440px 宽屏无水平溢出",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "innerWidth": 1440,
+      "offenders": []
+    },
+    {
+      "name": "Shift+Enter 在输入框内换行而不发送"
+    },
+    {
+      "name": "Enter 发送；消息经服务端确认后草稿清空"
+    },
+    {
+      "name": "UI 显示真实 Docker 任务完成，退出码为 0",
+      "exitCode": 0,
+      "stdout": "Created result.txt",
+      "artifactBytes": 26
+    },
+    {
+      "name": "聊天不显示 commandId/taskId/内部提示语或原始回执 JSON",
+      "checked": 7
+    },
+    {
+      "name": "点击产物按认证请求取字节，内容与字节数同服务端记录一致",
+      "filename": "result.txt",
+      "bytes": 26,
+      "sha256": "ae5b19a1befff17336cded09e325451b11e0444993ba31c36b6986eb806cec65"
+    },
+    {
+      "name": "认证 API 创建的 12 秒 ESM 任务在 UI 中出现并进入运行中"
+    },
+    {
+      "name": "点击停止后显示「停止请求已发送」，不谎称已停止"
+    },
+    {
+      "name": "服务端给出真实终态 cancelled，UI 换成「已取消」而非停留在请求态",
+      "status": "cancelled",
+      "exitCode": 137,
+      "artifacts": 0
+    },
+    {
+      "name": "停止一个任务不影响另一个任务的终态与产物"
+    },
+    {
+      "name": "断网后明说「当前状态未知」，运行中任务改为「状态未知（上次：…）」，发送不可用",
+      "connection": "连接已断开 · 最后确认 01:35 · 当前状态未知，显示的是上次确认的内容。 · 重新连接",
+      "task": "状态未知（上次：运行中）"
+    },
+    {
+      "name": "断网后约 45s 内转为断开（看门狗 45s）",
+      "detectedAfterMs": 45006
+    },
+    {
+      "name": "浏览器离线期间服务端后台照常完成该任务",
+      "status": "completed",
+      "exitCode": 0
+    },
+    {
+      "name": "重连后对账到真实终态「已完成」，不重放、不重复执行"
+    },
+    {
+      "name": "390px 窄屏无水平溢出",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "innerWidth": 390,
+      "offenders": []
+    },
+    {
+      "name": "窄屏任务区不遮挡输入框，聊天行未被压成 0",
+      "rows": "448.281px 320.719px"
+    },
+    {
+      "name": "窄屏下输入与发送按钮可用，消息正常出现"
+    },
+    {
+      "name": "键盘 Tab 进入时有可见焦点环",
+      "tag": "button",
+      "text": "断开",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid"
+    },
+    {
+      "name": "整个流程无未捕获脚本错误",
+      "pageErrors": 0,
+      "consoleErrors": 0
+    }
+  ],
+  "screenshots": [
+    "01-desktop-connected.png",
+    "02-offline-last-confirmed.png",
+    "03-narrow-390.png"
+  ],
+  "cjkFonts": [
+    "Noto Serif CJK JP",
+    "Noto Serif CJK KR",
+    "Noto Serif CJK HK"
+  ],
+  "diagnostics": {
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedRequests": [
+      "GET http://127.0.0.1:38471/api/events?after=0&epoch=75ca3118-4ca6-4065-a3c9-1963299ef621",
+      "GET http://127.0.0.1:38471/api/snapshot"
+    ]
+  },
+  "evidence": {
+    "task": {
+      "id": "fc2f0e40-1314-4bfc-a1dc-188489be7d25",
+      "status": "completed",
+      "exitCode": 0,
+      "artifact": {
+        "name": "result.txt",
+        "sizeBytes": 26
+      },
+      "stdout": "Created result.txt"
+    },
+    "artifact": {
+      "suggestedFilename": "result.txt",
+      "bytes": 26,
+      "sha256": "ae5b19a1befff17336cded09e325451b11e0444993ba31c36b6986eb806cec65",
+      "text": "Companion demo completed.\n"
+    },
+    "stop": {
+      "status": "cancelled",
+      "artifacts": 0
+    },
+    "offlineDetectedAfterMs": 45006,
+    "background": {
+      "status": "completed",
+      "exitCode": 0
+    }
+  },
+  "finishedAt": "2026-11-07T17:36:31.038Z",
+  "passed": true
+}

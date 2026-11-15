@@ -1,0 +1,176 @@
+{
+  "id": "local-plugin-host-qq-bridge",
+  "name": "local-plugin-host-qq-bridge",
+  "title": "Complete local QQ plugin host and remote Agent bridge",
+  "description": "User requests completing local QQ plugin hosting before testing: desktop, QQ adapters, SnowLuma and platform credentials on the user's machine; the same Agent/State/persona/cloud work on the server. Reuse M6 protocol/media/authority/delivery components, add the missing controlled local-host bridge and local management/delivery path. Planning first, no real QQ/model tests or original4120 changes.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-11-13",
+  "completedAt": null,
+  "branch": "feat/local-plugin-host-qq-bridge",
+  "base_branch": "feat/qq-platform-entry",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "11-06-unified-companion-architecture",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "planningBaseline": "68977877e8294935aab0cc3acc2a9306156ce460",
+    "userDecisions": {
+      "localHostLifetime": {
+        "selected": "退出桌面后 QQ 仍继续运行",
+        "at": "2026-11-14T02:02:20+08:00",
+        "requirements": [
+          "L11",
+          "A9"
+        ]
+      }
+    },
+    "planningReview": {
+      "status": "approved-for-implementation",
+      "contextEntries": {
+        "implement": 13,
+        "check": 13
+      },
+      "productImplementationStarted": false,
+      "realQQOrPaidModelTrial": false,
+      "at": "2026-11-14T03:39:00+08:00",
+      "reviews": [
+        "review.md",
+        "evidence-review.md"
+      ],
+      "remainingBlockingFindings": 0,
+      "requirementsConverged": true,
+      "prdConvergencePass": true,
+      "reviewedArtifactsSha256": {
+        "prd.md": "2d9a9b0d95558dfe8bfba5d8d43724bc6643d4d555e317305bc67bd182393405",
+        "design.md": "db068f8f40c0187afba8c5dcb7be742b98fa3b1bfcdc4f8ff6012c99e2969365",
+        "implement.md": "d8676fd9d7ed65e93d54dd5d7709e656e6c09dd06babf35daac6e46f9c2017d0",
+        "implement.jsonl": "04b6f494e1b9ef660d7aef1a929244078cf6387e21a16d8916b93343719ae795",
+        "check.jsonl": "3e238eafa249b197ad96aaf19d5ca9c4eb1400228f13b5f636d8803f5c2c7e68"
+      }
+    },
+    "implementationApproval": {
+      "status": "approved",
+      "questionId": "approve_local_host_plan",
+      "userSelection": "按方案开始实现 (Recommended)",
+      "at": "2026-11-14T05:38:43+08:00",
+      "reviewedArtifactsSha256": {
+        "prd.md": "2d9a9b0d95558dfe8bfba5d8d43724bc6643d4d555e317305bc67bd182393405",
+        "design.md": "db068f8f40c0187afba8c5dcb7be742b98fa3b1bfcdc4f8ff6012c99e2969365",
+        "implement.md": "d8676fd9d7ed65e93d54dd5d7709e656e6c09dd06babf35daac6e46f9c2017d0",
+        "implement.jsonl": "04b6f494e1b9ef660d7aef1a929244078cf6387e21a16d8916b93343719ae795",
+        "check.jsonl": "3e238eafa249b197ad96aaf19d5ca9c4eb1400228f13b5f636d8803f5c2c7e68"
+      },
+      "realQQOrPaidModelTrial": false,
+      "gitCommitOrPublicPublish": false
+    },
+    "plannedWorkBranch": "feat/local-plugin-host-qq-bridge",
+    "stageHandoffApproval": {
+      "source": "Direct user request: finish this stage, then push and merge to GitHub for development on another Windows machine",
+      "gitCommit": true,
+      "gitPush": true,
+      "gitMerge": true,
+      "targetDevelopmentOS": "Windows x64",
+      "status": "authorized-in-progress",
+      "guide": "docs/41-windows-development-handoff.md",
+      "workCommits": [
+        "3cbce0f118281d5d8f220a4cf74671ea19d866a6",
+        "4fa34da9640fc03ab32317609edcee671d8d82b9",
+        "ea500e5c97ad647a6e601ee909a8dd0564da4ff7",
+        "47fcd626d0a949056c034b05f7135979e9d23c76"
+      ]
+    },
+    "subagentModelPreference": {
+      "preferredRoutes": [
+        {
+          "provider": "magpie",
+          "model": "group/deepseek-v4.1-flash"
+        },
+        {
+          "provider": "magpie",
+          "model": "group/hy4free"
+        }
+      ],
+      "reasoningEffort": "max",
+      "scope": "prefer scoped implementation and verification by DeepSeek and Hy4; parent plans, coordinates and accepts results",
+      "source": "latest direct user requests: prefer DeepSeek and Hy4, default subsequent subagent reasoning to max"
+    },
+    "execution": {
+      "gate": "G7-controlled-acceptance-complete-awaiting-work-commit-approval",
+      "recordedAt": "2026-11-15T17:12:56+08:00",
+      "productImplementationStarted": true,
+      "componentEvidence": [
+        "evidence/g0-kernel.md",
+        "evidence/g0-process.md",
+        "evidence/g0-wire.md",
+        "evidence/g0-wire-review.md",
+        "evidence/g0-official-hello.md",
+        "evidence/g0-bridge.md",
+        "evidence/g0-custody.md",
+        "evidence/g0-package.md",
+        "evidence/g1-state4.md",
+        "evidence/g2-sources.md",
+        "evidence/g3-bridge.md",
+        "evidence/g4-media.md",
+        "evidence/g5-delivery.md",
+        "evidence/g5-independent-review.md",
+        "evidence/g6-ui.md",
+        "evidence/g6-native.md",
+        "evidence/g7-package.md",
+        "evidence/quality-static.md",
+        "evidence/quality-model-budget.md",
+        "evidence/quality-final.md",
+        "evidence/quality-docker-optin.md",
+        "evidence/service-handoff.md",
+        "evidence/g6-stop-review.md",
+        "evidence/ui-redesign.md",
+        "evidence/windows-startup-fix.md"
+      ],
+      "fullG0Passed": true,
+      "pending": [
+        "Windows preview9 startup, GUI reattachment and explicit stop confirmation after the confirmed preview8 script defect; real QQ/model joint trial remains separate",
+        "Complete the authorized stage commits and GitHub push/merge after device login, then record the Windows development handoff"
+      ],
+      "realQQOrPaidModelTrial": false,
+      "original4120OrSnowLumaChanged": false,
+      "ownedIdle4121PreviewStopped": false,
+      "preview": {
+        "url": "http://127.0.0.1:4121",
+        "mode": "scripted",
+        "stateFormat": 4,
+        "identityPreserved": true,
+        "fullRootBackupVerified": true,
+        "jobOwner": "parent-session",
+        "jobId": "bash-220cc404c8874b47",
+        "lastVerifiedStatus": "ready",
+        "pid": 3428075,
+        "lastVerifiedMode": "scripted",
+        "messages": 0,
+        "tasks": 0
+      },
+      "authorizedImplementationComplete": true,
+      "controlledAcceptanceComplete": true,
+      "delivery": {
+        "version": "0.1.0-preview.9",
+        "target": "win32-x64 portable preview candidate",
+        "sourceContentSha256": "037c871ad94bfd7cddf5f1cc40c28cd29d4a16c582e7adc283a8643f69295095",
+        "zipPath": ".cache/release/Pet-Windows-x64-0.1.0-preview.9.zip",
+        "zipBytes": 184354557,
+        "zipSha256": "2c63caa225de7f043045536d30ddeaa6e8a2b66e3df01b16a65fba3faa9cae50",
+        "linuxProductionGuiReport": "qa/fixtures/local-host/evidence/desktop-ed89c186-57e7-437e-b565-e1f55bc0f301/report.json",
+        "windowsDeviceRun": true,
+        "windowsDeviceResult": "preview8 startup failed at PowerShell helper line95; fixed source awaiting preview9 confirmation",
+        "uiEvidence": "evidence/ui-redesign.md"
+      }
+    }
+  }
+}

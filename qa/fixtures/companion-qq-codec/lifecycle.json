@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+  "manifestSha256": "69745cbac7496217f6d79f015d396f7ad066e0473c2fcea5e5b0e60c8aa58bdb",
+  "success": true,
+  "cases": [
+    {
+      "name": "source-revocation",
+      "containerId": "6068546abc008ea147dae4cc18d9210a7cbe32e09c1d6cfa3f4d358500b932f7",
+      "pid": 2332989,
+      "consumed": false
+    },
+    {
+      "name": "source-close",
+      "containerId": "b8bf4008f328e8ec53a86ce941cd5d873fbf1b810a4f486a4b7d422d4a521ab9",
+      "pid": 2333204,
+      "consumed": false
+    },
+    {
+      "name": "non-20ms-tail-complete-with-declared-codec-padding",
+      "sourceFrames": 24001,
+      "encodedFrames": 24480,
+      "decodedFrames": 16320
+    },
+    {
+      "name": "actual-codec-exit-clears-job-clock-before-long-scoped-consumer"
+    },
+    {
+      "name": "partial-consumer-return-does-not-complete",
+      "activeJobs": 0
+    },
+    {
+      "name": "two-preparations-and-real-staging-drain",
+      "activeJobs": 0,
+      "third": "quota-exceeded"
+    },
+    {
+      "name": "wrong-manifest-no-availability"
+    }
+  ],
+  "receipts": [
+    {
+      "id": "7656e7a4-0570-4383-a88c-515d5d73b358",
+      "mode": "encode",
+      "containerId": "6068546abc008ea147dae4cc18d9210a7cbe32e09c1d6cfa3f4d358500b932f7",
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": 137,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 960000,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "491a147d-bf93-448b-a84e-c0ebd76de06d",
+      "mode": "encode",
+      "containerId": "b8bf4008f328e8ec53a86ce941cd5d873fbf1b810a4f486a4b7d422d4a521ab9",
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": 137,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 960000,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "9e4aeb3d-9866-4d57-a75a-ca44c3ed991a",
+      "mode": "encode",
+      "containerId": "ee3099a8573d2242814c3091da6b9676d0b0ee5914815b090e0cf6b93f396bf4",
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 48002,
+      "output": {
+        "encoding": "tencent-silk-v3",
+        "sampleRate": 24000,
+        "channels": 1,
+        "frames": 24480,
+        "durationMs": 1020,
+        "sizeBytes": 3802,
+        "sha256": "ad2d20e45b35280ee0efc144c9f3703586067df6cb40741658bb3bc23db8c5a4",
+        "spans": []
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "153f8a15-9bda-4898-aaa7-2f1372d469eb",
+      "mode": "decode",
+      "containerId": "e851dc1f007d1017bd89dbf3a4ed25e29752d5799c76b30ad5d684d325ecdcf0",
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 3802,
+      "output": {
+        "encoding": "pcm-f32le",
+        "sampleRate": 16000,
+        "channels": 1,
+        "frames": 16320,
+        "durationMs": 1020,
+        "sizeBytes": 65280,
+        "sha256": "692e1bd1735709b8b4946e2de7a14f62434f9bd51726de1ec39c44c578f1811e",
+        "spans": [
+          {
+            "startFrame": 0,
+            "frames": 16320
+          }
+        ]
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "91ed506a-f925-4717-8989-fff0f1f4e863",
+      "mode": "encode",
+      "containerId": "03d7fe8f7fc13891fa7316efcd3570a3fc39cd5fbd0fb91ff1499bbeb4c28433",
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 48000,
+      "output": {
+        "encoding": "tencent-silk-v3",
+        "sampleRate": 24000,
+        "channels": 1,
+        "frames": 24000,
+        "durationMs": 1000,
+        "sizeBytes": 3762,
+        "sha256": "a653048f5a0db285b40c7507e97864b7889a1acde28904d7c52a37c2c959db99",
+        "spans": []
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "007855bb-dcd1-461c-81e4-62c7aedfeff2",
+      "mode": "encode",
+      "containerId": "1641c07aaaa63d4a7433137eaf83b4f5b5036f6e697e6774ccdac52e24e45eb5",
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": 0,
+      "oomKilled": false,
+      "stopped": true,
+      "removed": true,
+      "workspaceRemoved": true,
+      "inputBytes": 48000,
+      "output": {
+        "encoding": "tencent-silk-v3",
+        "sampleRate": 24000,
+        "channels": 1,
+        "frames": 24000,
+        "durationMs": 1000,
+        "sizeBytes": 3762,
+        "sha256": "a653048f5a0db285b40c7507e97864b7889a1acde28904d7c52a37c2c959db99",
+        "spans": []
+      },
+      "diagnostic": null
+    },
+    {
+      "id": "7d6a8b27-9981-471b-8990-0f4110c2ebfa",
+      "mode": "encode",
+      "containerId": null,
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": null,
+      "oomKilled": false,
+      "stopped": false,
+      "removed": false,
+      "workspaceRemoved": true,
+      "inputBytes": 0,
+      "output": null,
+      "diagnostic": null
+    },
+    {
+      "id": "bfff2852-7207-4fa6-8673-c5fa47b9daf7",
+      "mode": "encode",
+      "containerId": null,
+      "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+      "exitCode": null,
+      "oomKilled": false,
+      "stopped": false,
+      "removed": false,
+      "workspaceRemoved": true,
+      "inputBytes": 0,
+      "output": null,
+      "diagnostic": null
+    }
+  ],
+  "activeJobs": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}

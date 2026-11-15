@@ -9,13 +9,42 @@
  */
 import type { JSX } from 'react';
 
+import { Icon, type IconName } from './minimal-ui/icons.js';
 import { SiteGlyphIcon, type SiteGlyph } from './site-ui/site-icons.js';
 
 export type SettingsNavIcon =
-  'play' | 'bot' | 'shirt' | 'activity' | 'message' | 'puzzle' | 'shield' | 'info' | 'panel';
+  | 'play'
+  | 'bot'
+  | 'shirt'
+  | 'activity'
+  | 'message'
+  | 'puzzle'
+  | 'shield'
+  | 'info'
+  | 'panel'
+  | 'connect'
+  | 'chat'
+  | 'cat'
+  | 'model'
+  | 'qq'
+  | 'server'
+  | 'microphone'
+  | 'volume';
+
+/** 新增页面用自绘那套线性图标；旧的入口继续用 vendored 字形。 */
+const NEW_NAV_ICON: Partial<Record<SettingsNavIcon, IconName>> = {
+  connect: 'plug',
+  chat: 'chat',
+  cat: 'cat',
+  model: 'model',
+  qq: 'qq',
+  server: 'server',
+  microphone: 'microphone',
+  volume: 'volume',
+};
 
 /** 语义名 → vendored 那一枚：父级按页面给语义名，这里只换成真字形。 */
-const NAV_GLYPH: Readonly<Record<SettingsNavIcon, SiteGlyph>> = {
+const NAV_GLYPH: Partial<Record<SettingsNavIcon, SiteGlyph>> = {
   play: 'player-play',
   bot: 'robot',
   shirt: 'shirt',
@@ -39,7 +68,17 @@ export function NavIcon({
   icon?: SettingsNavIcon | undefined;
   className?: string | undefined;
 }): JSX.Element {
-  return <SiteGlyphIcon name={NAV_GLYPH[icon ?? 'panel']} size={20} className={className} />;
+  const custom = icon === undefined ? undefined : NEW_NAV_ICON[icon];
+  if (custom !== undefined) {
+    return <Icon name={custom} size={20} className={className} />;
+  }
+  return (
+    <SiteGlyphIcon
+      name={icon === undefined ? 'layout-dashboard' : (NAV_GLYPH[icon] ?? 'layout-dashboard')}
+      size={20}
+      className={className}
+    />
+  );
 }
 
 /** 开始：播放形，说的是“向导与连接从这里起步”，不是媒体按钮。 */

@@ -2,7 +2,7 @@
   "name": "@pet/desktop",
   "version": "0.0.0",
   "private": true,
-  "description": "Electron 桌面应用（主进程骨架；renderer/preload 由后续工作包实现）",
+  "description": "Electron \u684c\u9762\u5e94\u7528\uff08\u4e3b\u8fdb\u7a0b\u9aa8\u67b6\uff1brenderer/preload \u7531\u540e\u7eed\u5de5\u4f5c\u5305\u5b9e\u73b0\uff09",
   "license": "MIT",
   "type": "module",
   "main": "./dist/main/index.mjs",
@@ -35,8 +35,12 @@
     "@pet/contracts": "workspace:*",
     "@pet/host-kernel": "workspace:*",
     "@pet/ui-kit": "workspace:*",
+    "@pet/text-client": "workspace:*",
     "morphicons": "2.0.2",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "@pet/audio-capture": "workspace:*",
+    "@pet/local-host": "workspace:*",
+    "tsx": "4.23.15"
   }
 }

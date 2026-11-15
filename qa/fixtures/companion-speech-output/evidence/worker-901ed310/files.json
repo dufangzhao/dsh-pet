@@ -1,0 +1,52 @@
+[
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/report.json",
+    "bytes": 1263,
+    "sha256": "67c4d8803e6fd2acfb6ea40ab6acf439267e48a3dbfae42bc190fe61b6e8804f"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/assertions.json",
+    "bytes": 1964,
+    "sha256": "3fc3660f5ae90551267fba3a7f8d28a4deef8d043d4bd28fc01b2f444577cd30"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/resources.json",
+    "bytes": 1039,
+    "sha256": "c56a3d9eb228b4804fad1620b532847269ecd07d8a51966809b590ce5e4594bb"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/scope.json",
+    "bytes": 201,
+    "sha256": "e243adbef928529050476697caddb2c36a11029b95090eab4d4803ddbfcad0c8"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/inputs.json",
+    "bytes": 690398,
+    "sha256": "49d4cfee2a83f5acebfde9197005530ad083500ffeff377ada7526d796e95630"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/dependencies.json",
+    "bytes": 137622,
+    "sha256": "5baebb35c9d312330d0ecbe5c25157fc174d7460ce550c05a2a0616821d4efd3"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/node.json",
+    "bytes": 526,
+    "sha256": "c389d5ea1e6f817bcefa9f5d1f1c0d123586ea710cdfe1e16e837034723ba20d"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/image.json",
+    "bytes": 191,
+    "sha256": "d6a389808ce9a1fa8001736bfb59d470479c4b8f5d46f810b322ef7991bfdfc9"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/roots.json",
+    "bytes": 20654,
+    "sha256": "5d419cf058b0539558fd82dc2bb10dfc072ecdc0843d6754e9c933648dd778c1"
+  },
+  {
+    "path": "qa/fixtures/companion-speech-output/evidence/worker-901ed310/exit.txt",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  }
+]

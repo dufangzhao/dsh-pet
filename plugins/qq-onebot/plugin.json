@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.qq-onebot",
+  "version": "0.1.0",
+  "displayName": { "en": "QQ OneBot v11", "zh-CN": "QQ OneBot v11" },
+  "description": {
+    "en": "Authenticated reverse Universal OneBot protocol through source-bound host transport"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "onebot",
+      "capability": "companion.qq.protocol@1",
+      "features": {
+        "nativeQQ": 1,
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["qq-onebot-access-token"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "accountId",
+        "mode",
+        "channelMode",
+        "mediaProfile",
+        "listenHost",
+        "listenPort",
+        "path"
+      ],
+      "properties": {
+        "protocol": { "type": "string", "const": "onebot-v11", "default": "onebot-v11" },
+        "accountId": { "type": "string", "maxLength": 20, "default": "" },
+        "mode": { "type": "string", "const": "reverse-ws", "default": "reverse-ws" },
+        "channelMode": { "type": "string", "const": "universal", "default": "universal" },
+        "mediaProfile": { "type": "string", "const": "snowluma-v11", "default": "snowluma-v11" },
+        "listenHost": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "default": "127.0.0.1"
+        },
+        "listenPort": { "type": "integer", "minimum": 0, "maximum": 65535, "default": 6199 },
+        "path": { "type": "string", "minLength": 1, "maxLength": 128, "default": "/ws" }
+      }
+    },
+    "apply": {
+      "protocol": "reload",
+      "accountId": "reload",
+      "mode": "reload",
+      "channelMode": "reload",
+      "mediaProfile": "reload",
+      "listenHost": "reload",
+      "listenPort": "reload",
+      "path": "reload"
+    }
+  }
+}

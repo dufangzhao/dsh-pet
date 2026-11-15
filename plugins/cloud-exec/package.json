@@ -1,0 +1,31 @@
+{
+  "name": "@pet/cloud-exec",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bounded Docker JavaScript execution provider with retained artifacts",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "node build.mjs",
+    "test": "node --import ./tests/source-loader.mjs --test tests/*.test.mjs",
+    "test:docker": "PET_CLOUD_EXEC_DOCKER_TEST=1 node --import ./tests/source-loader.mjs --test tests/*docker.test.mjs"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "esbuild": "0.28.2"
+  }
+}

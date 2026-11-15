@@ -1,18 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  PET_STATES,
-  type ApplicationDialog,
-  type PetPrototypeBridge,
-  type PetSnapshot,
-} from '@pet/contracts';
+import { PET_STATES, type PetPrototypeBridge, type PetSnapshot } from '@pet/contracts';
 
 import { HoverTracker, PetApp, createPetInteractionSession, reconcileHover } from './App.js';
 import { PetAvatar } from './PetAvatar.js';
 import { PetBubble } from './PetBubble.js';
 import { PetComposer } from './PetComposer.js';
-import { PetDialog, dialogFocusTarget, planDialogSubmit } from './PetDialog.js';
 import { PetMenu } from './PetMenu.js';
 import { PET_COPY, stateBubble } from './copy.js';
 import { PetDragController, RENDERER_DRAG_TIMEOUT_MS } from './drag-controller.js';
@@ -563,16 +557,20 @@ describe('气泡、提示与菜单', () => {
     expect(markup(<PetBubble state="listening" text={null} />)).toBe('');
   });
 
-  it('菜单只有真实入口：设置、引导、停止（宿主说能停才出现）与退出', () => {
+  it('菜单只有真实入口：设置、聊天、明暗、音效、停止这次回应与退出', () => {
     const html = markup(
       <PetMenu
         name="小蓝"
+        connectionLabel="已连接"
         canStop
         stopping={false}
         onStop={() => {}}
-        guideDisabled={false}
-        guideBusy={false}
-        onGuide={() => {}}
+        appearance="light"
+        onToggleAppearance={() => {}}
+        soundEnabled
+        onToggleSound={() => {}}
+        chatOpen={false}
+        onChat={() => {}}
         quitDisabled={false}
         onQuit={() => {}}
       />,
@@ -580,120 +578,49 @@ describe('气泡、提示与菜单', () => {
     expect(html).toContain('data-testid="pet-menu"');
     expect(html).toContain('data-testid="pet-name"');
     expect(html).toContain('小蓝');
-    for (const id of ['pet-settings', 'pet-guide', 'pet-stop', 'pet-quit']) {
+    expect(html).toContain('已连接');
+    for (const id of ['pet-settings', 'pet-stop', 'pet-quit', 'pet-menu-chat']) {
       expect(html).toContain(`data-testid="${id}"`);
     }
-    // 开发期的状态预览按钮不属于产品界面。
+    // 共享组合里没有的旧入口一个都不留：暂停、引导、语音、装扮。
+    for (const id of ['pet-menu-pause', 'pet-guide', 'pet-menu-voice', 'pet-menu-appearance']) {
+      expect(html).not.toContain(`data-testid="${id}"`);
+    }
     expect(html).not.toContain('data-testid="state-idle"');
     expect(html).toContain('data-testid="pet-menu-more"');
   });
 
   it('宿主说不能停时不画停止按钮，没读到名字就留空，不可用的入口禁用', () => {
     const html = markup(
-      <PetMenu
-        name={null}
-        canStop={false}
-        stopping={false}
-        onStop={() => {}}
-        guideDisabled
-        guideBusy={false}
-        onGuide={() => {}}
-        quitDisabled
-        onQuit={() => {}}
-      />,
+      <PetMenu name={null} canStop={false} stopping={false} quitDisabled onQuit={() => {}} />,
     );
     expect(html).not.toContain('data-testid="pet-stop"');
     expect(html).not.toContain('data-testid="pet-name"');
-    expect(tag(html, 'pet-guide')).toContain('disabled');
     expect(tag(html, 'pet-quit')).toContain('disabled');
+    // 没有连接、没有本机呈现时，聊天与明暗都按不动，也不谎称可用。
+    expect(tag(html, 'pet-menu-chat')).toContain('disabled');
+    expect(tag(html, 'pet-menu-theme')).toContain('disabled');
   });
 
-  it('提示渲染宿主给的标题、正文与选项，主选项有唯一标记', () => {
-    const dialog: ApplicationDialog = {
-      id: 'guide-1',
-      step: 'name',
-      title: '怎么称呼你',
-      text: '这个名字会出现在气泡里。',
-      choices: [
-        { id: 'keep', label: '就叫小蓝', primary: true },
-        { id: 'later', label: '稍后再说' },
-      ],
-      busy: false,
-    };
-    const html = markup(
-      <PetDialog dialog={dialog} state="idle" pending={false} onAnswer={() => {}} />,
-    );
-    expect(html).toContain('data-testid="pet-dialog"');
-    expect(html).toContain('怎么称呼你');
-    expect(html).toContain('这个名字会出现在气泡里。');
-    expect(tag(html, 'pet-dialog-choice-keep')).toContain('data-primary="true"');
-    expect(tag(html, 'pet-dialog-choice-later')).toContain('data-primary="false"');
-    // 没有输入框就没有掩码字段，界面上不多出一个假入口。
-    expect(html).not.toContain('pet-dialog-input');
-  });
-
-  it('掩码输入只跟着能承载文本的选项，其余选项不带值', () => {
-    const dialog: ApplicationDialog = {
-      id: 'guide-2',
-      step: 'key',
-      title: '填写密钥',
-      text: '只交给宿主保存。',
-      choices: [
-        { id: 'save', label: '保存', primary: true },
-        { id: 'cancel', label: '取消' },
-      ],
-      input: { kind: 'secret', label: '密钥' },
-      busy: true,
-    };
-    const plan = planDialogSubmit(dialog);
-    expect(plan.carrier?.id).toBe('save');
-    expect(plan.plain.map((choice) => choice.id)).toEqual(['cancel']);
-    expect(plan.inputUsable).toBe(true);
-    const html = markup(
-      <PetDialog dialog={dialog} state="idle" pending={false} onAnswer={() => {}} />,
-    );
-    expect(html).toContain('type="password"');
-    expect(html).toContain(PET_COPY.dialog.secretHint);
-    // 宿主说这一步还在处理：控件全部禁用，界面不假装已经提交。
-    expect(tag(html, 'pet-dialog-choice-save')).toContain('disabled');
-    expect(html).toContain('data-testid="pet-dialog-busy"');
-    // 有输入框时焦点先落在输入上，不用 Tab 穿过选项。
-    expect(dialogFocusTarget(dialog)).toBe('input');
-  });
-
-  it('没有可承载文本的选项时不假装能输入', () => {
-    const dialog: ApplicationDialog = {
-      id: 'guide-3',
-      step: 'ask',
-      title: '补充一句',
-      text: '这一步没有选项。',
-      choices: [],
-      input: { kind: 'text', label: '说明' },
-      busy: false,
-    };
-    expect(planDialogSubmit(dialog).inputUsable).toBe(false);
-    const html = markup(
-      <PetDialog dialog={dialog} state="idle" pending={false} onAnswer={() => {}} />,
-    );
-    expect(html).toContain('data-testid="pet-dialog-unusable"');
-    expect(PET_COPY.dialog.noChoice).toContain('设置');
-    expect(tag(html, 'pet-dialog-input-text')).toContain('disabled');
-  });
-
-  it('空白不给发送，宿主未就绪时仍能保留和编辑草稿', () => {
+  it('空白不给发送，连不上服务时草稿照样能编辑并留着', () => {
     const ready = markup(<PetComposer canSend sending={false} onSend={async () => true} />);
     expect(tag(ready, 'pet-composer-input')).not.toContain('disabled');
-    // 空输入只禁用发送按钮，输入框照样能打字。
     expect(tag(ready, 'pet-composer-send')).toContain('disabled');
     expect(ready).toContain(PET_COPY.sendPlaceholder);
 
     const blocked = markup(
-      <PetComposer canSend={false} sending={false} onSend={async () => true} />,
+      <PetComposer
+        canSend={false}
+        sending={false}
+        blockedReason="连接断开时不能发送，先重新连接。"
+        onSend={async () => true}
+      />,
     );
     expect(tag(blocked, 'pet-composer-input')).not.toContain('disabled');
     expect(tag(blocked, 'pet-composer-input')).toContain('rows="1"');
-    expect(tag(blocked, 'pet-composer-input')).toContain('<textarea');
     expect(tag(blocked, 'pet-composer-send')).toContain('disabled');
+    // 不能发的原因写在输入框下面，不靠 tooltip。
+    expect(blocked).toContain('连接断开时不能发送');
   });
 });
 

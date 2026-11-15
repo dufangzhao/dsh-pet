@@ -1,0 +1,601 @@
+{
+  "status": "archived-private-sha256-verified",
+  "collectedAtUtc": "2026-11-12T01:40:50.494Z",
+  "sourceDirectory": "qa/fixtures/companion-speech-output/evidence",
+  "archiveRootProposal": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf",
+  "totals": {
+    "files": 52,
+    "bytes": 10113770,
+    "retainPublicFiles": 25,
+    "retainPublicBytes": 4950079,
+    "archivePrivateFiles": 27,
+    "archivePrivateBytes": 5163691
+  },
+  "groups": [
+    {
+      "group": "119e6a84",
+      "recommendation": "archive-private",
+      "files": 2,
+      "bytes": 321372
+    },
+    {
+      "group": "219cec3e",
+      "recommendation": "archive-private",
+      "files": 4,
+      "bytes": 365199
+    },
+    {
+      "group": "35fad705",
+      "recommendation": "archive-private",
+      "files": 5,
+      "bytes": 2841847
+    },
+    {
+      "group": "null-setup-preflight",
+      "recommendation": "archive-private",
+      "files": 1,
+      "bytes": 1072
+    },
+    {
+      "group": "6bdb1aa0",
+      "recommendation": "archive-private",
+      "files": 3,
+      "bytes": 437845
+    },
+    {
+      "group": "8bd686c4",
+      "recommendation": "archive-private",
+      "files": 4,
+      "bytes": 387310
+    },
+    {
+      "group": "be4d50e6",
+      "recommendation": "archive-private",
+      "files": 5,
+      "bytes": 486393
+    },
+    {
+      "group": "final-web",
+      "recommendation": "retain-public",
+      "files": 5,
+      "bytes": 440115
+    },
+    {
+      "group": "final-web-duplicate-prehash",
+      "recommendation": "archive-private",
+      "files": 1,
+      "bytes": 52828
+    },
+    {
+      "group": "cc4d4e60",
+      "recommendation": "archive-private",
+      "files": 2,
+      "bytes": 269825
+    },
+    {
+      "group": "final-native",
+      "recommendation": "retain-public",
+      "files": 5,
+      "bytes": 3635544
+    },
+    {
+      "group": "final-live-parent",
+      "recommendation": "retain-public",
+      "files": 3,
+      "bytes": 15211
+    },
+    {
+      "group": "final-worker",
+      "recommendation": "retain-public",
+      "files": 12,
+      "bytes": 859209
+    }
+  ],
+  "files": [
+    {
+      "relativePath": "119e6a84-before.json",
+      "bytes": 106720,
+      "sha256": "9ccc1448dda28151f193ef8cc1b1a32add989424e8faa1ac8c949017a96ba6f3",
+      "recommendation": "archive-private",
+      "group": "119e6a84",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/119e6a84-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/119e6a84-before.json"
+    },
+    {
+      "relativePath": "119e6a84-native.json",
+      "bytes": 214652,
+      "sha256": "158609aba89d3ca640552fad33ba84eb2ad419e975ec0ae5d5161a58887d06bb",
+      "recommendation": "archive-private",
+      "group": "119e6a84",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/119e6a84-native.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/119e6a84-native.json"
+    },
+    {
+      "relativePath": "219cec3e-before.json",
+      "bytes": 89252,
+      "sha256": "1880683a65a3bb85a6e8adb10945b120974c8e6e2f33bf492e5cb4e5bcce1a74",
+      "recommendation": "archive-private",
+      "group": "219cec3e",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/219cec3e-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/219cec3e-before.json"
+    },
+    {
+      "relativePath": "219cec3e-failure.png",
+      "bytes": 67618,
+      "sha256": "f3aa13b01ffe85b9a881aa678e8ba76dde499b4c7fa1804d6f7f764425087d0f",
+      "recommendation": "archive-private",
+      "group": "219cec3e",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/219cec3e-failure.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/219cec3e-failure.png"
+    },
+    {
+      "relativePath": "219cec3e-native.json",
+      "bytes": 204660,
+      "sha256": "9010374c37307ea28bff050117d685b6f7c7905124f67458994260862fd874f3",
+      "recommendation": "archive-private",
+      "group": "219cec3e",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/219cec3e-native.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/219cec3e-native.json"
+    },
+    {
+      "relativePath": "35fad705-before.json",
+      "bytes": 106720,
+      "sha256": "a28e049ebd33c69f393f83eda89881049c33ebc2cf0bac036c622bd43f7d6e73",
+      "recommendation": "archive-private",
+      "group": "35fad705",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-before.json"
+    },
+    {
+      "relativePath": "35fad705-failure.png",
+      "bytes": 59793,
+      "sha256": "dd27a38c2b3393e2a7eb282379594d0d8101d9b5b233274c2a07982d65227c6f",
+      "recommendation": "archive-private",
+      "group": "35fad705",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-failure.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-failure.png"
+    },
+    {
+      "relativePath": "35fad705-first-completed.png",
+      "bytes": 86896,
+      "sha256": "2b23433830db24ab88ccb9249a2efa480428913ee0dab927f845ace85927cc52",
+      "recommendation": "archive-private",
+      "group": "35fad705",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-first-completed.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-first-completed.png"
+    },
+    {
+      "relativePath": "35fad705-native.json",
+      "bytes": 2580562,
+      "sha256": "21f55454ffef20bc305b0f4ebdd04bf3b49150f34e719ee916b8a45982d95fd8",
+      "recommendation": "archive-private",
+      "group": "35fad705",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-native.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/35fad705-native.json"
+    },
+    {
+      "relativePath": "39e6412a-null-preflight.json",
+      "bytes": 1072,
+      "sha256": "3bdab8f8da2c7069d1265b30d47741c23c1e514a2e6a20c1de4aaff93c4d853c",
+      "recommendation": "archive-private",
+      "group": "null-setup-preflight",
+      "reason": "Successful early setup-only probe is superseded publicly by actual final routed playback/cleanup.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/39e6412a-null-preflight.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/39e6412a-null-preflight.json"
+    },
+    {
+      "relativePath": "6bdb1aa0-before.json",
+      "bytes": 106720,
+      "sha256": "28efe02e45bae24c3b47ffc35a1da68f7963ab34b0d13bad2a521a2f42d474b4",
+      "recommendation": "archive-private",
+      "group": "6bdb1aa0",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/6bdb1aa0-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/6bdb1aa0-before.json"
+    },
+    {
+      "relativePath": "6bdb1aa0-failure.png",
+      "bytes": 87855,
+      "sha256": "688c5727ac2b2c60441ea3b5838ad5ca3e97b93cd624d0b8170e440cdbbdd8e7",
+      "recommendation": "archive-private",
+      "group": "6bdb1aa0",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/6bdb1aa0-failure.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/6bdb1aa0-failure.png"
+    },
+    {
+      "relativePath": "6bdb1aa0-native.json",
+      "bytes": 243270,
+      "sha256": "84a88e159f7afb5ae064118fe57973b6490b2806d91af699bcce7b2c830e172d",
+      "recommendation": "archive-private",
+      "group": "6bdb1aa0",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/6bdb1aa0-native.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/6bdb1aa0-native.json"
+    },
+    {
+      "relativePath": "8bd686c4-before.json",
+      "bytes": 89252,
+      "sha256": "e7f47e9b8ed72f10f27493d4b88586537ff0b29fc6c5b685db3ff92b689ad603",
+      "recommendation": "archive-private",
+      "group": "8bd686c4",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/8bd686c4-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/8bd686c4-before.json"
+    },
+    {
+      "relativePath": "8bd686c4-failure.png",
+      "bytes": 88415,
+      "sha256": "9804ca5607a7df651d950e417b429ae68b85eaa4093f12109b535088995a4c57",
+      "recommendation": "archive-private",
+      "group": "8bd686c4",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/8bd686c4-failure.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/8bd686c4-failure.png"
+    },
+    {
+      "relativePath": "8bd686c4-native.json",
+      "bytes": 205832,
+      "sha256": "c5497ebd704e298d28b1252d52546d92664ca0482411c80138df9911216e5c68",
+      "recommendation": "archive-private",
+      "group": "8bd686c4",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/8bd686c4-native.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/8bd686c4-native.json"
+    },
+    {
+      "relativePath": "be4d50e6-web-ASR-review-zero-TTS.png",
+      "bytes": 105957,
+      "sha256": "3d6786034bb40bee87f7d4402d43daed5b01dbfd036355d35d1132aede509123",
+      "recommendation": "archive-private",
+      "group": "be4d50e6",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-ASR-review-zero-TTS.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-ASR-review-zero-TTS.png"
+    },
+    {
+      "relativePath": "be4d50e6-web-before.json",
+      "bytes": 52828,
+      "sha256": "0528ce0d497cfb4d48b9d792acd5fb7cb4292c099bf02d180afe9f67958b4528",
+      "recommendation": "archive-private",
+      "group": "be4d50e6",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-before.json"
+    },
+    {
+      "relativePath": "be4d50e6-web-review-sent-zero-TTS.png",
+      "bytes": 118825,
+      "sha256": "c7d932e18c80a3e4676b02bbf9e5029a589ffd0f8a90ef70af82f9fbd4240189",
+      "recommendation": "archive-private",
+      "group": "be4d50e6",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-review-sent-zero-TTS.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-review-sent-zero-TTS.png"
+    },
+    {
+      "relativePath": "be4d50e6-web-typed-zero-TTS.png",
+      "bytes": 95232,
+      "sha256": "28ee0193c1ce07e8da29406ace963a2d8af2310fbe60ca2d43589026cc6cca87",
+      "recommendation": "archive-private",
+      "group": "be4d50e6",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-typed-zero-TTS.png",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web-typed-zero-TTS.png"
+    },
+    {
+      "relativePath": "be4d50e6-web.json",
+      "bytes": 113551,
+      "sha256": "fd108b7d635dff8533926e0680e933ce8e5acc075bc6cb59dd6a23cf2883e2a0",
+      "recommendation": "archive-private",
+      "group": "be4d50e6",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/be4d50e6-web.json"
+    },
+    {
+      "relativePath": "c5852eaf-web-ASR-review-zero-TTS.png",
+      "bytes": 105926,
+      "sha256": "f5e83b0170b1544ed6e2f85827cd55ecdca2bc12cb6d50906bfaa2aa960e8b0d",
+      "recommendation": "retain-public",
+      "group": "final-web",
+      "reason": "Final whole-pass Web raw, three reviewed screenshots and summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "c5852eaf-web-before.json",
+      "bytes": 52828,
+      "sha256": "b30d052aa53bdfbb124f85ce06f767791ad5b14ba0e1f86fe66ca765def732c5",
+      "recommendation": "archive-private",
+      "group": "final-web-duplicate-prehash",
+      "reason": "Separate final Web prehash is redundant with hashesBefore in retained final raw; not a failed run.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/c5852eaf-web-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/c5852eaf-web-before.json"
+    },
+    {
+      "relativePath": "c5852eaf-web-review-sent-zero-TTS.png",
+      "bytes": 118597,
+      "sha256": "c8afb18b3740514b3013ccfa3ce8b0ef04a6fbd5b9960f4a87b0c1d4f7c3ca80",
+      "recommendation": "retain-public",
+      "group": "final-web",
+      "reason": "Final whole-pass Web raw, three reviewed screenshots and summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "c5852eaf-web-typed-zero-TTS.png",
+      "bytes": 95397,
+      "sha256": "b563aff83a0bb5743f47f9b7ac14186faf6895acd08ea20b2fea84402104c49d",
+      "recommendation": "retain-public",
+      "group": "final-web",
+      "reason": "Final whole-pass Web raw, three reviewed screenshots and summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "c5852eaf-web.json",
+      "bytes": 114166,
+      "sha256": "6f3bde6aeec0cbf7e0315b6120d8e437950d8dfecd8a27bd5917fda2236078d6",
+      "recommendation": "retain-public",
+      "group": "final-web",
+      "reason": "Final whole-pass Web raw, three reviewed screenshots and summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "cc4d4e60-before.json",
+      "bytes": 89252,
+      "sha256": "8ee250dd9df6bf2b65fcbf2d1a385de8bcc6a46b9d962bf7f54e8b7c721a61da",
+      "recommendation": "archive-private",
+      "group": "cc4d4e60",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/cc4d4e60-before.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/cc4d4e60-before.json"
+    },
+    {
+      "relativePath": "cc4d4e60-native.json",
+      "bytes": 180573,
+      "sha256": "8720bf961a49cd70aa1f964f359b90e90d00f73c09c8520cbbf9c9a19e00ab26",
+      "recommendation": "archive-private",
+      "group": "cc4d4e60",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/cc4d4e60-native.json",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/cc4d4e60-native.json"
+    },
+    {
+      "relativePath": "d71f3948-before.json",
+      "bytes": 106720,
+      "sha256": "cc21d66bf20af9899adbb5db377f4a9e759da44e95d559aad82f2a87bdb9f1a5",
+      "recommendation": "retain-public",
+      "group": "final-native",
+      "reason": "Final native report, required prehash, two screenshots and concise summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "d71f3948-final-Pet.png",
+      "bytes": 23426,
+      "sha256": "c53a3fcd60565df53163022548df60e5d00332812f58210f7928a99dd730a4ce",
+      "recommendation": "retain-public",
+      "group": "final-native",
+      "reason": "Final native report, required prehash, two screenshots and concise summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "d71f3948-first-completed.png",
+      "bytes": 87329,
+      "sha256": "c340951209728b681420e2700896c533e6c2a97bd8c8c8eeac3f062677ac5899",
+      "recommendation": "retain-public",
+      "group": "final-native",
+      "reason": "Final native report, required prehash, two screenshots and concise summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "d71f3948-native.json",
+      "bytes": 3410136,
+      "sha256": "f5802f93fb0109b9362e0d2fc0a9c9d0680eba389d34b0a9f887039ee0c132d4",
+      "recommendation": "retain-public",
+      "group": "final-native",
+      "reason": "Final native report, required prehash, two screenshots and concise summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "final-native-d71f3948.md",
+      "bytes": 7933,
+      "sha256": "98a82cbda6c392f293415845515b1622e9ab11f4da4605c8e40909b845362db1",
+      "recommendation": "retain-public",
+      "group": "final-native",
+      "reason": "Final native report, required prehash, two screenshots and concise summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "final-web-c5852eaf.md",
+      "bytes": 6029,
+      "sha256": "7f99fc8442d32e270512c0ab40265de25d3819482e6a0276db5a2b70ef049004",
+      "recommendation": "retain-public",
+      "group": "final-web",
+      "reason": "Final whole-pass Web raw, three reviewed screenshots and summary.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "live-freeze-43147468.json",
+      "bytes": 307,
+      "sha256": "87ed8b10ef11dc21b0a464c9dd543e5089580c39f0f603e18ec4c36b3dc17dc9",
+      "recommendation": "retain-public",
+      "group": "final-live-parent",
+      "reason": "Parent-authored live evidence; no content review/rewrite or re-execution here.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "live-mimo-43147468.json",
+      "bytes": 11880,
+      "sha256": "88edc8a58ec667b44c087d84470ba37b0733ee3f08dc426d548a74061af33026",
+      "recommendation": "retain-public",
+      "group": "final-live-parent",
+      "reason": "Parent-authored live evidence; no content review/rewrite or re-execution here.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "live-mimo-43147468.md",
+      "bytes": 3024,
+      "sha256": "3d4896f6d99047efbaa074a058cc0f07aeb8f44f049d8c53878a3f8afac02e07",
+      "recommendation": "retain-public",
+      "group": "final-live-parent",
+      "reason": "Parent-authored live evidence; no content review/rewrite or re-execution here.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "native-blocked-219cec3e.md",
+      "bytes": 3669,
+      "sha256": "c6141f26ceff757f92a0cc8d764d872d48f4a8988bb1f03255e57c0a5cecf954",
+      "recommendation": "archive-private",
+      "group": "219cec3e",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/native-blocked-219cec3e.md",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/native-blocked-219cec3e.md"
+    },
+    {
+      "relativePath": "native-blocked-8bd686c4.md",
+      "bytes": 3811,
+      "sha256": "5abc4e8dd28f9afc44aabf03189da78d4d882fb9dbba4f2953fa0f182d7c4102",
+      "recommendation": "archive-private",
+      "group": "8bd686c4",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/native-blocked-8bd686c4.md",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/native-blocked-8bd686c4.md"
+    },
+    {
+      "relativePath": "native-checkpoint-35fad705.md",
+      "bytes": 7876,
+      "sha256": "eee0ae441ccf5d410d3ef298f83a9466cb0670000fcc380c0edbece1b85ef659",
+      "recommendation": "archive-private",
+      "group": "35fad705",
+      "reason": "Keep intermediate blocked/partial/debug raw, before-map, screenshots and related narrative together unchanged.",
+      "proposedArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/native-checkpoint-35fad705.md",
+      "actualArchivePath": ".companion-data/qa-private/companion-speech-output/evidence-archive-c5852eaf/native-checkpoint-35fad705.md"
+    },
+    {
+      "relativePath": "worker-901ed310.md",
+      "bytes": 3372,
+      "sha256": "ae86e4b93035dcd20023af65e6f199789e7f7025a3e1f8b3f9c1b9f3ba1bb822",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/assertions.json",
+      "bytes": 1964,
+      "sha256": "3fc3660f5ae90551267fba3a7f8d28a4deef8d043d4bd28fc01b2f444577cd30",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/dependencies.json",
+      "bytes": 137622,
+      "sha256": "5baebb35c9d312330d0ecbe5c25157fc174d7460ce550c05a2a0616821d4efd3",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/exit.txt",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/files.json",
+      "bytes": 1977,
+      "sha256": "9ff85ffc904994ec8f87b415d3fd8f4207f281a924c48e7f1223e3fa0e5cad3b",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/image.json",
+      "bytes": 191,
+      "sha256": "d6a389808ce9a1fa8001736bfb59d470479c4b8f5d46f810b322ef7991bfdfc9",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/inputs.json",
+      "bytes": 690398,
+      "sha256": "49d4cfee2a83f5acebfde9197005530ad083500ffeff377ada7526d796e95630",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/node.json",
+      "bytes": 526,
+      "sha256": "c389d5ea1e6f817bcefa9f5d1f1c0d123586ea710cdfe1e16e837034723ba20d",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/report.json",
+      "bytes": 1263,
+      "sha256": "67c4d8803e6fd2acfb6ea40ab6acf439267e48a3dbfae42bc190fe61b6e8804f",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/resources.json",
+      "bytes": 1039,
+      "sha256": "c56a3d9eb228b4804fad1620b532847269ecd07d8a51966809b590ce5e4594bb",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/roots.json",
+      "bytes": 20654,
+      "sha256": "5d419cf058b0539558fd82dc2bb10dfc072ecdc0843d6754e9c933648dd778c1",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    },
+    {
+      "relativePath": "worker-901ed310/scope.json",
+      "bytes": 201,
+      "sha256": "e243adbef928529050476697caddb2c36a11029b95090eab4d4803ddbfcad0c8",
+      "recommendation": "retain-public",
+      "group": "final-worker",
+      "reason": "Keep complete worker directory and summary together.",
+      "proposedArchivePath": null
+    }
+  ],
+  "notes": [
+    "Only new inventory/plan documents were written; all 52 evidence files were read for stat/hash and remain in place.",
+    "All three Parent-authored live files had appeared by this snapshot and are retained publicly; private live report/WAV/outer freeze remain untouched outside this inventory.",
+    "Future archival must preserve every byte/SHA and update public indexes deliberately. Old archived Markdown itself should not be rewritten; original-path mapping remains available here.",
+    "Use the existing .companion-data/qa-private location; no new archive directory has been created.",
+    "c5852eaf-web-before.json is the only proposed final-run duplicate archive; keep it publicly too if independent prehash access is preferred."
+  ],
+  "archivedAtUtc": "2026-11-12T01:46:19.424595+00:00",
+  "movedFiles": 27,
+  "deletedFiles": 0
+}

@@ -1,0 +1,13 @@
+{"file":".trellis/spec/shared/index.md","reason":"Shared project contracts and guideline routing; read relevant linked sections only."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"One plugin standard, reviewed source trust, real task/credential/media ownership and existing native IPC."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend conventions and package-specific contract index."}
+{"file":".trellis/spec/backend/companion-service.md","reason":"Single Agent/State, owner HTTP auth, stopped migration and cloud execution baseline."}
+{"file":".trellis/spec/backend/qq-platform-entry.md","reason":"Preserve M6 scope/grants/native receipts/byte custody while moving actual source IO local."}
+{"file":".trellis/spec/backend/desktop-companion.md","reason":"Keep Main personal snapshot/target fences and M4/M5 behavior; daemon link is a separate purpose."}
+{"file":".trellis/spec/frontend/index.md","reason":"Existing frontend structure and verification conventions; avoid another UI/state framework."}
+{"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Captured connection/CAS ownership and actual production desktop entry."}
+{"file":".trellis/spec/frontend/qq-management.md","reason":"Reuse pure forms and independent key/config/policy domains without making server forms local by name."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Check existing host/kernel/primitives before adding composition or helper abstractions."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace local source through authenticated task/media/state/effect and back to actual UI."}
+{"file":".trellis/tasks/11-13-local-plugin-host-qq-bridge/research/index.md","reason":"Discover targeted host, authority/media, transport and UX evidence; read the assigned topic rather than dumping all research."}
+{"file":".trellis/tasks/11-13-local-plugin-host-qq-bridge/research/transport-reuse.md","reason":"Critical existing IPC versus missing network authority, bounded byteplane and physical settlement limits."}

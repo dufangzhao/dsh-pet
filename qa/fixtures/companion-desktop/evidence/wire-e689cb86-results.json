@@ -1,0 +1,21 @@
+{
+  "scope": "browser-snapshot-wire-id-correlation-only",
+  "status": "passed",
+  "exitCode": 0,
+  "jobId": "bash-f717acc5236d44df",
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-wire.mjs",
+  "checks": ["actual-browser-snapshot-and-dom-match-service-and-both-desktop-projections"],
+  "correlation": {"agentId": "421bff74-2aaa-49db-aac6-6fc5a9e7f496", "messageId": "7b62ecef-631a-4643-ad15-5aadf977c806", "inputId": "233b212f-3bff-47d6-919f-e7c6a877968b", "browserSnapshotMatches": 2},
+  "screenshot": "qa/fixtures/companion-desktop/evidence/wire-e689cb86.png",
+  "screenshotReviewed": true,
+  "runnerSha256BeforeRun": "2634a8c4a55587dd85595f1225b3da15cc5704cf334d15700ce5709e3f2f27aa",
+  "displayFixtureSha256BeforeRun": "2c36c515ece4139b28d0ce0f36ecb2bfb834d376de141ca57bd06ab3419ade43",
+  "serviceFixtureSha256BeforeRun": "ad15280bdf0d57b5544b0dd240011b317640fac7e3c82057659e5726617af19f",
+  "productionMainSha256": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+  "consoleCssSha256": "adeb22bf7675f371213c7de190f904dd03b87758f455e64c97f1117aaf3b555d",
+  "consoleJsSha256": "4238ce82efa659a6a52261b5f832e8f2de62bacca0a73eebea11ad645ad8b311",
+  "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+  "method": "Actual web page initiated its snapshot request; Playwright observed the real response and compared the received identifiers with the canonical service and both production desktop bridge projections. No window state, request or response was fabricated.",
+  "cleanup": "The runner returned after finally closed browser, Electron, isolated service and owned Xvfb. Subsequent process and Docker checks found only pre-existing unrelated instances.",
+  "limit": "This is one short Linux D1 correlation scenario, not an aggregate A1–A9 or Windows-native pass."
+}

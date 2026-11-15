@@ -52,7 +52,7 @@ describe('应用页面识别', () => {
       page({ id: 'community', order: 20, owner: owner('community.translator') }),
     ]);
     expect(items.map((item) => item.icon)).toEqual(['bot', 'panel']);
-    expect(RECOVERY_ITEMS.map((item) => item.icon)).toEqual(['puzzle', 'info']);
+    expect(RECOVERY_ITEMS.map((item) => item.icon)).toEqual(['puzzle', 'shield', 'info']);
   });
 
   it('导航顺序跟着宿主的 order，不是本机数组顺序', () => {

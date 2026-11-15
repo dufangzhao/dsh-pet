@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.shared-speech",
+  "version": "0.1.0",
+  "displayName": { "en": "Shared speech output", "zh-CN": "共享语音输出" },
+  "description": {
+    "en": "Canonical reply preparation and cancellable speech streams for the same Agent"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "output",
+      "capability": "companion.speech.control@1",
+      "features": {
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "consumes": [{ "capability": "companion.speech.output@1", "optional": true }],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "capability-use", "capability": "companion.speech.output@1" }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["providerRef"],
+      "properties": {
+        "providerRef": { "type": "string", "maxLength": 256, "default": "pet.tts-magpie/magpie" }
+      }
+    },
+    "apply": { "providerRef": "immediate" }
+  }
+}

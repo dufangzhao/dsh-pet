@@ -1,0 +1,10 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Actual kernel, ConfigService and single-source application boundaries; avoid generated template assumptions"}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Existing owner-bound capabilities, Config CAS and real lifecycle cleanup"}
+{"file":".trellis/spec/backend/companion-service.md","reason":"Canonical SQLite facts/commands/events, Harness projection and independent work contracts"}
+{"file":".trellis/spec/backend/model-connections.md","reason":"Preserve native model identity, source/credential authority and controlled foreground changes"}
+{"file":".trellis/spec/backend/desktop-companion.md","reason":"Main/preload authority, current-target fences, saved facts and actual retirement outcomes"}
+{"file":".trellis/spec/frontend/shared-desktop-entry.md","reason":"Rendered target versus latest-ref fencing, form baselines, pending/saved/apply distinctions and actual DOM validation"}
+{"file":".trellis/spec/frontend/model-settings.md","reason":"Reuse existing form interaction principles without duplicating a reducer/framework"}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/controlled-persona-memory.md","reason":"Source-backed storage/lifecycle/migration findings; exact task contract supersedes provisional strict grammar proposal"}
+{"file":".trellis/tasks/archive/2026-11/11-08-controlled-persona-memory/research/persona-memory-ux.md","reason":"Actual web/desktop consumers, compact surfaces and required real interaction evidence"}
+{"file":".trellis/tasks/archive/2026-11/11-08-controlled-persona-memory/research/acceptance-plan.md","reason":"Bounded real regressions for profile application, memory ABA/replay, exclusive migration and actual two-client forms; no duplicate authority or synthetic native claims"}

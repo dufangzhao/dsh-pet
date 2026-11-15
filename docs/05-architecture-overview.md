@@ -1,6 +1,6 @@
 # 总体架构草案 v0.1
 
-状态：架构方向已定，技术与部署细节待选。不是可直接编码的冻结接口。
+状态：历史架构草案。现有桌面以[桌宠指南](34-plugin-pet-guide.md)为准，新增独立服务见[文字 Agent 指南](35-text-agent-foundation.md)及源码；当前方向由 [ADR-0015](adr/0015-independent-continuous-agent-runtime.md)的独立持续 Agent 和 [ADR-0016](adr/0016-cloud-service-and-pluggable-features.md)的云端服务、精简内核与可插拔功能共同确定。新设计及异步工具事件/计算状态分离统一维护在 [Trellis](../.trellis/tasks/11-06-unified-companion-architecture/design.md)。下文保留历史来源，不是本轮开工依据。
 
 ## 已确认约束
 

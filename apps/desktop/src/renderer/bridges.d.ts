@@ -1,5 +1,8 @@
 import type {
   ApplicationBridge,
+  DesktopCompanionBridge,
+  DesktopLocalHostBridge,
+  DesktopPresentationBridge,
   ConsoleBridge,
   DemoBridge,
   ModelConnectionBridge,
@@ -9,8 +12,12 @@ import type {
 
 declare global {
   interface Window {
+    readonly petCompanion?: DesktopCompanionBridge;
+    readonly petLocalPresentation?: DesktopPresentationBridge;
     readonly petDesignLab?: StartDesignLabPresentation;
     readonly petConsole?: ConsoleBridge;
+    /** 独立本地宿主的管理面；缺失表示这台机器没有本地宿主桥。 */
+    readonly petLocalHost?: DesktopLocalHostBridge;
     readonly petDemo?: DemoBridge;
     readonly petSettings?: SettingsLauncher;
     /**

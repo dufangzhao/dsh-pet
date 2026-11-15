@@ -2,7 +2,7 @@
   "name": "@pet/asr-cloud",
   "version": "0.0.0",
   "private": true,
-  "description": "云端识别插件：厂家表与适配器（M3-05 填充）",
+  "description": "\u4e91\u7aef\u8bc6\u522b\u63d2\u4ef6\uff1a\u5382\u5bb6\u8868\u4e0e\u9002\u914d\u5668\uff08M3-05 \u586b\u5145\uff09",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@pet/contracts": "workspace:*",
-    "@pet/plugin-sdk": "workspace:*"
+    "@pet/plugin-sdk": "workspace:*",
+    "@pet/audio-capture": "workspace:*"
   }
 }

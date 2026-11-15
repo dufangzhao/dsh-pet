@@ -1,0 +1,8 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Check actual reused services, isolated service data and preservation of the existing desktop."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Review authority, configuration revisions, lifecycle/resource cleanup and truthful receipts."}
+{"file":".trellis/spec/frontend/index.md","reason":"Check connected UI behavior, accessible controls and separation of task facts from optimistic presentation."}
+{"file":"docs/adr/0015-independent-continuous-agent-runtime.md","reason":"Reject a Session-centered user workflow, duplicate identity owners or a mandatory DSH host."}
+{"file":"docs/adr/0016-cloud-service-and-pluggable-features.md","reason":"Verify optional views, cloud/client separation and honest cancellation/recovery scope."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/current-runtime.md","reason":"Verify that long work is truly independent of foreground cancellation and that canonical records are not dual-written."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/upstream-runtimes.md","reason":"Require real next-step admission and cancellation evidence; fixtures do not prove native duplex or universal Harness compatibility."}
+{"file": ".trellis/spec/backend/companion-service.md", "reason": "Verify actual result/settlement, exact-source permissions, recovery enrichment and UI truthfulness"}

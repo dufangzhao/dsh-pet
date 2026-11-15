@@ -1,0 +1,229 @@
+{
+  "level": "real-magpie-cortico-docker",
+  "gateway": "http://127.0.0.1:3425/v1",
+  "model": "codex/gpt-6.1-sol",
+  "authSource": "local-client-id",
+  "startedAt": 1794126207895,
+  "maxNativeGenerations": 8,
+  "windowMs": 180000,
+  "nativeGenerations": [
+    {
+      "ordinal": 1,
+      "startedAt": 1794126210062,
+      "finishedAt": 1794126214154,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": [
+        "remember"
+      ]
+    },
+    {
+      "ordinal": 2,
+      "startedAt": 1794126214250,
+      "finishedAt": 1794126218383,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": [
+        "say"
+      ]
+    },
+    {
+      "ordinal": 3,
+      "startedAt": 1794126218462,
+      "finishedAt": 1794126222136,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "ordinal": 4,
+      "startedAt": 1794126222244,
+      "finishedAt": 1794126232661,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": [
+        "start_work"
+      ]
+    },
+    {
+      "ordinal": 5,
+      "startedAt": 1794126232766,
+      "finishedAt": 1794126236878,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": [
+        "say"
+      ]
+    },
+    {
+      "ordinal": 6,
+      "startedAt": 1794126236995,
+      "finishedAt": 1794126241076,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": [
+        "say"
+      ]
+    },
+    {
+      "ordinal": 7,
+      "startedAt": 1794126241157,
+      "finishedAt": 1794126245472,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": 200,
+          "outcome": "completed",
+          "purpose": "generation"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "ordinal": 8,
+      "startedAt": 1794126246660,
+      "finishedAt": 1794126246840,
+      "requestedOutputTokens": null,
+      "attempts": [
+        {
+          "status": null,
+          "outcome": "aborted"
+        }
+      ],
+      "tools": [],
+      "errorType": "GenerationError",
+      "causeType": "LLMError"
+    }
+  ],
+  "toolReceipts": [
+    {
+      "name": "remember",
+      "commandId": "effect-2d861443df7b5731b1a2dccf3f3c03bf760527afc1d721412cef100a0f7e24fa",
+      "status": "accepted",
+      "taskId": null,
+      "messageId": null
+    },
+    {
+      "name": "start_work",
+      "commandId": "effect-c9394e843bc5a07b40ce41882925cac0c55bfc670aa5556a6475661f63087088",
+      "status": "accepted",
+      "taskId": "df49fc9a-7003-465a-9db5-bcd4c3ea2679",
+      "messageId": null
+    }
+  ],
+  "memory": {
+    "key": "answer-style",
+    "value": "回答简短",
+    "revision": 1
+  },
+  "conversation": {
+    "inputId": "ac7eb3ca-5edb-41d3-8587-b513b9b36d02",
+    "assistant": "已记住你的偏好：回答简短。"
+  },
+  "primary": {
+    "inputId": "84f775a6-55bd-4a88-b3d7-fd2bd1d75363",
+    "taskId": "df49fc9a-7003-465a-9db5-bcd4c3ea2679",
+    "executionId": "exec-2119b65f39ea75e6a31ba3436c73f19d25dd44b0485fc5e3",
+    "admissionReceipt": {
+      "name": "start_work",
+      "commandId": "effect-c9394e843bc5a07b40ce41882925cac0c55bfc670aa5556a6475661f63087088",
+      "status": "accepted",
+      "taskId": "df49fc9a-7003-465a-9db5-bcd4c3ea2679",
+      "messageId": null
+    },
+    "runningObservedAt": 1794126232803,
+    "status": "completed",
+    "exitCode": 0,
+    "completedAt": 1794126246484,
+    "identityPreserved": true,
+    "total": 25,
+    "realModelToolReceipt": true
+  },
+  "interactionB": {
+    "inputId": "e3a91829-ef79-4965-aacf-f3779fc36ea3",
+    "assistant": "我现在能继续交流",
+    "publishedAt": 1794126240986,
+    "taskStatusAtReplyObservation": "running",
+    "nativeObservation": {
+      "firstNativeGeneration": 6,
+      "observedAt": 1794126237019,
+      "taskStatus": "running",
+      "inputId": "e3a91829-ef79-4965-aacf-f3779fc36ea3"
+    }
+  },
+  "artifacts": [
+    {
+      "name": "summary.md",
+      "artifactId": "artifact-33dc87a34ab39689f1d071d27e8866845c0d4af2dc78a73e",
+      "taskId": "df49fc9a-7003-465a-9db5-bcd4c3ea2679",
+      "sizeBytes": 52,
+      "downloadedBytes": 52,
+      "sha256": "23f866645a9d7c3f2ce8da5eb5d2aa25278a87ffe7b20220ef4d87b0579e28d2",
+      "text": "三项数据：A = 12，B = 8，C = 5。\n\nTotal: 25\n"
+    },
+    {
+      "name": "items.csv",
+      "artifactId": "artifact-870beedcd1f1cae70ea589184904b1956d6719ab672472e6",
+      "taskId": "df49fc9a-7003-465a-9db5-bcd4c3ea2679",
+      "sizeBytes": 34,
+      "downloadedBytes": 34,
+      "sha256": "c9258681b1e491137dcb201e9ea9a9cb3475201e82d7953e45ddca77c15b804e",
+      "text": "item,amount\nA,12\nB,8\nC,5\nTOTAL,25\n"
+    }
+  ],
+  "optionalCancellation": {
+    "attempted": false,
+    "reason": "insufficient-settled-native-budget-for-optional-task-and-result-rounds",
+    "callsUsed": 7,
+    "pendingNative": 1,
+    "existingEvidence": "qa/companion-acceptance.md + companion-service Docker integration gates"
+  },
+  "a2Passed": true,
+  "failure": null,
+  "cleanup": {
+    "serviceClosed": true,
+    "ownedContainersAbsent": true
+  },
+  "image": "1panel/deepseek-harness:0.2.0-rc.2",
+  "imageId": "sha256:a9975a0df83b07f6ef3a57098174a8303cb0e322570e1d2f175ceba33f417a72",
+  "nativeGenerationCalls": 8,
+  "stopReason": null,
+  "finishedAt": 1794126246933,
+  "elapsedMs": 39038
+}

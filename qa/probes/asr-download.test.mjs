@@ -785,10 +785,10 @@ describe('返修回归：逐段路径检查（R1/R2）', () => {
   });
 
   test('toSafeSegmentsWithin 拒绝绝对路径与穿越', () => {
-    const root = path.resolve('C:/ws-root');
+    const root = path.resolve('ws-root');
     assert.deepEqual(toSafeSegmentsWithin(root, '.cache/asr-models', 'E_X').segments, ['.cache', 'asr-models']);
     assert.throws(() => toSafeSegmentsWithin(root, '../x', 'E_X'), /repoRoot/);
-    assert.throws(() => toSafeSegmentsWithin(root, 'C:/Windows', 'E_X'), /repoRoot/);
+    assert.throws(() => toSafeSegmentsWithin(root, path.resolve(root, '../outside-ws-root'), 'E_X'), /repoRoot/);
   });
 });
 

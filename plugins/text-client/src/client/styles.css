@@ -1,0 +1,541 @@
+/*
+ * 文字客户端的页面样式。
+ *
+ * 一屏一件事：左边对话与输入，右边任务。只有细线分区，不用卡片阴影；
+ * 颜色全部取 @pet/ui-kit 的语义令牌，因此深浅色与对比度跟着既有系统走。
+ * 唯一实心强调色留给「发送」。
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  font-family: var(--pk-font);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pk-ring);
+  outline-offset: 2px;
+}
+
+/* ---- 连接入口 ---- */
+
+.tc-gate {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 32px 20px;
+}
+
+.tc-gate__inner {
+  width: min(400px, 100%);
+}
+
+.tc-gate__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.tc-gate__lead {
+  margin: 6px 0 28px;
+  color: var(--pk-muted);
+  font-size: 14px;
+}
+
+.tc-gate__form {
+  display: grid;
+  gap: 8px;
+}
+
+.tc-gate__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tc-gate__input {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  font-family: var(--pk-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.tc-gate__hint {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 12.5px;
+}
+
+.tc-gate__error {
+  margin: 0;
+  color: var(--pk-danger);
+  font-size: 13px;
+}
+
+.tc-gate .tc-send {
+  margin-top: 8px;
+}
+
+/* ---- 外壳 ---- */
+
+.tc-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.tc-head {
+  display: grid;
+  gap: 6px;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.tc-head__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tc-head__actions {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.tc-agent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+}
+
+.tc-agent__name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tc-agent__mode {
+  color: var(--pk-muted);
+  font-size: 12.5px;
+}
+
+.tc-conn {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 12.5px;
+  color: var(--pk-muted);
+}
+
+.tc-conn__time,
+.tc-task__meta,
+.tc-compose__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-conn__hint {
+  min-width: 0;
+}
+
+.tc-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pk-accent-text);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.tc-link:disabled {
+  color: var(--pk-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+.tc-banner {
+  margin: 0;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--pk-border);
+  background: var(--pk-danger-soft);
+  color: var(--pk-danger);
+  font-size: 13px;
+}
+
+.tc-banner--quiet {
+  background: var(--pk-surface);
+  color: var(--pk-muted);
+}
+
+/* ---- 主体：对话 + 任务 ---- */
+
+.tc-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  flex: 1;
+  min-height: 0;
+}
+
+.tc-chat {
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  min-height: 0;
+  border-right: 1px solid var(--pk-border);
+}
+
+.tc-chat__log {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 20px 24px 8px;
+  scrollbar-gutter: stable;
+}
+
+.tc-chat__empty {
+  margin: 0;
+  padding-top: 24px;
+  color: var(--pk-muted);
+  font-size: 14px;
+}
+
+.tc-note {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 12.5px;
+}
+
+.tc-chat > .tc-note {
+  padding: 0 24px 8px;
+}
+
+.tc-msg {
+  max-width: 68ch;
+  margin: 0 0 20px;
+}
+
+.tc-msg__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin-bottom: 3px;
+}
+
+.tc-msg__role {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tc-msg--notice .tc-msg__role {
+  color: var(--pk-muted);
+}
+
+.tc-msg__time,
+.tc-msg__flag {
+  color: var(--pk-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-msg__text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* 助手回复不缩进、不加底色，只用左侧一条细线把它和「你」分开。 */
+.tc-msg--assistant .tc-msg__text {
+  padding-left: 12px;
+  border-left: 2px solid var(--pk-border);
+}
+
+.tc-msg--notice .tc-msg__text {
+  color: var(--pk-muted);
+  font-size: 13.5px;
+}
+
+/* 未确认的本地消息用虚线边和「正在发送」说明，不冒充已送达。 */
+.tc-msg--pending .tc-msg__text {
+  padding: 6px 10px;
+  border: 1px dashed var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  color: var(--pk-muted);
+}
+
+/* ---- 输入 ---- */
+
+.tc-compose {
+  display: grid;
+  gap: 6px;
+  padding: 12px 24px 18px;
+  border-top: 1px solid var(--pk-border);
+}
+
+.tc-compose__label {
+  color: var(--pk-muted);
+  font-size: 12.5px;
+}
+
+.tc-compose__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius);
+  background: var(--pk-bg);
+  font-size: 15px;
+  line-height: 1.55;
+  resize: vertical;
+  min-height: 76px;
+}
+
+.tc-compose__input:disabled {
+  background: var(--pk-surface);
+  color: var(--pk-muted);
+}
+
+.tc-compose__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tc-compose__count {
+  color: var(--pk-muted);
+  font-size: 12px;
+}
+
+.tc-send {
+  min-height: 34px;
+  padding: 0 18px;
+  border: 1px solid var(--pk-accent);
+  border-radius: var(--pk-radius);
+  background: var(--pk-accent);
+  color: var(--pk-accent-on);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tc-send:hover:not(:disabled) {
+  background: var(--pk-accent-hover);
+  border-color: var(--pk-accent-hover);
+}
+
+.tc-send:disabled {
+  border-color: var(--pk-border);
+  background: var(--pk-border);
+  color: var(--pk-muted);
+  cursor: not-allowed;
+}
+
+/* ---- 任务 ---- */
+
+.tc-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 18px 20px;
+}
+
+/* 人格与记忆在侧栏里排在任务之后，与任务之间留出同一档间距。 */
+.tc-side__persona {
+  min-width: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--pk-border);
+}
+
+.tc-tasks__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.tc-tasks__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tc-tasks__count {
+  color: var(--pk-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-tasks__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tc-task {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--pk-border);
+}
+
+.tc-task__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.tc-task__title {
+  flex: 1 1 100%;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+
+.tc-task__meta {
+  color: var(--pk-muted);
+  font-size: 12px;
+}
+
+.tc-task__stop {
+  margin-left: auto;
+  padding: 1px 8px;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pk-text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tc-task__stop:hover:not(:disabled) {
+  border-color: var(--pk-danger);
+  color: var(--pk-danger);
+}
+
+.tc-task__stop:disabled {
+  border-color: var(--pk-border);
+  color: var(--pk-muted);
+  cursor: default;
+}
+
+.tc-task__artifacts {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tc-task__artifacts li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tc-task__artifacts .tc-link {
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.tc-task__detail {
+  font-size: 12.5px;
+}
+
+.tc-task__detail summary {
+  color: var(--pk-muted);
+  cursor: pointer;
+}
+
+.tc-task__log {
+  max-height: 180px;
+  margin: 6px 0 0;
+  padding: 8px;
+  overflow: auto;
+  border-radius: var(--pk-radius);
+  background: var(--pk-sunken);
+  font-family: var(--pk-font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- 窄屏：任务折到对话下面，输入仍贴着底边 ---- */
+
+@media (max-width: 760px) {
+  /* 任务区固定占下方一段并自己滚动：若用 auto，任务一多就把聊天行挤成 0，
+     而聊天自身的高度会溢出并盖住输入框。 */
+  .tc-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 38vh);
+    overflow: hidden;
+  }
+
+  .tc-chat {
+    min-height: 0;
+    border-right: 0;
+  }
+
+  .tc-chat__log {
+    padding: 16px 16px 4px;
+  }
+
+  .tc-chat > .tc-note,
+  .tc-compose {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .tc-side {
+    overflow-y: auto;
+    border-top: 1px solid var(--pk-border);
+    padding: 14px 16px 20px;
+  }
+
+  .tc-head {
+    padding: 12px 16px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

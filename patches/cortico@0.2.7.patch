@@ -1,0 +1,54 @@
+diff --git a/src/providers/transport/chat.ts b/src/providers/transport/chat.ts
+index d9a3ce5aac17b48bb7b269f3f36f6d0e3abfe258..e4fe8a12aa3b7d49cc086df2d73e681da4e009b2 100644
+--- a/src/providers/transport/chat.ts
++++ b/src/providers/transport/chat.ts
+@@ -62,6 +62,7 @@ export abstract class OpenAIHttpClient extends BaseProvider {
+     const key = OpenAIHttpClient.streakKey(request.model ?? '', options.role);
+     return generate(request, options, origin, {
+       url: `${this.baseUrl}${this.chatPath}`, body: this.buildResponseBody(request, options),
++      eventCodeUnitsFloor: this.eventCodeUnitsFloor,
+       headers: () => this.headers(), refresh: () => this.onAuthError(),
+       assembly: () => this.responseAssembly(request), parse: raw => this.parseResponse(raw, request), log: this.log,
+       succeeded: () => { if (!options.diagnostic) this.inflightStreak.delete(key); },
+@@ -90,6 +91,8 @@ export abstract class OpenAIHttpClient extends BaseProvider {
+   protected log: Logger;
+   /** 相对 baseUrl 的端点路径，可由适配器覆盖。 */
+   protected chatPath = '/chat/completions';
++  /** Internal provider opt-in, 0..65536 UTF-16 code units; validated once by generate(). */
++  protected eventCodeUnitsFloor = 0;
+   /** 同一 (model, role) 上的连续在途生成失败数;成功即清零。 */
+   private inflightStreak = new Map<string, number>();
+   /** 在途生成失败的时刻表,只用于频次告警(见 noteInflightFailure)。 */
+diff --git a/src/providers/transport/response-http.ts b/src/providers/transport/response-http.ts
+index 97fb654969309c58947226e5156ab7b8855163cd..697db0d569d4d0ad82c6980558da294ecbd44fd9 100644
+--- a/src/providers/transport/response-http.ts
++++ b/src/providers/transport/response-http.ts
+@@ -9,6 +9,8 @@ import type { ResponseAssembly } from './response-assembly.ts';
+ export interface ResponseTransport {
+   url: string;
+   body: Record<string, unknown>;
++  /** Provider-owned SSE framing floor in UTF-16 code units; never changes output limits. */
++  eventCodeUnitsFloor?: number;
+   headers(): Record<string, string> | Promise<Record<string, string>>;
+   refresh(): Promise<boolean>;
+   assembly(): ResponseAssembly;
+@@ -113,6 +115,9 @@ export async function generate(request: Request, options: GenerateOptions, origi
+   const delays = options.diagnostic ? [] : [1000, 4000, 10000];
+   const fail = (error: unknown): GenerationError => new GenerationError(errorText(error) + reqIdSuffix(attempts.filter(attempt => attempt.purpose !== 'diagnostic').at(-1)?.requestId), attempts,
+     partial, origin, error instanceof LLMError ? error.status : 0, error instanceof LLMError ? error.body : '', { cause: error });
++  const eventCodeUnitsFloor = transport.eventCodeUnitsFloor ?? 0;
++  if (!Number.isSafeInteger(eventCodeUnitsFloor) || eventCodeUnitsFloor < 0 || eventCodeUnitsFloor > 65536)
++    throw fail(new ResponseProtocolError('Invalid SSE event floor in UTF-16 code units'));
+   for (let ordinal = 0; ordinal <= delays.length; ordinal++) {
+     try {
+       if (options.signal?.aborted) throw abortError(options.signal);
+@@ -184,7 +189,8 @@ export async function generate(request: Request, options: GenerateOptions, origi
+         const decoder = new TextDecoder();
+         // one event carries at most the whole output again (a done or completed event repeats its items), and
+         // JSON escaping at most doubles ordinary text
+-        const frames = new EventDecoder(outputMax * 2);
++        // Legal resources can repeat input instructions as well as output. Keep the output guard unchanged.
++        const frames = new EventDecoder(Math.max(outputMax * 2, eventCodeUnitsFloor));
+         touchContent();
+         stream: for (;;) {
+           const chunk = await reader.read();

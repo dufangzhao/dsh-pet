@@ -1,186 +1,230 @@
-import { ModelOAuth } from './model-oauth.js';
-import { PresentationController, handlePresentationRequest } from './presentation-controller.js';
-import {
-  SpeechOutputController,
-  handleSpeechOutputRequest,
-  type SpeechOutputAction,
-} from './speech-output-controller.js';
-import { VoiceInputController, handleVoiceInputRequest } from './voice-input-controller.js';
-import { PRESENTATION_IPC, SPEECH_OUTPUT_IPC, VOICE_INPUT_IPC } from '@pet/contracts';
-import { ModelConnectionController } from './model-connection-controller.js';
-import { handleModelConnectionRequest } from './model-connection-request.js';
-import { MODEL_CONNECTION_IPC, START_DESIGN_LAB_FLAG } from '@pet/contracts';
-import { ApplicationController } from './application-controller.js';
-import { migrateApplicationProfile } from './application-profile-migration.js';
-import { handleApplicationRequest } from './application-request.js';
-import { APPLICATION_IPC, APPLICATION_DEFAULTS, type ApplicationPreferences } from '@pet/contracts';
 import {
   app,
   BrowserWindow,
   ipcMain,
   session,
   safeStorage,
+  dialog,
   shell,
   type IpcMainInvokeEvent,
 } from 'electron';
-import { mkdirSync } from 'node:fs';
 import path from 'node:path';
+import { mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CONSOLE_IPC, HOST_IPC, PET_IPC, makeError, type PetSnapshot } from '@pet/contracts';
+import {
+  PET_IPC,
+  HOST_IPC,
+  CONSOLE_IPC,
+  PRESENTATION_IPC,
+  DESKTOP_SPEECH_IPC,
+  SPEECH_FEATURE_PLUGIN_ID,
+  DESKTOP_COMPANION_IPC,
+  DESKTOP_LOCAL_HOST_IPC,
+  DESKTOP_VOICE_IPC,
+  VOICE_CAPTURE_PLUGIN_ID,
+  DESKTOP_PRESENTATION_IPC,
+  DESKTOP_COMPANION_PLUGIN_ID,
+  APPLICATION_PLUGIN_IDS,
+  type DesktopPresentationPreferences,
+  type PetSnapshot,
+} from '@pet/contracts';
+import { createSafeStorageCipher, KernelFault, type SecretCipher } from '@pet/host-kernel';
+import { DesktopHost } from './desktop-host.js';
+import { DesktopCompanionController } from './companion-client-controller.js';
+import { DesktopLocalHostController } from './local-host-controller.js';
+import {
+  handleDesktopLocalHostRequest,
+  type DesktopLocalHostAction,
+} from './local-host-request.js';
+import {
+  attachLocalHost,
+  startOrAttachLocalHost,
+  localHostEnvironment,
+} from '../local-host/client.js';
+import { DesktopCompanionHostAdapter } from './companion-client-host.js';
+import {
+  handleDesktopCompanionRequest,
+  type DesktopCompanionAction,
+} from './companion-client-request.js';
+import {
+  LocalPresentationController,
+  handleDesktopPresentationRequest,
+} from './local-presentation-controller.js';
+import { SharedApplicationState } from './shared-application-state.js';
+import { admittedApplicationSource } from './application-admission.js';
+import { mvpReadiness } from './mvp-readiness.js';
 import { ConsoleWindow } from './windows/console-window.js';
-import { consoleSnapshot } from './console-snapshot.js';
+import { createPetWindow, type PetWindowController } from './windows/pet-window.js';
+import { handlePetRequest, isTrustedPetSource, type PetRequestSource } from './ipc-request.js';
 import { handleSettingsOpenRequest } from './settings-open-request.js';
+import { HostStatusRequests } from './host-request.js';
+import { consoleSnapshot } from './console-snapshot.js';
 import { handleConsoleRequest } from './console-request.js';
 import { handleConsoleConfigRequest } from './console-config-request.js';
 import { ConsolePluginRequests } from './console-plugin-request.js';
 import { ConsoleSecurityRequests } from './console-security-request.js';
-import { DemoController } from './demo-controller.js';
+import { PresentationController, handlePresentationRequest } from './presentation-controller.js';
+import { SharedSpeechController } from './shared-speech-controller.js';
+import { SharedSpeechHost } from './shared-speech-host.js';
+import { handleDesktopSpeechRequest, type DesktopSpeechAction } from './shared-speech-request.js';
 import { createDemoTray } from './demo-tray.js';
-import { handleDemoRequest, type DemoAction } from './demo-request.js';
-import { mvpReadiness } from './mvp-readiness.js';
-import { installDemoMediaPermission } from './demo-media-permission.js';
-import { DEMO_IPC, DEMO_PLUGIN_IDS } from '@pet/contracts';
-import { createSafeStorageCipher, type SecretCipher } from '@pet/host-kernel';
-import { DesktopHost } from './desktop-host.js';
-import { HostStatusRequests } from './host-request.js';
-import { createPetWindow, type PetWindowController } from './windows/pet-window.js';
-import { handlePetRequest, isTrustedPetSource, type PetRequestSource } from './ipc-request.js';
+
+import { SharedVoiceController } from './shared-voice-controller.js';
+import { SharedVoiceCaptureHost } from './shared-voice-capture-host.js';
+import { handleDesktopVoiceRequest, type DesktopVoiceAction } from './shared-voice-request.js';
+import { installSharedVoicePermission } from './shared-voice-permission.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const startDesignLab = !app.isPackaged && process.argv.includes(START_DESIGN_LAB_FLAG);
-const rendererPath = path.resolve(here, '../renderer/pet/index.html');
-const expectedUrl = pathToFileURL(rendererPath).href;
-const consolePath = path.resolve(here, '../renderer/console/index.html');
-const consoleUrl = pathToFileURL(consolePath).href;
+const petEntry = path.resolve(here, '../renderer/pet/index.html');
+const consoleEntry = path.resolve(here, '../renderer/console/index.html');
+const petUrl = pathToFileURL(petEntry).href;
+const consoleUrl = pathToFileURL(consoleEntry).href;
+const preload = path.resolve(here, '../preload/index.cjs');
+let host: DesktopHost | undefined;
+let companion: DesktopCompanionController | undefined;
+let localPlugins: DesktopLocalHostController | undefined;
+let voice: SharedVoiceController | undefined;
+let local: LocalPresentationController | undefined;
+let speech: SharedSpeechController | undefined;
+let pet: PetWindowController | undefined;
+let window: BrowserWindow | undefined;
+let tray: ReturnType<typeof createDemoTray> | undefined;
+let preferences: DesktopPresentationPreferences | null = null;
+let quitting = false;
+let petBudgetStart = performance.now();
+let petRequests = 0;
 const settings = new ConsoleWindow(
-  consolePath,
-  path.resolve(here, '../preload/index.cjs'),
-  () => {
-    demo?.onConsoleClosed();
-    presentation.ownerClosed();
+  consoleEntry,
+  preload,
+  () => presentation.ownerClosed(),
+  false,
+  (owner) => {
+    let documentFrame = owner.webContents.mainFrame;
+    owner.on('hide', () => voice?.ownerHidden());
+    owner.webContents.on('did-start-navigation', (details) => {
+      if (details.isMainFrame && !details.isSameDocument) voice?.ownerHidden();
+    });
+    owner.webContents.on('did-navigate', () => {
+      voice?.ownerGone(documentFrame);
+      documentFrame = owner.webContents.mainFrame;
+    });
+    owner.webContents.on('render-process-gone', () => voice?.ownerGone(documentFrame));
+    owner.webContents.once('destroyed', () => voice?.ownerGone(documentFrame));
   },
-  startDesignLab,
 );
-const channels = [
-  PET_IPC.snapshot,
-  PET_IPC.interaction,
-  PET_IPC.dragStart,
-  PET_IPC.dragEnd,
-  PET_IPC.preview,
-  PET_IPC.quit,
-];
-function windowSource(
+const broadcast = (channel: string): void => {
+  for (const target of [window, settings.current])
+    if (target && !target.isDestroyed()) target.webContents.send(channel);
+};
+const presentation = new PresentationController(
+  () => broadcast(PRESENTATION_IPC.changed),
+  (request) => {
+    if (!settings.current || settings.current.isDestroyed())
+      throw new Error('Settings unavailable');
+    settings.current.webContents.send(PRESENTATION_IPC.appearanceRequested, request);
+  },
+);
+function sourceFor(
   event: IpcMainInvokeEvent,
   target: BrowserWindow | undefined,
-  url: string,
+  expectedUrl: string,
 ): PetRequestSource {
-  const frame = event.senderFrame;
   return {
     senderId: event.sender.id,
     expectedId: target?.webContents.id ?? -1,
-    mainFrame: frame !== null && frame === target?.webContents.mainFrame,
-    frameUrl: frame?.url ?? '',
-    expectedUrl: url,
+    mainFrame: event.senderFrame !== null && event.senderFrame === target?.webContents.mainFrame,
+    frameUrl: event.senderFrame?.url ?? '',
+    expectedUrl,
   };
 }
-let controller: PetWindowController | undefined;
-let window: BrowserWindow | undefined;
-let budgetStart = performance.now();
-let requests = 0;
-let host: DesktopHost | undefined;
-let demo: DemoController | undefined;
-let application: ApplicationController | undefined;
-let models: ModelConnectionController | undefined;
-let speech: SpeechOutputController | undefined;
-let voice: VoiceInputController | undefined;
-const presentation = new PresentationController(
-  () => {
-    for (const target of [window, settings.current])
-      if (target && !target.isDestroyed()) target.webContents.send(PRESENTATION_IPC.changed);
-  },
-  (request) => {
-    const target = settings.current;
-    if (!target || target.isDestroyed()) throw new Error('Settings owner unavailable');
-    target.webContents.send(PRESENTATION_IPC.appearanceRequested, request);
-  },
-);
-let preferences: Readonly<ApplicationPreferences> = APPLICATION_DEFAULTS;
-let tray: ReturnType<typeof createDemoTray> | undefined;
-let hostStarting: Promise<DesktopHost> | undefined;
-let quitting = false;
-function quitWithCode(code: number): void {
+function requestSource(event: IpcMainInvokeEvent) {
+  const consoleSource = sourceFor(event, settings.current, consoleUrl);
+  return isTrustedPetSource(consoleSource)
+    ? { ...consoleSource, role: 'console' as const }
+    : { ...sourceFor(event, window, petUrl), role: 'pet' as const };
+}
+function syncPet(): void {
+  if (!window || window.isDestroyed() || !host) return;
+  const avatar = host.manager.get({ pluginId: 'pet.avatar-default', instanceId: 'default' });
+  const client = host.manager.get({ pluginId: DESKTOP_COMPANION_PLUGIN_ID, instanceId: 'default' });
+  // The lawful Linux text composition renders the existing pure SVG, not a Windows avatar plugin.
+  const available =
+    process.platform === 'win32'
+      ? !!avatar && host.manager.isActive(avatar.owner)
+      : !!client && host.manager.isActive(client.owner);
+  const visible = available && (preferences?.visible ?? true);
+  if (visible && !window.isVisible()) window.showInactive();
+  if (!visible && window.isVisible()) window.hide();
+}
+function refreshSpeech(): void {
+  void speech?.refreshSource().catch(() => console.error('Speech source refresh failed'));
+}
+function stopSpeech(): void {
+  const current = speech;
+  if (!current) return;
+  void current
+    .getState()
+    .then(async (state) => {
+      if (!state.ok) throw new KernelFault(state.error.code);
+      if (!state.value.connectionId) return;
+      const result = await current.stop({ connectionId: state.value.connectionId });
+      if (!result.ok && result.error.code !== 'stale-owner')
+        throw new KernelFault(result.error.code);
+    })
+    .catch(() => console.error('Speech stop failed'));
+}
+async function quit(exitCode = 0): Promise<void> {
   if (quitting) return;
   quitting = true;
-  for (const channel of channels) ipcMain.removeHandler(channel);
-  ipcMain.removeHandler(HOST_IPC.status);
-  ipcMain.removeHandler(CONSOLE_IPC.open);
-  ipcMain.removeHandler(CONSOLE_IPC.snapshot);
-  ipcMain.removeHandler(CONSOLE_IPC.stopAll);
-  ipcMain.removeHandler(CONSOLE_IPC.inspectConfig);
-  ipcMain.removeHandler(CONSOLE_IPC.saveConfig);
-  ipcMain.removeHandler(CONSOLE_IPC.pluginAction);
-  for (const channel of Object.values(MODEL_CONNECTION_IPC)) ipcMain.removeHandler(channel);
-  for (const channel of Object.values(APPLICATION_IPC))
-    if (channel !== APPLICATION_IPC.changed) ipcMain.removeHandler(channel);
-  for (const channel of Object.values(DEMO_IPC))
-    if (channel !== DEMO_IPC.changed) ipcMain.removeHandler(channel);
-  for (const channel of [
-    CONSOLE_IPC.security,
-    CONSOLE_IPC.trust,
-    CONSOLE_IPC.preset,
-    CONSOLE_IPC.approval,
-    CONSOLE_IPC.audit,
-    CONSOLE_IPC.restoreBuiltin,
-  ])
-    ipcMain.removeHandler(channel);
   tray?.destroy();
-  tray = undefined;
   presentation.ownerClosed();
-  speech?.close();
-  voice?.close();
-  for (const channel of [
-    ...Object.values(SPEECH_OUTPUT_IPC),
-    ...Object.values(VOICE_INPUT_IPC),
-    ...Object.values(PRESENTATION_IPC),
-  ])
-    ipcMain.removeHandler(channel);
-  models?.close();
-  application?.close();
-  demo?.close();
+  let speechCleanupFailed = false;
+  try {
+    // The Pet frame and live connection must remain available for release/cancel acknowledgments.
+    await speech?.close();
+  } catch {
+    speechCleanupFailed = true;
+  }
   settings.close();
-  controller?.dispose();
-  void (async () => {
-    const active = host ?? (await hostStarting?.catch(() => undefined));
-    const stopped = await active?.shutdown();
-    app.exit(stopped && !stopped.exitConfirmed ? 1 : code);
-  })().catch(() => app.exit(1));
+  pet?.dispose();
+  try {
+    // Detach this GUI's management session; the independently owned host keeps running.
+    await localPlugins?.close();
+    // PluginManager joins the client source's Main drain and actual worker disposal.
+    const stopped = await host?.shutdown();
+    await voice?.close();
+    await companion?.close();
+    app.exit(speechCleanupFailed || (stopped && !stopped.exitConfirmed) ? 1 : exitCode);
+  } catch {
+    app.exit(1);
+  }
 }
 if (!app.isPackaged) {
-  const acceptanceFlag = process.argv.find((arg) => arg.startsWith('--demo-acceptance='));
-  if (acceptanceFlag && !/^--demo-acceptance=[A-Za-z0-9-]{1,64}$/.test(acceptanceFlag))
+  const flag = process.argv.find((arg) => arg.startsWith('--demo-acceptance='));
+  if (flag && !/^--demo-acceptance=[A-Za-z0-9-]{1,64}$/.test(flag))
     throw new Error('Invalid acceptance profile');
-  const acceptanceProfile = acceptanceFlag
-    ? 'pet-demo-acceptance-' + acceptanceFlag.slice('--demo-acceptance='.length)
-    : 'pet-demo-acceptance-profile';
   const profile = path.resolve(
     here,
     '../../../../.cache/',
-    process.argv.includes('--demo-acceptance') || acceptanceFlag !== undefined
-      ? acceptanceProfile
-      : startDesignLab
-        ? 'pet-start-design-lab-profile'
-        : process.argv.includes('--m1-host-smoke')
-          ? 'pet-host-smoke-profile'
-          : process.argv.includes('--m0-key-lab')
-            ? 'pet-key-lab-profile'
-            : process.argv.includes('--m0-mouse-lab')
-              ? 'pet-mouse-lab-profile'
-              : 'pet-prototype-profile',
+    flag
+      ? 'pet-demo-acceptance-' + flag.slice('--demo-acceptance='.length)
+      : 'pet-prototype-profile',
   );
   mkdirSync(profile, { recursive: true });
   app.setPath('userData', profile);
 }
 if (!app.requestSingleInstanceLock()) app.exit(0);
+const localRoles = [
+  DESKTOP_COMPANION_PLUGIN_ID,
+  VOICE_CAPTURE_PLUGIN_ID,
+  SPEECH_FEATURE_PLUGIN_ID,
+  APPLICATION_PLUGIN_IDS.profile,
+  APPLICATION_PLUGIN_IDS.start,
+  APPLICATION_PLUGIN_IDS.persona,
+  APPLICATION_PLUGIN_IDS.appearance,
+  APPLICATION_PLUGIN_IDS.conversation,
+  'pet.avatar-default',
+];
 const startup = app
   .whenReady()
   .then(async () => {
@@ -192,122 +236,207 @@ const startup = app
     try {
       cipher = createSafeStorageCipher(safeStorage);
     } catch {
-      // No approved encryption backend: leave credentials unavailable, never use plaintext.
+      /* Existing encrypted storage is optional; service tokens remain process-only. */
     }
-    const modelRoot = path.resolve(here, '../../../../.cache/asr-models');
-    const syncAvatar = () => {
-      if (!window || window.isDestroyed()) return;
-      const avatar = host?.manager.get({ pluginId: DEMO_PLUGIN_IDS.avatar, instanceId: 'default' });
-      const enabled =
-        preferences.visible &&
-        !!avatar &&
-        avatar.origin === 'builtin' &&
-        host!.manager.isActive(avatar.owner);
-      if (enabled && !window.isVisible()) window.showInactive();
-      if (!enabled && window.isVisible()) window.hide();
-    };
-    const notifyApplication = () => {
-      for (const target of [window, settings.current])
-        if (target && !target.isDestroyed()) target.webContents.send(APPLICATION_IPC.changed);
-    };
-    const notifyDemo = () => {
-      syncAvatar();
-      notifyApplication();
-      for (const target of [window, settings.current])
-        if (target && !target.isDestroyed()) target.webContents.send(DEMO_IPC.changed);
-    };
-    hostStarting = DesktopHost.create({
-      adapters: mvpReadiness(modelRoot),
-      onChanged: () => {
-        speech?.onHostChanged();
-        if (application) void application.refreshPreferences().catch(() => notifyApplication());
-        else notifyApplication();
-      },
-      media: {
-        input: (reference, writer) => {
-          if (demo) demo.input(reference, writer);
-          else writer.cancel();
-        },
-        output: (reference, reader) => {
-          if (speech?.output(reference, reader) || voice?.output(reference, reader)) return;
-          if (demo) demo.output(reference, reader);
-          else reader.cancel();
-        },
-        capabilityTask: (parent, child, capability, method) => {
-          if (speech?.capabilityTask(parent, child, capability, method)) return;
-          demo?.capabilityTask(parent, child, capability, method);
-        },
-      },
-      ...(cipher ? { cipher } : {}),
-      executable: process.execPath,
+    host = await DesktopHost.create({
+      executable:
+        app.isPackaged && process.platform === 'linux'
+          ? path.join(path.dirname(process.execPath), 'pet-worker')
+          : process.execPath,
       workerEntry: path.resolve(here, '../runtime/worker.cjs'),
       builtinDirectory: app.isPackaged
         ? path.join(process.resourcesPath, 'plugins')
         : path.resolve(here, '../../../../plugins'),
       userDirectory: path.join(app.getPath('userData'), 'plugins'),
+      sharedCompanion: true,
+      companionLifecycle: {
+        sourcePluginId: DESKTOP_COMPANION_PLUGIN_ID,
+        stopFor: async (owner) => {
+          await companion?.retireSource(owner);
+        },
+      },
+      captureLifecycle: {
+        sourcePluginId: VOICE_CAPTURE_PLUGIN_ID,
+        stopFor: async (owner) => {
+          await voice?.retireSource(owner);
+        },
+      },
+      speechLifecycle: {
+        sourcePluginId: SPEECH_FEATURE_PLUGIN_ID,
+        stopFor: async (owner) => {
+          await speech?.stopFor(owner);
+        },
+      },
+      adapters: mvpReadiness(path.resolve(here, '../../../../.cache/asr-models'), true),
+      onChanged: () => {
+        refreshSpeech();
+        void local?.refresh();
+      },
+      media: {
+        input: (_reference, writer) => writer.cancel(),
+        output: (_reference, reader) => reader.cancel(),
+      },
+      ...(cipher ? { cipher } : {}),
     });
-    host = await hostStarting;
-    if (quitting) {
-      await host.shutdown();
-      return;
-    }
-    const migratedProfile = await migrateApplicationProfile(host!);
-    if (!migratedProfile.ok)
-      throw new Error('Profile migration failed: ' + migratedProfile.error.code);
-    demo = await DemoController.create(host!, modelRoot, notifyDemo, (text, id) => {
-      void speech?.speak(text, id);
-    });
-    application = await ApplicationController.create(
-      host!,
-      demo,
-      app.getPath('userData'),
-      notifyApplication,
+    const activeHost = host;
+    companion = new DesktopCompanionController(
+      new DesktopCompanionHostAdapter(activeHost),
+      {
+        choose: async (name, senderId, signal) => {
+          const owner = BrowserWindow.fromWebContents(webContentsFor(senderId));
+          if (!owner || owner.isDestroyed() || signal.aborted) return null;
+          const selected = await dialog.showSaveDialog(owner, {
+            defaultPath: path.basename(name),
+            properties: ['showOverwriteConfirmation'],
+          });
+          return selected.canceled || signal.aborted ? null : (selected.filePath ?? null);
+        },
+      },
+      () => broadcast(DESKTOP_COMPANION_IPC.changed),
+      (url) => shell.openExternal(url),
+    );
+    voice = new SharedVoiceController(
+      companion,
+      new SharedVoiceCaptureHost(activeHost),
+      () => {
+        const contents = settings.current?.webContents;
+        return contents && !contents.isDestroyed() && contents.getURL() === consoleUrl
+          ? contents.mainFrame
+          : null;
+      },
+      () => broadcast(DESKTOP_VOICE_IPC.changed),
+    );
+    installSharedVoicePermission(session.defaultSession, settings, consoleUrl, voice);
+    const activeVoice = voice;
+    const voiceService = companion;
+    for (const [action, channel] of Object.entries(DESKTOP_VOICE_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleDesktopVoiceRequest(
+            requestSource(event),
+            event.senderFrame,
+            action as DesktopVoiceAction,
+            args,
+            activeVoice,
+            voiceService,
+          ),
+        );
+    local = new LocalPresentationController(
+      activeHost,
+      () => ({ available: !!window && !window.isDestroyed(), shown: !!window?.isVisible() }),
+      () => broadcast(DESKTOP_PRESENTATION_IPC.changed),
       (next) => {
-        const speechWasAllowed = preferences.soundEnabled && preferences.speechEnabled;
+        const wasSoundEnabled = preferences?.soundEnabled;
         preferences = next;
-        if (!next.voiceEnabled) voice?.onVoiceDisabled();
-        if (speechWasAllowed && (!next.soundEnabled || !next.speechEnabled)) void speech?.stop();
-        speech?.onHostChanged();
-        if (!next.draggable) controller?.endDrag();
-        if (window && !window.isDestroyed()) window.setAlwaysOnTop(next.alwaysOnTop);
-        syncAvatar();
+        if (!next.draggable) pet?.endDrag();
+        window?.setAlwaysOnTop(next.alwaysOnTop);
+        if (wasSoundEnabled !== false && !next.soundEnabled) stopSpeech();
+        refreshSpeech();
+        syncPet();
       },
     );
-    const requestSource = (event: IpcMainInvokeEvent) => {
-      const source = windowSource(event, settings.current, consoleUrl);
-      return isTrustedPetSource(source)
-        ? { ...source, role: 'console' as const }
-        : { ...windowSource(event, window, expectedUrl), role: 'pet' as const };
-    };
-    const notifySpeech = () => {
-      for (const target of [window, settings.current])
-        if (target && !target.isDestroyed()) target.webContents.send(SPEECH_OUTPUT_IPC.changed);
-      void application?.refreshPreferences();
-    };
-    speech = new SpeechOutputController(host, notifySpeech, (event, payload) => {
-      if (window && !window.isDestroyed())
-        window.webContents.send(SPEECH_OUTPUT_IPC.audio, event, payload);
+    const ledger = await SharedApplicationState.create(app.getPath('userData'));
+    for (const id of localRoles) {
+      if (ledger.disabled(id)) continue;
+      const entry = activeHost.manager.get({ pluginId: id, instanceId: 'default' });
+      const source = entry ? activeHost.getPackage(entry.owner) : null;
+      if (!entry || entry.state === 'rejected' || !source || !admittedApplicationSource(source))
+        continue;
+      const review = activeHost.describeTrust(entry.owner);
+      if (!review || !(await activeHost.verifyTrust(entry.owner, review.digest))) continue;
+      activeHost.permissionControl.confirmTrust(
+        { pluginId: id, instanceId: 'default' },
+        review.digest,
+        true,
+      );
+      const config = await activeHost.configs.get({ pluginId: id, instanceId: 'default' });
+      if (config.ok)
+        await activeHost.manager.enable({ pluginId: id, instanceId: 'default' }, config.value.data);
+    }
+    await companion.initialize();
+    const localPluginProfile = path.join(app.getPath('userData'), 'local-plugin-host');
+    localPlugins = new DesktopLocalHostController({
+      companion,
+      attach: () => attachLocalHost(localPluginProfile, app.getVersion()),
+      start: () =>
+        startOrAttachLocalHost({
+          profileDirectory: localPluginProfile,
+          packageVersion: app.getVersion(),
+          launch: {
+            executablePath: process.execPath,
+            entryPath: path.resolve(here, '../local-host-app'),
+            ...(process.platform === 'linux' && app.isPackaged
+              ? {
+                  environment: {
+                    ...localHostEnvironment(),
+                    LD_LIBRARY_PATH: [
+                      path.join(path.dirname(process.execPath), 'lib'),
+                      path.join(path.dirname(process.execPath), 'lib/browser'),
+                    ].join(path.delimiter),
+                  },
+                }
+              : {}),
+            ...(process.platform === 'linux' && app.commandLine.hasSwitch('no-sandbox')
+              ? { noSandbox: true }
+              : {}),
+          },
+        }),
+      changed: () => broadcast(DESKTOP_LOCAL_HOST_IPC.changed),
     });
-    const notifyVoice = () => {
-      for (const target of [window, settings.current])
-        if (target && !target.isDestroyed()) target.webContents.send(VOICE_INPUT_IPC.changed);
-      notifyDemo();
+    await localPlugins.initialize();
+    const activeLocalPlugins = localPlugins;
+    const activeCompanion = companion;
+    const activeLocal = local;
+    const securityChanged = () => {
+      broadcast(CONSOLE_IPC.securityChanged);
+      refreshSpeech();
+      syncPet();
     };
-    voice = new VoiceInputController(
-      host,
-      modelRoot,
-      demo,
-      notifyVoice,
-      (id) => !application!.pluginWasDisabled(id),
-      async (enabled) => {
-        const current = await application!.snapshot();
-        if (!current.profile) return { ok: false, error: makeError('not-ready', false) };
-        return application!.saveProfile(current.profile.revision, {
-          ...current.profile.data,
-          voiceEnabled: enabled,
-        });
+    const consoleView = () =>
+      consoleSnapshot(
+        activeHost.status(),
+        activeHost.manager.list(),
+        {
+          name: 'AI 桌宠',
+          version: app.getVersion(),
+          electron: process.versions.electron ?? '',
+          node: process.versions.node,
+          platform: `${process.platform}-${process.arch}`,
+        },
+        activeHost.manager.contributions(),
+      );
+    const security = new ConsoleSecurityRequests(activeHost, consoleView, securityChanged);
+    const plugins = new ConsolePluginRequests(
+      activeHost,
+      consoleView,
+      async (pluginId, enabled) => {
+        if (localRoles.includes(pluginId)) await ledger.record(pluginId, enabled);
       },
     );
+    for (const [action, channel] of Object.entries(DESKTOP_LOCAL_HOST_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleDesktopLocalHostRequest(
+            requestSource(event),
+            action as DesktopLocalHostAction,
+            args,
+            activeLocalPlugins,
+          ),
+        );
+    for (const [action, channel] of Object.entries(DESKTOP_COMPANION_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleDesktopCompanionRequest(
+            requestSource(event),
+            action as DesktopCompanionAction,
+            args,
+            activeCompanion,
+          ),
+        );
+    for (const action of ['snapshot', 'save'] as const)
+      ipcMain.handle(DESKTOP_PRESENTATION_IPC[action], (event, ...args: unknown[]) =>
+        handleDesktopPresentationRequest(requestSource(event), action, args, activeLocal),
+      );
     for (const [action, channel] of Object.entries(PRESENTATION_IPC))
       if (!['changed', 'appearanceRequested'].includes(action))
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
@@ -318,161 +447,82 @@ const startup = app
             presentation,
           ),
         );
-    for (const [action, channel] of Object.entries(SPEECH_OUTPUT_IPC))
+    speech = new SharedSpeechController(
+      activeCompanion,
+      new SharedSpeechHost(activeHost),
+      () => {
+        const contents = window?.webContents;
+        return contents && !contents.isDestroyed() && contents.getURL() === petUrl
+          ? contents.mainFrame
+          : null;
+      },
+      () => broadcast(DESKTOP_SPEECH_IPC.changed),
+      (frame, event, payload) => {
+        const contents = window?.webContents;
+        if (
+          contents &&
+          !contents.isDestroyed() &&
+          contents.mainFrame === frame &&
+          contents.getURL() === petUrl
+        )
+          contents.send(DESKTOP_SPEECH_IPC.audio, event, payload);
+      },
+      async () => {
+        if (!preferences?.soundEnabled) throw new KernelFault('not-ready');
+        return preferences.speechVolume;
+      },
+    );
+    const activeSpeech = speech;
+    for (const [action, channel] of Object.entries(DESKTOP_SPEECH_IPC))
       if (!['changed', 'audio'].includes(action))
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
-          handleSpeechOutputRequest(
+          handleDesktopSpeechRequest(
             requestSource(event),
-            action as SpeechOutputAction,
+            event.senderFrame,
+            action as DesktopSpeechAction,
             args,
-            speech!,
+            activeSpeech,
+            activeCompanion,
           ),
         );
-    for (const [action, channel] of Object.entries(VOICE_INPUT_IPC))
-      if (action !== 'changed')
-        ipcMain.handle(channel, (event, ...args: unknown[]) =>
-          handleVoiceInputRequest(
-            requestSource(event),
-            action as
-              'snapshot' | 'saveSettings' | 'saveApiKey' | 'start' | 'stop' | 'installModel',
-            args,
-            voice!,
-          ),
-        );
-
-    application.desktopStatus = () => {
-      const avatar = host?.manager.get({ pluginId: DEMO_PLUGIN_IDS.avatar, instanceId: 'default' });
-      const available =
-        !!window &&
-        !window.isDestroyed() &&
-        !!avatar &&
-        avatar.origin === 'builtin' &&
-        host!.manager.isActive(avatar.owner);
-      return { available, shown: available && window!.isVisible() };
-    };
-    for (const [action, channel] of Object.entries(APPLICATION_IPC))
-      if (action !== 'changed') {
-        ipcMain.handle(channel, async (event, ...args: unknown[]) => {
-          const source = windowSource(event, settings.current, consoleUrl);
-          const result = await handleApplicationRequest(
-            isTrustedPetSource(source) ? source : windowSource(event, window, expectedUrl),
-            action,
-            args,
-            application!,
-          );
-          if (result.ok && action === 'paused') notifyDemo();
-          if (result.ok && action === 'guide') {
-            demo?.onConsoleClosed();
-            settings.current?.hide();
-          }
-          return result;
-        });
-      }
-
-    models = new ModelConnectionController(host, application, notifyDemo, (url) =>
-      shell.openExternal(url),
+    ipcMain.handle(CONSOLE_IPC.snapshot, (event, ...args: unknown[]) =>
+      handleConsoleRequest(sourceFor(event, settings.current, consoleUrl), args, consoleView),
     );
-    if (host.credentials)
-      models.auth = await ModelOAuth.create(
-        host.credentials,
-        app.getPath('userData'),
-        notifyDemo,
-        (url) => shell.openExternal(url),
-      );
-    await models.restore();
-    for (const [action, channel] of Object.entries(MODEL_CONNECTION_IPC))
-      ipcMain.handle(channel, (event, ...args: unknown[]) =>
-        handleModelConnectionRequest(
-          windowSource(event, settings.current, consoleUrl),
-          action,
-          args,
-          models!,
-        ),
-      );
-    installDemoMediaPermission(session.defaultSession, settings, consoleUrl, demo);
-    const acceptanceTrace: Array<Record<string, unknown>> | undefined = process.argv.some(
-      (arg) => arg === '--demo-acceptance' || arg.startsWith('--demo-acceptance='),
-    )
-      ? []
-      : undefined;
-    if (acceptanceTrace)
-      Object.assign(globalThis, { petDemoAcceptance: { events: acceptanceTrace } });
-    for (const [action, channel] of Object.entries(DEMO_IPC))
-      if (!['changed', 'recordingRequested'].includes(action))
-        ipcMain.handle(channel, async (event, ...args: unknown[]) => {
-          const consoleSource = windowSource(event, settings.current, consoleUrl);
-          const source = isTrustedPetSource(consoleSource)
-            ? { ...consoleSource, role: 'console' as const }
-            : { ...windowSource(event, window, expectedUrl), role: 'pet' as const };
-          const result = await handleDemoRequest(source, action as DemoAction, args, demo!);
-          if (acceptanceTrace && action !== 'snapshot' && (action !== 'pcm' || !result.ok)) {
-            const body = args[0] as Record<string, unknown> | undefined;
-            acceptanceTrace.push({
-              at: Date.now(),
-              action,
-              role: source.role,
-              code: result.ok ? null : result.error.code,
-              ...(action === 'captureError' ? { reason: body?.['reason'] } : {}),
-            });
-            if (acceptanceTrace.length > 64) acceptanceTrace.shift();
-          }
-          return result;
-        });
-    const hostRequests = new HostStatusRequests(() => host!.status());
-    ipcMain.handle(HOST_IPC.status, (event, ...args: unknown[]) => {
-      try {
-        if (!window || window.isDestroyed())
-          return { ok: false, error: makeError('unavailable', false) };
-        const frame = event.senderFrame;
-        return hostRequests.handle(
-          {
-            senderId: event.sender.id,
-            expectedId: window.webContents.id,
-            mainFrame: frame !== null && frame === window.webContents.mainFrame,
-            frameUrl: frame?.url ?? '',
-            expectedUrl,
-          },
-          HOST_IPC.status,
-          args,
-        );
-      } catch {
-        return { ok: false, error: makeError('unavailable', false) };
-      }
-    });
     ipcMain.handle(CONSOLE_IPC.open, (event, ...args: unknown[]) =>
       handleSettingsOpenRequest(
-        windowSource(event, window, expectedUrl),
+        sourceFor(event, window, petUrl),
         args,
         () => settings.open(),
-        (request) => {
-          const target = settings.current;
-          if (!target || target.isDestroyed()) throw new Error('Settings owner unavailable');
-          target.webContents.send(CONSOLE_IPC.navigate, request);
-        },
+        (request) => settings.current?.webContents.send(CONSOLE_IPC.navigate, request),
       ),
     );
-    const snapshot = () =>
-      consoleSnapshot(
-        host!.status(),
-        host!.manager.list(),
-        {
-          name: 'AI 桌宠',
-          version: app.getVersion(),
-          electron: process.versions.electron!,
-          node: process.versions.node,
-          platform: process.platform + '-' + process.arch,
-        },
-        host!.manager.contributions(),
-      );
-    ipcMain.handle(CONSOLE_IPC.snapshot, (event, ...args: unknown[]) =>
-      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, snapshot),
+    ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
+      handleConsoleRequest(sourceFor(event, settings.current, consoleUrl), args, () => {
+        stopSpeech();
+        return activeHost.status();
+      }),
     );
-    const notifySecurity = () => {
-      const target = settings.current;
-      if (target && !target.isDestroyed()) target.webContents.send(CONSOLE_IPC.securityChanged);
-      notifyDemo();
-    };
-    const securityRequests = new ConsoleSecurityRequests(host!, snapshot, notifySecurity);
+    ipcMain.handle(CONSOLE_IPC.pluginAction, async (event, ...args: unknown[]) => {
+      const result = await plugins.handle(sourceFor(event, settings.current, consoleUrl), args);
+      if (result.ok) {
+        await activeCompanion.initialize();
+        await activeLocal.refresh();
+        securityChanged();
+      }
+      return result;
+    });
+    for (const [channel, action] of [
+      [CONSOLE_IPC.inspectConfig, 'inspect'],
+      [CONSOLE_IPC.saveConfig, 'save'],
+    ] as const)
+      ipcMain.handle(channel, (event, ...args: unknown[]) =>
+        handleConsoleConfigRequest(
+          sourceFor(event, settings.current, consoleUrl),
+          action,
+          args,
+          activeHost,
+        ),
+      );
     for (const [channel, action] of [
       [CONSOLE_IPC.security, 'get'],
       [CONSOLE_IPC.trust, 'trust'],
@@ -481,151 +531,100 @@ const startup = app
       [CONSOLE_IPC.audit, 'audit'],
       [CONSOLE_IPC.restoreBuiltin, 'restore'],
     ] as const)
-      ipcMain.handle(channel, (event, ...args: unknown[]) =>
-        securityRequests.handle(windowSource(event, settings.current, consoleUrl), action, args),
-      );
-    host!.approvals.subscribe(notifySecurity);
-    const pluginRequests = new ConsolePluginRequests(host!, snapshot);
-    ipcMain.handle(CONSOLE_IPC.pluginAction, async (event, ...args: unknown[]) => {
-      const result = await pluginRequests.handle(
-        windowSource(event, settings.current, consoleUrl),
-        args,
-      );
-      if (result.ok) {
-        await application?.recordPluginStates();
-        notifySecurity();
-      }
-      return result;
-    });
-    ipcMain.handle(CONSOLE_IPC.stopAll, (event, ...args: unknown[]) =>
-      handleConsoleRequest(windowSource(event, settings.current, consoleUrl), args, () => {
-        const status = host!.stopAll();
-        demo?.onAllStopped();
-        voice?.onVoiceDisabled();
-        void speech?.stop();
-        return status;
-      }),
-    );
-    for (const [channel, action] of [
-      [CONSOLE_IPC.inspectConfig, 'inspect'],
-      [CONSOLE_IPC.saveConfig, 'save'],
-    ] as const)
       ipcMain.handle(channel, async (event, ...args: unknown[]) => {
-        const result = await handleConsoleConfigRequest(
-          windowSource(event, settings.current, consoleUrl),
+        const result = await security.handle(
+          sourceFor(event, settings.current, consoleUrl),
           action,
           args,
-          host!,
         );
-        if (action === 'save' && result.ok) notifyDemo();
+        await activeCompanion.initialize();
         return result;
       });
-    for (const channel of channels)
+    activeHost.approvals.subscribe(securityChanged);
+    const status = new HostStatusRequests(() => activeHost.status());
+    ipcMain.handle(HOST_IPC.status, (event, ...args: unknown[]) =>
+      status.handle(sourceFor(event, window, petUrl), HOST_IPC.status, args),
+    );
+    for (const channel of [
+      PET_IPC.snapshot,
+      PET_IPC.interaction,
+      PET_IPC.dragStart,
+      PET_IPC.dragEnd,
+      PET_IPC.preview,
+      PET_IPC.quit,
+    ])
       ipcMain.handle(channel, (event, ...args: unknown[]) => {
-        try {
-          if (!controller || !window || window.isDestroyed())
-            return { ok: false, error: 'unavailable' };
-          const frame = event.senderFrame;
-          const source = {
-            senderId: event.sender.id,
-            expectedId: window.webContents.id,
-            mainFrame: frame !== null && frame === window.webContents.mainFrame,
-            frameUrl: frame?.url ?? '',
-            expectedUrl,
-          };
-          if (!isTrustedPetSource(source)) return { ok: false, error: 'untrusted-sender' };
-          const now = performance.now();
-          if (now - budgetStart >= 1000) {
-            budgetStart = now;
-            requests = 0;
-          }
-          if (++requests > 240) return { ok: false, error: 'unavailable' };
-          const pet = controller;
-          return handlePetRequest(source, channel, args, {
-            getSnapshot: () => pet.getSnapshot(),
-            setInteraction: (value) => pet.setInteraction(value),
-            beginDrag: () => {
-              if (preferences.draggable) pet.beginDrag();
-            },
-            endDrag: () => pet.endDrag(),
-            setState: (value) => pet.setState(value),
-            quit: () => {
-              setImmediate(() => app.quit());
-            },
-          });
-        } catch {
-          return { ok: false, error: 'unavailable' };
+        const currentPet = pet;
+        if (!currentPet) return { ok: false, error: 'unavailable' };
+        const now = performance.now();
+        if (now - petBudgetStart >= 1000) {
+          petBudgetStart = now;
+          petRequests = 0;
         }
+        if (++petRequests > 240) return { ok: false, error: 'unavailable' };
+        return handlePetRequest(sourceFor(event, window, petUrl), channel, args, {
+          getSnapshot: () => currentPet.getSnapshot(),
+          setInteraction: (value) => currentPet.setInteraction(value),
+          beginDrag: () => {
+            if (preferences?.draggable !== false) currentPet.beginDrag();
+          },
+          endDrag: () => currentPet.endDrag(),
+          setState: (value) => currentPet.setState(value),
+          quit: () => {
+            app.quit();
+          },
+        });
       });
-    const broadcast = (snapshot: PetSnapshot): void => {
-      if (window && !window.isDestroyed()) window.webContents.send(PET_IPC.changed, snapshot);
-    };
-    controller = createPetWindow({
-      preloadPath: path.resolve(here, '../preload/index.cjs'),
-      rendererPath,
-      onSnapshot: broadcast,
+    pet = createPetWindow({
+      preloadPath: preload,
+      rendererPath: petEntry,
+      onSnapshot: (snapshot: PetSnapshot) => window?.webContents.send(PET_IPC.changed, snapshot),
     });
-    if (!(controller.window instanceof BrowserWindow)) throw new Error('Invalid window controller');
-    window = controller.window;
-    window.setAlwaysOnTop(preferences.alwaysOnTop);
-    syncAvatar();
-    tray = createDemoTray({
-      showPet: () => {
-        syncAvatar();
-        if (!window?.isVisible()) showSettingsForLaunch();
-      },
-      showSettings: showSettingsForLaunch,
-      stop: () => {
-        host?.stopAll();
-        demo?.onAllStopped();
-        notifySecurity();
-      },
-      quit: () => app.quit(),
+    if (!(pet.window instanceof BrowserWindow)) throw new Error('Invalid pet window');
+    window = pet.window;
+    let speechFrame = window.webContents.mainFrame;
+    window.webContents.on('did-navigate', () => {
+      speech?.ownerGone(speechFrame);
+      if (window && !window.webContents.isDestroyed()) speechFrame = window.webContents.mainFrame;
+      refreshSpeech();
     });
+    window.webContents.on('render-process-gone', () => speech?.ownerGone(speechFrame));
+    window.webContents.once('destroyed', () => speech?.ownerGone(speechFrame));
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event) => event.preventDefault());
     window.webContents.on('will-redirect', (event) => event.preventDefault());
     window.webContents.on('will-attach-webview', (event) => event.preventDefault());
-    window.webContents.on('did-finish-load', () => {
-      if (controller) broadcast(controller.getSnapshot());
-    });
     await settings.open(false);
-    const captureWindow = settings.current;
-    if (captureWindow) {
-      demo.setRecordingOwner(captureWindow.webContents.id, (request) => {
-        const target = settings.current;
-        if (!target || target.isDestroyed()) return false;
-        target.webContents.send(DEMO_IPC.recordingRequested, request);
-        return true;
-      });
-      captureWindow.webContents.on('render-process-gone', () => {
-        demo?.setRecordingOwner(null);
-      });
-    }
-    void voice.restore();
-    window.webContents.on('did-fail-load', () => {
-      console.error('M0 renderer failed to load');
-      quitWithCode(1);
+    await activeLocal.refresh();
+    await speech.refreshSource();
+    syncPet();
+    tray = createDemoTray({
+      stopLabel: '停止本地播放',
+      showPet: syncPet,
+      showSettings: () => {
+        void settings.open();
+      },
+      stop: () => {
+        stopSpeech();
+      },
+      quit: () => app.quit(),
     });
   })
   .catch(() => {
-    console.error('M0 desktop startup failed');
-    quitWithCode(1);
+    console.error('Shared desktop startup failed');
+    void quit(1);
   });
-function showSettingsForLaunch(): void {
-  void startup
-    .then(async () => {
-      if (!quitting) await settings.open();
-    })
-    .catch(() => {
-      console.error('Settings window failed to open');
-      quitWithCode(1);
-    });
+function webContentsFor(senderId: number) {
+  for (const target of [window, settings.current])
+    if (target?.webContents.id === senderId) return target.webContents;
+  throw new Error('Window unavailable');
 }
-app.on('second-instance', showSettingsForLaunch);
-if (process.argv.includes('--show-settings')) showSettingsForLaunch();
+app.on('second-instance', () => {
+  void startup.then(() => settings.open());
+});
+if (process.argv.includes('--show-settings')) void startup.then(() => settings.open());
 app.on('window-all-closed', () => app.quit());
 app.on('before-quit', (event) => {
   event.preventDefault();
-  quitWithCode(0);
+  void quit();
 });

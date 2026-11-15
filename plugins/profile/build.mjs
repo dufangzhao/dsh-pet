@@ -15,7 +15,7 @@ const manifest = {
   },
   license: 'MIT',
   host: '^1.0.0',
-  platforms: ['win32-x64'],
+  platforms: ['linux-x64', 'win32-x64'],
   entries: { runtime: 'dist/index.mjs' },
   provides: [{ id: 'profile', capability: 'app.profile@1' }],
   consumes: [{ capability: 'speech.output@1', optional: true }],

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.asr-magpie",
+  "version": "0.1.0",
+  "displayName": { "en": "Magpie speech recognition", "zh-CN": "Magpie 语音识别" },
+  "description": {
+    "en": "Source-owned native ASR through an independently operated Magpie gateway"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "magpie",
+      "capability": "companion.voice.asr@1",
+      "features": {
+        "nativeAsr": 1,
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["asr-api-key"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrl", "modelRef", "authMode", "protocol"],
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "default": "http://127.0.0.1:3425/v1"
+        },
+        "modelRef": { "type": "string", "maxLength": 128, "default": "" },
+        "authMode": {
+          "type": "string",
+          "enum": ["local-client-id", "gateway-key"],
+          "default": "local-client-id"
+        },
+        "protocol": { "type": "string", "enum": ["mimo-native"], "default": "mimo-native" }
+      }
+    },
+    "apply": {
+      "baseUrl": "reload",
+      "modelRef": "reload",
+      "authMode": "reload",
+      "protocol": "reload"
+    }
+  }
+}

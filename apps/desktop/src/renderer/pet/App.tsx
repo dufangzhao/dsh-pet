@@ -36,11 +36,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { PetAvatar } from './PetAvatar.js';
 import { PetBubble } from './PetBubble.js';
 import { PetComposer } from './PetComposer.js';
-import { PetDialog } from './PetDialog.js';
 import { PetMenu } from './PetMenu.js';
 import { PetTools } from './PetTools.js';
-import { SpeechOutputPlaybackOwner } from '../speech-output/playback-owner.js';
-import { bubbleLifetime, type PetBubbleEvent } from './demo-status.js';
+import { SharedSpeechPlaybackMount } from '../speech-output/shared-playback-owner.js';
+import { usePetSpeechStatus } from './use-pet-speech.js';
+import { bubbleLifetime } from './bubble-lifetime.js';
 import { useBubblePresence, useReducedMotion } from './use-bubble-motion.js';
 import { petPresentationStyle, usePetSettings } from './use-pet-settings.js';
 import { PET_COPY } from './copy.js';
@@ -59,14 +59,17 @@ import {
 } from './hit-regions.js';
 import { ExpressionTimeline, type PetExpression } from './expression.js';
 import { classifyGesture, type PetGesture } from './pet-gesture.js';
-import {
-  applicationSnapshotErrorText,
-  readApplicationBridge,
-  useApplication,
-  type ApplicationView,
-} from './use-application.js';
 import { readBridge, usePetBridge } from './use-pet-bridge.js';
-import { useDemoStatus } from './use-demo-status.js';
+import { newCommandId } from '../shared/commands.js';
+import { useCompanion } from '../shared/use-companion.js';
+import { useLocalPresentation } from '../shared/use-local-presentation.js';
+import {
+  clipBubbleText,
+  connectionView,
+  lastAssistant,
+  petStateOf,
+  sendBlockedReason,
+} from '../shared/companion-state.js';
 
 /** 拖拽兜底：与主进程看门狗一致，避免指针事件丢失后卡在拖拽态。 */
 export { RENDERER_DRAG_TIMEOUT_MS } from './drag-controller.js';
@@ -345,33 +348,24 @@ export interface PetAppProps {
 }
 
 /** 提示的存在会改变矩形集合，尺寸/形态也一样。 */
-function geometryKey(dialogId: string | null, figure: PetFigure, size: string): string {
-  return (dialogId ?? 'none') + ':' + figure + ':' + size;
+function geometryKey(figure: PetFigure, size: string): string {
+  return figure + ':' + size;
 }
 
-export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Element {
+export function PetApp({ bridge }: PetAppProps = {}): React.JSX.Element {
   const view = usePetBridge({
     bridge: bridge === undefined ? readBridge() : readBridge({ pet: bridge }),
     missingNotice: PET_COPY.bridgeMissing,
     failureNotice: PET_COPY.bridgeError,
     quitFailureNotice: PET_COPY.quitFailed,
   });
-  const app: ApplicationView = useApplication({
-    bridge:
-      application === undefined
-        ? readApplicationBridge()
-        : readApplicationBridge({ petApplication: application }),
-  });
   const { setInteraction, beginDrag, endDrag, quit } = view;
-  const { interact: recordReaction } = app;
-  // 宿主 Demo 是录音与回复的真实来源；没读到快照时沿用窗口原型自己的状态。
-  const demo = useDemoStatus();
-  const settings = usePetSettings();
+  // 服务的状态与本地呈现各一个所有者：桌宠窗口只读它们，不自己连、不自己存。
+  const companion = useCompanion();
+  const presentation = useLocalPresentation();
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPending, setMenuPending] = useState<'voice' | 'theme' | null>(null);
   const [menuNotice, setMenuNotice] = useState<string | null>(null);
-  const menuCommandBusy = useRef(false);
   const [hovered, setHovered] = useState(false);
   const hoverExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -381,47 +375,54 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     [],
   );
   const [focused, setFocused] = useState(false);
-  const [dismissedDialog, setDismissedDialog] = useState<string | null>(null);
-  const state = demo.state ?? view.state;
+  const [sending, setSending] = useState(false);
+  const [stoppingForeground, setStoppingForeground] = useState(false);
+  const sendBusy = useRef(false);
+  const stopBusy = useRef(false);
+  /** 结果未知的那一次：内容不变的重试复用同一个 commandId，避免重复提交。 */
+  const uncertainSend = useRef<{ text: string; commandId: string } | null>(null);
+  const menuCommandBusy = useRef(false);
+  const settings = usePetSettings();
+  const speech = usePetSpeechStatus();
+  const [stoppingSpeech, setStoppingSpeech] = useState(false);
+  const speechStopBusy = useRef(false);
 
-  // 同一份 profile 描述的就是桌面上这一只；没读到就沿用窗口原型自带的形态。
-  const profile = app.profile;
+  // 同一份本机记录描述的就是桌面上这一只；没读到就沿用窗口原型自带的形态。
+  const profile = presentation.snapshot?.preferences ?? null;
   const figure: PetFigure = profile?.figure ?? 'minimal';
   const palette = profile?.palette ?? 'morning';
   const size = profile?.size ?? 'normal';
   const reducedMotion = useReducedMotion(profile?.reducedMotion ?? false);
   const chatPresence = useBubblePresence(chatOpen, reducedMotion);
   const draggable = profile?.draggable ?? true;
-  const petName = profile?.petName ?? null;
-  const hostDialogKey = app.dialog === null ? null : `${app.dialog.id}:${app.dialog.step}`;
-  const dialog = hostDialogKey === dismissedDialog ? null : app.dialog;
-  const toolsVisible = hovered || focused || chatOpen || menuOpen || demo.recording;
+  const serviceState = companion.state;
+  const agentName = serviceState?.snapshot?.agent.name ?? null;
+  const petName = agentName;
+  const toolsVisible = hovered || focused || chatOpen || menuOpen;
+  const connection = serviceState === null ? null : connectionView(serviceState);
+  const state = serviceState === null ? view.state : petStateOf(serviceState);
+  const reply = lastAssistant(serviceState?.snapshot?.messages ?? []);
   const notice =
     menuNotice ??
-    app.failure?.text ??
-    applicationSnapshotErrorText(app.snapshot) ??
-    view.notice ??
-    demo.notice ??
-    settings.notice;
-  const event: PetBubbleEvent | null = notice
-    ? { key: `notice:${notice}`, kind: 'error' as const, text: notice }
-    : demo.event;
-  const bubble =
-    event &&
-    ((event.kind === 'status' &&
-      !(profile?.statusBubble ?? PET_PREFERENCE_DEFAULTS.statusBubble)) ||
-      (event.kind === 'reply' && !(profile?.saidBubble ?? PET_PREFERENCE_DEFAULTS.saidBubble)))
-      ? null
-      : event;
+    companion.readError ??
+    presentation.error ??
+    (serviceState !== null && serviceState.error !== null
+      ? `连接问题：${connection?.label ?? ''}`
+      : null) ??
+    view.notice;
+  // 气泡：错误优先，其次最近一条服务回复；两者都没有就不编一句话。
+  const bubbleText = notice ?? (reply === null ? null : clipBubbleText(reply.text));
+  const bubbleKind: 'error' | 'reply' | null =
+    notice !== null ? 'error' : reply === null ? null : 'reply';
+  const bubbleAllowed =
+    bubbleKind === 'error' || (profile?.saidBubble ?? PET_PREFERENCE_DEFAULTS.saidBubble);
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const toolsRef = useRef<HTMLDivElement | null>(null);
   const composerRef = useRef<HTMLDivElement | null>(null);
   const avatarRef = useRef<SVGSVGElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
-  const transcriptRef = useRef<HTMLDivElement | null>(null);
   const pressRef = useRef<PressRecord | null>(null);
   const unmounting = useRef(false);
   const [dragging, setDragging] = useState(false);
@@ -430,7 +431,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   const expressionTimeline = useRef<ExpressionTimeline | null>(null);
 
   /** 收集当前窗口内真实可交互的形状：角色绘制面 + 提示矩形 + 面板矩形。 */
-  const composing = dialog === null && chatOpen;
+  const composing = chatOpen;
   const collectHitShapes = useCallback((): HitShape[] => {
     const shapes: HitShape[] = [];
     const avatar = avatarRef.current;
@@ -458,12 +459,8 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
           ry: rect.height / 2,
         });
     });
-    const transcript = popoverHitShape(transcriptRef.current);
-    if (transcript) shapes.push(transcript);
     const bubble = popoverHitShape(bubbleRef.current);
     if (bubble) shapes.push(bubble);
-    const dialogue = popoverHitShape(dialogRef.current);
-    if (dialogue !== null) shapes.push(dialogue);
     return shapes;
   }, [figure]);
 
@@ -535,7 +532,8 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   useEffect(() => {
     const timeline = new ExpressionTimeline({
       onApply: setExpression,
-      onVisible: () => recordReaction('blush'),
+      // 物理反应留在本地：它不改服务里的任何记录，也不写本机历史。
+      onVisible: () => undefined,
       isVisible: () => typeof document !== 'undefined' && document.visibilityState === 'visible',
     });
     expressionTimeline.current = timeline;
@@ -543,7 +541,7 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       expressionTimeline.current = null;
       timeline.dispose();
     };
-  }, [recordReaction]);
+  }, []);
 
   /**
    * 与主进程的权威快照对账，避免“没有事件就永久挡/透”。
@@ -568,20 +566,12 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
   }, [view.snapshot, setInteraction]);
 
   /**
-   * 触碰记录：只有真的做完一个物理动作才记一条，判定依据全是真实证据。
-   * 失败由 use-application 收敛成带来源的提示，不静默丢弃。
-   *
-   * 戳一下同时是这套短时表情的唯一触发点：先让红晕真的画到屏幕上，
-   * 再由 ExpressionTimeline 在可见帧之后回报一次 blush；摸和拖动不装脸红。
+   * 触碰只有本地表情：共享组合里没有本地互动记录，也不往服务里发一条假消息。
+   * 判定依据仍是真实证据（位移与按住时长），只是结论不再写成一条记录。
    */
-  const recordGesture = useCallback(
-    (gesture: PetGesture | null): void => {
-      if (gesture === null) return;
-      recordReaction(gesture);
-      if (gesture === 'poke') expressionTimeline.current?.blush();
-    },
-    [recordReaction],
-  );
+  const recordGesture = useCallback((gesture: PetGesture | null): void => {
+    if (gesture === 'poke') expressionTimeline.current?.blush();
+  }, []);
 
   /**
    * 拖拽路径的判定入口：等主进程的权威快照。
@@ -607,8 +597,11 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
    * 指针可能一动不动，但它的命中结果已经不一样了。
    */
   const geometry =
-    geometryKey(dialog === null ? null : `${dialog.id}:${dialog.step}`, figure, size) +
-    `:${composing}:${chatPresence.present}:${toolsVisible}:${menuOpen}:${bubble?.key ?? ''}:${demo.transcriptEvent?.identity ?? ''}:${demo.transcriptEvent?.text ?? ''}:${demo.transcriptEvent?.live ?? false}`;
+    geometryKey(figure, size) +
+    `:${composing}:${chatPresence.present}:${toolsVisible}:${menuOpen}:${bubbleText ?? ''}` +
+    // 连接状态与待确认条目也会改变面板高度：它们变了必须重算命中区。
+    `:${serviceState?.phase ?? 'none'}:${serviceState?.pending.length ?? 0}:` +
+    (serviceState?.snapshot?.tasks.map((task) => task.id + ':' + task.status).join(',') ?? '');
   useEffect(resyncHitShapes, [geometry, resyncHitShapes]);
 
   useEffect(() => {
@@ -748,9 +741,6 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       // Esc 落在提示的控件里时不退出交互：那会把用户正在用的按钮和输入框
       // 放回穿透态，等于用一个没有取消语义的键把这次操作打断。
       const active = typeof document === 'undefined' ? null : document.activeElement;
-      if (dialogRef.current !== null && active !== null && dialogRef.current.contains(active)) {
-        return;
-      }
       setChatOpen(false);
       setMenuOpen(false);
       setFocused(false);
@@ -805,30 +795,24 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     sessionRef.current?.cancel('lostpointercapture');
   }, []);
 
-  const runMenuCommand = (
-    kind: 'voice' | 'theme',
-    run: () => Promise<{ ok: boolean; error?: { code: string } }>,
-  ): void => {
+  /** 菜单里的开关只写本机呈现：失败要说原因，不静默留在旧值上。 */
+  const runMenuCommand = (run: () => Promise<boolean>): void => {
     if (menuCommandBusy.current) return;
     menuCommandBusy.current = true;
-    setMenuPending(kind);
     setMenuNotice(null);
     void run()
-      .then(async (result) => {
-        if (result.ok && kind === 'voice') await app.refreshSnapshot();
-        if (!unmounting.current && !result.ok)
-          setMenuNotice('操作未完成：' + (result.error?.code ?? 'unavailable'));
+      .then((ok) => {
+        if (!unmounting.current && !ok) setMenuNotice('操作未完成，本机设置没有写入。');
       })
       .catch(() => {
         if (!unmounting.current) setMenuNotice('操作未完成，请稍后重试。');
       })
       .finally(() => {
         menuCommandBusy.current = false;
-        if (!unmounting.current) setMenuPending(null);
       });
   };
+
   const openChat = (): void => {
-    if (!demo.available) return;
     setMenuOpen(false);
     setChatOpen(true);
   };
@@ -839,26 +823,66 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
     setChatOpen(false);
     restoreAvatarFocus();
   };
-  const hideDialog = (): void => {
-    setDismissedDialog(hostDialogKey);
-    restoreAvatarFocus();
-  };
-
   const handleQuit = useCallback((): void => {
     quit();
   }, [quit]);
 
-  const handleAnswer = useCallback(
-    (choice: string, text?: string): void => {
-      if (dialog === null) return;
-      app.answer(dialog, choice, text);
+  /** 发送一句话：只有服务受理才清草稿；未知/被拒都留原文，重试复用同一 commandId。 */
+  const send = useCallback(
+    async (text: string): Promise<boolean> => {
+      if (sendBusy.current || text.trim() === '') return false;
+      sendBusy.current = true;
+      setSending(true);
+      try {
+        const previous = uncertainSend.current;
+        const commandId =
+          previous !== null && previous.text === text ? previous.commandId : newCommandId();
+        const result = await companion.send(commandId, text.trim());
+        if (result.outcome === 'accepted') {
+          uncertainSend.current = null;
+        } else if (result.outcome === 'uncertain') {
+          uncertainSend.current = { text, commandId };
+        } else if (result.outcome === 'failed' && result.error !== null) {
+          setMenuNotice(PET_COPY.sendFailed + result.error);
+        }
+        return result.outcome === 'accepted';
+      } finally {
+        sendBusy.current = false;
+        setSending(false);
+      }
     },
-    [app, dialog],
+    [companion],
   );
 
-  // 一次只有一条提示在前台：有 ApplicationDialog 时它取代只读气泡，
-  // 没有才显示宿主 Demo 的真实文本，不并排两块、也不留第二个聊天入口。
-  const canRetryRead = app.available && app.failure?.source === 'read';
+  /** 停止这次回应：只打断当前前台生成，不发任务停止，也不取消后台工作。 */
+  const stopForeground = useCallback(async (): Promise<void> => {
+    if (stopBusy.current) return;
+    stopBusy.current = true;
+    setStoppingForeground(true);
+    try {
+      const result = await companion.stopForeground();
+      if (result.outcome === 'failed' && result.error !== null)
+        setMenuNotice(PET_COPY.stopFailed + result.error);
+    } finally {
+      stopBusy.current = false;
+      setStoppingForeground(false);
+    }
+  }, [companion]);
+
+  const blockedReason =
+    serviceState === null ? '正在读取连接状态…' : sendBlockedReason(serviceState);
+  // 能发 = 通道在、连接在线、且没有被模型/断线挡住；被挡住时按钮按不动，原因写在输入框下。
+  const canCompose =
+    companion.available &&
+    serviceState !== null &&
+    serviceState.phase === 'live' &&
+    blockedReason === null;
+  const canStopForeground =
+    serviceState !== null &&
+    serviceState.phase === 'live' &&
+    serviceState.snapshot?.agent.status === 'busy';
+
+  const canRetryRead = companion.available && companion.readError !== null;
 
   return (
     <div
@@ -889,9 +913,9 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
       data-palette={palette}
       data-size={size}
       data-reduced-motion={reducedMotion ? 'true' : 'false'}
-      data-dialog={dialog === null ? 'false' : 'true'}
+      data-connection={serviceState?.phase ?? 'none'}
     >
-      <SpeechOutputPlaybackOwner />
+      <SharedSpeechPlaybackMount />
       <div className="pet-root__avatar">
         <PetAvatar
           state={state}
@@ -939,67 +963,27 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
             register={toolsRef}
             hover={profile?.hover ?? PET_PREFERENCE_DEFAULTS.hover}
             chatOpen={chatOpen}
-            canChat={demo.available}
-            canRecord={demo.canRecord && (profile?.voiceEnabled ?? true)}
-            recording={demo.recording}
-            pending={demo.recordingPending}
-            talkKeyLabel={
-              settings.voice?.talkKeyLabel ?? demo.snapshot?.settings.talkKeyLabel ?? null
-            }
+            canChat={companion.available}
             onChat={() => {
               if (chatOpen) closeChat();
               else openChat();
             }}
-            onVoice={() => void demo.requestRecording(demo.recording ? 'finish' : 'toggle')}
           />
         ) : null}
       </div>
       <div className="pet-root__content" id="pet-chat-surface">
-        {demo.transcriptEvent ? (
+        {bubbleAllowed && bubbleText !== null ? (
           <PetBubble
-            key={demo.transcriptEvent.identity}
-            state="listening"
-            variant="transcript"
-            label={demo.transcriptEvent.live ? '实时识别' : '识别结果'}
-            text={demo.transcriptEvent.text}
-            streaming={demo.transcriptEvent.live}
-            reducedMotion={reducedMotion}
-            lifetimeMs={Math.max(8000, bubbleLifetime(demo.transcriptEvent.text, 100))}
-            onGeometryChange={resyncHitShapes}
-            register={(element) => {
-              transcriptRef.current = element;
-            }}
-            onDismiss={restoreAvatarFocus}
-          />
-        ) : null}
-        {dialog !== null ? (
-          <PetDialog
-            key={`${dialog.id}:${dialog.step}`}
-            dialog={dialog}
-            state={state}
-            pending={app.answerBusy}
-            reducedMotion={reducedMotion}
-            speed={profile?.bubbleSpeed ?? PET_PREFERENCE_DEFAULTS.bubbleSpeed}
-            onGeometryChange={resyncHitShapes}
-            onAnswer={handleAnswer}
-            onDismiss={hideDialog}
-            register={(element) => {
-              dialogRef.current = element;
-            }}
-          />
-        ) : bubble ? (
-          <PetBubble
-            key={bubble.identity ?? bubble.key}
-            state={bubble.kind === 'error' ? 'error' : state}
-            text={bubble.text}
-            reveal={bubble.kind === 'reply'}
-            streaming={bubble.key.startsWith('partial:') && demo.snapshot?.phase === 'responding'}
+            key={bubbleKind + ':' + bubbleText}
+            state={bubbleKind === 'error' ? 'error' : state}
+            text={bubbleText}
+            reveal={bubbleKind === 'reply'}
             speed={profile?.bubbleSpeed ?? PET_PREFERENCE_DEFAULTS.bubbleSpeed}
             reducedMotion={reducedMotion}
             onGeometryChange={resyncHitShapes}
             onDismiss={restoreAvatarFocus}
             lifetimeMs={bubbleLifetime(
-              bubble.text,
+              bubbleText,
               profile?.bubbleSpeed ?? PET_PREFERENCE_DEFAULTS.bubbleSpeed,
             )}
             register={(element) => {
@@ -1014,13 +998,13 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
             data-closing={chatPresence.closing}
             inert={chatPresence.closing}
             aria-hidden={chatPresence.closing}
-            hidden={dialog !== null}
             data-pet-surface
           >
             <PetComposer
-              canSend={demo.canSend}
-              sending={demo.sending}
-              onSend={demo.send}
+              canSend={canCompose}
+              sending={sending}
+              blockedReason={blockedReason}
+              onSend={send}
               onClose={closeChat}
             />
           </div>
@@ -1031,94 +1015,51 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
         <div className="pet-root__panel" ref={panelRef} data-pet-surface>
           <PetMenu
             name={petName}
-            {...(typeof demo.snapshot?.paused === 'boolean'
-              ? {
-                  paused: demo.snapshot.paused,
-                  onTogglePause: () => {
-                    void app.setPaused(!demo.snapshot!.paused);
-                  },
-                }
-              : {})}
-            pausePending={app.menuBusy}
+            connectionLabel={connection?.label ?? null}
             chatOpen={chatOpen}
-            chatDisabled={!demo.available}
+            chatDisabled={!companion.available}
             onChat={() => {
               openChat();
               setMenuOpen(false);
             }}
-            {...(profile && window.petVoiceInput
-              ? {
-                  voiceEnabled: profile.voiceEnabled,
-                  onToggleVoice: () =>
-                    runMenuCommand('voice', () =>
-                      profile.voiceEnabled
-                        ? window.petVoiceInput!.stop()
-                        : window.petVoiceInput!.start(),
-                    ),
-                }
-              : {})}
-            voicePending={menuPending === 'voice'}
-            talkKeyLabel={
-              settings.voice?.talkKeyLabel ?? demo.snapshot?.settings.talkKeyLabel ?? null
-            }
-            {...(settings.theme && window.petPresentation
-              ? {
+            {...(profile === null || settings.theme === null
+              ? {}
+              : {
                   appearance: settings.theme.appearance,
-                  onToggleTheme: () =>
-                    runMenuCommand('theme', () =>
-                      window.petPresentation!.setAppearance({
+                  onToggleAppearance: () =>
+                    runMenuCommand(async () => {
+                      const result = await window.petPresentation!.setAppearance({
                         appearance: settings.theme!.appearance === 'dark' ? 'light' : 'dark',
-                      }),
-                    ),
-                }
-              : {})}
-            themePending={menuPending === 'theme'}
-            {...(profile
-              ? {
+                      });
+                      return result.ok;
+                    }),
                   soundEnabled: profile.soundEnabled,
-                  onToggleSound: () => {
-                    void app.savePreferences({ soundEnabled: !profile.soundEnabled });
-                  },
-                  onHide: () => {
-                    void app.savePreferences({ visible: false }).then((ok) => {
-                      if (ok) setMenuOpen(false);
-                    });
-                  },
-                }
-              : {})}
-            soundPending={app.menuBusy}
-            {...(app.snapshot?.pages.some(
-              (page) => page.owner.pluginId === 'pet.page-appearance',
-            ) && window.petSettings
-              ? {
-                  onAppearance: () => {
-                    setMenuOpen(false);
-                    void window.petSettings!.open({ view: 'appearance' }).then((reply) => {
-                      if (!reply.ok && !unmounting.current) setMenuNotice('打开装扮设置失败。');
-                    });
-                  },
-                }
-              : {})}
-            canStop={demo.canStop}
-            stopping={demo.stopping}
-            onStop={demo.stop}
-            guideDisabled={!app.available}
-            guideBusy={app.guideBusy}
-            onGuide={app.startGuide}
+                  onToggleSound: () =>
+                    runMenuCommand(() =>
+                      presentation.save({ soundEnabled: !profile.soundEnabled }),
+                    ),
+                })}
+            soundPending={presentation.saving}
+            canStop={canStopForeground}
+            stopping={stoppingForeground}
+            onStop={() => void stopForeground()}
+            canStopSpeech={speech.stoppable}
+            stoppingSpeech={stoppingSpeech}
+            onStopSpeech={() => {
+              if (speechStopBusy.current) return;
+              speechStopBusy.current = true;
+              setStoppingSpeech(true);
+              void speech.stop().finally(() => {
+                speechStopBusy.current = false;
+                if (!unmounting.current) setStoppingSpeech(false);
+              });
+            }}
             quitDisabled={!view.available}
             onQuit={handleQuit}
             onClose={() => {
               setMenuOpen(false);
               restoreAvatarFocus();
             }}
-            {...(app.dialog !== null && dialog === null
-              ? {
-                  onResumeDialog: () => {
-                    setDismissedDialog(null);
-                    setMenuOpen(false);
-                  },
-                }
-              : {})}
           />
 
           {canRetryRead ? (
@@ -1126,11 +1067,11 @@ export function PetApp({ bridge, application }: PetAppProps = {}): React.JSX.Ele
               type="button"
               className="pet-menu__button pet-root__retry"
               data-testid="pet-reload"
-              onClick={app.reload}
-              disabled={app.readBusy}
-              title="再向宿主读一次当前状态"
+              onClick={companion.refresh}
+              disabled={companion.loading}
+              title="再向主进程读一次连接状态"
             >
-              {app.readBusy ? PET_COPY.app.reloading : PET_COPY.app.reload}
+              {companion.loading ? PET_COPY.app.reloading : PET_COPY.app.reload}
             </button>
           ) : null}
         </div>

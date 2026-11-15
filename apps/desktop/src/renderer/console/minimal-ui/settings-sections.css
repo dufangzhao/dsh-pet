@@ -151,7 +151,7 @@
   font-size: 13px;
 }
 
-/* 搜索与筛选共处一行，窄屏各自折行。 */
+/* 搜索一行：搜索框占满，计数跟在右边。 */
 .plugin-tools {
   display: flex;
   flex-wrap: wrap;
@@ -200,68 +200,70 @@
   filter: grayscale(1);
   opacity: 0.5;
 }
-.plugin-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.btn.plugin-filter {
-  min-height: 32px;
-  padding: 0 12px;
+.plugin-tools__count {
+  margin: 0;
   color: var(--ink-quiet);
-  font-size: 13px;
-}
-.btn.plugin-filter:hover {
-  color: var(--ink);
-}
-.btn.plugin-filter[aria-pressed='true'] {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--on-primary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
-.plugins-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+/* 模块分组：一条标题、一句说明，然后是一串等高的行。没有卡片套卡片。 */
+.plugin-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.plugin-module__title {
+  margin: 0;
+  color: var(--ink-quiet);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.plugin-module__note {
+  margin: 2px 0 0;
+  color: var(--ink-quiet);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.plugin-rows {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
 }
 
-/* 整张卡是它自己的设置入口：标题按钮用伪元素铺满卡面，动作控件压在它上面。 */
-.plugin-card {
+/* 一行一个插件；名称按钮的伪元素铺满整行，动作控件压在它上面。 */
+.plugin-row {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  transition: border-color 0.2s ease-in-out;
+  gap: 2px;
+  padding: 4px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
 }
-.plugin-card > .card__body {
-  flex: 1;
-  gap: 10px;
-  padding: 0;
-}
-/* 动作还没回来时标题按钮停下，卡面也不再装作能点。 */
-.plugin-card[data-openable='true']:has(.plugin-card__open:not(:disabled)):hover {
-  border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
-}
-.plugin-card__head {
+.plugin-row__line {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+  min-height: 44px;
+  padding: 0 4px;
 }
-.plugin-icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 36px;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-quiet);
-  font-size: 14px;
-  font-weight: 600;
-}
-.plugin-card__id {
+.plugin-row__name {
+  flex: 1 1 auto;
+  margin: 0;
   min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.plugin-row__tag {
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink-quiet);
+  font-size: 11px;
+  line-height: 18px;
 }
 .plugin-card__open {
   padding: 0;
@@ -276,7 +278,6 @@
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-card);
 }
 .plugin-card__open:disabled {
   cursor: default;
@@ -287,61 +288,39 @@
 .plugin-card__open:focus-visible::after {
   outline: 2px solid var(--blue);
   outline-offset: -3px;
+  border-radius: var(--radius-field);
 }
-.plugin-card__meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: var(--ink-quiet);
-}
-.plugin-card__meta .status {
-  font-size: 12px;
-}
-.plugin-tag {
-  padding: 1px 7px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--surface-quiet);
-  font-size: 11px;
-}
-.plugin-card__note {
+.plugin-row__note {
   margin: 0;
+  padding: 0 4px 4px;
+  color: var(--ink-quiet);
   font-size: 12px;
   line-height: 1.5;
-  color: var(--ink-quiet);
 }
-.plugin-card__repair {
+.plugin-row__repair {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
 }
-.plugin-card__repair-actions {
+.plugin-row__repair-actions {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.plugin-card__repair .btn {
+.plugin-row__repair .btn {
   min-height: 28px;
   padding: 0 8px;
   font-size: 12px;
 }
-.plugin-card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
+.plugin-row__state {
+  flex: 0 0 auto;
 }
-/* 动作控件在卡面点击层之上：点开关或垃圾桶不会顺带打开设置。
-   说明文字仍留在点击层下面，点它照样进设置。 */
-.plugin-card__foot > *,
-.plugin-card__repair .btn {
+/* 动作控件在行点击层之上：点开关或垃圾桶不会顺带打开设置。 */
+.plugin-row__state,
+.plugin-row .plugin-toggle,
+.plugin-row__remove,
+.plugin-row__repair .btn {
   position: relative;
   z-index: 1;
 }
@@ -371,16 +350,55 @@ body[data-motion='off'] .plugin-toggle .switch i::after {
     transition: none;
   }
 }
-.plugin-card__remove:hover:not(:disabled) {
+.plugin-row__remove:hover:not(:disabled) {
   background: color-mix(in srgb, var(--danger) 12%, transparent);
   color: var(--danger);
 }
-.plugin-card__remove:focus-visible {
+.plugin-row__remove:focus-visible {
   outline-color: var(--danger);
 }
-.plugin-card__remove:disabled {
+.plugin-row__remove:disabled {
   cursor: not-allowed;
   opacity: 0.4;
+}
+
+/* 内部组成件：默认折起来，展开后仍是同一套行。 */
+.plugin-fold {
+  margin-top: 8px;
+}
+.plugin-fold__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  color: var(--ink-quiet);
+  font-size: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.plugin-fold__summary::-webkit-details-marker {
+  display: none;
+}
+.plugin-fold__summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease-in-out;
+}
+.plugin-fold[open] > .plugin-fold__summary::before {
+  transform: rotate(45deg);
+}
+.plugin-fold__summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.plugin-fold .plugin-rows {
+  border-top: 0;
+  margin-top: 0;
 }
 .plugin-empty {
   margin: 0;
@@ -671,8 +689,11 @@ body[data-motion='off'] .plugin-toggle .switch i::after {
   height: 18px;
 }
 @media (max-width: 720px) {
-  .plugins-grid {
-    grid-template-columns: 1fr;
+  .plugin-row__line {
+    flex-wrap: wrap;
+  }
+  .plugin-row__name {
+    flex-basis: 100%;
   }
   .plugin-toolbar__actions {
     margin-left: 0;

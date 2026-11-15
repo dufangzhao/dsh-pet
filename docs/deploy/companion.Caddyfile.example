@@ -1,0 +1,11 @@
+# Replace this example name with the operator-controlled TLS domain.
+companion.example.com {
+    # Remote deployments supply gateway keys on the host; never proxy private key writes.
+    @privateCredential path /api/model/credential /api/voice/credential /api/speech/credential /api/qq/credential /api/qq/judge/credential
+    respond @privateCredential "Configure credentials through the service host's private entry." 403
+
+    reverse_proxy 127.0.0.1:4120 {
+        # Forward committed events promptly; the service sends SSE heartbeats.
+        flush_interval -1
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "scope": "isolated-legacy-preservation-token-and-stream-only",
+  "status": "passed",
+  "exitCode": 0,
+  "jobId": "bash-0b5739e5484e4384",
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-preservation.mjs",
+  "checks": ["actual-shared-startup-does-not-activate-legacy-roles", "real-stream-loss-retains-confirmed-state-and-manual-reconnect", "isolated-synthetic-history-persona-vault-bytes-preserved", "synthetic-service-token-absent-from-isolated-desktop-regular-files"],
+  "seeded": {"history": "actual FileConfigStore schema 1, pet.voice-chat/default", "persona": "actual FileConfigStore schema 2, pet.profile/default with synthetic persona", "vault": "actual FileCiphertextStore sealed envelope with synthetic opaque bytes", "byteIdenticalAfterExit": true},
+  "tokenScan": {"regularFiles": 62, "skippedSymlinks": 0, "patterns": ["raw", "URL-encoded", "base64", "JSON-escaped"], "found": false},
+  "runnerSha256BeforeRun": "de5a166916bb33a5b394d44afc912816cc55ece85d3dbdfc76a0de30f9ec10ab",
+  "displayFixtureSha256BeforeRun": "2c36c515ece4139b28d0ce0f36ecb2bfb834d376de141ca57bd06ab3419ade43",
+  "serviceFixtureSha256BeforeRun": "ad15280bdf0d57b5544b0dd240011b317640fac7e3c82057659e5726617af19f",
+  "faultProxySha256BeforeRun": "b0154e169501b8950c712ccf21176c8ebf237a35b25c2c14b15ec3dabea86d8c",
+  "productionMainSha256": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+  "productionPreloadSha256": "946293e69aca1db17b65b0c1e8b55b3a9c53a14926c1a67db8e63d5a576baed7",
+  "productionWorkerSha256": "b1300cbe4c1780829301695996a527e2386906c8852ae5b2d46d4e9296cc8551",
+  "admissionSha256": "f216f50344bb5b4412588fffac4c55901c9173fa0abce933976c3b4d48c7bcbb",
+  "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+  "history": "First attempt exited 1 because the QA check required a timestamp equal to an earlier observation even though a valid intervening snapshot had advanced it. After cleanup the check was corrected to require a retained nondecreasing timestamp; the isolated rerun passed.",
+  "limit": "Linux rejects the Windows-only profile plugin; this verifies byte preservation and no import, not Windows local profile/audio integration or decryption of the synthetic opaque vault bytes.",
+  "cleanup": "The runner returned after finally closed Electron, proxy, isolated service and owned Xvfb. Subsequent process and Docker checks found only pre-existing unrelated instances."
+}

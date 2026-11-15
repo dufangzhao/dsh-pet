@@ -1,16 +1,18 @@
+/**
+ * 悬停工具：只留文字聊天这一件服务里真有的动作。
+ *
+ * 语音输入与录音属于本机设备通道，共享组合里没有它；留一个按不动的麦克风
+ * 只会让人以为这台机器缺了点什么。命中区仍按画出来的圆逐个计算。
+ */
 import type { Ref } from 'react';
 
 export interface PetToolsProps {
   register: Ref<HTMLDivElement>;
   hover: readonly string[];
   chatOpen: boolean;
+  /** 连接通道存在即可打开：真正的发送可用性由输入框自己判断。 */
   canChat: boolean;
-  canRecord: boolean;
-  recording: boolean;
-  pending: boolean;
-  talkKeyLabel: string | null;
   onChat(): void;
-  onVoice(): void;
 }
 
 /** Original line icons in the compact 34px side stack. */
@@ -28,6 +30,7 @@ export function PetTools(props: PetToolsProps): React.JSX.Element {
             aria-expanded={props.chatOpen}
             aria-controls="pet-chat-surface"
             disabled={!props.canChat}
+            title={props.canChat ? '文字聊天' : '这台机器没有连接服务的通道'}
             onClick={props.onChat}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -35,43 +38,6 @@ export function PetTools(props: PetToolsProps): React.JSX.Element {
               <path d="M8 9h8M8 12h5" />
             </svg>
           </button>
-        ) : null}
-        {props.hover.includes('voice') ? (
-          <div className="pet-tools__mic">
-            <button
-              type="button"
-              className="pet-tool"
-              data-pet-circle
-              data-testid="pet-mic"
-              aria-label={props.recording ? '结束录音并发送' : '开始语音输入'}
-              aria-pressed={props.recording}
-              disabled={props.pending || (!props.recording && !props.canRecord)}
-              title={
-                props.recording
-                  ? '结束录音并发送'
-                  : props.canRecord
-                    ? '开始语音输入'
-                    : '语音输入尚未就绪，请在设置中检查'
-              }
-              onClick={props.onVoice}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                {props.recording ? (
-                  <path d="M8 8h8v8H8Z" />
-                ) : (
-                  <>
-                    <rect x="9" y="3" width="6" height="12" rx="3" />
-                    <path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" />
-                  </>
-                )}
-              </svg>
-            </button>
-            {props.talkKeyLabel ? (
-              <span className="pet-tools__key" data-testid="pet-talk-key">
-                {props.talkKeyLabel.replace(/\s+/g, '')}
-              </span>
-            ) : null}
-          </div>
         ) : null}
       </div>
     </div>

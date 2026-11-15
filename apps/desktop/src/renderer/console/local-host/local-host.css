@@ -1,0 +1,147 @@
+/* 本机 QQ 接入：接入卡、每个 QQ 客户端与 Agent 链路各是一张独立卡；卡内只用行与分节。 */
+.local-host {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.host-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.host-note {
+  margin: 0;
+  color: var(--ink-quiet);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.host-note--danger {
+  color: var(--danger);
+}
+
+.host-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--ink-quiet);
+  font-size: 12px;
+}
+
+.host-row {
+  cursor: default;
+}
+
+.host-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.host-sub__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.host-subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.host-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.host-fields__wide {
+  grid-column: 1 / -1;
+}
+
+.host-checks {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 50px;
+  padding: 0 12px;
+  border: 1.5px solid var(--field);
+  border-radius: var(--radius-field);
+}
+
+.host-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.host-check input {
+  accent-color: var(--ink);
+}
+
+.host-source-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.host-source {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.host-source:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.host-source__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.host-source__phase {
+  margin-left: auto;
+  color: var(--ink-quiet);
+  font-size: 13px;
+}
+
+.host-source__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  color: var(--ink-quiet);
+  font-size: 13px;
+}
+
+.host-policy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.host-policy .btn {
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .host-fields {
+    grid-template-columns: 1fr;
+  }
+}

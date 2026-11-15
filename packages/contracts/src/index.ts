@@ -39,3 +39,32 @@ export * from './voice-input.js';
 export * from './model-connection.js';
 export * from './model-services.js';
 export * from './design-lab.js';
+export * from './companion.js';
+export * from './companion-profile.js';
+export * from './companion-memory.js';
+export * from './desktop-companion.js';
+export * from './audio-capture.js';
+export * from './companion-voice.js';
+export * from './desktop-voice.js';
+export * from './companion-speech.js';
+export * from './desktop-speech.js';
+export * from './companion-origin.js';
+export * from './companion-material.js';
+export * from './companion-qq.js';
+export * from './local-host.js';
+export * from './local-host-process.js';
+export * from './local-host-qq.js';
+export * from './local-host-console.js';
+export * from './desktop-local-host.js';
+export type {
+  ResponsesConnectionSettings,
+  CompanionModelCredentialView,
+  CompanionModelConnectorView,
+  CompanionModelBindingView,
+  CompanionModelCheckView,
+  CompanionModelView,
+  CompanionModelSaveCommand,
+  CompanionModelCredentialCommand,
+  CompanionModelTestCommand,
+  CompanionModelCommandResult,
+} from './companion-model.js';

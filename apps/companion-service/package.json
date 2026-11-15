@@ -1,0 +1,48 @@
+{
+  "name": "@pet/companion-service",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=26.13.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "build": "node build.mjs",
+    "start": "node --import tsx src/main.ts"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*",
+    "@pet/host-kernel": "workspace:*",
+    "@pet/companion-runtime": "workspace:*",
+    "@pet/local-host": "workspace:*",
+    "@pet/local-host-bridge": "workspace:*",
+    "@pet/state-sqlite": "workspace:*",
+    "@pet/cloud-exec": "workspace:*",
+    "@pet/harness-cortico": "workspace:*",
+    "@pet/text-client": "workspace:*",
+    "@pet/model-connection-magpie": "workspace:*",
+    "cortico": "0.2.7",
+    "tsx": "4.23.15",
+    "@pet/asr-magpie": "workspace:*",
+    "@pet/shared-voice": "workspace:*",
+    "@pet/tts-magpie": "workspace:*",
+    "@pet/shared-speech": "workspace:*",
+    "@pet/shared-qq": "workspace:*",
+    "@pet/qq-official": "workspace:*",
+    "@pet/qq-onebot": "workspace:*",
+    "@pet/qq-participation-magpie": "workspace:*",
+    "@pet/qq-media-codec": "workspace:*",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/ws": "8.18.2",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "esbuild": "0.28.2"
+  }
+}

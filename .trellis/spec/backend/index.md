@@ -1,6 +1,6 @@
 # Backend Development Guidelines Index
 
-> **Actual stack**: Electron main process, host-kernel services, revisioned JSON FileConfigStore, and encrypted credential storage. Read [Project baseline](../shared/project-baseline.md) first. The database/Zod examples in the initial templates do not describe this repository.
+> **Actual stack**: The existing desktop uses Electron, host-kernel, FileConfigStore and encrypted credentials. The additive [companion service](companion-service.md) uses the same kernel/SDK plus a `node:sqlite` state plugin, Docker execution and HTTP/SSE. Read [Project baseline](../shared/project-baseline.md) first. Generic Drizzle/Zod templates are not the implemented stack.
 
 ## Related Guidelines
 
@@ -14,6 +14,14 @@
 
 | File                                               | Description                                       | When to Read                       |
 | -------------------------------------------------- | ------------------------------------------------- | ---------------------------------- |
+| [companion-service.md](./companion-service.md) | Executable service/State4/worker/Harness contracts | Headless service and feature plugins |
+| [qq-platform-entry.md](./qq-platform-entry.md) | Scoped QQ admission, shared native sources, materials and State4 delivery facts | QQ entry and cross-layer scope/authority changes |
+| [local-plugin-host.md](./local-plugin-host.md) | Independent daemon, native console, remote task authority and portable runtime contracts | Local-host bridge, desktop handoff and package lifecycle changes |
+| [model-connections.md](./model-connections.md) | Native connector authority, model configuration/checks and snapshot budget | Model-connection plugins and owner APIs |
+| [desktop-companion.md](./desktop-companion.md) | Shared Main/preload client, source lifetime, saved facts and native publication | Desktop service entry and connection/lifecycle changes |
+| [persona-memory.md](./persona-memory.md) | Canonical persona application, scoped fact authority, CAS/replay and cold migration | Persona/memory APIs, Harness context and format upgrades |
+| [shared-voice-input.md](./shared-voice-input.md) | Shared ASR/capture authority, fixed bridge, bounded media, lifetime and UI state contracts | Service voice sources and web/desktop voice consumers |
+| [shared-speech-output.md](./shared-speech-output.md) | Canonical TTS admission, Magpie streaming, bounded playback, real cleanup and settings ownership | Speech sources, Main/Pet audio and speech configuration |
 | [directory-structure.md](./directory-structure.md) | Project structure and domain organization         | Starting a new feature             |
 | [api-module.md](./api-module.md)                   | API module pattern (types, procedures, lib)       | Creating/modifying service modules |
 | [api-patterns.md](./api-patterns.md)               | Common patterns for API calls and data operations | Implementing CRUD, pagination      |

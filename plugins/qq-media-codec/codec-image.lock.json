@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "baseImageId": "sha256:a9975a0df83b07f6ef3a57098174a8303cb0e322570e1d2f175ceba33f417a72",
+  "baseImageDigest": "1panel/deepseek-harness@sha256:72c58e3b343cce588a05d0d107abb362f6b4c52eb313d54afe3a28ef4cef6d7f",
+  "nodeVersion": "24.21.0",
+  "ffmpeg": "7.1.2",
+  "ffmpegSourceSha256": "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304",
+  "ffmpegSigningFingerprint": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+  "lame": "3.100",
+  "silkVersion": "3.7.1",
+  "silkIntegrity": "sha512-mXPwLRtZxrYV3TZx41jMAeKc80wvmyrcXIcs8HctFxK15Ahz2OJQENYhNgEPeCEOdI6Mbx1NxQsqxzwc3DKerw==",
+  "silkGitHead": "5971995be3ce05d4a1bf820fdf9d7ccdc942e945",
+  "files": [
+    {
+      "path": "job-runner.mjs",
+      "sha256": "6d2490fcc66ea598d4f3af9d1b694170bfa5b93f4118dbe421d1052b57900f77",
+      "sizeBytes": 63634
+    },
+    {
+      "path": "bin/ffmpeg",
+      "sha256": "1042a1f0b098c6b44905e3085cf1a9bf05dbfc3a51939a3c310007b102fa3327",
+      "sizeBytes": 4815272
+    },
+    {
+      "path": "bin/ffprobe",
+      "sha256": "ef43beaec555f07b10b8b3499478cab15cac03bfb3e07991c7f6642fe1f43a6b",
+      "sizeBytes": 4708040
+    },
+    {
+      "path": "silk/index.mjs",
+      "sha256": "1a95755169e70de059b47a7e7d81a2c3e4f0f0d2ac8d26a8d1d90eaeaac4f937",
+      "sizeBytes": 23840
+    },
+    {
+      "path": "silk/silk.wasm",
+      "sha256": "88152af59af535b8056ac806710824b2259a361027451b494f175f48fb39c807",
+      "sizeBytes": 234626
+    },
+    {
+      "path": "licenses/ffmpeg-LGPL-2.1.txt",
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe",
+      "sizeBytes": 26526
+    },
+    {
+      "path": "licenses/lame-LGPL-2.txt",
+      "sha256": "bfe4a52dc4645385f356a8e83cc54216a293e3b6f1cb4f79f5fc0277abf937fd",
+      "sizeBytes": 25284
+    },
+    {
+      "path": "licenses/silk-wrapper-MIT.txt",
+      "sha256": "3b1585c0e6d9d501e86383948fc0d1734bcb86517a13111d97749c65ad2bfb74",
+      "sizeBytes": 1085
+    },
+    {
+      "path": "licenses/silk-container-BSD.txt",
+      "sha256": "2605f550752714dccc2b9f38c5951582937b1f1e957bc0d0b51bad5a0ac5f6b6",
+      "sizeBytes": 1291
+    },
+    {
+      "path": "licenses/glibc-copyright.txt",
+      "sha256": "d3c95b56fa33e28b57860580f0baf4e4f4de2a268a2b80f1d031a5191bade265",
+      "sizeBytes": 26462
+    },
+    {
+      "path": "licenses/gcc-runtime-copyright.txt",
+      "sha256": "c2ff6bea4ff8eb81e93a10878e3a03db5015051b32272b363a6f23d3b86b11a2",
+      "sizeBytes": 70612
+    },
+    {
+      "path": "licenses/silk-Skype-BSD-notice.txt",
+      "sha256": "10abd8371227c527862ddb062631394e99ad27ce78a7290a85405433b63f515e",
+      "sizeBytes": 1787
+    }
+  ],
+  "imageId": "sha256:efbbfdfd603a862fb15929e43cf9afd38241c7ca89343907460bcc7cdab6bc1f",
+  "manifestSha256": "69745cbac7496217f6d79f015d396f7ad066e0473c2fcea5e5b0e60c8aa58bdb",
+  "contextIdentity": "7f4f20ffef34c4db1b820f8ccae31535ea187d376abfd5be54c5a26774c3a0bf"
+}

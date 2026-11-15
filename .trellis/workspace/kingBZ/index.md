@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 20
-- **Last Active**: 2026-11-04
+- **Total Sessions**: 29
+- **Last Active**: 2026-11-16
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~678 | Active |
+| `journal-1.md` | ~1086 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,15 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 29 | 2026-11-16 | Local QQ bridge, Windows startup repair and development handoff | `3cbce0f118281d5d8f220a4cf74671ea19d866a6`, `4fa34da9640fc03ab32317609edcee671d8d82b9`, `ea500e5c97ad647a6e601ee909a8dd0564da4ff7`, `47fcd626d0a949056c034b05f7135979e9d23c76` | `feat/local-plugin-host-qq-bridge` |
+| 28 | 2026-11-13 | Implement pluggable QQ entry | `f2aa4d1`, `85f4457`, `ee1045e`, `f6333e3` | `feat/qq-platform-entry` |
+| 27 | 2026-11-12 | 完成 M5 共享 Magpie 语音输出 | `5e61f9668388d05740825b4185a6444bead4696b`, `3287f42a6de08a63a0145af4e4139382a02b190c` | `feat/shared-speech-output` |
+| 26 | 2026-11-11 | Complete shared voice input and live Magpie ASR verification | `b58c9958a6a2f029490a2dbfc52cd58565738a91`, `c1583c179283624a06d5f091dfc480a3b3da968a` | `feat/shared-voice-input` |
+| 25 | 2026-11-09 | Controlled persona and explicit persistent memory | `c673f2d`, `3277f2a` | `feat/controlled-persona-memory` |
+| 24 | 2026-11-08 | Shared desktop pet and console Agent entry | `ec441f8`, `8321cfa` | `feat/shared-desktop-agent-entry` |
+| 23 | 2026-11-08 | Replaceable Magpie connection and useful text stage | `6778eec`, `0be35b1`, `6c49a21` | `feat/companion-model-text-loop` |
+| 22 | 2026-11-08 | Text-first continuous Agent foundation | `1a7b082`, `8fc76f7`, `9d86962` | `feat/text-agent-foundation` |
+| 21 | 2026-11-06 | Cross-platform companion architecture discovery | - | `main` |
 | 20 | 2026-11-04 | Simplify plugin list controls and settings navigation | `aaab58d` | `feat/plugin-pet-mvp-20261101` |
 | 19 | 2026-11-03 | Live transcripts and compact context menu | `263d6c0` | `feat/minimal-settings-preview-only` |
 | 18 | 2026-11-03 | Pet bubble replica and default permissions | `8fd1e07` | `feat/minimal-settings-preview-only` |

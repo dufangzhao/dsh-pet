@@ -1,8 +1,8 @@
 {
   "name": "@pet/audio-capture",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
-  "description": "录音插件：麦克风采集（M3-01 填充）",
+  "description": "Owned renderer audio capture and neutral browser/WAV primitives",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
@@ -11,16 +11,31 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./browser": {
+      "types": "./src/browser.ts",
+      "default": "./src/browser.ts"
+    },
+    "./capture-worklet": "./src/capture-worklet.ts",
+    "./wave": {
+      "types": "./src/pcm-wave.ts",
+      "default": "./src/pcm-wave.ts"
     }
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "build": "node build.mjs"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "esbuild": "0.28.2"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*"
   }
 }

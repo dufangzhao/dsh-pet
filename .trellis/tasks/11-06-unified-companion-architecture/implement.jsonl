@@ -1,0 +1,7 @@
+{"file":".trellis/spec/shared/project-baseline.md","reason":"Actual current stack and authority boundaries; historical host choice is reopened by the current PRD."}
+{"file":".trellis/spec/shared/plugin-application-contracts.md","reason":"Existing executable plugin, profile, cancellation and application contracts to preserve or deliberately migrate."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/current-runtime.md","reason":"Source-backed coupling, streaming and state-ownership findings; not implementation approval."}
+{"file":".trellis/tasks/11-06-unified-companion-architecture/research/ecosystem-and-duplex.md","reason":"Verified DSH/Pi/AstrBot boundaries, Jev example and Higgs API availability."}
+{"file": ".trellis/tasks/11-06-unified-companion-architecture/research/upstream-runtimes.md", "reason": "Verified Cortico and Superagent behavior, capability levels and state portability"}
+{"file": "docs/adr/0015-independent-continuous-agent-runtime.md", "reason": "Accepted independent runtime, continuous Agent, parallel Workers and internal Sessions; not implementation approval"}
+{"file": "docs/adr/0016-cloud-service-and-pluggable-features.md", "reason": "Accepted cloud-capable service, minimal kernel and replaceable features; distinguish device and service lifetimes"}

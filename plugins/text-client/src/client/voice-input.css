@@ -1,0 +1,86 @@
+/*
+ * 语音输入：web 与设置台共用。
+ *
+ * 全部规则都挂在 .tc-voice 下面：桌宠窗口不 import 这个文件，
+ * 透明窗口不会因为这里多出来的盒模型变成不透明。
+ */
+
+.tc-voice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tc-voice__hint,
+.tc-voice__note {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.tc-voice__note--error {
+  color: var(--pk-danger);
+}
+
+.tc-voice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tc-voice__state {
+  color: var(--pk-muted);
+  font-size: 12px;
+}
+
+/* 录音指示：只是一根会动的条，不说话。 */
+.tc-voice__level {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--pk-border);
+}
+
+.tc-voice__level > i {
+  display: block;
+  height: 100%;
+  background: var(--pk-accent);
+  transition: width 80ms linear;
+}
+
+.tc-voice__preview {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+  font: inherit;
+}
+
+.tc-voice-settings,
+.tc-voice-settings .pk-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tc-voice-settings {
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
+.tc-voice-settings .pk-input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tc-voice-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

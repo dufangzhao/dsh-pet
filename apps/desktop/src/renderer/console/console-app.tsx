@@ -1,3 +1,10 @@
+/**
+ * 设置台外壳：四页日常 + 三个恢复入口，一份服务连接与一份本机呈现。
+ *
+ * 共享组合里不再有本地 Core、模型目录、录音会话或引导：那几条数据源在这里根本不挂，
+ * 不是藏起来。导航仍是 React 状态——宿主按完整 URL 校验请求来源，改 hash 会让请求被拒。
+ * 切页只清掉一次性回执，不碰任何页面自己的草稿。
+ */
 import type { ConsolePlugin, ConsolePluginAction, ConsoleSecurityChange } from '@pet/contracts';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 
@@ -6,81 +13,72 @@ import { Dialog, Toast, useToastStore } from '@pet/ui-kit';
 import { Button } from './original-ui/kit.js';
 import { Button as MinimalButton } from './minimal-ui/controls.js';
 
-import type { AppView } from './app-views.js';
+import { RECOVERY_ITEMS } from './app-views.js';
 import {
-  RECOVERY_ITEMS,
-  VIEW_SUMMARY,
-  appViewOf,
-  navItemsOf,
-  resolveSelection,
-} from './app-views.js';
+  CONSOLE_VIEW_SUMMARY,
+  consoleNavItems,
+  consoleViewLabel,
+  isConsoleView,
+  resolveConsoleView,
+  type ConsoleView,
+} from './nav.js';
+import { Icon } from './minimal-ui/icons.js';
 import { ApprovalNotice } from './console-approvals.js';
 import { COPY } from './copy.js';
-import { ownerKey } from './labels.js';
 import { AboutPage } from './pages/about.js';
 import { AppearancePage } from './pages/appearance.js';
 import { ConversationPage } from './pages/conversation.js';
-import { DemoRecorder } from './pages/demo-console.js';
-import { GenericPage } from './pages/generic-page.js';
+import { ModelPage } from './pages/model.js';
 import { PermissionsPage } from './pages/permissions.js';
 import { PersonaPage } from './pages/persona.js';
+import { PetPage } from './pages/pet.js';
 import { PluginConfigPanel } from './pages/plugin-config.js';
 import { PluginsPage } from './pages/plugins.js';
-import { StartGuideAction, StartPage } from './pages/start.js';
-import { designLabEnabled } from './start-designs/registry.js';
-import { StyleFamilyGallery } from './style-families/gallery.js';
-import { VoicePage } from './pages/voice.js';
+import { QQPage } from './pages/qq.js';
+import { StartPage } from './pages/start.js';
+import { AsrPage } from './pages/voice-settings.js';
+import { TtsPage } from './pages/tts-settings.js';
 import { MinimalShell as SettingsShell } from './minimal-ui/shell.js';
-import { useApplication } from './use-application.js';
+import { connectionView } from '../shared/companion-state.js';
+import { useCompanion } from '../shared/use-companion.js';
+import { useConsoleVoice } from './use-console-voice.js';
+import { useLocalPresentation } from '../shared/use-local-presentation.js';
 import { useConsoleSnapshot } from './use-snapshot.js';
-import { useDemo } from './use-demo.js';
-import { useModelConnection } from './use-model-connection.js';
 import { actionLabel, usePluginActions } from './use-plugin-actions.js';
 import { useSecurity } from './use-security.js';
-import { useStopAll } from './use-stop-all.js';
 import { usePresentationTheme } from './use-presentation-theme.js';
 
-const STOP_ALL = {
-  title: '停止全部任务',
-  confirm: '确认停止',
-  cancel: '取消',
-  /** 宿主确认接受后仍可能有余量在收尾，文案跟着返回的 pendingWork 走。 */
-  accepted: (pendingWork: number): string =>
-    pendingWork > 0
-      ? `已停止当前任务，还有 ${pendingWork} 项工作正在结束。`
-      : '已停止当前任务，应用继续运行。',
-} as const;
+const CANCEL = '取消';
 
-/** 卸载之后共同的两件事：本机数据还在，信任却不会跟着回来——恢复或重装后仍要重新确认。 */
+/** 卸载之后共同的两件事：本机数据还在，信任却不会跟着回来。 */
 const KEPT_AFTER_UNINSTALL =
   '配置、凭据和数据保留在本机；信任不随卸载保留，恢复或重装后仍要重新确认。';
 
-/**
- * 需要确认的动作。启用是可逆的日常操作，点一下就做；
- * 停用会取消任务并隐藏入口，卸载会改动安装结果，两者都必须问一次。
- */
+/** 需要确认的动作：启用可逆，停用与卸载会改动安装结果，都要问一次。 */
 const CONFIRM: Readonly<
   Record<
     'disable' | 'uninstall',
-    { title: (name: string) => string; body: (plugin: ConsolePlugin) => string; confirm: string }
+    {
+      title: (name: string) => string;
+      body: (builtin: boolean) => string;
+      confirm: string;
+    }
   >
 > = {
   disable: {
     title: (name) => `停用 ${name}？`,
-    body: () => '正在运行的任务会被取消，它注册的入口会立即消失。配置、凭据和数据都保留在本机。',
+    body: () => '它注册的入口会立即消失，正在进行的本地工作会结束。配置、凭据和数据都保留在本机。',
     confirm: '确认停用',
   },
   uninstall: {
     title: (name) => `卸载 ${name}？`,
-    body: (plugin) =>
-      plugin.origin === 'builtin'
+    body: (builtin) =>
+      builtin
         ? `这是应用自带的功能。卸载结果会保存下来：它从当前和后续启动中移除，重启后也不会自己回来；应用代码仍在，之后可以在插件权限中恢复。${KEPT_AFTER_UNINSTALL}`
         : `这会删除它的代码包，不能撤销。${KEPT_AFTER_UNINSTALL}`,
     confirm: '确认卸载',
   },
 };
-
-const CANCEL = '取消';
 
 /** 恢复入口的标题与说明。这一页可以出现技术词，日常页不出现。 */
 const RECOVERY_TITLES: Readonly<Record<string, string>> = {
@@ -95,41 +93,30 @@ const RECOVERY_SUMMARY: Readonly<Record<string, string>> = {
   about: '版本与许可。',
 };
 
-/**
- * 设置台外壳：导航、主题、三份真实快照与停止命令的唯一持有者。
- *
- * 日常入口来自宿主给的 pages：扩展被停用、报错或移除时那一页自然消失，
- * 这里不跟着改；一条都没有时落到扩展列表，不显示空页。
- * 录音会话（useDemo）与应用状态（useApplication）各只有一份，页面不自己新建。
- */
+const RECOVERY_VIEWS = ['plugins', 'permissions', 'about'] as const;
+type RecoveryView = (typeof RECOVERY_VIEWS)[number];
+type Selection = ConsoleView | RecoveryView;
+
 export function ConsoleApp(): JSX.Element {
-  // 页面只用 React 状态：宿主按完整 URL 校验请求来源，改 hash 会让后续请求被拒。
-  const [selection, setSelection] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState(false);
-  /** 正在编辑配置的扩展；null 表示停在扩展列表。 */
+  const [view, setView] = useState<Selection>('start');
   const [configuring, setConfiguring] = useState<ConsolePlugin | null>(null);
-  /** 表单里还有没保存的改动时，切页或返回列表前先问一次。 */
-  const [discarding, setDiscarding] = useState<(() => void) | null>(null);
-  /**
-   * 评审实例里 Start 那一眼要看哪个评审面：整窗风格家族（默认）或旧的排法对照。
-   * 只有主进程挂了 --start-design-lab 标记的未打包实例才有这条岔路。
-   */
-  const [reviewSurface, setReviewSurface] = useState<'styles' | 'layouts'>('styles');
-  /** 等待确认的扩展动作；null 表示没有确认框。 */
   const [confirmAction, setConfirmAction] = useState<{
     plugin: ConsolePlugin;
     action: 'disable' | 'uninstall';
   } | null>(null);
   const dirtyRef = useRef(false);
   const toasts = useToastStore();
-  const app = useApplication();
+  const companion = useCompanion();
+  // 语音 owner 挂在外壳上：换页不打断录音，页面只拿视图。
+  const voice = useConsoleVoice(companion);
+  const presentation = useLocalPresentation();
   const snapshotState = useConsoleSnapshot();
   const securityState = useSecurity();
-  const stopAll = useStopAll();
   const pluginActions = usePluginActions({
     applySnapshot: snapshotState.applySnapshot,
     markUncertain: snapshotState.markUncertain,
   });
+  const presentationError = usePresentationTheme();
 
   const notify = useCallback(
     (message: string, tone: 'ok' | 'danger') => {
@@ -138,100 +125,30 @@ export function ConsoleApp(): JSX.Element {
     [toasts],
   );
 
-  const demoState = useDemo({ notify });
-  const models = useModelConnection();
-  const presentationError = usePresentationTheme();
-
-  /*
-   * 安全写操作返回两份真实快照：先都采用，再由调用方判断 operationError。
-   * 只应用其中一份会让页面一半新一半旧。
-   */
-  const applySecurityChange = useCallback(
-    (change: ConsoleSecurityChange) => {
-      snapshotState.applySnapshot(change.snapshot);
-      securityState.applySecurity(change.security);
-    },
-    [snapshotState, securityState],
-  );
-
-  /** 结果未确认时两份都可能过期，一起收起，等用户自己重新读取。 */
-  const markUncertainAll = useCallback(() => {
-    snapshotState.markUncertain();
-    securityState.markUncertain();
-  }, [snapshotState, securityState]);
-
-  /**
-   * 有未保存改动时先挂起目标动作，确认后才执行。
-   * 目标动作存成函数而不是"待确认的页面"，返回列表和切页共用一套确认。
-   */
-  const guard = useCallback((action: () => void) => {
-    if (dirtyRef.current) {
-      setDiscarding(() => action);
-      return;
-    }
-    action();
-  }, []);
-
-  const pages = app.snapshot?.pages ?? [];
-  const items = [...navItemsOf(pages), ...RECOVERY_ITEMS];
-  const current =
-    selection === 'permissions' ? 'permissions' : (resolveSelection(items, selection) ?? 'plugins');
-  const page = pages.find((candidate) => candidate.id === current) ?? null;
-  const view = page === null ? null : appViewOf(page);
-
   const select = useCallback(
     (next: string) => {
-      guard(() => {
-        setConfiguring(null);
-        setSelection(next);
-      });
+      // 换页只清掉一次性回执；各页的草稿留在它们自己那里。
+      companion.clearNotice();
+      setConfiguring(null);
+      setView(isSelection(next) ? next : 'start');
     },
-    [guard],
-  );
-
-  /** 页间跳转只按视图找宿主给的那一页；那一页被撤回就落到扩展，不在本机猜 id。 */
-  const goToView = useCallback(
-    (target: AppView) => {
-      const found = pages.find((candidate) => appViewOf(candidate) === target);
-      select(found?.id ?? 'plugins');
-    },
-    [pages, select],
+    [companion],
   );
 
   useEffect(
     () =>
       window.petSettings?.onNavigate((request) => {
-        if (request.view === 'plugins' || request.view === 'about') select(request.view);
-        else goToView(request.view);
+        if (request.view === 'plugins') setView('plugins');
+        else if (request.view === 'about') setView('about');
+        else {
+          // 旧深链（voice、local-host）在这里落到现在真正存在的页，不留死页。
+          const next = resolveConsoleView(request.view);
+          if (next !== null) setView(next);
+        }
       }),
-    [goToView, select],
-  );
-  const openConfig = useCallback(
-    (plugin: ConsolePlugin) => {
-      guard(() => {
-        const ownPage = pages.find(
-          (page) =>
-            page.owner.pluginId === plugin.owner.pluginId &&
-            page.owner.instanceId === plugin.owner.instanceId &&
-            page.owner.generation === plugin.owner.generation,
-        );
-        if (ownPage) {
-          setConfiguring(null);
-          setSelection(ownPage.id);
-        } else setConfiguring(plugin);
-      });
-    },
-    [guard, pages],
+    [],
   );
 
-  const closeConfig = useCallback(() => {
-    guard(() => setConfiguring(null));
-  }, [guard]);
-
-  /**
-   * 执行一次扩展动作，结果只报事实：达成说做了，没达成说为什么。
-   * 未确认时页面已经由 markUncertain 收起旧数据，这里不补读也不自动重试。
-   */
   const runPluginAction = useCallback(
     async (plugin: ConsolePlugin, action: ConsolePluginAction) => {
       const outcome = await pluginActions.run(plugin, action);
@@ -244,42 +161,22 @@ export function ConsoleApp(): JSX.Element {
     [pluginActions, toasts],
   );
 
-  /**
-   * 行上的按钮先到这里。停用与卸载要确认，启用直接做；
-   * 但无论哪条路径都要穿过 guard，未保存的配置不能因为一次动作被丢掉。
-   */
   const requestPluginAction = useCallback(
     (plugin: ConsolePlugin, action: ConsolePluginAction) => {
-      guard(() => {
-        if (action === 'enable') {
-          void runPluginAction(plugin, action);
-          return;
-        }
-        setConfirmAction({ plugin, action });
-      });
+      if (action === 'enable') {
+        void runPluginAction(plugin, action);
+        return;
+      }
+      setConfirmAction({ plugin, action });
     },
-    [guard, runPluginAction],
+    [runPluginAction],
   );
 
   const confirmPluginAction = useCallback(async () => {
     const request = confirmAction;
     setConfirmAction(null);
-    if (request !== null) {
-      await runPluginAction(request.plugin, request.action);
-    }
+    if (request !== null) await runPluginAction(request.plugin, request.action);
   }, [confirmAction, runPluginAction]);
-
-  const confirmStopAll = useCallback(async () => {
-    setConfirming(false);
-    const outcome = await stopAll.stop();
-    if (outcome.status !== null) {
-      toasts.push(STOP_ALL.accepted(outcome.status.pendingWork), 'ok');
-      // stopAll 不改扩展，宿主返回的就是最新运行状态，直接合并，不再补一次读取。
-      snapshotState.applyHostStatus(outcome.status);
-    } else {
-      toasts.push(outcome.error ?? '停止失败。', 'danger');
-    }
-  }, [snapshotState, stopAll, toasts]);
 
   const shared = {
     snapshot: snapshotState.snapshot,
@@ -290,114 +187,67 @@ export function ConsoleApp(): JSX.Element {
   };
 
   const pendingApprovals = securityState.security?.pending.length ?? 0;
-  /** 录音会话是全场的：停在别的页也看得见，也能结束或取消。 */
-  const recordingStrip =
-    demoState.recording === null || view === 'voice' || view === 'conversation' ? null : (
-      <div className="pb-strip">
-        <DemoRecorder demo={demoState} />
-      </div>
-    );
+  const items = [...consoleNavItems(), ...RECOVERY_ITEMS];
+  const connection = companion.state === null ? null : connectionView(companion.state);
   const notice =
-    pendingApprovals === 0 && recordingStrip === null ? undefined : (
-      <>
-        <ApprovalNotice count={pendingApprovals} onOpen={() => select('permissions')} />
-        {recordingStrip}
-      </>
+    pendingApprovals === 0 ? undefined : (
+      <ApprovalNotice count={pendingApprovals} onOpen={() => setView('permissions')} />
     );
-
-  const configPanel = (owner: ConsolePlugin['owner'], back: () => void) => (
-    <PluginConfigPanel
-      key={ownerKey(owner)}
-      owner={owner}
-      backLabel={COPY.backToRecovery}
-      onBack={back}
-      onDirtyChange={(dirty) => {
-        dirtyRef.current = dirty;
-      }}
-    />
-  );
-
-  /**
-   * 评审实例的根分支：整窗风格家族。这条路不挂设置台外壳——侧栏、页头、页脚一个都不渲染，
-   * 所以读屏里不会有第二份导航，评审看到的确实是那一家自己那一整扇窗。
-   * 跳去「语音设置」「装扮」或别的页时回到真实页面；回到 Start 仍是家族那一扇窗。
-   * 正常入口没有 petDesignLab 标记，走不到这里，生产那一屏一个像素都不变。
-   */
-  if (designLabEnabled() && view === 'start' && reviewSurface === 'styles') {
-    return (
-      <>
-        <StyleFamilyGallery
-          owners={{
-            app,
-            demo: demoState,
-            models,
-            notify,
-            goToView,
-            onOpenPlugins: () => select('plugins'),
-          }}
-          onOpenLayouts={() => setReviewSurface('layouts')}
-        />
-        <Toast items={toasts.items} onDismiss={toasts.dismiss} />
-      </>
-    );
-  }
 
   return (
     <>
       <SettingsShell
         items={items}
-        selected={current}
+        selected={view}
         onSelect={select}
         brand={COPY.appName}
-        actions={view === 'start' ? <StartGuideAction app={app} notify={notify} /> : undefined}
-        title={configuring?.name ?? page?.title ?? RECOVERY_TITLES[current] ?? COPY.appName}
-        /* 空字符串＝这一页不写整页说明：开始页的句子在「连接模型」那一节里。 */
+        title={
+          configuring?.name ??
+          (isRecovery(view) ? (RECOVERY_TITLES[view] ?? COPY.appName) : viewTitle(view))
+        }
         summary={
-          (page === null ? RECOVERY_SUMMARY[current] : (VIEW_SUMMARY[view ?? 'generic'] ?? '')) ||
+          (isRecovery(view) ? RECOVERY_SUMMARY[view] : (CONSOLE_VIEW_SUMMARY[view] ?? '')) ||
           undefined
         }
         notice={notice}
         footer={
-          <>
-            <RunToggle
-              ready={app.snapshot?.agent.state === 'ready'}
-              paused={models.snapshot?.paused ?? false}
-              busy={models.pausing}
-              onToggle={(next) => {
-                void models.setPaused(next);
-              }}
-            />
-          </>
+          <div className="pb-run">
+            <span className="pb-run__state" data-state={connection?.tone ?? 'offline'}>
+              {connection === null ? '连接状态未读取' : connection.label}
+            </span>
+            {companion.state?.snapshot == null ? null : (
+              // 完整名字留在 title 与可访问文本里；排版只负责省略。
+              <span
+                className="row__value pb-run__name"
+                title={companion.state.snapshot.agent.name}
+                data-testid="connection-name"
+              >
+                {companion.state.snapshot.agent.name}
+              </span>
+            )}
+            <MinimalButton
+              size="small"
+              className="pb-run__button"
+              data-testid="connection-refresh"
+              aria-label="刷新连接状态"
+              title="刷新连接状态"
+              busy={companion.loading}
+              onClick={companion.refresh}
+            >
+              {/* 折叠轨里只显示这一枚图标；宽窗口显示完整文字，图标不出现。 */}
+              <Icon name="refresh" className="pb-run__icon" />
+              <span className="pb-run__label">刷新连接</span>
+            </MinimalButton>
+          </div>
         }
       >
-        {presentationError ? (
+        {presentationError !== null && (view === 'appearance' || view === 'pet') ? (
           <p role="alert" className="minimal-error">
             {presentationError}
           </p>
         ) : null}
-        {current === 'permissions' ? (
-          <Button onClick={() => select('plugins')}>返回插件</Button>
-        ) : null}
         {renderBody()}
       </SettingsShell>
-
-      <Dialog
-        open={confirming}
-        title={STOP_ALL.title}
-        onClose={() => setConfirming(false)}
-        footer={
-          <>
-            <Button data-autofocus onClick={() => setConfirming(false)}>
-              {STOP_ALL.cancel}
-            </Button>
-            <Button variant="primary" onClick={() => void confirmStopAll()}>
-              {STOP_ALL.confirm}
-            </Button>
-          </>
-        }
-      >
-        正在运行的任务会被取消，应用与扩展继续运行。已经完成的工作不会回滚。
-      </Dialog>
 
       <Dialog
         open={confirmAction !== null}
@@ -422,33 +272,9 @@ export function ConsoleApp(): JSX.Element {
           </>
         }
       >
-        {confirmAction === null ? null : CONFIRM[confirmAction.action].body(confirmAction.plugin)}
-      </Dialog>
-
-      <Dialog
-        open={discarding !== null}
-        title={COPY.discardTitle}
-        onClose={() => setDiscarding(null)}
-        footer={
-          <>
-            <Button data-autofocus onClick={() => setDiscarding(null)}>
-              {COPY.discardCancel}
-            </Button>
-            <Button
-              variant="primary"
-              data-testid="discard-confirm"
-              onClick={() => {
-                const action = discarding;
-                setDiscarding(null);
-                action?.();
-              }}
-            >
-              {COPY.discardConfirm}
-            </Button>
-          </>
-        }
-      >
-        {COPY.discardBody}
+        {confirmAction === null
+          ? null
+          : CONFIRM[confirmAction.action].body(confirmAction.plugin.origin === 'builtin')}
       </Dialog>
 
       <Toast items={toasts.items} onDismiss={toasts.dismiss} />
@@ -456,55 +282,67 @@ export function ConsoleApp(): JSX.Element {
   );
 
   function renderBody(): JSX.Element {
-    if (page !== null) {
-      switch (view) {
-        case 'start':
-          return (
-            <StartPage
-              app={app}
-              demo={demoState}
-              models={models}
-              notify={notify}
-              goToView={goToView}
-              onOpenPlugins={() => select('plugins')}
-              onOpenStyles={designLabEnabled() ? () => setReviewSurface('styles') : undefined}
-            />
-          );
-        case 'persona':
-          return <PersonaPage app={app} notify={notify} />;
-        case 'appearance':
-          return <AppearancePage app={app} notify={notify} />;
-        case 'conversation':
-          return <ConversationPage app={app} demo={demoState} notify={notify} />;
-        case 'voice':
-          return (
-            <VoicePage
-              app={app}
-              demo={demoState}
-              notify={notify}
-              onGoToStart={() => goToView('start')}
-            />
-          );
-        case 'generic':
-          return (
-            <GenericPage
-              page={page}
-              app={app}
-              onBack={() => select('plugins')}
-              onDirtyChange={(dirty) => {
-                dirtyRef.current = dirty;
-              }}
-            />
-          );
-      }
+    if (configuring !== null) {
+      return (
+        <PluginConfigPanel
+          key={ownerKeyOf(configuring)}
+          owner={configuring.owner}
+          backLabel={COPY.backToRecovery}
+          onBack={() => setConfiguring(null)}
+          onDirtyChange={(dirty) => {
+            dirtyRef.current = dirty;
+          }}
+        />
+      );
     }
-
-    switch (current) {
+    switch (view) {
+      case 'start':
+        return (
+          <StartPage
+            companion={companion}
+            presentation={presentation}
+            voice={voice.controller}
+            notify={notify}
+          />
+        );
+      case 'conversation':
+        return (
+          <ConversationPage
+            companion={companion}
+            notify={notify}
+            voice={voice.controller}
+            onGoToStart={() => select('start')}
+          />
+        );
+      case 'persona':
+        return <PersonaPage companion={companion} presentation={presentation} notify={notify} />;
+      case 'appearance':
+        return <AppearancePage presentation={presentation} notify={notify} />;
+      case 'pet':
+        return <PetPage companion={companion} presentation={presentation} notify={notify} />;
+      case 'model':
+        return <ModelPage companion={companion} />;
+      case 'qq':
+        return <QQPage companion={companion} />;
+      case 'asr':
+        return (
+          <AsrPage
+            companion={companion}
+            voice={voice.controller}
+            notify={notify}
+            onOpenModel={() => select('model')}
+          />
+        );
+      case 'tts':
+        return (
+          <TtsPage
+            companion={companion}
+            presentation={presentation}
+            onOpenModel={() => select('model')}
+            onOpenPlugins={() => select('plugins')}
+          />
+        );
       case 'permissions':
-        /*
-         * 安全快照单独一路：读失败只收起这一页，不牵连扩展页。
-         * 写操作的结果未确认时才把两份一起收起。
-         */
         return (
           <PermissionsPage
             security={securityState.security}
@@ -515,105 +353,41 @@ export function ConsoleApp(): JSX.Element {
               shared.onRetry();
               securityState.refresh();
             }}
-            onApplyChange={applySecurityChange}
-            onUncertain={markUncertainAll}
+            onApplyChange={(change: ConsoleSecurityChange) =>
+              securityState.applySecurity(change.security)
+            }
+            onUncertain={() => securityState.markUncertain()}
             notify={notify}
           />
         );
       case 'about':
         return <AboutPage {...shared} />;
       default:
-        return configuring === null ? (
+        return (
           <PluginsPage
             {...shared}
-            onOpenConfig={(plugin) => openConfig(plugin)}
-            onOpenPermissions={() => select('permissions')}
+            onOpenConfig={setConfiguring}
+            onOpenPermissions={() => setView('permissions')}
             pending={pluginActions.pending}
             onAction={requestPluginAction}
-            stopping={stopAll.busy}
-            onRequestStopAll={() => {
-              // 请求进行中重复点击不重复开框。
-              if (!stopAll.busy) {
-                setConfirming(true);
-              }
-            }}
           />
-        ) : (
-          configPanel(configuring.owner, closeConfig)
         );
     }
   }
 }
 
-/**
- * 这一栏要说的话：桌宠在不在跑决定能不能按，paused 决定按下去是暂停还是继续。
- *
- * 可用性取代理状态（Core 的离线演示脚本也在跑，也真的可暂停），
- * 不以"接了哪家模型"为条件；桌宠没启动时按不了，也要把原因写在字面上。
- */
-export function runState(ready: boolean, paused: boolean): RunState {
-  if (!ready) {
-    return {
-      status: '桌宠未启动',
-      action: '暂停回应',
-      hint: '桌宠未启动，现在没有可暂停的回应',
-      enabled: false,
-    };
-  }
-  return paused
-    ? { status: '已暂停', action: '继续回应', hint: '回应已暂停：点这里继续', enabled: true }
-    : { status: '运行中', action: '暂停回应', hint: '正在回应：点这里暂停', enabled: true };
+function isRecovery(value: string): value is RecoveryView {
+  return (RECOVERY_VIEWS as readonly string[]).includes(value);
 }
 
-export interface RunState {
-  /** 状态那一行的词。 */
-  status: string;
-  /** 按钮上的动作词。 */
-  action: string;
-  /** 悬停与读屏用的完整一句。 */
-  hint: string;
-  enabled: boolean;
+function isSelection(value: string): value is Selection {
+  return isConsoleView(value) || isRecovery(value);
 }
 
-/**
- * 侧栏底部的回应开关，常驻。暂停与继续说的是宿主那条运行总线，
- * paused 读模型连接快照，不在这份界面里另记一次。
- */
-function RunToggle({
-  ready,
-  paused,
-  busy,
-  onToggle,
-}: {
-  ready: boolean;
-  paused: boolean;
-  busy: boolean;
-  onToggle: (next: boolean) => void;
-}): JSX.Element {
-  const state = runState(ready, paused);
-  return (
-    <div className="pb-run">
-      <span
-        className="pb-run__state"
-        data-state={ready ? (paused ? 'paused' : 'running') : 'offline'}
-      >
-        {state.status}
-      </span>
-      {/* 按钮是来源那一件；折叠到 72px 时只剩这枚 vendored 的 play↔pause 真形变。 */}
-      <MinimalButton
-        size="small"
-        className="pb-run__button"
-        aria-pressed={ready ? paused : undefined}
-        aria-label={state.hint}
-        title={state.hint}
-        disabled={!state.enabled || busy}
-        busy={busy}
-        data-testid="model-pause"
+function viewTitle(view: Selection): string {
+  return isConsoleView(view) ? consoleViewLabel(view) : COPY.appName;
+}
 
-        onClick={() => onToggle(!paused)}
-      >
-        <span className="pb-run__label">{state.action}</span>
-      </MinimalButton>
-    </div>
-  );
+function ownerKeyOf(plugin: ConsolePlugin): string {
+  return plugin.owner.pluginId + '/' + plugin.owner.instanceId;
 }

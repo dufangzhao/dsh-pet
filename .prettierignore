@@ -13,6 +13,7 @@ LICENSE
 # 生成物与依赖
 .cache/
 .model-cache/
+.companion-data/
 node_modules/
 dist/
 out/

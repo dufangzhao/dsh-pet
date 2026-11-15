@@ -1,0 +1,40 @@
+{
+  "managedJob": "bash-6bf9dd1a68054276",
+  "actualExit": 0,
+  "privateRoot": "/tmp/companion-speech-worker-4j3x1M",
+  "durableCloudRecords": 1,
+  "jobId": "e7739ec7-9ac7-4b8f-9bfb-512c42b0ebb8",
+  "containerId": "a7bf4d2476b7872a69b5dfebed620132c71b3ba274df8c44c8f182cc747f1779",
+  "containerInspection": "absent",
+  "mountsMatchPrivateRoot": true,
+  "cloudResult": {
+    "status": "exited",
+    "exitCode": 0,
+    "settled": true
+  },
+  "tasks": [
+    {
+      "id": "44875131-9d5e-4c16-8325-6d83a577dc67",
+      "executionId": "exec-397951696ac5dcdc128ab382b1ef120534beadeae81a8f6e",
+      "status": "completed",
+      "exitCode": 0
+    }
+  ],
+  "messageCounts": [
+    {
+      "role": "assistant",
+      "count": 3
+    },
+    {
+      "role": "notice",
+      "count": 1
+    },
+    {
+      "role": "user",
+      "count": 3
+    }
+  ],
+  "artifactSha256": "e16003e8ee5e314f97adc58ad71ef65fc95d2ed202637e31017d1d6f82b93088",
+  "effectSha256": "ad06e72726f6d8ff00228160453949c1ceb89571c99332e4815f9edce2acad07",
+  "effectExactlyOnce": true
+}

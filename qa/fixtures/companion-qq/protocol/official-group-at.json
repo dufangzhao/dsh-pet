@@ -1,0 +1,32 @@
+{
+  "op": 0,
+  "s": 42,
+  "t": "GROUP_AT_MESSAGE_CREATE",
+  "id": "event-fixture-42",
+  "d": {
+    "id": "ROBOT1.0_fixture-inbound",
+    "group_openid": "opaque_group_fixture",
+    "timestamp": "2026-11-13T04:00:00+08:00",
+    "author": {
+      "id": "opaque_member_fixture",
+      "member_openid": "opaque_member_fixture",
+      "username": "Synthetic member",
+      "bot": false,
+      "member_role": "owner"
+    },
+    "content": "  内容保留\r\n第二行",
+    "message_type": 103,
+    "mentions": [],
+    "attachments": [
+      {"content_type": "image/png", "url": "https://media.example.invalid/image?rkey=fixture-private", "filename": "image.png", "size": 24},
+      {"content_type": "voice", "url": "https://media.example.invalid/voice", "filename": "voice.silk", "voice_wav_url": "https://media.example.invalid/voice.wav", "asr_refer_text": "Reference only"},
+      {"content_type": "file", "url": "https://media.example.invalid/file", "filename": "report.txt", "size": 10}
+    ],
+    "message_scene": {
+      "ext": ["msg_idx=REFIDX_fixture-current", "ref_msg_idx=REFIDX_fixture-quoted", "auth_token=must-not-project"]
+    },
+    "msg_elements": [
+      {"msg_idx": "REFIDX_fixture-quoted", "content": "quoted", "message_type": 103, "msg_elements": [{"content": "nested", "message_type": 0}]}
+    ]
+  }
+}

@@ -44,9 +44,10 @@ const VIEW_ICON: Readonly<Record<AppView, SettingsNavIcon>> = {
   generic: 'panel',
 };
 
-/** 恢复类入口：日常五页之外仍然可达，但不占主视线。 */
+/** 恢复类入口：日常页之外仍然可达，但不占主视线。 */
 export const RECOVERY_ITEMS: readonly SettingsNavItem[] = [
   { id: 'plugins', label: '插件', icon: 'puzzle', quiet: true },
+  { id: 'permissions', label: '权限', icon: 'shield', quiet: true },
   { id: 'about', label: '关于', icon: 'info', quiet: true },
 ];
 

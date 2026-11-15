@@ -1,0 +1,28 @@
+[Unit]
+Description=Persistent companion text service
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=companion
+Group=companion
+SupplementaryGroups=docker
+WorkingDirectory=/opt/dsh-pet
+# Provision this environment file outside the repository with operator-only permissions.
+# COMPANION_DATA_DIR=/srv/companion-data
+# COMPANION_TOKEN=<operator-provisioned random token>
+# COMPANION_EXEC_IMAGE=<prepared Node image>
+# COMPANION_ORIGIN=https://companion.example.com
+EnvironmentFile=/etc/companion/service.env
+ExecStart=/usr/bin/node --import tsx apps/companion-service/dist/main.mjs
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=60
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

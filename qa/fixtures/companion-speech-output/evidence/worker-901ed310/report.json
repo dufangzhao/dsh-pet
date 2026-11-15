@@ -1,0 +1,25 @@
+{
+  "scope": "speech-core-docker-asr-continuity",
+  "status": "passed",
+  "checks": [
+    "completed-native-speech-delivery-keeps-actual-Core-held-ASR-and-same-running-container",
+    "speech-cancel-joins-only-owned-native-audio-without-stopping-held-Core-ASR-or-Docker-execution",
+    "held-ASR-and-original-Core-finish-independently-and-same-worker-produces-one-effect-and-matching-artifact"
+  ],
+  "limit": "Actual service/Core/Docker and loopback synthetic TTS/ASR; no renderer, playback device, hearing or live model claim.",
+  "imageId": "sha256:a9975a0df83b07f6ef3a57098174a8303cb0e322570e1d2f175ceba33f417a72",
+  "syntheticRoot": "/tmp/companion-speech-worker-4j3x1M",
+  "task": {
+    "taskId": "44875131-9d5e-4c16-8325-6d83a577dc67",
+    "executionId": "exec-397951696ac5dcdc128ab382b1ef120534beadeae81a8f6e",
+    "supervisorTaskId": "11c43869-35ee-488b-959b-6970a9393091",
+    "jobId": "e7739ec7-9ac7-4b8f-9bfb-512c42b0ebb8",
+    "containerId": "a7bf4d2476b7872a69b5dfebed620132c71b3ba274df8c44c8f182cc747f1779"
+  },
+  "artifactSha256": "e16003e8ee5e314f97adc58ad71ef65fc95d2ed202637e31017d1d6f82b93088",
+  "pcmSha256": "0566839f5260aa06098367a73967cb2de276a8bfeddedf9fae06622ecbf6acf1",
+  "cleanup": {
+    "status": "settled",
+    "failures": []
+  }
+}

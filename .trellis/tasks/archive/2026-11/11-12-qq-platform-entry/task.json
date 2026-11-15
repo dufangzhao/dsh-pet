@@ -1,0 +1,61 @@
+{
+  "id": "qq-platform-entry",
+  "name": "qq-platform-entry",
+  "title": "Implement pluggable QQ platform entry",
+  "description": "Final QQ first-release plan approved by the user2026-11-13. Implement Q1-Q16 through ordered contract/context/codec gates, scoped State/Harness, both QQ protocols, all four media, participation judgment and Web management. Real account/model/send tests remain separately authorized.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "kingBZ",
+  "assignee": "kingBZ",
+  "createdAt": "2026-11-12",
+  "completedAt": "2026-11-13",
+  "branch": "feat/qq-platform-entry",
+  "base_branch": "feat/shared-speech-output",
+  "worktree_path": null,
+  "commit": "f6333e3cb72e48d888d8a69e3adfecbe63d0d79b",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "11-06-unified-companion-architecture",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "planningReview": "no-remaining-design-blockers",
+    "implementationApproval": {
+      "status": "approved",
+      "userText": "批准",
+      "at": "2026-11-13T04:34:44+08:00",
+      "reviewedArtifactsSha256": {
+        "prd.md": "86958702abd3a63dba692b3d31f7a89218225b266962f877b2ebef56eb33fc30",
+        "design.md": "abdc376a9acada1bdb0bfd09a80bfa593f0a40022255eca4bca09a86363e44ad",
+        "implement.md": "9b7ff01ba45fd9b316ea5c2c04671f073c6d96602119b68255a18220e1814647",
+        "implement.jsonl": "d36f70870b729e1fd7cc5c1308f9f96b7efd1deb77d11e28cfc680c624e0be48",
+        "check.jsonl": "fedb15a5f4f83e20f5d75b9cd0332fcac2410c6a4f9c1320559c7c9960be47ae"
+      }
+    },
+    "implementContextEntries": 21,
+    "checkContextEntries": 21,
+    "finishReview": {
+      "status": "passed-and-approved",
+      "at": "2026-11-13T14:38:21+08:00",
+      "acceptanceRecord": "qa/companion-qq-acceptance.md",
+      "nativeReport": "qa/fixtures/companion-qq-desktop/evidence/eec1249c-c314-4364-9586-db18fc78dc56/report.json",
+      "realQQOrPaidModelTrial": false
+    },
+    "workCommits": [
+      "f2aa4d1cf61567b17568512ae26f3a0f79d1527c",
+      "85f4457a9f84b773721a3ac5b5f355fa1e0bc0d5",
+      "ee1045e9e1d38738790ffd4c4abca68e2eec74fc",
+      "f6333e3cb72e48d888d8a69e3adfecbe63d0d79b"
+    ],
+    "commitArchiveApproval": {
+      "questionId": "m6_commit_archive",
+      "selected": "按清单提交并归档 (Recommended)",
+      "at": "2026-11-13T15:07:51+08:00",
+      "remotePush": false
+    }
+  }
+}

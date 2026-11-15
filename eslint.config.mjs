@@ -13,6 +13,7 @@ export default [
       '**/coverage/**',
       '**/.cache/**',
       '**/.model-cache/**',
+      '**/.companion-data/**',
       'docs/**',
       'research/**',
       'qa/**',

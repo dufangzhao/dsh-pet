@@ -1,0 +1,17 @@
+{
+  "scope": "one-authorized-public-speech-asr",
+  "fixtureSha256": "17e7fba4b006f086d644468a94c937d0d8cff182d16e479887fefa913b2a9467",
+  "seconds": 3,
+  "baseUrl": "http://127.0.0.1:3425/v1",
+  "modelRef": "xiaomi/mimo-v2.5-asr",
+  "uploadAttempts": 1,
+  "status": "passed",
+  "limit": "One project-to-Magpie audio POST; no retries, no Core message, no personal audio, no accuracy/latency aggregate claim.",
+  "elapsedMs": 2655,
+  "phase": "final",
+  "cleanup": "settled",
+  "error": null,
+  "transcript": "开放时间早上九点",
+  "noMessageOrTask": true,
+  "closed": true
+}

@@ -1,0 +1,16 @@
+{
+  "scope": "native-source-lifecycle-only",
+  "status": "passed",
+  "exitCode": 0,
+  "jobId": "bash-1a838acc86074662",
+  "command": "PET_CLOUD_EXEC_IMAGE=1panel/deepseek-harness:0.2.0-rc.2 node qa/probes/companion-desktop-source.mjs",
+  "checks": ["real-source-disable-reenable-revoke-drains-sse-and-denies-stale-send"],
+  "observations": ["Actual active source disabled via production console bridge; proxied SSE stream count fell from 1 to 0.", "The retired connection's send was rejected and generated no message request; the service retained the same agent.", "Real source enable followed by fresh explicit token created a different connection and SSE stream.", "Actual trust revocation drained the stream and denied connection; independent service identity remained available."],
+  "runnerSha256": "45d37b8ac225948ed2458cba9d2f7df26be62228b56b63772272b9fb8409103a",
+  "lifecycleFixtureSha256": "325f0e8b225b12da2b52f21a796f60fd40022491d07145a37860c4afb7e5b349",
+  "faultProxySha256": "b0154e169501b8950c712ccf21176c8ebf237a35b25c2c14b15ec3dabea86d8c",
+  "productionMainSha256": "aba668e8964fb9a7c4e5aaf371ef26f3bb39488f7bf02c5df7f3159dbc687328",
+  "patchedElectronSha256": "bcf2b3e430c49265f6da8b81b2f28032e0434155e1e7c4d8d7edfaf449b024dc",
+  "limit": "This does not establish physical drain of every outstanding download or arbitrary late callback; full and Windows gates remain pending.",
+  "cleanup": "Runner returned after finally closed production Electron, proxy, isolated service and owned Xvfb without reporting a cleanup failure."
+}

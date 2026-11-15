@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.qq-official",
+  "version": "0.1.0",
+  "displayName": { "en": "Official QQ", "zh-CN": "QQ 官方机器人" },
+  "description": { "en": "Production QQ WebSocket protocol through source-bound host transport" },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "official",
+      "capability": "companion.qq.protocol@1",
+      "features": {
+        "nativeQQ": 1,
+        "methodPermissions": {
+          "describe": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [
+    { "kind": "files", "scope": "plugin-data", "access": "read-write" },
+    { "kind": "credentials", "keys": ["qq-official-app-secret"] }
+  ],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "appId", "scenes"],
+      "properties": {
+        "protocol": { "type": "string", "const": "official", "default": "official" },
+        "appId": { "type": "string", "maxLength": 256, "default": "" },
+        "scenes": {
+          "type": "array",
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["private", "group"] },
+          "default": ["private", "group"]
+        }
+      }
+    },
+    "apply": { "protocol": "reload", "appId": "reload", "scenes": "reload" }
+  }
+}

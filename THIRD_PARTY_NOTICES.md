@@ -44,3 +44,11 @@ The isolated review presentation uses morphicons2.0.2 (MIT, Copyright2026Guiller
 ## LobeHub provider icons
 
 The settings model selector uses13 selected SVGs from @lobehub/icons-static-svg1.101.0, MIT, Copyright(c)2023LobeHub. Source: https://github.com/lobehub/lobe-icons. Exact package integrity and service mapping are in [the icon manifest](apps/desktop/src/renderer/console/vendor-icons/manifest.json); the full [MIT notice](apps/desktop/src/renderer/console/vendor-icons/LICENSE.txt) accompanies them. Provider names and marks identify their respective services. No runtime icon dependency is installed.
+
+## QQ transport and fixed codec (2026-11-13)
+
+The QQ adapters are independent implementations. AstrBot's AGPL-3.0-or-later adapter and the pinned SnowLuma source archive were read as protocol/reference material; neither implementation nor their account/runtime assets were copied into the product. The SnowLuma archive has its own source-available/noncommercial terms and is not relicensed here. Fixed references and the selected interoperability profile are recorded in [QQ research](.trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/astrbot-qq.md) and [protocol environment evidence](.trellis/tasks/archive/2026-11/11-12-qq-platform-entry/research/onebot-environment.md).
+
+The optional Docker codec contains FFmpeg7.1.2 (the selected LGPL2.1-or-later build), static LAME3.100 (LGPL2-or-later), and silk-wasm3.7.1. The wrapper's MIT declaration does not replace the embedded SILK notices: the image retains the Russell two-clause notice and Skype SDK BSD-style notice, including its explicit no-patent-grant language. glibc and GCC runtime notices are retained as well. Source/archive integrity, build configuration and every embedded notice hash are maintained in [codec provenance](qa/fixtures/companion-qq-codec/provenance.json) and [the artifact lock](plugins/qq-media-codec/codec-image.lock.json); [codec documentation](plugins/qq-media-codec/README.md) points to the reproducible build recipe. Distribution of that image must preserve the applicable source/notice obligations rather than presenting the whole image as MIT.
+
+The source service additionally uses ws8.22.0 under its package MIT license. Its precise dependency graph remains in the workspace lockfile.

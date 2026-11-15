@@ -1,10 +1,18 @@
 # AI 桌宠项目（暂定名）
 
+2026-11-07：已新增[独立文字 Agent 服务](docs/35-text-agent-foundation.md)，落实[持续 Agent 运行时](docs/adr/0015-independent-continuous-agent-runtime.md)与[云端服务/可插拔功能](docs/adr/0016-cloud-service-and-pluggable-features.md)的首段基础：持久状态、真实 Cortico、独立 Docker 工作和可替换文字客户端。后续语音、Live2D 与平台接入沿用这些边界；[验收记录](qa/companion-acceptance.md)区分已运行证据和后续范围。现有桌面入口及数据独立保留，不自动迁入新服务。
+
 当前采用 DSH 式统一插件宿主：Cortico 负责智能体与统一日常记录，五个设置页面、人设、外观和语音能力通过插件组合。桌宠气泡与设置台使用同一份配置与记录；没有 Key 时可体验明确标注的离线脚本。当前使用与扩展说明统一见[插件式桌宠指南](docs/34-plugin-pet-guide.md)，历史 Demo 交付记录保留在[原验证记录](qa/demo-status.md)。前端由 DeepSeek max 实现，主会话负责后端、集成与验收。
 
 目标是实用、可定制、交互顺畅的独立桌面助手：用户可按需组合语音、声音、角色、屏幕理解与电脑操作能力，而非仅有聊天/养成的桌宠。已确定能力 + 受控UI贡献点；DSH为可选集成，不是运行前提。
 
-## 打开当前 Demo
+## 启动独立文字服务
+
+Linux 服务端使用 Node 26.13.0+。完成依赖安装后运行 `pnpm companion:build`，配置独立的 `COMPANION_DATA_DIR` 和 `COMPANION_TOKEN`，再运行 `pnpm companion:start`。默认监听 `http://127.0.0.1:4120`；默认脚本模式有明确标记。真实模型、Docker 镜像、数据恢复与云端运行方法见[文字服务指南](docs/35-text-agent-foundation.md)。
+
+QQ 官方机器人与 OneBot 双入口的配置、身份名单、可选语音和投递说明见[QQ 接入指南](docs/40-qq-platform-entry.md)。它们默认停用，沿用同一 Agent 的持久状态与工作；桌面只读状态，完整管理在 Web。
+
+## 打开现有桌面 Demo
 
 双击项目根目录的[启动桌宠.cmd](启动桌宠.cmd)，桌宠和设置台会按当前已保存的启用选择显示。首次可直接在桌宠气泡完成初始化。重复双击复用同一设置窗口；桌宠面板和托盘都可退出。首次选择模型、确认功能与对话步骤见[当前使用说明](docs/34-plugin-pet-guide.md)。启动器直接打开当前构建，不需要全局安装 Node 或 pnpm。
 
@@ -34,9 +42,13 @@ Coopanion仅作为交互、设置台与架构参考，本阶段不二开，见[A
 本地 Git 主分支为 main；实现阶段按工作包审查、验证并使用约定式提交。
 不提交密钥、个人聊天、录音、模型权重、依赖目录与临时截图。公开仓库：[dufangzhao/dsh-pet](https://github.com/dufangzhao/dsh-pet)，主分支为 main。
 
+## 在 Windows 继续开发
+
+另一台 Windows 机器的环境安装、PowerShell 启动命令、已有服务连接和当前验收入口统一见 [Windows 开发交接](docs/41-windows-development-handoff.md)。源码从 GitHub 获取；依赖与 Windows Electron 在新机器重新安装，服务数据与密钥不随 Git 迁移。
+
 ## 开发检查
 
-本机已验证 Node 24.18.0 + pnpm 11.24.0。安装依赖时默认不运行第三方构建脚本；后续原生依赖逐项审阅。
+现有桌面曾在 Node 24.18.0 验证；新文字服务与本轮完整工作区检查使用 Node 26.13.0 + pnpm 11.24.0。安装依赖时默认不运行第三方构建脚本；原生依赖逐项审阅。
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
@@ -47,7 +59,7 @@ pnpm format:check
 pnpm test:qa
 ```
 
-或运行 `pnpm check` 一次完成工作区类型/测试、QA回归、lint、格式与构建；该命令不接管真实鼠标或键盘。
+或运行 `pnpm check` 一次完成工作区类型/测试、QA回归、lint、格式与构建；该命令不接管真实鼠标或键盘。M6 服务集成测试还会创建和清理自有 Docker 夹具，需预先准备固定 codec/worker 镜像；构建方法和验收层次见[QQ 验收记录](qa/companion-qq-acceptance.md)与[codec 说明](plugins/qq-media-codec/README.md)，测试不会自动拉取镜像或使用真实账号。
 
 M0-01曾为空跑；当前已有真实工作区测试、下载安全测试与Electron集成探针。
 

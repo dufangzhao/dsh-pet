@@ -1,0 +1,100 @@
+# Shared speech output contracts
+
+## 1. Scope / trigger
+
+Use this contract when changing automatic speech admission, Magpie TTS, task-owned PCM transport, desktop playback or speech settings. It extends the [service](companion-service.md), [desktop](desktop-companion.md) and [voice-input](shared-voice-input.md) contracts. Executed scope belongs only to [M5 acceptance](../../../qa/fixtures/companion-speech-output/acceptance.md); this document is not a claim of live-model or hardware verification.
+
+Three ordinary sources have distinct owners: local optional `pet.speech-output` controls automatic Pet playback; service `pet.shared-speech` owns preparation/configuration and utterance lifetime; `pet.tts-magpie` owns the gateway binding/codec. Reuse PluginManager, ConfigService, PermissionKernel, CredentialBroker, TaskSupervisor and TaskMediaPeer. Source declarations/constants are maintained in code, not a parallel provider registry.
+
+## 2. Signatures
+
+| Authoritative source | Entry / responsibility |
+| --- | --- |
+| [companion-speech.ts](../../../packages/contracts/src/companion-speech.ts) | `SpeechView`, provider/credential CAS commands, logical/segment keys, headers, terminal facts, guards and all `SPEECH_*` limits |
+| [desktop-speech.ts](../../../packages/contracts/src/desktop-speech.ts) | Fixed `DesktopSpeechBridge`, `DESKTOP_SPEECH_IPC`, complete playback identity and ready/consume/playback/released receipts |
+| [speech-output-types.ts](../../../packages/companion-runtime/src/speech-output-types.ts) | Host-private source ports, actual media reader, produced counter and `SharedSpeechPorts.settled(receipt)` |
+| [State methods](../../../plugins/state-sqlite/src/types.ts) | `getMessage({id,eventSequence}): Result<CompanionMessage>`; a readonly lookup, also classified readonly by runtime |
+| [shared-speech](../../../plugins/shared-speech/src/index.ts), [segments](../../../plugins/shared-speech/src/segments.ts) | Whole admission, one current segment, terminal/orphan cleanup and exact canonical slicing |
+| [provider](../../../plugins/tts-magpie/src/index.ts), [codec](../../../plugins/tts-magpie/src/stream.ts), [runtime binding](../../../packages/companion-runtime/src/speech-providers.ts) | Ordinary source activation, streaming decode, credentials/authority and actual settlement |
+| [controller](../../../apps/companion-service/src/speech-controller.ts), [router](../../../apps/companion-service/src/speech-http.ts), [native client](../../../apps/companion-service/src/speech-client.ts) | Checked service ingress and one-consumer binary HTTP |
+| [speech protocol](../../../plugins/text-client/src/client/speech-protocol.ts) | `getSpeech`, `saveSpeechProvider`, `writeSpeechCredential`, catalog, begin/reserve/status/cancel and `consumeSpeechAudio` |
+| [desktop controller](../../../apps/desktop/src/main/shared-speech-controller.ts), [host](../../../apps/desktop/src/main/shared-speech-host.ts) | Event FIFO, actual local task/media, Pet preparation, bounded IPC and cleanup |
+| [connection owner](../../../apps/desktop/src/main/companion-client-controller.ts), [preload](../../../apps/desktop/src/preload/shared-speech-bridge.ts) | One SSE reader, target-bound token scope and frozen purpose-specific bridge |
+| [player](../../../apps/desktop/src/renderer/speech-output/stream-playback.ts), [settings hook](../../../apps/desktop/src/renderer/console/minimal-ui/use-shared-speech.ts) | Bounded scheduled nodes, actual device release and owner-bound settings drafts |
+
+`consumeSpeechAudio(transport,key,binding,consume,signal?)` awaits its consumer and reader cleanup inside the caller's authorization scope. It does not hand a live body to renderer. Public schemas/limits stay in contracts; private ports do not become model tools or generic SDK network/media APIs.
+
+## 3. Contracts
+
+**Canonical personal intent.** Each new committed owner-private assistant message is one logical Pet utterance/FIFO item, including formal Harness `say`. Main checks explicit owner-private before queue admission and public service synthesis checks it again; broader management readability grants no automatic playback. Reasoning, deltas, notices and raw tool receipts are not speech. State validates exact event/message correspondence. Scope-filtered event sequences may skip while remaining strictly increasing; malformed frames still fence. Clients supply IDs/selections, not text/offsets/native URLs. No new Core turn/user message is created. [M6 audio/delivery](qq-platform-entry.md#frozen-delivery-quota-and-audio) owns the separate private QQ consumer and text-before-voice gate.
+
+**Semantic documents.** A canonical `text-document` stores the complete body in an authorized material; `message.text` is only its explanation. The service's `SpeechController.setCanonicalTextResolver` is a host-private composition hook, not an HTTP/SDK reader. Missing resolver is not-ready; owner-private material scope and returned UTF-8/size/hash are checked before the existing M5 text/segment budget. [M6](qq-platform-entry.md#material-and-complete-semantic-text) explains why the28KiB complete-record budget can require this even for a legal8000-unit body. QQ output uses the separate private TTS consumer, never public Pet admission.
+
+**Playback opt-in.** The [existing application ledger](../../../apps/desktop/src/main/shared-application-state.ts) stores explicit optional-source adoption; absence means off. Old audition flags do not authorize automatic speech. Only Pet owns a player; console controls it and Web retains text/ASR. Enable/reconnect/restart takes a fresh future-event baseline, with no history/offline replay. Local volume is captured before whole admission; later changes apply to future speech. Master sound off stops/refuses speech. The existing [profile source](../../../plugins/profile/plugin.json) must be admitted on the actual desktop platform; its Config-only implementation supports Linux and Windows. Its manifest is generated by [profile/build.mjs](../../../plugins/profile/build.mjs): edit that source, then verify the generated platforms and builtin admission after the full build. Editing only the generated JSON is overwritten. Missing real preferences remain not-ready, rather than being replaced with guessed sound permission or volume.
+
+**Source and request identity.** Freeze provider/model/voice/config/key/source/policy/binding/codec for the whole. Config and credentials retain their real source owners; desktop opt-in revision is not the service feature revision. Each segment has a known request ID before POST, one reserve and one audio claim. Unknown outcomes do not re-POST, re-GET or switch provider. The Main local owner/task/media is authority; remote binding is provenance only.
+
+**Streaming.** Ordinary MiMo TTS is requested through configured Magpie plus its fixed native route, with PCM16LE/24kHz/mono streaming. A non-stream example does not disable vendor streaming, and there is no JSON/WAV fallback. Canonical text slices preserve exact concatenation, surrogate pairs and CRLF. Cumulative PCM caps are counters, never whole-audio allocations. The producer and media/HTTP reader run concurrently. Main has one bounded IPC chunk outstanding; Pet schedules bounded nodes and immediately schedules every chunk's short tail before consume ACK.
+
+**Completion facts.** `finish_reason=stop`, actual produced/drained counts, native settlement, client EOF, node-ended frames and physical release are separate facts. Service terminal data must be readable before HTTP `end`; media drain does not wait for HTTP finish, Main status or Pet release. Main checks one terminal status after EOF, then sends verified end. Next segment waits for actual local tail and release. No receipt proves human hearing.
+
+**Owned cleanup.** Stop fences synchronously, stops/disconnects nodes and unblocks capacity; it starts closing an allocated context before waiting for a possibly held resume. Released waits for setup/chunk/receipt work and that close. A later empty session cannot erase an earlier failed close. Exact old-frame cleanup ACKs do not regain network authority. After retiring/CAS/revoke/offline, retain M4 authority: local abort/join and old-target remote uncertainty, without a retired-token channel.
+
+Service watchdogs must close the existing outer authority lifetime when the actual whole cleanup settles, even with no later status/cancel/audio request. `settled(receipt)` matches feature generation, complete key and unique utterance binding; stale completion cannot finish a replacement lifetime. Produced frames come from verified native progress independently of drain, including failure paths.
+
+**Failure scope and settings.** Ordinary utterance failure clears only that utterance after actual cleanup, retaining a healthy event baseline and later FIFO items. Connection/source/feed invalidation and explicit stop clear the feed. Current control target comes from whole/baseline/arming, not historical displayed state. Refresh notifications received during an arm/read must survive coalescing under that captured connection/generation. A first not-ready attempt must be recoverable on a valid current-connection refresh; confirm the service binding before rearming when no session was captured. `DesktopSpeechState.appliedBinding` derives from the effective baseline/view, not a second cache or stop authority. An old idle phase or successful configuration save does not prove the new binding is applied. Settings read using the captured companion target, even when local speech is off. A draft binds connection/provider/revision; local volume has its own first-edit revision. Target changes and every awaited operation require ownership checks; configuration operations cannot clear another operation's busy state. Playback progress does not poll remote configuration.
+
+## 4. Validation & error matrix
+
+| Condition | Required result |
+| --- | --- |
+| Extra/invalid control fields, invalid PCM/header or unexpected receipt sequence | Refuse at the relevant boundary; no guessed payload or native call |
+| Wrong event/message pairing or changed CAS/binding | Conflict/stale rejection; never adopt caller text or silently rebase |
+| Missing configuration/key, disabled or denied source | Explicit not-ready/permission result before inference |
+| FIFO/admission bounds exceeded | Quota result without overwriting another intent |
+| Native length/filter/error, malformed stream, missing stop or incomplete PCM frame | `audio-format`/fixed failure; preserve real partial counts and cleanup facts |
+| Consumer disconnect, stopped device or target retirement | Fence old work, actual join, no next segment/retry |
+| Unknown remote cancellation | Old-target `remote-unknown`; not proof of stopped vendor compute/billing |
+| Cleanup failure | Retain failure/unavailable or pending-restart state; do not report settled or activate replacement |
+
+Key writing remains the existing trusted loopback ingress with target/config/credential CAS; Main projects `writable:false`. Operator steps are in the [usage guide](../../../docs/39-shared-speech-output.md).
+
+## 5. Good / base / bad cases
+
+- Base: configure while local speech is off, enable, receive one new formal message, play on Pet and stop without stopping Core/work/ASR.
+- Good: a long canonical reply completes all sequential slices while bounded buffers stay constant; no old whole-operation deadline kills healthy progress.
+- Bad: reuse snapshot diffs as an event feed, wait for a future chunk to ACK a short tail, or wait for producer completion before reading its media.
+- Bad: redirect an A draft to B because Config revisions happen to match; revive A after disconnect; let a second button invalidate the first operation's busy cleanup.
+- Bad: count drained bytes as generated bytes on failure, or let an orphan's native record expire while its authority task/leases remain alive.
+
+## 6. Tests required
+
+- Guards/State: exact identities, explicit owner-private role/event mapping, valid scoped sequence gaps and no QQ/unknown audience FIFO admission; no migration or canonical writes during readonly lookup. Controlled service tests also require absent document resolver refusal, full UTF-8/size/hash correspondence and unchanged M5 slicing.
+- Provider/service: fragmented SSE/UTF-8/base64/odd-byte carry, stop/error distinction, first PCM before terminal, exact full-text slices and zero retry/fallback/direct-vendor calls.
+- Lifetimes: plan/attach/next-segment orphan watchdogs must drain tasks/leases without a caller polling status; producer-ahead failure must retain produced greater than drained.
+- Main/renderer: one-frame and non-block-size tails, bounded healthy backpressure beyond old deadlines, late receipts, actual held resume/close, failed close across repeated replacements, single status and no future segment after stop.
+- Feed: multiple formal messages in one refresh window, corrupt control events, future baselines, current-target stop, and a new message after a delayed ordinary failure without an incidental refresh.
+- Settings: A/B with equal revisions, disconnect during reads, old-render actions, overlapping config/stop operations, dirty volume across external revisions. Hook harnesses must model dependency equality, cleanup and per-test isolation; gates must prove the operation actually started. Passing a pure patch-object test is not an interactive save proof.
+- Frozen production: actual Electron player on verified private null output, real UI/source controls and lifecycle, and separate Core/Docker/ASR continuity. Live TTS requires its own bounded authorization. Keep fixture, source, production and live evidence distinct.
+
+## 7. Wrong vs correct
+
+```ts
+// Wrong: producer completion can wait for credits which only this unread consumer returns.
+await operation.result;
+for await (const chunk of operation.audio) await write(chunk);
+
+// Correct: start the actual read before waiting for producer completion.
+const consuming = (async () => {
+  for await (const chunk of operation.audio) await write(chunk);
+})();
+await Promise.all([operation.result, consuming]);
+```
+
+```ts
+// Wrong: this session allocated nothing, so it overwrites an older failed close with success.
+this.releasing = cleanup;
+
+// Correct: own cleanup and cumulative reuse eligibility are different facts.
+this.releasing = Promise.all([prior, cleanup]).then(([before, now]) => before && now);
+```
