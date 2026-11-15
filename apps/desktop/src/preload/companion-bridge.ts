@@ -1,8 +1,10 @@
 import {
   DESKTOP_COMPANION_IPC,
+  DESKTOP_LOCAL_HOST_IPC,
   DESKTOP_PRESENTATION_IPC,
   makeError,
   type DesktopCompanionBridge,
+  type DesktopLocalHostBridge,
   type DesktopPresentationBridge,
   type DesktopPresentationSnapshot,
   type Result,
@@ -38,6 +40,24 @@ export function createDesktopCompanionBridge(
     version: 1,
     onChanged: subscription(listen),
   }) as unknown as DesktopCompanionBridge;
+}
+export function createDesktopLocalHostBridge(
+  invoke: Invoke,
+  listen: (listener: () => void) => () => void,
+): DesktopLocalHostBridge {
+  const methods = Object.fromEntries(
+    Object.entries(DESKTOP_LOCAL_HOST_IPC)
+      .filter(([name]) => name !== 'changed')
+      .map(([name, channel]) => [
+        name,
+        call(invoke, channel, name === 'getState' || name === 'start' ? 0 : 1),
+      ]),
+  );
+  return Object.freeze({
+    ...methods,
+    version: 1,
+    onChanged: subscription(listen),
+  }) as unknown as DesktopLocalHostBridge;
 }
 export function createDesktopPresentationBridge(
   invoke: Invoke,

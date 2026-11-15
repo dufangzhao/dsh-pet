@@ -11,11 +11,18 @@
 import { useId, useRef, type JSX } from 'react';
 
 import { BrandMark, NavIcon } from '../icons.js';
-import type { SettingsNavItem, SettingsShellProps } from '../settings-shell.js';
+import type { SettingsNavGroup, SettingsNavItem, SettingsShellProps } from '../settings-shell.js';
 
 const SIDEBAR_LABEL = '设置';
 const NAV_LABEL = '设置页导航';
 const SKIP_LABEL = '跳到主要内容';
+
+const GROUP_LABEL: Readonly<Record<SettingsNavGroup, string>> = {
+  main: '连接',
+  assistant: '助手',
+  plugins: '插件',
+};
+const GROUP_ORDER: readonly SettingsNavGroup[] = ['main', 'assistant', 'plugins'];
 
 export function MinimalShell({
   items,
@@ -33,6 +40,11 @@ export function MinimalShell({
   const mainRef = useRef<HTMLElement>(null);
   const everyday = items.filter((item) => item.quiet !== true);
   const recovery = items.filter((item) => item.quiet === true);
+  const groups = GROUP_ORDER.map((id) => ({
+    id,
+    items: everyday.filter((item) => item.group === id),
+  })).filter((group) => group.items.length > 0);
+  const ungrouped = everyday.filter((item) => item.group === undefined);
 
   return (
     <div className="window" data-testid="settings-shell">
@@ -57,13 +69,27 @@ export function MinimalShell({
       <div className="body">
         <aside className="rail" aria-label={SIDEBAR_LABEL} data-testid="settings-sidebar">
           <nav className="rail__nav" aria-label={NAV_LABEL} data-testid="settings-nav">
-            <ul className="rail__list">
-              {everyday.map((item) => (
-                <li key={item.id}>
-                  <NavButton item={item} selected={selected} onSelect={onSelect} />
-                </li>
-              ))}
-            </ul>
+            {ungrouped.length === 0 ? null : (
+              <ul className="rail__list">
+                {ungrouped.map((item) => (
+                  <li key={item.id}>
+                    <NavButton item={item} selected={selected} onSelect={onSelect} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            {groups.map((group) => (
+              <div className="rail__group" key={group.id} data-group={group.id}>
+                <p className="rail__group-title">{GROUP_LABEL[group.id]}</p>
+                <ul className="rail__list">
+                  {group.items.map((item) => (
+                    <li key={item.id}>
+                      <NavButton item={item} selected={selected} onSelect={onSelect} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
             {recovery.length === 0 ? null : (
               <ul className="rail__list rail__list--quiet">
                 {recovery.map((item) => (

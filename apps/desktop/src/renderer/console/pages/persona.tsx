@@ -20,7 +20,6 @@ import '@pet/text-client/persona-memory.css';
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type JSX } from 'react';
 
 import { Button, Card, Status } from '../minimal-ui/controls.js';
-import { SharedSpeechSettings } from '../minimal-ui/shared-speech-settings.js';
 import type { CompanionView } from '../../shared/use-companion.js';
 import type { LocalPresentationView } from '../../shared/use-local-presentation.js';
 import { agentModeLabel, clockTime, connectionView } from '../../shared/companion-state.js';
@@ -29,8 +28,6 @@ export interface PersonaPageProps {
   companion: CompanionView;
   presentation: LocalPresentationView;
   notify: (message: string, tone: 'ok' | 'danger') => void;
-  /** 跳到插件页：语音输出 source 的启用/停用属于插件生命周期。 */
-  onOpenPlugins?: () => void;
 }
 
 const RANGES = [
@@ -45,12 +42,7 @@ const SWITCHES = [
   ['saidBubble', '显示回复气泡'],
 ] as const;
 
-export function PersonaPage({
-  companion,
-  presentation,
-  notify,
-  onOpenPlugins,
-}: PersonaPageProps): JSX.Element {
+export function PersonaPage({ companion, presentation, notify }: PersonaPageProps): JSX.Element {
   const state = companion.state;
   const snapshot = state?.snapshot ?? null;
   const preferences = presentation.snapshot?.preferences ?? null;
@@ -253,14 +245,6 @@ export function PersonaPage({
             {presentation.error}
           </p>
         )}
-      </Card>
-
-      <Card title="声音">
-        <SharedSpeechSettings
-          companion={companion}
-          presentation={presentation}
-          {...(onOpenPlugins === undefined ? {} : { onOpenPlugins })}
-        />
       </Card>
     </>
   );

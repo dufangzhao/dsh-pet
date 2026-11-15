@@ -28,6 +28,8 @@ const RAIL_COLLAPSE_LABEL = '收起侧栏';
 const RAIL_EXPAND_LABEL = '展开侧栏';
 const RAIL_STORAGE_KEY = 'pet.console.rail';
 
+export type SettingsNavGroup = 'main' | 'assistant' | 'plugins';
+
 export interface SettingsNavItem {
   /** 父级的入口标识；外壳只把它原样回传给 onSelect。 */
   id: string;
@@ -37,6 +39,8 @@ export interface SettingsNavItem {
    * 外部插件页给不出来就用通用格子——外壳不认识具体页面，也不替它编一个含义。
    */
   icon?: SettingsNavIcon | undefined;
+  /** 日常入口的三组之一；恢复入口不填。 */
+  group?: SettingsNavGroup | undefined;
   /** 恢复类入口（扩展、关于）：仍然可达，但不与日常入口抢视觉重心。 */
   quiet?: boolean | undefined;
 }

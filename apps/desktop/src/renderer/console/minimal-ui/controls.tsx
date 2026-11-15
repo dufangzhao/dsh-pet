@@ -29,6 +29,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   busy?: boolean;
   variant?: ButtonVariant;
   size?: 'small';
+  /** 文字左边的一枚图形；装饰性，名称仍由文字或 aria-label 给。 */
+  icon?: ReactNode;
 }
 
 export function Button({
@@ -39,6 +41,7 @@ export function Button({
   disabled = false,
   className,
   children,
+  icon,
   ...rest
 }: ButtonProps): JSX.Element {
   const names =
@@ -54,7 +57,53 @@ export function Button({
       {...(busy ? { 'aria-busy': true as const } : {})}
       className={names}
     >
+      {icon === undefined ? null : (
+        <span className="btn__icon" aria-hidden="true">
+          {icon}
+        </span>
+      )}
       {children}
+    </button>
+  );
+}
+
+export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** 必填：图标按钮没有可见文字，读屏与悬停都靠这一句。 */
+  label: string;
+  variant?: ButtonVariant;
+  size?: 'normal' | 'small';
+  busy?: boolean;
+  children: ReactNode;
+}
+
+/** 方形图标按钮：34–38px 一格，焦点环与禁用态和普通按钮一致。 */
+export function IconButton({
+  label,
+  variant = 'ghost',
+  size = 'normal',
+  busy = false,
+  type = 'button',
+  disabled = false,
+  className,
+  children,
+  ...rest
+}: IconButtonProps): JSX.Element {
+  const names =
+    'icon-btn icon-btn--' +
+    variant +
+    (size === 'small' ? ' icon-btn--small' : '') +
+    (className === undefined ? '' : ' ' + className);
+  return (
+    <button
+      {...rest}
+      type={type}
+      aria-label={label}
+      title={label}
+      disabled={disabled || busy}
+      {...(busy ? { 'aria-busy': true as const } : {})}
+      className={names}
+    >
+      {busy ? <span className="icon-btn__busy" aria-hidden="true" /> : children}
     </button>
   );
 }
@@ -68,13 +117,16 @@ export interface CardProps {
   action?: ReactNode;
   className?: string;
   id?: string;
+  /** QA 与页面测试用的锚点；视觉上没有任何作用。 */
+  testId?: string;
 }
 
 /** 一节内容：article.card + header.card__head + h2.card__title + div.card__body。 */
-export function Card({ title, children, action, className, id }: CardProps): JSX.Element {
+export function Card({ title, children, action, className, id, testId }: CardProps): JSX.Element {
   return (
     <article
       {...(id === undefined ? {} : { id })}
+      {...(testId === undefined ? {} : { 'data-testid': testId })}
       className={className === undefined ? 'card' : 'card ' + className}
     >
       <header className="card__head">
@@ -102,6 +154,8 @@ export interface FieldControl {
 
 export interface FieldProps {
   label: string;
+  /** 字段用途的一句短提示；只补控件没说的信息。 */
+  hint?: string;
   /**
    * 节点＝这一栏只有一件控件；函数＝拿到关联 id 自己放控件。
    * 原生 input/select/textarea 由这里套上 .inputForm，自带外壳的控件（例如 Select）原样放。
@@ -112,15 +166,19 @@ export interface FieldProps {
   className?: string;
 }
 
-export function Field({ label, children, error, className }: FieldProps): JSX.Element {
+export function Field({ label, children, hint, error, className }: FieldProps): JSX.Element {
   const base = useId();
   const inputId = base + '-input';
   const labelId = base + '-label';
+  const hintId = base + '-hint';
   const errorId = base + '-error';
   const control: FieldControl = {
     inputId,
     labelId,
-    describedBy: error === undefined ? undefined : errorId,
+    describedBy:
+      [hint === undefined ? '' : hintId, error === undefined ? '' : errorId]
+        .filter(Boolean)
+        .join(' ') || undefined,
     invalid: error !== undefined,
   };
   const content = typeof children === 'function' ? children(control) : children;
@@ -131,6 +189,11 @@ export function Field({ label, children, error, className }: FieldProps): JSX.El
       <label className="field__label" id={labelId} htmlFor={inputId}>
         {label}
       </label>
+      {hint === undefined ? null : (
+        <p className="field__hint" id={hintId}>
+          {hint}
+        </p>
+      )}
       {native === null ? (
         content
       ) : (

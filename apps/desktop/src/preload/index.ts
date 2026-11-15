@@ -6,6 +6,7 @@ import {
   PRESENTATION_IPC,
   SPEECH_OUTPUT_IPC,
   DESKTOP_COMPANION_IPC,
+  DESKTOP_LOCAL_HOST_IPC,
   DESKTOP_VOICE_IPC,
   DESKTOP_SPEECH_IPC,
   DESKTOP_PRESENTATION_IPC,
@@ -22,6 +23,7 @@ import {
 } from '@pet/contracts';
 import {
   createDesktopCompanionBridge,
+  createDesktopLocalHostBridge,
   createDesktopPresentationBridge,
 } from './companion-bridge.js';
 import { createPresentationBridge } from './presentation-bridge.js';
@@ -72,6 +74,13 @@ contextBridge.exposeInMainWorld(
   createDesktopCompanionBridge(
     (channel, ...args) => ipcRenderer.invoke(channel, ...args),
     (listener) => changed(DESKTOP_COMPANION_IPC.changed, listener),
+  ),
+);
+contextBridge.exposeInMainWorld(
+  'petLocalHost',
+  createDesktopLocalHostBridge(
+    (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    (listener) => changed(DESKTOP_LOCAL_HOST_IPC.changed, listener),
   ),
 );
 contextBridge.exposeInMainWorld(

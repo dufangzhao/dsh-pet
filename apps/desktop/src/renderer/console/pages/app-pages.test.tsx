@@ -4,8 +4,13 @@ import { describe, expect, it } from 'vitest';
 
 import { AppearancePage } from './appearance.js';
 import { ConversationPage } from './conversation.js';
+import { ModelPage } from './model.js';
 import { PersonaPage } from './persona.js';
+import { PetPage } from './pet.js';
+import { QQPage } from './qq.js';
 import { StartPage } from './start.js';
+import { AsrPage } from './voice-settings.js';
+import { TtsPage } from './tts-settings.js';
 import type { CompanionView } from '../../shared/use-companion.js';
 import type { VoiceController } from '@pet/text-client/voice-input-ui';
 import { emptyVoiceState } from '@pet/text-client/voice-input-ui';
@@ -207,6 +212,30 @@ describe('开始页', () => {
     expect(html).toContain('令牌只用于这一次连接');
   });
 
+  it('只保留连接服务：模型、QQ、本机接入、语音与桌宠都不在这一页', () => {
+    const html = renderToStaticMarkup(
+      <StartPage
+        companion={companion()}
+        presentation={presentation()}
+        voice={voice()}
+        notify={noop}
+      />,
+    );
+    for (const testId of [
+      'model-connection-card',
+      'qq-card',
+      'voice-card',
+      'local-host-section',
+      'start-pet-card',
+      'start-pet',
+    ]) {
+      expect(html, testId).not.toContain(`data-testid="${testId}"`);
+    }
+    expect(html).toContain('data-testid="start-connect-form"');
+    // 令牌只在这一次连接里使用，这句话必须仍让用户看到。
+    expect(html).toContain('令牌只用于这一次连接');
+  });
+
   it('已连接：显示服务里的名字、模式与人格修订，不拿本地名字冒充', () => {
     const state = snapshot({
       phase: 'live',
@@ -403,6 +432,142 @@ describe('开始页', () => {
   });
 });
 
+describe('独立设置页', () => {
+  it('模型页只渲染模型连接卡', () => {
+    const html = renderToStaticMarkup(<ModelPage companion={companion()} />);
+    expect(html).toContain('data-testid="model-connection-card"');
+    expect(html).toContain('服务还没有提供模型信息。');
+  });
+
+  it('QQ 页渲染服务端 QQ 状态', () => {
+    const state = snapshot({
+      phase: 'live',
+      connectionId: 'c1',
+      snapshot: {
+        protocolVersion: 1,
+        epoch: 'e',
+        cursor: 1,
+        now: 1,
+        agent: {
+          id: 'agent-1',
+          name: '阿蓝',
+          profileRevision: 1,
+          harness: 'cortico',
+          mode: 'scripted',
+          status: 'ready',
+          error: null,
+        },
+        messages: [],
+        tasks: [],
+        facts: [],
+        plugins: [],
+        qq: {
+          version: 1,
+          sources: [
+            {
+              protocol: 'official',
+              sourcePluginId: 'pet.qq-official',
+              desiredEnabled: true,
+              source: 'ready',
+              phase: 'ready',
+              account: {
+                protocol: 'official',
+                sourcePluginId: 'pet.qq-official',
+                instanceId: 'default',
+                accountId: 'app-1',
+              },
+              cleanup: 'settled',
+              error: null,
+            },
+          ],
+        },
+      },
+    });
+    const html = renderToStaticMarkup(<QQPage companion={companion({ state })} bridge={null} />);
+    expect(html).toContain('data-testid="qq-card"');
+    expect(html).toContain('官方 QQ');
+    expect(html).toContain('已连接');
+  });
+
+  it('QQ 页一页两段：服务端 QQ 与本机 QQ 接入各一张卡', () => {
+    const html = renderToStaticMarkup(
+      <QQPage
+        companion={companion({
+          state: snapshot({
+            phase: 'live',
+            connectionId: 'c1',
+            snapshot: {
+              protocolVersion: 1,
+              epoch: 'e',
+              cursor: 1,
+              now: 1,
+              agent: {
+                id: 'agent-1',
+                name: '阿蓝',
+                profileRevision: 1,
+                harness: 'cortico',
+                mode: 'scripted',
+                status: 'ready',
+                error: null,
+              },
+              messages: [],
+              tasks: [],
+              facts: [],
+              plugins: [],
+              qq: { version: 1, sources: [] },
+            },
+          }),
+        })}
+        bridge={null}
+      />,
+    );
+    expect(html).toContain('data-testid="qq-card"');
+    expect(html).toContain('data-testid="local-host-section"');
+    expect(html).toContain('data-testid="local-host-card"');
+    // 第一行说清它是什么，其余全是事实。
+    expect(html).toContain('支持 SnowLuma / NapCat（OneBot v11）和官方 QQ 机器人。');
+    expect(html).toContain('data-testid="local-host-phase"');
+    expect(html).toContain('未运行');
+  });
+
+  it('语音输入页：网关依赖 + 转写卡，网关地址来自 provider', () => {
+    const html = renderToStaticMarkup(
+      <AsrPage companion={companion()} voice={voice()} notify={noop} onOpenModel={noop} />,
+    );
+    expect(html).toContain('data-testid="gateway-note"');
+    expect(html).toContain('data-testid="gateway-base-url"');
+    expect(html).toContain('data-testid="gateway-state"');
+    expect(html).toContain('data-testid="gateway-open-model"');
+    expect(html).toContain('data-testid="voice-card"');
+    expect(html).toContain('data-testid="voice-summary"');
+    // 没读到提供者时不编地址。
+    expect(html).toContain('还没有配置');
+  });
+
+  it('语音输出页：网关依赖 + 语音输出卡', () => {
+    const html = renderToStaticMarkup(
+      <TtsPage
+        companion={companion()}
+        presentation={presentation()}
+        onOpenModel={noop}
+        onOpenPlugins={noop}
+      />,
+    );
+    expect(html).toContain('data-testid="gateway-note"');
+    expect(html).toContain('data-testid="gateway-open-model"');
+    expect(html).toContain('id="shared-speech-settings"');
+  });
+
+  it('桌宠页渲染预览与显示开关', () => {
+    const html = renderToStaticMarkup(
+      <PetPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    expect(html).toContain('data-testid="start-pet-card"');
+    expect(html).toContain('data-testid="start-pet"');
+    expect(html).toContain('data-testid="pet-hide"');
+  });
+});
+
 describe('对话页', () => {
   it('还没连上：说清去哪里连，不给一个能发出去的输入框', () => {
     const html = renderToStaticMarkup(
@@ -557,6 +722,14 @@ describe('人格页', () => {
     );
     expect(html).toContain('当前未连接服务，这里只能看不能改');
     expect(html).toContain('data-testid="profile-name"');
+  });
+
+  it('声音不在人格页：语音输出已独立成页', () => {
+    const html = renderToStaticMarkup(
+      <PersonaPage companion={companion()} presentation={presentation()} notify={noop} />,
+    );
+    expect(html).not.toContain('id="shared-speech-settings"');
+    expect(html).not.toContain('data-testid="shared-speech-source"');
   });
 
   it('本机呈现字段在：双击、状态气泡、回复气泡与三个范围', () => {

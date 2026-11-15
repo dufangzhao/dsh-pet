@@ -1,14 +1,14 @@
 import { useId, useState, type JSX } from 'react';
 import {
   APPLICATION_DEFAULTS,
-  SPEECH_FEATURE_PLUGIN_ID,
   type DesktopSpeechState,
   type SpeechReason,
   type SpeechView,
 } from '@pet/contracts';
 import { describeError } from '../copy.js';
 import { Button, Card, Field, Select, Status, type StatusTone } from './controls.js';
-import { useSharedSpeech } from './use-shared-speech.js';
+import { Icon } from './icons.js';
+import type { SharedSpeechForm } from './use-shared-speech.js';
 import {
   adoptVolume,
   commitVolume,
@@ -16,7 +16,6 @@ import {
   EMPTY_VOLUME,
   volumeFacts,
 } from './volume-draft.js';
-import type { CompanionView } from '../../shared/use-companion.js';
 import type { LocalPresentationView } from '../../shared/use-local-presentation.js';
 
 const reasonText: Readonly<Record<SpeechReason, string>> = {
@@ -76,24 +75,28 @@ const featureSourceText = (speech: SpeechView | null): string => {
 /**
  * 语音输出卡片：本机 source 启停（走插件页）、远端 provider 表单、真实播放状态与停止。
  *
+ * 表单 owner 由调用方持有（`useSharedSpeech`）：语音输出页要拿同一份 provider 去画
+ * 网关依赖区，两处必须读同一份，不能再挂第二个 hook。
+ *
  * 本机启用/停用不在这个卡片里造第二个开关——`pet.speech-output` 的生命周期由插件页
  * 的 enable/disable 表达，这里只如实说明当前状态并给一个入口。
  */
 export function SharedSpeechSettings({
-  companion,
+  form,
   presentation,
+  target,
   onOpenPlugins,
 }: {
-  companion: CompanionView;
+  form: SharedSpeechForm;
   presentation: LocalPresentationView;
+  /** 当前连接的 id；表单必须属于它才可编辑。 */
+  target: string | null;
   onOpenPlugins?: () => void;
 }): JSX.Element {
-  const form = useSharedSpeech(companion);
   const voiceHintId = useId();
   const { state, speech, draft, provider } = form;
   const phase = phaseText(state);
   // 表单必须真的属于当前配置目标：换目标后、新配置读回来之前，旧表单不可编辑。
-  const target = companion.state?.connectionId ?? null;
   const ownedByTarget = form.owner !== null && form.owner.connectionId === target;
   const editable =
     !!draft &&
@@ -138,10 +141,14 @@ export function SharedSpeechSettings({
       </p>
       {onOpenPlugins === undefined ? null : (
         <div className="card__foot">
-          <Button data-testid="shared-speech-plugins" onClick={onOpenPlugins}>
-            管理 {SPEECH_FEATURE_PLUGIN_ID}
+          <Button
+            size="small"
+            icon={<Icon name="puzzle" />}
+            data-testid="shared-speech-plugins"
+            onClick={onOpenPlugins}
+          >
+            在插件页管理
           </Button>
-          <Status>启用或停用是插件级操作，不在这一页另存一个开关。</Status>
         </div>
       )}
 

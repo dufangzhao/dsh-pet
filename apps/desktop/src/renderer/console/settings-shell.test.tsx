@@ -9,6 +9,8 @@ import {
   type SettingsNavItem,
   type SettingsShellProps,
 } from './settings-shell.js';
+import { MinimalShell } from './minimal-ui/shell.js';
+import { consoleNavItems, resolveConsoleView } from './nav.js';
 
 /**
  * 外壳只该做两件事：把父级给的入口画出来并标出当前项，把插槽放回该放的位置。
@@ -75,6 +77,67 @@ describe('设置台外壳', () => {
     expect(html).toMatch(/<main class="pb-main"[^>]*tabindex="-1"/);
     expect(html).toContain('<button type="button" class="pb-shell__skip"');
     expect(html).not.toContain('href=');
+  });
+});
+
+describe('极简外壳分组', () => {
+  it('按连接、助手、插件三组渲染标题，恢复入口仍置底', () => {
+    const grouped: readonly SettingsNavItem[] = [
+      { id: 'start', label: '开始', group: 'main' },
+      { id: 'conversation', label: '对话', group: 'main' },
+      { id: 'persona', label: '人格', group: 'assistant' },
+      { id: 'model', label: '模型', group: 'plugins' },
+      { id: 'qq', label: 'QQ', group: 'plugins' },
+      { id: 'asr', label: '语音输入', group: 'plugins' },
+      { id: 'tts', label: '语音输出', group: 'plugins' },
+      { id: 'plugins', label: '插件', quiet: true },
+    ];
+    const html = renderToStaticMarkup(
+      <MinimalShell
+        items={grouped}
+        selected="start"
+        onSelect={() => undefined}
+        brand="AI 桌宠"
+        title="开始"
+      >
+        <p>内容</p>
+      </MinimalShell>,
+    );
+    for (const label of ['连接', '助手', '插件']) {
+      expect(html).toContain(`<p class="rail__group-title">${label}</p>`);
+    }
+    const positions = ['main', 'assistant', 'plugins'].map((group) =>
+      html.indexOf(`data-group="${group}"`),
+    );
+    expect(positions[0]).toBeGreaterThanOrEqual(0);
+    expect(positions[0]).toBeLessThan(positions[1] ?? -1);
+    expect(positions[1]).toBeLessThan(positions[2] ?? -1);
+    // 日常组之后才是恢复入口，且 quiet 列表只有一条。
+    expect(html.indexOf('rail__list--quiet')).toBeGreaterThan(positions[2] ?? -1);
+    expect(html.match(/rail__list--quiet/g)).toHaveLength(1);
+  });
+
+  it('语音拆成输入与输出两页，都在插件组；本地宿主不再有独立入口', () => {
+    const items = consoleNavItems();
+    const ids = items.map((item) => item.id);
+    expect(ids).toContain('asr');
+    expect(ids).toContain('tts');
+    expect(ids).not.toContain('voice');
+    expect(ids).not.toContain('local-host');
+    const groupOf = (id: string): string | undefined => items.find((item) => item.id === id)?.group;
+    expect(groupOf('asr')).toBe('plugins');
+    expect(groupOf('tts')).toBe('plugins');
+    // 图标是自绘线性那两枚，不是 emoji 也不是通用格子。
+    expect(items.find((item) => item.id === 'asr')?.icon).toBe('microphone');
+    expect(items.find((item) => item.id === 'tts')?.icon).toBe('volume');
+  });
+
+  it('旧深链落到现存的页：voice→asr，local-host→qq', () => {
+    expect(resolveConsoleView('voice')).toBe('asr');
+    expect(resolveConsoleView('local-host')).toBe('qq');
+    expect(resolveConsoleView('asr')).toBe('asr');
+    expect(resolveConsoleView('qq')).toBe('qq');
+    expect(resolveConsoleView('unknown')).toBeNull();
   });
 });
 

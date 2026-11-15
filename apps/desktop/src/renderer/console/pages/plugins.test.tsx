@@ -249,3 +249,60 @@ describe('扩展页的插件卡', () => {
     expect(html).toContain('前往权限与数据');
   });
 });
+
+describe('按功能模块分组', () => {
+  const many = (): ConsolePlugin[] => [
+    plugin({
+      owner: { pluginId: 'pet.agent-cortico', instanceId: 'i1', generation: 1 },
+      name: 'Cortico 智能体',
+    }),
+    plugin({
+      owner: { pluginId: 'pet.tts-magpie', instanceId: 'i1', generation: 1 },
+      name: 'Magpie 语音合成',
+    }),
+    plugin({
+      owner: { pluginId: 'pet.talk-key', instanceId: 'i1', generation: 1 },
+      name: '说话键',
+    }),
+    plugin({
+      owner: { pluginId: 'pet.qq-official', instanceId: 'i1', generation: 1 },
+      name: '官方 QQ',
+    }),
+    plugin({
+      owner: { pluginId: 'pet.unknown-thing', instanceId: 'i1', generation: 1 },
+      name: '没见过的插件',
+    }),
+  ];
+
+  it('每个模块一个标题与一句说明，组内插件各占一行', () => {
+    const html = page(many());
+    for (const id of ['agent', 'asr', 'tts', 'qq', 'other']) {
+      expect(html).toContain('data-testid="plugin-module-' + id + '"');
+    }
+    // 没有插件的模块整块不出现。
+    expect(html).not.toContain('data-testid="plugin-module-gateway"');
+    expect(html).toContain('把你说的话交给助手');
+    expect(html).toContain('把回复念出来。');
+    // 未识别的插件进「其他」，不丢。
+    expect(html).toContain('没见过的插件');
+    // 旧的等权卡片墙与四个筛选按钮都撤了。
+    expect(html).not.toContain('plugins-grid');
+    expect(html).not.toContain('plugin-filter-');
+    expect(html).toContain('data-testid="plugin-search"');
+  });
+
+  it('内部组成件默认折在组内，仍可启用/停用', () => {
+    const html = page(many());
+    const fold = html.slice(html.indexOf('data-testid="plugin-internal-asr"'));
+    expect(fold).toContain('内部组成件（1）');
+    expect(fold).toContain('data-testid="plugin-toggle-pet.talk-key"');
+    // 折叠容器是 details：默认不开，展开才看得到。
+    expect(html).toContain('<details');
+    expect(/<details[^>]*data-testid="plugin-internal-asr"[^>]*open/.test(html)).toBe(false);
+  });
+
+  it('计数行跟着渲染出的总数走，不再按启用状态过滤', () => {
+    const html = page(many());
+    expect(html).toContain('5 / 5 个插件');
+  });
+});

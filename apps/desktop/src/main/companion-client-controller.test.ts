@@ -187,6 +187,52 @@ async function fixture(
   };
 }
 describe('shared desktop contract seam', () => {
+  it('hands the selected Agent to one native callback under the real current token lifetime', async () => {
+    const f = await fixture();
+    const connected = await f.controller.connect({
+      baseUrl: f.baseUrl,
+      token: 't'.repeat(24),
+      expectedRevision: 1,
+    });
+    if (!connected.ok || !connected.value.connectionId) throw new Error('connect failed');
+    const target = { connectionId: connected.value.connectionId };
+    const rejected = vi.fn(async () => ({ ok: true as const, value: null }));
+    expect((await f.controller.handoffCurrentAgent({ connectionId: 'retired' }, rejected)).ok).toBe(
+      false,
+    );
+    expect(rejected).not.toHaveBeenCalled();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let capturedSignal: AbortSignal | undefined;
+    const entered = vi.fn();
+    const handoff = f.controller.handoffCurrentAgent(target, async (agent, signal) => {
+      entered(agent);
+      capturedSignal = signal;
+      await gate;
+      return { ok: true, value: null };
+    });
+    await vi.waitFor(() =>
+      expect(entered).toHaveBeenCalledWith({
+        baseUrl: f.baseUrl,
+        agentId: 'agent',
+        agentEpoch: 'epoch',
+        token: 't'.repeat(24),
+      }),
+    );
+    let retired = false;
+    const disconnect = f.controller.disconnect(target).then(() => {
+      retired = true;
+    });
+    await vi.waitFor(() => expect(capturedSignal?.aborted).toBe(true));
+    expect(retired).toBe(false);
+    release();
+    expect((await handoff).ok).toBe(false);
+    await disconnect;
+    expect(retired).toBe(true);
+    expect(JSON.stringify(await f.controller.getState())).not.toContain('t'.repeat(24));
+  });
   it('delivers formal events synchronously and observes malformed events without disrupting text', async () => {
     const f = await fixture();
     const observed: SpeechConnectionEvent[] = [];

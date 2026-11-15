@@ -15,23 +15,29 @@ import { Button as MinimalButton } from './minimal-ui/controls.js';
 
 import { RECOVERY_ITEMS } from './app-views.js';
 import {
-  CONSOLE_VIEWS,
   CONSOLE_VIEW_SUMMARY,
   consoleNavItems,
+  consoleViewLabel,
   isConsoleView,
+  resolveConsoleView,
   type ConsoleView,
-} from '../shared/console-views.js';
-import { ActivityIcon } from './icons.js';
+} from './nav.js';
+import { Icon } from './minimal-ui/icons.js';
 import { ApprovalNotice } from './console-approvals.js';
 import { COPY } from './copy.js';
 import { AboutPage } from './pages/about.js';
 import { AppearancePage } from './pages/appearance.js';
 import { ConversationPage } from './pages/conversation.js';
+import { ModelPage } from './pages/model.js';
 import { PermissionsPage } from './pages/permissions.js';
 import { PersonaPage } from './pages/persona.js';
+import { PetPage } from './pages/pet.js';
 import { PluginConfigPanel } from './pages/plugin-config.js';
 import { PluginsPage } from './pages/plugins.js';
+import { QQPage } from './pages/qq.js';
 import { StartPage } from './pages/start.js';
+import { AsrPage } from './pages/voice-settings.js';
+import { TtsPage } from './pages/tts-settings.js';
 import { MinimalShell as SettingsShell } from './minimal-ui/shell.js';
 import { connectionView } from '../shared/companion-state.js';
 import { useCompanion } from '../shared/use-companion.js';
@@ -134,7 +140,11 @@ export function ConsoleApp(): JSX.Element {
       window.petSettings?.onNavigate((request) => {
         if (request.view === 'plugins') setView('plugins');
         else if (request.view === 'about') setView('about');
-        else if (isSelection(request.view)) setView(request.view);
+        else {
+          // 旧深链（voice、local-host）在这里落到现在真正存在的页，不留死页。
+          const next = resolveConsoleView(request.view);
+          if (next !== null) setView(next);
+        }
       }),
     [],
   );
@@ -225,13 +235,13 @@ export function ConsoleApp(): JSX.Element {
               onClick={companion.refresh}
             >
               {/* 折叠轨里只显示这一枚图标；宽窗口显示完整文字，图标不出现。 */}
-              <ActivityIcon className="pb-run__icon" />
+              <Icon name="refresh" className="pb-run__icon" />
               <span className="pb-run__label">刷新连接</span>
             </MinimalButton>
           </div>
         }
       >
-        {presentationError ? (
+        {presentationError !== null && (view === 'appearance' || view === 'pet') ? (
           <p role="alert" className="minimal-error">
             {presentationError}
           </p>
@@ -305,16 +315,33 @@ export function ConsoleApp(): JSX.Element {
           />
         );
       case 'persona':
+        return <PersonaPage companion={companion} presentation={presentation} notify={notify} />;
+      case 'appearance':
+        return <AppearancePage presentation={presentation} notify={notify} />;
+      case 'pet':
+        return <PetPage companion={companion} presentation={presentation} notify={notify} />;
+      case 'model':
+        return <ModelPage companion={companion} />;
+      case 'qq':
+        return <QQPage companion={companion} />;
+      case 'asr':
         return (
-          <PersonaPage
+          <AsrPage
+            companion={companion}
+            voice={voice.controller}
+            notify={notify}
+            onOpenModel={() => select('model')}
+          />
+        );
+      case 'tts':
+        return (
+          <TtsPage
             companion={companion}
             presentation={presentation}
-            notify={notify}
+            onOpenModel={() => select('model')}
             onOpenPlugins={() => select('plugins')}
           />
         );
-      case 'appearance':
-        return <AppearancePage presentation={presentation} notify={notify} />;
       case 'permissions':
         return (
           <PermissionsPage
@@ -358,7 +385,7 @@ function isSelection(value: string): value is Selection {
 }
 
 function viewTitle(view: Selection): string {
-  return CONSOLE_VIEWS.find((item) => item.id === view)?.label ?? COPY.appName;
+  return isConsoleView(view) ? consoleViewLabel(view) : COPY.appName;
 }
 
 function ownerKeyOf(plugin: ConsolePlugin): string {

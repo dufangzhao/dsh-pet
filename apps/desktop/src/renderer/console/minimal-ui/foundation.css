@@ -415,7 +415,7 @@ body[data-motion='off'] * {
 .body {
   flex: 1;
   display: grid;
-  grid-template-columns: 226px 1fr;
+  grid-template-columns: 240px 1fr;
   min-height: 0;
 }
 
@@ -429,6 +429,12 @@ body[data-motion='off'] * {
   border-right: 1px solid var(--line);
   overflow-y: auto;
 }
+.rail__nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
 .rail__list {
   list-style: none;
   margin: 0;
@@ -437,8 +443,26 @@ body[data-motion='off'] * {
   flex-direction: column;
   gap: 4px;
 }
+.rail__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+}
+.rail__group:first-child {
+  margin-top: 0;
+}
+.rail__group-title {
+  margin: 0 0 4px;
+  padding: 0 10px;
+  color: var(--ink-quiet);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .rail__list--quiet {
-  margin-top: 14px;
+  margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
@@ -449,6 +473,7 @@ body[data-motion='off'] * {
 }
 
 .nav {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -478,10 +503,25 @@ body[data-motion='off'] * {
   color: var(--ink);
   font-weight: 600;
 }
+.nav[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
 .nav__icon {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+  border-radius: 7px;
+}
+.nav[aria-current='page'] .nav__icon {
+  background: var(--surface-quiet);
 }
 .rail__list--quiet .nav {
   min-height: 34px;
@@ -502,7 +542,7 @@ body[data-motion='off'] * {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 940px;
+  max-width: 860px;
 }
 .page__head {
   margin-bottom: 2px;
@@ -529,7 +569,7 @@ body[data-motion='off'] * {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 22px 0;
+  padding: 16px 20px 0;
 }
 .card__title {
   margin: 0;
@@ -544,8 +584,8 @@ body[data-motion='off'] * {
 .card__body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 18px 22px 22px;
+  gap: 16px;
+  padding: 16px 20px 20px;
 }
 .card__body--split {
   display: grid;
@@ -780,29 +820,75 @@ dialog > form.card {
 .icon-btn {
   display: grid;
   place-items: center;
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 8px;
-  background: none;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
   color: var(--ink-quiet);
   cursor: pointer;
   transition:
     background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
     color 0.2s ease-in-out;
+}
+.icon-btn--small {
+  flex-basis: 34px;
+  width: 34px;
+  height: 34px;
 }
 .icon-btn svg {
   width: 18px;
   height: 18px;
 }
-.icon-btn:hover {
+.icon-btn--secondary {
+  border-color: var(--field);
+  background: var(--surface);
+  color: var(--ink);
+}
+.icon-btn--primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--on-primary);
+}
+.icon-btn--danger {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+  color: var(--danger);
+}
+.icon-btn:hover:not(:disabled) {
   background: var(--surface-quiet);
   color: var(--ink);
+}
+.icon-btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 90%, var(--surface));
+  color: var(--on-primary);
+}
+.icon-btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  color: var(--danger);
 }
 .icon-btn:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 1px;
+}
+.icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.icon-btn__busy {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: icon-btn-spin 0.8s linear infinite;
+}
+@keyframes icon-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .icon-btn svg + svg {
   display: none;
@@ -815,6 +901,10 @@ dialog > form.card {
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 42px;
   padding: 0 18px;
   border: 1px solid #ededef;
@@ -827,6 +917,10 @@ dialog > form.card {
   transition:
     background-color 0.2s ease-in-out,
     border-color 0.2s ease-in-out;
+}
+.btn__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
 }
 .btn:hover {
   border-color: #dcdfe2;
@@ -1223,6 +1317,21 @@ dialog::backdrop {
     height: 1px;
     overflow: hidden;
     clip-path: inset(50%);
+  }
+  .rail__group {
+    width: 100%;
+    gap: 1px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .rail__group:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .rail__group-title {
+    display: none;
   }
   .rail__meta {
     display: none;

@@ -19,6 +19,7 @@ import {
   DESKTOP_SPEECH_IPC,
   SPEECH_FEATURE_PLUGIN_ID,
   DESKTOP_COMPANION_IPC,
+  DESKTOP_LOCAL_HOST_IPC,
   DESKTOP_VOICE_IPC,
   VOICE_CAPTURE_PLUGIN_ID,
   DESKTOP_PRESENTATION_IPC,
@@ -30,6 +31,16 @@ import {
 import { createSafeStorageCipher, KernelFault, type SecretCipher } from '@pet/host-kernel';
 import { DesktopHost } from './desktop-host.js';
 import { DesktopCompanionController } from './companion-client-controller.js';
+import { DesktopLocalHostController } from './local-host-controller.js';
+import {
+  handleDesktopLocalHostRequest,
+  type DesktopLocalHostAction,
+} from './local-host-request.js';
+import {
+  attachLocalHost,
+  startOrAttachLocalHost,
+  localHostEnvironment,
+} from '../local-host/client.js';
 import { DesktopCompanionHostAdapter } from './companion-client-host.js';
 import {
   handleDesktopCompanionRequest,
@@ -71,6 +82,7 @@ const consoleUrl = pathToFileURL(consoleEntry).href;
 const preload = path.resolve(here, '../preload/index.cjs');
 let host: DesktopHost | undefined;
 let companion: DesktopCompanionController | undefined;
+let localPlugins: DesktopLocalHostController | undefined;
 let voice: SharedVoiceController | undefined;
 let local: LocalPresentationController | undefined;
 let speech: SharedSpeechController | undefined;
@@ -176,6 +188,8 @@ async function quit(exitCode = 0): Promise<void> {
   settings.close();
   pet?.dispose();
   try {
+    // Detach this GUI's management session; the independently owned host keeps running.
+    await localPlugins?.close();
     // PluginManager joins the client source's Main drain and actual worker disposal.
     const stopped = await host?.shutdown();
     await voice?.close();
@@ -225,7 +239,10 @@ const startup = app
       /* Existing encrypted storage is optional; service tokens remain process-only. */
     }
     host = await DesktopHost.create({
-      executable: process.execPath,
+      executable:
+        app.isPackaged && process.platform === 'linux'
+          ? path.join(path.dirname(process.execPath), 'pet-worker')
+          : process.execPath,
       workerEntry: path.resolve(here, '../runtime/worker.cjs'),
       builtinDirectory: app.isPackaged
         ? path.join(process.resourcesPath, 'plugins')
@@ -337,6 +354,37 @@ const startup = app
         await activeHost.manager.enable({ pluginId: id, instanceId: 'default' }, config.value.data);
     }
     await companion.initialize();
+    const localPluginProfile = path.join(app.getPath('userData'), 'local-plugin-host');
+    localPlugins = new DesktopLocalHostController({
+      companion,
+      attach: () => attachLocalHost(localPluginProfile, app.getVersion()),
+      start: () =>
+        startOrAttachLocalHost({
+          profileDirectory: localPluginProfile,
+          packageVersion: app.getVersion(),
+          launch: {
+            executablePath: process.execPath,
+            entryPath: path.resolve(here, '../local-host-app'),
+            ...(process.platform === 'linux' && app.isPackaged
+              ? {
+                  environment: {
+                    ...localHostEnvironment(),
+                    LD_LIBRARY_PATH: [
+                      path.join(path.dirname(process.execPath), 'lib'),
+                      path.join(path.dirname(process.execPath), 'lib/browser'),
+                    ].join(path.delimiter),
+                  },
+                }
+              : {}),
+            ...(process.platform === 'linux' && app.commandLine.hasSwitch('no-sandbox')
+              ? { noSandbox: true }
+              : {}),
+          },
+        }),
+      changed: () => broadcast(DESKTOP_LOCAL_HOST_IPC.changed),
+    });
+    await localPlugins.initialize();
+    const activeLocalPlugins = localPlugins;
     const activeCompanion = companion;
     const activeLocal = local;
     const securityChanged = () => {
@@ -365,6 +413,16 @@ const startup = app
         if (localRoles.includes(pluginId)) await ledger.record(pluginId, enabled);
       },
     );
+    for (const [action, channel] of Object.entries(DESKTOP_LOCAL_HOST_IPC))
+      if (action !== 'changed')
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handleDesktopLocalHostRequest(
+            requestSource(event),
+            action as DesktopLocalHostAction,
+            args,
+            activeLocalPlugins,
+          ),
+        );
     for (const [action, channel] of Object.entries(DESKTOP_COMPANION_IPC))
       if (action !== 'changed')
         ipcMain.handle(channel, (event, ...args: unknown[]) =>

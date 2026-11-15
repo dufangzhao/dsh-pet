@@ -78,9 +78,9 @@ describe('桌面 QQ 只读状态', () => {
     expect(markup).toContain('10001');
     expect(markup).toContain('已连接');
     expect(markup).toContain('已离线');
-    // 管理入口只在这里出现，且明说配置在 Web。
+    // 管理入口只在这里出现；说明性小字不再占卡片。
     expect(markup).toContain('打开 Web 管理');
-    expect(markup).toContain('都在服务 Web 上管理');
+    expect(markup).not.toContain('名单、触发与密钥');
   });
 
   it('旧服务没有 qq 时整张卡不出现', () => {

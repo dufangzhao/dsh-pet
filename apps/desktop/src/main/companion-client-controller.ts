@@ -293,6 +293,41 @@ export class DesktopCompanionController {
     if (live && this.#state.phase !== 'live') throw new KernelFault('not-ready');
     return active;
   }
+  /** Native-only handoff to the explicitly selected local host; never exposed as a secret getter. */
+  async handoffCurrentAgent<T>(
+    target: DesktopCompanionTarget,
+    receive: (
+      agent: {
+        readonly baseUrl: string;
+        readonly agentId: string;
+        readonly agentEpoch: string;
+        readonly token: string;
+      },
+      signal: AbortSignal,
+    ) => Promise<Result<T>>,
+  ): Promise<Result<T>> {
+    try {
+      const connection = this.#binding(target);
+      const snapshot = this.#state.snapshot;
+      if (!snapshot) return fail('not-ready');
+      const agentId = snapshot.agent.id;
+      const agentEpoch = snapshot.epoch;
+      return await this.#run(connection, async (transport, signal) => {
+        if (
+          !this.#current(connection) ||
+          this.#state.snapshot?.agent.id !== agentId ||
+          this.#state.snapshot?.epoch !== agentEpoch
+        )
+          return fail('stale-owner');
+        return receive(
+          { baseUrl: transport.baseUrl, agentId, agentEpoch, token: transport.token },
+          signal,
+        );
+      });
+    } catch (error) {
+      return { ok: false, error: problem(error) };
+    }
+  }
   async #run<T>(
     connection: Connection,
     operation: (transport: ClientTransport, signal: AbortSignal) => Promise<Result<T>>,

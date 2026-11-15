@@ -193,6 +193,9 @@ await page.addInitScript(() => {
 });
 
 await page.goto(`${origin}/`);
+// QQ 现在有独立页签，先进入它再等原来的按钮。
+await page.waitForSelector('[data-testid="nav-qq"]', { timeout: 15_000 });
+await page.click('[data-testid="nav-qq"]');
 await page.waitForSelector('[data-testid="qq-open-web"]', { timeout: 15_000 });
 
 try {

@@ -68,6 +68,10 @@ try {
   const showList = async () => {
     await page.getByRole('button', { name: '插件', exact: true }).click();
     await expect(page.locator('.plugin-card').first()).toBeVisible();
+    // 内部组成件默认折在模块里；这一轮要逐个数开关，先全部展开。
+    for (const fold of await page.locator('details.plugin-fold:not([open])').all()) {
+      await fold.locator('summary').click();
+    }
   };
   const capture = async (name) => {
     const notices = page.getByRole('button', { name: /^关闭提示：/ });

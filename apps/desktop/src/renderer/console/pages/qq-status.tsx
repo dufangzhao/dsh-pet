@@ -12,6 +12,7 @@ import { useState, type JSX } from 'react';
 import type { CompanionSnapshot, QQStatus } from '@pet/contracts';
 
 import { Button, Card, Status, type StatusTone } from '../minimal-ui/controls.js';
+import { Icon } from '../minimal-ui/icons.js';
 
 /** 协议在界面上的名字；未知协议原样显示，不猜。 */
 const PROTOCOL_LABEL: Readonly<Record<string, string>> = {
@@ -73,13 +74,15 @@ export function QQStatusCard({ qq, connectionId, openWeb }: QQStatusCardProps): 
 
   return (
     <Card
-      title="QQ"
+      title="服务端 QQ"
       id="qq-card"
+      testId="qq-card"
       action={
         <Button
           size="small"
           busy={busy}
           disabled={connectionId === null}
+          icon={<Icon name="external-link" />}
           data-testid="qq-open-web"
           onClick={() => void open()}
         >
@@ -121,10 +124,6 @@ export function QQStatusCard({ qq, connectionId, openWeb }: QQStatusCardProps): 
           {failure}
         </p>
       )}
-
-      <p className="row__value" data-testid="qq-manage-hint">
-        名单、触发与密钥都在服务 Web 上管理。
-      </p>
     </Card>
   );
 }

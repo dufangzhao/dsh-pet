@@ -1,13 +1,16 @@
 /**
- * 开始页：一条连接、一个服务模型、一只桌宠。
+ * 开始页：只有「连接服务」。
  *
  * 连接是主人唯一要动手的地方：地址是普通非secret配置，令牌只在这一次对话框里存在。
  * 令牌输入在调用 connect 的同一步、发出之前就清空；失败、挂起、冲突都不留 secret。
- * 模型表单复用文本客户端那份受控实现（只吃 ModelTransport），桌面侧把
- * saveModel/testModel 绑到当前 connectionId；写密钥的方法在桌面端恒为拒绝。
+ * 模型、QQ、本地宿主、语音与桌宠各有独立页面，不再挤在这一页。
  */
 import { createReadOnlyModelTransport, ModelDialog } from '@pet/text-client/model-ui';
-import type { CompanionModelSaveCommand, CompanionModelTestCommand } from '@pet/contracts';
+import type {
+  CompanionModelSaveCommand,
+  CompanionModelTestCommand,
+  DesktopLocalHostBridge,
+} from '@pet/contracts';
 import { useEffect, useId, useRef, useState, type CSSProperties, type JSX } from 'react';
 
 import { PetAvatar } from '../../pet/PetAvatar.js';
@@ -27,10 +30,16 @@ import {
   hostOf,
   petStateOf,
 } from '../../shared/companion-state.js';
-import { Button, Card, Field, Status, type StatusTone } from '../minimal-ui/controls.js';
+import {
+  Button,
+  Card,
+  Field,
+  IconButton,
+  Status,
+  type StatusTone,
+} from '../minimal-ui/controls.js';
+import { Icon } from '../minimal-ui/icons.js';
 import type { VoiceController } from '@pet/text-client/voice-input-ui';
-import { VoiceCard } from './voice-card.js';
-import { QQStatusCard, qqOf } from './qq-status.js';
 
 import '@pet/text-client/model.css';
 
@@ -38,6 +47,11 @@ export interface StartPageProps {
   companion: CompanionView;
   presentation: LocalPresentationView;
   voice: VoiceController;
+  /**
+   * 本地宿主的管理面（已冻结的 `DesktopLocalHostBridge`）。
+   * 这个字段只为兼容旧调用保留；宿主现在有独立页面。
+   */
+  localHost?: DesktopLocalHostBridge | null;
   notify: (message: string, tone: 'ok' | 'danger') => void;
 }
 
@@ -53,20 +67,8 @@ function toneOf(tone: string): StatusTone {
   return STATUS_TONE[tone] ?? 'muted';
 }
 
-export function StartPage({ companion, presentation, voice, notify }: StartPageProps): JSX.Element {
-  return (
-    <>
-      <ConnectionCard companion={companion} notify={notify} />
-      <ModelCard companion={companion} />
-      <QQStatusCard
-        qq={qqOf(companion.state?.snapshot ?? null)}
-        connectionId={companion.state?.connectionId ?? null}
-        openWeb={companion.openWeb}
-      />
-      <VoiceCard companion={companion} voice={voice} notify={notify} />
-      <PetCard companion={companion} presentation={presentation} notify={notify} />
-    </>
-  );
+export function StartPage({ companion, notify }: StartPageProps): JSX.Element {
+  return <ConnectionCard companion={companion} notify={notify} />;
 }
 
 /* ---------------------------------------------------------------- 连接服务 */
@@ -88,7 +90,8 @@ function ConnectionCard({
    */
   const [baseline, setBaseline] = useState<number | null>(null);
   const [token, setToken] = useState('');
-  const [missing, setMissing] = useState(false);
+  const [missingAddress, setMissingAddress] = useState(false);
+  const [missingToken, setMissingToken] = useState(false);
   const [asking, setAsking] = useState(false);
   /**
    * 自己这次提交还在途。
@@ -102,15 +105,23 @@ function ConnectionCard({
   const addressId = useId();
   const tokenId = useId();
   const busy = submitting || state?.phase === 'connecting' || state?.phase === 'retiring';
-  // 有连接时这次提交是「更新」：在线换地址/换令牌不必先断开。
-  const label =
+  const updates = state !== null && updatesConnection(state);
+  const primaryLabel =
     state === null
       ? '输入令牌并连接'
       : state.phase === 'offline'
         ? '输入令牌并重新连接'
-        : updatesConnection(state)
+        : updates
           ? '更新连接或更换令牌'
           : '输入令牌并连接';
+  const primaryText =
+    state === null
+      ? '连接'
+      : state.phase === 'offline'
+        ? '重新连接'
+        : updates
+          ? '更新连接'
+          : '连接';
 
   // 只在这份草稿还没起过稿时铺一次，并同时记下它的 Config 基线。
   // 之后外部再改地址，也不覆盖用户正在编辑的内容——保留草稿并标注外部变更。
@@ -139,15 +150,11 @@ function ConnectionCard({
   const submit = async (): Promise<void> => {
     const address = baseUrl.trim();
     const secret = token.trim();
-    if (address === '') {
-      setMissing(true);
-      return;
-    }
-    if (secret === '') {
-      setMissing(true);
-      return;
-    }
-    setMissing(false);
+    const addressMissing = address === '';
+    const tokenMissing = secret === '';
+    setMissingAddress(addressMissing);
+    setMissingToken(tokenMissing);
+    if (addressMissing || tokenMissing) return;
     // 先清空再用捕获到的局部值发出：失败、超时、挂起、CAS 冲突都不留 secret。
     setToken('');
     setAsking(false);
@@ -249,7 +256,7 @@ function ConnectionCard({
             </p>
           ) : null}
 
-          <Field label="服务地址" {...(missing ? { error: '请填服务地址。' } : {})}>
+          <Field label="服务地址" {...(missingAddress ? { error: '请填服务地址。' } : {})}>
             {({ inputId }) => (
               <input
                 id={inputId}
@@ -266,13 +273,15 @@ function ConnectionCard({
                   // 令牌是为「当时那个目标」填的：换了地址就不再适用，不能带过去。
                   setBaseUrl(event.target.value);
                   setToken('');
+                  setMissingAddress(false);
+                  setMissingToken(false);
                 }}
               />
             )}
           </Field>
 
           {asking ? (
-            <Field label="访问令牌" {...(missing ? { error: '请填入访问令牌。' } : {})}>
+            <Field label="访问令牌" {...(missingToken ? { error: '请填入访问令牌。' } : {})}>
               {({ inputId }) => (
                 <input
                   ref={tokenInput}
@@ -284,29 +293,37 @@ function ConnectionCard({
                   value={token}
                   disabled={busy}
                   data-testid="start-token"
-                  onChange={(event) => setToken(event.target.value)}
+                  onChange={(event) => {
+                    setToken(event.target.value);
+                    setMissingToken(false);
+                  }}
                 />
               )}
             </Field>
           ) : null}
 
           <p className="row__value" id={addressId}>
-            令牌只用于这一次连接，不写进配置、不进 URL，也不跨进程保留。
+            令牌只用于这一次连接。
           </p>
 
           <div className="card__foot">
             {asking ? (
               <>
-                <Button type="submit" variant="primary" busy={busy} data-testid="start-connect">
-                  {busy
-                    ? '正在连接…'
-                    : state !== null && updatesConnection(state)
-                      ? '更新连接'
-                      : '连接'}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  busy={busy}
+                  icon={<Icon name="plug" />}
+                  data-testid="start-connect"
+                  aria-label={primaryLabel}
+                  title={primaryLabel}
+                >
+                  {busy ? '正在连接…' : updates ? '更新连接' : '连接'}
                 </Button>
                 {/* 收起输入时也清掉已填的令牌：不留下看不见的 secret。 */}
                 <Button
                   variant="ghost"
+                  icon={<Icon name="x" />}
                   data-testid="start-cancel-token"
                   disabled={busy}
                   onClick={() => {
@@ -320,20 +337,34 @@ function ConnectionCard({
             ) : (
               <Button
                 variant="primary"
+                icon={<Icon name="plug" />}
                 disabled={busy || (state !== null && !canConnect(state))}
                 data-testid="start-ask-token"
-                onClick={() => setAsking(true)}
+                aria-label={primaryLabel}
+                title={primaryLabel}
+                onClick={() => {
+                  setMissingAddress(false);
+                  setMissingToken(false);
+                  setAsking(true);
+                }}
               >
-                {label}
+                {primaryText}
               </Button>
             )}
             {state !== null && state.phase === 'offline' && state.connectionId !== null ? (
-              <Button data-testid="start-reconnect" onClick={() => void companion.reconnect()}>
-                用这次进程里的令牌重连
+              <Button
+                icon={<Icon name="refresh" />}
+                data-testid="start-reconnect"
+                aria-label="用这次进程里的令牌重连"
+                title="用这次进程里的令牌重连"
+                onClick={() => void companion.reconnect()}
+              >
+                重连
               </Button>
             ) : null}
             {state !== null && state.connectionId !== null ? (
               <Button
+                icon={<Icon name="unplug" />}
                 data-testid="start-disconnect"
                 disabled={busy}
                 onClick={() => void companion.disconnect()}
@@ -341,22 +372,23 @@ function ConnectionCard({
                 断开
               </Button>
             ) : null}
-            <Button
-              variant="ghost"
+            <IconButton
+              label="重新读取连接状态"
               data-testid="start-refresh"
               disabled={companion.loading}
+              busy={companion.loading}
               onClick={companion.refresh}
             >
-              {companion.loading ? '读取中…' : '重新读取'}
-            </Button>
+              <Icon name="refresh" />
+            </IconButton>
           </div>
-          {asking ? null : (
+          {asking || state?.phase === 'live' ? null : (
             <p className="row__value" id={tokenId}>
               {state === null
                 ? '正在读取连接状态…'
                 : state.baseUrl === ''
                   ? '还没有保存过地址。'
-                  : `已保存 ${hostOf(state.baseUrl)}；令牌不跨进程保留，需要重新输入。`}
+                  : `已保存 ${hostOf(state.baseUrl)}`}
             </p>
           )}
         </form>
@@ -378,7 +410,7 @@ function Row({ label, value }: { label: string; value: string }): JSX.Element {
 
 /* ---------------------------------------------------------------- 服务模型 */
 
-function ModelCard({ companion }: { companion: CompanionView }): JSX.Element | null {
+export function ModelCard({ companion }: { companion: CompanionView }): JSX.Element {
   const state = companion.state;
   const [open, setOpen] = useState(false);
   const connectionId = state?.connectionId ?? null;
@@ -393,27 +425,41 @@ function ModelCard({ companion }: { companion: CompanionView }): JSX.Element | n
     testModel: (command: CompanionModelTestCommand) => companion.testModel(command),
   });
 
-  if (state === null || view === null) return null;
+  if (state === null || view === null) {
+    return (
+      <Card title="模型连接" id="model-connection-card" testId="model-connection-card">
+        <p className="row__value" data-testid="model-summary" role="status">
+          {state === null ? '还没有连接服务。' : '服务还没有提供模型信息。'}
+        </p>
+      </Card>
+    );
+  }
 
   const applied = view.applied;
   const connector = view.connectors.find((item) => item.id === applied?.connectorId) ?? null;
   const summary =
     applied === null
       ? view.desired.mode === 'scripted'
-        ? '现在用脚本回复。要接真实模型，先选连接并填好地址和模型。'
-        : '模型模式已选，但还没有可用的连接。'
+        ? '脚本回复'
+        : '模型模式已选，连接未就绪'
       : !view.enabled
-        ? '连接已就绪，但前台还没有切到它。'
+        ? '连接就绪，未启用'
         : state.snapshot?.agent.status === 'unavailable'
-          ? '模型模式已选，但连接当前不可用。'
+          ? '模型不可用'
           : `模型回复 · ${connector?.label ?? applied.connectorId}`;
 
   return (
     <Card
       title="模型连接"
       id="model-connection-card"
+      testId="model-connection-card"
       action={
-        <Button size="small" data-testid="model-open" onClick={() => setOpen(true)}>
+        <Button
+          size="small"
+          icon={<Icon name="sliders" />}
+          data-testid="model-open"
+          onClick={() => setOpen(true)}
+        >
           设置
         </Button>
       }
@@ -428,9 +474,6 @@ function ModelCard({ companion }: { companion: CompanionView }): JSX.Element | n
           <Row label="凭据来源" value={connector.credential.source} />
         </div>
       )}
-      <p className="row__value">
-        保存与测试都针对已应用的这一份；密钥只能由服务操作员在服务端注入，这里不代写。
-      </p>
       {open ? (
         <ModelDialog
           key={connectionId ?? 'no-connection'}
@@ -454,7 +497,7 @@ const POSES = [
   { pose: 'replying', glyph: '↗', label: '预览回应' },
 ] as const;
 
-function PetCard({
+export function PetCard({
   companion,
   presentation,
   notify,
@@ -481,7 +524,7 @@ function PetCard({
   };
 
   return (
-    <Card title="桌宠" id="start-pet-card">
+    <Card title="桌宠" id="start-pet-card" testId="start-pet-card">
       {presentation.available ? null : (
         <p role="alert">
           <Status tone="warn">这台机器没有本地外观通道，下面的开关不会生效。</Status>
@@ -512,7 +555,7 @@ function PetCard({
           aria-pressed={night}
           onClick={() => setNight((now) => !now)}
         >
-          ☼
+          <Icon name={night ? 'moon' : 'sun'} size={16} />
         </button>
         <button
           type="button"
@@ -552,6 +595,7 @@ function PetCard({
           variant="ghost"
           busy={presentation.saving}
           disabled={!presentation.available || desktop?.shown === false}
+          icon={<Icon name="eye-off" />}
           data-testid="pet-hide"
           onClick={() => void save({ visible: false }, '在桌面隐藏')}
         >
@@ -561,6 +605,7 @@ function PetCard({
           variant="ghost"
           busy={presentation.saving}
           disabled={!presentation.available || desktop?.shown === true}
+          icon={<Icon name="eye" />}
           data-testid="pet-show"
           onClick={() => void save({ visible: true }, '在桌面显示')}
         >
@@ -593,11 +638,6 @@ function PetCard({
           onChange={(next) => void save({ reducedMotion: next }, '减少动画')}
         />
       </div>
-
-      <p className="row__value">
-        形态、配色、大小与气泡细节在「外观」与「人格」两页；它们改的是这台机器上的呈现，
-        不会改服务里的助手。
-      </p>
     </Card>
   );
 }

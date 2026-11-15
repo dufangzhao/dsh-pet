@@ -7,9 +7,15 @@
  */
 import { useEffect, useState, type JSX } from 'react';
 import { VoiceSettings, type VoiceSettingsActions } from '@pet/text-client/voice-input-ui';
-import { errorMessage, type VoiceAsrSettings } from '@pet/contracts';
+import {
+  errorMessage,
+  type VoiceAsrSettings,
+  type VoiceProviderView,
+  type VoiceView,
+} from '@pet/contracts';
 
 import { Button, Card } from '../minimal-ui/controls.js';
+import { Icon } from '../minimal-ui/icons.js';
 import type { CompanionView } from '../../shared/use-companion.js';
 import type { VoiceController } from '@pet/text-client/voice-input-ui';
 
@@ -21,15 +27,18 @@ export interface VoiceCardProps {
   readonly notify: (message: string, tone: 'ok' | 'danger') => void;
 }
 
+/** 当前生效的转写提供者；语音页的网关区也用它，不另读一份。 */
+export function asrProviderOf(view: VoiceView | null): VoiceProviderView | null {
+  if (view === null) return null;
+  return view.providers.find((item) => item.providerRef === view.feature.providerRef) ?? null;
+}
+
 export function VoiceCard({ companion, voice, notify }: VoiceCardProps): JSX.Element {
   const state = companion.state;
   const [open, setOpen] = useState(false);
   const connectionId = state?.connectionId ?? null;
   const view = voice.view;
-  const provider =
-    view === null
-      ? null
-      : (view.providers.find((item) => item.providerRef === view.feature.providerRef) ?? null);
+  const provider = asrProviderOf(view);
 
   // 换连接就关掉：这份表单属于那一条连接。
   useEffect(() => {
@@ -82,9 +91,11 @@ export function VoiceCard({ companion, voice, notify }: VoiceCardProps): JSX.Ele
     <Card
       title="语音输入"
       id="voice-card"
+      testId="voice-card"
       action={
         <Button
           size="small"
+          icon={<Icon name="sliders" />}
           data-testid="voice-open"
           disabled={state === null || state.phase !== 'live'}
           onClick={() => setOpen(true)}
@@ -95,9 +106,6 @@ export function VoiceCard({ companion, voice, notify }: VoiceCardProps): JSX.Ele
     >
       <p className="row__value" data-testid="voice-summary">
         {summary}
-      </p>
-      <p className="row__value">
-        语音走它自己的提供者与密钥；保存这里不会改动文字连接，也不会结束正在进行的任务。
       </p>
       {open ? (
         <VoiceSettings
