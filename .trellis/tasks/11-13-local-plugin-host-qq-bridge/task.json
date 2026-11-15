@@ -81,7 +81,13 @@
       "gitMerge": true,
       "targetDevelopmentOS": "Windows x64",
       "status": "authorized-in-progress",
-      "guide": "docs/41-windows-development-handoff.md"
+      "guide": "docs/41-windows-development-handoff.md",
+      "workCommits": [
+        "3cbce0f118281d5d8f220a4cf74671ea19d866a6",
+        "4fa34da9640fc03ab32317609edcee671d8d82b9",
+        "ea500e5c97ad647a6e601ee909a8dd0564da4ff7",
+        "47fcd626d0a949056c034b05f7135979e9d23c76"
+      ]
     },
     "subagentModelPreference": {
       "preferredRoutes": [

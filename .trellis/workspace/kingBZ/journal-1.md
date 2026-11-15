@@ -1043,3 +1043,46 @@ Completed official QQ WebSocket and OneBot reverse-Universal plugins for the sam
 ### Next Steps
 
 - None - task complete
+
+
+## Session 29: Local QQ bridge, Windows startup repair and development handoff
+
+**Date**: 2026-11-16
+**Task**: Local QQ bridge, Windows startup repair and development handoff
+**Branch**: `feat/local-plugin-host-qq-bridge`
+
+### Summary
+
+Completed four authorized work commits, source and package audits, and Windows PowerShell handoff. Full workspace typecheck, desktop1144, local-host39 plus one explicit Windows-only skip, lint and format passed. Preview9 contains both repaired helper copies; Windows device confirmation and GitHub device login remain pending.
+
+### Main Changes
+
+- Delivered the independent QQ source process and authenticated remote bridge while retaining one server Agent/State and once-only delivery; details in the [task progress](../../tasks/11-13-local-plugin-host-qq-bridge/progress.md).
+- Reorganized settings into functional modules and ASR/TTS pages; QQ client labels identify SnowLuma / NapCat and the official bot entry without claiming client detection.
+- Fixed the actual Windows PowerShell line95 comment defect; recorded the failing-old/passing-new regression and preserved every native directory check in [Windows evidence](../../tasks/11-13-local-plugin-host-qq-bridge/evidence/windows-startup-fix.md).
+- Built and independently verified preview9; ZIP SHA256 is 2c63caa225de7f043045536d30ddeaa6e8a2b66e3df01b16a65fba3faa9cae50.
+- Prepared [Windows development handoff](../../../docs/41-windows-development-handoff.md). User authorized commits/push/merge; GitHub device login is pending at this journal entry. Keep the task open for actual Windows preview9 startup/reattach/stop confirmation.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `3cbce0f118281d5d8f220a4cf74671ea19d866a6` | (see git log) |
+| `4fa34da9640fc03ab32317609edcee671d8d82b9` | (see git log) |
+| `ea500e5c97ad647a6e601ee909a8dd0564da4ff7` | (see git log) |
+| `47fcd626d0a949056c034b05f7135979e9d23c76` | (see git log) |
+
+### Testing
+
+- Workspace types, lint and formatting passed; desktop121 files/1144 tests and local-host9 files/39 tests passed. The Windows-native directory test was explicitly skipped on Linux.
+- Preview9 ZIP SHA256/CRC/safe paths and both repaired helper copies were independently verified.
+
+### Status
+
+Implementation and local commits complete; external handoff and Windows confirmation pending. The Trellis task remains open.
+
+### Next Steps
+
+- Complete GitHub device login, push and merge the authorized branch.
+- On Windows, verify preview9 startup, GUI reattachment and explicit QQ stop; use the Windows development guide for the next machine.
