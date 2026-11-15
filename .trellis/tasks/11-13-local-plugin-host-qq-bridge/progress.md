@@ -2,7 +2,7 @@
 
 ## Current execution
 
-Implementation and the authorized Linux controlled acceptance are complete on `feat/local-plugin-host-qq-bridge`, from baseline `6897787`. The complete proposal was approved on 2026-11-14; its approval hashes remain unchanged. The user subsequently authorized this stage's commits, GitHub push and merge, and specified Windows as the next development machine. Final work commits and remote publication are being completed; the task remains `in_progress` until their finish record is written.
+Implementation and the authorized Linux controlled acceptance are complete on `feat/local-plugin-host-qq-bridge`, from baseline `6897787`. The complete proposal was approved on 2026-11-14; its approval hashes remain unchanged. The user subsequently authorized this stage's commits, GitHub push and merge, and specified Windows as the next development machine. The four work commits and stage journal were pushed and merged into `main` through [PR1](https://github.com/dufangzhao/dsh-pet/pull/1), merge `91ca2509ce3cb6bffec61689e1e57c2a159d696a`. The task remains `in_progress` for the repaired Windows candidate's actual startup/reattach/stop confirmation; code publication is complete.
 
 **Current delivery: Windows x64 portable preview candidate `0.1.0-preview.9`.** The start page contains only the connection card; QQ includes client access management; ASR and TTS have separate pages; plugin management groups related components and collapses internal parts. QQ client labels now name SnowLuma / NapCat（OneBot v11）and official QQ without claiming client detection or installation. The user's preview8 Windows startup test found an executable `//` line in the PowerShell initialization script. The confirmed defect is fixed in both copies inside preview9, and script failures are no longer mislabeled as missing authorization. See [Windows regression evidence](evidence/windows-startup-fix.md) and [Windows development handoff](../../../docs/41-windows-development-handoff.md).
 
@@ -44,7 +44,8 @@ The Windows candidate, Chinese usage guide and checksum are separate user delive
 ## Remaining human actions
 
 1. Run preview9 on Windows and confirm QQ access startup, GUI exit/reattach and explicit stop. The new Windows-only private-directory test is also available from the [development handoff](../../../docs/41-windows-development-handoff.md).
-2. Complete GitHub device login for the already-authorized push/merge. Use the final handoff receipt to identify the published commit and branch. Live account/model testing is independent of this code handoff.
+
+Code and records are published on `main`; GitHub login and merge are complete. Live account/model testing is independent of this code handoff.
 
 ## Environment and authorization
 

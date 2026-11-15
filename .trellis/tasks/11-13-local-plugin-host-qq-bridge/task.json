@@ -80,7 +80,12 @@
       "gitPush": true,
       "gitMerge": true,
       "targetDevelopmentOS": "Windows x64",
-      "status": "authorized-in-progress",
+      "status": "published-and-merged",
+      "github": {
+        "pullRequest": "https://github.com/dufangzhao/dsh-pet/pull/1",
+        "mergeCommit": "91ca2509ce3cb6bffec61689e1e57c2a159d696a",
+        "baseBranch": "main"
+      },
       "guide": "docs/41-windows-development-handoff.md",
       "workCommits": [
         "3cbce0f118281d5d8f220a4cf74671ea19d866a6",
@@ -105,7 +110,7 @@
       "source": "latest direct user requests: prefer DeepSeek and Hy4, default subsequent subagent reasoning to max"
     },
     "execution": {
-      "gate": "G7-controlled-acceptance-complete-awaiting-work-commit-approval",
+      "gate": "G7-code-published-Windows-preview9-confirmation-pending",
       "recordedAt": "2026-11-15T17:12:56+08:00",
       "productImplementationStarted": true,
       "componentEvidence": [
@@ -137,8 +142,7 @@
       ],
       "fullG0Passed": true,
       "pending": [
-        "Windows preview9 startup, GUI reattachment and explicit stop confirmation after the confirmed preview8 script defect; real QQ/model joint trial remains separate",
-        "Complete the authorized stage commits and GitHub push/merge after device login, then record the Windows development handoff"
+        "Windows preview9 startup, GUI reattachment and explicit stop confirmation after the confirmed preview8 script defect; real QQ/model joint trial remains separate"
       ],
       "realQQOrPaidModelTrial": false,
       "original4120OrSnowLumaChanged": false,

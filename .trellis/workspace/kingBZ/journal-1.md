@@ -1053,7 +1053,7 @@ Completed official QQ WebSocket and OneBot reverse-Universal plugins for the sam
 
 ### Summary
 
-Completed four authorized work commits, source and package audits, and Windows PowerShell handoff. Full workspace typecheck, desktop1144, local-host39 plus one explicit Windows-only skip, lint and format passed. Preview9 contains both repaired helper copies; Windows device confirmation and GitHub device login remain pending.
+Completed four authorized work commits, source and package audits, and Windows PowerShell handoff. Full workspace typecheck, desktop1144, local-host39 plus one explicit Windows-only skip, lint and format passed. Preview9 contains both repaired helper copies. GitHub login, push and merge subsequently completed through [PR1](https://github.com/dufangzhao/dsh-pet/pull/1), merge `91ca2509ce3cb6bffec61689e1e57c2a159d696a`; Windows device confirmation remains pending.
 
 ### Main Changes
 
@@ -1061,7 +1061,7 @@ Completed four authorized work commits, source and package audits, and Windows P
 - Reorganized settings into functional modules and ASR/TTS pages; QQ client labels identify SnowLuma / NapCat and the official bot entry without claiming client detection.
 - Fixed the actual Windows PowerShell line95 comment defect; recorded the failing-old/passing-new regression and preserved every native directory check in [Windows evidence](../../tasks/11-13-local-plugin-host-qq-bridge/evidence/windows-startup-fix.md).
 - Built and independently verified preview9; ZIP SHA256 is 2c63caa225de7f043045536d30ddeaa6e8a2b66e3df01b16a65fba3faa9cae50.
-- Prepared [Windows development handoff](../../../docs/41-windows-development-handoff.md). User authorized commits/push/merge; GitHub device login is pending at this journal entry. Keep the task open for actual Windows preview9 startup/reattach/stop confirmation.
+- Prepared [Windows development handoff](../../../docs/41-windows-development-handoff.md). User-authorized commits/push/merge are complete. Keep the task open for actual Windows preview9 startup/reattach/stop confirmation.
 
 
 ### Git Commits
@@ -1080,9 +1080,8 @@ Completed four authorized work commits, source and package audits, and Windows P
 
 ### Status
 
-Implementation and local commits complete; external handoff and Windows confirmation pending. The Trellis task remains open.
+Implementation, local commits and GitHub handoff complete; Windows confirmation pending. The Trellis task remains open.
 
 ### Next Steps
 
-- Complete GitHub device login, push and merge the authorized branch.
-- On Windows, verify preview9 startup, GUI reattachment and explicit QQ stop; use the Windows development guide for the next machine.
+- On Windows, clone or pull `main`, then verify preview9 startup, GUI reattachment and explicit QQ stop; use the Windows development guide for the next machine.
