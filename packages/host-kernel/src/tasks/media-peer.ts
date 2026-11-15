@@ -31,6 +31,8 @@ export type MediaControl =
   | Omit<StreamCreditMessage, 'protocol' | 'id' | 'sessionId' | 'owner'>
   | Omit<StreamEndMessage, 'protocol' | 'id' | 'sessionId' | 'owner'>;
 export interface MediaPeerOptions {
+  /** A narrower transport can cap its live streams below the kernel default. */
+  maxStreams?: number;
   closed?(reference: TaskMediaReference): void;
   signalFor: (owner: OwnerRef, taskId: string) => AbortSignal | null;
   write: (frame: MediaFrame) => Promise<Result<null>>;
@@ -82,7 +84,12 @@ export class TaskMediaPeer {
   #writeStarted = 0;
   #writeDone = 0;
   #writeTail = Promise.resolve();
-  constructor(private readonly options: MediaPeerOptions) {}
+  readonly #limit: number;
+  constructor(private readonly options: MediaPeerOptions) {
+    this.#limit = options.maxStreams ?? 64;
+    if (!Number.isSafeInteger(this.#limit) || this.#limit < 1 || this.#limit > 64)
+      throw new Error('Invalid media stream limit');
+  }
   private prepare(input: unknown): Result<{ reference: TaskMediaReference; signal: AbortSignal }> {
     const ref = mediaReference(input);
     if (!ref) return fail('invalid-input');
@@ -97,7 +104,7 @@ export class TaskMediaPeer {
     }
     if (!signal || signal.aborted) return fail('stale-owner');
     if (
-      this.#streams.size >= 64 ||
+      this.#streams.size >= this.#limit ||
       [...this.#streams.values()].filter(
         (r) => sameOwner(r.reference.owner, ref.owner) && r.reference.taskId === ref.taskId,
       ).length >= 4

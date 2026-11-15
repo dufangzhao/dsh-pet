@@ -18,6 +18,8 @@
     "@pet/plugin-sdk": "workspace:*",
     "@pet/host-kernel": "workspace:*",
     "@pet/companion-runtime": "workspace:*",
+    "@pet/local-host": "workspace:*",
+    "@pet/local-host-bridge": "workspace:*",
     "@pet/state-sqlite": "workspace:*",
     "@pet/cloud-exec": "workspace:*",
     "@pet/harness-cortico": "workspace:*",

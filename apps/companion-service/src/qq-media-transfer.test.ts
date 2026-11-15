@@ -1,5 +1,7 @@
 import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
+import { createReadStream } from 'node:fs';
+import { finished } from 'node:stream/promises';
 import { mkdtemp, mkdir, readFile, writeFile, rm, realpath, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
@@ -41,8 +43,13 @@ import { QQAudio } from './qq-audio.js';
 import { VoiceController } from './voice-controller.js';
 import { SpeechController } from './speech-controller.js';
 import { createMaterialStore, type HostMaterialStore } from './material-store.js';
-import { createQQMediaTransfer, type QQMediaTransfer } from './qq-media-transfer.js';
-import type { QQMappedInput, QQRemoteMaterial } from './qq-input.js';
+import {
+  createQQMediaTransfer,
+  type QQMediaTransfer,
+  type QQInputMaterialProducer,
+  type QQObservedFileProducerFor,
+} from './qq-media-transfer.js';
+import type { QQMappedInput, QQRemoteMaterial } from '@pet/local-host/qq-input';
 
 const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => {
@@ -99,7 +106,9 @@ function wave(): Buffer {
     );
   return output;
 }
-async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {}) {
+async function fixture(
+  options: { expectedOfficialCloseFailure?: boolean; observedFileMode?: 'missing' | 'remote' } = {},
+) {
   const root = await mkdtemp(path.join(tmpdir(), 'qq-transfer-test-'));
   const payloads = new Map<string, Buffer>([
     ['file', Buffer.from('actual binary bytes'.repeat(1000))],
@@ -107,9 +116,14 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
     ['voice', wave()],
   ]);
   const calls: { protocol: string; action: string; data: unknown }[] = [];
+  const remoteObserved: { open?: QQObservedFileProducerFor } = {};
   const controls = {
     asrText: '实际语音正文',
+    holdDecode: false,
+    decodeEntered: deferred(),
+    decodeRelease: deferred(),
     badComplete: false,
+    badCompleteFileOnly: false,
     failPhysical: false,
     holdPhysical: false,
     physicalEntered: deferred(),
@@ -246,7 +260,21 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
                   ? createSharedVoicePlugin((context) => need('voice').featurePorts(context))
                   : manifest.id === 'pet.asr-magpie'
                     ? asrDefinition
-                    : createQqMediaCodecPlugin((context) => need('audio').codecPorts(context));
+                    : createQqMediaCodecPlugin((context) => {
+                        const ports = need('audio').codecPorts(context);
+                        return {
+                          bind: (native) =>
+                            ports.bind({
+                              ...native,
+                              decode: async (input, consume, signal) => {
+                                controls.decodeEntered.resolve();
+                                if (controls.holdDecode) await controls.decodeRelease.promise;
+                                signal.throwIfAborted();
+                                return native.decode(input, consume, signal);
+                              },
+                            }),
+                        };
+                      });
     registrations.push({
       manifest,
       definition,
@@ -268,6 +296,7 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
   }
   cleanups.push(async () => {
     controls.physicalRelease.resolve();
+    controls.decodeRelease.resolve();
     let error: unknown;
     for (const close of [
       () => refs.transfer?.close(),
@@ -520,7 +549,11 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
                         data_type: 'file_complete',
                         file_name: key + '.bin',
                         total_chunks: index,
-                        total_bytes: bytes + (controls.badComplete ? 1 : 0),
+                        total_bytes:
+                          bytes +
+                          (controls.badComplete && (!controls.badCompleteFileOnly || key === 'file')
+                            ? 1
+                            : 0),
                       });
                     } finally {
                       done.resolve();
@@ -672,7 +705,24 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
   );
   if (!written.ok) throw new Error('No config');
   await host.setEnabled(QQ_CODEC_PLUGIN_ID, true);
-  const transfer = createQQMediaTransfer({ host, runtime, qq, materials, audio });
+  const transfer = createQQMediaTransfer({
+    host,
+    runtime,
+    qq,
+    materials,
+    audio,
+    ...(options.observedFileMode === 'missing'
+      ? {}
+      : {
+          producerForObservedFile:
+            options.observedFileMode === 'remote'
+              ? async (...args: Parameters<QQObservedFileProducerFor>) => {
+                  if (!remoteObserved.open) throw new KernelFault('not-ready');
+                  return remoteObserved.open(...args);
+                }
+              : ('service-local' as const),
+        }),
+  });
   refs.transfer = transfer;
   let count = 0;
   const account = (protocol: QQProtocol): QQAccountRef => ({
@@ -681,7 +731,12 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
     instanceId: 'default',
     accountId: protocol === 'official' ? 'fixture-account' : '900',
   });
-  const input = async (protocol: QQProtocol, parts: readonly QQRemoteMaterial[], group = false) => {
+  const input = async (
+    protocol: QQProtocol,
+    parts: readonly QQRemoteMaterial[],
+    group = false,
+    proactive = false,
+  ) => {
     const id = 'input-' + ++count,
       ac = account(protocol),
       actor = group
@@ -694,21 +749,32 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
       targetId: group ? '200' : '101',
       reference: { eventId: null, messageId: '1', occurredAt: Date.now(), displayReference: null },
     };
-    const origin: CompanionInputOrigin = {
-      kind: 'qq',
-      inputId: id,
-      principalId: 'alice',
-      audience: group
-        ? { kind: 'qq-group', account: ac, groupId: '200' }
-        : { kind: 'person-private', principalId: 'alice' },
-      route,
-      policyRevision: qq.policy().revision,
-      actor,
-      eventKey: 'event-' + id,
-      messageId: '1',
-      trigger: 'direct',
-      quote: null,
-    };
+    const origin: CompanionInputOrigin = proactive
+      ? {
+          kind: 'qq-proactive',
+          inputId: id,
+          principalId: null,
+          account: ac,
+          eventKey: 'event-' + id,
+          audience: { kind: 'qq-group', account: ac, groupId: '200' },
+          route,
+          policyRevision: qq.policy().revision,
+        }
+      : {
+          kind: 'qq',
+          inputId: id,
+          principalId: 'alice',
+          audience: group
+            ? { kind: 'qq-group', account: ac, groupId: '200' }
+            : { kind: 'person-private', principalId: 'alice' },
+          route,
+          policyRevision: qq.policy().revision,
+          actor,
+          eventKey: 'event-' + id,
+          messageId: '1',
+          trigger: 'direct',
+          quote: null,
+        };
     const materialIds = parts.map((_, index) => id + '-material-' + index);
     const created = await runtime.state('createInput', {
       id,
@@ -792,12 +858,101 @@ async function fixture(options: { expectedOfficialCloseFailure?: boolean } = {})
     audio,
     transfer,
     controls,
+    remoteObserved,
     payloads,
     calls,
     base,
     part,
     input,
     account,
+  };
+}
+
+type TransferFixture = Awaited<ReturnType<typeof fixture>>;
+async function observedWork(
+  f: TransferFixture,
+  options: { groupId?: string; expired?: boolean; metadataOnly?: boolean } = {},
+) {
+  const a = await f.input('onebot-v11', [], true),
+    id = 'observe-file-remote';
+  const audience = a.input.origin.audience;
+  if (audience.kind !== 'qq-group') throw new Error('Missing group');
+  await f.runtime.state('observe', {
+    observation: {
+      id,
+      audience: { ...audience, groupId: options.groupId ?? '200' },
+      principalId: 'bob',
+      observedAt: Date.now() - (options.expired ? 24 * 60 * 60 * 1000 : 0),
+      text: 'file metadata, not loaded',
+      quotedText: null,
+      materialIds: [],
+      fileEvidence: options.metadataOnly
+        ? null
+        : {
+            kind: 'qq-file',
+            account: f.account('onebot-v11'),
+            groupId: options.groupId ?? '200',
+            fileId: 'native-observed-file-id',
+            busId: '3',
+            name: 'observed.bin',
+            reportedSize: f.payloads.get('file')?.length ?? null,
+          },
+    },
+  });
+  return {
+    ...a,
+    observationId: id,
+    request: {
+      title: 'read observed resource',
+      code: 'unchanged',
+      materials: [{ materialId: id, inputName: 'observed.bin' }],
+    },
+  };
+}
+async function controlledObservedProducer(
+  f: TransferFixture,
+  local: AbortController,
+  onOpen: () => void,
+): Promise<QQInputMaterialProducer> {
+  const bytes = f.payloads.get('file');
+  if (!bytes) throw new Error('No controlled bytes');
+  const file = path.join(f.root, 'remote-native-observed.bin');
+  await writeFile(file, bytes);
+  return {
+    account: f.account('onebot-v11'),
+    parts: [
+      {
+        kind: 'file',
+        name: 'observed.bin',
+        quoted: false,
+        expectedSizeBytes: bytes.length,
+        expectedSha256: hash(bytes),
+      },
+    ],
+    readPart: async (index, actor, consume) => {
+      expect(index).toBe(0);
+      await actor.check();
+      local.signal.throwIfAborted();
+      onOpen();
+      const reader = createReadStream(file, { highWaterMark: 16384 }),
+        settled = finished(reader);
+      void settled.catch(() => {});
+      try {
+        await consume({
+          body: reader,
+          settled,
+          signal: local.signal,
+          check: async () => {
+            await actor.check();
+            local.signal.throwIfAborted();
+          },
+          cancel: () => reader.destroy(),
+        });
+      } finally {
+        reader.destroy();
+        await Promise.allSettled([settled]);
+      }
+    },
   };
 }
 
@@ -857,6 +1012,130 @@ it('downloads real original/wav fallback voice and keeps quoted ASR in notice no
   expect(f.calls.filter((c) => c.protocol === 'asr')).toHaveLength(2);
 }, 30000);
 
+it.each(['local-loss', 'server-withdrawal'] as const)(
+  'finishes the whole raw set before server processing and respects %s at the cut',
+  async (mode) => {
+    const f = await fixture(),
+      a = await f.input('official', [f.part('official', 'voice'), f.part('official', 'file')]);
+    f.controls.holdDecode = true;
+    const work = f.transfer.prepareInput(a.input, a.mapped, a.source, a.access);
+    await f.controls.decodeEntered.promise;
+    expect(
+      (await readdir(path.join(f.root, 'material/materials/staging'))).filter((name) =>
+        name.endsWith('.raw'),
+      ),
+    ).toHaveLength(2);
+    for (const id of a.input.materialIds)
+      expect(await f.runtime.state('findMaterial', { id, scope: a.access.scope })).toBeNull();
+    expect(f.calls.filter((call) => call.protocol === 'asr')).toHaveLength(0);
+    const downloads = f.calls.filter((call) => call.action === 'download').length;
+    expect(downloads).toBe(2);
+    await f.qq.setPlugin('pet.qq-official', false, 'retire-native-at-custody');
+    expect(a.source.signal.aborted).toBe(true);
+    if (mode === 'server-withdrawal') {
+      a.authority.allowed = false;
+      a.abort.abort();
+    }
+    f.controls.decodeRelease.resolve();
+    const result = await work;
+    if (mode === 'server-withdrawal') {
+      expect(result.ok).toBe(false);
+      expect(f.calls.filter((call) => call.protocol === 'asr')).toHaveLength(0);
+    } else {
+      if (!result.ok) throw new Error(JSON.stringify(result));
+      expect(result.transcript).toBe('实际语音正文');
+      expect(result.materials.map((material) => material.id)).toEqual(a.input.materialIds);
+      const committed = await f.runtime.state('commitInput', {
+        id: a.input.id,
+        text: result.transcript,
+        materials: result.materials,
+      });
+      const material = result.materials[1];
+      if (!material) throw new Error('Missing worker file');
+      const request = {
+        title: 'inspect retained server bytes',
+        code: 'unchanged',
+        materials: [{ materialId: material.id, inputName: 'worker.bin' }],
+      };
+      expect(await f.transfer.prepareWork(committed.admission, request, a.access)).toEqual(request);
+      const bytes = await f.materials.withMaterial(material.id, a.access, async (_ref, source) => {
+        const parts: Uint8Array[] = [];
+        for await (const part of source) parts.push(part);
+        return Buffer.concat(parts);
+      });
+      expect(bytes).toEqual(f.payloads.get('file'));
+    }
+    expect(f.calls.filter((call) => call.action === 'download')).toHaveLength(downloads);
+    expect(await readdir(path.join(f.root, 'material/materials/staging'))).toEqual([]);
+  },
+  30000,
+);
+
+it('accepts only safe producer descriptors and preserves committed custody after source postflight failure', async () => {
+  const f = await fixture(),
+    a = await f.input('onebot-v11', [f.part('onebot-v11', 'file')]);
+  const bytes = f.payloads.get('file');
+  if (!bytes) throw new Error('Missing input');
+  const file = path.join(f.root, 'controlled-native-part.bin');
+  await writeFile(file, bytes);
+  const local = new AbortController();
+  let opens = 0;
+  const producer: QQInputMaterialProducer = {
+    account: a.source.account,
+    parts: [
+      {
+        kind: 'file',
+        name: 'safe.bin',
+        quoted: false,
+        expectedSizeBytes: bytes.length,
+        expectedSha256: hash(bytes),
+      },
+    ],
+    readPart: async (index, actor, consume) => {
+      expect(index).toBe(0);
+      await actor.check();
+      opens++;
+      const reader = createReadStream(file, { highWaterMark: 16384 });
+      const settled = finished(reader);
+      void settled.catch(() => {});
+      try {
+        await consume({
+          body: reader,
+          settled,
+          signal: local.signal,
+          check: async () => {
+            await actor.check();
+            local.signal.throwIfAborted();
+          },
+          cancel: () => reader.destroy(),
+        });
+      } finally {
+        reader.destroy();
+        await Promise.allSettled([settled]);
+      }
+      local.abort();
+      throw new KernelFault('stale-owner');
+    },
+  };
+  expect(JSON.stringify({ account: producer.account, parts: producer.parts })).not.toContain('url');
+  const result = await f.transfer.prepareProducedInput(a.input, producer, a.access);
+  if (!result.ok) throw new Error(JSON.stringify(result));
+  expect(result.materials[0]?.sha256).toBe(hash(bytes));
+  expect(opens).toBe(1);
+  expect(local.signal.aborted).toBe(true);
+}, 30000);
+
+it('rejects public proactive origin without the original server-private candidate grant', async () => {
+  const f = await fixture(),
+    a = await f.input('onebot-v11', [f.part('onebot-v11', 'voice')], true, true);
+  const before = f.calls.length;
+  expect(await f.transfer.prepareInput(a.input, a.mapped, a.source, a.access)).toMatchObject({
+    ok: false,
+    error: { code: 'permission-denied' },
+  });
+  expect(f.calls).toHaveLength(before);
+}, 30000);
+
 it('does not replace a captured connection or perform IO after denied scope', async () => {
   const f = await fixture(),
     a = await f.input('official', [f.part('official', 'file')]);
@@ -869,6 +1148,12 @@ it('does not replace a captured connection or perform IO after denied scope', as
       a.access,
     ),
   ).toMatchObject({ ok: false, error: { code: 'stale-owner' }, cleanup: 'settled' });
+  expect(
+    await f.transfer.prepareInput(a.input, a.mapped, a.source, {
+      ...a.access,
+      scope: { kind: 'management' },
+    }),
+  ).toMatchObject({ ok: false, error: { code: 'permission-denied' } });
   a.authority.allowed = false;
   expect(await f.transfer.prepareInput(a.input, a.mapped, a.source, a.access)).toMatchObject({
     ok: false,
@@ -876,6 +1161,21 @@ it('does not replace a captured connection or perform IO after denied scope', as
     cleanup: 'settled',
   });
   expect(f.calls).toHaveLength(before);
+}, 30000);
+
+it('does not decode a first voice part when a later required raw part fails native completion', async () => {
+  const f = await fixture(),
+    a = await f.input('onebot-v11', [f.part('onebot-v11', 'voice'), f.part('onebot-v11', 'file')]);
+  f.controls.badComplete = true;
+  f.controls.badCompleteFileOnly = true;
+  expect(await f.transfer.prepareInput(a.input, a.mapped, a.source, a.access)).toMatchObject({
+    ok: false,
+    cleanup: 'unknown',
+  });
+  expect(f.calls.filter((call) => call.protocol === 'asr')).toHaveLength(0);
+  for (const id of a.input.materialIds)
+    expect(await f.runtime.state('findMaterial', { id, scope: a.access.scope })).toBeNull();
+  expect(await readdir(path.join(f.root, 'material/materials/staging'))).toEqual([]);
 }, 30000);
 
 it('does not send EOF to store when native download terminal evidence is wrong', async () => {
@@ -917,6 +1217,203 @@ it('waits actual native physical join before EOF/metadata and close does not fak
   await closing;
   expect(await readdir(path.join(f.root, 'material/materials/staging'))).toEqual([]);
 }, 30000);
+
+it('reuses the same native observed-file opener through an explicit service callback', async () => {
+  const f = await fixture({ observedFileMode: 'remote' }),
+    a = await observedWork(f);
+  const native = vi.fn(f.transfer.producerFromNativeObservation);
+  f.remoteObserved.open = native;
+  const prepared = await f.transfer.prepareWork(a.input, a.request, a.access),
+    id = prepared.materials?.[0]?.materialId;
+  expect(native).toHaveBeenCalledTimes(1);
+  const call = native.mock.calls[0];
+  if (!call || !id) throw new Error('Missing native producer callback');
+  expect(call[0].id).toBe(a.input.id);
+  expect(call[1].id).toBe(a.observationId);
+  expect(call[2]).toBe(id);
+  expect(call[3].scope).toEqual(a.access.scope);
+  expect(f.calls.filter((entry) => entry.action === 'get_group_file_url')).toHaveLength(1);
+  expect(f.calls.find((entry) => entry.action === 'get_group_file_url')?.data).toEqual({
+    group_id: '200',
+    file_id: 'native-observed-file-id',
+    busid: 3,
+  });
+  expect((await f.runtime.state('getMaterial', { id, scope: a.access.scope })).observationId).toBe(
+    a.observationId,
+  );
+  expect(await f.transfer.prepareWork(a.input, a.request, a.access)).toEqual(prepared);
+  expect(native).toHaveBeenCalledTimes(1);
+}, 30000);
+
+it('fails closed for an observed file when no producer strategy is selected', async () => {
+  const f = await fixture({ observedFileMode: 'missing' }),
+    a = await observedWork(f),
+    legacy = vi.spyOn(f.qq, 'sourceFor'),
+    before = f.calls.length;
+  await expect(f.transfer.prepareWork(a.input, a.request, a.access)).rejects.toMatchObject({
+    error: { code: 'not-ready' },
+  });
+  expect(legacy).not.toHaveBeenCalled();
+  expect(f.calls).toHaveLength(before);
+}, 30000);
+
+it('loads a scoped remote observed file with the exact input/resource and reuses it offline after TTL', async () => {
+  const f = await fixture({ observedFileMode: 'remote' }),
+    a = await observedWork(f),
+    local = new AbortController();
+  let reads = 0;
+  const producer = await controlledObservedProducer(f, local, () => {
+    reads++;
+  });
+  const open = vi.fn<QQObservedFileProducerFor>(async (input, observation, materialId, access) => {
+    expect(input.id).toBe(a.input.id);
+    expect(observation.id).toBe(a.observationId);
+    expect(observation.fileEvidence).toMatchObject({
+      groupId: '200',
+      fileId: 'native-observed-file-id',
+      busId: '3',
+    });
+    expect(materialId).toMatch(/^material-[a-f0-9]{64}$/u);
+    expect(access.scope).toEqual(a.access.scope);
+    await access.check();
+    return producer;
+  });
+  f.remoteObserved.open = open;
+  const legacy = vi.spyOn(f.qq, 'sourceFor').mockImplementation(() => {
+    throw new Error('Legacy source must not receive a remote read');
+  });
+  const ready = await f.transfer.prepareWork(a.input, a.request, a.access),
+    id = ready.materials?.[0]?.materialId;
+  if (!id) throw new Error('No canonical file');
+  expect(id).not.toBe(a.observationId);
+  expect(reads).toBe(1);
+  expect(open).toHaveBeenCalledTimes(1);
+  expect(legacy).not.toHaveBeenCalled();
+  const stored = await f.runtime.state('getMaterial', { id, scope: a.access.scope });
+  expect(stored.inputId).toBe(a.input.id);
+  expect(stored.observationId).toBe(a.observationId);
+  expect(stored.reference?.sha256).toBe(hash(f.payloads.get('file')!));
+  local.abort();
+  f.remoteObserved.open = async () => {
+    throw new KernelFault('not-ready');
+  };
+  const now = Date.now();
+  vi.spyOn(Date, 'now').mockReturnValue(now + 24 * 60 * 60 * 1000);
+  expect(await f.transfer.prepareWork(a.input, a.request, a.access)).toEqual(ready);
+  expect(reads).toBe(1);
+  expect(legacy).not.toHaveBeenCalled();
+}, 30000);
+
+it('never falls back to legacy after the remote observed-file opener rejects', async () => {
+  const f = await fixture({ observedFileMode: 'remote' }),
+    a = await observedWork(f),
+    legacy = vi.spyOn(f.qq, 'sourceFor');
+  f.remoteObserved.open = async () => {
+    throw new KernelFault('network');
+  };
+  await expect(f.transfer.prepareWork(a.input, a.request, a.access)).rejects.toMatchObject({
+    error: { code: 'network' },
+  });
+  expect(legacy).not.toHaveBeenCalled();
+  expect(f.calls.filter((call) => call.action === 'get_group_file_url')).toHaveLength(0);
+}, 30000);
+
+it.each(['expired', 'cross-group', 'metadata-only'] as const)(
+  'rejects %s observed evidence before selecting any remote producer',
+  async (mode) => {
+    const f = await fixture({ observedFileMode: 'remote' }),
+      a = await observedWork(f, {
+        expired: mode === 'expired',
+        groupId: mode === 'cross-group' ? '201' : '200',
+        metadataOnly: mode === 'metadata-only',
+      });
+    const open = vi.fn<QQObservedFileProducerFor>(async () => {
+      throw new Error('No invalid resource may open');
+    });
+    f.remoteObserved.open = open;
+    const legacy = vi.spyOn(f.qq, 'sourceFor');
+    await expect(f.transfer.prepareWork(a.input, a.request, a.access)).rejects.toBeDefined();
+    expect(open).not.toHaveBeenCalled();
+    expect(legacy).not.toHaveBeenCalled();
+  },
+  30000,
+);
+
+it('refuses a remote observed producer captured for another account', async () => {
+  const f = await fixture({ observedFileMode: 'remote' }),
+    a = await observedWork(f),
+    local = new AbortController();
+  let reads = 0;
+  const producer = await controlledObservedProducer(f, local, () => {
+    reads++;
+  });
+  f.remoteObserved.open = async () => ({
+    ...producer,
+    account: { ...producer.account, accountId: '901' },
+  });
+  const legacy = vi.spyOn(f.qq, 'sourceFor');
+  await expect(f.transfer.prepareWork(a.input, a.request, a.access)).rejects.toMatchObject({
+    error: { code: 'permission-denied' },
+  });
+  expect(reads).toBe(0);
+  expect(legacy).not.toHaveBeenCalled();
+}, 30000);
+
+it.each(['local-loss', 'server-withdrawal'] as const)(
+  'keeps observed-file custody actor-independent under %s',
+  async (mode) => {
+    const f = await fixture({ observedFileMode: 'remote' }),
+      a = await observedWork(f),
+      local = new AbortController();
+    let reads = 0;
+    const producer = await controlledObservedProducer(f, local, () => {
+      reads++;
+    });
+    f.remoteObserved.open = async () => producer;
+    const entered = deferred(),
+      release = deferred(),
+      put = f.materials.put.bind(f.materials);
+    const write = vi.spyOn(f.materials, 'put').mockImplementation(async (...args) => {
+      entered.resolve();
+      await release.promise;
+      return put(...args);
+    });
+    cleanups.push(async () => {
+      release.resolve();
+    });
+    const work = f.transfer.prepareWork(a.input, a.request, a.access).then(
+      (value) => ({ ok: true as const, value }),
+      (error) => ({ ok: false as const, error }),
+    );
+    await Promise.race([
+      entered.promise,
+      work.then((result) => {
+        if (!result.ok) throw result.error;
+      }),
+    ]);
+    local.abort();
+    if (mode === 'server-withdrawal') {
+      a.authority.allowed = false;
+      a.abort.abort();
+    }
+    release.resolve();
+    const result = await work;
+    if (mode === 'local-loss') {
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        const id = result.value.materials?.[0]?.materialId;
+        if (!id) throw new Error('No worker material');
+        expect(
+          (await f.runtime.state('getMaterial', { id, scope: a.access.scope })).reference?.sha256,
+        ).toBe(hash(f.payloads.get('file')!));
+      }
+    } else expect(result.ok).toBe(false);
+    write.mockRestore();
+    expect(reads).toBe(1);
+    expect(await readdir(path.join(f.root, 'material/materials/staging'))).toEqual([]);
+  },
+  30000,
+);
 
 it('loads a visible observed file through exact native lookup and reuses its current-input canonical material', async () => {
   const f = await fixture(),
@@ -1046,10 +1543,9 @@ it('enforces actual aggregate32MiB even when both original file sizes are unrepo
     error: { code: 'quota-exceeded' },
     cleanup: 'unknown',
   });
-  expect(
-    (await f.runtime.state('getMaterial', { id: a.input.materialIds[0]!, scope: a.access.scope }))
-      .reference?.sizeBytes,
-  ).toBe(17 * 1024 * 1024);
+  for (const id of a.input.materialIds)
+    expect(await f.runtime.state('findMaterial', { id, scope: a.access.scope })).toBeNull();
+  expect(f.calls.filter((call) => call.protocol === 'asr')).toEqual([]);
   expect(await readdir(path.join(f.root, 'material/materials/staging'))).toEqual([]);
 }, 30000);
 

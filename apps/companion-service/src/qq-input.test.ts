@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import { decodeOfficialGatewayFrame } from '@pet/qq-official';
 import { decodeOneBotFrame } from '@pet/qq-onebot';
 import type { QQAccountRef } from '@pet/contracts';
-import { mapOfficialInput, mapOneBotInput } from './qq-input.js';
+import { mapOfficialInput, mapOneBotInput } from '@pet/local-host/qq-input';
 
 const official: QQAccountRef = {
   protocol: 'official',

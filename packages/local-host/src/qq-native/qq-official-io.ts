@@ -8,11 +8,7 @@ import {
 } from '@pet/contracts';
 import { KernelFault, SecretRedactor } from '@pet/host-kernel';
 import type { CompanionPluginHost, QQIoOutcome } from '@pet/companion-runtime';
-import type {
-  OfficialGateway,
-  OfficialHttpResponse,
-  OfficialIo,
-} from '../../../plugins/qq-official/src/ports.js';
+import type { OfficialGateway, OfficialHttpResponse, OfficialIo } from '@pet/qq-official';
 import {
   decodeOfficialTokenResponse,
   encodeOfficialHeartbeat,
@@ -22,13 +18,14 @@ import {
   encodeOfficialResume,
   encodeOfficialTokenRequest,
   type OfficialMessageRequest,
-} from '../../../plugins/qq-official/src/wire.js';
+} from '@pet/qq-official';
 import {
   createQqAuthority,
   isQqEgressPostflightFailure,
   type CapturedQqBinding,
 } from './qq-native-types.js';
 import { ownedQqSocket } from './qq-socket.js';
+import { assertQqOperation, checkQqOperation } from './qq-operation.js';
 import { createOfficialMediaIo, type OfficialAttachmentTestHooks } from './qq-official-media-io.js';
 
 const API = 'https://api.bot.qq.com';
@@ -145,6 +142,16 @@ export function createAuthorizedOfficialIo(
     fetch: nativeFetch,
     ...(test.attachment ? { attachmentTest: test.attachment } : {}),
     check: authority.check,
+    checkOperation: (signal) =>
+      checkQqOperation(host, binding.owner, binding.requireOperationCheck === true, signal),
+    assertOperation: (signal, deadline) =>
+      assertQqOperation(
+        host,
+        binding.owner,
+        binding.requireOperationCheck === true,
+        signal,
+        deadline,
+      ),
     fence: authority.fence,
     token: accessToken,
     safe: safeText,
@@ -167,6 +174,21 @@ export function createAuthorizedOfficialIo(
         await authority.check();
         if (live.aborted) throw new KernelFault('cancelled');
         safeText(JSON.stringify(parsed.body), secret, token);
+        const operationDeadline = await checkQqOperation(
+          host,
+          binding.owner,
+          binding.requireOperationCheck === true,
+          live,
+        );
+        await authority.check();
+        if (live.aborted) throw new KernelFault('cancelled');
+        assertQqOperation(
+          host,
+          binding.owner,
+          binding.requireOperationCheck === true,
+          live,
+          operationDeadline,
+        );
         dispatched = true;
         const response = await request(`${API}${parsed.path}`, {
           method: 'POST',
@@ -248,75 +270,74 @@ export function createAuthorizedOfficialIo(
               maxPayload: MAX_BYTES,
               handshakeTimeout: 30000,
             });
-        await new Promise<void>((resolve, reject) => {
-          const abort = (): void => {
-            if (socket.readyState !== WebSocket.CLOSED) socket.terminate();
-          };
-          const opened = (): void => {
-            cleanup();
-            resolve();
-          };
-          // A handshake error is logical; only close confirms the socket actually settled.
-          const errored = (): void => {
-            abort();
-          };
-          const finished = (): void => {
-            cleanup();
-            reject(new KernelFault(live.aborted ? 'cancelled' : 'network'));
-          };
-          const cleanup = (): void => {
-            live.removeEventListener('abort', abort);
-            socket.off('open', opened);
-            socket.off('error', errored);
-            socket.off('close', finished);
-          };
-          socket.once('open', opened);
-          socket.on('error', errored);
-          socket.once('close', finished);
-          live.addEventListener('abort', abort, { once: true });
-          if (live.aborted) abort();
-        });
         const owned = ownedQqSocket(socket, live, authority.check);
+        let gateway: OfficialGateway | undefined;
         try {
+          await new Promise<void>((resolve, reject) => {
+            const abort = (): void => {
+              if (socket.readyState !== WebSocket.CLOSED) socket.terminate();
+            };
+            const opened = (): void => {
+              cleanup();
+              resolve();
+            };
+            // A handshake error is logical; only close confirms the socket actually settled.
+            const errored = (): void => {
+              abort();
+            };
+            const finished = (): void => {
+              cleanup();
+              reject(new KernelFault(live.aborted ? 'cancelled' : 'network'));
+            };
+            const cleanup = (): void => {
+              live.removeEventListener('abort', abort);
+              socket.off('open', opened);
+              socket.off('error', errored);
+              socket.off('close', finished);
+            };
+            socket.once('open', opened);
+            socket.on('error', errored);
+            socket.once('close', finished);
+            live.addEventListener('abort', abort, { once: true });
+            if (live.aborted) abort();
+          });
           await authority.check();
           if (live.aborted) throw new KernelFault('cancelled');
-        } catch (error) {
-          await owned.close();
-          throw error;
-        }
-        const frameStream: AsyncIterable<string> = {
-          async *[Symbol.asyncIterator]() {
-            for await (const frame of owned.frames) {
-              safeText(frame, secret, token);
-              yield frame;
-            }
-          },
-        };
-        const gateway: OfficialGateway = {
-          id: owned.id,
-          signal: owned.signal,
-          frames: frameStream,
-          settled: work.then(
-            () => {},
-            () => {},
-          ),
-          identify: (caller) =>
-            owned.send(JSON.stringify(unwrap(encodeOfficialIdentify(token))), caller),
-          resume: (input, caller) =>
-            owned.send(
-              JSON.stringify(unwrap(encodeOfficialResume(token, input.sessionId, input.sequence))),
-              caller,
+          if (owned.signal.aborted) throw new KernelFault('network');
+          const frameStream: AsyncIterable<string> = {
+            async *[Symbol.asyncIterator]() {
+              for await (const frame of owned.frames) {
+                safeText(frame, secret, token);
+                yield frame;
+              }
+            },
+          };
+          gateway = {
+            id: owned.id,
+            signal: owned.signal,
+            frames: frameStream,
+            settled: work.then(
+              () => {},
+              () => {},
             ),
-          heartbeat: (sequence, caller) =>
-            owned.send(JSON.stringify(unwrap(encodeOfficialHeartbeat(sequence))), caller),
-          close: () => owned.close(),
-        };
-        sockets.add(gateway);
-        resolveReady(gateway);
-        try {
+            identify: (caller) =>
+              owned.send(JSON.stringify(unwrap(encodeOfficialIdentify(token))), caller),
+            resume: (input, caller) =>
+              owned.send(
+                JSON.stringify(
+                  unwrap(encodeOfficialResume(token, input.sessionId, input.sequence)),
+                ),
+                caller,
+              ),
+            heartbeat: (sequence, caller) =>
+              owned.send(JSON.stringify(unwrap(encodeOfficialHeartbeat(sequence))), caller),
+            close: () => owned.close(),
+          };
+          sockets.add(gateway);
+          resolveReady(gateway);
           await owned.settled;
         } finally {
-          sockets.delete(gateway);
+          if (gateway) sockets.delete(gateway);
           await owned.close();
         }
       });

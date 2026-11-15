@@ -10,11 +10,16 @@ import {
 } from '@pet/contracts';
 import { KernelFault, SecretRedactor } from '@pet/host-kernel';
 import type { CompanionPluginHost, QQIoOutcome } from '@pet/companion-runtime';
-import type { OneBotIo, OneBotPeer } from '../../../plugins/qq-onebot/src/ports.js';
-import { decodeOneBotFrame, encodeOneBotAction } from '../../../plugins/qq-onebot/src/wire.js';
-import { SNOW_MEDIA_FRAME_MAX_BYTES } from '../../../plugins/qq-onebot/src/media-wire.js';
+import {
+  decodeOneBotFrame,
+  encodeOneBotAction,
+  type OneBotIo,
+  type OneBotPeer,
+} from '@pet/qq-onebot';
+import { SNOW_MEDIA_FRAME_MAX_BYTES } from '@pet/qq-onebot/media-wire';
 import { createQqAuthority, type CapturedQqBinding } from './qq-native-types.js';
 import { ownedQqSocket } from './qq-socket.js';
+import { assertQqOperation, checkQqOperation } from './qq-operation.js';
 import { createOneBotMediaIo, type OneBotMediaRouter } from './qq-onebot-media-io.js';
 
 /** Private reverse Universal listener. No listener or credential borrow occurs until nextPeer. */
@@ -125,7 +130,23 @@ export function createAuthorizedOneBotIo(
               ): Promise<QQIoOutcome<null>> => {
                 let dispatched = false;
                 try {
+                  const operationDeadline = await checkQqOperation(
+                    host,
+                    binding.owner,
+                    binding.requireOperationCheck === true,
+                    caller,
+                  );
+                  await authority.check();
+                  if (caller.aborted || sourceSignal.aborted || owned.signal.aborted)
+                    throw new KernelFault('cancelled');
                   await owned.send(text, caller, () => {
+                    assertQqOperation(
+                      host,
+                      binding.owner,
+                      binding.requireOperationCheck === true,
+                      caller,
+                      operationDeadline,
+                    );
                     dispatched = true;
                   });
                   return { ok: true, value: null };

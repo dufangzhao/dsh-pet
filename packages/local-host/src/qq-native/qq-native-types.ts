@@ -6,7 +6,8 @@ import {
   KernelFault,
   MemoryCiphertextStore,
 } from '@pet/host-kernel';
-import { withSourceAuthority, type CompanionPluginHost } from '@pet/companion-runtime';
+import { withSourceAuthority } from '@pet/companion-runtime/source-authority';
+import type { CompanionPluginHost } from '@pet/companion-runtime/plugin-host';
 
 /** Host-only capture. Neither the secret nor this object is a plugin capability payload. */
 export interface CapturedQqBinding<S> {
@@ -16,6 +17,8 @@ export interface CapturedQqBinding<S> {
   readonly credentialVersion: string;
   readonly settings: S;
   readonly credential: string;
+  /** Distributed sources require a fresh scoped server check before every business dispatch. */
+  readonly requireOperationCheck?: boolean;
   check(): void | Promise<void>;
 }
 

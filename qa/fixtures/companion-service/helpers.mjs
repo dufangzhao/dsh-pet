@@ -154,21 +154,21 @@ export async function records(root) {
 export async function effectRecord(root) {
   return until(
     async () => {
-      const all = await records(root);
-      if (all.length !== 1) return null;
-      const record = all[0];
-      const inspected = await inspectOwned(record);
-      if (inspected.kind !== 'owned' || !inspected.container.state.Running) return null;
+      const jobs = jobsRoot(root);
+      const ids = await listRecords(jobs);
+      if (ids.length !== 1) return null;
+      const jobId = ids[0];
       try {
-        const effect = await readFile(
-          path.join(jobsRoot(root), record.jobId, 'work', 'effect.txt'),
-          'utf8',
-        );
-        return effect === 'once\n' ? record : null;
+        const effect = await readFile(path.join(jobs, jobId, 'work', 'effect.txt'), 'utf8');
+        if (effect !== 'once\n') return null;
       } catch (error) {
         if (error.code !== 'ENOENT') throw error;
         return null;
       }
+      const record = await readRecord(jobs, jobId, 'pet.cloud-exec');
+      const inspected = await inspectOwned(record);
+      if (inspected.kind !== 'owned' || !inspected.container.state.Running) return null;
+      return record;
     },
     Boolean,
     'owned running container and first committed append',

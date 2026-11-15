@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import WebSocket, { WebSocketServer } from '../apps/companion-service/node_modules/ws/wrapper.mjs';
 import { QQ_OFFICIAL_PLUGIN_ID, type QQInputReceipt } from '../packages/contracts/src/index.js';
 import { createCompanionService } from '../apps/companion-service/src/service.js';
-import { mapOfficialInput } from '../apps/companion-service/src/qq-input.js';
+import { mapOfficialInput } from '../packages/local-host/src/qq-input.js';
 import { decodeOfficialGatewayFrame } from '../plugins/qq-official/src/index.js';
 
 test('private-only official source ignores group events but keeps the same socket and private path', { timeout: 20000 }, async () => {

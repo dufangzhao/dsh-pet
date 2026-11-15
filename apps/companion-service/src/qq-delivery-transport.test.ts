@@ -32,7 +32,7 @@ import { snowStagedSend, uploadSnowMedia } from '../../../plugins/qq-onebot/src/
 import { uploadOfficialMedia } from '../../../plugins/qq-official/src/media.js';
 import { encodeSnowMediaRequest } from '../../../plugins/qq-onebot/src/media-wire.js';
 import { encodeOneBotAction, type OneBotAction } from '../../../plugins/qq-onebot/src/wire.js';
-import { createQQDeliverySource } from './qq-delivery-transport.js';
+import { createQQDeliverySource } from '../../../packages/local-host/src/qq-delivery-transport.js';
 import type { QQDeliveryProgress, QQDeliveryRequest } from './qq-delivery.js';
 
 const sha = (bytes: string | Uint8Array): string =>

@@ -11,6 +11,8 @@ import {
   makeError,
   QQ_OFFICIAL_PLUGIN_ID,
   QQ_ONEBOT_PLUGIN_ID,
+  LOCAL_HOST_BRIDGE_PLUGIN_ID,
+  LOCAL_HOST_QQ_CONTROL_PATH,
   type CompanionModelView,
   type CompanionMessageCommand,
   type CompanionTaskCommand,
@@ -25,6 +27,7 @@ import { voiceHttp } from './voice-http.js';
 import type { SpeechController } from './speech-controller.js';
 import { speechHttp } from './speech-http.js';
 import type { QQController } from './qq-controller.js';
+import type { QQLocalHostController } from './qq-local-host.js';
 import { qqHttp } from './qq-http.js';
 import type { HostMaterialStore } from './material-store.js';
 
@@ -151,6 +154,7 @@ export interface TextServiceOptions {
   readonly voice?: VoiceController;
   readonly speech?: SpeechController;
   readonly qq?: QQController;
+  readonly localHost?: QQLocalHostController;
   readonly materials?: HostMaterialStore;
   readonly token: string;
   readonly hostname?: string;
@@ -369,6 +373,19 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       host: request.headers.host,
       origin: typeof origin === 'string' ? origin : undefined,
     });
+    if (pathname === LOCAL_HOST_QQ_CONTROL_PATH) {
+      if (!options.localHost) throw new KernelFault('not-ready');
+      if ([...url.searchParams].length) throw new KernelFault('invalid-input');
+      if (method === 'GET')
+        send(response, 200, { ok: true, value: await options.localHost.view() });
+      else if (method === 'POST')
+        send(response, 200, {
+          ok: true,
+          value: await options.localHost.select(await body(request)),
+        });
+      else throw new KernelFault('invalid-input');
+      return;
+    }
     const materialMatch = /^\/api\/materials\/([^/]+)$/.exec(pathname);
     if (method === 'GET' && materialMatch?.[1]) {
       let id: string;
@@ -383,7 +400,19 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     }
     if (/^\/api\/qq(?:\/|$)/.test(pathname)) {
       if (!options.qq) throw new KernelFault('not-ready');
-      if (await qqHttp({ request, response, url, writable, qq: options.qq, body, send })) return;
+      if (
+        await qqHttp({
+          request,
+          response,
+          url,
+          writable,
+          qq: options.qq,
+          ...(options.localHost ? { localHost: options.localHost } : {}),
+          body,
+          send,
+        })
+      )
+        return;
     }
     if (/^\/api\/speech(?:\/|$)/.test(pathname)) {
       if (!options.speech) throw new KernelFault('not-ready');
@@ -525,13 +554,22 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
     }
     const pluginMatch = /^\/api\/plugins\/([a-z0-9.-]+)$/.exec(pathname);
     if (pluginMatch?.[1] && typeof input['enabled'] === 'boolean') {
-      send(response, 200, {
-        ok: true,
-        value:
-          options.qq && [QQ_OFFICIAL_PLUGIN_ID, QQ_ONEBOT_PLUGIN_ID].includes(pluginMatch[1])
-            ? await options.qq.setPlugin(pluginMatch[1], input['enabled'], id)
-            : await options.runtime.setPlugin(pluginMatch[1], input['enabled'], id),
-      });
+      const pluginId = pluginMatch[1];
+      const nativeQQ = [QQ_OFFICIAL_PLUGIN_ID, QQ_ONEBOT_PLUGIN_ID].includes(pluginId);
+      if (
+        nativeQQ &&
+        input['enabled'] &&
+        options.localHost &&
+        (await options.localHost.view()).selection.mode === 'remote-host'
+      )
+        throw new KernelFault('permission-denied');
+      const value =
+        pluginId === LOCAL_HOST_BRIDGE_PLUGIN_ID && options.localHost
+          ? await options.localHost.setPlugin(input['enabled'], id)
+          : nativeQQ && options.qq
+            ? await options.qq.setPlugin(pluginId, input['enabled'], id)
+            : await options.runtime.setPlugin(pluginId, input['enabled'], id);
+      send(response, 200, { ok: true, value });
       return;
     }
     if (pathname === '/api/harness' && typeof input['harness'] === 'string') {
@@ -573,6 +611,7 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
       });
     },
   );
+  await options.localHost?.attach(server, options.token);
   server.listen(options.port ?? 0, options.hostname ?? '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
@@ -599,7 +638,9 @@ export async function serveText(options: TextServiceOptions): Promise<TextServic
         server.close((error) => (error ? reject(error) : resolve())),
       );
       server.closeAllConnections();
-      await closed;
+      const results = await Promise.allSettled([closed, options.localHost?.close()]);
+      const failed = results.find((result) => result.status === 'rejected');
+      if (failed?.status === 'rejected') throw failed.reason;
     },
   };
 }

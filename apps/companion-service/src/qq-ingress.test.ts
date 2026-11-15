@@ -19,7 +19,7 @@ import { KernelFault, type TaskHandle } from '@pet/host-kernel';
 import { decodeOneBotFrame } from '@pet/qq-onebot';
 import { createCompanionService } from './service.js';
 import { QQIngress, type QQIngressOptions, type QQInputPreparation } from './qq-ingress.js';
-import { mapOneBotInput } from './qq-input.js';
+import { mapOneBotInput } from '@pet/local-host/qq-input';
 import type { CapturedQqSourceBase } from './qq-controller.js';
 
 const cleanups: Array<() => Promise<void>> = [];

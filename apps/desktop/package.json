@@ -39,6 +39,8 @@
     "morphicons": "2.0.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "@pet/audio-capture": "workspace:*"
+    "@pet/audio-capture": "workspace:*",
+    "@pet/local-host": "workspace:*",
+    "tsx": "4.23.15"
   }
 }

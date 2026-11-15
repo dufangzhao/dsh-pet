@@ -13,10 +13,9 @@ import {
 } from '@pet/contracts';
 import { KernelFault } from '@pet/host-kernel';
 import type { QQIoOutcome, QQMediaRead } from '@pet/companion-runtime';
-import type { OfficialMediaIo } from '../../../plugins/qq-official/src/media-types.js';
-import type { OfficialHttpResponse } from '../../../plugins/qq-official/src/ports.js';
+import type { OfficialMediaIo, OfficialHttpResponse } from '@pet/qq-official';
 import { isQqEgressPostflightFailure } from './qq-native-types.js';
-import { decodeOfficialHttpReceipt } from '../../../plugins/qq-official/src/wire.js';
+import { decodeOfficialHttpReceipt } from '@pet/qq-official';
 import {
   decodeOfficialPrepared,
   isOfficialPartFinished,
@@ -26,7 +25,7 @@ import {
   validOfficialMediaMetadata,
   type OfficialMediaMetadata,
   type OfficialMediaRoute,
-} from '../../../plugins/qq-official/src/media-wire.js';
+} from '@pet/qq-official/media-wire';
 
 export interface AttachmentAddress {
   readonly address: string;
@@ -69,6 +68,8 @@ export interface OfficialMediaHostPorts {
   readonly fetch: typeof fetch;
   readonly attachmentTest?: OfficialAttachmentTestHooks;
   check(): Promise<void>;
+  checkOperation(signal: AbortSignal): Promise<number | null>;
+  assertOperation(signal: AbortSignal, deadline: number | null): void;
   fence(): void;
   token(secret: string, signal: AbortSignal): Promise<string>;
   safe(text: string, ...secrets: string[]): void;
@@ -273,6 +274,10 @@ export function createOfficialMediaIo(ports: OfficialMediaHostPorts): OfficialMe
     const deadline = AbortSignal.timeout(30000);
     const live = AbortSignal.any([signal, deadline]);
     if (live.aborted) throw new KernelFault('cancelled');
+    const operationDeadline = await ports.checkOperation(live);
+    await ports.check();
+    if (live.aborted) throw new KernelFault('cancelled');
+    ports.assertOperation(live, operationDeadline);
     dispatch();
     const response = await ports.fetch(url, {
       ...init,
@@ -302,6 +307,10 @@ export function createOfficialMediaIo(ports: OfficialMediaHostPorts): OfficialMe
     live.addEventListener('abort', abort, { once: true });
     try {
       if (live.aborted) throw new KernelFault('cancelled');
+      const operationDeadline = await ports.checkOperation(live);
+      await ports.check();
+      if (live.aborted) throw new KernelFault('cancelled');
+      ports.assertOperation(live, operationDeadline);
       dispatch();
       const response = await ports.fetch(url, {
         method,
@@ -400,7 +409,9 @@ export function createOfficialMediaIo(ports: OfficialMediaHostPorts): OfficialMe
           throw new KernelFault('permission-denied');
         const selected = addresses[0];
         if (!selected) throw new KernelFault('unavailable');
+        const operationDeadline = await ports.checkOperation(signal);
         await check();
+        ports.assertOperation(signal, operationDeadline);
         const opened = await (ports.attachmentTest?.open(url, selected, signal) ??
           openAttachment(url, selected, signal));
         const response = opened.response;

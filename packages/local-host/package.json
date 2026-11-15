@@ -1,0 +1,47 @@
+{
+  "name": "@pet/local-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./qq-native": {
+      "types": "./src/qq-native/index.ts",
+      "default": "./src/qq-native/index.ts"
+    },
+    "./qq-input": {
+      "types": "./src/qq-input.ts",
+      "default": "./src/qq-input.ts"
+    },
+    "./qq-source": {
+      "types": "./src/qq-source.ts",
+      "default": "./src/qq-source.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@pet/contracts": "workspace:*",
+    "@pet/host-kernel": "workspace:*",
+    "@pet/plugin-sdk": "workspace:*",
+    "@pet/companion-runtime": "workspace:*",
+    "@pet/qq-official": "workspace:*",
+    "@pet/qq-onebot": "workspace:*",
+    "@pet/local-agent-link": "workspace:*",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/ws": "8.18.2",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

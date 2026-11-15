@@ -1,4 +1,6 @@
 import { createServer } from 'node:http';
+import { createReadStream } from 'node:fs';
+import { finished } from 'node:stream/promises';
 import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -660,6 +662,7 @@ async function fixture(
     return { ...a, messages, record, body };
   };
   return {
+    directory,
     controls,
     host,
     runtime,
@@ -676,26 +679,68 @@ async function fixture(
   };
 }
 
-it('decodes real120s into all six actual ASR WAV spans with one frozen provider and preserved original', async () => {
-  const f = await fixture();
-  await f.host.setEnabled('pet.shared-voice', false);
-  const a = await f.input(['recording']);
-  const result = await f.audio.transcribe(
-    {
-      inputId: a.admission.id,
-      materialId: 'recording',
-      name: 'qq-recording.wav',
-      encoded: stream(wave(120)),
-    },
-    a.access,
-  );
-  expect(result.transcript).toBe('span-1\nspan-2\nspan-3\nspan-4\nspan-5\nspan-6');
-  expect(f.asr.map((call) => call.frames)).toEqual(Array(6).fill(320000));
-  expect(f.asr.map((call) => call.frequency)).toEqual([220, 293, 366, 439, 512, 585]);
-  expect(f.asr.every((call) => call.authorization === 'Bearer magpie-dsh-pet')).toBe(true);
-  expect(result.material.durationMs).toBe(120000);
-  expect(f.tts).toEqual([]);
-}, 30000);
+it.each(['legacy', 'custody'] as const)(
+  'decodes real120s from %s into all six actual ASR WAV spans with one frozen provider and preserved original',
+  async (mode) => {
+    const f = await fixture();
+    await f.host.setEnabled('pet.shared-voice', false);
+    const a = await f.input(['recording']);
+    const encoded = wave(120);
+    const result =
+      mode === 'legacy'
+        ? await f.audio.transcribe(
+            {
+              inputId: a.admission.id,
+              materialId: 'recording',
+              name: 'qq-recording.wav',
+              encoded: stream(encoded),
+            },
+            a.access,
+          )
+        : await (async () => {
+            const file = path.join(f.directory, 'native-recording.wav');
+            await writeFile(file, encoded);
+            const reader = createReadStream(file, { highWaterMark: 65536 }),
+              local = new AbortController(),
+              settled = finished(reader);
+            void settled.catch(() => {});
+            const custody = await f.materials.stageRawInput(
+              { expectedSizeBytes: encoded.length, expectedSha256: hash(encoded) },
+              {
+                body: reader,
+                settled,
+                signal: local.signal,
+                check: async () => {
+                  local.signal.throwIfAborted();
+                },
+                cancel: () => reader.destroy(),
+              },
+              a.access,
+            );
+            local.abort();
+            try {
+              return await f.audio.transcribeRaw(
+                {
+                  inputId: a.admission.id,
+                  materialId: 'recording',
+                  name: 'qq-recording.wav',
+                  custody,
+                },
+                a.access,
+              );
+            } finally {
+              await f.materials.releaseRawInput(custody);
+            }
+          })();
+    expect(result.transcript).toBe('span-1\nspan-2\nspan-3\nspan-4\nspan-5\nspan-6');
+    expect(f.asr.map((call) => call.frames)).toEqual(Array(6).fill(320000));
+    expect(f.asr.map((call) => call.frequency)).toEqual([220, 293, 366, 439, 512, 585]);
+    expect(f.asr.every((call) => call.authorization === 'Bearer magpie-dsh-pet')).toBe(true);
+    expect(result.material.durationMs).toBe(120000);
+    expect(f.tts).toEqual([]);
+  },
+  30000,
+);
 
 it.each(['failure', 'source-change', 'codec-disable', 'caller-cancel', 'role-revoke'] as const)(
   'does not publish partial transcript on %s and joins the native source',

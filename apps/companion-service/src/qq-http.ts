@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { isCompanionRecordId, QQ_PAGE_MAX_ITEMS, type QQView, type Result } from '@pet/contracts';
 import { KernelFault } from '@pet/host-kernel';
 import type { QQController } from './qq-controller.js';
+import type { QQLocalHostController } from './qq-local-host.js';
 
 function ingressView(view: QQView, writable: boolean): QQView {
   return {
@@ -39,6 +40,7 @@ export async function qqHttp(input: {
   readonly url: URL;
   readonly writable: boolean;
   readonly qq: QQController;
+  readonly localHost?: QQLocalHostController;
   body(request: IncomingMessage): Promise<unknown>;
   send<T>(response: ServerResponse, status: number, result: Result<T>): void;
 }): Promise<boolean> {
@@ -87,6 +89,12 @@ export async function qqHttp(input: {
     ].includes(route)
   )
     return false;
+  if (
+    (route === '/api/qq/source' || route === '/api/qq/credential') &&
+    input.localHost &&
+    (await input.localHost.view()).selection.mode === 'remote-host'
+  )
+    throw new KernelFault('permission-denied');
   if (route.endsWith('/credential') && !writable) throw new KernelFault('permission-denied');
   if ([...url.searchParams].length) throw new KernelFault('invalid-input');
   const command = await body(request);

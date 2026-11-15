@@ -115,8 +115,15 @@ export class CompanionPluginHost {
   static async create(options: {
     dataDirectory: string;
     plugins: readonly ServicePluginRegistration[];
+    /** Local compositions may require explicit review; service callers retain their existing default. */
+    sourceTrust?: 'preapproved' | 'review';
     changed?: () => void;
   }): Promise<CompanionPluginHost> {
+    if (
+      options.sourceTrust !== undefined &&
+      !['preapproved', 'review'].includes(options.sourceTrust)
+    )
+      throw new KernelFault('invalid-input');
     const dataRoot = path.resolve(options.dataDirectory);
     await mkdir(dataRoot, { recursive: true, mode: 0o700 });
     const sources = new Map<string, Source>();
@@ -370,7 +377,8 @@ export class CompanionPluginHost {
           if (!initialized.ok) throw new KernelFault(initialized.error.code);
         }
         if (
-          !permission.control.confirmTrust(id, digest, true) ||
+          (options.sourceTrust !== 'review' &&
+            !permission.control.confirmTrust(id, digest, true)) ||
           !permission.control.setPreset(id, registration.preset)
         )
           throw new KernelFault('permission-denied');
@@ -514,6 +522,21 @@ export class CompanionPluginHost {
     if (!result.ok) throw new KernelFault(result.error.code);
     this.track(result.value);
     return result.value;
+  }
+
+  /** Join this exact source generation's tracked native work before a replacement starts. */
+  async drainOwner(owner: OwnerRef): Promise<void> {
+    const pending = [...this.handles].filter((handle) => {
+      const current = handle.snapshot().owner;
+      return (
+        current.pluginId === owner.pluginId &&
+        current.instanceId === owner.instanceId &&
+        current.generation === owner.generation
+      );
+    });
+    await Promise.all(pending.map((handle) => handle.settled));
+    if (pending.some((handle) => handle.snapshot().cleanupFailed))
+      throw new KernelFault('unavailable');
   }
 
   /** Activation can receive a read-only seed before it is allowed to start supervised work. */

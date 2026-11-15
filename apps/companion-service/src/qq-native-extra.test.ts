@@ -19,10 +19,13 @@ import {
   companionHostDefinition,
   companionHostManifest,
 } from '@pet/companion-runtime';
-import { createAuthorizedOfficialIo } from './qq-official-io.js';
-import { createAuthorizedOneBotIo } from './qq-onebot-io.js';
-import type { CapturedQqBinding } from './qq-native-types.js';
-import { ownedQqSocket } from './qq-socket.js';
+import {
+  createAuthorizedOfficialIo,
+  createAuthorizedOneBotIo,
+  ownedQqSocket,
+  withQqOperationCheck,
+  type CapturedQqBinding,
+} from '@pet/local-host/qq-native';
 import {
   decodeSnowDownloadReply,
   SNOW_MEDIA_ECHO_PREFIX,
@@ -30,6 +33,7 @@ import {
 import { uploadOfficialMedia } from '../../../plugins/qq-official/src/media.js';
 import { OfficialQqDriver } from '../../../plugins/qq-official/src/driver.js';
 import { KernelFault } from '@pet/host-kernel';
+import { encodeOneBotAction } from '@pet/qq-onebot';
 import { downloadSnowMedia, uploadSnowMedia } from '../../../plugins/qq-onebot/src/media.js';
 
 const cleanups: Array<() => Promise<void>> = [];
@@ -147,10 +151,7 @@ it.each(['source-revoke', 'transient-stale'] as const)(
     });
     const gateways = new WebSocketServer({ server });
     gateways.on('connection', (socket) => {
-      setTimeout(() => {
-        if (socket.readyState === WebSocket.OPEN)
-          socket.send(JSON.stringify({ op: 10, d: { heartbeat_interval: 60000 } }));
-      }, 20);
+      socket.send(JSON.stringify({ op: 10, d: { heartbeat_interval: 60000 } }));
       socket.on('message', (data) => {
         const frame = JSON.parse(String(data)) as { op: number };
         if (frame.op === 2)
@@ -327,10 +328,7 @@ it('reports unknown after a partial response and never sends a second part', asy
   });
   const gateways = new WebSocketServer({ server });
   gateways.on('connection', (socket) => {
-    setTimeout(() => {
-      if (socket.readyState === WebSocket.OPEN)
-        socket.send(JSON.stringify({ op: 10, d: { heartbeat_interval: 60000 } }));
-    }, 20);
+    socket.send(JSON.stringify({ op: 10, d: { heartbeat_interval: 60000 } }));
     socket.on('message', (data) => {
       if ((JSON.parse(String(data)) as { op: number }).op === 2)
         socket.send(
@@ -625,6 +623,148 @@ it('revokes a live reverse peer and drains its source and credential leases', as
   await peer.settled;
   await closed;
   await io.close();
+  expect(f.host.permissions.diagnostics().leases).toBe(0);
+  expect(f.host.tasks.diagnostics().pendingWork).toBe(0);
+});
+
+it('checks the actual OneBot source task for every action and media write', async () => {
+  const settings: QQOneBotSettings = {
+    protocol: 'onebot-v11',
+    accountId: '555',
+    mode: 'reverse-ws',
+    channelMode: 'universal',
+    mediaProfile: 'snowluma-v11',
+    listenHost: '127.0.0.1',
+    listenPort: 0,
+    path: '/qq',
+  };
+  const f = await setup('onebot', settings);
+  let ready: (port: number) => void = () => {};
+  const listening = new Promise<number>((resolve) => {
+    ready = resolve;
+  });
+  let expireNext = false;
+  let fenceCalls = 0;
+  let expiresAt = 0;
+  let reached: () => void = () => {};
+  let release: () => void = () => {};
+  const entered = new Promise<void>((resolve) => {
+    reached = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const io = createAuthorizedOneBotIo(
+    f.host,
+    {
+      ...f.binding,
+      requireOperationCheck: true,
+      async check() {
+        if (expireNext && ++fenceCalls === 2) {
+          reached();
+          await gate;
+        }
+      },
+    },
+    { onListening: (address) => ready(address.port) },
+  );
+  cleanups.push(async () => {
+    release();
+    await io.close();
+  });
+  const pending = io.nextPeer(new AbortController().signal);
+  const port = await listening;
+  const remote = new WebSocket(`ws://127.0.0.1:${port}/qq`, {
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      'X-Self-ID': '555',
+      'X-Client-Role': 'Universal',
+    },
+  });
+  remote.on('error', () => {});
+  await once(remote, 'open');
+  const peer = await pending;
+  const action = encodeOneBotAction(
+    'send_private_msg',
+    { user_id: 777, message: [{ type: 'text', data: { text: 'fixture' } }] },
+    'action-1',
+  );
+  if (!action.ok) throw new Error('invalid action');
+  const received: string[] = [];
+  remote.on('message', (value) => received.push(String(value)));
+  expect(await peer.send(action.value, new AbortController().signal)).toMatchObject({
+    ok: false,
+    dispatched: false,
+    error: { code: 'permission-denied' },
+  });
+  let checks = 0;
+  let permitted = true;
+  let thrown: unknown;
+  const task = f.host.runFor(f.binding.owner.pluginId, async (task) => {
+    try {
+      await withQqOperationCheck(
+        f.host,
+        task,
+        async () => {
+          checks++;
+          if (!permitted) throw new KernelFault('permission-denied');
+          expiresAt = performance.now() + (expireNext ? 20 : 1000);
+          return expiresAt;
+        },
+        async () => {
+          const actionSent = once(remote, 'message');
+          expect(await peer.send(action.value, task.signal)).toEqual({ ok: true, value: null });
+          await actionSent;
+          const mediaSent = once(remote, 'message');
+          const media = peer.openMedia(
+            {
+              action: 'download_file_stream',
+              echo: `${SNOW_MEDIA_ECHO_PREFIX}0123456789abcdef0123456789abcdef:1`,
+              params: { file_id: 'fixture', chunk_size: 16384 },
+            },
+            task.signal,
+          );
+          expect(await media.sent).toEqual({ ok: true, value: null });
+          await mediaSent;
+          expireNext = true;
+          const held = peer.send(action.value, task.signal);
+          await entered;
+          await new Promise<void>((resolve) =>
+            setTimeout(resolve, Math.max(0, expiresAt - performance.now()) + 5),
+          );
+          release();
+          expect(await held).toMatchObject({
+            ok: false,
+            dispatched: false,
+            error: { code: 'timeout' },
+          });
+          expireNext = false;
+          permitted = false;
+          const denied = await peer.send(action.value, task.signal);
+          expect(denied).toMatchObject({
+            ok: false,
+            dispatched: false,
+            error: { code: 'permission-denied' },
+          });
+          expect(checks).toBe(4);
+          await media.close();
+          await media.settled;
+          expect(checks).toBe(4); // Actual cleanup never requires a fresh remote grant.
+        },
+      );
+      return null;
+    } catch (error) {
+      thrown = error;
+      throw error;
+    }
+  });
+  const result = await task.result;
+  await task.settled;
+  if (thrown) throw thrown;
+  expect(result.ok).toBe(true);
+  expect(received).toHaveLength(2);
+  await io.close();
+  await peer.settled;
   expect(f.host.permissions.diagnostics().leases).toBe(0);
   expect(f.host.tasks.diagnostics().pendingWork).toBe(0);
 });
@@ -1068,6 +1208,375 @@ it('joins a media reader that is still checking authority when its exchange clos
   lifetime.abort();
   await io.close();
   await peer.settled;
+});
+
+it('checks the actual source task before every official multipart business dispatch', async () => {
+  const settings: QQOfficialSettings = { protocol: 'official', appId: '555', scenes: ['private'] };
+  const f = await setup('official', settings);
+  const wire: string[] = [];
+  let upload = 0;
+  const server = createServer((request, response) => {
+    void (async () => {
+      for await (const chunk of request) void chunk;
+      const url = request.url ?? '';
+      if (url !== '/app/getAppAccessToken') wire.push(url);
+      response.setHeader('Content-Type', 'application/json');
+      if (url === '/app/getAppAccessToken')
+        response.end(JSON.stringify({ access_token: 'fixture-access-25', expires_in: 7200 }));
+      else if (url.endsWith('/upload_prepare'))
+        response.end(
+          JSON.stringify({
+            upload_id: `upload-${++upload}`,
+            block_size: '1',
+            parts: [
+              {
+                index: 0,
+                block_size: '1',
+                presigned_url: 'https://storage.qq.com/part?sig=private',
+              },
+            ],
+          }),
+        );
+      else if (url === '/part' || url.endsWith('/upload_part_finish')) response.end('{}');
+      else if (url.endsWith('/files'))
+        response.end(
+          JSON.stringify({ file_uuid: 'fixture', file_info: 'private-scope-only', ttl: 60 }),
+        );
+      else response.end(JSON.stringify({ id: 'fixture-message' }));
+    })().catch(() => response.destroy());
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('missing server');
+  const io = createAuthorizedOfficialIo(
+    f.host,
+    { ...f.binding, requireOperationCheck: true },
+    {
+      fetch: (url, init) =>
+        fetch(`http://127.0.0.1:${address.port}${new URL(String(url)).pathname}`, init),
+    },
+  );
+  cleanups.push(async () => {
+    await io.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+  const signal = new AbortController().signal;
+  const bytes = Buffer.from([42]);
+  const hash = (name: string) => createHash(name).update(bytes).digest('hex');
+  const metadata = {
+    scene: 'c2c' as const,
+    targetId: 'target',
+    file_type: 4 as const,
+    file_name: 'fixture.bin',
+    sizeBytes: 1,
+  };
+  const hashes = {
+    md5: hash('md5'),
+    sha1: hash('sha1'),
+    md5_10m: hash('md5'),
+    sha256: hash('sha256'),
+  };
+  const message = {
+    path: '/v2/users/target/messages',
+    body: { msg_type: 0, msg_seq: 1, content: 'fixture' },
+  };
+  const noScope = await io.send(message, signal);
+  expect(noScope).toMatchObject({
+    ok: false,
+    dispatched: false,
+    error: { code: 'permission-denied' },
+  });
+  expect(wire).toEqual([]);
+  let checks = 0;
+  let allowed = true;
+  let thrown: unknown;
+  const task = f.host.runFor(f.binding.owner.pluginId, async (task) => {
+    try {
+      await expect(
+        withQqOperationCheck(
+          f.host,
+          { ...task, taskId: 'forged-task' },
+          async () => performance.now() + 1000,
+          async () => null,
+        ),
+      ).rejects.toMatchObject({ error: { code: 'permission-denied' } });
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let detached: Promise<unknown> | undefined;
+      await withQqOperationCheck(
+        f.host,
+        task,
+        async () => {
+          checks++;
+          if (!allowed) throw new KernelFault('permission-denied');
+          return performance.now() + 1000;
+        },
+        async () => {
+          async function* body() {
+            yield bytes;
+          }
+          const first = await io.media.prepare(metadata, hashes, task.signal);
+          if (!first.ok || first.value.kind !== 'prepared') throw new Error('prepare failed');
+          const id = first.value.plan.upload_id;
+          expect(
+            (
+              await io.media.putPart(
+                { scene: 'c2c', targetId: 'target', upload_id: id, part_index: 0, byteLength: 1 },
+                body(),
+                task.signal,
+              )
+            ).ok,
+          ).toBe(true);
+          expect(
+            (
+              await io.media.finishPart(
+                {
+                  scene: 'c2c',
+                  targetId: 'target',
+                  upload_id: id,
+                  part_index: 0,
+                  block_size: '1',
+                  md5: hashes.md5,
+                },
+                task.signal,
+              )
+            ).ok,
+          ).toBe(true);
+          expect(
+            (
+              await io.media.commit(
+                { ...metadata, upload_id: id, srv_send_msg: false },
+                task.signal,
+              )
+            ).ok,
+          ).toBe(true);
+          expect((await io.send(message, task.signal)).ok).toBe(true);
+          expect(checks).toBe(5);
+          const second = await io.media.prepare(metadata, hashes, task.signal);
+          if (!second.ok || second.value.kind !== 'prepared')
+            throw new Error('second prepare failed');
+          const secondId = second.value.plan.upload_id;
+          expect(
+            (
+              await io.media.putPart(
+                {
+                  scene: 'c2c',
+                  targetId: 'target',
+                  upload_id: secondId,
+                  part_index: 0,
+                  byteLength: 1,
+                },
+                body(),
+                task.signal,
+              )
+            ).ok,
+          ).toBe(true);
+          allowed = false;
+          const before = wire.length;
+          const denied = await io.media.finishPart(
+            {
+              scene: 'c2c',
+              targetId: 'target',
+              upload_id: secondId,
+              part_index: 0,
+              block_size: '1',
+              md5: hashes.md5,
+            },
+            task.signal,
+          );
+          expect(denied).toMatchObject({
+            ok: false,
+            dispatched: false,
+            error: { code: 'permission-denied' },
+          });
+          expect(checks).toBe(8);
+          expect(wire).toHaveLength(before);
+          allowed = true;
+          detached = gate.then(() => io.send(message, task.signal));
+        },
+      );
+      const before = wire.length;
+      release();
+      if (!detached) throw new Error('missing detached fixture');
+      expect(await detached).toMatchObject({
+        ok: false,
+        dispatched: false,
+        error: { code: 'permission-denied' },
+      });
+      expect(wire).toHaveLength(before);
+      return null;
+    } catch (error) {
+      thrown = error;
+      throw error;
+    }
+  });
+  const result = await task.result;
+  await task.settled;
+  if (thrown) throw thrown;
+  expect(result.ok).toBe(true);
+  await io.close();
+  expect(f.host.permissions.diagnostics().leases).toBe(0);
+  expect(f.host.tasks.diagnostics().pendingWork).toBe(0);
+});
+
+it('keeps a completed scoped receipt when authority is revoked after the body', async () => {
+  const settings: QQOfficialSettings = { protocol: 'official', appId: '555', scenes: ['private'] };
+  const f = await setup('official', settings);
+  let full = false;
+  let revoked = false;
+  let checks = 0;
+  const server = createServer((request, response) => {
+    request.resume();
+    response.setHeader('Content-Type', 'application/json');
+    if (request.url === '/app/getAppAccessToken')
+      response.end(JSON.stringify({ access_token: 'fixture-access-25', expires_in: 7200 }));
+    else response.end(JSON.stringify({ id: 'observed-accepted' }));
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('missing server');
+  const io = createAuthorizedOfficialIo(
+    f.host,
+    {
+      ...f.binding,
+      requireOperationCheck: true,
+      check() {
+        if (full && !revoked) {
+          revoked = true;
+          f.host.permissionControl.revoke({
+            pluginId: f.binding.owner.pluginId,
+            instanceId: 'default',
+          });
+          throw new KernelFault('permission-denied');
+        }
+      },
+    },
+    {
+      fetch: async (url, init) => {
+        const path = new URL(String(url)).pathname;
+        const response = await fetch(`http://127.0.0.1:${address.port}${path}`, init);
+        return path.endsWith('/messages')
+          ? flagResponseEof(response, () => {
+              full = true;
+            })
+          : response;
+      },
+    },
+  );
+  cleanups.push(async () => {
+    await io.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+  let observed: unknown;
+  const task = f.host.runFor(f.binding.owner.pluginId, async (task) => {
+    observed = await withQqOperationCheck(
+      f.host,
+      task,
+      async () => {
+        checks++;
+        return performance.now() + 1000;
+      },
+      () =>
+        io.send(
+          {
+            path: '/v2/users/target/messages',
+            body: { msg_type: 0, msg_seq: 1, content: 'fixture' },
+          },
+          task.signal,
+        ),
+    );
+    return null;
+  });
+  await task.result;
+  await task.settled;
+  expect(checks).toBe(1);
+  expect(revoked).toBe(true);
+  expect(observed).toMatchObject({
+    ok: true,
+    value: { status: 200, body: '{"id":"observed-accepted"}' },
+  });
+  await io.close();
+  expect(f.host.permissions.diagnostics().leases).toBe(0);
+});
+
+it('expires a fresh scoped check after a held local fence without dispatching a body', async () => {
+  const settings: QQOfficialSettings = { protocol: 'official', appId: '555', scenes: ['private'] };
+  const f = await setup('official', settings);
+  let hold = false;
+  let reached: () => void = () => {};
+  let release: () => void = () => {};
+  const entered = new Promise<void>((resolve) => {
+    reached = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let business = 0;
+  const io = createAuthorizedOfficialIo(
+    f.host,
+    {
+      ...f.binding,
+      requireOperationCheck: true,
+      async check() {
+        if (hold) {
+          reached();
+          await gate;
+          hold = false;
+        }
+      },
+    },
+    {
+      fetch: async (url) => {
+        if (String(url).endsWith('/app/getAppAccessToken'))
+          return Response.json({ access_token: 'temporary-synthetic-access', expires_in: 7200 });
+        business++;
+        return Response.json({ id: 'must-not-send' });
+      },
+    },
+  );
+  cleanups.push(async () => {
+    release();
+    await io.close();
+  });
+  let observed: unknown;
+  let deadline = 0;
+  const task = f.host.runFor(f.binding.owner.pluginId, async (task) => {
+    observed = await withQqOperationCheck(
+      f.host,
+      task,
+      async () => {
+        hold = true;
+        deadline = performance.now() + 20;
+        return deadline;
+      },
+      () =>
+        io.send(
+          {
+            path: '/v2/users/target/messages',
+            body: { msg_type: 0, msg_seq: 1, content: 'fixture' },
+          },
+          task.signal,
+        ),
+    );
+    return null;
+  });
+  await entered;
+  await new Promise<void>((resolve) =>
+    setTimeout(resolve, Math.max(0, deadline - performance.now()) + 5),
+  );
+  release();
+  await task.result;
+  await task.settled;
+  expect(observed).toMatchObject({ ok: false, dispatched: false, error: { code: 'timeout' } });
+  expect(business).toBe(0);
+  await io.close();
+  expect(f.host.permissions.diagnostics().leases).toBe(0);
 });
 
 it('streams official inline and registered multipart bytes without exposing presigned URLs or QQ authorization to storage', async () => {

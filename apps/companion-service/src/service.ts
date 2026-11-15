@@ -1,4 +1,5 @@
 import { mkdir, readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -6,6 +7,7 @@ import {
   QQ_CODEC_PLUGIN_ID,
   QQ_OFFICIAL_PLUGIN_ID,
   QQ_ONEBOT_PLUGIN_ID,
+  LOCAL_HOST_BRIDGE_PLUGIN_ID,
   type JsonObject,
   type PluginManifest,
   type QQInputReceipt,
@@ -69,7 +71,10 @@ import { createReplyMaterialResolver } from './reply-materials.js';
 import { qqGroupSettings } from './qq-policy.js';
 import { createQQMediaTransfer, type QQMediaTransfer } from './qq-media-transfer.js';
 import { QQDeliveryController } from './qq-delivery.js';
-import { createQQDeliverySource } from './qq-delivery-transport.js';
+import { createQQDeliverySource } from '@pet/local-host';
+import { createLocalHostBridgePlugin } from '@pet/local-host-bridge';
+import { QQLocalHostController } from './qq-local-host.js';
+import { QQRemoteDelivery } from './qq-remote-delivery.js';
 
 export interface CompanionServiceOptions {
   readonly dataDirectory: string;
@@ -110,6 +115,8 @@ export interface CompanionService {
   readonly audio: QQAudio;
   readonly materials: HostMaterialStore;
   readonly delivery: QQDeliveryController;
+  readonly localHost: QQLocalHostController;
+  readonly remoteDelivery: QQRemoteDelivery;
   close(): Promise<void>;
 }
 async function manifest(directory: string): Promise<PluginManifest> {
@@ -142,6 +149,7 @@ export async function createCompanionService(
     qqOnebot: path.join(root, 'plugins/qq-onebot'),
     qqJudge: path.join(root, 'plugins/qq-participation-magpie'),
     qqCodec: path.join(root, 'plugins/qq-media-codec'),
+    localHost: path.join(root, 'plugins/local-host-bridge'),
   };
   const [
     stateManifest,
@@ -158,6 +166,7 @@ export async function createCompanionService(
     qqOnebotManifest,
     qqJudgeManifest,
     qqCodecManifest,
+    localHostManifest,
   ] = await Promise.all([
     manifest(directories.state),
     manifest(directories.cloud),
@@ -173,6 +182,7 @@ export async function createCompanionService(
     manifest(directories.qqOnebot),
     manifest(directories.qqJudge),
     manifest(directories.qqCodec),
+    manifest(directories.localHost),
   ]);
   const rawCodecLock: unknown = JSON.parse(
     await readFile(path.join(directories.qqCodec, 'codec-image.lock.json'), 'utf8'),
@@ -232,14 +242,18 @@ export async function createCompanionService(
   let materials: HostMaterialStore | undefined;
   let mediaTransfer: QQMediaTransfer | undefined;
   let delivery: QQDeliveryController | undefined;
+  let localHost: QQLocalHostController | undefined;
+  let remoteDelivery: QQRemoteDelivery | undefined;
   let offTerminal: (() => void) | undefined;
   const cleanup = async (): Promise<void> => {
     let failure: unknown;
     for (const close of [
       () => offTerminal?.(),
       () => http?.close(),
+      () => localHost?.close(),
       () => ingress?.close(),
       () => delivery?.close(),
+      () => remoteDelivery?.close(),
       () => mediaTransfer?.close(),
       () => audio?.close(),
       () => qq?.close(),
@@ -258,6 +272,10 @@ export async function createCompanionService(
       }
     }
     if (failure !== undefined) throw failure;
+  };
+  const requireLocalHost = (): QQLocalHostController => {
+    if (!localHost) throw new KernelFault('not-ready');
+    return localHost;
   };
   const requireQQ = (): QQController => {
     if (!qq) throw new KernelFault('not-ready');
@@ -466,6 +484,15 @@ export async function createCompanionService(
     },
     ...connections,
     {
+      manifest: localHostManifest,
+      directory: directories.localHost,
+      preset: 'allow',
+      enabled: false,
+      definition: createLocalHostBridgePlugin((context) =>
+        requireLocalHost().featurePorts(context),
+      ),
+    },
+    {
       manifest: qqManifest,
       directory: directories.qq,
       preset: 'allow',
@@ -596,11 +623,47 @@ export async function createCompanionService(
     qq = new QQController(host, runtime, models.connections, options.qqController);
     judge = new QQJudgeController(host, runtime, models.connections, qq.judgePolicyPorts());
     qq.setJudge(judge);
-    mediaTransfer = createQQMediaTransfer({ host, runtime, qq, materials, audio });
+    mediaTransfer = createQQMediaTransfer({
+      host,
+      runtime,
+      qq,
+      materials,
+      audio,
+      producerForObservedFile: async (input, observation, materialId, access) => {
+        const bridge = requireLocalHost();
+        if ((await bridge.view()).selection.mode === 'remote-host')
+          return bridge.observedFileProducer(input, observation, materialId, access);
+        if (!mediaTransfer) throw new KernelFault('not-ready');
+        return mediaTransfer.producerFromNativeObservation(input, observation, materialId, access);
+      },
+    });
     ingress = new QQIngress(host, runtime, qq, {
       judge,
       prepareMedia: mediaTransfer.prepareInput,
+      prepareProducedMedia: mediaTransfer.prepareProducedInput,
       ...(options.onQQInputReceipt ? { onReceipt: options.onQQInputReceipt } : {}),
+    });
+    const bridgeHost = host;
+    localHost = new QQLocalHostController({
+      host,
+      runtime,
+      ingress,
+      beforeRemoteListen: async () => {
+        for (const id of [QQ_OFFICIAL_PLUGIN_ID, QQ_ONEBOT_PLUGIN_ID]) {
+          if (bridgeHost.isEnabled(id)) await requireQQ().setPlugin(id, false, randomUUID());
+        }
+      },
+    });
+    const activeLocalHost = localHost;
+    remoteDelivery = new QQRemoteDelivery({
+      host,
+      runtime,
+      capture: (account) => activeLocalHost.capture(account),
+    });
+    const activeRemoteDelivery = remoteDelivery;
+    localHost.setDeliveryHooks({
+      authority: (peer, input) => activeRemoteDelivery.authority(peer, input),
+      report: (peer, input) => activeRemoteDelivery.report(peer, input),
     });
     qq.setIngress(ingress.handlers);
     qq.setCodecStatusProvider(() => requireAudio().codecStatus());
@@ -658,6 +721,10 @@ export async function createCompanionService(
       audio,
       policy: async () => activeQQ.policy(),
       sourceFor: (account) => createQQDeliverySource(activeQQ.sourceFor(account)),
+      executionFor: async (account) =>
+        (await activeLocalHost.view()).selection.mode === 'service-local'
+          ? { kind: 'service-local' }
+          : activeRemoteDelivery.executionFor(account),
       allowOfficialProactive: async (grant) => {
         if (grant.origin.kind !== 'qq-proactive' || grant.origin.audience.kind !== 'qq-group')
           return false;
@@ -672,6 +739,7 @@ export async function createCompanionService(
     offTerminal = runtime.onInputTerminal((event) => activeDelivery.enqueue(event));
     await qq.initialize();
     await judge.initialize();
+    await localHost.initialize(!disabled.has(LOCAL_HOST_BRIDGE_PLUGIN_ID));
     runtime.setQQStatusProvider(() => activeQQ.status());
     if (!disabled.has(QQ_CODEC_PLUGIN_ID)) await host.setEnabled(QQ_CODEC_PLUGIN_ID, true);
     http = await serveText({
@@ -681,6 +749,7 @@ export async function createCompanionService(
       voice,
       speech,
       qq,
+      localHost,
       materials,
       token: options.token,
       clientPluginId: textManifest.id,
@@ -704,6 +773,8 @@ export async function createCompanionService(
       audio,
       materials,
       delivery,
+      localHost,
+      remoteDelivery,
       close() {
         return (closing ??= cleanup());
       },

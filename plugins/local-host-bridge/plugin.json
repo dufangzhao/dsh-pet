@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.local-host-bridge",
+  "version": "0.1.0",
+  "displayName": { "en": "Local QQ host bridge", "zh-CN": "本地 QQ 宿主桥" },
+  "description": {
+    "en": "Authenticated fixed-purpose connection to the selected local QQ host",
+    "zh-CN": "连接选定本地 QQ 宿主的受控认证通道"
+  },
+  "license": "MIT",
+  "host": "^1.0.0",
+  "platforms": ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64"],
+  "entries": { "runtime": "dist/index.mjs" },
+  "provides": [
+    {
+      "id": "bridge",
+      "capability": "companion.localhost.bridge@1",
+      "features": {
+        "methodPermissions": {
+          "status": [{ "kind": "files", "scope": "plugin-data", "access": "read" }]
+        }
+      }
+    }
+  ],
+  "permissions": [{ "kind": "files", "scope": "plugin-data", "access": "read-write" }],
+  "config": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "hostId"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["service-local", "remote-host"],
+          "default": "service-local"
+        },
+        "hostId": { "type": "string", "maxLength": 128, "default": "" }
+      }
+    },
+    "apply": { "mode": "immediate", "hostId": "immediate" }
+  }
+}

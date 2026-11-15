@@ -6,6 +6,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import {
   COMPANION_MATERIAL_IMAGE_MAX_BYTES,
+  COMPANION_MATERIAL_MAX_PARTS,
   COMPANION_MATERIAL_FILE_MAX_BYTES,
   COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE,
   COMPANION_MATERIAL_STAGING_MAX_BYTES,
@@ -46,6 +47,41 @@ export interface MaterialStoreOptions {
   readonly host: Pick<CompanionPluginHost, 'runFor' | 'permissions'>;
   readonly state: Pick<CompanionRuntime, 'state'>;
 }
+const rawCustody = Symbol('server raw input custody');
+/** Host-private object identity. Serialized metadata cannot recreate this proof or its actor. */
+export interface RawInputCustody {
+  readonly [rawCustody]: true;
+}
+export interface RawInputSource {
+  readonly body: AsyncIterable<Uint8Array>;
+  /** Resolves only after successful native completion AND actual reader join; cancellation rejects. */
+  readonly settled: Promise<void>;
+  readonly signal: AbortSignal;
+  check(): Promise<void>;
+  cancel(): void;
+}
+export interface RawInputExpectation {
+  readonly expectedSizeBytes: number | null;
+  readonly expectedSha256: string | null;
+}
+export interface RawInputBytes {
+  readonly sizeBytes: number;
+  readonly sha256: string;
+}
+type StagedBytes = RawInputBytes & {
+  readonly name: string;
+  readonly owned: Identity;
+  release(): void;
+};
+type RawInputRecord = RawInputBytes & {
+  readonly name: string;
+  readonly owned: Identity;
+  readonly actor: RuntimeInputAccess;
+  readonly readers: Set<Promise<unknown>>;
+  readonly abort: AbortController;
+  readonly releaseReservation: () => void;
+  releasing: Promise<void> | undefined;
+};
 type Identity = { readonly dev: number; readonly ino: number };
 type Directory = Identity & { readonly path: string };
 type Operation = {
@@ -75,12 +111,18 @@ async function directoryIdentity(target: string): Promise<Directory> {
 export class HostMaterialStore {
   private readonly lifetime = new AbortController();
   private readonly active = new Set<Promise<unknown>>();
+  private preparations = 0;
+  private readonly rawReaders = new Set<Promise<unknown>>();
   private readonly root: Directory;
   private readonly objects: Directory;
   private readonly staging: Directory;
   private reservedBytes = 0;
   private closed = false;
   private cleanupFailed = false;
+  private closing: Promise<void> | undefined;
+  private readonly rawStages = new Set<Promise<unknown>>();
+  private readonly rawInputs = new Map<RawInputCustody, RawInputRecord>();
+  private readonly releasedRawInputs = new WeakSet<RawInputCustody>();
   private constructor(
     private readonly options: MaterialStoreOptions,
     directories: readonly [Directory, Directory, Directory],
@@ -131,15 +173,17 @@ export class HostMaterialStore {
     access: RuntimeInputAccess,
     writing: boolean,
     work: (operation: Operation) => Promise<T>,
+    preparation = true,
   ): Promise<T> {
     if (this.closed || this.cleanupFailed) throw new KernelFault('not-ready');
-    if (this.active.size >= COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE)
+    if (preparation && this.preparations >= COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE)
       throw new KernelFault('quota-exceeded');
     const captured: RuntimeInputAccess = {
       scope: structuredClone(access.scope),
       signal: access.signal,
       check: access.check.bind(access),
     };
+    if (preparation) this.preparations++;
     const running = withSourceAuthority(
       this.options.host,
       COMPANION_HOST_ID,
@@ -165,6 +209,7 @@ export class HostMaterialStore {
       return await running;
     } finally {
       this.active.delete(running);
+      if (preparation) this.preparations--;
     }
   }
   private async get(id: string, operation: Operation): Promise<StoredMaterial> {
@@ -190,13 +235,38 @@ export class HostMaterialStore {
       companionAudienceKey(stored.audience) !== companionAudienceKey(reference.audience)
     )
       throw new KernelFault('not-ready');
+    const verified = await this.readVerified(
+      this.objects,
+      objectName(stored.id),
+      reference,
+      operation,
+    );
+    try {
+      return verified.bytes;
+    } finally {
+      verified.release();
+    }
+  }
+  private async readVerified(
+    directory: Directory,
+    name: string,
+    reference: RawInputBytes,
+    operation: Operation,
+    owned?: Identity,
+  ): Promise<{ bytes: Buffer; release(): void }> {
     const release = this.reserve(reference.sizeBytes);
-    let handle: FileHandle | undefined;
+    let handle: FileHandle | undefined,
+      transferred = false;
     try {
       await operation.check();
-      const target = path.join(this.objects.path, objectName(stored.id));
+      const target = path.join(directory.path, name);
       const before = await lstat(target);
-      if (!before.isFile() || before.isSymbolicLink() || before.nlink !== 1)
+      if (
+        !before.isFile() ||
+        before.isSymbolicLink() ||
+        before.nlink !== 1 ||
+        (owned && !sameFile(before, owned))
+      )
         throw new KernelFault('permission-denied');
       handle = await open(target, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
       const info = await handle.stat();
@@ -229,10 +299,16 @@ export class HostMaterialStore {
       )
         throw new KernelFault('invalid-input');
       await operation.check();
-      return output;
+      await handle.close();
+      handle = undefined;
+      transferred = true;
+      return { bytes: output, release };
     } finally {
-      if (handle) await handle.close();
-      release();
+      try {
+        if (handle) await handle.close();
+      } finally {
+        if (!transferred) release();
+      }
     }
   }
   async withMaterial<T>(
@@ -289,6 +365,76 @@ export class HostMaterialStore {
       throw new KernelFault('permission-denied');
     await unlink(target);
   }
+  private async stageBytes(
+    source: AsyncIterable<Uint8Array>,
+    limit: number,
+    operation: Operation,
+  ): Promise<StagedBytes> {
+    await operation.check();
+    const name = `${randomUUID()}.part`;
+    const handle = await open(
+      path.join(this.staging.path, name),
+      constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY | (constants.O_NOFOLLOW ?? 0),
+      0o600,
+    );
+    let owned: Identity | undefined,
+      retained = 0,
+      sizeBytes = 0;
+    const hash = createHash('sha256');
+    try {
+      owned = await handle.stat();
+      for await (const chunk of source) {
+        await operation.check();
+        if (!(chunk instanceof Uint8Array)) throw new KernelFault('invalid-input');
+        if (
+          sizeBytes + chunk.byteLength > limit ||
+          this.reservedBytes + chunk.byteLength > COMPANION_MATERIAL_STAGING_MAX_BYTES
+        )
+          throw new KernelFault('quota-exceeded');
+        sizeBytes += chunk.byteLength;
+        retained += chunk.byteLength;
+        this.reservedBytes += chunk.byteLength;
+        hash.update(chunk);
+        await handle.writeFile(chunk);
+      }
+      await handle.sync();
+      await handle.close();
+      await operation.check();
+      const result: StagedBytes = {
+        name,
+        owned,
+        sizeBytes,
+        sha256: hash.digest('hex'),
+        release: () => {
+          this.reservedBytes -= retained;
+          retained = 0;
+        },
+      };
+      return result;
+    } catch (error) {
+      try {
+        await handle.close();
+        if (owned) await this.removeOwned(this.staging, name, owned);
+        else this.cleanupFailed = true;
+      } catch {
+        this.cleanupFailed = true;
+      }
+      this.reservedBytes -= retained;
+      throw error;
+    }
+  }
+  private async syncDirectory(directory: Directory): Promise<void> {
+    const handle = await open(
+      directory.path,
+      constants.O_RDONLY | constants.O_DIRECTORY | (constants.O_NOFOLLOW ?? 0),
+    );
+    try {
+      if (!sameFile(directory, await handle.stat())) throw new KernelFault('permission-denied');
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+  }
   private async write(
     input: MaterialWrite,
     source: AsyncIterable<Uint8Array>,
@@ -314,36 +460,15 @@ export class HostMaterialStore {
         : input.kind === 'text'
           ? COMPANION_FULL_TEXT_MAX_BYTES
           : COMPANION_MATERIAL_FILE_MAX_BYTES;
-    const stageName = `${randomUUID()}.part`,
+    const stage = await this.stageBytes(source, limit, operation);
+    const stageName = stage.name,
+      owned = stage.owned,
+      size = stage.sizeBytes,
       finalName = objectName(id);
-    const handle = await open(
-      path.join(this.staging.path, stageName),
-      constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY | (constants.O_NOFOLLOW ?? 0),
-      0o600,
-    );
-    const owned = await handle.stat();
-    const hash = createHash('sha256');
-    let reserved = 0;
-    let size = 0,
-      linked = false,
+    let linked = false,
       commitAttempt = false,
       committed = false;
     try {
-      for await (const chunk of source) {
-        await operation.check();
-        if (!(chunk instanceof Uint8Array)) throw new KernelFault('invalid-input');
-        size += chunk.byteLength;
-        if (size > limit) throw new KernelFault('quota-exceeded');
-        if (this.reservedBytes + chunk.byteLength > COMPANION_MATERIAL_STAGING_MAX_BYTES)
-          throw new KernelFault('quota-exceeded');
-        this.reservedBytes += chunk.byteLength;
-        reserved += chunk.byteLength;
-        hash.update(chunk);
-        await handle.writeFile(chunk);
-      }
-      await handle.sync();
-      await handle.close();
-      await operation.check();
       let mediaType =
         input.mediaType ?? (input.kind === 'text' ? 'text/plain' : 'application/octet-stream');
       if (input.kind === 'image' || input.kind === 'text') {
@@ -369,7 +494,7 @@ export class HostMaterialStore {
         name: input.name,
         mediaType,
         sizeBytes: size,
-        sha256: hash.digest('hex'),
+        sha256: stage.sha256,
         durationMs: input.kind === 'voice' ? (input.durationMs ?? null) : null,
         audience: structuredClone(admission.origin.audience),
         originInputIds: [input.inputId],
@@ -404,17 +529,7 @@ export class HostMaterialStore {
         throw error;
       }
       await this.removeOwned(this.staging, stageName, owned);
-      const directory = await open(
-        this.objects.path,
-        constants.O_RDONLY | constants.O_DIRECTORY | (constants.O_NOFOLLOW ?? 0),
-      );
-      try {
-        if (!sameFile(this.objects, await directory.stat()))
-          throw new KernelFault('permission-denied');
-        await directory.sync();
-      } finally {
-        await directory.close();
-      }
+      await this.syncDirectory(this.objects);
       await operation.check();
       commitAttempt = true;
       const saved = await this.options.state.state(
@@ -438,7 +553,6 @@ export class HostMaterialStore {
       await operation.check();
       return structuredClone(reference);
     } finally {
-      await handle.close();
       try {
         await this.removeOwned(this.staging, stageName, owned);
         if (linked && !committed) {
@@ -460,7 +574,7 @@ export class HostMaterialStore {
       } catch {
         this.cleanupFailed = true;
       }
-      this.reservedBytes -= reserved;
+      stage.release();
     }
   }
   private async readStage(name: string, owned: Identity, size: number): Promise<Buffer> {
@@ -477,6 +591,269 @@ export class HostMaterialStore {
     } finally {
       await handle.close();
     }
+  }
+  /** The producer is host-private: EOF plus successful native join, never a wire ready flag. */
+  stageRawInput(
+    expectation: RawInputExpectation,
+    source: RawInputSource,
+    actor: RuntimeInputAccess,
+  ): Promise<RawInputCustody> {
+    const expected = structuredClone(expectation);
+    if (
+      (expected.expectedSizeBytes !== null &&
+        (!Number.isSafeInteger(expected.expectedSizeBytes) ||
+          expected.expectedSizeBytes < 0 ||
+          expected.expectedSizeBytes > COMPANION_MATERIAL_FILE_MAX_BYTES)) ||
+      (expected.expectedSha256 !== null && !/^[a-f0-9]{64}$/u.test(expected.expectedSha256))
+    )
+      return Promise.reject(new KernelFault('invalid-input'));
+    if (
+      this.rawInputs.size + this.rawStages.size >=
+      COMPANION_MATERIAL_MAX_PARTS * COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE
+    )
+      return Promise.reject(new KernelFault('quota-exceeded'));
+    if (this.rawStages.size >= COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE)
+      return Promise.reject(new KernelFault('quota-exceeded'));
+    const body = source.body,
+      settled = source.settled,
+      localSignal = source.signal;
+    const localCheck = source.check.bind(source),
+      cancelSource = source.cancel.bind(source);
+    // Native failure may precede iterator EOF; its original promise is still awaited below.
+    void settled.catch(() => {});
+    let started = false;
+    const work = this.authorized(actor, true, async (operation) => {
+      started = true;
+      let acquired = false,
+        cancelFailure: unknown,
+        failure: unknown;
+      let stage: StagedBytes | undefined,
+        linked = false,
+        custody: RawInputCustody | undefined;
+      const finalName = `${randomUUID()}.raw`;
+      const cancel = () => {
+        if (!acquired) {
+          try {
+            cancelSource();
+          } catch (error) {
+            cancelFailure ??= error;
+          }
+        }
+      };
+      localSignal.addEventListener('abort', cancel, { once: true });
+      operation.signal.addEventListener('abort', cancel, { once: true });
+      const incoming: AsyncIterable<Uint8Array> = {
+        async *[Symbol.asyncIterator]() {
+          const iterator = body[Symbol.asyncIterator]();
+          try {
+            for (;;) {
+              await operation.check();
+              localSignal.throwIfAborted();
+              await localCheck();
+              localSignal.throwIfAborted();
+              const next = await iterator.next();
+              if (next.done) {
+                // A fulfilled join must mean successful native completion, including cancellation rejection.
+                await settled;
+                acquired = true;
+                break;
+              }
+              await operation.check();
+              localSignal.throwIfAborted();
+              await localCheck();
+              localSignal.throwIfAborted();
+              yield next.value;
+            }
+          } finally {
+            if (!acquired) {
+              cancel();
+              await iterator.return?.();
+            }
+          }
+        },
+      };
+      try {
+        stage = await this.stageBytes(incoming, COMPANION_MATERIAL_FILE_MAX_BYTES, operation);
+        if (
+          (expected.expectedSizeBytes !== null && stage.sizeBytes !== expected.expectedSizeBytes) ||
+          (expected.expectedSha256 !== null && stage.sha256 !== expected.expectedSha256)
+        )
+          throw new KernelFault('invalid-input');
+        const verified = await this.readVerified(
+          this.staging,
+          stage.name,
+          stage,
+          operation,
+          stage.owned,
+        );
+        verified.release();
+        await operation.check();
+        await link(
+          path.join(this.staging.path, stage.name),
+          path.join(this.staging.path, finalName),
+        );
+        linked = true;
+        await this.removeOwned(this.staging, stage.name, stage.owned);
+        await this.syncDirectory(this.staging);
+        await operation.check();
+        custody = Object.freeze({
+          [rawCustody]: true as const,
+          toJSON(): never {
+            throw new KernelFault('permission-denied');
+          },
+        });
+        this.rawInputs.set(custody, {
+          name: finalName,
+          owned: stage.owned,
+          sizeBytes: stage.sizeBytes,
+          sha256: stage.sha256,
+          actor: operation.access,
+          readers: new Set(),
+          abort: new AbortController(),
+          releaseReservation: stage.release,
+          releasing: undefined,
+        });
+      } catch (error) {
+        failure = error;
+      } finally {
+        localSignal.removeEventListener('abort', cancel);
+        operation.signal.removeEventListener('abort', cancel);
+        if (!acquired) {
+          cancel();
+          const result = await Promise.allSettled([settled]);
+          if (result[0]?.status === 'rejected') failure ??= result[0].reason;
+        }
+        if (!custody && stage) {
+          try {
+            await this.removeOwned(this.staging, stage.name, stage.owned);
+            if (linked) await this.removeOwned(this.staging, finalName, stage.owned);
+          } catch {
+            this.cleanupFailed = true;
+            failure ??= new KernelFault('unavailable');
+          }
+          stage.release();
+        }
+      }
+      // Successful native EOF/join is stronger than a source-only cancel/postflight refusal.
+      if (cancelFailure && !acquired) throw new KernelFault('unavailable');
+      if (failure) throw failure;
+      if (!custody) throw new KernelFault('unavailable');
+      return custody;
+    });
+    const drained = work
+      .catch(async (error) => {
+        if (!started) {
+          const cleanup = await Promise.allSettled([Promise.resolve().then(cancelSource), settled]);
+          if (cleanup[0]?.status === 'rejected') throw new KernelFault('unavailable');
+        }
+        throw error;
+      })
+      .finally(() => {
+        this.rawStages.delete(drained);
+      });
+    this.rawStages.add(drained);
+    return drained;
+  }
+  /** Reuses only the original captured server actor; the local source is no longer consulted. */
+  withRawInput<T>(
+    custody: RawInputCustody,
+    consume: (
+      info: RawInputBytes,
+      bytes: AsyncIterable<Uint8Array>,
+      signal: AbortSignal,
+    ) => Promise<T>,
+  ): Promise<T> {
+    const record = this.rawInputs.get(custody);
+    if (!record || record.releasing) return Promise.reject(new KernelFault('permission-denied'));
+    if (this.rawReaders.size >= COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE)
+      return Promise.reject(new KernelFault('quota-exceeded'));
+    const access: RuntimeInputAccess = {
+      ...record.actor,
+      signal: AbortSignal.any([record.actor.signal, record.abort.signal]),
+    };
+    const work = this.authorized(
+      access,
+      false,
+      async (operation) => {
+        const check = async () => {
+          if (record.releasing) throw new KernelFault('permission-denied');
+          await operation.check();
+        };
+        await check();
+        const verified = await this.readVerified(
+          this.staging,
+          record.name,
+          record,
+          { ...operation, check },
+          record.owned,
+        );
+        const bytes = verified.bytes;
+        let complete = false;
+        const stream: AsyncIterable<Uint8Array> = {
+          async *[Symbol.asyncIterator]() {
+            for (let at = 0; at < bytes.length; at += 64 * 1024) {
+              await check();
+              yield bytes.subarray(at, at + 64 * 1024);
+            }
+            complete = true;
+          },
+        };
+        try {
+          const value = await consume(
+            Object.freeze({ sizeBytes: record.sizeBytes, sha256: record.sha256 }),
+            stream,
+            operation.signal,
+          );
+          await check();
+          if (!complete) throw new KernelFault('invalid-input');
+          return value;
+        } finally {
+          verified.release();
+        }
+      },
+      false,
+    );
+    this.rawReaders.add(work);
+    record.readers.add(work);
+    void work.then(
+      () => {
+        record.readers.delete(work);
+        this.rawReaders.delete(work);
+      },
+      () => {
+        record.readers.delete(work);
+        this.rawReaders.delete(work);
+      },
+    );
+    return work;
+  }
+  releaseRawInput(custody: RawInputCustody): Promise<void> {
+    const record = this.rawInputs.get(custody);
+    if (!record)
+      return this.releasedRawInputs.has(custody)
+        ? Promise.resolve()
+        : Promise.reject(new KernelFault('permission-denied'));
+    record.abort.abort();
+    return (record.releasing ??= Promise.resolve().then(async () => {
+      await Promise.allSettled([...record.readers]);
+      try {
+        await withSourceAuthority(
+          this.options.host,
+          COMPANION_HOST_ID,
+          [{ kind: 'files', scope: 'plugin-data', access: 'read-write' }],
+          async () => {
+            await this.removeOwned(this.staging, record.name, record.owned);
+            await this.syncDirectory(this.staging);
+          },
+        );
+        record.releaseReservation();
+        this.rawInputs.delete(custody);
+        this.releasedRawInputs.add(custody);
+      } catch (error) {
+        this.cleanupFailed = true;
+        throw error;
+      }
+    }));
   }
   put(
     input: MaterialWrite,
@@ -588,11 +965,17 @@ export class HostMaterialStore {
       return new TextDecoder('utf-8', { fatal: true }).decode(await this.bytes(stored, operation));
     });
   };
-  async close(): Promise<void> {
-    this.closed = true;
-    this.lifetime.abort();
-    await Promise.allSettled([...this.active]);
-    if (this.cleanupFailed) throw new KernelFault('unavailable');
+  close(): Promise<void> {
+    return (this.closing ??= (async () => {
+      this.closed = true;
+      this.lifetime.abort();
+      await Promise.allSettled([...this.active, ...this.rawStages]);
+      const cleanup = await Promise.allSettled(
+        [...this.rawInputs.keys()].map((custody) => this.releaseRawInput(custody)),
+      );
+      if (this.cleanupFailed || cleanup.some((result) => result.status === 'rejected'))
+        throw new KernelFault('unavailable');
+    })());
   }
 }
 export function createMaterialStore(options: MaterialStoreOptions): Promise<HostMaterialStore> {

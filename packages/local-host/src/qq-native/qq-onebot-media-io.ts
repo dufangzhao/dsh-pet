@@ -2,14 +2,14 @@ import type WebSocket from 'ws';
 import { makeError } from '@pet/contracts';
 import { KernelFault, type SecretRedactor } from '@pet/host-kernel';
 import type { QQIoOutcome } from '@pet/companion-runtime';
-import type { SnowMediaExchange, SnowMediaIo } from '../../../plugins/qq-onebot/src/media-types.js';
+import type { SnowMediaExchange, SnowMediaIo } from '@pet/qq-onebot';
 import {
   encodeSnowMediaRequest,
   parseSnowMediaEcho,
   SNOW_MEDIA_ECHO_PREFIX,
   SNOW_MEDIA_FRAME_MAX_BYTES,
   type SnowMediaRequest,
-} from '../../../plugins/qq-onebot/src/media-wire.js';
+} from '@pet/qq-onebot/media-wire';
 
 /** Media echoes are private to one authenticated peer; closed IDs need no tombstone table. */
 interface Route {

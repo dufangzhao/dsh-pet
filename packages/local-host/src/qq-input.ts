@@ -7,12 +7,12 @@ import {
   isQQQuoteEvidence,
   isQQReplyRoute,
   type QQAccountRef,
+  type QQFileEvidence,
   type QQExternalActor,
   type QQQuoteEvidence,
   type QQReplyRoute,
 } from '@pet/contracts';
 import { KernelFault } from '@pet/host-kernel';
-import type { QQFileEvidence } from '@pet/state-sqlite';
 import type { OfficialAttachment, OfficialMessageEvent } from '@pet/qq-official';
 import type {
   OneBotFileNotice,
@@ -53,9 +53,9 @@ export interface QQMappedInput {
   readonly fileEvidence: QQFileEvidence | null;
 }
 
-const digest = (value: unknown): string =>
+export const qqInputDigest = (value: unknown): string =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
-const accountKey = (account: QQAccountRef): unknown[] => [
+export const qqAccountKey = (account: QQAccountRef): unknown[] => [
   account.protocol,
   account.sourcePluginId,
   account.instanceId,
@@ -68,8 +68,12 @@ function external(value: unknown): string {
 function nativeId(value: string | number | null): string | null {
   return value === null ? null : external(String(value));
 }
-function eventKey(account: QQAccountRef, route: QQReplyRoute, messageId: string): string {
-  return `qq-message-${digest([accountKey(account), route.scene, route.targetId, messageId, route.reference?.displayReference ?? null])}`;
+export function qqInputEventKey(
+  account: QQAccountRef,
+  route: QQReplyRoute,
+  messageId: string,
+): string {
+  return `qq-message-${qqInputDigest([qqAccountKey(account), route.scene, route.targetId, messageId, route.reference?.displayReference ?? null])}`;
 }
 function checked(input: QQMappedInput): QQMappedInput {
   if (!isQQReplyRoute(input.route) || (input.quote !== null && !isQQQuoteEvidence(input.quote)))
@@ -135,7 +139,7 @@ export function mapOfficialInput(
       displayReference: event.d.message_scene.msg_idx,
     },
   };
-  const key = eventKey(account, route, messageId);
+  const key = qqInputEventKey(account, route, messageId);
   const materials: QQRemoteMaterial[] = [];
   const add = (attachment: OfficialAttachment, quoted: boolean): void => {
     materials.push({
@@ -162,7 +166,7 @@ export function mapOfficialInput(
   collect(event.d.msg_elements);
   return checked({
     eventKey: key,
-    observationId: `qq-input-${digest(key)}`,
+    observationId: `qq-input-${qqInputDigest(key)}`,
     actor,
     route,
     text: event.d.content,
@@ -219,7 +223,7 @@ function oneBotMessage(
         quotedText: '',
       }
     : null;
-  const key = eventKey(account, route, messageId);
+  const key = qqInputEventKey(account, route, messageId);
   const materials = event.message.flatMap((segment): QQRemoteMaterial[] => {
     if (segment.type !== 'image' && segment.type !== 'record' && segment.type !== 'file') return [];
     return [
@@ -233,7 +237,7 @@ function oneBotMessage(
   });
   return checked({
     eventKey: key,
-    observationId: `qq-input-${digest(key)}`,
+    observationId: `qq-input-${qqInputDigest(key)}`,
     actor,
     route,
     text: event.message
@@ -273,7 +277,7 @@ function oneBotFile(
   return checked({
     eventKey: null,
     // Resource identity is useful context dedup; it is deliberately not a native event/message ID.
-    observationId: `observe-file-${digest([accountKey(account), groupId, fileId, fileEvidence.busId])}`,
+    observationId: `observe-file-${qqInputDigest([qqAccountKey(account), groupId, fileId, fileEvidence.busId])}`,
     actor,
     route: {
       kind: 'qq',

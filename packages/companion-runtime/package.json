@@ -10,6 +10,14 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./plugin-host": {
+      "types": "./src/plugin-host.ts",
+      "default": "./src/plugin-host.ts"
+    },
+    "./source-authority": {
+      "types": "./src/source-authority.ts",
+      "default": "./src/source-authority.ts"
     }
   },
   "scripts": {

@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 import { isDeepStrictEqual } from 'node:util';
 import {
@@ -9,10 +8,8 @@ import {
   isQQPolicyCommand,
   isQQView,
   QQ_VIEW_MAX_BYTES,
-  isQQSourceSettings,
   isQQSourceSettingsCommand,
   makeError,
-  sameQQAccount,
   QQ_FEATURE_PLUGIN_ID,
   QQ_OFFICIAL_PLUGIN_ID,
   QQ_ONEBOT_PLUGIN_ID,
@@ -21,7 +18,6 @@ import {
   type KernelError,
   type OwnerRef,
   type QQAccountRef,
-  type QQCredentialCommand,
   type QQDeliveryPage,
   type QQDeliveryView,
   type QQJudgePolicy,
@@ -31,12 +27,11 @@ import {
   type QQPolicySettings,
   type QQPrincipalPage,
   type QQProtocol,
-  type QQSourceSettings,
   type QQSourceView,
   type QQStatus,
   type QQView,
 } from '@pet/contracts';
-import { KernelFault, SecretRedactor, type TaskHandle } from '@pet/host-kernel';
+import { KernelFault } from '@pet/host-kernel';
 import {
   withSourceAuthority,
   type CompanionPluginHost,
@@ -45,57 +40,26 @@ import {
 } from '@pet/companion-runtime';
 import type { PluginContext } from '@pet/plugin-sdk';
 import type { SharedQQPorts } from '../../../plugins/shared-qq/src/index.js';
-import type {
-  OfficialQqPorts,
-  OfficialDriverStatus,
-  OfficialIo,
-} from '../../../plugins/qq-official/src/ports.js';
+import type { OfficialQqPorts, OfficialIo } from '../../../plugins/qq-official/src/ports.js';
 import type { OfficialQqDriver } from '../../../plugins/qq-official/src/driver.js';
 import type { OfficialMessageEvent } from '../../../plugins/qq-official/src/wire.js';
-import type {
-  OneBotQqPorts,
-  OneBotDriverStatus,
-  OneBotIo,
-} from '../../../plugins/qq-onebot/src/ports.js';
+import type { OneBotQqPorts, OneBotIo } from '../../../plugins/qq-onebot/src/ports.js';
 import type { OneBotQqDriver } from '../../../plugins/qq-onebot/src/driver.js';
 import type { OneBotFrame, OneBotResponse } from '../../../plugins/qq-onebot/src/wire.js';
-import { createAuthorizedOfficialIo, type OfficialIoTestHooks } from './qq-official-io.js';
-import { createAuthorizedOneBotIo } from './qq-onebot-io.js';
-import type { CapturedQqBinding } from './qq-native-types.js';
+import {
+  qqSourceId as pluginId,
+  qqSourceProtocol as protocolFor,
+  type OfficialIoTestHooks,
+  type CapturedQqBinding,
+} from '@pet/local-host/qq-native';
+import { QQSourceCore, type LocalCapturedSourceBase } from '@pet/local-host/qq-source';
 import { resolveQQParticipant } from './qq-policy.js';
 
 const identity = (pluginId: string) => ({ pluginId, instanceId: 'default' as const });
-const pluginId = (protocol: QQProtocol): string =>
-  protocol === 'official' ? QQ_OFFICIAL_PLUGIN_ID : QQ_ONEBOT_PLUGIN_ID;
-const protocolFor = (id: string): QQProtocol | null =>
-  id === QQ_OFFICIAL_PLUGIN_ID ? 'official' : id === QQ_ONEBOT_PLUGIN_ID ? 'onebot-v11' : null;
 const safeError = (error: unknown): KernelError =>
   error instanceof KernelFault ? error.error : makeError('unavailable');
-const toJson = (value: QQSourceSettings | QQPolicySettings): JsonObject =>
+const toJson = (value: QQPolicySettings): JsonObject =>
   structuredClone(value) as unknown as JsonObject;
-const targetOf = (settings: QQSourceSettings): string =>
-  settings.protocol === 'official'
-    ? JSON.stringify([settings.protocol, settings.appId])
-    : JSON.stringify([
-        settings.protocol,
-        settings.accountId,
-        settings.mode,
-        settings.channelMode,
-        settings.listenHost,
-        settings.listenPort,
-        settings.path,
-      ]);
-const accountOf = (settings: QQSourceSettings): QQAccountRef | null => {
-  const accountId = settings.protocol === 'official' ? settings.appId : settings.accountId;
-  return accountId
-    ? {
-        protocol: settings.protocol,
-        sourcePluginId: pluginId(settings.protocol),
-        instanceId: 'default',
-        accountId,
-      }
-    : null;
-};
 const authorityFields = (policy: QQPolicySettings): unknown => [
   policy.privateAllowlist,
   policy.groupAllowlist,
@@ -104,30 +68,6 @@ const authorityFields = (policy: QQPolicySettings): unknown => [
   policy.knownMachineActors,
 ];
 
-interface Slot {
-  target: string;
-  revision: number;
-  version: string;
-  value: string | undefined;
-}
-interface SourceRecord {
-  readonly owner: OwnerRef;
-  readonly settings: QQSourceSettings;
-  readonly revision: number;
-  readonly credentialVersion: string;
-  readonly policyEpoch: number;
-  readonly abort: AbortController;
-  readonly signal: AbortSignal;
-  readonly context: PluginContext;
-  readonly bindingId: string;
-  driver: OfficialQqDriver | OneBotQqDriver | undefined;
-  root: TaskHandle | undefined;
-  running: boolean;
-  status: OfficialDriverStatus | OneBotDriverStatus | undefined;
-  connection: { readonly id: string; readonly signal: AbortSignal } | undefined;
-  cleanup: QQSourceView['cleanup'];
-  error: KernelError | null;
-}
 interface FeatureLease {
   readonly epoch: number;
   readonly abort: AbortController;
@@ -177,12 +117,7 @@ export interface QQJudgePort {
 
 /** One controller for the existing Config, PluginManager and source-owned tasks. */
 export class QQController {
-  private readonly generation = randomUUID();
-  private readonly slots = new Map<QQProtocol, Slot>();
-  private readonly records = new Map<QQProtocol, SourceRecord>();
-  private readonly failures = new Map<QQProtocol, KernelError>();
-  private readonly cleanup = new Map<QQProtocol, QQSourceView['cleanup']>();
-  private readonly redactor = new SecretRedactor();
+  private readonly sources: QQSourceCore;
   private policyValue: QQPolicySettings = defaultQQPolicySettings();
   private policyRevision = 0;
   private policyInvalid = false;
@@ -213,26 +148,54 @@ export class QQController {
     readonly runtime: CompanionRuntime,
     readonly connections: ModelConnections,
     readonly options: QQControllerOptions = {},
-  ) {}
+  ) {
+    this.sources = new QQSourceCore(
+      {
+        host,
+        checkConfigSource: (id) => {
+          if (!host.verifySource(id)) throw new KernelFault('package-changed');
+        },
+        setEnabled: (id, enabled) => host.setEnabled(id, enabled),
+        runFor: (id, work, taskOptions) => host.runFor(id, work, taskOptions),
+      },
+      {
+        ...options,
+        changed: () => runtime.notify(),
+        beforeStart: () => {
+          if (!this.ingress) throw new KernelFault('not-ready');
+        },
+        beforeEvent: async (source) => {
+          await this.capture(source).check();
+        },
+        onOfficial: async (event, source) => {
+          const captured = this.capture(source);
+          await captured.check();
+          if (!this.ingress) throw new KernelFault('not-ready');
+          await this.ingress.official(event, captured);
+          await captured.check();
+        },
+        onOneBot: async (event, source) => {
+          const captured = this.capture(source);
+          await captured.check();
+          if (!this.ingress) throw new KernelFault('not-ready');
+          await this.ingress.onebot(event, captured);
+          await captured.check();
+        },
+      },
+      {
+        read: async () => {
+          const snapshot = await this.desiredSnapshot();
+          return {
+            revision: snapshot.revision,
+            officialEnabled: snapshot.ids.has(QQ_OFFICIAL_PLUGIN_ID),
+            onebotEnabled: snapshot.ids.has(QQ_ONEBOT_PLUGIN_ID),
+          };
+        },
+      },
+      false,
+    );
+  }
 
-  private version(): string {
-    return `${this.generation}:${randomUUID()}`;
-  }
-  private slot(settings: QQSourceSettings, revision: number): Slot {
-    const target = targetOf(settings);
-    let slot = this.slots.get(settings.protocol);
-    if (slot && revision < slot.revision) throw new KernelFault('conflict');
-    if (!slot || slot.target !== target) {
-      slot = { target, revision, version: this.version(), value: undefined };
-      this.slots.set(settings.protocol, slot);
-    } else slot.revision = revision;
-    return slot;
-  }
-  private fence(record: SourceRecord): void {
-    record.abort.abort();
-    record.cleanup = 'pending';
-    this.cleanup.set(record.settings.protocol, 'pending');
-  }
   private async serialized<T>(operation: () => Promise<T>): Promise<T> {
     if (this.closed || this.busy) throw new KernelFault('conflict');
     this.busy = true;
@@ -304,21 +267,6 @@ export class QQController {
         }
         return;
       }
-      const protocol = protocolFor(commit.pluginId);
-      if (!protocol) return;
-      if (isQQSourceSettings(commit.data) && commit.data.protocol === protocol) {
-        this.slot(commit.data, commit.revision);
-      } else {
-        const slot = this.slots.get(protocol);
-        if (slot && commit.revision >= slot.revision) {
-          slot.value = undefined;
-          slot.version = this.version();
-          slot.revision = commit.revision;
-        }
-        this.failures.set(protocol, makeError('invalid-input'));
-      }
-      const record = this.records.get(protocol);
-      if (record && record.revision !== commit.revision) this.fence(record);
     });
     const profile = await this.runtime.profile();
     const disabled =
@@ -335,17 +283,16 @@ export class QQController {
     if (!disabled && !this.host.isEnabled(QQ_FEATURE_PLUGIN_ID))
       await this.host.setEnabled(QQ_FEATURE_PLUGIN_ID, true);
     if (disabled) return;
+    await this.sources.initialize();
     const desired = await this.desired();
     for (const protocol of ['official', 'onebot-v11'] as const) {
-      const current = await this.configured(protocol);
-      this.slot(current.settings, current.revision);
       if (!desired.has(pluginId(protocol))) continue;
       try {
         if (!this.host.isEnabled(pluginId(protocol)))
           await this.host.setEnabled(pluginId(protocol), true);
         await this.start(protocol);
       } catch (error) {
-        this.failures.set(protocol, safeError(error));
+        this.sources.markFailure(protocol, error);
       }
     }
   }
@@ -525,21 +472,7 @@ export class QQController {
     this.codec = provider;
   }
 
-  private async configured(
-    protocol: QQProtocol,
-  ): Promise<{ settings: QQSourceSettings; revision: number }> {
-    const id = pluginId(protocol);
-    if (!this.host.verifySource(id)) throw new KernelFault('package-changed');
-    const config = await this.host.configs.get(identity(id));
-    if (
-      !config.ok ||
-      !isQQSourceSettings(config.value.data) ||
-      config.value.data.protocol !== protocol
-    )
-      throw new KernelFault(config.ok ? 'invalid-input' : config.error.code);
-    return { settings: structuredClone(config.value.data), revision: config.value.revision };
-  }
-  private async desired(): Promise<Set<string>> {
+  private async desiredSnapshot(): Promise<{ revision: number; ids: Set<string> }> {
     const profile = await this.runtime.profile();
     const enabled = Array.isArray(profile.data['enabledOptionalPlugins'])
       ? profile.data['enabledOptionalPlugins'].filter((id): id is string => typeof id === 'string')
@@ -547,254 +480,50 @@ export class QQController {
     const disabled = Array.isArray(profile.data['disabledPlugins'])
       ? profile.data['disabledPlugins'].filter((id): id is string => typeof id === 'string')
       : [];
-    return new Set(enabled.filter((id) => !disabled.includes(id)));
+    return {
+      revision: profile.revision,
+      ids: new Set(enabled.filter((id) => !disabled.includes(id))),
+    };
+  }
+  private async desired(): Promise<Set<string>> {
+    return (await this.desiredSnapshot()).ids;
   }
   async prepareSource(context: PluginContext): Promise<void> {
-    const protocol = protocolFor(context.owner.pluginId);
-    if (!protocol || context.owner.instanceId !== 'default' || context.signal.aborted)
-      throw new KernelFault('stale-owner');
-    const config = await this.configured(protocol);
-    if (
-      context.signal.aborted ||
-      !isDeepStrictEqual(context.config, config.settings) ||
-      this.records.has(protocol)
-    )
-      throw new KernelFault('conflict');
-    const slot = this.slot(config.settings, config.revision);
-    const policy = this.host.permissionControl.inspect(identity(context.owner.pluginId));
-    if (!policy) throw new KernelFault('permission-denied');
-    const abort = new AbortController();
-    this.records.set(protocol, {
-      owner: { ...context.owner },
-      settings: config.settings,
-      revision: config.revision,
-      credentialVersion: slot.version,
-      policyEpoch: policy.epoch,
-      abort,
-      signal: AbortSignal.any([context.signal, abort.signal]),
-      context,
-      bindingId: `qq-${randomUUID()}`,
-      driver: undefined,
-      root: undefined,
-      running: false,
-      status: undefined,
-      connection: undefined,
-      cleanup: 'settled',
-      error: null,
-    });
+    await this.sources.prepareSource(context);
   }
-  private record(context: PluginContext, protocol: QQProtocol): SourceRecord {
-    const record = this.records.get(protocol);
-    if (
-      !record ||
-      record.owner.pluginId !== context.owner.pluginId ||
-      record.owner.generation !== context.owner.generation ||
-      record.context !== context ||
-      record.signal.aborted
-    )
-      throw new KernelFault('stale-owner');
-    return record;
+  officialPorts(context: PluginContext): OfficialQqPorts {
+    return this.sources.officialPorts(context);
   }
-  private async check(record: SourceRecord): Promise<void> {
-    const protocol = record.settings.protocol;
-    const current = this.host.manager.get(identity(record.owner.pluginId));
-    const policy = this.host.permissionControl.inspect(identity(record.owner.pluginId));
-    if (
-      this.closed ||
-      record.signal.aborted ||
-      this.records.get(protocol) !== record ||
-      !current ||
-      current.owner.generation !== record.owner.generation ||
-      !this.host.manager.isActive(record.owner)
-    )
-      throw new KernelFault('stale-owner');
-    if (!this.host.verifySource(record.owner.pluginId)) throw new KernelFault('package-changed');
-    if (
-      !policy ||
-      policy.blocked ||
-      policy.preset === 'deny' ||
-      policy.epoch !== record.policyEpoch
-    )
-      throw new KernelFault('permission-denied');
-    const slot = this.slots.get(protocol);
-    if (
-      !slot ||
-      slot.version !== record.credentialVersion ||
-      slot.target !== targetOf(record.settings)
-    )
-      throw new KernelFault('stale-owner');
-    const config = await this.configured(protocol);
-    if (
-      config.revision !== record.revision ||
-      record.signal.aborted ||
-      this.records.get(protocol) !== record
-    )
-      throw new KernelFault('stale-owner');
+  onebotPorts(context: PluginContext): OneBotQqPorts {
+    return this.sources.onebotPorts(context);
   }
-  private binding<S extends QQSourceSettings>(
-    record: SourceRecord,
-    settings: S,
-  ): CapturedQqBinding<S> {
-    const slot = this.slot(settings, record.revision);
-    return {
-      owner: record.owner,
-      signal: record.signal,
-      configRevision: record.revision,
-      credentialVersion: record.credentialVersion,
-      settings,
-      credential: slot.value ?? '',
-      check: () => this.check(record),
-    };
-  }
-  private bind(
-    record: SourceRecord,
-    driver: OfficialQqDriver | OneBotQqDriver,
-  ): () => Promise<void> {
-    if (record.driver || record.signal.aborted) throw new KernelFault('conflict');
-    record.driver = driver;
-    return async () => {
-      this.fence(record);
-      if (this.records.get(record.settings.protocol) === record)
-        this.records.delete(record.settings.protocol);
-    };
-  }
-  private capture(
-    record: SourceRecord,
-    connectionId: string,
-    signal: AbortSignal,
-  ): CapturedQqSourceBase {
+  private capture(source: LocalCapturedSourceBase, extra?: AbortSignal): CapturedQqSourceBase {
     this.policy();
-    const account = accountOf(record.settings);
     const featureOwner = this.featureOwner;
     const featureSignal = this.featureSignal;
     const featurePolicy = this.host.permissionControl.inspect(identity(QQ_FEATURE_PLUGIN_ID));
-    if (!account || !connectionId || !featureOwner || !featureSignal || !featurePolicy)
-      throw new KernelFault('not-ready');
-    const joined = AbortSignal.any([record.signal, signal, featureSignal]);
-    const selfId =
-      record.settings.protocol === 'official'
-        ? record.status && 'selfId' in record.status
-          ? record.status.selfId
-          : null
-        : record.settings.accountId;
+    if (!featureOwner || !featureSignal || !featurePolicy) throw new KernelFault('not-ready');
+    const signal = AbortSignal.any(
+      extra ? [source.signal, featureSignal, extra] : [source.signal, featureSignal],
+    );
     return {
-      account,
-      connectionId,
-      ...(selfId ? { selfId } : {}),
-      signal: joined,
+      account: source.account,
+      connectionId: source.connectionId,
+      ...(source.selfId ? { selfId: source.selfId } : {}),
+      signal,
       check: async () => {
         this.policy();
-        await this.check(record);
+        await source.check();
         this.policy();
-        const currentFeaturePolicy = this.host.permissionControl.inspect(
-          identity(QQ_FEATURE_PLUGIN_ID),
-        );
+        const policy = this.host.permissionControl.inspect(identity(QQ_FEATURE_PLUGIN_ID));
         if (
-          joined.aborted ||
+          signal.aborted ||
           this.featureOwner?.generation !== featureOwner.generation ||
-          !currentFeaturePolicy ||
-          currentFeaturePolicy.epoch !== featurePolicy.epoch ||
-          record.status?.connectionId !== connectionId ||
-          record.status.phase !== 'ready'
+          !policy ||
+          policy.epoch !== featurePolicy.epoch
         )
           throw new KernelFault('stale-owner');
       },
-    };
-  }
-  officialPorts(context: PluginContext): OfficialQqPorts {
-    const record = this.record(context, 'official');
-    return {
-      authorizedOfficial: (settings) => {
-        if (!isDeepStrictEqual(settings, record.settings)) throw new KernelFault('conflict');
-        const binding = this.binding(record, settings);
-        const io = this.options.officialFactory
-          ? this.options.officialFactory(this.host, binding)
-          : createAuthorizedOfficialIo(this.host, binding, this.options.officialTest);
-        return {
-          media: io.media,
-          openGateway: async (signal) => {
-            const gateway = await io.openGateway(signal);
-            try {
-              await this.check(record);
-              if (gateway.signal.aborted) throw new KernelFault('stale-owner');
-              record.connection = { id: gateway.id, signal: gateway.signal };
-              return gateway;
-            } catch (error) {
-              await gateway.close();
-              await gateway.settled;
-              throw error;
-            }
-          },
-          send: (request, signal) => io.send(request, signal),
-          upload: (request, signal) => io.upload(request, signal),
-          close: () => io.close(),
-        };
-      },
-      observer: {
-        onStatus: (status) => {
-          if (this.records.get('official') === record && !record.signal.aborted) {
-            record.status = status;
-            record.error = status.error;
-            this.runtime.notify();
-          }
-        },
-        onEvent: async (event, id, signal) => {
-          const source = this.capture(record, id, signal);
-          await source.check();
-          if (record.settings.protocol !== 'official') throw new KernelFault('stale-owner');
-          const scene = event.t === 'C2C_MESSAGE_CREATE' ? 'private' : 'group';
-          if (!record.settings.scenes.includes(scene)) return;
-          if (!this.ingress) throw new KernelFault('not-ready');
-          await this.ingress.official(event, source);
-          await source.check();
-        },
-      },
-      bind: (driver) => this.bind(record, driver),
-    };
-  }
-  onebotPorts(context: PluginContext): OneBotQqPorts {
-    const record = this.record(context, 'onebot-v11');
-    return {
-      authorizedOneBot: (settings) => {
-        if (!isDeepStrictEqual(settings, record.settings)) throw new KernelFault('conflict');
-        const binding = this.binding(record, settings);
-        const io = this.options.onebotFactory
-          ? this.options.onebotFactory(this.host, binding)
-          : createAuthorizedOneBotIo(this.host, binding, this.options.onebotTest);
-        return {
-          nextPeer: async (signal) => {
-            const peer = await io.nextPeer(signal);
-            try {
-              await this.check(record);
-              if (peer.signal.aborted) throw new KernelFault('stale-owner');
-              record.connection = { id: peer.id, signal: peer.signal };
-              return peer;
-            } catch (error) {
-              await peer.close();
-              await peer.settled;
-              throw error;
-            }
-          },
-          close: () => io.close(),
-        };
-      },
-      observer: {
-        onStatus: (status) => {
-          if (this.records.get('onebot-v11') === record && !record.signal.aborted) {
-            record.status = status;
-            record.error = status.error;
-            this.runtime.notify();
-          }
-        },
-        onEvent: async (event, id, signal) => {
-          const source = this.capture(record, id, signal);
-          await source.check();
-          if (!this.ingress) throw new KernelFault('not-ready');
-          await this.ingress.onebot(event, source);
-          await source.check();
-        },
-      },
-      bind: (driver) => this.bind(record, driver),
     };
   }
   sourceFor(account: QQAccountRef): CapturedQqSource {
@@ -809,99 +538,14 @@ export class QQController {
       participant.epoch !== featurePolicy.epoch
     )
       throw new KernelFault('permission-denied');
-    const record = this.records.get(account.protocol);
-    const capturedAccount = record && accountOf(record.settings);
-    if (
-      !record?.driver ||
-      !record.status ||
-      record.status.phase !== 'ready' ||
-      !record.status.connectionId ||
-      !record.connection ||
-      record.connection.id !== record.status.connectionId ||
-      record.connection.signal.aborted ||
-      !capturedAccount ||
-      !sameQQAccount(capturedAccount, account)
-    )
-      throw new KernelFault('not-ready');
-    const base = this.capture(
-      record,
-      record.status.connectionId,
-      AbortSignal.any([record.connection.signal, participant.signal]),
-    );
-    if (account.protocol === 'official')
-      return { ...base, protocol: 'official', driver: record.driver as OfficialQqDriver };
-    return { ...base, protocol: 'onebot-v11', driver: record.driver as OneBotQqDriver };
+    const source = this.sources.captureSource(account);
+    const base = this.capture(source, participant.signal);
+    return source.protocol === 'official'
+      ? { ...base, protocol: 'official', driver: source.driver }
+      : { ...base, protocol: 'onebot-v11', driver: source.driver };
   }
   private async start(protocol: QQProtocol): Promise<void> {
-    const record = this.records.get(protocol);
-    if (!record?.driver) return;
-    if (record.root) return;
-    if (!this.ingress) throw new KernelFault('not-ready');
-    if (!this.slot(record.settings, record.revision).value) {
-      record.error = makeError('not-ready');
-      return;
-    }
-    await this.check(record);
-    record.cleanup = 'pending';
-    const root = this.host.runFor(
-      record.owner.pluginId,
-      async (task) => {
-        await record.driver?.start(task.signal);
-        return null;
-      },
-      { signal: record.signal },
-    );
-    record.root = root;
-    record.running = true;
-    void root.result.then((result) => {
-      if (!result.ok && !record.signal.aborted) {
-        record.error = result.error;
-        this.failures.set(protocol, result.error);
-        this.runtime.notify();
-      }
-    });
-    void root.settled.then(() => {
-      record.running = false;
-      record.cleanup = 'settled';
-      if (this.records.get(protocol) === record && !record.signal.aborted)
-        this.cleanup.set(protocol, 'settled');
-      this.runtime.notify();
-    });
-    this.failures.delete(protocol);
-  }
-  private async retire(protocol: QQProtocol): Promise<void> {
-    const record = this.records.get(protocol);
-    if (record) this.fence(record);
-    try {
-      const state = this.host.manager.get(identity(pluginId(protocol)))?.state;
-      if (state && state !== 'disabled') await this.host.setEnabled(pluginId(protocol), false);
-      await record?.root?.settled;
-      if (record) {
-        record.cleanup = 'settled';
-        if (this.records.get(protocol) === record) this.records.delete(protocol);
-      }
-      this.cleanup.set(protocol, 'settled');
-      this.failures.delete(protocol);
-    } catch (error) {
-      if (record) {
-        record.cleanup = 'failed';
-        record.error = safeError(error);
-      }
-      this.cleanup.set(protocol, 'failed');
-      this.failures.set(protocol, safeError(error));
-      throw error;
-    }
-  }
-  private async reload(protocol: QQProtocol, desired: boolean): Promise<void> {
-    await this.retire(protocol);
-    if (!desired) return;
-    try {
-      await this.host.setEnabled(pluginId(protocol), true);
-      await this.start(protocol);
-    } catch (error) {
-      this.failures.set(protocol, safeError(error));
-      throw error;
-    }
+    await this.sources.startCurrent(protocol);
   }
   async setPlugin(
     id: string,
@@ -914,18 +558,13 @@ export class QQController {
       const lookup = { commandId, kind: 'plugin.select', payload: { id, enabled } };
       const known = await this.runtime.state('getCommand', lookup);
       if (known) return known;
-      const previous = this.records.get(protocol);
-      if (enabled && previous && (previous.signal.aborted || (previous.root && !previous.running)))
-        await this.retire(protocol);
-      if (!enabled && previous) this.fence(previous);
+      if (enabled && this.sources.needsRetire(protocol)) await this.sources.retire(protocol);
+      const previous = enabled ? undefined : this.sources.beginDisable(protocol);
       let receipt: CompanionCommandReceipt;
       try {
         receipt = await this.runtime.setPlugin(id, enabled, commandId);
       } catch (error) {
-        if (!enabled && previous) {
-          this.cleanup.set(protocol, 'failed');
-          this.failures.set(protocol, safeError(error));
-        }
+        if (previous?.hadRecord) previous.fail(error);
         throw error;
       }
       if (receipt.status === 'duplicate') return receipt;
@@ -933,13 +572,11 @@ export class QQController {
         try {
           await this.start(protocol);
         } catch (error) {
-          this.failures.set(protocol, safeError(error));
+          this.sources.markFailure(protocol, error);
           throw error;
         }
       } else {
-        await previous?.root?.settled;
-        if (previous && this.records.get(protocol) === previous) this.records.delete(protocol);
-        this.cleanup.set(protocol, 'settled');
+        await previous?.settle();
       }
       return receipt;
     });
@@ -947,7 +584,7 @@ export class QQController {
   async savePolicy(input: unknown): Promise<QQView> {
     if (!isQQPolicyCommand(input)) throw new KernelFault('invalid-input');
     return this.serialized(async () => {
-      if (this.redactor.containsValue(input.settings)) throw new KernelFault('permission-denied');
+      if (this.sources.containsSecret(input.settings)) throw new KernelFault('permission-denied');
       const saved = await this.host.configs.save(
         identity(QQ_FEATURE_PLUGIN_ID),
         toJson(input.settings),
@@ -960,50 +597,16 @@ export class QQController {
   async saveSource(input: unknown): Promise<QQView> {
     if (!isQQSourceSettingsCommand(input)) throw new KernelFault('invalid-input');
     return this.serialized(async () => {
-      const current = await this.configured(input.protocol);
-      if (current.revision !== input.expectedRevision) throw new KernelFault('conflict');
-      if (this.redactor.containsValue(input.settings)) throw new KernelFault('permission-denied');
-      if (isDeepStrictEqual(current.settings, input.settings)) return this.view();
-      const desired = await this.desired();
-      const saved = await this.host.configs.save(
-        identity(pluginId(input.protocol)),
-        toJson(input.settings),
-        input.expectedRevision,
-      );
-      if (!saved.ok) throw new KernelFault(saved.error.code);
-      await this.reload(input.protocol, desired.has(pluginId(input.protocol)));
+      const result = await this.sources.saveSource(input);
+      if (result.error) throw new KernelFault(result.error.code);
       return this.view();
     });
   }
   async credential(input: unknown): Promise<QQView> {
     if (!isQQCredentialCommand(input)) throw new KernelFault('invalid-input');
-    const command: QQCredentialCommand = input;
     return this.serialized(async () => {
-      const current = await this.configured(command.protocol);
-      const slot = this.slot(current.settings, current.revision);
-      if (
-        current.revision !== command.expectedRevision ||
-        slot.version !== command.expectedCredentialVersion
-      )
-        throw new KernelFault('conflict');
-      const desired = await this.desired();
-      slot.value = undefined;
-      slot.version = this.version();
-      const record = this.records.get(command.protocol);
-      if (record) this.fence(record);
-      await this.retire(command.protocol);
-      if (command.value !== null) this.redactor.add(command.value);
-      slot.value = command.value ?? undefined;
-      slot.version = this.version();
-      if (desired.has(pluginId(command.protocol))) {
-        try {
-          await this.host.setEnabled(pluginId(command.protocol), true);
-          await this.start(command.protocol);
-        } catch (error) {
-          this.failures.set(command.protocol, safeError(error));
-          throw error;
-        }
-      }
+      const result = await this.sources.credential(input);
+      if (result.error) throw new KernelFault(result.error.code);
       return this.view();
     });
   }
@@ -1068,91 +671,14 @@ export class QQController {
     );
   }
   private async sourceViews(): Promise<QQSourceView[]> {
-    const desired = await this.desired();
-    return Promise.all(
-      (['official', 'onebot-v11'] as const).map(async (protocol): Promise<QQSourceView> => {
-        const current = await this.configured(protocol);
-        const slot = this.slot(current.settings, current.revision);
-        const record = this.records.get(protocol);
-        const enabled = desired.has(pluginId(protocol));
-        const featureReady = this.featureReady();
-        const featurePolicy = this.host.permissionControl.inspect(identity(QQ_FEATURE_PLUGIN_ID));
-        const active = this.host.isEnabled(pluginId(protocol));
-        const policy = this.host.permissionControl.inspect(identity(pluginId(protocol)));
-        const applied =
-          record &&
-          active &&
-          record.running &&
-          !record.signal.aborted &&
-          record.revision === current.revision &&
-          record.credentialVersion === slot.version &&
-          policy &&
-          !policy.blocked &&
-          policy.preset !== 'deny' &&
-          policy.epoch === record.policyEpoch
-            ? record
-            : undefined;
-        const phase = !enabled
-          ? 'disabled'
-          : !featureReady
-            ? 'failed'
-            : !accountOf(current.settings) || !slot.value
-              ? 'unconfigured'
-              : !applied
-                ? 'failed'
-                : applied?.status?.phase === 'waiting' ||
-                    applied?.status?.phase === 'idle' ||
-                    !applied?.status
-                  ? 'connecting'
-                  : applied.status.phase === 'stopped'
-                    ? 'offline'
-                    : applied.status.phase;
-        return {
-          protocol,
-          sourcePluginId: pluginId(protocol),
-          instanceId: 'default',
-          desiredEnabled: enabled,
-          source: !enabled ? 'disabled' : featureReady && applied ? 'ready' : 'unavailable',
-          configRevision: current.revision,
-          appliedRevision: applied?.revision ?? null,
-          settings: current.settings,
-          account: accountOf(current.settings),
-          bindingId: applied?.bindingId ?? null,
-          phase,
-          credential: {
-            available: !!slot.value,
-            writable: true,
-            version: slot.version,
-            source: slot.value ? 'memory' : 'none',
-          },
-          installedVersion: null,
-          media: {
-            text: 'unverified',
-            image: 'unverified',
-            voice: 'unverified',
-            file: 'unverified',
-          },
-          cleanup: record?.cleanup ?? this.cleanup.get(protocol) ?? 'settled',
-          error:
-            (enabled && !featureReady
-              ? makeError(
-                  featurePolicy?.blocked || featurePolicy?.preset === 'deny'
-                    ? 'permission-denied'
-                    : 'not-ready',
-                )
-              : null) ??
-            (enabled &&
-            policy &&
-            (policy.blocked ||
-              policy.preset === 'deny' ||
-              (record && policy.epoch !== record.policyEpoch))
-              ? makeError('permission-denied')
-              : null) ??
-            record?.error ??
-            this.failures.get(protocol) ??
-            (enabled && !applied ? makeError('not-ready') : null),
-        };
-      }),
+    const sources = (await this.sources.view()).sources;
+    if (this.featureReady()) return [...sources];
+    const policy = this.host.permissionControl.inspect(identity(QQ_FEATURE_PLUGIN_ID));
+    const error = makeError(
+      policy?.blocked || policy?.preset === 'deny' ? 'permission-denied' : 'not-ready',
+    );
+    return sources.map((source) =>
+      source.desiredEnabled ? { ...source, source: 'unavailable', phase: 'failed', error } : source,
     );
   }
   async status(): Promise<QQStatus> {
@@ -1163,15 +689,15 @@ export class QQController {
         version: 1,
         sources: (['official', 'onebot-v11'] as const).map((protocol) => {
           const enabled = desired.has(pluginId(protocol));
-          const record = this.records.get(protocol);
+          const summary = this.sources.summary(protocol);
           return {
             protocol,
             sourcePluginId: pluginId(protocol),
             desiredEnabled: enabled,
             source: enabled ? ('unavailable' as const) : ('disabled' as const),
             phase: enabled ? ('failed' as const) : ('disabled' as const),
-            account: record ? accountOf(record.settings) : null,
-            cleanup: record?.cleanup ?? this.cleanup.get(protocol) ?? 'settled',
+            account: summary.account,
+            cleanup: summary.cleanup,
             error: enabled
               ? makeError(
                   featurePolicy?.blocked || featurePolicy?.preset === 'deny'
@@ -1246,13 +772,8 @@ export class QQController {
       await this.leaseGate;
       await this.featureLease?.done;
       this.featureLease = undefined;
-      for (const record of this.records.values()) this.fence(record);
-      const retired = await Promise.allSettled(
-        (['official', 'onebot-v11'] as const).map((protocol) => this.retire(protocol)),
-      );
+      const retired = await Promise.allSettled([this.sources.close()]);
       await this.judge?.close();
-      for (const slot of this.slots.values()) slot.value = undefined;
-      this.redactor.clear();
       const failed = retired.find((result) => result.status === 'rejected');
       if (failed?.status === 'rejected') throw failed.reason;
       if (this.policyRecheckFailure) throw new KernelFault(this.policyRecheckFailure.code);

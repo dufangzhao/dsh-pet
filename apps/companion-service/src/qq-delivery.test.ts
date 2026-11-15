@@ -34,6 +34,7 @@ import {
   type QQDeliveryRequest,
   type QQDeliveryTerminal,
   type QQDeliveryTransport,
+  type QQDeliveryOptions,
 } from './qq-delivery.js';
 import { deliveryId, inlineText, textHash } from './qq-delivery-plan.js';
 
@@ -58,7 +59,7 @@ const receipt = (value: Partial<QQRemoteReceipt>): QQRemoteReceipt => ({
   sequenceAuthoritative: null,
   ...value,
 });
-async function fixture(voice = false) {
+async function fixture(voice = false, executionFor?: QQDeliveryOptions['executionFor']) {
   const directory = await mkdtemp(path.join(tmpdir(), 'companion-qq-delivery-'));
   const stateManifest = JSON.parse(
     await readFile(new URL('../../../plugins/state-sqlite/plugin.json', import.meta.url), 'utf8'),
@@ -147,6 +148,7 @@ async function fixture(voice = false) {
     runtime,
     materials,
     policy,
+    ...(executionFor ? { executionFor } : {}),
     audio: {
       async exportVoice(input, access) {
         voiceCalls++;
@@ -399,6 +401,65 @@ async function fixture(voice = false) {
     },
   };
 }
+
+it('persists an explicit offline remote target without consulting the legacy source or starting voice', async () => {
+  const f = await fixture(true, () => ({
+    kind: 'unavailable',
+    execution: { kind: 'unavailable', hostId: 'selected-host' },
+    error: makeError('not-ready'),
+  }));
+  const event = await f.terminal('remote-offline', ['Canonical text remains available.']);
+  const delivered = await f.sender.onTerminal(event);
+  expect(delivered).toMatchObject({
+    phase: 'blocked',
+    outcome: 'failed',
+    error: { code: 'not-ready' },
+  });
+  expect(f.sourceCalls()).toBe(0);
+  expect(f.requests).toHaveLength(0);
+  expect(f.voiceCalls()).toBe(0);
+  expect(
+    await f.runtime.state('getDeliveryExecution', {
+      id: deliveryId(event.admission.id),
+      scope: { kind: 'management' },
+    }),
+  ).toEqual({
+    target: { kind: 'unavailable', hostId: 'selected-host' },
+    attempts: [],
+  });
+  expect(await f.sender.onTerminal(event)).toEqual(delivered);
+});
+
+it.each([false, true])(
+  'selects service-local explicitly without remote execution metadata (missing=%s)',
+  async (missing) => {
+    const f = await fixture(false, () => ({ kind: 'service-local' }));
+    f.missing(missing);
+    const event = await f.terminal(`explicit-local-${missing}`, [
+      'An explicitly selected local reply.',
+    ]);
+    expect((await f.sender.onTerminal(event))?.outcome).toBe(missing ? 'failed' : 'accepted');
+    expect(f.sourceCalls()).toBe(1);
+    expect(
+      await f.runtime.state('getDeliveryExecution', {
+        id: deliveryId(event.admission.id),
+        scope: { kind: 'management' },
+      }),
+    ).toBeNull();
+  },
+);
+
+it('keeps absent execution metadata for the existing service-local strategy', async () => {
+  const f = await fixture();
+  const event = await f.terminal('local-execution-absence', ['Legacy local reply.']);
+  expect((await f.sender.onTerminal(event))?.outcome).toBe('accepted');
+  expect(
+    await f.runtime.state('getDeliveryExecution', {
+      id: deliveryId(event.admission.id),
+      scope: { kind: 'management' },
+    }),
+  ).toBeNull();
+});
 
 it('keeps Unicode/CRLF exact and freezes every formal say/message origin in order', async () => {
   const f = await fixture();

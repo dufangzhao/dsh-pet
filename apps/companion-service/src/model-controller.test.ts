@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   JSON_MAX_BYTES,
   type CompanionModelCommandResult,
@@ -12,6 +12,7 @@ import {
 } from '@pet/contracts';
 import { jsonPreflight } from '@pet/contracts/validation';
 import { KernelFault } from '@pet/host-kernel';
+import type { StateMethodOutputs } from '@pet/state-sqlite';
 import {
   createFixtureModelClient,
   createFixtureModelPlugin,
@@ -28,9 +29,11 @@ import { credentialIngressAllowed } from './server.js';
 const token = 'model-controller-test-operator-token-45c173';
 const key = 'independent-gateway-key-canary-5d28490';
 const cleanups: Array<() => Promise<void>> = [];
-afterEach(async () => {
+/** Single drain shared by afterEach and a suite afterAll; splice keeps repeated calls idempotent. */
+async function drainCleanups(): Promise<void> {
   for (const close of cleanups.splice(0).reverse()) await close();
-});
+}
+afterEach(drainCleanups);
 
 function value<T>(result: Result<T>): T {
   if (!result.ok) throw new Error(result.error.code);
@@ -822,85 +825,99 @@ it.each(['extra-field', 'oversized', 'bad-auth', 'bad-shape'] as const)(
   },
 );
 
-it('budgets real SQLite history once at the final Result/snapshot boundary with maximum connector metadata', async () => {
-  const f = await setup();
-  const runtime = f.service().runtime;
-  for (let index = 0; index < 24; index++) {
-    const accepted = await runtime.state('createTask', {
-      commandId: `budget-task-${index}`,
-      title: 'T'.repeat(160),
-      code: 'fixture()',
+describe('final snapshot budget over retained history', () => {
+  type Fixture = Awaited<ReturnType<typeof setup>>;
+  let f: Fixture;
+  let raw: StateMethodOutputs['snapshot'];
+  let maximum: CompanionModelView;
+  // Retained history costs ~296 authorized capability round trips (~23s), so it is prepared once
+  // outside the case budget; the final Result/snapshot boundary keeps its own 20s budget below.
+  beforeAll(async () => {
+    f = await setup();
+    const runtime = f.service().runtime;
+    for (let index = 0; index < 24; index++) {
+      const accepted = await runtime.state('createTask', {
+        commandId: `budget-task-${index}`,
+        title: 'T'.repeat(160),
+        code: 'fixture()',
+      });
+      await runtime.state('updateTask', {
+        taskId: accepted.task.id,
+        status: 'completed',
+        exitCode: 0,
+        stdout: 's'.repeat(12000),
+        stderr: 'e'.repeat(12000),
+      });
+      const memory = await runtime.state('memorySnapshot', {});
+      await runtime.state('rememberFact', {
+        expectedMemoryRevision: memory.memoryRevision,
+        expectedFactRevision: 0,
+        origin: { kind: 'owner-form' },
+        commandId: `budget-fact-${index}`,
+        key: `fact-${index}`,
+        value: 'f'.repeat(200),
+      });
+    }
+    for (let index = 0; index < 100; index++) {
+      const accepted = await runtime.state('acceptMessage', {
+        commandId: `budget-message-${index}`,
+        text: 'm'.repeat(8000),
+      });
+      // This fixture represents retained history, not one hundred live ready inputs.
+      await runtime.state('updateInput', {
+        id: accepted.message.id,
+        phase: 'completed',
+        cleanup: 'settled',
+      });
+    }
+    raw = await runtime.state('snapshot', {});
+    const initial = await f.view();
+    const first = initial.connectors[0];
+    if (!first) throw new Error('missing initial connector');
+    const url = 'https://example.test/' + 'p'.repeat(2048 - 'https://example.test/'.length);
+    maximum = {
+      ...initial,
+      connectors: Array.from({ length: 8 }, (_, index) => ({
+        ...first,
+        id: index === 0 ? MAGPIE_CONNECTION : `pet.connector-${index}/provider`,
+        label: 'L'.repeat(80),
+        model: 'M'.repeat(128),
+        settings: { baseUrl: url, model: 'M'.repeat(128), authMode: 'gateway-key' },
+        credential: {
+          required: true,
+          available: false,
+          source: 'none',
+          version: 'v'.repeat(128),
+          writable: true,
+        },
+      })),
+      check: { ...initial.check, state: 'configured' },
+    };
+  }, 60_000);
+  // If the case is filtered out or fails before afterEach, still join the real HTTP/runtime work.
+  afterAll(drainCleanups);
+
+  it('budgets real SQLite history once at the final Result/snapshot boundary with maximum connector metadata', async () => {
+    const runtime = f.service().runtime;
+    expect(
+      Buffer.byteLength(JSON.stringify(raw)) + Buffer.byteLength(JSON.stringify(maximum)),
+    ).toBeGreaterThan(JSON_MAX_BYTES);
+    runtime.setModelControls({
+      view: async () => maximum,
+      isChecking: () => false,
+      close: () => f.service().models.close(),
     });
-    await runtime.state('updateTask', {
-      taskId: accepted.task.id,
-      status: 'completed',
-      exitCode: 0,
-      stdout: 's'.repeat(12000),
-      stderr: 'e'.repeat(12000),
+    const response = await f.request<CompanionSnapshot>('/api/snapshot');
+    expect(response.status).toBe(200);
+    expect(Buffer.byteLength(JSON.stringify(response.result))).toBeLessThanOrEqual(JSON_MAX_BYTES);
+    expect(jsonPreflight(response.result).ok).toBe(true);
+    const snapshot = value(response.result);
+    expect(snapshot.facts).toEqual(raw.facts);
+    expect(snapshot.projection).toEqual({
+      hasMoreMessages: true,
+      hasMoreTasks: true,
+      taskDetailsTruncated: true,
     });
-    const memory = await runtime.state('memorySnapshot', {});
-    await runtime.state('rememberFact', {
-      expectedMemoryRevision: memory.memoryRevision,
-      expectedFactRevision: 0,
-      origin: { kind: 'owner-form' },
-      commandId: `budget-fact-${index}`,
-      key: `fact-${index}`,
-      value: 'f'.repeat(200),
-    });
-  }
-  for (let index = 0; index < 100; index++) {
-    const accepted = await runtime.state('acceptMessage', {
-      commandId: `budget-message-${index}`,
-      text: 'm'.repeat(8000),
-    });
-    // This fixture represents retained history, not one hundred live ready inputs.
-    await runtime.state('updateInput', {
-      id: accepted.message.id,
-      phase: 'completed',
-      cleanup: 'settled',
-    });
-  }
-  const raw = await runtime.state('snapshot', {});
-  const initial = await f.view();
-  const first = initial.connectors[0];
-  if (!first) throw new Error('missing initial connector');
-  const url = 'https://example.test/' + 'p'.repeat(2048 - 'https://example.test/'.length);
-  const maximum: CompanionModelView = {
-    ...initial,
-    connectors: Array.from({ length: 8 }, (_, index) => ({
-      ...first,
-      id: index === 0 ? MAGPIE_CONNECTION : `pet.connector-${index}/provider`,
-      label: 'L'.repeat(80),
-      model: 'M'.repeat(128),
-      settings: { baseUrl: url, model: 'M'.repeat(128), authMode: 'gateway-key' },
-      credential: {
-        required: true,
-        available: false,
-        source: 'none',
-        version: 'v'.repeat(128),
-        writable: true,
-      },
-    })),
-    check: { ...initial.check, state: 'configured' },
-  };
-  expect(
-    Buffer.byteLength(JSON.stringify(raw)) + Buffer.byteLength(JSON.stringify(maximum)),
-  ).toBeGreaterThan(JSON_MAX_BYTES);
-  runtime.setModelControls({
-    view: async () => maximum,
-    isChecking: () => false,
-    close: () => f.service().models.close(),
-  });
-  const response = await f.request<CompanionSnapshot>('/api/snapshot');
-  expect(response.status).toBe(200);
-  expect(Buffer.byteLength(JSON.stringify(response.result))).toBeLessThanOrEqual(JSON_MAX_BYTES);
-  expect(jsonPreflight(response.result).ok).toBe(true);
-  const snapshot = value(response.result);
-  expect(snapshot.facts).toEqual(raw.facts);
-  expect(snapshot.projection).toEqual({
-    hasMoreMessages: true,
-    hasMoreTasks: true,
-    taskDetailsTruncated: true,
-  });
-  expect(snapshot.messages.length).toBeLessThan(raw.messages.length);
-}, 20000);
+    expect(snapshot.messages.length).toBeLessThan(raw.messages.length);
+  }, 20000);
+});

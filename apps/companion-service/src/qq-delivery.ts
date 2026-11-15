@@ -11,7 +11,6 @@ import {
   sameQQAccount,
   makeError,
   isKernelErrorCode,
-  type CompanionCleanup,
   type CompanionMaterialRef,
   type CompanionMessage,
   type KernelError,
@@ -34,6 +33,7 @@ import {
   type RuntimeInputGrant,
   type RuntimeInputTerminal,
 } from '@pet/companion-runtime';
+import type { ExecutionTarget } from '@pet/state-sqlite';
 import type { QQAudio } from './qq-audio.js';
 import type { HostMaterialStore } from './material-store.js';
 import { qqGroupSettings } from './qq-policy.js';
@@ -46,50 +46,34 @@ import {
   textHash,
 } from './qq-delivery-plan.js';
 
-export interface QQDeliveryProgress {
-  readonly dispatched: boolean;
-  readonly receipt: QQRemoteReceipt | null;
-  /** Actual native correlation only; unknown until observed is null/absent. */
-  readonly correlationId?: string | null;
-}
-export interface QQDeliveryOutcome extends QQDeliveryProgress {
-  readonly outcome: Exclude<QQDeliveryAttempt['outcome'], 'pending'>;
-  /** Local native/key work settlement; never a claim that remote stage bytes were deleted. */
-  readonly cleanup: CompanionCleanup;
-  readonly error: KernelError | null;
-  /** Opaque private file_info/remote staging handle, never stored in State/SSE. */
-  readonly uploaded?: unknown;
-}
-export interface QQDeliveryRequest {
-  /** Captured grant plus exact source; adapters recheck at every native/range/chunk boundary. */
-  check(): Promise<void>;
-  readonly expectedConnectionId: string;
-  readonly attemptId: string;
-  readonly operation: QQDeliveryAttempt['operation'];
-  readonly delivery: QQDeliveryView;
-  readonly part: QQDeliveryPart;
-  readonly material?: CompanionMaterialRef;
-  readonly bytes?: AsyncIterable<Uint8Array>;
-  readonly uploaded?: unknown;
-}
-export interface QQDeliveryTransport {
-  /** One attempt; resolves only after actual IO settlement, preserving any known post-dispatch receipt. */
-  execute(
-    request: QQDeliveryRequest,
-    signal: AbortSignal,
-    progress: (value: QQDeliveryProgress) => Promise<void>,
-  ): Promise<QQDeliveryOutcome>;
-}
-export interface QQDeliverySource {
-  readonly account: QQAccountRef;
-  readonly connectionId: string;
-  readonly signal: AbortSignal;
-  readonly transport: QQDeliveryTransport;
-  check(): Promise<void>;
-}
+import type {
+  QQDeliveryOutcome,
+  QQDeliveryProgress,
+  QQDeliveryRequest,
+  QQDeliverySource,
+} from '../../../packages/local-host/src/qq-delivery-types.js';
+export type {
+  QQDeliveryOutcome,
+  QQDeliveryProgress,
+  QQDeliveryRequest,
+  QQDeliverySource,
+  QQDeliveryTransport,
+} from '../../../packages/local-host/src/qq-delivery-types.js';
 export interface QQDeliveryTerminal extends RuntimeInputTerminal {
   readonly grant: RuntimeInputGrant;
 }
+export type QQDeliveryExecutionSelection =
+  | { readonly kind: 'service-local' }
+  | {
+      readonly kind: 'available';
+      readonly source: QQDeliverySource;
+      readonly execution: Extract<ExecutionTarget, { kind: 'remote' }>;
+    }
+  | {
+      readonly kind: 'unavailable';
+      readonly execution: Extract<ExecutionTarget, { kind: 'unavailable' }>;
+      readonly error: KernelError;
+    };
 export interface QQDeliveryOptions {
   readonly host: CompanionPluginHost;
   readonly runtime: CompanionRuntime;
@@ -97,6 +81,10 @@ export interface QQDeliveryOptions {
   readonly audio: Pick<QQAudio, 'exportVoice'>;
   policy(): Promise<{ readonly revision: number; readonly settings: QQPolicySettings }>;
   sourceFor(account: QQAccountRef): QQDeliverySource;
+  /** Only explicit service-local (or legacy absence) calls sourceFor; unavailable never falls back. */
+  executionFor?(
+    account: QQAccountRef,
+  ): QQDeliveryExecutionSelection | Promise<QQDeliveryExecutionSelection>;
   /** Explicit current wire-active permission, separate from app-level proactive eligibility. */
   allowOfficialProactive?(grant: RuntimeInputGrant): Promise<boolean>;
   onError?(error: KernelError, event: QQDeliveryTerminal): void | Promise<void>;
@@ -111,6 +99,7 @@ interface Pending {
 }
 interface Batch {
   delivery: QQDeliveryView;
+  readonly execution?: ExecutionTarget;
   readonly source: QQDeliverySource;
   readonly access: RuntimeInputAccess;
 }
@@ -352,7 +341,7 @@ export class QQDeliveryController {
   private async prepare(
     entry: Pending,
     access: RuntimeInputAccess,
-  ): Promise<{ delivery: QQDeliveryView; source?: QQDeliverySource }> {
+  ): Promise<{ delivery: QQDeliveryView; source?: QQDeliverySource; execution?: ExecutionTarget }> {
     const { admission, outputs } = entry.event;
     const route = admission.origin.route;
     if (
@@ -431,14 +420,37 @@ export class QQDeliveryController {
     if (admission.cleanup !== 'settled' || admission.phase !== 'completed')
       error = admission.error ?? makeError('unavailable', false);
     let source: QQDeliverySource | undefined;
+    let execution: ExecutionTarget | undefined;
+    let serviceLocal = this.options.executionFor === undefined;
     try {
-      source = this.options.sourceFor(route.account);
-      if (!sameQQAccount(source.account, route.account) || !source.connectionId)
-        throw new KernelFault('stale-owner');
-      await source.check();
-      if (source.signal.aborted) throw new KernelFault('stale-owner');
+      if (this.options.executionFor) {
+        const selected = await this.options.executionFor(route.account);
+        if (selected.kind === 'service-local') {
+          serviceLocal = true;
+          source = this.options.sourceFor(route.account);
+        } else {
+          execution = structuredClone(selected.execution);
+          if (selected.kind === 'unavailable') error ??= selected.error;
+          else {
+            source = selected.source;
+            if (
+              selected.execution.binding.nativeConnectionId !== source.connectionId ||
+              selected.execution.binding.sourceOwner.pluginId !== route.account.sourcePluginId ||
+              selected.execution.binding.sourceOwner.instanceId !== route.account.instanceId
+            )
+              throw new KernelFault('stale-owner');
+          }
+        }
+      } else source = this.options.sourceFor(route.account);
+      if (source) {
+        if (!sameQQAccount(source.account, route.account) || !source.connectionId)
+          throw new KernelFault('stale-owner');
+        await source.check();
+        if (source.signal.aborted) throw new KernelFault('stale-owner');
+      }
     } catch (cause) {
       error ??= failed(cause);
+      if (!serviceLocal && !execution) execution = { kind: 'unavailable', hostId: null };
     }
     if (error)
       parts = parts.map((part) =>
@@ -465,8 +477,12 @@ export class QQDeliveryController {
       error,
     };
     return {
-      delivery: await this.options.runtime.state('createDelivery', { delivery }),
+      delivery: await this.options.runtime.state('createDelivery', {
+        delivery,
+        ...(execution ? { execution } : {}),
+      }),
       ...(source ? { source } : {}),
+      ...(execution ? { execution } : {}),
     };
   }
   private async update(batch: Batch, parts: readonly QQDeliveryPart[]): Promise<void> {
@@ -541,6 +557,9 @@ export class QQDeliveryController {
         operation,
         delivery: batch.delivery,
         part,
+        ...(batch.execution?.kind === 'remote'
+          ? { executionBinding: batch.execution.binding }
+          : {}),
         ...(uploaded !== undefined ? { uploaded } : {}),
       };
       if (operation === 'send') {
@@ -574,7 +593,7 @@ export class QQDeliveryController {
               ? 'cancelled-before-dispatch'
               : 'failed',
           receipt: null,
-          cleanup: 'settled',
+          cleanup: invoked && batch.execution?.kind === 'remote' ? 'unknown' : 'settled',
           error: interruption,
         };
     }
@@ -623,7 +642,10 @@ export class QQDeliveryController {
         settledAt: Math.max(Date.now(), current.startedAt),
       };
     }
-    if (actual.cleanup !== 'settled') this.cleanupFailure = makeError('unavailable', false);
+    // The remote execution owner retains its exact uncertain task/source hold. A lost bridge
+    // does not poison the service's unrelated native sources or claim remote physical closure.
+    if (actual.cleanup !== 'settled' && batch.execution?.kind !== 'remote')
+      this.cleanupFailure = makeError('unavailable', false);
     await this.update(
       batch,
       batch.delivery.parts.map((candidate) =>
@@ -740,6 +762,7 @@ export class QQDeliveryController {
     const batch: Batch = {
       delivery: prepared.delivery,
       source: prepared.source,
+      ...(prepared.execution ? { execution: prepared.execution } : {}),
       access: this.access(entry, eligibilitySignal, prepared.source),
     };
     let error: KernelError | null = null;

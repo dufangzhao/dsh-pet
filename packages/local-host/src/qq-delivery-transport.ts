@@ -20,17 +20,19 @@ import type { QQMediaRead, QQMediaSource } from '@pet/companion-runtime';
 import type {
   OfficialQqDriver,
   OfficialDriverHttpResult,
-} from '../../../plugins/qq-official/src/driver.js';
-import type { OfficialMediaResult } from '../../../plugins/qq-official/src/media-types.js';
-import { OFFICIAL_MEDIA_MAX_PARTS } from '../../../plugins/qq-official/src/media-wire.js';
-import type { OfficialHttpReceipt } from '../../../plugins/qq-official/src/wire.js';
-import type { OneBotQqDriver, OneBotCallOutcome } from '../../../plugins/qq-onebot/src/driver.js';
-import type { SnowStagedMedia } from '../../../plugins/qq-onebot/src/media-types.js';
-import { decodeOneBotActionReceipt } from '../../../plugins/qq-onebot/src/wire.js';
-import type { CapturedQqSourceBase } from './qq-controller.js';
-import type { QQDeliveryOutcome, QQDeliveryRequest, QQDeliverySource } from './qq-delivery.js';
+  OfficialMediaResult,
+  OfficialHttpReceipt,
+} from '@pet/qq-official';
+import { OFFICIAL_MEDIA_MAX_PARTS } from '@pet/qq-official/media-wire';
+import type { OneBotQqDriver, OneBotCallOutcome, SnowStagedMedia } from '@pet/qq-onebot';
+import { decodeOneBotActionReceipt } from '@pet/qq-onebot/wire';
+import type {
+  QQDeliveryOutcome,
+  QQDeliveryRequest,
+  QQDeliverySource,
+} from './qq-delivery-types.js';
 
-export type QQDeliveryNativeSource = CapturedQqSourceBase &
+export type QQDeliveryNativeSource = Omit<QQDeliverySource, 'transport'> &
   (
     | {
         readonly protocol: 'official';

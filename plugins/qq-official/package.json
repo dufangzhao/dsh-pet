@@ -14,6 +14,10 @@
     "./wire": {
       "types": "./src/wire.ts",
       "default": "./src/wire.ts"
+    },
+    "./media-wire": {
+      "types": "./src/media-wire.ts",
+      "default": "./src/media-wire.ts"
     }
   },
   "scripts": {

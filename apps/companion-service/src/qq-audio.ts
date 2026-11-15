@@ -34,7 +34,8 @@ import type { QqCodecNative, QqCodecPortsFor } from '@pet/qq-media-codec';
 import { speechSegments } from '@pet/shared-speech';
 import type { VoiceController } from './voice-controller.js';
 import type { SpeechController } from './speech-controller.js';
-import type { HostMaterialStore } from './material-store.js';
+import type { HostMaterialStore, RawInputCustody } from './material-store.js';
+import { qqMediaAccess, type QQProactiveMediaAuthority } from './qq-media-authority.js';
 
 const CODEC_CAPABILITY = 'companion.qq.codec@1';
 const identity = (id: string) => ({ pluginId: id, instanceId: 'default' });
@@ -60,6 +61,10 @@ export interface QQEncodedVoice {
   readonly name: string;
   readonly encoded: AsyncIterable<Uint8Array>;
 }
+export interface QQRawVoice extends Omit<QQEncodedVoice, 'encoded'> {
+  readonly custody: RawInputCustody;
+}
+type EncodedVoice = { readonly prefix: Buffer; source(): AsyncIterable<Uint8Array> };
 export interface QQAcceptedVoiceOutput {
   readonly inputId: string;
   readonly deliveryId: string;
@@ -343,99 +348,170 @@ export class QQAudio {
   transcribe(
     input: QQEncodedVoice,
     access: RuntimeInputAccess,
+    candidate?: QQProactiveMediaAuthority,
   ): Promise<{ material: CompanionMaterialRef; transcript: string }> {
+    if (this.closed) return Promise.reject(new KernelFault('not-ready'));
+    if (this.operations.size >= COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE)
+      return Promise.reject(new KernelFault('quota-exceeded'));
     const captured = {
       inputId: input.inputId,
       materialId: input.materialId,
       name: input.name,
       encoded: input.encoded,
     };
+    return this.track(
+      this.transcribePrepared(
+        captured,
+        access,
+        async (verify) => {
+          const encoded = await collect(
+            captured.encoded,
+            COMPANION_MATERIAL_INPUT_MAX_BYTES,
+            verify,
+          );
+          return { prefix: encoded, source: () => chunks(encoded, verify) };
+        },
+        candidate,
+      ),
+    );
+  }
+  transcribeRaw(
+    input: QQRawVoice,
+    actor: RuntimeInputAccess,
+    candidate?: QQProactiveMediaAuthority,
+  ): Promise<{ material: CompanionMaterialRef; transcript: string }> {
     if (this.closed) return Promise.reject(new KernelFault('not-ready'));
     if (this.operations.size >= COMPANION_MATERIAL_PREPARATION_MAX_ACTIVE)
       return Promise.reject(new KernelFault('quota-exceeded'));
+    const captured = {
+      inputId: input.inputId,
+      materialId: input.materialId,
+      name: input.name,
+      custody: input.custody,
+    };
     return this.track(
-      this.options.voice.withAsrConsumer(
-        QQ_FEATURE_PLUGIN_ID,
-        AbortSignal.any([access.signal, this.lifetime.signal]),
-        (asr, asrSignal) =>
-          this.codec(
-            access,
-            async (codec, signal, check) => {
-              const admission = await this.admission(captured.inputId, access);
-              if (
-                admission.origin.kind !== 'qq' ||
-                !admission.materialIds.includes(captured.materialId)
-              )
-                throw new KernelFault('permission-denied');
-              const verify = async () => {
-                signal.throwIfAborted();
-                await check();
-                await asr.check();
-              };
-              const encoded = await collect(
-                captured.encoded,
-                COMPANION_MATERIAL_INPUT_MAX_BYTES,
-                verify,
-              );
-              return codec.decode(
-                chunks(encoded, verify),
-                async (output, pcm) => {
+      this.options.materials.withRawInput(captured.custody, async (info, raw, rawSignal) => {
+        // These bounded views borrow the already charged verified buffer until this whole consumer returns.
+        const views: Uint8Array[] = [];
+        let size = 0;
+        for await (const view of raw) {
+          this.lifetime.signal.throwIfAborted();
+          await actor.check();
+          if (
+            view.length > 64 * 1024 ||
+            views.length >= Math.ceil(COMPANION_MATERIAL_INPUT_MAX_BYTES / (64 * 1024))
+          )
+            throw new KernelFault('quota-exceeded');
+          views.push(view);
+          size += view.length;
+        }
+        if (size !== info.sizeBytes) throw new KernelFault('audio-format');
+        const first = views[0],
+          prefix = first ? Buffer.from(first.subarray(0, 32)) : Buffer.alloc(0);
+        const access: RuntimeInputAccess = {
+          scope: actor.scope,
+          signal: AbortSignal.any([actor.signal, rawSignal, this.lifetime.signal]),
+          check: actor.check.bind(actor),
+        };
+        return this.transcribePrepared(
+          captured,
+          access,
+          async (verify) => ({
+            prefix,
+            source: () => ({
+              async *[Symbol.asyncIterator]() {
+                for (const view of views) {
+                  await verify();
+                  yield view;
+                }
+              },
+            }),
+          }),
+          candidate,
+        );
+      }),
+    );
+  }
+  private async transcribePrepared(
+    captured: Omit<QQEncodedVoice, 'encoded'>,
+    access: RuntimeInputAccess,
+    load: (verify: () => Promise<void>) => Promise<EncodedVoice>,
+    candidate?: QQProactiveMediaAuthority,
+  ): Promise<{ material: CompanionMaterialRef; transcript: string }> {
+    access = await qqMediaAccess(await this.admission(captured.inputId, access), access, candidate);
+    return this.options.voice.withAsrConsumer(
+      QQ_FEATURE_PLUGIN_ID,
+      AbortSignal.any([access.signal, this.lifetime.signal]),
+      (asr, asrSignal) =>
+        this.codec(
+          access,
+          async (codec, signal, check) => {
+            const admission = await this.admission(captured.inputId, access);
+            if (!admission.materialIds.includes(captured.materialId))
+              throw new KernelFault('permission-denied');
+            const verify = async () => {
+              signal.throwIfAborted();
+              await check();
+              await asr.check();
+            };
+            const encoded = await load(verify);
+            return codec.decode(
+              encoded.source(),
+              async (output, pcm) => {
+                await verify();
+                if (
+                  output.encoding !== 'pcm-f32le' ||
+                  output.sampleRate !== VOICE_SAMPLE_RATE ||
+                  output.frames < 1 ||
+                  output.frames > (VOICE_SAMPLE_RATE * COMPANION_VOICE_ATTACHMENT_MAX_MS) / 1000 ||
+                  output.spans.length > COMPANION_VOICE_ATTACHMENT_MAX_SPANS
+                )
+                  throw new KernelFault('audio-format');
+                const material = await this.options.materials.put(
+                  {
+                    id: captured.materialId,
+                    inputId: captured.inputId,
+                    kind: 'voice',
+                    name: captured.name,
+                    mediaType: encodedMime(encoded.prefix),
+                    durationMs: output.durationMs,
+                  },
+                  encoded.source(),
+                  access,
+                );
+                const bytes = await collect(pcm, output.frames * 4, verify);
+                if (bytes.length !== output.frames * 4) throw new KernelFault('audio-format');
+                const texts: string[] = [];
+                let through = 0;
+                for (const span of output.spans) {
                   await verify();
                   if (
-                    output.encoding !== 'pcm-f32le' ||
-                    output.sampleRate !== VOICE_SAMPLE_RATE ||
-                    output.frames < 1 ||
-                    output.frames >
-                      (VOICE_SAMPLE_RATE * COMPANION_VOICE_ATTACHMENT_MAX_MS) / 1000 ||
-                    output.spans.length > COMPANION_VOICE_ATTACHMENT_MAX_SPANS
+                    span.startFrame !== through ||
+                    span.frames < 1 ||
+                    span.frames > VOICE_MAX_SAMPLES
                   )
                     throw new KernelFault('audio-format');
-                  const material = await this.options.materials.put(
-                    {
-                      id: captured.materialId,
-                      inputId: captured.inputId,
-                      kind: 'voice',
-                      name: captured.name,
-                      mediaType: encodedMime(encoded),
-                      durationMs: output.durationMs,
-                    },
-                    chunks(encoded, verify),
-                    access,
+                  const result = await asr.recognize(
+                    span.frames,
+                    chunks(bytes.subarray(through * 4, (through + span.frames) * 4), verify),
+                    signal,
                   );
-                  const bytes = await collect(pcm, output.frames * 4, verify);
-                  if (bytes.length !== output.frames * 4) throw new KernelFault('audio-format');
-                  const texts: string[] = [];
-                  let through = 0;
-                  for (const span of output.spans) {
-                    await verify();
-                    if (
-                      span.startFrame !== through ||
-                      span.frames < 1 ||
-                      span.frames > VOICE_MAX_SAMPLES
-                    )
-                      throw new KernelFault('audio-format');
-                    const result = await asr.recognize(
-                      span.frames,
-                      chunks(bytes.subarray(through * 4, (through + span.frames) * 4), verify),
-                      signal,
-                    );
-                    through += span.frames;
-                    texts.push(result.kind === 'final' ? result.text : '');
-                    if (texts.join('\n').length > COMPANION_MAX_TEXT)
-                      throw new KernelFault('quota-exceeded');
-                  }
-                  if (through !== output.frames) throw new KernelFault('audio-format');
-                  const transcript = texts.join('\n');
-                  if (!texts.some((text) => text.trim())) throw new KernelFault('no-speech');
-                  await verify();
-                  return { material, transcript };
-                },
-                signal,
-              );
-            },
-            asrSignal,
-          ),
-      ),
+                  through += span.frames;
+                  texts.push(result.kind === 'final' ? result.text : '');
+                  if (texts.join('\n').length > COMPANION_MAX_TEXT)
+                    throw new KernelFault('quota-exceeded');
+                }
+                if (through !== output.frames) throw new KernelFault('audio-format');
+                const transcript = texts.join('\n');
+                if (!texts.some((text) => text.trim())) throw new KernelFault('no-speech');
+                await verify();
+                return { material, transcript };
+              },
+              signal,
+            );
+          },
+          asrSignal,
+        ),
     );
   }
   exportVoice(

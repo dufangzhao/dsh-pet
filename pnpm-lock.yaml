@@ -113,6 +113,12 @@ importers:
       '@pet/host-kernel':
         specifier: workspace:*
         version: link:../../packages/host-kernel
+      '@pet/local-host':
+        specifier: workspace:*
+        version: link:../../packages/local-host
+      '@pet/local-host-bridge':
+        specifier: workspace:*
+        version: link:../../plugins/local-host-bridge
       '@pet/model-connection-magpie':
         specifier: workspace:*
         version: link:../../plugins/model-connection-magpie
@@ -186,6 +192,9 @@ importers:
       '@pet/host-kernel':
         specifier: workspace:*
         version: link:../../packages/host-kernel
+      '@pet/local-host':
+        specifier: workspace:*
+        version: link:../../packages/local-host
       '@pet/text-client':
         specifier: workspace:*
         version: link:../../plugins/text-client
@@ -201,6 +210,9 @@ importers:
       react-dom:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
     devDependencies:
       '@tailwindcss/vite':
         specifier: 4.3.3
@@ -332,6 +344,46 @@ importers:
       vite:
         specifier: 'catalog:'
         version: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/local-host:
+    dependencies:
+      '@pet/companion-runtime':
+        specifier: workspace:*
+        version: link:../companion-runtime
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../host-kernel
+      '@pet/local-agent-link':
+        specifier: workspace:*
+        version: link:../../plugins/local-agent-link
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../plugin-sdk
+      '@pet/qq-official':
+        specifier: workspace:*
+        version: link:../../plugins/qq-official
+      '@pet/qq-onebot':
+        specifier: workspace:*
+        version: link:../../plugins/qq-onebot
+      ws:
+        specifier: 8.22.0
+        version: 8.22.0
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      '@types/ws':
+        specifier: 8.18.2
+        version: 8.18.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
@@ -657,6 +709,56 @@ importers:
       vite:
         specifier: 'catalog:'
         version: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/local-agent-link:
+    dependencies:
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  plugins/local-host-bridge:
+    dependencies:
+      '@pet/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pet/host-kernel':
+        specifier: workspace:*
+        version: link:../../packages/host-kernel
+      '@pet/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))

@@ -11,7 +11,8 @@ import {
   type CompanionInputAdmission,
   type CompanionInputOrigin,
   type CompanionMaterialRef,
-  type JsonObject,
+  sameQQAccount,
+  type LocalHostQQInput,
   type KernelError,
   type QQInputReceipt,
 } from '@pet/contracts';
@@ -31,7 +32,16 @@ import type {
   QQIngressHandlers,
 } from './qq-controller.js';
 import type { QQJudgeController } from './qq-judge.js';
-import { mapOfficialInput, mapOneBotInput, type QQMappedInput } from './qq-input.js';
+import { mapOfficialInput, mapOneBotInput, type QQMappedInput } from '@pet/local-host/qq-input';
+import {
+  canonicalQQInput,
+  canonicalQQEvidence as evidence,
+  canonicalQQObservationText as observationText,
+  parseQQInputProjection,
+  type QQCanonicalInput,
+} from '@pet/local-host';
+import type { QQInputMaterialProducer } from './qq-media-transfer.js';
+import type { QQProactiveMediaAuthority } from './qq-media-authority.js';
 import {
   assertQQParticipantCurrent,
   qqGroupSettings,
@@ -55,6 +65,13 @@ export interface QQIngressOptions {
     mapped: QQMappedInput,
     source: CapturedQqSourceBase,
     access: RuntimeInputAccess,
+    candidate?: QQProactiveMediaAuthority,
+  ): Promise<QQInputPreparation>;
+  prepareProducedMedia?(
+    input: CompanionInputAdmission,
+    producer: QQInputMaterialProducer,
+    access: RuntimeInputAccess,
+    candidate?: QQProactiveMediaAuthority,
   ): Promise<QQInputPreparation>;
   readonly random?: () => number;
   onReceipt?(receipt: QQInputReceipt): void;
@@ -81,63 +98,11 @@ const receipt = (
   messageId: input?.messageId ?? null,
   error,
 });
-function evidence(mapped: QQMappedInput): JsonObject {
-  const parts = mapped.materials.map((part) =>
-    part.protocol === 'official'
-      ? {
-          kind: part.kind,
-          quoted: part.quoted,
-          name: part.attachment.filename,
-          type: part.attachment.content_type,
-          size: part.attachment.size,
-        }
-      : {
-          kind: part.kind,
-          quoted: part.quoted,
-          name: part.segment.data['name'] ?? part.segment.data['file_name'] ?? null,
-          size: part.segment.data['file_size'] ?? part.segment.data['size'] ?? null,
-          fileId: part.segment.data['file_id'] ?? null,
-        },
-  );
-  return JSON.parse(
-    JSON.stringify({
-      actor: mapped.actor,
-      text: mapped.text,
-      quote: mapped.quote,
-      messageId: mapped.route.reference?.messageId ?? null,
-      parts,
-    }),
-  ) as JsonObject;
-}
-
-function observationText(mapped: QQMappedInput): string {
-  if (!mapped.materials.length && !mapped.fileEvidence) return mapped.text;
-  return JSON.stringify({
-    text: mapped.text,
-    media: mapped.materials.map((part) => ({
-      kind: part.kind,
-      quoted: part.quoted,
-      name:
-        part.protocol === 'official'
-          ? part.attachment.filename
-          : (part.segment.data['name'] ?? part.segment.data['file_name'] ?? null),
-      reportedSize:
-        part.protocol === 'official'
-          ? part.attachment.size
-          : (part.segment.data['file_size'] ?? part.segment.data['size'] ?? null),
-    })),
-    ...(mapped.fileEvidence
-      ? {
-          sharedFile: {
-            materialId: mapped.observationId,
-            name: mapped.fileEvidence.name,
-            reportedSize: mapped.fileEvidence.reportedSize,
-            availability: 'not-loaded',
-          },
-        }
-      : {}),
-  });
-}
+type PrepareInput = (
+  input: CompanionInputAdmission,
+  access: RuntimeInputAccess,
+  candidate?: QQProactiveMediaAuthority,
+) => Promise<QQInputPreparation>;
 
 /** Bounded source admission. Model work and accepted jobs keep their own host-policy lifetime. */
 export class QQIngress {
@@ -345,7 +310,41 @@ export class QQIngress {
     return first;
   }
 
-  async accept(mapped: QQMappedInput, source: CapturedQqSourceBase): Promise<QQInputReceipt> {
+  accept(mapped: QQMappedInput, source: CapturedQqSourceBase): Promise<QQInputReceipt> {
+    return this.acceptCanonical(canonicalQQInput(mapped), source, (input, access, candidate) => {
+      if (!this.options.prepareMedia) throw new KernelFault('not-ready');
+      return this.options.prepareMedia(input, mapped, source, access, candidate);
+    });
+  }
+  acceptProjected(
+    projected: LocalHostQQInput,
+    source: CapturedQqSourceBase,
+    producerFor: (input: CompanionInputAdmission) => QQInputMaterialProducer,
+  ): Promise<QQInputReceipt> {
+    const mapped = parseQQInputProjection(projected);
+    return this.acceptCanonical(mapped, source, (input, access, candidate) => {
+      if (!this.options.prepareProducedMedia) throw new KernelFault('not-ready');
+      const producer = producerFor(input);
+      if (
+        !sameQQAccount(producer.account, mapped.actor.account) ||
+        producer.parts.length !== mapped.materials.length ||
+        producer.parts.some(
+          (part, index) =>
+            part.kind !== mapped.materials[index]?.kind ||
+            part.quoted !== mapped.materials[index]?.quoted,
+        )
+      )
+        throw new KernelFault('permission-denied');
+      return this.options.prepareProducedMedia(input, producer, access, candidate);
+    });
+  }
+  private async acceptCanonical(
+    mapped: QQCanonicalInput,
+    source: CapturedQqSourceBase,
+    prepare: PrepareInput,
+  ): Promise<QQInputReceipt> {
+    if (!sameQQAccount(source.account, mapped.actor.account))
+      throw new KernelFault('permission-denied');
     if (this.closed) throw new KernelFault('not-ready');
     await source.check();
     if (mapped.self || mapped.machine)
@@ -419,7 +418,7 @@ export class QQIngress {
           return this.launch(mapped.eventKey, grant, async (signal, announce) => {
             signal.throwIfAborted();
             announce(receipt(mapped.eventKey, 'observed', null));
-            return this.proactive(mapped, source, grant, group, signal, announce);
+            return this.proactive(mapped, source, grant, group, signal, announce, prepare);
           });
         }
       }
@@ -463,7 +462,7 @@ export class QQIngress {
     });
     // No await between issuing this grant and registering its policy watcher in launch().
     return this.launch(mapped.eventKey, grant, (signal, announce) =>
-      this.admit(mapped, source, grant, mapped.text, signal, announce),
+      this.admit(mapped, source, grant, mapped.text, signal, announce, prepare),
     );
   }
 
@@ -491,12 +490,13 @@ export class QQIngress {
   }
 
   private async admit(
-    mapped: QQMappedInput,
+    mapped: QQCanonicalInput,
     source: CapturedQqSourceBase,
     grant: RuntimeInputGrant,
     text: string,
     signal: AbortSignal,
     announce: (value: QQInputReceipt) => void,
+    prepare: PrepareInput,
     proactiveLimits?: { readonly cooldownMs: number; readonly maxRepliesPerHour: number },
   ): Promise<QQInputReceipt> {
     const origin = grant.origin;
@@ -530,9 +530,26 @@ export class QQIngress {
       let transcript = '';
       let notes: readonly string[] = [];
       if (mapped.materials.length) {
-        if (!this.options.prepareMedia) throw new KernelFault('not-ready');
+        let candidate: QQProactiveMediaAuthority | undefined;
+        if (origin.kind === 'qq-proactive') {
+          const observation = await this.runtime.state('getObservation', {
+            id: mapped.observationId,
+            scope: access.scope,
+          });
+          await access.check();
+          const participant = resolveQQParticipant(this.qq.policy().settings, mapped.actor);
+          if (
+            !participant ||
+            observation.principalId !== participant.principalId ||
+            companionAudienceKey(observation.audience) !== companionAudienceKey(origin.audience) ||
+            observation.text !== observationText(mapped) ||
+            observation.quotedText !== (mapped.quote?.quotedText ?? null)
+          )
+            throw new KernelFault('permission-denied');
+          candidate = { grant, actor: structuredClone(mapped.actor), observation };
+        }
         cleanup = 'unknown';
-        const prepared = await this.options.prepareMedia(input, mapped, source, access);
+        const prepared = await prepare(input, access, candidate);
         cleanup = prepared.ok ? 'settled' : prepared.cleanup;
         await access.check();
         if (!prepared.ok) return this.rejected(mapped.eventKey, input, prepared.error, cleanup);
@@ -579,12 +596,13 @@ export class QQIngress {
   }
 
   private async proactive(
-    mapped: QQMappedInput,
+    mapped: QQCanonicalInput,
     source: CapturedQqSourceBase,
     grant: RuntimeInputGrant,
     settings: ReturnType<typeof qqGroupSettings>,
     signal: AbortSignal,
     announce: (value: QQInputReceipt) => void,
+    prepare: PrepareInput,
   ): Promise<QQInputReceipt | null> {
     const origin = grant.origin;
     if (
@@ -652,7 +670,7 @@ export class QQIngress {
       if (!judgment.decision) return null;
     }
     await check();
-    return this.admit(mapped, source, grant, text, signal, announce, limits);
+    return this.admit(mapped, source, grant, text, signal, announce, prepare, limits);
   }
 
   async grantForWorkResult(origin: CompanionInputOrigin): Promise<RuntimeInputGrant> {
