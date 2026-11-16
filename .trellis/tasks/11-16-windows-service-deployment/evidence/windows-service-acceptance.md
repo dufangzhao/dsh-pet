@@ -56,6 +56,13 @@ Verified on the real machine:
 - `GET /` -> 200 `text/html; charset=utf-8` (414 bytes).
 - `POST /api/messages` -> 202; snapshot contains the user message and the scripted
   assistant reply.
+- `POST /api/model/test` against the local Magpie gateway (`http://127.0.0.1:3425/v1`,
+  model `codex/gpt-6.1-sol`, `local-client-id` auth) -> `verified`, `evidence: network`,
+  `elapsedMs: 3517`.
+- In `model` mode, `POST /api/messages` returned a real model answer (not the scripted
+  text) before restart; after `local.mjs stop` / `start` the saved mode still applied
+  (`Mode: model; model connection: applied; model foreground: enabled`) and a second
+  message was answered with `OK`.
 - `POST /api/messages` with `创建文件任务` -> task created then `status: failed`,
   `error.code: not-ready`, no artifacts. Unavailable execution is reported honestly.
 - `local.mjs stop` -> `Stopped (pid 7976)`, process gone, pid file removed, log has no
@@ -78,7 +85,8 @@ Verified on the real machine:
 
 ## Limits
 
-- Scripted mode only. No model endpoint, key, real QQ account, ASR or TTS was used.
+- Scripted and local-Magpie model modes verified. No remote paid model endpoint, API key,
+  real QQ account, ASR or TTS was used.
 - The service is a detached foreground-style process, not a Windows service; a reboot
   stops it until `local.mjs start` runs again.
 - Cloud execution stays unavailable on this host, so file/artifact tasks fail by design.

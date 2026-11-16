@@ -21,14 +21,23 @@
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Service starts and serves the text client on Windows x64 in scripted mode; packaged desktop lifecycle passed on a locally rebuilt preview.11 package.",
+  "notes": "Service starts and serves the text client on Windows x64 in scripted and model modes; model mode is verified through the local Magpie gateway; packaged desktop lifecycle passed on a locally rebuilt preview.11 package.",
   "meta": {
     "execution": {
-      "gate": "windows-service-scripted-accepted; model-mode and real QQ trials pending",
-      "recordedAt": "2026-11-17T01:15:00+08:00",
+      "gate": "windows-service-scripted-and-model-accepted; real QQ/ASR/TTS out of scope",
+      "recordedAt": "2026-11-17T05:02:04+08:00",
       "evidence": "../evidence/windows-service-acceptance.md",
       "packagedDesktop": "qa/fixtures/local-host/evidence/windows-1569f47c-874a-4469-8f90-d7840d2d1721/report.json",
       "packagedDesktopEarlier": "qa/fixtures/local-host/evidence/windows-bc95c26e-85eb-4df3-b28a-bdf1a8e6812f/report.json",
+      "model": {
+        "connectorId": "pet.model-connection-magpie/magpie",
+        "baseUrl": "http://127.0.0.1:3425/v1",
+        "model": "codex/gpt-6.1-sol",
+        "authMode": "local-client-id",
+        "check": "verified",
+        "evidence": "network",
+        "elapsedMs": 3517
+      },
       "package": {
         "version": "0.1.0-preview.11",
         "directoryBytes": 455692024,

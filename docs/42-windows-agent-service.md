@@ -59,11 +59,22 @@ API calls. The desktop can attach to the same service through its normal server 
 
 - Service starts, `agent.status` is `ready`, `pet.text-client` is `active`.
 - `GET /` returns the text client HTML.
-- `POST /api/messages` is accepted and the scripted reply is stored.
+- `POST /api/messages` is accepted and the reply is stored (scripted mode and real model
+  mode both exercised).
 - Messages survive a stop/start cycle (State4 SQLite).
 - `local.mjs stop` ends the process through the stop file, removes the pid file, and logs
   no cleanup failure.
 - Restart attaches to the same data directory and token.
+
+## Model connection
+
+The service runs in `model` mode through the local Magpie gateway at
+`http://127.0.0.1:3425/v1`. The saved connector is
+`pet.model-connection-magpie/magpie` with model `codex/gpt-6.1-sol` and
+`local-client-id` auth. `POST /api/model/test` returned `verified` with
+`evidence: network` in 3,517 ms; owner messages were answered by the model before and
+after `local.mjs stop` / `start`, and the saved mode survived the restart
+(`Mode: model; model connection: applied; model foreground: enabled`).
 
 ## Packaged desktop
 
@@ -84,7 +95,8 @@ current source, not for that artifact.
   fabricated.
 - QQ media: `pet.qq-media-codec` is unavailable, so audio messages report
   `source: 'unavailable'`.
-- Real QQ account/model/ASR/TTS joint trials were not run.
-- `COMPANION_MODE=model` was not exercised; nobody supplied a model endpoint or key.
+- Real QQ account, ASR and TTS joint trials were not run.
+- Model mode was verified only against the local Magpie gateway (`codex/gpt-6.1-sol`,
+  `local-client-id`); no remote paid endpoint or API key was used.
 - The service does not install itself as a Windows service and does not start at login.
   A reboot leaves it stopped until `local.mjs start` is run again.
