@@ -741,7 +741,8 @@ export async function createCompanionService(
     await judge.initialize();
     await localHost.initialize(!disabled.has(LOCAL_HOST_BRIDGE_PLUGIN_ID));
     runtime.setQQStatusProvider(() => activeQQ.status());
-    if (!disabled.has(QQ_CODEC_PLUGIN_ID)) await host.setEnabled(QQ_CODEC_PLUGIN_ID, true);
+    if (!disabled.has(QQ_CODEC_PLUGIN_ID) && !host.isUnavailable(QQ_CODEC_PLUGIN_ID))
+      await host.setEnabled(QQ_CODEC_PLUGIN_ID, true);
     http = await serveText({
       runtime,
       host,

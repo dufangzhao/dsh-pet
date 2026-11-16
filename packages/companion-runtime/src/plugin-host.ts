@@ -343,13 +343,22 @@ export class CompanionPluginHost {
       configurationFaults,
     );
     try {
+      // A package that cannot run on this host (for example a Linux-only
+      // execution provider on Windows) leaves its capability unavailable; it
+      // must not take the whole service down. Protected packages still fail
+      // closed, and a broken manifest/config definition is never tolerated.
+      const unavailable = new Set<string>();
       for (const { registration, fingerprint: digest } of sources.values()) {
         const installed = manager.install(registration.manifest, {
           directory: path.resolve(registration.directory),
           origin: 'builtin',
         });
         if (!installed.ok) throw new KernelFault(installed.error.code);
-        if (installed.value.state === 'rejected') throw new KernelFault('not-ready');
+        if (installed.value.state === 'rejected') {
+          if (registration.protected || installed.value.reason?.code !== 'not-ready')
+            throw new KernelFault(installed.value.reason?.code ?? 'not-ready');
+          unavailable.add(registration.manifest.id);
+        }
         const id = identity(registration.manifest.id);
         const definition = configs.register(id, registration.manifest);
         if (!definition.ok) throw new KernelFault(definition.error.code);
@@ -384,7 +393,8 @@ export class CompanionPluginHost {
           throw new KernelFault('permission-denied');
       }
       for (const { registration } of sources.values()) {
-        if (registration.enabled) await host.setEnabled(registration.manifest.id, true);
+        if (registration.enabled && !unavailable.has(registration.manifest.id))
+          await host.setEnabled(registration.manifest.id, true);
       }
       return host;
     } catch (error) {
@@ -452,6 +462,11 @@ export class CompanionPluginHost {
 
   isEnabled(pluginId: string): boolean {
     return this.manager.get(identity(pluginId))?.state === 'active';
+  }
+
+  /** Installed package is present but cannot run on this host/platform. */
+  isUnavailable(pluginId: string): boolean {
+    return this.manager.get(identity(pluginId))?.state === 'rejected';
   }
 
   views(): CompanionPluginView[] {
