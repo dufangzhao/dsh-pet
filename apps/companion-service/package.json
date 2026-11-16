@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "build": "node build.mjs",
-    "start": "node --import tsx src/main.ts"
+    "start": "node --import tsx src/main.ts",
+    "local": "node local.mjs"
   },
   "dependencies": {
     "@pet/contracts": "workspace:*",

@@ -1,3 +1,4 @@
+import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { createCompanionService } from './service.js';
 import { KernelFault } from '@pet/host-kernel';
@@ -43,16 +44,30 @@ if (!token || Buffer.byteLength(token) < 24) {
       `Mode: ${modelState.desired.mode}; model connection: ${modelState.applied ? 'applied' : 'not applied'}; model foreground: ${modelState.enabled ? 'enabled' : 'disabled'}`,
     );
     let stopping = false;
+    let stopWatch: NodeJS.Timeout | undefined;
     const stop = (): void => {
       if (stopping) return;
       stopping = true;
+      if (stopWatch) clearInterval(stopWatch);
       void service.close().catch(() => {
         console.error('Service cleanup was not fully confirmed.');
         process.exitCode = 1;
       });
     };
+    // Windows has no SIGTERM for a detached process; a supervised deployment
+    // signals shutdown by creating this file instead.
+    const stopFile = process.env['COMPANION_STOP_FILE'];
+    if (stopFile) {
+      stopWatch = setInterval(() => {
+        if (!existsSync(stopFile)) return;
+        rmSync(stopFile, { force: true });
+        stop();
+      }, 500);
+      stopWatch.unref();
+    }
     process.once('SIGTERM', stop);
     process.once('SIGINT', stop);
+    process.once('SIGBREAK', stop);
   } catch (error) {
     console.error(
       `Companion could not start: ${error instanceof KernelFault ? error.error.code : 'internal'}`,
