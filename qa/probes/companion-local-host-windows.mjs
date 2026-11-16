@@ -10,7 +10,13 @@ import { fileURLToPath } from 'node:url';
 import { _electron, expect } from '@playwright/test';
 
 assert.equal(process.platform, 'win32');
-assert.deepEqual(process.argv.slice(2), ['--run-windows']);
+const argv = process.argv.slice(2);
+const executableArg = argv.find((arg) => arg.startsWith('--executable='));
+assert.deepEqual(argv.filter((arg) => arg !== '--run-windows' && arg !== executableArg), []);
+assert.ok(argv.includes('--run-windows'));
+const packagedExecutable = executableArg
+  ? path.resolve(executableArg.slice('--executable='.length))
+  : undefined;
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const require = createRequire(new URL('../../apps/desktop/package.json', import.meta.url));
 const WebSocket = createRequire(new URL('../../packages/local-host/package.json', import.meta.url))('ws');
@@ -22,10 +28,15 @@ const key = `controlled-windows-${id}`;
 const report = {
   id,
   status: 'running',
-  scope: 'Windows-x64-built-development-Main-preload-independent-daemon',
+  scope: packagedExecutable
+    ? 'Windows-x64-packaged-Main-preload-independent-daemon'
+    : 'Windows-x64-built-development-Main-preload-independent-daemon',
   checks: [],
   cleanup: {},
-  limitations: ['Development build, not an independently packaged preview.9 ZIP.', 'Controlled authenticated loopback OneBot peer; no real QQ account, model, ASR or TTS calls.'],
+  limitations: [
+    ...(packagedExecutable ? [] : ['Development build, not an independently packaged preview.9 ZIP.']),
+    'Controlled authenticated loopback OneBot peer; no real QQ account, model, ASR or TTS calls.',
+  ],
 };
 let application, page, peer, target;
 let stage = 'launch';
@@ -46,7 +57,14 @@ async function launch() {
   for (const name of ['SystemRoot', 'WINDIR', 'TEMP', 'TMP', 'PATH', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'HOMEDRIVE', 'HOMEPATH']) {
     if (process.env[name] !== undefined) env[name] = process.env[name];
   }
-  const app = await _electron.launch({ executablePath: require('electron'), args: [path.join(root, 'apps/desktop'), profileFlag, '--show-settings'], env, timeout: 30000 });
+  const app = await _electron.launch({
+    executablePath: packagedExecutable ?? require('electron'),
+    args: packagedExecutable
+      ? [`--user-data-dir=${path.join(root, '.cache', `pet-demo-acceptance-windows-${id}`)}`, '--show-settings']
+      : [path.join(root, 'apps/desktop'), profileFlag, '--show-settings'],
+    env,
+    timeout: 60000,
+  });
   application = app;
   await expect.poll(() => app.windows().filter((window) => window.url().startsWith('file:')).length, { timeout: 30000 }).toBe(2);
   page = app.windows().find((window) => window.url().endsWith('/console/index.html'));
@@ -79,7 +97,7 @@ try {
   assert.equal(report.native.platform, 'win32');
   assert.equal(report.native.arch, 'x64');
   assert.equal(report.native.electron, '45.0.0');
-  assert.equal(report.native.packaged, false);
+  assert.equal(report.native.packaged, Boolean(packagedExecutable));
   for (const preferences of report.native.windows) assert.deepEqual(preferences, { sandbox: true, contextIsolation: true, nodeIntegration: false });
   assert.equal(await page.evaluate(() => Object.isFrozen(window.petLocalHost)), true);
   const pet = application.windows().find((window) => window.url().endsWith('/pet/index.html'));
@@ -161,7 +179,9 @@ try {
   report.cleanup.nativePeerClosed = true;
   await noSecrets(path.join(report.native.userData, 'local-plugin-host'));
   report.checks.push('server-absent-explicit-stop-completes-and-closes-native-peer');
-  report.status = 'Windows-development-lifecycle-passed';
+  report.status = packagedExecutable
+    ? 'Windows-packaged-lifecycle-passed'
+    : 'Windows-development-lifecycle-passed';
 } catch (error) {
   report.status = 'failed';
   report.failure = `${stage}: ${error instanceof Error ? error.stack : String(error)}`;

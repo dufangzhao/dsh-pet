@@ -35,6 +35,17 @@ const within = (root, name) => {
   );
 };
 async function run(command, args, cwd, env) {
+  // Windows cannot spawn a pnpm.cmd shim without a shell. Use the caller's
+  // pnpm CLI entry directly so paths and arguments retain their exact values.
+  if (process.platform === 'win32' && command === 'pnpm') {
+    const entry = process.env.npm_execpath;
+    assert.ok(
+      entry && path.isAbsolute(entry) && /^pnpm\.c?js$/.test(path.basename(entry)),
+      'On Windows, run from a pnpm script or set npm_execpath to the pnpm.cjs entry',
+    );
+    command = process.execPath;
+    args = [entry, ...args];
+  }
   const child = spawn(command, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
   let output = '';
   for (const stream of [child.stdout, child.stderr])
