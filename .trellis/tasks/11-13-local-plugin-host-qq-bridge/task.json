@@ -143,7 +143,7 @@
       ],
       "fullG0Passed": true,
       "pending": [
-        "Packaged preview9 ZIP startup, GUI reattachment and explicit stop on Windows; the development build already passed the same cycle on this device, and a real QQ/model joint trial remains separate",
+        "Packaged preview9 ZIP startup, GUI reattachment and explicit stop on Windows: the original preview9 bytes remain unavailable; a locally rebuilt preview11 package passed the same five-check lifecycle probe, but must not be reported as preview9 evidence. A real QQ/model joint trial remains separate",
         "Windows closed-loop decision: keep the continuous Agent service on Linux and attach Windows as a client, or declare win32-x64 for plugins/cloud-exec, plugins/text-client and plugins/qq-media-codec and port their native dependencies"
       ],
       "realQQOrPaidModelTrial": false,
@@ -174,7 +174,7 @@
         "zipSha256": "2c63caa225de7f043045536d30ddeaa6e8a2b66e3df01b16a65fba3faa9cae50",
         "linuxProductionGuiReport": "qa/fixtures/local-host/evidence/desktop-ed89c186-57e7-437e-b565-e1f55bc0f301/report.json",
         "windowsDeviceRun": true,
-        "windowsDeviceResult": "development build passed start, three-source trust with an authenticated OneBot peer, GUI exit with the native source still answering, same-boot reattach with idempotent start and explicit stop; packaged preview9 ZIP not yet run on Windows",
+        "windowsDeviceResult": "development build passed start, three-source trust with an authenticated OneBot peer, GUI exit with the native source still answering, same-boot reattach with idempotent start and explicit stop; a locally rebuilt packaged preview11 later passed the same five-check lifecycle probe (qa/fixtures/local-host/evidence/windows-1569f47c-874a-4469-8f90-d7840d2d1721/report.json); the original preview9 ZIP bytes were never available on this machine",
         "windowsDeviceEvidence": "qa/fixtures/local-host/evidence/windows-44ae2bd4-0671-46d3-a2f7-4edc475547d4/report.json",
         "uiEvidence": "evidence/ui-redesign.md"
       }

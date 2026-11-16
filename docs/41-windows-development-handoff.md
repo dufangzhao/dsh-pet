@@ -66,7 +66,14 @@ pnpm lint
 pnpm format:check
 ```
 
-第一条会在 Windows 真正创建并校验临时私有目录和文件；同一用例在 Linux 跳过。桌面套件对并发敏感：默认并发下 `shared-voice-host` 与 `shared-companion-host` 偶尔超过 5 秒插件激活预算而失败，单跑该文件或加 `--maxWorkers=4` 即全绿，这是机器被压满所致，不是产品缺陷。完整 `pnpm check` 还包含服务端与 Docker 相关的集成检查，运行条件见 [QQ 验收记录](../qa/companion-qq-acceptance.md)。在 Windows 上它不会全绿：`plugins/cloud-exec`、`plugins/text-client`、`plugins/qq-media-codec` 只声明了 Linux 平台，且 `cloud-exec` 需要 Docker 与非提权用户无法创建的符号链接，所以这些失败不代表桌面验证结果。
+第一条会在 Windows 真正创建并校验临时私有目录和文件；同一用例在 Linux 跳过。桌面套件对并发敏感：默认并发下 `shared-voice-host` 与 `shared-companion-host` 偶尔超过 5 秒插件激活预算而失败，单跑该文件或加 `--maxWorkers=4` 即全绿，这是机器被压满所致，不是产品缺陷。完整 `pnpm check` 还包含服务端与 Docker 相关的集成检查，运行条件见 [QQ 验收记录](../qa/companion-qq-acceptance.md)。在 Windows 上它不会全绿：`plugins/cloud-exec` 与 `plugins/qq-media-codec` 只声明了 Linux 平台，且 `cloud-exec` 需要 Docker 与非提权用户无法创建的符号链接，所以这些失败不代表桌面验证结果。
+
+## 在 Windows 本机运行 Agent 服务
+
+服务现在可以在 Windows x64 上启动并服务浏览器文本客户端。用 `node apps/companion-service/local.mjs start|status|stop` 管理；默认端口 4120、数据目录 `<仓库>/.companion-data/agent`。可用能力与平台限制见 [Windows Agent 服务](42-windows-agent-service.md)。
+
+打包产品的生命周期已在本机用重建的 preview 包跑通（启动、关 GUI 后独立进程继续、重开附着、显式停止）；原始 preview9 ZIP 构建于 Linux 且哈希无法在本机复现，重建包不冒充原包。
+
 
 ## 不随 Git 搬迁的内容
 

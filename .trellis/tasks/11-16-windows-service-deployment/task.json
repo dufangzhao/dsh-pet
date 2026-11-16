@@ -1,0 +1,46 @@
+{
+  "id": "windows-service-deployment",
+  "name": "windows-service-deployment",
+  "title": "Support and deploy the companion service on Windows",
+  "description": "User authorized Windows compatibility and local deployment alongside packaged desktop lifecycle acceptance. Keep Docker optional and verify real platform behavior.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "chief-windows",
+  "assignee": "chief-windows",
+  "createdAt": "2026-11-16",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Service starts and serves the text client on Windows x64 in scripted mode; packaged desktop lifecycle passed on a locally rebuilt preview.11 package.",
+  "meta": {
+    "execution": {
+      "gate": "windows-service-scripted-accepted; model-mode and real QQ trials pending",
+      "recordedAt": "2026-11-17T01:15:00+08:00",
+      "evidence": "../evidence/windows-service-acceptance.md",
+      "packagedDesktop": "qa/fixtures/local-host/evidence/windows-1569f47c-874a-4469-8f90-d7840d2d1721/report.json",
+      "packagedDesktopEarlier": "qa/fixtures/local-host/evidence/windows-bc95c26e-85eb-4df3-b28a-bdf1a8e6812f/report.json",
+      "package": {
+        "version": "0.1.0-preview.11",
+        "directoryBytes": 455692024,
+        "files": 3746,
+        "zipPath": ".cache/release/Pet-Windows-x64-0.1.0-preview.11.zip",
+        "zipBytes": 188590904,
+        "zipSha256": "dfa39aba9fcb88294bb42b302c0ac5f23e800d77a966a7fb0f50e1090f9b3805",
+        "sourceContent": "7fcd457cd6e3a6f88d2d4e8fa149d1e186c958d5c68d28d91c355e0843fb6571"
+      },
+      "unavailablePlugins": ["pet.cloud-exec", "pet.qq-media-codec"],
+      "dataDirectory": ".companion-data/agent",
+      "port": 4120
+    }
+  }
+}
