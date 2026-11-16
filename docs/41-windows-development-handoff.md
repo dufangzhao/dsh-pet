@@ -33,6 +33,8 @@ pnpm --filter @pet/desktop build
 pnpm --filter @pet/desktop start
 ```
 
+本机实测该安装脚本会报 `TypeError: fetch failed`。若同样失败，可手动取用锁定版本（`node_modules/electron/package.json` 的 `version`）的 `electron-v<version>-win32-x64.zip`，先与 `node_modules/electron/checksums.json` 中的 SHA256 核对，再解压到 `node_modules/electron/dist` 并写入 `path.txt` 为 `electron.exe`；不要跳过校验，也不要把未校验的二进制放进仓库。
+
 后续修改桌面代码后可以运行 `pnpm dev`，它会重建并启动桌面应用。不要复制服务器上的 Linux `node_modules`、Electron、二进制依赖或整个 `.companion-data` 到 Windows；在 Windows 重新安装对应平台的依赖。
 
 开发模式使用独立的 `.cache/pet-prototype-profile`。便携测试包使用 Windows 应用数据目录，两者不会自动共享连接配置或密钥。首次打开开发版需重新输入服务地址和访问令牌。
@@ -53,7 +55,8 @@ ssh -N -L 4121:127.0.0.1:4121 <用户名>@<服务器地址>
 - 插件管理按功能模块分组；说话键、采样等内部组件默认折叠。语音输入（ASR）与语音输出（TTS）各有独立设置入口。
 - QQ 接入进程独立于桌面窗口。关闭 GUI 不等于停止 QQ 接入；升级前从 QQ 页显式停止旧进程，重新启动后按界面要求补入临时密钥。
 - Windows preview8 的启动失败已定位到目录初始化脚本中错误的 `//` 注释。修复使用 PowerShell 的 `#`，保持原有 owner/DACL/reparse 校验；程序故障不再统一当作权限不足。
-- Linux 上的类型、单元测试、浏览器与受控原生证据不代表 Windows 真机通过。下一步在 Windows 运行下列针对性检查，再复测 QQ 页启动、关闭 GUI 后重开附着、显式停止；真实 QQ、ASR/TTS 与模型联调的结果另行记录。
+- 修复后的源码已在本机 Windows 11 x64（build 26200）完成一次真机验收：开发版桌面启动、三类来源在真实界面中授权并让带认证的 OneBot peer 进入 ready、关闭 GUI 后独立进程继续应答、重开 GUI 附着到同一宿主身份与密钥且启动幂等、显式停止后 peer 关闭。证据见 [Windows 设备验收](../.trellis/tasks/11-13-local-plugin-host-qq-bridge/evidence/windows-device-acceptance.md)。这次跑的是开发版，不是打包后的 preview9 ZIP；用的是受控回环 peer，没有真实 QQ、模型、ASR 或 TTS 调用。
+- 因此下面的针对性检查已经在本机跑过；仍待确认的是打包 ZIP 自身的启动路径，以及真实账号与语音模型的联调。
 
 ```powershell
 pnpm --filter @pet/local-host exec vitest run src/windows-private-directory.test.ts
@@ -63,7 +66,7 @@ pnpm lint
 pnpm format:check
 ```
 
-第一条会在 Windows 真正创建并校验临时私有目录和文件；同一用例在 Linux 跳过。完整 `pnpm check` 还包含服务端与 Docker 相关的集成检查，运行条件见 [QQ 验收记录](../qa/companion-qq-acceptance.md)，不要把未准备镜像造成的失败当作 Windows 桌面验证结果。
+第一条会在 Windows 真正创建并校验临时私有目录和文件；同一用例在 Linux 跳过。桌面套件对并发敏感：默认并发下 `shared-voice-host` 与 `shared-companion-host` 偶尔超过 5 秒插件激活预算而失败，单跑该文件或加 `--maxWorkers=4` 即全绿，这是机器被压满所致，不是产品缺陷。完整 `pnpm check` 还包含服务端与 Docker 相关的集成检查，运行条件见 [QQ 验收记录](../qa/companion-qq-acceptance.md)。在 Windows 上它不会全绿：`plugins/cloud-exec`、`plugins/text-client`、`plugins/qq-media-codec` 只声明了 Linux 平台，且 `cloud-exec` 需要 Docker 与非提权用户无法创建的符号链接，所以这些失败不代表桌面验证结果。
 
 ## 不随 Git 搬迁的内容
 

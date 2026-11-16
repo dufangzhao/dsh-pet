@@ -110,8 +110,8 @@
       "source": "latest direct user requests: prefer DeepSeek and Hy4, default subsequent subagent reasoning to max"
     },
     "execution": {
-      "gate": "G7-code-published-Windows-preview9-confirmation-pending",
-      "recordedAt": "2026-11-15T17:12:56+08:00",
+      "gate": "G7-Windows-development-lifecycle-confirmed-packaged-preview9-pending",
+      "recordedAt": "2026-11-16T03:04:39+08:00",
       "productImplementationStarted": true,
       "componentEvidence": [
         "evidence/g0-kernel.md",
@@ -138,11 +138,13 @@
         "evidence/service-handoff.md",
         "evidence/g6-stop-review.md",
         "evidence/ui-redesign.md",
-        "evidence/windows-startup-fix.md"
+        "evidence/windows-startup-fix.md",
+        "evidence/windows-device-acceptance.md"
       ],
       "fullG0Passed": true,
       "pending": [
-        "Windows preview9 startup, GUI reattachment and explicit stop confirmation after the confirmed preview8 script defect; real QQ/model joint trial remains separate"
+        "Packaged preview9 ZIP startup, GUI reattachment and explicit stop on Windows; the development build already passed the same cycle on this device, and a real QQ/model joint trial remains separate",
+        "Windows closed-loop decision: keep the continuous Agent service on Linux and attach Windows as a client, or declare win32-x64 for plugins/cloud-exec, plugins/text-client and plugins/qq-media-codec and port their native dependencies"
       ],
       "realQQOrPaidModelTrial": false,
       "original4120OrSnowLumaChanged": false,
@@ -172,7 +174,8 @@
         "zipSha256": "2c63caa225de7f043045536d30ddeaa6e8a2b66e3df01b16a65fba3faa9cae50",
         "linuxProductionGuiReport": "qa/fixtures/local-host/evidence/desktop-ed89c186-57e7-437e-b565-e1f55bc0f301/report.json",
         "windowsDeviceRun": true,
-        "windowsDeviceResult": "preview8 startup failed at PowerShell helper line95; fixed source awaiting preview9 confirmation",
+        "windowsDeviceResult": "development build passed start, three-source trust with an authenticated OneBot peer, GUI exit with the native source still answering, same-boot reattach with idempotent start and explicit stop; packaged preview9 ZIP not yet run on Windows",
+        "windowsDeviceEvidence": "qa/fixtures/local-host/evidence/windows-44ae2bd4-0671-46d3-a2f7-4edc475547d4/report.json",
         "uiEvidence": "evidence/ui-redesign.md"
       }
     }

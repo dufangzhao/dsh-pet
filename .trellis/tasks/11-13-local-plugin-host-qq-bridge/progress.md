@@ -2,11 +2,13 @@
 
 ## Current execution
 
-Implementation and the authorized Linux controlled acceptance are complete on `feat/local-plugin-host-qq-bridge`, from baseline `6897787`. The complete proposal was approved on 2026-11-14; its approval hashes remain unchanged. The user subsequently authorized this stage's commits, GitHub push and merge, and specified Windows as the next development machine. The four work commits and stage journal were pushed and merged into `main` through [PR1](https://github.com/dufangzhao/dsh-pet/pull/1), merge `91ca2509ce3cb6bffec61689e1e57c2a159d696a`. The task remains `in_progress` for the repaired Windows candidate's actual startup/reattach/stop confirmation; code publication is complete.
+Implementation and the authorized Linux controlled acceptance are complete on `feat/local-plugin-host-qq-bridge`, from baseline `6897787`. The complete proposal was approved on 2026-11-14; its approval hashes remain unchanged. The user subsequently authorized this stage's commits, GitHub push and merge, and specified Windows as the next development machine. The four work commits and stage journal were pushed and merged into `main` through [PR1](https://github.com/dufangzhao/dsh-pet/pull/1), merge `91ca2509ce3cb6bffec61689e1e57c2a159d696a`. Code publication is complete; the task stays `in_progress` only for the packaged preview9 artifact and the live-account/live-model trial.
 
 **Current delivery: Windows x64 portable preview candidate `0.1.0-preview.9`.** The start page contains only the connection card; QQ includes client access management; ASR and TTS have separate pages; plugin management groups related components and collapses internal parts. QQ client labels now name SnowLuma / NapCat（OneBot v11）and official QQ without claiming client detection or installation. The user's preview8 Windows startup test found an executable `//` line in the PowerShell initialization script. The confirmed defect is fixed in both copies inside preview9, and script failures are no longer mislabeled as missing authorization. See [Windows regression evidence](evidence/windows-startup-fix.md) and [Windows development handoff](../../../docs/41-windows-development-handoff.md).
 
-The previous preview6 Linux production GUI acceptance covered three-source authorization, actual GUI exit with the daemon continuing, same-boot/key reattachment and offline stop. That evidence remains Linux-only. The repaired preview9 still needs the user's Windows startup/reattach/stop confirmation; actual QQ/account/model joint tests remain separate.
+The previous preview6 Linux production GUI acceptance covered three-source authorization, actual GUI exit with the daemon continuing, same-boot/key reattachment and offline stop. That evidence remains Linux-only.
+
+The Windows development-machine acceptance now passes on the actual device: the built development Main process, the real preload bridge and the independent daemon completed start, three-source review/trust/allow with an authenticated OneBot peer reaching `ready`, physical GUI exit with the native source still answering, GUI reopen on the same host identity/boot/key with an idempotent start, and an explicit stop with the peer closed. See [Windows device acceptance](evidence/windows-device-acceptance.md). This closes the Windows startup/reattach/stop confirmation for the repaired source, but it ran the development build rather than the packaged preview9 ZIP, and it used a controlled loopback peer with no real QQ account, model, ASR or TTS call; those remain separate.
 
 ## Implemented slices and evidence
 
@@ -22,7 +24,7 @@ The previous preview6 Linux production GUI acceptance covered three-source autho
 | Desktop and user controls | [Renderer](evidence/g6-ui.md), [Main/native](evidence/g6-native.md), [r6 actual GUI report](../../../qa/fixtures/local-host/evidence/desktop-ed89c186-57e7-437e-b565-e1f55bc0f301/report.json) | All three sources have explicit review/trust/allow/deny controls; real DOM and native lifecycle accepted; stale-boot responses cannot overwrite the accepted target |
 | Portable package | [G7 assembly and audit](evidence/g7-package.md) | preview9 ZIP/CRC/SHA256 and target runtime/dependencies verified; both shipped Windows private-directory helpers include the repair; older candidates remain historical |
 | Settings UI | [UI redesign](evidence/ui-redesign.md) | QQ client access, ASR/TTS pages, grouped plugin modules and readable platform labels; final desktop 1144 tests passed |
-| Windows startup | [Windows regression evidence](evidence/windows-startup-fix.md) | Actual preview8 failure identified at PowerShell line95; regression fails on old source and passes after repair; Windows-only native test awaits Windows execution |
+| Windows startup | [Windows regression evidence](evidence/windows-startup-fix.md), [Windows device acceptance](evidence/windows-device-acceptance.md) | Actual preview8 failure identified at PowerShell line95; regression fails on old source and passes after repair; Windows-only native test and the full desktop lifecycle now pass on the actual Windows device |
 | Whole-project quality | [Final gate report](evidence/quality-final.md), [budget fixture correction](evidence/quality-model-budget.md), [Docker supplement](evidence/quality-docker-optin.md) | Six base gates passed, required prepared-image Docker targets actually passed, final source types/lint/format independently rechecked |
 | Preserved test-service identity | [Service handoff](evidence/service-handoff.md) | Verified whole-root backup, cold format3→4 migration without changing Agent/epoch, restored empty loopback preview |
 
@@ -43,9 +45,10 @@ The Windows candidate, Chinese usage guide and checksum are separate user delive
 
 ## Remaining human actions
 
-1. Run preview9 on Windows and confirm QQ access startup, GUI exit/reattach and explicit stop. The new Windows-only private-directory test is also available from the [development handoff](../../../docs/41-windows-development-handoff.md).
+1. Run the packaged preview9 ZIP on Windows and confirm the same start/exit/reattach/stop cycle. The source-level cycle already passed on this device; what remains untested is the shipped artifact's own startup path.
+2. Decide whether the continuous Agent service should keep running on Linux while Windows attaches as a client, or whether `plugins/cloud-exec`, `plugins/text-client` and `plugins/qq-media-codec` should declare `win32-x64` and port their native dependencies. Root `pnpm check` cannot be green on Windows while they stay Linux-only.
 
-Code and records are published on `main`; GitHub login and merge are complete. Live account/model testing is independent of this code handoff.
+Live account/model testing is independent of this code handoff.
 
 ## Environment and authorization
 

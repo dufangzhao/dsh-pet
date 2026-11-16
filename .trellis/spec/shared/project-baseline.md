@@ -30,4 +30,6 @@ Current additive application contracts are in [plugin-application-contracts.md](
 
 Run `pnpm check` for workspace types/tests/QA/lint/format/build. Use focused meaningful regressions while implementing. Native Electron acceptance scripts run serially under `qa/probes`; use isolated profiles and public WAV fake devices, with real permission decisions. Do not add the automatic media-consent flag when testing authority. The environment needs explicit `--no-sandbox` for native acceptance; do not describe it as OS sandbox validation.
 
+`pnpm check` is a Linux gate. On Windows it cannot pass: `plugins/cloud-exec`, `plugins/text-client` and `plugins/qq-media-codec` declare Linux-only platforms, `cloud-exec` needs Docker, and its suite also creates symlinks that a non-elevated Windows user cannot create. The desktop suite is load-sensitive too — at the default worker count two unrelated plugin-activation cases can exceed the deliberate 5s budget, so use `--maxWorkers=4` there. Neither is a Windows desktop regression; the Windows-specific gates are listed in [local-plugin-host](../backend/local-plugin-host.md).
+
 Read `AGENTS.md` for restraint/readability and the current task PRD/design/implementation plan for scope. The generic template files are references, not evidence of dependencies that exist in this repository.
