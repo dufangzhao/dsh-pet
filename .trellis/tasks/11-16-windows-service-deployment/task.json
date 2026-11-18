@@ -15,13 +15,13 @@
   "branch": null,
   "base_branch": "main",
   "worktree_path": null,
-  "commit": null,
+  "commit": "570a5e450378a94697b9fb1e4b2ad12c19481b62",
   "pr_url": null,
   "subtasks": [],
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "The Windows service passed scripted and local Magpie replies and restart persistence. Rebuilt preview.11 passed packaged lifecycle and shared live conversation with Edge. An isolated Linux Agent passed task cancellation, completion after desktop exit, Edge download and Windows native save.",
+  "notes": "The Windows service passed scripted and local Magpie replies and restart persistence. Rebuilt preview.11 passed packaged lifecycle and shared live conversation with Edge. An isolated Linux Agent passed task cancellation, completion after desktop exit, Edge download and Windows native save. Handoff documentation and local-host evidence were committed and pushed on 2026-11-18; the task is archived. Real QQ, the pinned Linux codec image and physical audio remain outside this task.",
   "meta": {
     "execution": {
       "gate": "windows-service-and-shared-use-accepted",
@@ -50,6 +50,25 @@
       "unavailablePlugins": ["pet.cloud-exec", "pet.qq-media-codec"],
       "dataDirectory": ".companion-data/agent",
       "port": 4120
+    },
+    "handoff": {
+      "document": "docs/41-windows-development-handoff.md",
+      "evidence": "qa/fixtures/local-host/evidence/",
+      "workCommits": [
+        "a3cb1022af8a92047a6ac24e5c6667976c359e25",
+        "54a306e447fee3c9a021996311ab76a2c823c39a",
+        "3cd9d892ea5371383902b5caa7f5ef04389fc2ca",
+        "0eb907d98c4625708554329dcd08a729981ecdae",
+        "8ce2123131067c07318481e49d9c695865237b60",
+        "b5286ce07cf48cd7874431407be6e3bf2ff92995",
+        "f8bad5805fbe392f94d82df6c6c26f12ad78de1d",
+        "00f1f35b1cd53850aa64e2987d4bd7b289220a76",
+        "e652ac6aa2468725db098ba630c89d7423465a46",
+        "417bb5bd2eb8c30fd21a23676ba98ee6d7fd2335",
+        "570a5e450378a94697b9fb1e4b2ad12c19481b62",
+        "6e58ac169e264649976f00e5b952f4aaa6630742"
+      ],
+      "remotePush": true
     }
   }
 }

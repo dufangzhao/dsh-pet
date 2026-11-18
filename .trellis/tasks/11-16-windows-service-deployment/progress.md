@@ -2,11 +2,12 @@
 
 ## Current execution
 
-Status: in_progress. The Windows service and rebuilt preview.11 passed packaged local-host
-lifecycle, local Magpie model persistence, and the shared conversation across the pet,
-settings and Edge. The Windows service stayed ready when the desktop exited, and the
-reopened desktop recovered the two model exchanges after reconnecting. A separate Linux
-execution host passed the Windows desktop and Edge task and artifact checks.
+Status: completed and archived on 2026-11-18. The Windows service and rebuilt preview.11
+passed packaged local-host lifecycle, local Magpie model persistence, and the shared
+conversation across the pet, settings and Edge. The Windows service stayed ready when the
+desktop exited, and the reopened desktop recovered the two model exchanges after
+reconnecting. A separate Linux execution host passed the Windows desktop and Edge task and
+artifact checks.
 
 ## Evidence
 
@@ -42,4 +43,13 @@ execution host passed the Windows desktop and Edge task and artifact checks.
   gateway did not list `xiaomi/mimo-v2.5-asr` or `xiaomi/mimo-v2.5-tts` when queried
   with the corresponding clients. Physical audio acceptance needs an available route
   and a supervised device trial.
-- The Windows deployment gate is recorded above. Commit review and `/finish-work` are pending.
+- The Windows deployment gate is recorded above. Commit review and `/finish-work` completed
+  on 2026-11-18.
+
+## Handoff
+
+- The Windows development handoff lives at `docs/41-windows-development-handoff.md`.
+- The task is archived at `.trellis/tasks/archive/2026-11/11-16-windows-service-deployment/`.
+- Real QQ delivery, the pinned Linux codec image and physical audio remain outside this
+  task; continue them in `11-13-local-plugin-host-qq-bridge` when an authorized peer,
+  image and audio route are available.
