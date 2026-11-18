@@ -2,12 +2,11 @@
 
 ## Current execution
 
-Status: in_progress — implementation and real-machine acceptance done; packaged preview.11
-rebuilt and passed the same five-check lifecycle probe. Model mode was verified end-to-end
-through the local Magpie gateway, including restart persistence.
-
-The service now starts on Windows x64 in scripted and model modes and serves the browser
-text client. Packaged desktop lifecycle passed on a locally rebuilt preview.11 package.
+Status: in_progress. The Windows service and rebuilt preview.11 passed packaged local-host
+lifecycle, local Magpie model persistence, and the shared conversation across the pet,
+settings and Edge. The Windows service stayed ready when the desktop exited, and the
+reopened desktop recovered the two model exchanges after reconnecting. A separate Linux
+execution host passed the Windows desktop and Edge task and artifact checks.
 
 ## Evidence
 
@@ -18,7 +17,9 @@ text client. Packaged desktop lifecycle passed on a locally rebuilt preview.11 p
 | Text client and messages | 200 / 202, scripted and model replies stored | `evidence/windows-service-acceptance.md` |
 | Restart persistence | messages retained, model mode re-applied | `evidence/windows-service-acceptance.md` |
 | Model connection | Magpie `verified`, 3517 ms, `evidence: network` | `evidence/windows-service-acceptance.md` |
-| Unavailable execution | `not-ready`, no fake artifact | `evidence/windows-service-acceptance.md` |
+| Packaged desktop and Edge | 7/7 checks passed, including Magpie replies after desktop exit and recovery by message ID | [Windows shared Agent evidence](evidence/windows-service-acceptance.md#windows-desktop-and-browser-share-a-live-agent) |
+| Task and artifact on Linux through Windows clients | 5/5 checks passed, including selected cancellation, completion after desktop exit and native save | [Windows task and artifact evidence](evidence/windows-service-acceptance.md#windows-desktop-and-edge-complete-a-task-and-save-its-file) |
+| Native Windows execution | `not-ready`, no artifact | `evidence/windows-service-acceptance.md` |
 | Packaged desktop lifecycle | 5/5 checks passed (preview.10 and preview.11) | `qa/fixtures/local-host/evidence/windows-bc95c26e-85eb-4df3-b28a-bdf1a8e6812f/report.json`, `qa/fixtures/local-host/evidence/windows-1569f47c-874a-4469-8f90-d7840d2d1721/report.json` |
 | Preview.11 ZIP | 188590904 bytes, SHA256 `dfa39aba...f9b3805` | `.cache/release/Pet-Windows-x64-0.1.0-preview.11.zip` |
 | Typecheck / lint / format / build | pass | `.cache/checklogs/windows/` |
@@ -34,7 +35,11 @@ text client. Packaged desktop lifecycle passed on a locally rebuilt preview.11 p
 
 ## Remaining
 
-- Model mode is verified against the local Magpie gateway; no remote paid endpoint or API
-  key was used.
-- Real QQ account, ASR and TTS trials remain out of scope for this task.
-- Operator can run `/finish-work` to archive the task and record the session journal.
+- Real QQ delivery needs an authorized test peer and recipient. The codec admission check
+  passed on Docker 29.6.2. Real media jobs need the pinned Linux image. This machine lacks
+  the image and its pinned base. The Docker Hub request for that base timed out.
+- Windows enumerates a microphone array and speakers. The verified local Magpie text
+  gateway did not list `xiaomi/mimo-v2.5-asr` or `xiaomi/mimo-v2.5-tts` when queried
+  with the corresponding clients. Physical audio acceptance needs an available route
+  and a supervised device trial.
+- The Windows deployment gate is recorded above. Commit review and `/finish-work` are pending.

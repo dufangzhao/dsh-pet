@@ -53,7 +53,7 @@ Verified on the real machine:
 
 - `local.mjs start` -> `Started: http://127.0.0.1:4120 (pid 7976)`;
   `status` -> `Agent: ready`, `Unavailable on this host: pet.cloud-exec, pet.qq-media-codec`.
-- `GET /` -> 200 `text/html; charset=utf-8` (414 bytes).
+- `GET /` -> 200 `text/html; charset=utf-8` (414 bytes). An unauthenticated state request returned 401.
 - `POST /api/messages` -> 202; snapshot contains the user message and the scripted
   assistant reply.
 - `POST /api/model/test` against the local Magpie gateway (`http://127.0.0.1:3425/v1`,
@@ -68,6 +68,62 @@ Verified on the real machine:
 - `local.mjs stop` -> `Stopped (pid 7976)`, process gone, pid file removed, log has no
   cleanup failure.
 - Restart with the same data directory -> 7 messages retained (State4 SQLite).
+
+## Windows desktop and browser share a live Agent
+
+On 2026-11-18 (Asia/Shanghai), an isolated Windows desktop profile ran the packaged
+`0.1.0-preview.11` with Electron 45.0.0. The visible desktop and Edge connected to the
+same local service at `http://127.0.0.1:4120`. Magpie verified the configured
+`codex/gpt-6.1-sol` connection over the network in 3,210 ms before the run.
+
+- The desktop settings form and browser each accepted the operator token through their
+  normal controls. The desktop identified model mode, and Edge showed `模型回复 · Magpie`.
+- A message sent from the pet's composer and its real reply appeared once in both the
+  desktop conversation and Edge. The probe matched the assistant's owner origin to the
+  user message ID and confirmed that the pet held the same reply ID.
+- The pet's menu exited the original desktop process (PID 14488). With it closed, Edge
+  sent another message and received a real reply from the same Agent.
+- The new desktop process (PID 40688) restored the saved service address and required the
+  token again. After reconnecting, both exchanges retained their message IDs and appeared
+  once in the desktop state. The existing unavailable execution task showed `失败` and
+  offered no file to save.
+
+All seven probe checks passed. See the [local verification report](../../../../.cache/pet-shared-agent-3qEcOD/verification.json).
+
+## Windows desktop and Edge complete a task and save its file
+
+On 2026-11-18 (Asia/Shanghai), preview.11 and Edge used an isolated scripted Linux Agent
+on Docker Desktop, bound to `http://127.0.0.1:4121`. Docker Engine 29.6.2 ran the worker
+without network access, with a read-only root, UID/GID `65534:65534` and two mounts,
+`/job/code.mjs` and `/work`.
+
+1. The isolated Agent reached `ready` and rejected an unauthenticated state request.
+2. A request sent from the pet composer created and completed a real Docker file task.
+   The desktop conversation and Edge both showed completion.
+3. With two jobs running, the stop button in desktop settings cancelled the selected job.
+   Edge showed the cancellation and the other job remained running.
+4. The pet exited while the other job was running. Edge stayed connected to the same Agent,
+   saw the job complete and downloaded the exact artifact bytes.
+5. Relaunch restored the address and required the token again. Settings recovered the same
+   Agent, task and artifact IDs. The owned Windows save dialog returned a cancellation and
+   then saved the file to the selected path on the next attempt. Both copies matched the
+   39-byte server artifact, SHA256 `c99f37438c667c3faddab50ea6614c9606842f3effdc688cb38b6882471570ae`.
+
+All five checks and test resource cleanup passed. See the [local verification report](../../../../.cache/pet-shared-work-Lv2bES/verification.json).
+
+The Docker 29 CLI can omit an empty `Config.Volumes` field. Cloud execution now reads that
+field with `index` and accepts only null or an empty object. The existing Docker execution
+and materials suites passed 16/16. A real image declaring a `VOLUME` was rejected before
+worker creation, with no job records or receipts. The test Agent and its workers shared
+an owned daemon-side `/tmp` tree so their private bind mounts worked on this engine.
+
+The QQ codec admission check had the same Docker 29 failure. On the same engine,
+`CodecDockerRunner.create` incorrectly returned `not-ready` for a test image with the
+expected manifest and entrypoint and no declared volumes. With the correction it
+admitted that image and rejected a declared volume and a mismatched manifest pin.
+The image assembly probe reads the same optional field. The codec plugin test passed
+1/1. The OneBot and official QQ protocol suites each passed 44/44. Actual codec jobs
+and QQ delivery require the pinned Linux image and an authorized QQ test peer.
 
 ## Gates
 

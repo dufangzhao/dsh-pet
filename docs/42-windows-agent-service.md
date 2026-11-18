@@ -84,6 +84,15 @@ source with `apps/desktop/package-portable.mjs`. The existing Windows probe now 
 profile instead of the repository desktop build. It passed all five lifecycle checks and
 recorded `packaged: true` and `packageVersion: 0.1.0-preview.11` in its report.
 
+The same build also shared live Magpie replies between the pet, settings and Edge.
+Edge continued the conversation after the desktop exited. Reopening the desktop and
+entering the operator token again recovered the same history. See the
+[Windows acceptance evidence](../.trellis/tasks/11-16-windows-service-deployment/evidence/windows-service-acceptance.md#windows-desktop-and-browser-share-a-live-agent).
+
+Preview.11 and Edge also passed task cancellation, completion after desktop exit,
+Edge download and Windows native save against an isolated Linux Agent on Docker Desktop.
+See the [Windows task and artifact evidence](../.trellis/tasks/11-16-windows-service-deployment/evidence/windows-service-acceptance.md#windows-desktop-and-edge-complete-a-task-and-save-its-file).
+
 The original `0.1.0-preview.9` ZIP from the Linux build host is still unavailable on this
 machine, so its own bytes were not re-accepted; the preview.11 rebuild is evidence for the
 current source, not for that artifact.

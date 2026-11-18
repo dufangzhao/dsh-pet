@@ -21,12 +21,12 @@
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Service starts and serves the text client on Windows x64 in scripted and model modes; model mode is verified through the local Magpie gateway; packaged desktop lifecycle passed on a locally rebuilt preview.11 package.",
+  "notes": "The Windows service passed scripted and local Magpie replies and restart persistence. Rebuilt preview.11 passed packaged lifecycle and shared live conversation with Edge. An isolated Linux Agent passed task cancellation, completion after desktop exit, Edge download and Windows native save.",
   "meta": {
     "execution": {
-      "gate": "windows-service-scripted-and-model-accepted; real QQ/ASR/TTS out of scope",
-      "recordedAt": "2026-11-17T05:02:04+08:00",
-      "evidence": "../evidence/windows-service-acceptance.md",
+      "gate": "windows-service-and-shared-use-accepted",
+      "recordedAt": "2026-11-18T03:09:26+08:00",
+      "evidence": "evidence/windows-service-acceptance.md",
       "packagedDesktop": "qa/fixtures/local-host/evidence/windows-1569f47c-874a-4469-8f90-d7840d2d1721/report.json",
       "packagedDesktopEarlier": "qa/fixtures/local-host/evidence/windows-bc95c26e-85eb-4df3-b28a-bdf1a8e6812f/report.json",
       "model": {

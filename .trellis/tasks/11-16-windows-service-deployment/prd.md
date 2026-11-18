@@ -16,12 +16,13 @@ On 2026-11-16 the user authorized testing the packaged desktop and making the co
 
 ## Acceptance criteria
 
-- [ ] Windows-supported plugins admit and start through the actual plugin host; unsupported optional capabilities have a truthful unavailable state.
-- [ ] Authenticated HTTP text input produces an explicitly scripted response; unauthorized requests fail, and state survives graceful stop/restart.
-- [ ] The browser and desktop can attach to the Windows service using its real authenticated endpoint; task failures never claim successful execution without a backend.
-- [ ] Local start/status/stop work as an ordinary Windows user and cleanup is confirmed. A final ready deployment remains available on loopback with discoverable local instructions.
-- [ ] The independently assembled Windows desktop starts as packaged, survives GUI exit with the same local daemon, reattaches without a second host, and explicitly stops its OneBot peer.
-- [ ] Appropriate Windows tests, QA probes, typechecking, lint, format and builds pass; platform-specific exclusions and remaining limitations are recorded accurately.
+- [x] Windows-supported plugins start through the actual plugin host, which reports unsupported optional capabilities as unavailable.
+- [x] Authenticated HTTP text input produces an explicitly scripted response. Unauthorized state requests return HTTP 401, and state survives graceful stop/restart.
+- [x] The browser and desktop attach to the Windows service through the authenticated endpoint. The [desktop and browser run](evidence/windows-service-acceptance.md#windows-desktop-and-browser-share-a-live-agent) verified shared replies, reauthentication, and the failed task state without a file.
+- [x] The Windows desktop and Edge share tasks on a supported Linux execution host. The [task and artifact run](evidence/windows-service-acceptance.md#windows-desktop-and-edge-complete-a-task-and-save-its-file) verified targeted cancellation, background completion after desktop exit, and byte-identical Edge downloads and Windows native saves.
+- [x] Local start/status/stop work as an ordinary Windows user and cleanup is confirmed. A final ready deployment remains available on loopback with discoverable local instructions.
+- [x] The independently assembled Windows desktop starts as packaged, survives GUI exit with the same local daemon, reattaches without a second host, and explicitly stops its OneBot peer.
+- [x] Windows-specific probes, typechecking, lint, format and builds passed. The [quality record](evidence/windows-service-acceptance.md#gates) lists package-suite failures and the platform limits.
 
 ## Limits
 
