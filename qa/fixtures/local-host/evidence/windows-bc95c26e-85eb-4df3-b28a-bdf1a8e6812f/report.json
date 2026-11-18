@@ -1,0 +1,53 @@
+{
+  "id": "bc95c26e-85eb-4df3-b28a-bdf1a8e6812f",
+  "status": "Windows-packaged-lifecycle-passed",
+  "scope": "Windows-x64-packaged-Main-preload-independent-daemon",
+  "checks": [
+    "Windows-production-Main-preload-start-private-directory-and-role-guards",
+    "actual-three-source-DOM-trust-and-allow-authenticated-native-OneBot-ready",
+    "GUI-process-exited-independent-native-source-still-answers-ping",
+    "GUI-reopen-same-host-boot-source-key-and-idempotent-start",
+    "server-absent-explicit-stop-completes-and-closes-native-peer"
+  ],
+  "cleanup": {
+    "nativePeerClosed": true,
+    "stop": {
+      "ok": false,
+      "error": {
+        "code": "stale-owner",
+        "messageKey": "errors.stale-owner",
+        "retryable": false
+      }
+    },
+    "guiClosed": true
+  },
+  "limitations": [
+    "Controlled authenticated loopback OneBot peer; no real QQ account, model, ASR or TTS calls."
+  ],
+  "native": {
+    "platform": "win32",
+    "arch": "x64",
+    "electron": "45.0.0",
+    "packaged": true,
+    "userData": ".cache\\pet-demo-acceptance-windows-bc95c26e-85eb-4df3-b28a-bdf1a8e6812f",
+    "pid": 38208,
+    "windows": [
+      {
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false
+      },
+      {
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false
+      }
+    ]
+  },
+  "host": {
+    "protocolVersion": 1,
+    "packageVersion": "0.1.0-preview.10",
+    "hostId": "866d7e1d-7b08-403c-b437-633c6b929dcf",
+    "bootId": "2181dbe0-2473-4f8d-8de6-43fbfe4cb197"
+  }
+}
