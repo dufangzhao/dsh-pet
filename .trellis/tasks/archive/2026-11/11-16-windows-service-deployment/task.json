@@ -3,7 +3,7 @@
   "name": "windows-service-deployment",
   "title": "Support and deploy the companion service on Windows",
   "description": "User authorized Windows compatibility and local deployment alongside packaged desktop lifecycle acceptance. Keep Docker optional and verify real platform behavior.",
-  "status": "in_progress",
+  "status": "completed",
   "dev_type": null,
   "scope": null,
   "package": null,
@@ -11,7 +11,7 @@
   "creator": "chief-windows",
   "assignee": "chief-windows",
   "createdAt": "2026-11-16",
-  "completedAt": null,
+  "completedAt": "2026-11-18",
   "branch": null,
   "base_branch": "main",
   "worktree_path": null,
@@ -47,7 +47,10 @@
         "zipSha256": "dfa39aba9fcb88294bb42b302c0ac5f23e800d77a966a7fb0f50e1090f9b3805",
         "sourceContent": "7fcd457cd6e3a6f88d2d4e8fa149d1e186c958d5c68d28d91c355e0843fb6571"
       },
-      "unavailablePlugins": ["pet.cloud-exec", "pet.qq-media-codec"],
+      "unavailablePlugins": [
+        "pet.cloud-exec",
+        "pet.qq-media-codec"
+      ],
       "dataDirectory": ".companion-data/agent",
       "port": 4120
     },
