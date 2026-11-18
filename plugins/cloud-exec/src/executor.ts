@@ -298,7 +298,8 @@ export class DockerExecutor {
         'image',
         'inspect',
         '--format',
-        '{{.Id}}\n{{json .Config.Volumes}}',
+        // Docker may omit Volumes for images that declare none.
+        '{{.Id}}\n{{json (index .Config "Volumes")}}',
         this.#config.image,
       ]);
       const [imageId, volumes] = image.stdout.trim().split('\n');

@@ -82,7 +82,7 @@ const output = await docker(['build', '--pull=false', '--network', 'none', '--ii
 console.log(output);
 const imageId = (await readFile(iid, 'utf8')).trim();
 if (!/^sha256:[a-f0-9]{64}$/.test(imageId)) throw new Error('Bad built image id');
-const image = JSON.parse((await docker(['image', 'inspect', '--format', '{"Id":{{json .Id}},"Volumes":{{json .Config.Volumes}}}', imageId])).trim());
+const image = JSON.parse((await docker(['image', 'inspect', '--format', '{"Id":{{json .Id}},"Volumes":{{json (index .Config "Volumes")}}}', imageId])).trim());
 if (image.Id !== imageId || image.Volumes !== null && Object.keys(image.Volumes).length)
   throw new Error('Unexpected image identity/volumes');
 const lock = { ...manifest, imageId, manifestSha256: sha(manifestBytes), contextIdentity: identity };

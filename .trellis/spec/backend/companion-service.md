@@ -35,6 +35,8 @@ Task `execution_id` is unique. The runtime reserves its deterministic execution 
 
 ### Physical work and recovery
 
+Docker 29 may omit `Config.Volumes` when an image declares no volumes. Read it with `index .Config "Volumes"` in the inspection template and require `null` or `{}` before creating a worker. The [QQ codec image check](../../../plugins/qq-media-codec/src/job.ts) applies the same rule.
+
 `TaskHandle.result` can resolve cancellation before work returns. Observe the provider's actual return inside its handler, then await `TaskHandle.settled` before publishing physical outcome. A logical cancellation alone cannot erase an already completed effect.
 
 The execution provider persists protected `.records/<jobId>.json` outside container mounts: full owner token, execution/job/task IDs, exact container identity and mounts, request hash, outputs/config and terminal receipt. Reconcile pages use lexical job UUID cursors, default4/max8 records and 48KiB payload budget. Inspect every outstanding record before new admission. Cleanup requires exact full IDs, labels and mounts; never delete by name prefix.

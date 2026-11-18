@@ -123,7 +123,7 @@ export class CodecDockerRunner {
       'image',
       'inspect',
       '--format',
-      '{"Id":{{json .Id}},"Volumes":{{json .Config.Volumes}},"manifest":{{json (index .Config.Labels "pet.qq-codec.manifest")}},"entrypoint":{{json .Config.Entrypoint}}}',
+      '{"Id":{{json .Id}},"Volumes":{{json (index .Config "Volumes")}},"manifest":{{json (index .Config.Labels "pet.qq-codec.manifest")}},"entrypoint":{{json .Config.Entrypoint}}}',
       options.pin.imageId,
     ]);
     if (image.failed || image.truncated || image.code !== 0) throw new KernelFault('not-ready');
